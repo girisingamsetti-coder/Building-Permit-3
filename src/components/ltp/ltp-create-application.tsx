@@ -58,10 +58,12 @@ const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
 ];
 
 export function LtpCreateApplication() {
-  const { navigate } = useAppStore();
+  const { navigate, openApplication, createApplication } = useAppStore();
   const { toast } = useToast();
   const [step, setStep] = React.useState(0);
   const [submitted, setSubmitted] = React.useState(false);
+  const [createdAppNo, setCreatedAppNo] = React.useState<string | null>(null);
+  const [createdAppId, setCreatedAppId] = React.useState<string | null>(null);
   const [form, setForm] = React.useState({
     appType: "BUILDING_PERMISSION" as ApplicationType,
     applicantName: "",
@@ -85,10 +87,30 @@ export function LtpCreateApplication() {
   }
 
   function handleSubmit() {
+    const newId = createApplication({
+      applicationType: form.appType,
+      propertyType: form.propertyType,
+      projectName: form.projectName || "Untitled Project",
+      applicantName: form.applicantName || "Applicant",
+      applicantContact: form.applicantContact || "+91 00000 00000",
+      applicantEmail: form.applicantEmail || "applicant@example.com",
+      applicantAddress: form.applicantAddress || "—",
+      plotArea: Number(form.plotArea) || 0,
+      builtUpArea: Number(form.builtUpArea) || 0,
+      landUse: form.landUse || "Residential (R1)",
+      ward: form.ward || "Ward 14 — Baner",
+      zone: form.zone || "Zone IV — West",
+      surveyNo: form.surveyNo || "—",
+      address: form.address || "—",
+    });
+    // Look up the generated application number from the store
+    const created = useAppStore.getState().applications.find((a) => a.id === newId);
+    setCreatedAppId(newId);
+    setCreatedAppNo(created?.applicationNo ?? "MC/BP/2026/04/0001");
     setSubmitted(true);
     toast({
       title: "Application created",
-      description: "Your draft application has been saved. Proceed to upload drawings.",
+      description: `Application ${created?.applicationNo ?? ""} has been saved as draft. Proceed to upload drawings.`,
     });
   }
 
@@ -110,7 +132,7 @@ export function LtpCreateApplication() {
             <div className="w-full max-w-sm rounded-xl border border-border bg-muted/30 p-4">
               <InfoGrid
                 items={[
-                  { label: "Application No.", value: <span className="font-mono text-primary">MC/BP/2025/04/0241</span> },
+                  { label: "Application No.", value: <span className="font-mono text-primary">{createdAppNo ?? "—"}</span> },
                   { label: "Type", value: APP_TYPES.find((t) => t.value === form.appType)?.label },
                   { label: "Project", value: form.projectName || "—" },
                   { label: "Status", value: <Badge className="bg-muted text-muted-foreground">Draft</Badge> },
@@ -122,9 +144,11 @@ export function LtpCreateApplication() {
               <Button variant="outline" onClick={() => navigate("ltp-applications")}>
                 Go to applications
               </Button>
-              <Button onClick={() => navigate("ltp-drawings")}>
-                Upload drawings <ArrowRight className="size-4" />
-              </Button>
+              {createdAppId && (
+                <Button onClick={() => openApplication(createdAppId, "ltp-drawings")}>
+                  Upload drawings <ArrowRight className="size-4" />
+                </Button>
+              )}
             </div>
           </div>
         </SectionCard>

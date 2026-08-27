@@ -3,7 +3,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
-import { FEE_STRUCTURES, FEE_COMPONENTS, buildFee } from "@/data/mock-data";
+import { FEE_STRUCTURES, FEE_COMPONENTS } from "@/data/mock-data";
+import { feeService } from "@/services/fee-service";
 import {
   PageHeader,
   SectionCard,
@@ -65,10 +66,17 @@ const BASIS_LABELS: Record<FeeComponent["basis"], { label: string; cls: string }
   SLAB: { label: "Slab", cls: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900" },
 };
 
-// Preview calculation - reuse buildFee logic
+// Preview calculation - uses FeeCalculationService
 function previewCalculation(area: number) {
-  const fee = buildFee(area);
-  return fee;
+  const result = feeService.calculate({
+    applicationType: "BUILDING_PERMISSION",
+    propertyType: "RESIDENTIAL",
+    builtUpArea: area,
+    plotArea: Math.round(area * 0.7),
+    documentCount: 8,
+  });
+  if (!result) return null;
+  return feeService.toApplicationFee(result, 0);
 }
 
 export function AdminFeeStructures() {
@@ -78,7 +86,7 @@ export function AdminFeeStructures() {
   const [addComponentOpen, setAddComponentOpen] = React.useState(false);
 
   const selected = FEE_STRUCTURES.find((f) => f.id === selectedId) ?? FEE_STRUCTURES[0];
-  const preview = React.useMemo(() => previewCalculation(previewArea), [previewArea]);
+  const preview = React.useMemo(() => previewCalculation(previewArea) ?? null, [previewArea]);
 
   const stats = {
     active: FEE_STRUCTURES.filter((f) => f.active).length,
@@ -272,6 +280,8 @@ export function AdminFeeStructures() {
                 </div>
               </div>
 
+              {preview ? (
+              <>
               <div className="overflow-hidden rounded-lg border border-border">
                 <Table>
                   <TableHeader>
@@ -329,6 +339,12 @@ export function AdminFeeStructures() {
                 <Gauge className="size-3.5" />
                 Formula: <span className="font-mono">App + Scrutiny(₹45 × area) + Dev(₹120 × area) + Proc + Doc(10 × ₹800) + 1% Labour Cess on Dev.</span>
               </div>
+              </>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border bg-muted/20 p-6 text-center text-sm text-muted-foreground">
+                  Unable to calculate fee for the selected parameters.
+                </div>
+              )}
             </div>
           </SectionCard>
         </div>

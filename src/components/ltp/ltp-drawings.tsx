@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, useSelectedApplication } from "@/store/app-store";
-import { APPLICATIONS } from "@/data/mock-data";
+import { useAppStore, useSelectedApplication, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
   SectionCard,
@@ -53,7 +52,7 @@ import type { Application } from "@/types";
 
 function useAppOrDefault(): Application | null {
   const sel = useSelectedApplication();
-  const apps = useAppStore((s) => s.applications);
+  const apps = useVisibleApplications();
   if (sel) return sel;
   // default to one with drawings
   return apps.find((a) => a.drawings.length > 0) ?? apps[0] ?? null;
@@ -81,11 +80,14 @@ function AppPicker({ apps, current }: { apps: Application[]; current: Applicatio
 // DRAWINGS PAGE
 // ============================================================
 export function LtpDrawings() {
-  const { navigate, applications, openApplication } = useAppStore();
+  const { navigate, openApplication, uploadDrawing, reuploadDrawing, runScrutiny } = useAppStore();
+  const visibleApps = useVisibleApplications();
+  const processingAppIds = useAppStore((s) => s.processingAppIds);
   const app = useAppOrDefault();
   const { toast } = useToast();
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
-  const [scrutinizing, setScrutinizing] = React.useState(false);
+
+  const isProcessing = app ? processingAppIds.includes(app.id) : false;
 
   if (!app) {
     return (
@@ -96,15 +98,46 @@ export function LtpDrawings() {
     );
   }
 
-  function runScrutiny() {
-    setScrutinizing(true);
-    setTimeout(() => {
-      setScrutinizing(false);
-      toast({
-        title: "Scrutiny completed",
-        description: "Drawing v4 has been processed. View the report for details.",
-      });
-    }, 2200);
+  function handleUpload(newFiles: UploadedFile[]) {
+    // Track locally for the FileUploader UI
+    setFiles((prev) => {
+      const map = new Map(prev.map((f) => [f.id, f]));
+      newFiles.forEach((f) => map.set(f.id, f));
+      return Array.from(map.values());
+    });
+    // Persist to store: upload first new file as next drawing version
+    if (!app) return;
+    const first = newFiles[0];
+    if (!first) return;
+    uploadDrawing(app.id, first.name, first.size || `${(5 + Math.random() * 3).toFixed(1)} MB`);
+    toast({
+      title: "Drawing uploaded",
+      description: `${first.name} has been uploaded. Run auto-scrutiny to validate.`,
+    });
+  }
+
+  function handleRunScrutiny() {
+    if (!app) return;
+    runScrutiny(app.id);
+    toast({
+      title: "Scrutiny started",
+      description: "Auto-scrutiny is running. This takes a few seconds.",
+    });
+  }
+
+  function handleReupload() {
+    if (!app) return;
+    // Simulate re-upload of a corrected drawing
+    const fileName = `Drawing_v${app.drawings.length + 1}_corrected.dwg`;
+    const fileSize = `${(5 + Math.random() * 3).toFixed(1)} MB`;
+    reuploadDrawing(app.id, fileName, fileSize);
+    toast({
+      title: "Drawing re-uploaded",
+      description: `${fileName} uploaded. Auto-scrutiny will run automatically.`,
+    });
+    // Store reuploadDrawing calls uploadDrawing which sets status to DRAWING_UPLOADED.
+    // Trigger scrutiny explicitly after a short delay (matches demo deterministic v2+ pass)
+    setTimeout(() => runScrutiny(app.id), 400);
   }
 
   return (
@@ -114,11 +147,11 @@ export function LtpDrawings() {
         description="Upload, version and scrutinise your project drawings against Development Control Regulations."
         icon={Upload}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings & Scrutiny" }]}
-        actions={<AppPicker apps={applications} current={app} />}
+        actions={<AppPicker apps={visibleApps} current={app} />}
       />
 
       {/* Status banner */}
-      <DrawingStatusBanner app={app} onScrutinize={runScrutiny} scrutinizing={scrutinizing} />
+      <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
@@ -154,18 +187,12 @@ export function LtpDrawings() {
               hint="Supported: DWG, DXF, PDF"
               accept=".dwg,.dxf,.pdf"
               uploadedFiles={files}
-              onUpload={(newFiles) => {
-                setFiles((prev) => {
-                  const map = new Map(prev.map((f) => [f.id, f]));
-                  newFiles.forEach((f) => map.set(f.id, f));
-                  return Array.from(map.values());
-                });
-              }}
+              onUpload={handleUpload}
               onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
             />
-            {files.some((f) => f.status === "done") && (
-              <Button className="mt-3 w-full" onClick={runScrutiny} disabled={scrutinizing}>
-                {scrutinizing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
+            {app.drawings.length > 0 && app.status !== "SCRUTINY_PASSED" && (
+              <Button className="mt-3 w-full" onClick={handleRunScrutiny} disabled={isProcessing}>
+                {isProcessing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
               </Button>
             )}
           </SectionCard>
@@ -184,6 +211,7 @@ export function LtpDrawings() {
                     {d.status === "SCRUTINY_FAILED" && <Badge className="bg-destructive/10 text-destructive text-[9px]">Failed</Badge>}
                     {d.status === "SUPERSEDED" && <Badge className="bg-muted text-muted-foreground text-[9px]">Superseded</Badge>}
                     {d.status === "PENDING_SCRUTINY" && <Badge className="bg-info/10 text-info text-[9px]">Pending</Badge>}
+                    {d.status === "SCRUTINY_IN_PROGRESS" && <Badge className="bg-info/10 text-info text-[9px]">In Progress</Badge>}
                   </div>
                   {d.notes && <p className="mt-1.5 text-[10px] text-muted-foreground italic">{d.notes}</p>}
                 </li>
@@ -199,8 +227,21 @@ export function LtpDrawings() {
   );
 }
 
-function DrawingStatusBanner({ app, onScrutinize, scrutinizing }: { app: Application; onScrutinize: () => void; scrutinizing: boolean }) {
-  const failed = app.status === "SCRUTINY_FAILED";
+function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { app: Application; onScrutinize: () => void; onReupload: () => void; scrutinizing: boolean }) {
+  if (scrutinizing || app.status === "SCRUTINY_IN_PROGRESS") {
+    return (
+      <div className="flex flex-col gap-3 rounded-xl border border-info/30 bg-info/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info"><RotateCw className="size-5 animate-spin" /></div>
+          <div className="space-y-0.5">
+            <p className="text-sm font-semibold text-info">Auto-Scrutiny In Progress</p>
+            <p className="text-xs text-info/80">Validating drawing against Development Control Regulations. This takes a few seconds…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  const failed = app.status === "SCRUTINY_FAILED" || app.status === "DRAWING_REUPLOAD_REQUIRED";
   if (failed) {
     return (
       <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -208,26 +249,42 @@ function DrawingStatusBanner({ app, onScrutinize, scrutinizing }: { app: Applica
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive"><XCircle className="size-5" /></div>
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-destructive">Scrutiny Failed — Re-upload Required</p>
-            <p className="text-xs text-destructive/80">{app.scrutinyReport?.summary}</p>
+            <p className="text-xs text-destructive/80">{app.scrutinyReport?.summary ?? "Critical non-compliances were identified. Please re-upload a corrected drawing."}</p>
           </div>
         </div>
-        <Button variant="destructive" size="sm" onClick={onScrutinize} disabled={scrutinizing}>
+        <Button variant="destructive" size="sm" onClick={onReupload} disabled={scrutinizing}>
           {scrutinizing ? <><RotateCw className="size-4 animate-spin" /> Processing…</> : <><Upload className="size-4" /> Re-upload Drawing</>}
         </Button>
       </div>
     );
   }
-  if (app.scrutinyReport?.status === "PASSED") {
+  if (app.scrutinyReport?.status === "PASSED" || app.status === "SCRUTINY_PASSED") {
     return (
       <div className="flex flex-col gap-3 rounded-xl border border-success/30 bg-success/5 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success"><CheckCircle2 className="size-5" /></div>
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-success">Scrutiny Passed</p>
-            <p className="text-xs text-success/80">{app.scrutinyReport.summary}</p>
+            <p className="text-xs text-success/80">{app.scrutinyReport?.summary ?? "Drawing complies with all critical and major DCR checks."}</p>
           </div>
         </div>
         <Button variant="outline" size="sm" className="border-success/30">Proceed to documents <ArrowRight className="size-4" /></Button>
+      </div>
+    );
+  }
+  if (app.drawings.length > 0) {
+    return (
+      <div className="flex flex-col gap-3 rounded-xl border border-info/30 bg-info/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info"><Info className="size-5" /></div>
+          <div className="space-y-0.5">
+            <p className="text-sm font-semibold text-info">Drawing Uploaded — Run Scrutiny</p>
+            <p className="text-xs text-info/80">Run auto-scrutiny to validate the drawing against DCR rules.</p>
+          </div>
+        </div>
+        <Button size="sm" onClick={onScrutinize} disabled={scrutinizing}>
+          {scrutinizing ? <><RotateCw className="size-4 animate-spin" /> Processing…</> : <><Play className="size-4" /> Run Scrutiny</>}
+        </Button>
       </div>
     );
   }
@@ -248,7 +305,8 @@ function DrawingStatusBanner({ app, onScrutinize, scrutinizing }: { app: Applica
 // SCRUTINY DASHBOARD PAGE
 // ============================================================
 export function LtpScrutiny() {
-  const { navigate, applications, openApplication } = useAppStore();
+  const { navigate, openApplication } = useAppStore();
+  const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
   if (!app || !app.scrutinyReport) {
     return (
@@ -271,7 +329,7 @@ export function LtpScrutiny() {
         description="Automated validation of drawings against Development Control Regulations"
         icon={ScrollText}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Scrutiny Report" }]}
-        actions={<AppPicker apps={applications} current={app} />}
+        actions={<AppPicker apps={visibleApps} current={app} />}
       />
 
       {/* Summary */}

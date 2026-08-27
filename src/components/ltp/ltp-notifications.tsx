@@ -41,11 +41,15 @@ const NOTIF_META: Record<NotificationType, { icon: React.ComponentType<{ classNa
   SCRUTINY_FAILED: { icon: XCircle, cls: "bg-destructive/10 text-destructive" },
   SCRUTINY_PASSED: { icon: CheckCircle2, cls: "bg-success/10 text-success" },
   DOCUMENTS_REQUIRED: { icon: FolderClosed, cls: "bg-info/10 text-info" },
+  DOCUMENT_VERIFIED: { icon: CheckCircle2, cls: "bg-success/10 text-success" },
   FEE_GENERATED: { icon: ReceiptIndianRupee, cls: "bg-amber-500/15 text-amber-600" },
   PAYMENT_SUCCESSFUL: { icon: BadgeCheck, cls: "bg-success/10 text-success" },
   SHORTFALL_RAISED: { icon: AlertTriangle, cls: "bg-warning/15 text-warning-foreground" },
+  SHORTFALL_RESPONDED: { icon: MessageSquare, cls: "bg-info/10 text-info" },
+  SHORTFALL_RESOLVED: { icon: CheckCircle2, cls: "bg-success/10 text-success" },
   APPLICATION_FORWARDED: { icon: Forward, cls: "bg-info/10 text-info" },
   APPLICATION_APPROVED: { icon: CheckCircle2, cls: "bg-success/10 text-success" },
+  APPLICATION_REJECTED: { icon: XCircle, cls: "bg-destructive/10 text-destructive" },
   APPLICATION_RETURNED: { icon: Undo2, cls: "bg-warning/15 text-warning-foreground" },
   FINAL_DECISION: { icon: Gavel, cls: "bg-primary/10 text-primary" },
   SYSTEM: { icon: Settings, cls: "bg-muted text-muted-foreground" },
@@ -59,7 +63,7 @@ const SMS_CLS: Record<string, string> = {
 };
 
 export function LtpNotifications() {
-  const { navigate, notifications, markAllNotificationsRead, markNotificationRead, openApplication } = useAppStore();
+  const { navigate, notifications, smsLogs, markAllNotificationsRead, markNotificationRead, openApplication } = useAppStore();
   const [query, setQuery] = React.useState("");
   const [tab, setTab] = React.useState("all");
 
@@ -72,7 +76,7 @@ export function LtpNotifications() {
 
   const unread = notifications.filter((n) => !n.read).length;
   const smsSent = notifications.filter((n) => n.smsSent).length;
-  const smsDelivered = notifications.filter((n) => n.smsStatus === "DELIVERED").length;
+  const smsDelivered = smsLogs.filter((s) => s.status === "DELIVERED").length;
 
   return (
     <div className="space-y-6">
@@ -173,21 +177,35 @@ export function LtpNotifications() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Notification</th>
+                <th className="px-4 py-2.5 font-medium">Template</th>
                 <th className="px-4 py-2.5 font-medium">Recipient</th>
-                <th className="px-4 py-2.5 font-medium">Channel</th>
+                <th className="px-4 py-2.5 font-medium">Application</th>
                 <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5 font-medium">Timestamp</th>
+                <th className="px-4 py-2.5 font-medium">Sent At</th>
+                <th className="px-4 py-2.5 font-medium">Delivered At</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {notifications.filter((n) => n.smsSent).map((n) => (
-                <tr key={n.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 text-xs">{n.title}</td>
-                  <td className="px-4 py-3 font-mono text-xs">+91 98XXX XXXXX</td>
-                  <td className="px-4 py-3"><Badge variant="outline" className="text-[9px]">SMS</Badge></td>
-                  <td className="px-4 py-3"><span className={cn("inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium", SMS_CLS[n.smsStatus ?? "PENDING"])}><MessageSquare className="size-2.5" /> {n.smsStatus}</span></td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{formatDateTime(n.timestamp)}</td>
+              {smsLogs.length === 0 ? (
+                <tr><td colSpan={6} className="px-4 py-6 text-center text-xs text-muted-foreground">No SMS notifications dispatched yet.</td></tr>
+              ) : smsLogs.map((s) => (
+                <tr key={s.id} className="hover:bg-muted/30">
+                  <td className="px-4 py-3">
+                    <p className="text-xs font-medium">{s.templateCode}</p>
+                    <p className="text-[10px] text-muted-foreground line-clamp-1 max-w-[260px]">{s.message}</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-mono text-xs">{s.recipient}</p>
+                    <p className="text-[10px] text-muted-foreground">{s.recipientName}</p>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs">{s.applicationNo ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <span className={cn("inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium", SMS_CLS[s.status ?? "PENDING"])}>
+                      <MessageSquare className="size-2.5" /> {s.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{formatDateTime(s.sentAt)}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{s.deliveredAt ? formatDateTime(s.deliveredAt) : "—"}</td>
                 </tr>
               ))}
             </tbody>

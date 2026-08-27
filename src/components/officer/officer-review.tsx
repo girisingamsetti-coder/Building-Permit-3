@@ -3,7 +3,9 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore, useSelectedApplication } from "@/store/app-store";
-import { ROLES, WORKFLOW_STAGES } from "@/data/mock-data";
+import { ROLES } from "@/data/mock-data";
+import { getStage } from "@/data/workflow-config";
+import { getAllowedActions } from "@/lib/permissions";
 import {
   PageHeader,
   SectionCard,
@@ -22,7 +24,6 @@ import {
   ShortfallTypeBadge,
 } from "@/components/design-system/badges";
 import {
-  WorkflowStepper,
   WorkflowTimeline,
   formatDateTime,
   formatDate,
@@ -32,7 +33,6 @@ import {
 import {
   DrawingViewer,
   FileUploader,
-  DocumentFileRow,
   type UploadedFile,
 } from "@/components/design-system/files";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,6 @@ import {
   FileSearch,
   ArrowLeft,
   ArrowRight,
-  Clock,
   CalendarClock,
   ShieldCheck,
   CheckCircle2,
@@ -75,7 +74,6 @@ import {
   Send,
   AlertTriangle,
   MessageSquare,
-  Gavel,
   User,
   Building2,
   MapPin,
@@ -92,16 +90,20 @@ import {
   ClipboardCheck,
   PanelLeft,
   PanelRight,
-  Info,
   FileWarning,
   Ban,
-  CircleCheck,
+  BadgeCheck,
+  XCircle,
+  RefreshCw,
+  Flag,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type {
   Application,
-  RoleKey,
+  Remark,
+  Shortfall,
   ShortfallType,
+  User as AppUser,
   WorkflowAction,
 } from "@/types";
 
@@ -120,49 +122,96 @@ function slaTone(days: number | null): { cls: string; label: string } {
   return { cls: "text-success font-medium", label: `${days}d left` };
 }
 
-/** Determine whether the user's role can act on the application's current stage. */
-function canUserActOnStage(userRole: RoleKey, stageRole: RoleKey): boolean {
-  if (userRole === stageRole) return true;
-  if (
-    (userRole === "TPS" || userRole === "TPA") &&
-    (stageRole === "TPS" || stageRole === "TPA")
-  )
-    return true;
-  if (
-    (userRole === "ZAD" || userRole === "ZDD") &&
-    (stageRole === "ZAD" || stageRole === "ZDD")
-  )
-    return true;
-  return false;
+// Open shortfall = any shortfall not RESOLVED
+function hasOpenShortfall(app: Application): boolean {
+  return app.shortfalls.some(
+    (s) => s.status === "OPEN" || s.status === "RESPONDED" || s.status === "UNDER_REVIEW" || s.status === "REOPENED"
+  );
 }
 
-function getStageAllowedActions(app: Application): WorkflowAction[] {
-  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
-  return stage?.allowedActions ?? [];
+function respondedShortfalls(app: Application): Shortfall[] {
+  return app.shortfalls.filter((s) => s.status === "RESPONDED" || s.status === "UNDER_REVIEW");
 }
 
 // ---------- Action button config ----------
-type ActionKey = "APPROVE" | "FORWARD" | "RAISE_SHORTFALL" | "RETURN" | "ADD_REMARKS" | "FINAL_DECISION";
+type ActionKey = Exclude<WorkflowAction, "FINAL_DECISION">;
 
 const ACTION_CONFIG: Record<
   ActionKey,
-  { label: string; icon: typeof CheckCircle2; variant: "default" | "destructive" | "outline" | "secondary"; tone: string; description: string }
+  {
+    label: string;
+    icon: typeof CheckCircle2;
+    variant: "default" | "destructive" | "outline" | "secondary";
+    tone: string;
+    description: string;
+  }
 > = {
-  APPROVE: { label: "Approve", icon: CheckCircle2, variant: "outline", tone: "text-success", description: "Approve at this stage and forward to the next reviewing officer." },
-  FORWARD: { label: "Forward", icon: Send, variant: "default", tone: "text-primary", description: "Forward this application to the next stage in the workflow." },
-  RAISE_SHORTFALL: { label: "Raise Shortfall", icon: AlertTriangle, variant: "outline", tone: "text-amber-600 dark:text-amber-400", description: "Raise a shortfall requiring applicant response before proceeding." },
-  RETURN: { label: "Return", icon: ArrowLeft, variant: "outline", tone: "text-destructive", description: "Return the application to the previous officer or applicant." },
-  ADD_REMARKS: { label: "Add Remarks", icon: MessageSquare, variant: "outline", tone: "text-muted-foreground", description: "Add an observation, instruction or informational remark to the file." },
-  FINAL_DECISION: { label: "Final Decision", icon: Gavel, variant: "default", tone: "text-primary", description: "Issue the final approval or rejection as the Commissioner." },
+  SUBMIT_TECHNICAL_SCRUTINY: {
+    label: "Submit Technical Scrutiny",
+    icon: ClipboardCheck,
+    variant: "default",
+    tone: "text-primary",
+    description: "Submit your technical scrutiny report and forward to TPA.",
+  },
+  APPROVE: {
+    label: "Approve",
+    icon: CheckCircle2,
+    variant: "outline",
+    tone: "text-success",
+    description: "Approve at this stage and forward to the next reviewing officer.",
+  },
+  FORWARD: {
+    label: "Forward",
+    icon: Send,
+    variant: "default",
+    tone: "text-primary",
+    description: "Forward this application to the next stage in the workflow.",
+  },
+  RETURN: {
+    label: "Return",
+    icon: ArrowLeft,
+    variant: "outline",
+    tone: "text-destructive",
+    description: "Return the application to the previous officer or applicant.",
+  },
+  REJECT: {
+    label: "Reject",
+    icon: Ban,
+    variant: "destructive",
+    tone: "text-destructive",
+    description: "Issue final rejection (Commissioner only). This action is binding.",
+  },
+  RAISE_SHORTFALL: {
+    label: "Raise Shortfall",
+    icon: AlertTriangle,
+    variant: "outline",
+    tone: "text-amber-600 dark:text-amber-400",
+    description: "Raise a shortfall requiring applicant response before proceeding.",
+  },
+  ADD_REMARKS: {
+    label: "Add Remarks",
+    icon: MessageSquare,
+    variant: "outline",
+    tone: "text-muted-foreground",
+    description: "Add an observation, instruction or informational remark to the file.",
+  },
 };
 
-const ALL_ACTIONS: ActionKey[] = ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "RETURN", "ADD_REMARKS", "FINAL_DECISION"];
+// Display order for action buttons (left → right)
+const ACTION_ORDER: ActionKey[] = [
+  "SUBMIT_TECHNICAL_SCRUTINY",
+  "APPROVE",
+  "FORWARD",
+  "RETURN",
+  "REJECT",
+  "RAISE_SHORTFALL",
+  "ADD_REMARKS",
+];
 
 // ---------- Main component ----------
 export function OfficerReview() {
   const app = useSelectedApplication();
   const { user, navigate, openApplication } = useAppStore();
-  const { toast } = useToast();
 
   // Mobile pane toggle
   const [mobilePane, setMobilePane] = React.useState<"details" | "documents">("details");
@@ -170,9 +219,9 @@ export function OfficerReview() {
   // Dialogs
   const [shortfallOpen, setShortfallOpen] = React.useState(false);
   const [remarksOpen, setRemarksOpen] = React.useState(false);
-  const [decisionOpen, setDecisionOpen] = React.useState<null | "APPROVE" | "FORWARD" | "RETURN" | "FINAL_DECISION">(null);
+  const [actionDialog, setActionDialog] = React.useState<null | "SUBMIT_TECHNICAL_SCRUTINY" | "APPROVE" | "FORWARD" | "RETURN" | "REJECT">(null);
 
-  if (!app) {
+  if (!app || !user) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -198,19 +247,20 @@ export function OfficerReview() {
     );
   }
 
-  const userRole = user?.role ?? "TPS";
-  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
+  const userRole = user.role;
+  const userObj = user;
+  const stage = getStage(app.currentStage);
   const stageRole = stage?.role ?? "TPS";
-  const allowedActions = getStageAllowedActions(app);
-  const canAct = canUserActOnStage(userRole, stageRole);
+  const isDecided = app.status === "APPROVED" || app.status === "REJECTED";
+  const openShortfall = hasOpenShortfall(app);
 
-  // Build action button list (visible only if relevant for this stage, enabled if canAct & in allowedActions)
-  const actionButtons = ALL_ACTIONS.map((key) => {
-    const cfg = ACTION_CONFIG[key];
-    const inStage = allowedActions.includes(key);
-    const enabled = canAct && inStage;
-    return { key, cfg, inStage, enabled };
-  }).filter((a) => a.inStage);
+  // Determine allowed actions via the permissions API
+  const allowedActions = isDecided
+    ? []
+    : getAllowedActions(userObj, app);
+
+  // Build action button list in display order
+  const actionButtons = ACTION_ORDER.filter((key) => allowedActions.includes(key));
 
   const days = daysRemaining(app.expectedSLA);
   const sla = slaTone(days);
@@ -224,10 +274,7 @@ export function OfficerReview() {
       setRemarksOpen(true);
       return;
     }
-    if (key === "APPROVE" || key === "FORWARD" || key === "RETURN" || key === "FINAL_DECISION") {
-      setDecisionOpen(key);
-      return;
-    }
+    setActionDialog(key);
   }
 
   return (
@@ -286,52 +333,69 @@ export function OfficerReview() {
             </div>
           </div>
 
-          {/* Action bar */}
-          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/20 px-4 py-3">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mr-auto">
-              <ShieldCheck className="size-3.5" />
-              <span>
-                {canAct ? (
-                  <>You are authorised to act at this stage as <RoleBadge role={userRole} label={ROLES[userRole].title} /></>
-                ) : (
-                  <>Stage handled by <RoleBadge role={stageRole} label={ROLES[stageRole].title} /> — view-only access for your role</>
-                )}
+          {/* Decision recorded banner */}
+          {isDecided && (
+            <div className={cn(
+              "flex items-center gap-2 border-t px-4 py-3 text-sm",
+              app.status === "APPROVED"
+                ? "border-success/30 bg-success/5 text-success"
+                : "border-destructive/30 bg-destructive/5 text-destructive"
+            )}>
+              {app.status === "APPROVED" ? <CheckCircle2 className="size-4" /> : <Ban className="size-4" />}
+              <span className="font-medium">
+                Decision recorded — this application has been {app.status === "APPROVED" ? "approved" : "rejected"}. No further actions are permitted.
               </span>
             </div>
-            {actionButtons.length === 0 ? (
-              <span className="text-xs text-muted-foreground italic">No actions permitted at this stage.</span>
-            ) : (
-              actionButtons.map(({ key, cfg, enabled }) => {
-                const Icon = cfg.icon;
-                const button = (
-                  <Button
-                    key={key}
-                    variant={cfg.variant}
-                    size="sm"
-                    disabled={!enabled}
-                    onClick={() => enabled && handleAction(key)}
-                    className={cn("gap-1.5", cfg.variant === "outline" && "border-current/30")}
-                  >
-                    <Icon className={cn("size-4", enabled && cfg.tone)} />
-                    {cfg.label}
-                  </Button>
-                );
-                if (!enabled) {
+          )}
+
+          {/* Open shortfall banner */}
+          {!isDecided && openShortfall && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning-foreground">
+              <AlertTriangle className="size-4 text-amber-600 dark:text-amber-400" />
+              <span className="font-medium text-amber-700 dark:text-amber-300">
+                Shortfall active — resolve before proceeding
+              </span>
+              <span className="text-xs text-amber-700/80 dark:text-amber-400/80">
+                Approve / Forward / Return are disabled until all open shortfalls are resolved.
+              </span>
+            </div>
+          )}
+
+          {/* Action bar */}
+          {!isDecided && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/20 px-4 py-3">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mr-auto">
+                <ShieldCheck className="size-3.5" />
+                <span>
+                  {allowedActions.length > 0 ? (
+                    <>You are authorised to act at this stage as <RoleBadge role={userRole} label={ROLES[userRole].title} /></>
+                  ) : (
+                    <>Stage handled by <RoleBadge role={stageRole} label={ROLES[stageRole].title} /> — view-only access for your role</>
+                  )}
+                </span>
+              </div>
+              {actionButtons.length === 0 ? (
+                <span className="text-xs text-muted-foreground italic">No actions permitted at this stage.</span>
+              ) : (
+                actionButtons.map((key) => {
+                  const cfg = ACTION_CONFIG[key];
+                  const Icon = cfg.icon;
                   return (
-                    <Tooltip key={key}>
-                      <TooltipTrigger asChild>
-                        <span>{button}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <span>{cfg.description} — not permitted at this stage.</span>
-                      </TooltipContent>
-                    </Tooltip>
+                    <Button
+                      key={key}
+                      variant={cfg.variant}
+                      size="sm"
+                      onClick={() => handleAction(key)}
+                      className={cn("gap-1.5", cfg.variant === "outline" && "border-current/30")}
+                    >
+                      <Icon className={cn("size-4", cfg.tone)} />
+                      {cfg.label}
+                    </Button>
                   );
-                }
-                return button;
-              })
-            )}
-          </div>
+                })
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -364,18 +428,18 @@ export function OfficerReview() {
 
         {/* RIGHT pane — tabbed viewer */}
         <div className={cn("space-y-4 lg:block", mobilePane === "documents" ? "block" : "hidden")}>
-          <RightPane app={app} />
+          <RightPane app={app} user={userObj} />
         </div>
       </div>
 
       {/* Dialogs */}
       <ShortfallDialog open={shortfallOpen} onOpenChange={setShortfallOpen} app={app} />
       <RemarksDialog open={remarksOpen} onOpenChange={setRemarksOpen} app={app} />
-      <DecisionDialog
-        open={decisionOpen !== null}
-        action={decisionOpen}
+      <ActionDialog
+        open={actionDialog !== null}
+        action={actionDialog}
         app={app}
-        onClose={() => setDecisionOpen(null)}
+        onClose={() => setActionDialog(null)}
       />
     </div>
   );
@@ -385,8 +449,14 @@ export function OfficerReview() {
 // LEFT PANE — Application information
 // ============================================================
 function LeftPane({ app }: { app: Application }) {
+  const responded = respondedShortfalls(app);
   return (
     <>
+      {/* Shortfall Review Response section — only if any RESPONDED/UNDER_REVIEW */}
+      {responded.length > 0 && (
+        <ShortfallResolutionSection app={app} shortfalls={responded} />
+      )}
+
       <SectionCard title="Application Information" icon={FileText}>
         <div className="space-y-3">
           <InfoGrid
@@ -518,7 +588,7 @@ function LeftPane({ app }: { app: Application }) {
           <p className="text-sm text-muted-foreground">No remarks yet from reviewing officers.</p>
         ) : (
           <ol className="space-y-3">
-            {app.remarks.map((r) => {
+            {app.remarks.map((r: Remark) => {
               const typeCls = {
                 INFO: "bg-info/10 text-info",
                 OBSERVATION: "bg-muted text-muted-foreground",
@@ -547,9 +617,152 @@ function LeftPane({ app }: { app: Application }) {
 }
 
 // ============================================================
+// Shortfall Resolution Section
+// ============================================================
+function ShortfallResolutionSection({
+  app,
+  shortfalls,
+}: {
+  app: Application;
+  shortfalls: Shortfall[];
+}) {
+  const {
+    reviewShortfallResponse,
+    resolveShortfall,
+    reopenShortfall,
+  } = useAppStore();
+  const { toast } = useToast();
+  const [resolveTarget, setResolveTarget] = React.useState<Shortfall | null>(null);
+  const [reopenTarget, setReopenTarget] = React.useState<Shortfall | null>(null);
+
+  function handleMarkUnderReview(sf: Shortfall) {
+    reviewShortfallResponse(app.id, sf.id);
+    toast({
+      title: "Shortfall under review",
+      description: `Shortfall ${sf.shortfallId} on ${app.applicationNo} marked as under review.`,
+    });
+  }
+
+  return (
+    <>
+      <SectionCard
+        title="Review Shortfall Response"
+        description="The applicant / LTP has responded to the shortfall(s) below. Review and resolve to resume the workflow."
+        icon={Flag}
+      >
+        <ul className="space-y-3">
+          {shortfalls.map((sf) => (
+            <li key={sf.id} className="rounded-lg border border-border bg-muted/20 p-3 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs font-semibold text-primary">{sf.shortfallId}</span>
+                  <ShortfallTypeBadge type={sf.type} />
+                  <ShortfallStatusBadge status={sf.status} />
+                </div>
+                <span className="text-[10px] text-muted-foreground">
+                  Raised {timeAgo(sf.raisedAt)} by {sf.raisedBy.name}
+                </span>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium">{sf.title}</p>
+                <p className="text-[11px] text-muted-foreground">{sf.description}</p>
+              </div>
+              {sf.response && (
+                <div className="rounded-md border border-info/30 bg-info/5 p-2.5 space-y-1">
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-info">
+                    <MessageSquare className="size-3" /> LTP Response
+                  </div>
+                  <p className="text-xs text-foreground/90">{sf.response.text}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Responded {formatDateTime(sf.response.respondedAt)}
+                    {sf.response.supportingDocument ? ` · Attachment: ${sf.response.supportingDocument}` : ""}
+                  </p>
+                </div>
+              )}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                {sf.status === "RESPONDED" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs gap-1"
+                    onClick={() => handleMarkUnderReview(sf)}
+                  >
+                    <Eye className="size-3.5" /> Mark Under Review
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs gap-1 border-success/40 text-success hover:bg-success/10"
+                  onClick={() => setResolveTarget(sf)}
+                >
+                  <CheckCircle2 className="size-3.5" /> Resolve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs gap-1 border-destructive/40 text-destructive hover:bg-destructive/10"
+                  onClick={() => setReopenTarget(sf)}
+                >
+                  <RefreshCw className="size-3.5" /> Reopen
+                </Button>
+                {(sf.reviewedBy || sf.resolvedBy) && (
+                  <span className="ml-auto text-[10px] text-muted-foreground">
+                    {sf.reviewedBy && <>Reviewed by {sf.reviewedBy.name}</>}
+                    {sf.reviewedBy && sf.resolvedBy && " · "}
+                    {sf.resolvedBy && <>Resolved by {sf.resolvedBy.name}</>}
+                  </span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </SectionCard>
+
+      {/* Inline resolution dialog (uses store directly) */}
+      <SimpleShortfallDialog
+        open={resolveTarget !== null}
+        shortfall={resolveTarget}
+        app={app}
+        mode="resolve"
+        onClose={() => setResolveTarget(null)}
+        onSubmit={(resolution) => {
+          if (resolveTarget) {
+            resolveShortfall(app.id, resolveTarget.id, resolution);
+            toast({
+              title: "Shortfall resolved",
+              description: `Shortfall ${resolveTarget.shortfallId} resolved. Workflow will resume if all shortfalls are cleared.`,
+            });
+          }
+          setResolveTarget(null);
+        }}
+      />
+      <SimpleShortfallDialog
+        open={reopenTarget !== null}
+        shortfall={reopenTarget}
+        app={app}
+        mode="reopen"
+        onClose={() => setReopenTarget(null)}
+        onSubmit={(reason) => {
+          if (reopenTarget) {
+            reopenShortfall(app.id, reopenTarget.id, reason);
+            toast({
+              title: "Shortfall reopened",
+              description: `Shortfall ${reopenTarget.shortfallId} reopened. Application paused pending applicant response.`,
+              variant: "destructive",
+            });
+          }
+          setReopenTarget(null);
+        }}
+      />
+    </>
+  );
+}
+
+// ============================================================
 // RIGHT PANE — Tabbed viewer (Drawings / Documents / Scrutiny)
 // ============================================================
-function RightPane({ app }: { app: Application }) {
+function RightPane({ app, user }: { app: Application; user: AppUser }) {
   return (
     <SectionCard
       title="Review Workspace"
@@ -589,45 +802,7 @@ function RightPane({ app }: { app: Application }) {
 
         {/* Documents tab */}
         <TabsContent value="documents" className="space-y-3">
-          <div className="overflow-hidden rounded-lg border border-border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40">
-                <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">Document</th>
-                  <th className="px-3 py-2 font-medium">Required</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
-                  <th className="px-3 py-2 font-medium">Verified By</th>
-                  <th className="px-3 py-2 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {app.documents.map((d) => (
-                  <tr key={d.id} className="hover:bg-muted/30">
-                    <td className="px-3 py-2.5">
-                      <p className="text-xs font-medium">{d.name}</p>
-                      <p className="font-mono text-[10px] text-muted-foreground">{d.code}</p>
-                      {d.remarks && <p className="mt-0.5 text-[10px] text-destructive">{d.remarks}</p>}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      {d.required ? (
-                        <Badge className="bg-destructive/10 text-destructive text-[9px]">Required</Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[9px]">Optional</Badge>
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5"><DocumentStatusBadge status={d.status} /></td>
-                    <td className="px-3 py-2.5 text-xs">{d.verifiedBy ?? "—"}</td>
-                    <td className="px-3 py-2.5 text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button size="icon" variant="ghost" className="size-7"><Eye className="size-3.5" /></Button>
-                        <Button size="icon" variant="ghost" className="size-7"><Download className="size-3.5" /></Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DocumentsTab app={app} user={user} />
         </TabsContent>
 
         {/* Scrutiny tab */}
@@ -640,6 +815,163 @@ function RightPane({ app }: { app: Application }) {
         </TabsContent>
       </Tabs>
     </SectionCard>
+  );
+}
+
+// ============================================================
+// Documents Tab — with TPA verify/reject actions
+// ============================================================
+function DocumentsTab({ app, user }: { app: Application; user: AppUser }) {
+  const { toast } = useToast();
+  const { verifyDocument, rejectDocument } = useAppStore();
+  const [rejectTarget, setRejectTarget] = React.useState<{ docId: string; docName: string } | null>(null);
+  const [rejectReason, setRejectReason] = React.useState("");
+
+  const isTPA = user.role === "TPA";
+
+  function handleVerify(docId: string, docName: string) {
+    verifyDocument(app.id, docId);
+    toast({
+      title: "Document verified",
+      description: `${docName} marked as verified${app.documents.filter((d) => d.required && d.status === "VERIFIED").length + 1 >= app.documents.filter((d) => d.required).length ? " — all required documents verified, fee auto-generated" : ""}.`,
+    });
+  }
+
+  function handleRejectSubmit() {
+    if (!rejectTarget) return;
+    if (!rejectReason.trim()) {
+      toast({ title: "Reason required", description: "Please provide a reason for rejecting this document." });
+      return;
+    }
+    rejectDocument(app.id, rejectTarget.docId, rejectReason);
+    toast({
+      title: "Document rejected",
+      description: `${rejectTarget.docName} has been rejected. The LTP will be notified to re-upload.`,
+      variant: "destructive",
+    });
+    setRejectTarget(null);
+    setRejectReason("");
+  }
+
+  return (
+    <>
+      <div className="overflow-hidden rounded-lg border border-border">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40">
+            <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+              <th className="px-3 py-2 font-medium">Document</th>
+              <th className="px-3 py-2 font-medium">Required</th>
+              <th className="px-3 py-2 font-medium">Status</th>
+              <th className="px-3 py-2 font-medium">Verified By</th>
+              <th className="px-3 py-2 font-medium text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {app.documents.map((d) => {
+              const canVerify = isTPA && (d.status === "UPLOADED" || d.status === "REQUIRED");
+              const canReject = isTPA && d.status !== "VERIFIED" && d.status !== "REQUIRED";
+              return (
+                <tr key={d.id} className="hover:bg-muted/30">
+                  <td className="px-3 py-2.5">
+                    <p className="text-xs font-medium">{d.name}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground">{d.code}</p>
+                    {d.remarks && <p className="mt-0.5 text-[10px] text-destructive">{d.remarks}</p>}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {d.required ? (
+                      <Badge className="bg-destructive/10 text-destructive text-[9px]">Required</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[9px]">Optional</Badge>
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5"><DocumentStatusBadge status={d.status} /></td>
+                  <td className="px-3 py-2.5 text-xs">{d.verifiedBy ?? "—"}</td>
+                  <td className="px-3 py-2.5 text-right">
+                    <div className="flex justify-end gap-1">
+                      {/* TPA verify / reject buttons */}
+                      {canVerify && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="size-7 text-success hover:bg-success/10"
+                              onClick={() => handleVerify(d.id, d.name)}
+                            >
+                              <BadgeCheck className="size-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><span>Verify document</span></TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canReject && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="size-7 text-destructive hover:bg-destructive/10"
+                              onClick={() => setRejectTarget({ docId: d.id, docName: d.name })}
+                            >
+                              <XCircle className="size-3.5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><span>Reject document</span></TooltipContent>
+                        </Tooltip>
+                      )}
+                      {/* Always-available view/download */}
+                      <Button size="icon" variant="ghost" className="size-7" disabled={d.status === "REQUIRED"}>
+                        <Eye className="size-3.5" />
+                      </Button>
+                      <Button size="icon" variant="ghost" className="size-7" disabled={d.status === "REQUIRED"}>
+                        <Download className="size-3.5" />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {!isTPA && (
+        <p className="text-[11px] text-muted-foreground italic">
+          Document verification is performed by the Town Planning Assistant (TPA). Verify / reject actions appear here when reviewing as a TPA.
+        </p>
+      )}
+
+      {/* Reject document dialog */}
+      <Dialog open={rejectTarget !== null} onOpenChange={(v) => { if (!v) { setRejectTarget(null); setRejectReason(""); } }}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="size-5 text-destructive" />
+              Reject Document
+            </DialogTitle>
+            <DialogDescription>
+              Reject <span className="font-medium text-foreground">{rejectTarget?.docName}</span> on <span className="font-mono">{app.applicationNo}</span>. A reason is required — the LTP will be notified to re-upload.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="rej-reason">Reason <span className="text-destructive">*</span></Label>
+            <Textarea
+              id="rej-reason"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="e.g. Document is illegible / not stamped / wrong version…"
+              className="min-h-24"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setRejectTarget(null); setRejectReason(""); }}>Cancel</Button>
+            <Button variant="destructive" onClick={handleRejectSubmit} className="gap-1.5">
+              <XCircle className="size-4" /> Reject Document
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -715,7 +1047,7 @@ function ScrutinyReportView({ app }: { app: Application }) {
 }
 
 // ============================================================
-// Shortfall Dialog
+// Shortfall Dialog (Raise shortfall)
 // ============================================================
 function ShortfallDialog({
   open,
@@ -727,6 +1059,7 @@ function ShortfallDialog({
   app: Application;
 }) {
   const { toast } = useToast();
+  const { raiseShortfall } = useAppStore();
   const [type, setType] = React.useState<ShortfallType>("DOCUMENT");
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
@@ -749,6 +1082,13 @@ function ShortfallDialog({
       });
       return;
     }
+    const due = dueDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+    raiseShortfall(app.id, {
+      type,
+      title: title.trim(),
+      description: description.trim(),
+      dueDate: new Date(due).toISOString(),
+    });
     toast({
       title: "Shortfall raised",
       description: `Shortfall on ${app.applicationNo} (${type.toLowerCase()}) has been raised. Applicant notified via SMS & in-app.`,
@@ -780,6 +1120,7 @@ function ShortfallDialog({
               <SelectContent>
                 <SelectItem value="DOCUMENT">Document — missing or invalid document</SelectItem>
                 <SelectItem value="FEE">Fee — outstanding or incorrect fee</SelectItem>
+                <SelectItem value="TECHNICAL">Technical — technical / drawing non-compliance</SelectItem>
                 <SelectItem value="GENERAL">General — clarification or general query</SelectItem>
               </SelectContent>
             </Select>
@@ -860,6 +1201,7 @@ function RemarksDialog({
   app: Application;
 }) {
   const { toast } = useToast();
+  const { addRemark } = useAppStore();
   const [type, setType] = React.useState<"INFO" | "OBSERVATION" | "INSTRUCTION" | "DECISION">("OBSERVATION");
   const [text, setText] = React.useState("");
 
@@ -876,6 +1218,7 @@ function RemarksDialog({
       });
       return;
     }
+    addRemark(app.id, text.trim(), type);
     toast({
       title: "Remark added",
       description: `Your ${type.toLowerCase()} on ${app.applicationNo} has been recorded in the file.`,
@@ -937,83 +1280,134 @@ function RemarksDialog({
 }
 
 // ============================================================
-// Decision Dialog (Approve / Forward / Return / Final Decision)
+// Action Dialog (Submit Technical Scrutiny / Approve / Forward / Return / Reject)
 // ============================================================
-function DecisionDialog({
+function ActionDialog({
   open,
   action,
   app,
   onClose,
 }: {
   open: boolean;
-  action: null | "APPROVE" | "FORWARD" | "RETURN" | "FINAL_DECISION";
+  action: null | "SUBMIT_TECHNICAL_SCRUTINY" | "APPROVE" | "FORWARD" | "RETURN" | "REJECT";
   app: Application;
   onClose: () => void;
 }) {
   const { toast } = useToast();
-  const { navigate } = useAppStore();
+  const {
+    submitTechnicalScrutiny,
+    approveApplication,
+    forwardApplication,
+    returnApplication,
+    rejectApplication,
+    navigate,
+  } = useAppStore();
   const [remarks, setRemarks] = React.useState("");
-  const [decision, setDecision] = React.useState<"APPROVE" | "REJECT">("APPROVE");
   const [conditions, setConditions] = React.useState("");
 
   React.useEffect(() => {
     if (open) {
       setRemarks("");
-      setDecision("APPROVE");
       setConditions("");
     }
   }, [open, action]);
 
   if (!action) return null;
 
-  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
+  const stage = getStage(app.currentStage);
   const nextStageLabel = stage?.nextStage
-    ? WORKFLOW_STAGES.find((s) => s.key === stage.nextStage)?.label
+    ? getStage(stage.nextStage)?.label
     : undefined;
 
   const cfg = ACTION_CONFIG[action];
   const Icon = cfg.icon;
 
+  const isCommissionerFinal = app.currentStage === "COMMISSIONER_REVIEW";
+
   const titleMap: Record<typeof action, string> = {
-    APPROVE: "Approve & Forward",
+    SUBMIT_TECHNICAL_SCRUTINY: "Submit Technical Scrutiny",
+    APPROVE: isCommissionerFinal ? "Approve Application" : "Approve & Forward",
     FORWARD: "Forward Application",
     RETURN: "Return Application",
-    FINAL_DECISION: "Issue Final Decision",
+    REJECT: "Reject Application",
   };
 
   const descMap: Record<typeof action, string> = {
-    APPROVE: nextStageLabel
-      ? `Approve at the ${app.currentStageLabel} stage and forward to ${nextStageLabel}.`
-      : `Approve at the ${app.currentStageLabel} stage.`,
+    SUBMIT_TECHNICAL_SCRUTINY: "Submit your technical scrutiny findings and forward the application to the TPA for further review.",
+    APPROVE: isCommissionerFinal
+      ? "Issue the final approval as the Commissioner. This action is binding."
+      : nextStageLabel
+        ? `Approve at the ${app.currentStageLabel} stage and forward to ${nextStageLabel}.`
+        : `Approve at the ${app.currentStageLabel} stage.`,
     FORWARD: nextStageLabel
       ? `Forward this application to ${nextStageLabel}.`
       : `Forward this application to the next stage.`,
     RETURN: "Return the application to the previous officer or applicant. A reason is required.",
-    FINAL_DECISION: "Issue the final approval or rejection as the Commissioner. This action is binding.",
+    REJECT: "Issue final rejection as the Commissioner. This action is binding and cannot be undone. A reason is required.",
   };
 
   function handleSubmit() {
-    if (action === "RETURN" && !remarks.trim()) {
+    if ((action === "RETURN" || action === "REJECT") && !remarks.trim()) {
       toast({
         title: "Reason required",
-        description: "Please provide a reason for returning this application.",
+        description: `Please provide a reason for ${action === "REJECT" ? "rejecting" : "returning"} this application.`,
       });
       return;
     }
-    const actionLabel =
-      action === "FINAL_DECISION"
-        ? decision === "APPROVE" ? "Application approved" : "Application rejected"
-        : action === "APPROVE" ? "Application approved & forwarded"
-        : action === "FORWARD" ? "Application forwarded"
-        : "Application returned";
 
-    toast({
-      title: actionLabel,
-      description: `${app.applicationNo} — ${action === "FINAL_DECISION" && decision === "APPROVE" ? "Final approval granted" : action === "FINAL_DECISION" ? "Final rejection issued" : "Workflow updated"}. Applicant & officers notified via SMS & in-app.`,
-    });
+    const trimmedRemarks = remarks.trim();
+    const trimmedConditions = conditions.trim();
+    const finalRemarks = trimmedConditions
+      ? `${trimmedRemarks}${trimmedRemarks ? " | Conditions: " : "Conditions: "}${trimmedConditions}`
+      : trimmedRemarks;
+
+    switch (action) {
+      case "SUBMIT_TECHNICAL_SCRUTINY":
+        submitTechnicalScrutiny(app.id, finalRemarks);
+        toast({
+          title: "Technical scrutiny submitted",
+          description: `${app.applicationNo} — scrutiny report submitted and forwarded to TPA.`,
+        });
+        break;
+      case "APPROVE":
+        approveApplication(app.id, finalRemarks);
+        toast({
+          title: isCommissionerFinal ? "Application approved" : "Application approved & forwarded",
+          description: isCommissionerFinal
+            ? `${app.applicationNo} — final approval granted by the Commissioner. Applicant & officers notified.`
+            : `${app.applicationNo} — approved and forwarded${nextStageLabel ? ` to ${nextStageLabel}` : ""}.`,
+        });
+        break;
+      case "FORWARD":
+        forwardApplication(app.id, finalRemarks);
+        toast({
+          title: "Application forwarded",
+          description: `${app.applicationNo} — forwarded${nextStageLabel ? ` to ${nextStageLabel}` : " to the next stage"}.`,
+        });
+        break;
+      case "RETURN":
+        returnApplication(app.id, finalRemarks);
+        toast({
+          title: "Application returned",
+          description: `${app.applicationNo} — returned to the previous officer. Reason recorded.`,
+          variant: "destructive",
+        });
+        break;
+      case "REJECT":
+        rejectApplication(app.id, finalRemarks);
+        toast({
+          title: "Application rejected",
+          description: `${app.applicationNo} — final rejection issued by the Commissioner. Applicant & officers notified.`,
+          variant: "destructive",
+        });
+        break;
+    }
     onClose();
     navigate("officer-applications");
   }
+
+  const requireReason = action === "RETURN" || action === "REJECT";
+  const showConditions = action === "APPROVE";
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -1041,7 +1435,7 @@ function DecisionDialog({
               <span className="text-muted-foreground">Current Stage</span>
               <span className="font-medium">{app.currentStageLabel}</span>
             </div>
-            {nextStageLabel && action !== "RETURN" && action !== "FINAL_DECISION" && (
+            {nextStageLabel && action !== "RETURN" && action !== "REJECT" && (
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">Next Stage</span>
                 <span className="font-medium text-primary flex items-center gap-1">
@@ -1051,49 +1445,8 @@ function DecisionDialog({
             )}
           </div>
 
-          {/* Final decision radio (only for FINAL_DECISION) */}
-          {action === "FINAL_DECISION" && (
-            <div className="space-y-2">
-              <Label>Decision</Label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setDecision("APPROVE")}
-                  className={cn(
-                    "flex items-center gap-2 rounded-lg border p-3 text-left transition-all",
-                    decision === "APPROVE"
-                      ? "border-success bg-success/5 ring-2 ring-success/20"
-                      : "border-border hover:border-success/40"
-                  )}
-                >
-                  <CircleCheck className={cn("size-5", decision === "APPROVE" ? "text-success" : "text-muted-foreground")} />
-                  <div>
-                    <p className="text-sm font-medium">Approve</p>
-                    <p className="text-[10px] text-muted-foreground">Grant final approval</p>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDecision("REJECT")}
-                  className={cn(
-                    "flex items-center gap-2 rounded-lg border p-3 text-left transition-all",
-                    decision === "REJECT"
-                      ? "border-destructive bg-destructive/5 ring-2 ring-destructive/20"
-                      : "border-border hover:border-destructive/40"
-                  )}
-                >
-                  <Ban className={cn("size-5", decision === "REJECT" ? "text-destructive" : "text-muted-foreground")} />
-                  <div>
-                    <p className="text-sm font-medium">Reject</p>
-                    <p className="text-[10px] text-muted-foreground">Issue final rejection</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Conditions (only on approve/final-approve) */}
-          {((action === "FINAL_DECISION" && decision === "APPROVE") || action === "APPROVE") && (
+          {/* Conditions of approval (only for APPROVE) */}
+          {showConditions && (
             <div className="space-y-2">
               <Label htmlFor="cond">Conditions of Approval (optional)</Label>
               <Textarea
@@ -1109,7 +1462,7 @@ function DecisionDialog({
           {/* Remarks / reason */}
           <div className="space-y-2">
             <Label htmlFor="dec-remarks">
-              {action === "RETURN" || (action === "FINAL_DECISION" && decision === "REJECT")
+              {requireReason
                 ? <>Reason <span className="text-destructive">*</span></>
                 : "Remarks (optional)"}
             </Label>
@@ -1120,9 +1473,11 @@ function DecisionDialog({
               placeholder={
                 action === "RETURN"
                   ? "Reason for returning — visible to applicant and previous officer…"
-                  : action === "FINAL_DECISION" && decision === "REJECT"
-                  ? "Reason for final rejection — visible to applicant and officers…"
-                  : "Optional remarks for the next reviewing officer…"
+                  : action === "REJECT"
+                    ? "Reason for final rejection — visible to applicant and officers…"
+                    : action === "SUBMIT_TECHNICAL_SCRUTINY"
+                      ? "Summary of technical scrutiny findings and any advisories…"
+                      : "Optional remarks for the next reviewing officer…"
               }
               className="min-h-24"
             />
@@ -1133,7 +1488,7 @@ function DecisionDialog({
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button
             variant={
-              action === "RETURN" || (action === "FINAL_DECISION" && decision === "REJECT")
+              action === "RETURN" || action === "REJECT"
                 ? "destructive"
                 : "default"
             }
@@ -1141,11 +1496,104 @@ function DecisionDialog({
             className="gap-1.5"
           >
             <Icon className="size-4" />
-            {action === "FINAL_DECISION"
-              ? decision === "APPROVE" ? "Grant Final Approval" : "Issue Final Rejection"
-              : action === "APPROVE" ? "Approve & Forward"
-              : action === "FORWARD" ? "Forward Application"
-              : "Return Application"}
+            {action === "SUBMIT_TECHNICAL_SCRUTINY"
+              ? "Submit & Forward"
+              : action === "APPROVE"
+                ? isCommissionerFinal ? "Grant Final Approval" : "Approve & Forward"
+                : action === "FORWARD"
+                  ? "Forward Application"
+                  : action === "RETURN"
+                    ? "Return Application"
+                    : "Issue Final Rejection"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ============================================================
+// Simple Shortfall Dialog (Resolve / Reopen) — used in ShortfallResolutionSection
+// ============================================================
+function SimpleShortfallDialog({
+  open,
+  shortfall,
+  app,
+  mode,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  shortfall: Shortfall | null;
+  app: Application;
+  mode: "resolve" | "reopen";
+  onClose: () => void;
+  onSubmit: (text: string) => void;
+}) {
+  const [text, setText] = React.useState("");
+
+  React.useEffect(() => {
+    if (open) setText("");
+  }, [open, shortfall?.id]);
+
+  if (!shortfall) return null;
+
+  const isResolve = mode === "resolve";
+  const Icon = isResolve ? CheckCircle2 : RefreshCw;
+  const cfg = isResolve
+    ? {
+        title: "Resolve Shortfall",
+        desc: `Mark shortfall ${shortfall.shortfallId} as resolved. If all shortfalls on ${app.applicationNo} are resolved, the workflow will automatically resume.`,
+        label: "Resolution Note",
+        placeholder: "e.g. Submitted document verified as compliant — shortfall cleared.",
+        button: "Resolve Shortfall",
+        tone: "text-success",
+        variant: "outline" as const,
+        buttonVariant: "default" as const,
+      }
+    : {
+        title: "Reopen Shortfall",
+        desc: `Reopen shortfall ${shortfall.shortfallId} on ${app.applicationNo}. The application will be paused again and the applicant will be notified to respond.`,
+        label: "Reason for Reopening",
+        placeholder: "e.g. Response is incomplete — additional clarification required.",
+        button: "Reopen Shortfall",
+        tone: "text-destructive",
+        variant: "outline" as const,
+        buttonVariant: "destructive" as const,
+      };
+
+  function handleSubmit() {
+    if (!text.trim()) return;
+    onSubmit(text.trim());
+    setText("");
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) { onClose(); setText(""); } }}>
+      <DialogContent className="sm:max-w-[520px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Icon className={cn("size-5", cfg.tone)} />
+            {cfg.title}
+          </DialogTitle>
+          <DialogDescription>{cfg.desc}</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-2">
+          <Label htmlFor="sf-action-text">{cfg.label} <span className="text-destructive">*</span></Label>
+          <Textarea
+            id="sf-action-text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={cfg.placeholder}
+            className="min-h-24"
+          />
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => { onClose(); setText(""); }}>Cancel</Button>
+          <Button variant={cfg.buttonVariant} onClick={handleSubmit} className="gap-1.5" disabled={!text.trim()}>
+            <Icon className="size-4" /> {cfg.button}
           </Button>
         </DialogFooter>
       </DialogContent>

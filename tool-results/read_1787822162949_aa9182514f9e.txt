@@ -1,0 +1,930 @@
+     1→"use client";
+     2→
+     3→import { create } from "zustand";
+     4→import type {
+     5→  Application,
+     6→  ApplicationStatus,
+     7→  ApplicationType,
+     8→  Applicant,
+     9→  AuditEntry,
+    10→  NotificationRecord,
+    11→  Payment,
+    12→  Portal,
+    13→  ProjectInfo,
+    14→  Remark,
+    15→  RoleKey,
+    16→  Shortfall,
+    17→  ShortfallType,
+    18→  SmsLog,
+    19→  User,
+    20→  ViewKey,
+    21→  WorkflowHistoryEntry,
+    22→  WorkflowStageKey,
+    23→} from "@/types";
+    24→import {
+    25→  SEED_APPLICATIONS,
+    26→  SEED_NOTIFICATIONS,
+    27→  SEED_SMS_LOGS,
+    28→  USERS,
+    29→  DEMO_CREDENTIALS,
+    30→  ROLES,
+    31→} from "@/data/mock-data";
+    32→import { WORKFLOW_STAGES, getStage, stageFromStatus } from "@/data/workflow-config";
+    33→import {
+    34→  canViewApplication,
+    35→  getAllowedActions,
+    36→  getAssignedOfficerForStage,
+    37→  portalForRole,
+    38→  computeProgress,
+    39→  rolesForStage,
+    40→} from "@/lib/permissions";
+    41→import { feeService } from "@/services/fee-service";
+    42→import { paymentService } from "@/services/payment-service";
+    43→import { NotificationFactory, createNotification } from "@/services/notification-service";
+    44→
+    45→// Re-export for views
+    46→export { DEMO_CREDENTIALS, ROLES };
+    47→export function defaultViewForPortal(portal: Portal): ViewKey {
+    48→  if (portal === "LTP") return "ltp-dashboard";
+    49→  if (portal === "OFFICER") return "officer-dashboard";
+    50→  return "admin-dashboard";
+    51→}
+    52→
+    53→function nowISO(): string {
+    54→  return new Date().toISOString();
+    55→}
+    56→
+    57→function genId(prefix: string): string {
+    58→  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    59→}
+    60→
+    61→// ============================================================
+    62→// STORE INTERFACE
+    63→// ============================================================
+    64→interface AppState {
+    65→  // auth
+    66→  user: User | null;
+    67→  isAuthenticated: boolean;
+    68→  authStage: "login" | "forgot" | "otp" | "authenticating";
+    69→  pendingEmail?: string;
+    70→  // routing
+    71→  view: ViewKey;
+    72→  portal: Portal;
+    73→  selectedApplicationId: string | null;
+    74→  // data — SINGLE SOURCE OF TRUTH
+    75→  applications: Application[];
+    76→  notifications: NotificationRecord[];
+    77→  smsLogs: SmsLog[];
+    78→  // sidebar
+    79→  sidebarCollapsed: boolean;
+    80→  mobileNavOpen: boolean;
+    81→  theme: "light" | "dark";
+    82→  // processing flags
+    83→  processingAppIds: string[]; // apps currently being processed (scrutiny/payment)
+    84→
+    85→  // ---- auth actions ----
+    86→  login: (email: string, password: string) => { ok: boolean; error?: string };
+    87→  loginAsRole: (role: RoleKey) => void;
+    88→  logout: () => void;
+    89→  setAuthStage: (s: AppState["authStage"]) => void;
+    90→  setPendingEmail: (e: string) => void;
+    91→
+    92→  // ---- navigation ----
+    93→  navigate: (view: ViewKey) => void;
+    94→  openApplication: (id: string, view?: ViewKey) => void;
+    95→  setSidebarCollapsed: (v: boolean) => void;
+    96→  setMobileNavOpen: (v: boolean) => void;
+    97→  toggleTheme: () => void;
+    98→
+    99→  // ---- application lifecycle (LTP) ----
+   100→  createApplication: (data: {
+   101→    applicationType: ApplicationType;
+   102→    propertyType: ProjectInfo["propertyType"];
+   103→    projectName: string;
+   104→    applicantName: string;
+   105→    applicantContact: string;
+   106→    applicantEmail: string;
+   107→    applicantAddress: string;
+   108→    plotArea: number;
+   109→    builtUpArea: number;
+   110→    landUse: string;
+   111→    ward: string;
+   112→    zone: string;
+   113→    surveyNo: string;
+   114→    address: string;
+   115→  }) => string;
+   116→
+   117→  uploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
+   118→  runScrutiny: (appId: string) => void;
+   119→  reuploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
+   120→
+   121→  uploadDocument: (appId: string, docCode: string, fileName: string, fileSize: string) => void;
+   122→
+   123→  generateFee: (appId: string) => void;
+   124→
+   125→  initiatePayment: (appId: string, method: Payment["method"]) => void;
+   126→
+   127→  respondToShortfall: (appId: string, shortfallId: string, responseText: string, supportingDoc?: string) => void;
+   128→
+   129→  // ---- officer workflow actions ----
+   130→  forwardApplication: (appId: string, remarks: string) => void;
+   131→  approveApplication: (appId: string, remarks: string) => void;
+   132→  rejectApplication: (appId: string, remarks: string) => void;
+   133→  returnApplication: (appId: string, remarks: string) => void;
+   134→  submitTechnicalScrutiny: (appId: string, remarks: string) => void;
+   135→
+   136→  raiseShortfall: (appId: string, data: { type: ShortfallType; title: string; description: string; dueDate: string }) => void;
+   137→  reviewShortfallResponse: (appId: string, shortfallId: string) => void;
+   138→  resolveShortfall: (appId: string, shortfallId: string, resolution: string) => void;
+   139→  reopenShortfall: (appId: string, shortfallId: string, reason: string) => void;
+   140→
+   141→  // officer document actions
+   142→  verifyDocument: (appId: string, docId: string) => void;
+   143→  rejectDocument: (appId: string, docId: string, reason: string) => void;
+   144→
+   145→  addRemark: (appId: string, text: string, type: Remark["type"]) => void;
+   146→
+   147→  // ---- notifications ----
+   148→  markNotificationRead: (id: string) => void;
+   149→  markAllNotificationsRead: () => void;
+   150→}
+   151→
+   152→// ============================================================
+   153→// INTERNAL HELPERS — update application immutably + side effects
+   154→// ============================================================
+   155→function updateApp(
+   156→  apps: Application[],
+   157→  appId: string,
+   158→  updater: (app: Application) => Application
+   159→): Application[] {
+   160→  return apps.map((a) => (a.id === appId ? updater(a) : a));
+   161→}
+   162→
+   163→function addAudit(app: Application, entry: Omit<AuditEntry, "id" | "timestamp" | "entity" | "entityId">): Application {
+   164→  const audit: AuditEntry = {
+   165→    ...entry,
+   166→    id: genId("audit"),
+   167→    entity: "Application",
+   168→    entityId: app.applicationNo,
+   169→    timestamp: nowISO(),
+   170→  };
+   171→  return { ...app, auditLog: [...app.auditLog, audit] };
+   172→}
+   173→
+   174→function addWorkflowHistory(
+   175→  app: Application,
+   176→  stage: WorkflowStageKey,
+   177→  actor: { name: string; role: RoleKey },
+   178→  action: string,
+   179→  remarks?: string,
+   180→  status: WorkflowHistoryEntry["status"] = "COMPLETED"
+   181→): Application {
+   182→  const entry: WorkflowHistoryEntry = {
+   183→    id: genId("wf"),
+   184→    stage,
+   185→    stageLabel: getStage(stage)?.label ?? stage,
+   186→    actor,
+   187→    action,
+   188→    remarks,
+   189→    timestamp: nowISO(),
+   190→    status,
+   191→  };
+   192→  return { ...app, workflowHistory: [...app.workflowHistory, entry] };
+   193→}
+   194→
+   195→function setAppStatus(app: Application, status: ApplicationStatus, stage?: WorkflowStageKey): Application {
+   196→  const newStage = stage ?? stageFromStatus(status);
+   197→  const stageInfo = getStage(newStage);
+   198→  return {
+   199→    ...app,
+   200→    status,
+   201→    currentStage: newStage,
+   202→    currentStageLabel: stageInfo?.label ?? app.currentStageLabel,
+   203→    lastUpdated: nowISO(),
+   204→    progress: computeProgress(status, newStage),
+   205→  };
+   206→}
+   207→
+   208→// ============================================================
+   209→// STORE IMPLEMENTATION
+   210→// ============================================================
+   211→export const useAppStore = create<AppState>((set, get) => ({
+   212→  user: null,
+   213→  isAuthenticated: false,
+   214→  authStage: "login",
+   215→  pendingEmail: undefined,
+   216→  view: "login",
+   217→  portal: "LTP",
+   218→  selectedApplicationId: null,
+   219→  applications: SEED_APPLICATIONS,
+   220→  notifications: SEED_NOTIFICATIONS,
+   221→  smsLogs: SEED_SMS_LOGS,
+   222→  sidebarCollapsed: false,
+   223→  mobileNavOpen: false,
+   224→  theme: "light",
+   225→  processingAppIds: [],
+   226→
+   227→  // ---- AUTH ----
+   228→  login: (email, password) => {
+   229→    const cred = DEMO_CREDENTIALS.find((c) => c.email === email.trim().toLowerCase());
+   230→    if (!cred) return { ok: false, error: "No account found with this email." };
+   231→    if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
+   232→    const user = USERS.find((u) => u.role === cred.role)!;
+   233→    const portal = portalForRole(cred.role);
+   234→    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal });
+   235→    return { ok: true };
+   236→  },
+   237→
+   238→  loginAsRole: (role) => {
+   239→    const user = USERS.find((u) => u.role === role)!;
+   240→    const portal = portalForRole(role);
+   241→    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal });
+   242→  },
+   243→
+   244→  logout: () =>
+   245→    set({ user: null, isAuthenticated: false, authStage: "login", view: "login", selectedApplicationId: null, mobileNavOpen: false }),
+   246→
+   247→  setAuthStage: (authStage) => set({ authStage }),
+   248→  setPendingEmail: (pendingEmail) => set({ pendingEmail }),
+   249→
+   250→  // ---- NAVIGATION ----
+   251→  navigate: (view) => set({ view, mobileNavOpen: false }),
+   252→  openApplication: (id, view) => set({ selectedApplicationId: id, view: view ?? "ltp-application-details" }),
+   253→  setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+   254→  setMobileNavOpen: (mobileNavOpen) => set({ mobileNavOpen }),
+   255→  toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
+   256→
+   257→  // ---- APPLICATION LIFECYCLE ----
+   258→  createApplication: (data) => {
+   259→    const user = get().user!;
+   260→    const id = genId("app");
+   261→    const seq = String(get().applications.length + 1).padStart(4, "0");
+   262→    const applicationNo = `MC/BP/2026/04/${seq}`;
+   263→    const now = nowISO();
+   264→
+   265→    const app: Application = {
+   266→      id,
+   267→      applicationNo,
+   268→      applicant: { name: data.applicantName, contact: data.applicantContact, email: data.applicantEmail, address: data.applicantAddress },
+   269→      ltpId: user.id,
+   270→      ltpName: user.name,
+   271→      project: {
+   272→        name: data.projectName,
+   273→        type: data.applicationType,
+   274→        propertyType: data.propertyType,
+   275→        plotArea: data.plotArea,
+   276→        builtUpArea: data.builtUpArea,
+   277→        landUse: data.landUse,
+   278→        ward: data.ward,
+   279→        zone: data.zone,
+   280→        surveyNo: data.surveyNo,
+   281→        address: data.address,
+   282→      },
+   283→      status: "DRAFT",
+   284→      currentStage: "APPLICATION_CREATED",
+   285→      currentStageLabel: "Application Created",
+   286→      submissionDate: now,
+   287→      lastUpdated: now,
+   288→      expectedSLA: new Date(Date.now() + 30 * 86400000).toISOString(),
+   289→      priority: data.builtUpArea > 5000 ? "HIGH" : "NORMAL",
+   290→      progress: 0,
+   291→      drawings: [],
+   292→      documents: [
+   293→        { id: genId("doc"), name: "7/12 Land Extract", code: "DOC_712", required: true, status: "REQUIRED" },
+   294→        { id: genId("doc"), name: "Property Card / Mutation", code: "DOC_PROP_CARD", required: true, status: "REQUIRED" },
+   295→        { id: genId("doc"), name: "Architectural Drawings (stamped)", code: "DOC_ARCH", required: true, status: "REQUIRED" },
+   296→        { id: genId("doc"), name: "Structural Drawings & Stability Certificate", code: "DOC_STRUCT", required: true, status: "REQUIRED" },
+   297→        { id: genId("doc"), name: "NOC from Fire Department", code: "DOC_FIRE_NOC", required: true, status: "REQUIRED" },
+   298→        { id: genId("doc"), name: "Environmental Clearance", code: "DOC_ENV", required: false, status: "REQUIRED" },
+   299→        { id: genId("doc"), name: "Society / Landowner Authorization", code: "DOC_AUTH", required: true, status: "REQUIRED" },
+   300→        { id: genId("doc"), name: "Affidavit — Ownership", code: "DOC_AFFIDAVIT", required: true, status: "REQUIRED" },
+   301→      ],
+   302→      shortfalls: [],
+   303→      workflowHistory: [{
+   304→        id: genId("wf"),
+   305→        stage: "APPLICATION_CREATED",
+   306→        stageLabel: "Application Created",
+   307→        actor: { name: user.name, role: user.role },
+   308→        action: "Application created",
+   309→        timestamp: now,
+   310→        status: "COMPLETED",
+   311→      }],
+   312→      auditLog: [{
+   313→        id: genId("audit"),
+   314→        user: user.name,
+   315→        role: user.role,
+   316→        action: "Application created",
+   317→        entity: "Application",
+   318→        entityId: applicationNo,
+   319→        timestamp: now,
+   320→        newStatus: "DRAFT",
+   321→        ip: "103.21.58.10",
+   322→        device: "Chrome / Windows",
+   323→      }],
+   324→      remarks: [],
+   325→    };
+   326→
+   327→    // Side effects: notification + SMS
+   328→    const { notification, smsLog } = NotificationFactory.applicationSubmitted(app);
+   329→    set((s) => ({
+   330→      applications: [app, ...s.applications],
+   331→      notifications: [notification, ...s.notifications],
+   332→      smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs,
+   333→    }));
+   334→    return id;
+   335→  },
+   336→
+   337→  uploadDrawing: (appId, fileName, fileSize) => {
+   338→    const user = get().user!;
+   339→    set((s) => ({
+   340→      applications: updateApp(s.applications, appId, (app) => {
+   341→        const version = app.drawings.length + 1;
+   342→        const drawing = {
+   343→          id: genId("dw"),
+   344→          fileName,
+   345→          fileType: "DWG" as const,
+   346→          fileSize,
+   347→          version,
+   348→          uploadedAt: nowISO(),
+   349→          uploadedBy: user.name,
+   350→          status: "PENDING_SCRUTINY" as const,
+   351→        };
+   352→        let updated = { ...app, drawings: [...app.drawings, drawing] };
+   353→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Drawing v${version} uploaded`, oldStatus: app.status, newStatus: "DRAWING_UPLOADED" });
+   354→        updated = setAppStatus(updated, "DRAWING_UPLOADED");
+   355→        return updated;
+   356→      }),
+   357→    }));
+   358→  },
+   359→
+   360→  runScrutiny: (appId) => {
+   361→    const user = get().user!;
+   362→    // Mark as processing
+   363→    set((s) => ({ processingAppIds: [...s.processingAppIds, appId] }));
+   364→    // Set SCRUTINY_IN_PROGRESS
+   365→    set((s) => ({
+   366→      applications: updateApp(s.applications, appId, (app) => {
+   367→        const latest = app.drawings[app.drawings.length - 1];
+   368→        let updated = { ...app, drawings: app.drawings.map((d) => d.id === latest.id ? { ...d, status: "SCRUTINY_IN_PROGRESS" as const } : d) };
+   369→        updated = addAudit(updated, { user: "System", role: "TPS", action: `Auto-scrutiny started (v${latest.version})`, oldStatus: app.status, newStatus: "SCRUTINY_IN_PROGRESS" });
+   370→        updated = setAppStatus(updated, "SCRUTINY_IN_PROGRESS");
+   371→        return updated;
+   372→      }),
+   373→    }));
+   374→    // After 2.5s, complete scrutiny
+   375→    setTimeout(() => {
+   376→      set((s) => ({
+   377→        applications: updateApp(s.applications, appId, (app) => {
+   378→          const latest = app.drawings[app.drawings.length - 1];
+   379→          // Deterministic: v1 fails, v2+ passes (so LTP experiences fail→reupload→pass)
+   380→          const passed = latest.version >= 2;
+   381→          const report = buildScrutinyResult(latest.version, passed);
+   382→          let updated = { ...app, scrutinyReport: report };
+   383→          updated = { ...updated, drawings: updated.drawings.map((d) => d.id === latest.id ? { ...d, status: (passed ? "SCRUTINY_PASSED" : "SCRUTINY_FAILED") as const } : d) };
+   384→          const newStatus = passed ? "SCRUTINY_PASSED" : "SCRUTINY_FAILED";
+   385→          updated = addAudit(updated, { user: "System", role: "TPS", action: `Auto-scrutiny ${passed ? "passed" : "failed"} (v${latest.version})`, oldStatus: app.status, newStatus });
+   386→          if (passed) {
+   387→            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "TPS" }, "Scrutiny passed", report.summary, "COMPLETED");
+   388→          } else {
+   389→            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "TPS" }, "Scrutiny failed — re-upload required", report.summary, "FAILED");
+   390→          }
+   391→          updated = setAppStatus(updated, newStatus, passed ? "DOCUMENTS" : "DRAWING_SCRUTINY");
+   392→          return updated;
+   393→        }),
+   394→        processingAppIds: s.processingAppIds.filter((id) => id !== appId),
+   395→      }));
+   396→      // Side effects: notification + SMS
+   397→      const app = get().applications.find((a) => a.id === appId)!;
+   398→      const { notification, smsLog } = app.status === "SCRUTINY_PASSED"
+   399→        ? NotificationFactory.scrutinyPassed(app)
+   400→        : NotificationFactory.scrutinyFailed(app);
+   401→      set((s) => ({
+   402→        notifications: [notification, ...s.notifications],
+   403→        smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs,
+   404→      }));
+   405→    }, 2500);
+   406→  },
+   407→
+   408→  reuploadDrawing: (appId, fileName, fileSize) => {
+   409→    get().uploadDrawing(appId, fileName, fileSize);
+   410→    // Mark old drawings as superseded
+   411→    set((s) => ({
+   412→      applications: updateApp(s.applications, appId, (app) => {
+   413→        const newVersion = app.drawings[app.drawings.length - 1];
+   414→        let updated = { ...app, drawings: app.drawings.map((d) => d.version < newVersion.version && d.status !== "SUPERSEDED" ? { ...d, status: "SUPERSEDED" as const } : d) };
+   415→        const audit = { id: genId("audit"), user: get().user!.name, role: get().user!.role, action: `Drawing re-uploaded (v${newVersion.version})`, entity: "Application", entityId: app.applicationNo, timestamp: nowISO(), oldStatus: app.status, newStatus: "DRAWING_UPLOADED", ip: "103.21.58.10", device: "Chrome / Windows" };
+   416→        updated = { ...updated, auditLog: [...updated.auditLog, audit] };
+   417→        updated = setAppStatus(updated, "DRAWING_UPLOADED", "DRAWING_SCRUTINY");
+   418→        return updated;
+   419→      }),
+   420→    }));
+   421→  },
+   422→
+   423→  uploadDocument: (appId, docCode, fileName, fileSize) => {
+   424→    const user = get().user!;
+   425→    set((s) => ({
+   426→      applications: updateApp(s.applications, appId, (app) => {
+   427→        let updated = { ...app, documents: app.documents.map((d) => d.code === docCode ? { ...d, status: "UPLOADED" as const, uploadedAt: nowISO(), version: (d.version ?? 0) + 1, fileSize } : d) };
+   428→        // If all required docs uploaded, move to DOCUMENT_VERIFICATION
+   429→        const allUploaded = updated.documents.filter((d) => d.required).every((d) => d.status === "UPLOADED" || d.status === "VERIFIED");
+   430→        if (allUploaded && app.status === "DOCUMENT_UPLOAD_PENDING") {
+   431→          updated = addAudit(updated, { user: user.name, role: user.role, action: "All required documents uploaded", oldStatus: app.status, newStatus: "DOCUMENT_VERIFICATION" });
+   432→          updated = setAppStatus(updated, "DOCUMENT_VERIFICATION", "DOCUMENTS");
+   433→          // Assign to TPA for verification
+   434→          const tpa = USERS.find((u) => u.role === "TPA")!;
+   435→          updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: nowISO() };
+   436→        } else {
+   437→          updated = addAudit(updated, { user: user.name, role: user.role, action: `Document uploaded: ${docCode}` });
+   438→        }
+   439→        return updated;
+   440→      }),
+   441→    }));
+   442→  },
+   443→
+   444→  generateFee: (appId) => {
+   445→    set((s) => ({
+   446→      applications: updateApp(s.applications, appId, (app) => {
+   447→        const docCount = app.documents.filter((d) => d.required).length;
+   448→        const result = feeService.calculate({
+   449→          applicationType: app.project.type,
+   450→          propertyType: app.project.propertyType,
+   451→          builtUpArea: app.project.builtUpArea,
+   452→          plotArea: app.project.plotArea,
+   453→          documentCount: docCount,
+   454→        });
+   455→        if (!result) return app;
+   456→        const fee = feeService.toApplicationFee(result, 0);
+   457→        let updated = { ...app, fee };
+   458→        updated = addAudit(updated, { user: "System (Fee Engine)", role: "TPA", action: "Fee calculated", oldStatus: app.status, newStatus: "FEE_GENERATED" });
+   459→        updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
+   460→        return updated;
+   461→      }),
+   462→    }));
+   463→    // Notification
+   464→    const app = get().applications.find((a) => a.id === appId)!;
+   465→    if (app.fee) {
+   466→      const { notification, smsLog } = NotificationFactory.feeGenerated(app);
+   467→      set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   468→    }
+   469→  },
+   470→
+   471→  initiatePayment: (appId, method) => {
+   472→    const user = get().user!;
+   473→    // Set PAYMENT_PROCESSING
+   474→    set((s) => ({
+   475→      applications: updateApp(s.applications, appId, (app) => {
+   476→        if (!app.fee) return app;
+   477→        const payment: Payment = {
+   478→          id: genId("pay"),
+   479→          transactionId: "",
+   480→          referenceNo: "",
+   481→          status: "PROCESSING",
+   482→          amount: app.fee.total,
+   483→          method,
+   484→          gateway: "Mock Payment Gateway (Demo)",
+   485→          initiatedAt: nowISO(),
+   486→          verified: false,
+   487→          isMock: true,
+   488→        };
+   489→        let updated = { ...app, payment };
+   490→        updated = addAudit(updated, { user: user.name, role: user.role, action: "Payment initiated", oldStatus: app.status, newStatus: "PAYMENT_PROCESSING" });
+   491→        updated = setAppStatus(updated, "PAYMENT_PROCESSING", "PAYMENT");
+   492→        return updated;
+   493→      }),
+   494→      processingAppIds: [...s.processingAppIds, appId],
+   495→    }));
+   496→    // After 2.5s, verify payment (mock gateway)
+   497→    setTimeout(async () => {
+   498→      const app = get().applications.find((a) => a.id === appId)!;
+   499→      if (!app.payment) return;
+   500→      // Use mock payment service for verification
+   501→      const result = await paymentService.verifyPayment(app.payment.id);
+   502→      set((s) => ({
+   503→        applications: updateApp(s.applications, appId, (a) => {
+   504→          if (!a.payment || !a.fee) return a;
+   505→          if (result.verified) {
+   506→            // PAYMENT SUCCESS — paid = total, outstanding = 0 (CONSISTENCY ENFORCED)
+   507→            const updatedPayment: Payment = {
+   508→              ...a.payment,
+   509→              status: "SUCCESS",
+   510→              transactionId: result.transactionId,
+   511→              receiptNo: result.receiptNo,
+   512→              completedAt: result.completedAt,
+   513→              verified: true,
+   514→            };
+   515→            const updatedFee = { ...a.fee, paidAmount: a.fee.total, outstanding: 0 };
+   516→            let updated = { ...a, payment: updatedPayment, fee: updatedFee };
+   517→            updated = addAudit(updated, { user: "Mock Payment Gateway", role: a.assignedOfficer?.role ?? "TPA", action: "Payment verified", oldStatus: a.status, newStatus: "PAYMENT_SUCCESS", remarks: `Txn: ${result.transactionId}` });
+   518→            updated = addWorkflowHistory(updated, "PAYMENT", { name: "Mock Payment Gateway", role: "TPA" }, "Payment received", `₹${a.fee.total.toLocaleString("en-IN")} via ${method}`, "COMPLETED");
+   519→            // Auto-advance to TPS_TECHNICAL_SCRUTINY
+   520→            const tps = USERS.find((u) => u.role === "TPS")!;
+   521→            updated = setAppStatus(updated, "TPS_TECHNICAL_SCRUTINY", "TPS_TECHNICAL_SCRUTINY");
+   522→            updated = { ...updated, assignedOfficer: { name: tps.name, role: tps.role }, assignedAt: nowISO() };
+   523→            updated = addWorkflowHistory(updated, "TPS_TECHNICAL_SCRUTINY", { name: tps.name, role: tps.role }, "Assigned to TPS for technical scrutiny", undefined, "CURRENT");
+   524→            return updated;
+   525→          } else {
+   526→            // PAYMENT FAILED
+   527→            const updatedPayment: Payment = { ...a.payment, status: "FAILED", completedAt: result.completedAt };
+   528→            let updated = { ...a, payment: updatedPayment };
+   529→            updated = addAudit(updated, { user: "Mock Payment Gateway", role: "TPA", action: "Payment failed", oldStatus: a.status, newStatus: "PAYMENT_PENDING" });
+   530→            updated = setAppStatus(updated, "PAYMENT_PENDING", "PAYMENT");
+   531→            return updated;
+   532→          }
+   533→        }),
+   534→        processingAppIds: s.processingAppIds.filter((id) => id !== appId),
+   535→      }));
+   536→      // Notification
+   537→      const updatedApp = get().applications.find((a) => a.id === appId)!;
+   538→      const { notification, smsLog } = updatedApp.payment?.status === "SUCCESS"
+   539→        ? NotificationFactory.paymentSuccessful(updatedApp)
+   540→        : createNotification({ type: "SYSTEM", title: "Payment Failed", message: `Payment for ${updatedApp.applicationNo} failed. Please try again.`, applicationId: appId, applicationNo: updatedApp.applicationNo });
+   541→      set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   542→    }, 2800);
+   543→  },
+   544→
+   545→  respondToShortfall: (appId, shortfallId, responseText, supportingDoc) => {
+   546→    const user = get().user!;
+   547→    set((s) => ({
+   548→      applications: updateApp(s.applications, appId, (app) => {
+   549→        let updated = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "RESPONDED" as const, response: { text: responseText, respondedAt: nowISO(), supportingDocument: supportingDoc } } : sf) };
+   550→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall responded: ${shortfallId}`, remarks: responseText });
+   551→        return updated;
+   552→      }),
+   553→    }));
+   554→    // Notification to officer
+   555→    const app = get().applications.find((a) => a.id === appId)!;
+   556→    const { notification, smsLog } = NotificationFactory.shortfallResponded(app, shortfallId);
+   557→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   558→  },
+   559→
+   560→  // ---- OFFICER WORKFLOW ----
+   561→  forwardApplication: (appId, remarks) => {
+   562→    const user = get().user!;
+   563→    set((s) => ({
+   564→      applications: updateApp(s.applications, appId, (app) => {
+   565→        const currentStage = getStage(app.currentStage);
+   566→        const nextStageKey = currentStage?.nextStage;
+   567→        if (!nextStageKey) return app;
+   568→        const nextStage = getStage(nextStageKey)!;
+   569→        // Mark current as completed
+   570→        let updated = { ...app, workflowHistory: app.workflowHistory.map((w) => w.stage === app.currentStage && w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
+   571→        // Assign to next officer
+   572→        const nextOfficer = getAssignedOfficerForStage(nextStageKey, USERS);
+   573→        updated = { ...updated, assignedOfficer: nextOfficer, assignedAt: nowISO() };
+   574→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
+   575→        updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Forwarded to ${nextStage.label}`, remarks, "COMPLETED");
+   576→        // Set new status
+   577→        const newStatus = statusForStage(nextStageKey);
+   578→        updated = setAppStatus(updated, newStatus, nextStageKey);
+   579→        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "TPS" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+   580→        return updated;
+   581→      }),
+   582→    }));
+   583→    // Notification
+   584→    const app = get().applications.find((a) => a.id === appId)!;
+   585→    const { notification, smsLog } = NotificationFactory.applicationForwarded(app, app.currentStageLabel);
+   586→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   587→  },
+   588→
+   589→  approveApplication: (appId, remarks) => {
+   590→    const user = get().user!;
+   591→    set((s) => ({
+   592→      applications: updateApp(s.applications, appId, (app) => {
+   593→        const currentStage = getStage(app.currentStage);
+   594→        // If at commissioner level → final approval
+   595→        if (app.currentStage === "COMMISSIONER_REVIEW") {
+   596→          let updated = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
+   597→          updated = addAudit(updated, { user: user.name, role: user.role, action: "Application approved", oldStatus: app.status, newStatus: "APPROVED", remarks });
+   598→          updated = addWorkflowHistory(updated, "COMMISSIONER_REVIEW", { name: user.name, role: user.role }, "Application approved", remarks, "COMPLETED");
+   599→          updated = addWorkflowHistory(updated, "FINAL_DECISION", { name: user.name, role: user.role }, "Final approval granted", remarks, "COMPLETED");
+   600→          updated = setAppStatus(updated, "APPROVED", "FINAL_DECISION");
+   601→          updated = { ...updated, assignedOfficer: undefined, progress: 100 };
+   602→          return updated;
+   603→        }
+   604→        // Otherwise, forward to next stage
+   605→        const nextStageKey = currentStage?.nextStage;
+   606→        if (!nextStageKey) return app;
+   607→        const nextStage = getStage(nextStageKey)!;
+   608→        let updated = { ...app, workflowHistory: app.workflowHistory.map((w) => w.stage === app.currentStage && w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
+   609→        const nextOfficer = getAssignedOfficerForStage(nextStageKey, USERS);
+   610→        updated = { ...updated, assignedOfficer: nextOfficer, assignedAt: nowISO() };
+   611→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Approved & forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
+   612→        updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved — forwarded to ${nextStage.label}`, remarks, "COMPLETED");
+   613→        updated = setAppStatus(updated, statusForStage(nextStageKey), nextStageKey);
+   614→        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "TPS" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+   615→        return updated;
+   616→      }),
+   617→    }));
+   618→    // Notification
+   619→    const app = get().applications.find((a) => a.id === appId)!;
+   620→    const { notification, smsLog } = app.status === "APPROVED"
+   621→      ? NotificationFactory.applicationApproved(app)
+   622→      : NotificationFactory.applicationForwarded(app, app.currentStageLabel);
+   623→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   624→  },
+   625→
+   626→  rejectApplication: (appId, remarks) => {
+   627→    const user = get().user!;
+   628→    set((s) => ({
+   629→      applications: updateApp(s.applications, appId, (app) => {
+   630→        let updated = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "FAILED" as const } : w) };
+   631→        updated = addAudit(updated, { user: user.name, role: user.role, action: "Application rejected", oldStatus: app.status, newStatus: "REJECTED", remarks });
+   632→        updated = addWorkflowHistory(updated, "COMMISSIONER_REVIEW", { name: user.name, role: user.role }, "Application rejected", remarks, "FAILED");
+   633→        updated = setAppStatus(updated, "REJECTED", "FINAL_DECISION");
+   634→        updated = { ...updated, assignedOfficer: undefined, progress: 100 };
+   635→        return updated;
+   636→      }),
+   637→    }));
+   638→    const app = get().applications.find((a) => a.id === appId)!;
+   639→    const { notification, smsLog } = NotificationFactory.applicationRejected(app, remarks);
+   640→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   641→  },
+   642→
+   643→  returnApplication: (appId, remarks) => {
+   644→    const user = get().user!;
+   645→    set((s) => ({
+   646→      applications: updateApp(s.applications, appId, (app) => {
+   647→        // Return to TPA or previous review stage
+   648→        const returnStage: WorkflowStageKey = app.currentStage === "COMMISSIONER_REVIEW" ? "ADDITIONAL_COMMISSIONER_REVIEW" : "TPA_REVIEW";
+   649→        const returnStageInfo = getStage(returnStage)!;
+   650→        let updated = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "RETURNED" as const } : w) };
+   651→        const returnOfficer = getAssignedOfficerForStage(returnStage, USERS);
+   652→        updated = { ...updated, assignedOfficer: returnOfficer, assignedAt: nowISO() };
+   653→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Returned to ${returnStageInfo.label}`, oldStatus: app.status, newStatus: "RETURNED", remarks });
+   654→        updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Returned to ${returnStageInfo.label}`, remarks, "RETURNED");
+   655→        updated = setAppStatus(updated, "RETURNED", returnStage);
+   656→        updated = addWorkflowHistory(updated, returnStage, returnOfficer ? { name: returnOfficer.name, role: returnOfficer.role } : { name: "System", role: "TPA" }, `Returned for correction`, remarks, "CURRENT");
+   657→        return updated;
+   658→      }),
+   659→    }));
+   660→    const app = get().applications.find((a) => a.id === appId)!;
+   661→    const { notification, smsLog } = NotificationFactory.applicationReturned(app, app.currentStageLabel);
+   662→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   663→  },
+   664→
+   665→  submitTechnicalScrutiny: (appId, remarks) => {
+   666→    const user = get().user!;
+   667→    set((s) => ({
+   668→      applications: updateApp(s.applications, appId, (app) => {
+   669→        let updated = addAudit(app, { user: user.name, role: user.role, action: "Technical scrutiny report submitted", remarks });
+   670→        updated = addWorkflowHistory(updated, "TPS_TECHNICAL_SCRUTINY", { name: user.name, role: user.role }, "Technical scrutiny submitted", remarks, "COMPLETED");
+   671→        // Forward to TPA
+   672→        const nextStage = getStage("TPA_REVIEW")!;
+   673→        const tpa = USERS.find((u) => u.role === "TPA")!;
+   674→        updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: nowISO() };
+   675→        updated = setAppStatus(updated, "TPA_REVIEW", "TPA_REVIEW");
+   676→        updated = addWorkflowHistory(updated, "TPA_REVIEW", { name: tpa.name, role: tpa.role }, "Assigned to TPA", undefined, "CURRENT");
+   677→        return updated;
+   678→      }),
+   679→    }));
+   680→    const app = get().applications.find((a) => a.id === appId)!;
+   681→    const { notification, smsLog } = NotificationFactory.applicationForwarded(app, "TPA Review");
+   682→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   683→  },
+   684→
+   685→  raiseShortfall: (appId, data) => {
+   686→    const user = get().user!;
+   687→    set((s) => ({
+   688→      applications: updateApp(s.applications, appId, (app) => {
+   689→        const shortfall: Shortfall = {
+   690→          id: genId("sf"),
+   691→          shortfallId: `SF/2026/${String(Math.floor(Math.random() * 9000) + 1000)}`,
+   692→          type: data.type,
+   693→          title: data.title,
+   694→          description: data.description,
+   695→          raisedBy: { name: user.name, role: user.role },
+   696→          raisedAt: nowISO(),
+   697→          dueDate: data.dueDate,
+   698→          status: "OPEN",
+   699→          applicationId: app.id,
+   700→          applicationNo: app.applicationNo,
+   701→          stageRaisedAt: app.currentStage,
+   702→        };
+   703→        let updated = { ...app, shortfalls: [...app.shortfalls, shortfall] };
+   704→        const oldStatus = app.status;
+   705→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall raised: ${shortfall.shortfallId}`, oldStatus, newStatus: "SHORTFALL_RAISED", remarks: data.title });
+   706→        updated = setAppStatus(updated, "SHORTFALL_RAISED");
+   707→        return updated;
+   708→      }),
+   709→    }));
+   710→    const app = get().applications.find((a) => a.id === appId)!;
+   711→    const { notification, smsLog } = NotificationFactory.shortfallRaised(app, data.title);
+   712→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   713→  },
+   714→
+   715→  reviewShortfallResponse: (appId, shortfallId) => {
+   716→    const user = get().user!;
+   717→    set((s) => ({
+   718→      applications: updateApp(s.applications, appId, (app) => ({
+   719→        ...app,
+   720→        shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "UNDER_REVIEW" as const, reviewedBy: { name: user.name, role: user.role }, reviewedAt: nowISO() } : sf),
+   721→        auditLog: [...app.auditLog, { id: genId("audit"), user: user.name, role: user.role, action: `Shortfall under review: ${shortfallId}`, entity: "Application", entityId: app.applicationNo, timestamp: nowISO() }],
+   722→      })),
+   723→    }));
+   724→  },
+   725→
+   726→  resolveShortfall: (appId, shortfallId, resolution) => {
+   727→    const user = get().user!;
+   728→    set((s) => ({
+   729→      applications: updateApp(s.applications, appId, (app) => {
+   730→        let updated = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "RESOLVED" as const, resolvedBy: { name: user.name, role: user.role }, resolvedAt: nowISO(), resolution } : sf) };
+   731→        // Check if all shortfalls resolved → resume workflow
+   732→        const hasOpen = updated.shortfalls.some((sf) => sf.status !== "RESOLVED");
+   733→        if (!hasOpen) {
+   734→          // Resume to the stage where shortfall was raised
+   735→          const raisedAt = app.shortfalls.find((sf) => sf.id === shortfallId)?.stageRaisedAt ?? "TPA_REVIEW";
+   736→          const stageInfo = getStage(raisedAt)!;
+   737→          const officer = getAssignedOfficerForStage(raisedAt, USERS);
+   738→          updated = { ...updated, assignedOfficer: officer, assignedAt: nowISO() };
+   739→          updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, oldStatus: "SHORTFALL_RAISED", newStatus: statusForStage(raisedAt), remarks: resolution });
+   740→          updated = setAppStatus(updated, statusForStage(raisedAt), raisedAt);
+   741→          updated = addWorkflowHistory(updated, raisedAt, { name: user.name, role: user.role }, "Shortfall resolved — resuming review", resolution, "CURRENT");
+   742→        } else {
+   743→          updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, remarks: resolution });
+   744→        }
+   745→        return updated;
+   746→      }),
+   747→    }));
+   748→    const app = get().applications.find((a) => a.id === appId)!;
+   749→    const { notification, smsLog } = NotificationFactory.shortfallResolved(app, shortfallId);
+   750→    set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   751→  },
+   752→
+   753→  reopenShortfall: (appId, shortfallId, reason) => {
+   754→    const user = get().user!;
+   755→    set((s) => ({
+   756→      applications: updateApp(s.applications, appId, (app) => {
+   757→        let updated = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "REOPENED" as const } : sf) };
+   758→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall reopened: ${shortfallId}`, remarks: reason });
+   759→        updated = setAppStatus(updated, "SHORTFALL_RAISED");
+   760→        return updated;
+   761→      }),
+   762→    }));
+   763→  },
+   764→
+   765→  verifyDocument: (appId, docId) => {
+   766→    const user = get().user!;
+   767→    set((s) => ({
+   768→      applications: updateApp(s.applications, appId, (app) => {
+   769→        let updated = { ...app, documents: app.documents.map((d) => d.id === docId ? { ...d, status: "VERIFIED" as const, verifiedBy: user.name, verifiedAt: nowISO() } : d) };
+   770→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document verified: ${updated.documents.find((d) => d.id === docId)?.name}` });
+   771→        // Check if all required docs verified → generate fee
+   772→        const allVerified = updated.documents.filter((d) => d.required).every((d) => d.status === "VERIFIED");
+   773→        if (allVerified && updated.status === "DOCUMENT_VERIFICATION") {
+   774→          const docCount = updated.documents.filter((d) => d.required).length;
+   775→          const result = feeService.calculate({
+   776→            applicationType: updated.project.type,
+   777→            propertyType: updated.project.propertyType,
+   778→            builtUpArea: updated.project.builtUpArea,
+   779→            plotArea: updated.project.plotArea,
+   780→            documentCount,
+   781→          });
+   782→          if (result) {
+   783→            const fee = feeService.toApplicationFee(result, 0);
+   784→            updated = { ...updated, fee };
+   785→            updated = addAudit(updated, { user: "System (Fee Engine)", role: "TPA", action: "All documents verified — fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
+   786→            updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
+   787→            updated = addWorkflowHistory(updated, "DOCUMENTS", { name: user.name, role: user.role }, "Documents verified", undefined, "COMPLETED");
+   788→          }
+   789→        }
+   790→        return updated;
+   791→      }),
+   792→    }));
+   793→    // Notification if fee generated
+   794→    const app = get().applications.find((a) => a.id === appId)!;
+   795→    if (app.status === "FEE_GENERATED" && app.fee) {
+   796→      const { notification, smsLog } = NotificationFactory.feeGenerated(app);
+   797→      set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+   798→    }
+   799→  },
+   800→
+   801→  rejectDocument: (appId, docId, reason) => {
+   802→    const user = get().user!;
+   803→    set((s) => ({
+   804→      applications: updateApp(s.applications, appId, (app) => {
+   805→        let updated = { ...app, documents: app.documents.map((d) => d.id === docId ? { ...d, status: "REJECTED" as const, verifiedBy: user.name, verifiedAt: nowISO(), remarks: reason } : d) };
+   806→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document rejected: ${updated.documents.find((d) => d.id === docId)?.name}`, remarks: reason });
+   807→        return updated;
+   808→      }),
+   809→    }));
+   810→  },
+   811→
+   812→  addRemark: (appId, text, type) => {
+   813→    const user = get().user!;
+   814→    set((s) => ({
+   815→      applications: updateApp(s.applications, appId, (app) => {
+   816→        const remark: Remark = { id: genId("rem"), author: { name: user.name, role: user.role }, text, timestamp: nowISO(), type };
+   817→        let updated = { ...app, remarks: [...app.remarks, remark] };
+   818→        updated = addAudit(updated, { user: user.name, role: user.role, action: `Remark added (${type})`, remarks: text });
+   819→        return updated;
+   820→      }),
+   821→    }));
+   822→  },
+   823→
+   824→  // ---- NOTIFICATIONS ----
+   825→  markNotificationRead: (id) =>
+   826→    set((s) => ({ notifications: s.notifications.map((n) => n.id === id ? { ...n, read: true } : n) })),
+   827→  markAllNotificationsRead: () =>
+   828→    set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
+   829→}));
+   830→
+   831→// ============================================================
+   832→// SELECTORS
+   833→// ============================================================
+   834→export function useSelectedApplication() {
+   835→  return useAppStore((s) => s.applications.find((a) => a.id === s.selectedApplicationId) ?? null);
+   836→}
+   837→
+   838→export function useVisibleApplications() {
+   839→  return useAppStore((s) => {
+   840→    if (!s.user) return [];
+   841→    if (s.user.role === "ADMIN") return s.applications;
+   842→    if (s.user.role === "LTP") return s.applications.filter((a) => a.ltpId === s.user!.id);
+   843→    return s.applications.filter((a) => {
+   844→      const roles = rolesForStage(a.currentStage);
+   845→      if (roles.includes(s.user!.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
+   846→      return a.workflowHistory.some((w) => w.actor.role === s.user!.role);
+   847→    });
+   848→  });
+   849→}
+   850→
+   851→export function useAssignedApplications() {
+   852→  return useAppStore((s) => {
+   853→    if (!s.user || s.user.role === "LTP" || s.user.role === "ADMIN") return [];
+   854→    return s.applications.filter((a) => {
+   855→      if (["APPROVED", "REJECTED"].includes(a.status)) return false;
+   856→      return rolesForStage(a.currentStage).includes(s.user!.role);
+   857→    });
+   858→  });
+   859→}
+   860→
+   861→export function useAllShortfalls() {
+   862→  return useAppStore((s) => s.applications.flatMap((a) => a.shortfalls.map((sf) => ({ ...sf, application: a }))));
+   863→}
+   864→
+   865→export function useAllAuditLogs() {
+   866→  return useAppStore((s) =>
+   867→    s.applications
+   868→      .flatMap((a) => a.auditLog.map((log) => ({ ...log, applicationNo: a.applicationNo })))
+   869→      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+   870→  );
+   871→}
+   872→
+   873→// ============================================================
+   874→// HELPERS
+   875→// ============================================================
+   876→function statusForStage(stage: WorkflowStageKey): ApplicationStatus {
+   877→  const map: Record<WorkflowStageKey, ApplicationStatus> = {
+   878→    APPLICATION_CREATED: "DRAFT",
+   879→    DRAWING_SCRUTINY: "SCRUTINY_IN_PROGRESS",
+   880→    DOCUMENTS: "DOCUMENT_VERIFICATION",
+   881→    FEE_GENERATED: "FEE_GENERATED",
+   882→    PAYMENT: "PAYMENT_PENDING",
+   883→    TPS_TECHNICAL_SCRUTINY: "TPS_TECHNICAL_SCRUTINY",
+   884→    TPA_REVIEW: "TPA_REVIEW",
+   885→    ZAD_ZDD_REVIEW: "ZAD_ZDD_REVIEW",
+   886→    ZJD_REVIEW: "ZJD_REVIEW",
+   887→    DIRECTOR_DP_REVIEW: "DIRECTOR_DP_REVIEW",
+   888→    ADDITIONAL_COMMISSIONER_REVIEW: "ADDITIONAL_COMMISSIONER_REVIEW",
+   889→    COMMISSIONER_REVIEW: "COMMISSIONER_REVIEW",
+   890→    FINAL_DECISION: "APPROVED",
+   891→  };
+   892→  return map[stage] ?? "DRAFT";
+   893→}
+   894→
+   895→function buildScrutinyResult(version: number, passed: boolean) {
+   896→  const checks = [
+   897→    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL" as const, status: (passed ? "PASS" : "FAIL") as const, message: passed ? "Front setback 6.2 m exceeds minimum 6.0 m." : "Front setback 5.4 m is below minimum 6.0 m.", recommendation: passed ? undefined : "Increase front setback to a minimum of 6.0 m." },
+   898→    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "Rear setback 4.1 m compliant." },
+   899→    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "3.2 m compliant." },
+   900→    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "3.0 m compliant." },
+   901→    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR" as const, status: "PASS" as const, message: "Coverage 58% within 60% limit." },
+   902→    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL" as const, status: "PASS" as const, message: "Achieved FAR 1.42 against permissible 1.50." },
+   903→    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR" as const, status: "PASS" as const, message: "Building height 14.8 m within 15 m limit." },
+   904→    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR" as const, status: "PASS" as const, message: "24 ECS provided, 22 required." },
+   905→    { id: "sc-9", rule: "Rain Water Harvesting", category: "Sustainability", severity: "MINOR" as const, status: "PASS" as const, message: "RWH pit shown at NE corner." },
+   906→    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR" as const, status: passed ? "PASS" : ("WARNING" as const), message: passed ? "STP of 30 KLD provided." : "STP capacity calculation sheet not attached.", recommendation: passed ? undefined : "Attach STP capacity calculation." },
+   907→    { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL" as const, status: "PASS" as const, message: "Stair width 1.8 m compliant." },
+   908→    { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR" as const, status: "PASS" as const, message: "Refuge area provided at 7th floor." },
+   909→    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR" as const, status: "WARNING" as const, message: "Indicate tree species on landscape plan." },
+   910→    { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR" as const, status: "PASS" as const, message: "1:12 ramp at main entrance." },
+   911→    { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "WARNING" as const, status: "PASS" as const, message: "Title block and north arrow present." },
+   912→  ];
+   913→  const failed = checks.filter((c) => c.status === "FAIL").length;
+   914→  const warnings = checks.filter((c) => c.status === "WARNING").length;
+   915→  return {
+   916→    reportNo: `SCR/2026/${String(Math.floor(1000 + Math.random() * 9000))}`,
+   917→    drawingVersion: version,
+   918→    generatedAt: nowISO(),
+   919→    status: (failed === 0 ? "PASSED" : "FAILED") as "PASSED" | "FAILED",
+   920→    summary: passed
+   921→      ? "Drawing scrutiny completed successfully. All critical and major checks passed. Minor advisories noted for compliance during construction."
+   922→      : "Scrutiny identified 1 critical non-compliance. Drawing must be corrected and re-uploaded before proceeding.",
+   923→    totalChecks: checks.length,
+   924→    passed: checks.length - failed - warnings,
+   925→    failed,
+   926→    warnings,
+   927→    checks,
+   928→  };
+   929→}
+   930→

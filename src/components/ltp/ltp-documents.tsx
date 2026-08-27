@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, useSelectedApplication } from "@/store/app-store";
-import { APPLICATIONS } from "@/data/mock-data";
+import { useAppStore, useSelectedApplication, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
   SectionCard,
@@ -43,12 +42,13 @@ import type { Application, DocumentRecord } from "@/types";
 
 function useAppOrDefault(): Application | null {
   const sel = useSelectedApplication();
-  const apps = useAppStore((s) => s.applications);
+  const apps = useVisibleApplications();
   return sel ?? apps.find((a) => a.documents.length > 0) ?? apps[0] ?? null;
 }
 
 export function LtpDocuments() {
-  const { navigate, applications, openApplication } = useAppStore();
+  const { navigate, openApplication, uploadDocument } = useAppStore();
+  const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
   const { toast } = useToast();
   const [query, setQuery] = React.useState("");
@@ -62,6 +62,17 @@ export function LtpDocuments() {
         <EmptyState icon={FileWarning} title="No applications" />
       </div>
     );
+  }
+
+  function handleUploadDocument(doc: DocumentRecord) {
+    if (!app) return;
+    const fakeName = `${doc.code}_${Date.now().toString().slice(-6)}.pdf`;
+    const fakeSize = `${(0.5 + Math.random() * 2).toFixed(1)} MB`;
+    uploadDocument(app.id, doc.code, fakeName, fakeSize);
+    toast({
+      title: "Document uploaded",
+      description: `${doc.name} has been uploaded and is pending verification by TPA.`,
+    });
   }
 
   const docs = app.documents.filter((d) => {
@@ -83,7 +94,7 @@ export function LtpDocuments() {
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Documents" }]}
         actions={
           <select value={app.id} onChange={(e) => openApplication(e.target.value, "ltp-documents")} className="h-8 rounded-md border border-input bg-background px-2 text-xs font-mono">
-            {applications.map((a) => <option key={a.id} value={a.id}>{a.applicationNo}</option>)}
+            {visibleApps.map((a) => <option key={a.id} value={a.id}>{a.applicationNo}</option>)}
           </select>
         }
       />
@@ -157,8 +168,8 @@ export function LtpDocuments() {
                       <td className="px-4 py-3 text-xs text-muted-foreground">{d.verifiedAt ? formatDate(d.verifiedAt) : "—"}</td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-1">
-                          {d.status === "REQUIRED" || d.status === "SHORTFALL" ? (
-                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => toast({ title: "Upload dialog", description: `Upload ${d.name}` })}><Upload className="size-3" /> Upload</Button>
+                          {d.status === "REQUIRED" || d.status === "SHORTFALL" || d.status === "REJECTED" ? (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUploadDocument(d)}><Upload className="size-3" /> Upload</Button>
                           ) : (
                             <>
                               <Button size="icon" variant="ghost" className="size-7"><Eye className="size-3.5" /></Button>

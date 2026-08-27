@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import { APPLICATIONS, ROLES } from "@/data/mock-data";
+import { useAppStore, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
   StatCard,
@@ -52,23 +51,40 @@ import type { Application } from "@/types";
 
 export function LtpDashboard() {
   const { user, navigate, openApplication, notifications } = useAppStore();
-  const apps = APPLICATIONS.filter((a) => a.ltpId === user?.id || user?.role === "LTP");
+  const apps = useVisibleApplications();
+
+  const REVIEW_STATUSES = [
+    "TPS_TECHNICAL_SCRUTINY",
+    "TPA_REVIEW",
+    "ZAD_ZDD_REVIEW",
+    "ZJD_REVIEW",
+    "DIRECTOR_DP_REVIEW",
+    "ADDITIONAL_COMMISSIONER_REVIEW",
+    "COMMISSIONER_REVIEW",
+  ] as const;
+  const ACTION_STATUSES = [
+    "SCRUTINY_FAILED",
+    "SHORTFALL_RAISED",
+    "PAYMENT_PENDING",
+    "DOCUMENT_UPLOAD_PENDING",
+    "DRAWING_REUPLOAD_REQUIRED",
+  ] as const;
 
   const stats = {
     total: apps.length,
     draft: apps.filter((a) => a.status === "DRAFT").length,
-    underReview: apps.filter((a) => ["UNDER_REVIEW", "PAYMENT_SUCCESSFUL"].includes(a.status)).length,
-    action: apps.filter((a) => ["SCRUTINY_FAILED", "SHORTFALL_RAISED", "PAYMENT_PENDING", "DOCUMENTS_PENDING"].includes(a.status)).length,
+    underReview: apps.filter((a) => (REVIEW_STATUSES as readonly string[]).includes(a.status)).length,
+    action: apps.filter((a) => (ACTION_STATUSES as readonly string[]).includes(a.status)).length,
     approved: apps.filter((a) => a.status === "APPROVED").length,
-    shortfalls: apps.reduce((s, a) => s + a.shortfalls.length, 0),
+    shortfalls: apps.reduce((s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length, 0),
     pendingPayment: apps.filter((a) => a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED").length,
   };
 
   const recent = [...apps].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated)).slice(0, 5);
-  const actionRequired = apps.filter((a) =>
-    ["SCRUTINY_FAILED", "SHORTFALL_RAISED", "PAYMENT_PENDING", "DOCUMENTS_PENDING"].includes(a.status)
-  );
-  const showcaseApp = apps.find((a) => a.status === "UNDER_REVIEW") ?? apps[0];
+  const actionRequired = apps
+    .filter((a) => (ACTION_STATUSES as readonly string[]).includes(a.status))
+    .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
+  const showcaseApp = apps.find((a) => a.status === "TPS_TECHNICAL_SCRUTINY" || a.status === "TPA_REVIEW") ?? apps[0];
   const recentNotifs = notifications.slice(0, 5);
 
   return (
@@ -128,16 +144,16 @@ export function LtpDashboard() {
                       <div
                         className={cn(
                           "flex size-10 shrink-0 items-center justify-center rounded-lg",
-                          a.status === "SCRUTINY_FAILED" && "bg-destructive/10 text-destructive",
+                          (a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED") && "bg-destructive/10 text-destructive",
                           a.status === "SHORTFALL_RAISED" && "bg-warning/15 text-warning-foreground",
                           a.status === "PAYMENT_PENDING" && "bg-amber-500/15 text-amber-600",
-                          a.status === "DOCUMENTS_PENDING" && "bg-info/10 text-info"
+                          a.status === "DOCUMENT_UPLOAD_PENDING" && "bg-info/10 text-info"
                         )}
                       >
-                        {a.status === "SCRUTINY_FAILED" && <FileWarning className="size-5" />}
+                        {(a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED") && <FileWarning className="size-5" />}
                         {a.status === "SHORTFALL_RAISED" && <AlertTriangle className="size-5" />}
                         {a.status === "PAYMENT_PENDING" && <CircleDollarSign className="size-5" />}
-                        {a.status === "DOCUMENTS_PENDING" && <Layers className="size-5" />}
+                        {a.status === "DOCUMENT_UPLOAD_PENDING" && <Layers className="size-5" />}
                       </div>
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -146,10 +162,10 @@ export function LtpDashboard() {
                         </div>
                         <p className="text-xs text-muted-foreground truncate">{a.project.name}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          {a.status === "SCRUTINY_FAILED" && "Re-upload corrected drawings to proceed"}
-                          {a.status === "SHORTFALL_RAISED" && `${a.shortfalls.length} shortfall(s) awaiting your response`}
-                          {a.status === "PAYMENT_PENDING" && `Outstanding ₹${a.fee?.outstanding.toLocaleString("en-IN")} — pay to start workflow`}
-                          {a.status === "DOCUMENTS_PENDING" && "Upload remaining required documents"}
+                          {(a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED") && "Re-upload corrected drawings to proceed"}
+                          {a.status === "SHORTFALL_RAISED" && `${a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) awaiting your response`}
+                          {a.status === "PAYMENT_PENDING" && `Outstanding ₹${(a.fee?.outstanding ?? 0).toLocaleString("en-IN")} — pay to start workflow`}
+                          {a.status === "DOCUMENT_UPLOAD_PENDING" && "Upload remaining required documents"}
                         </p>
                       </div>
                       <div className="hidden sm:flex flex-col items-end gap-1">

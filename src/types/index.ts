@@ -20,9 +20,9 @@ export interface Role {
   title: string;
   fullName: string;
   description: string;
-  level: number; // workflow level, 0 = applicant
+  level: number;
   permissions: Permission[];
-  color: string; // tailwind color token name for accents
+  color: string;
 }
 
 export type Permission =
@@ -40,6 +40,7 @@ export type Permission =
   | "workflow:approve"
   | "workflow:forward"
   | "workflow:return"
+  | "workflow:reject"
   | "shortfall:raise"
   | "shortfall:resolve"
   | "remarks:add"
@@ -57,7 +58,7 @@ export interface User {
   email: string;
   phone: string;
   employeeId?: string;
-  licenseNo?: string; // for LTP
+  licenseNo?: string;
   designation?: string;
   zone?: string;
   avatarColor: string;
@@ -70,14 +71,23 @@ export interface User {
 export type ApplicationStatus =
   | "DRAFT"
   | "DRAWING_UPLOADED"
+  | "SCRUTINY_IN_PROGRESS"
   | "SCRUTINY_FAILED"
+  | "DRAWING_REUPLOAD_REQUIRED"
   | "SCRUTINY_PASSED"
-  | "DOCUMENTS_PENDING"
-  | "DOCUMENTS_VERIFIED"
+  | "DOCUMENT_UPLOAD_PENDING"
+  | "DOCUMENT_VERIFICATION"
   | "FEE_GENERATED"
   | "PAYMENT_PENDING"
-  | "PAYMENT_SUCCESSFUL"
-  | "UNDER_REVIEW"
+  | "PAYMENT_PROCESSING"
+  | "PAYMENT_SUCCESS"
+  | "TPS_TECHNICAL_SCRUTINY"
+  | "TPA_REVIEW"
+  | "ZAD_ZDD_REVIEW"
+  | "ZJD_REVIEW"
+  | "DIRECTOR_DP_REVIEW"
+  | "ADDITIONAL_COMMISSIONER_REVIEW"
+  | "COMMISSIONER_REVIEW"
   | "SHORTFALL_RAISED"
   | "APPROVED"
   | "REJECTED"
@@ -109,8 +119,8 @@ export interface ProjectInfo {
   name: string;
   type: ApplicationType;
   propertyType: PropertyType;
-  plotArea: number; // sq.m
-  builtUpArea: number; // sq.m
+  plotArea: number;
+  builtUpArea: number;
   landUse: string;
   ward: string;
   zone: string;
@@ -129,11 +139,12 @@ export interface Application {
   currentStage: WorkflowStageKey;
   currentStageLabel: string;
   assignedOfficer?: { name: string; role: RoleKey };
+  assignedAt?: string;
   submissionDate: string;
   lastUpdated: string;
-  expectedSLA?: string; // target date
+  expectedSLA?: string;
   priority: "NORMAL" | "HIGH" | "URGENT";
-  progress: number; // 0-100
+  progress: number;
   fee?: ApplicationFee;
   payment?: Payment;
   drawings: Drawing[];
@@ -154,8 +165,7 @@ export interface Drawing {
   version: number;
   uploadedAt: string;
   uploadedBy: string;
-  status: "PENDING_SCRUTINY" | "SCRUTINY_PASSED" | "SCRUTINY_FAILED" | "SUPERSEDED";
-  thumbnail?: string;
+  status: "PENDING_SCRUTINY" | "SCRUTINY_IN_PROGRESS" | "SCRUTINY_PASSED" | "SCRUTINY_FAILED" | "SUPERSEDED";
   notes?: string;
 }
 
@@ -189,6 +199,7 @@ export interface ScrutinyReport {
 export type DocumentStatus =
   | "REQUIRED"
   | "UPLOADED"
+  | "UNDER_REVIEW"
   | "VERIFIED"
   | "REJECTED"
   | "SHORTFALL";
@@ -253,10 +264,10 @@ export interface ApplicationFee {
 // ---------- Payments ----------
 export type PaymentStatus =
   | "PENDING"
-  | "INITIATED"
   | "PROCESSING"
-  | "SUCCESSFUL"
+  | "SUCCESS"
   | "FAILED"
+  | "CANCELLED"
   | "REFUNDED";
 
 export interface Payment {
@@ -271,6 +282,7 @@ export interface Payment {
   completedAt?: string;
   receiptNo?: string;
   verified: boolean;
+  isMock: boolean;
 }
 
 // ---------- Workflow ----------
@@ -280,31 +292,37 @@ export type WorkflowStageKey =
   | "DOCUMENTS"
   | "FEE_GENERATED"
   | "PAYMENT"
-  | "TPA_TPS"
-  | "ZAD_ZDD"
-  | "ZJD"
-  | "DIRECTOR_DP"
-  | "ADDL_COMMISSIONER"
-  | "COMMISSIONER"
+  | "TPS_TECHNICAL_SCRUTINY"
+  | "TPA_REVIEW"
+  | "ZAD_ZDD_REVIEW"
+  | "ZJD_REVIEW"
+  | "DIRECTOR_DP_REVIEW"
+  | "ADDITIONAL_COMMISSIONER_REVIEW"
+  | "COMMISSIONER_REVIEW"
   | "FINAL_DECISION";
 
 export interface WorkflowStage {
   key: WorkflowStageKey;
   label: string;
+  shortLabel: string;
   role: RoleKey;
   order: number;
   allowedActions: WorkflowAction[];
   nextStage?: WorkflowStageKey;
   canRaiseShortfall: boolean;
   canApprove: boolean;
+  canReturn: boolean;
+  canReject: boolean;
 }
 
 export type WorkflowAction =
   | "APPROVE"
   | "FORWARD"
   | "RETURN"
+  | "REJECT"
   | "RAISE_SHORTFALL"
   | "ADD_REMARKS"
+  | "SUBMIT_TECHNICAL_SCRUTINY"
   | "FINAL_DECISION";
 
 export interface WorkflowHistoryEntry {
@@ -320,8 +338,8 @@ export interface WorkflowHistoryEntry {
 }
 
 // ---------- Shortfalls ----------
-export type ShortfallType = "DOCUMENT" | "FEE" | "GENERAL";
-export type ShortfallStatus = "OPEN" | "RESPONDED" | "RESOLVED" | "OVERDUE";
+export type ShortfallType = "DOCUMENT" | "FEE" | "TECHNICAL" | "GENERAL";
+export type ShortfallStatus = "OPEN" | "RESPONDED" | "UNDER_REVIEW" | "RESOLVED" | "REOPENED" | "OVERDUE";
 
 export interface Shortfall {
   id: string;
@@ -335,11 +353,14 @@ export interface Shortfall {
   status: ShortfallStatus;
   applicationId: string;
   applicationNo: string;
+  stageRaisedAt: WorkflowStageKey;
   response?: {
     text: string;
     respondedAt: string;
     supportingDocument?: string;
   };
+  reviewedBy?: { name: string; role: RoleKey };
+  reviewedAt?: string;
   resolvedBy?: { name: string; role: RoleKey };
   resolvedAt?: string;
   resolution?: string;
@@ -351,11 +372,15 @@ export type NotificationType =
   | "SCRUTINY_FAILED"
   | "SCRUTINY_PASSED"
   | "DOCUMENTS_REQUIRED"
+  | "DOCUMENT_VERIFIED"
   | "FEE_GENERATED"
   | "PAYMENT_SUCCESSFUL"
   | "SHORTFALL_RAISED"
+  | "SHORTFALL_RESPONDED"
+  | "SHORTFALL_RESOLVED"
   | "APPLICATION_FORWARDED"
   | "APPLICATION_APPROVED"
+  | "APPLICATION_REJECTED"
   | "APPLICATION_RETURNED"
   | "FINAL_DECISION"
   | "SYSTEM";
@@ -368,9 +393,26 @@ export interface NotificationRecord {
   timestamp: string;
   read: boolean;
   applicationId?: string;
+  applicationNo?: string;
   smsSent: boolean;
   smsStatus?: "SENT" | "DELIVERED" | "FAILED" | "PENDING";
   channel: "IN_APP" | "SMS" | "EMAIL";
+  recipientRole?: RoleKey;
+}
+
+// ---------- SMS Log ----------
+export interface SmsLog {
+  id: string;
+  notificationId: string;
+  recipient: string;
+  recipientName: string;
+  message: string;
+  templateCode: string;
+  status: "SENT" | "DELIVERED" | "FAILED" | "PENDING";
+  sentAt: string;
+  deliveredAt?: string;
+  applicationNo?: string;
+  isMock: boolean;
 }
 
 // ---------- Audit ----------
@@ -399,11 +441,9 @@ export interface Remark {
 
 // ---------- Navigation ----------
 export type ViewKey =
-  // auth
   | "login"
   | "forgot-password"
   | "otp"
-  // ltp
   | "ltp-dashboard"
   | "ltp-applications"
   | "ltp-application-details"
@@ -418,11 +458,9 @@ export type ViewKey =
   | "ltp-notifications"
   | "ltp-profile"
   | "ltp-help"
-  // officer
   | "officer-dashboard"
   | "officer-review"
   | "officer-applications"
-  // admin
   | "admin-dashboard"
   | "admin-users"
   | "admin-roles"

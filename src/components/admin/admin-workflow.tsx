@@ -50,12 +50,14 @@ const ACTION_LABELS: Record<WorkflowAction, string> = {
   APPROVE: "Approve",
   FORWARD: "Forward",
   RETURN: "Return",
+  REJECT: "Reject",
   RAISE_SHORTFALL: "Raise Shortfall",
   ADD_REMARKS: "Add Remarks",
+  SUBMIT_TECHNICAL_SCRUTINY: "Submit Technical Scrutiny",
   FINAL_DECISION: "Final Decision",
 };
 
-const ALL_ACTIONS: WorkflowAction[] = ["APPROVE", "FORWARD", "RETURN", "RAISE_SHORTFALL", "ADD_REMARKS", "FINAL_DECISION"];
+const ALL_ACTIONS: WorkflowAction[] = ["APPROVE", "FORWARD", "RETURN", "REJECT", "RAISE_SHORTFALL", "ADD_REMARKS", "SUBMIT_TECHNICAL_SCRUTINY", "FINAL_DECISION"];
 
 export function AdminWorkflow() {
   const { toast } = useToast();

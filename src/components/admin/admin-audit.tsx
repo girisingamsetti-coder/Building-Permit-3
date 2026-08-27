@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import { APPLICATIONS, USERS, ROLES } from "@/data/mock-data";
+import { useAppStore, useAllAuditLogs } from "@/store/app-store";
+import { USERS, ROLES } from "@/data/mock-data";
 import {
   PageHeader,
   SectionCard,
@@ -63,9 +63,8 @@ const ADMIN_EXTRAS: AuditEntry[] = [
   { id: "ax-7", user: "Shri. Kailash Patil", role: "ADMIN", action: "Maintenance mode toggled OFF", entity: "System", entityId: "maintenance", timestamp: "2025-01-15T18:00:00", oldStatus: "ON", newStatus: "OFF", ip: "10.0.0.55", device: "Edge / Windows" },
 ];
 
-function buildAllAudit(): AuditEntry[] {
-  const fromApps = APPLICATIONS.flatMap((a) => a.auditLog);
-  const merged = [...fromApps, ...ADMIN_EXTRAS];
+function buildAllAudit(liveAudit: AuditEntry[]): AuditEntry[] {
+  const merged = [...liveAudit, ...ADMIN_EXTRAS];
   const seen = new Set<string>();
   const deduped = merged.filter((e) => {
     if (seen.has(e.id)) return false;
@@ -75,8 +74,8 @@ function buildAllAudit(): AuditEntry[] {
   return deduped.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
-const ALL_ACTIONS = Array.from(new Set(buildAllAudit().map((e) => e.action)));
-const ALL_ENTITIES = Array.from(new Set(buildAllAudit().map((e) => e.entity)));
+const ALL_ACTIONS = ["Application created", "Drawing uploaded", "Drawing re-uploaded", "Auto-scrutiny started", "Auto-scrutiny passed", "Auto-scrutiny failed", "Documents uploaded", "Documents verified", "Document verified", "Document rejected", "Fee calculated", "Payment initiated", "Payment verified", "Payment failed", "Shortfall raised", "Shortfall responded", "Shortfall resolved", "Forwarded", "Application approved", "Application rejected", "Remark added"];
+const ALL_ENTITIES = ["Application", "Drawing", "Document", "Payment", "ScrutinyReport", "Shortfall"];
 
 export function AdminAudit() {
   const { navigate } = useAppStore();
@@ -88,7 +87,8 @@ export function AdminAudit() {
   const [actionFilter, setActionFilter] = React.useState<string>("ALL");
   const [entityFilter, setEntityFilter] = React.useState<string>("ALL");
 
-  const allAudit = React.useMemo(() => buildAllAudit(), []);
+  const liveAudit = useAllAuditLogs();
+  const allAudit = React.useMemo(() => buildAllAudit(liveAudit), [liveAudit]);
 
   const filtered = React.useMemo(() => {
     const now = Date.now();

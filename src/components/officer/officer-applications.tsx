@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import { ROLES, applicationsForRole } from "@/data/mock-data";
+import { useAppStore, useAssignedApplications } from "@/store/app-store";
+import { ROLES } from "@/data/mock-data";
 import {
   PageHeader,
   StatCard,
@@ -15,7 +15,7 @@ import {
   PriorityBadge,
   RoleBadge,
 } from "@/components/design-system/badges";
-import { formatDate, timeAgo } from "@/components/design-system/workflow";
+import { formatDate } from "@/components/design-system/workflow";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -43,6 +43,7 @@ import {
   FileSearch,
   ListFilter,
 } from "lucide-react";
+import type { ApplicationStatus } from "@/types";
 
 // ---------- Helpers ----------
 function daysRemaining(iso?: string): number | null {
@@ -61,12 +62,27 @@ function slaTone(days: number | null): { cls: string; label: string } {
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "ALL", label: "All statuses" },
-  { value: "UNDER_REVIEW", label: "Under Review" },
+  { value: "TPS_TECHNICAL_SCRUTINY", label: "TPS Technical Scrutiny" },
+  { value: "TPA_REVIEW", label: "TPA Review" },
+  { value: "ZAD_ZDD_REVIEW", label: "ZAD / ZDD Review" },
+  { value: "ZJD_REVIEW", label: "ZJD Review" },
+  { value: "DIRECTOR_DP_REVIEW", label: "Director – DP Review" },
+  { value: "ADDITIONAL_COMMISSIONER_REVIEW", label: "Addl. Commissioner Review" },
+  { value: "COMMISSIONER_REVIEW", label: "Commissioner Review" },
   { value: "SHORTFALL_RAISED", label: "Shortfall Raised" },
-  { value: "DOCUMENTS_PENDING", label: "Documents Pending" },
-  { value: "SCRUTINY_FAILED", label: "Scrutiny Failed" },
-  { value: "APPROVED", label: "Approved" },
+  { value: "DOCUMENT_UPLOAD_PENDING", label: "Documents Pending" },
   { value: "RETURNED", label: "Returned" },
+];
+
+const PENDING_REVIEW_STATUSES: ApplicationStatus[] = [
+  "TPS_TECHNICAL_SCRUTINY",
+  "TPA_REVIEW",
+  "ZAD_ZDD_REVIEW",
+  "ZJD_REVIEW",
+  "DIRECTOR_DP_REVIEW",
+  "ADDITIONAL_COMMISSIONER_REVIEW",
+  "COMMISSIONER_REVIEW",
+  "SHORTFALL_RAISED",
 ];
 
 const PRIORITY_FILTERS: { value: string; label: string }[] = [
@@ -78,14 +94,10 @@ const PRIORITY_FILTERS: { value: string; label: string }[] = [
 
 export function OfficerApplications() {
   const { user, navigate, openApplication } = useAppStore();
+  const assigned = useAssignedApplications();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("ALL");
   const [priority, setPriority] = React.useState("ALL");
-
-  const assigned = React.useMemo(
-    () => (user ? applicationsForRole(user.role) : []),
-    [user]
-  );
 
   const filtered = React.useMemo(() => {
     let list = [...assigned];
@@ -120,9 +132,12 @@ export function OfficerApplications() {
     }).length;
     return {
       total: assigned.length,
-      pending: assigned.filter((a) => ["UNDER_REVIEW", "DOCUMENTS_PENDING"].includes(a.status)).length,
+      pending: assigned.filter((a) => PENDING_REVIEW_STATUSES.includes(a.status)).length,
       nearSLA,
-      shortfalls: assigned.reduce((s, a) => s + a.shortfalls.length, 0),
+      shortfalls: assigned.reduce(
+        (s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length,
+        0
+      ),
     };
   }, [assigned]);
 

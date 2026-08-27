@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import { APPLICATIONS } from "@/data/mock-data";
+import { useAppStore, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
   StatCard,
@@ -46,21 +45,25 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "ALL", label: "All statuses" },
   { value: "DRAFT", label: "Draft" },
   { value: "SCRUTINY_FAILED", label: "Scrutiny Failed" },
-  { value: "DOCUMENTS_PENDING", label: "Documents Pending" },
+  { value: "DOCUMENT_UPLOAD_PENDING", label: "Documents Pending" },
   { value: "PAYMENT_PENDING", label: "Payment Pending" },
-  { value: "UNDER_REVIEW", label: "Under Review" },
+  { value: "TPS_TECHNICAL_SCRUTINY", label: "TPS Technical Scrutiny" },
+  { value: "TPA_REVIEW", label: "TPA Review" },
+  { value: "ZAD_ZDD_REVIEW", label: "ZAD/ZDD Review" },
+  { value: "ZJD_REVIEW", label: "ZJD Review" },
   { value: "SHORTFALL_RAISED", label: "Shortfall Raised" },
   { value: "APPROVED", label: "Approved" },
 ];
 
 export function LtpApplications() {
   const { user, openApplication, navigate } = useAppStore();
+  const visibleApps = useVisibleApplications();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("ALL");
   const [view, setView] = React.useState<"table" | "grid">("table");
 
   const apps = React.useMemo(() => {
-    let list = APPLICATIONS.filter((a) => a.ltpId === user?.id || user?.role === "LTP");
+    let list = visibleApps;
     if (query.trim()) {
       const q = query.toLowerCase();
       list = list.filter(
@@ -72,13 +75,14 @@ export function LtpApplications() {
     }
     if (status !== "ALL") list = list.filter((a) => a.status === status);
     return list;
-  }, [query, status, user]);
+  }, [query, status, visibleApps]);
 
+  const ACTION_STATUSES = ["SCRUTINY_FAILED", "SHORTFALL_RAISED", "PAYMENT_PENDING", "DOCUMENT_UPLOAD_PENDING", "DRAWING_REUPLOAD_REQUIRED"];
   const counts = {
-    total: apps.length,
-    active: apps.filter((a) => !["APPROVED", "REJECTED"].includes(a.status)).length,
-    approved: apps.filter((a) => a.status === "APPROVED").length,
-    action: apps.filter((a) => ["SCRUTINY_FAILED", "SHORTFALL_RAISED", "PAYMENT_PENDING", "DOCUMENTS_PENDING"].includes(a.status)).length,
+    total: visibleApps.length,
+    active: visibleApps.filter((a) => !["APPROVED", "REJECTED"].includes(a.status)).length,
+    approved: visibleApps.filter((a) => a.status === "APPROVED").length,
+    action: visibleApps.filter((a) => ACTION_STATUSES.includes(a.status)).length,
   };
 
   return (

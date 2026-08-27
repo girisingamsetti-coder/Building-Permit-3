@@ -67,6 +67,7 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   "workflow:approve": "Approve at stage",
   "workflow:forward": "Forward to next stage",
   "workflow:return": "Return to previous",
+  "workflow:reject": "Reject application",
   "shortfall:raise": "Raise shortfall",
   "shortfall:resolve": "Resolve shortfall",
   "remarks:add": "Add remarks",
@@ -81,8 +82,10 @@ const WORKFLOW_ACTION_LABELS: Record<WorkflowAction, string> = {
   APPROVE: "Approve",
   FORWARD: "Forward",
   RETURN: "Return",
+  REJECT: "Reject",
   RAISE_SHORTFALL: "Raise Shortfall",
   ADD_REMARKS: "Add Remarks",
+  SUBMIT_TECHNICAL_SCRUTINY: "Submit Technical Scrutiny",
   FINAL_DECISION: "Final Decision",
 };
 

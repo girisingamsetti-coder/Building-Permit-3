@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import { APPLICATIONS, resolveShortfallList } from "@/data/mock-data";
+import { useAppStore, useAllShortfalls } from "@/store/app-store";
 import {
   PageHeader,
   SectionCard,
@@ -63,20 +62,22 @@ import {
   Inbox,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Shortfall } from "@/types";
+import type { Application, Shortfall } from "@/types";
+
+type ShortfallWithApp = Shortfall & { application: Application };
 
 export function LtpShortfalls() {
-  const { navigate, openApplication } = useAppStore();
+  const { navigate, openApplication, respondToShortfall } = useAppStore();
   const { toast } = useToast();
   const [query, setQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
-  const [selected, setSelected] = React.useState<Shortfall | null>(null);
+  const [selected, setSelected] = React.useState<ShortfallWithApp | null>(null);
   const [respondOpen, setRespondOpen] = React.useState(false);
   const [responseText, setResponseText] = React.useState("");
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
 
-  const allShortfalls = resolveShortfallList();
+  const allShortfalls = useAllShortfalls();
   const filtered = allShortfalls.filter((s) => {
     if (query && !s.title.toLowerCase().includes(query.toLowerCase()) && !s.shortfallId.toLowerCase().includes(query.toLowerCase())) return false;
     if (typeFilter !== "ALL" && s.type !== typeFilter) return false;
@@ -86,12 +87,12 @@ export function LtpShortfalls() {
 
   const stats = {
     total: allShortfalls.length,
-    open: allShortfalls.filter((s) => s.status === "OPEN").length,
-    responded: allShortfalls.filter((s) => s.status === "RESPONDED").length,
+    open: allShortfalls.filter((s) => s.status === "OPEN" || s.status === "REOPENED").length,
+    responded: allShortfalls.filter((s) => s.status === "RESPONDED" || s.status === "UNDER_REVIEW").length,
     resolved: allShortfalls.filter((s) => s.status === "RESOLVED").length,
   };
 
-  function openRespond(s: Shortfall) {
+  function openRespond(s: ShortfallWithApp) {
     setSelected(s);
     setRespondOpen(true);
     setResponseText("");
@@ -99,8 +100,13 @@ export function LtpShortfalls() {
   }
 
   function submitResponse() {
+    if (!selected) return;
+    const supportingDoc = files[0]?.name;
+    respondToShortfall(selected.applicationId, selected.id, responseText, supportingDoc);
     setRespondOpen(false);
     toast({ title: "Response submitted", description: "Your response has been sent to the reviewing officer." });
+    setResponseText("");
+    setFiles([]);
   }
 
   return (
@@ -143,7 +149,9 @@ export function LtpShortfalls() {
                 <SelectItem value="ALL">All statuses</SelectItem>
                 <SelectItem value="OPEN">Open</SelectItem>
                 <SelectItem value="RESPONDED">Responded</SelectItem>
+                <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
                 <SelectItem value="RESOLVED">Resolved</SelectItem>
+                <SelectItem value="REOPENED">Reopened</SelectItem>
                 <SelectItem value="OVERDUE">Overdue</SelectItem>
               </SelectContent>
             </Select>
@@ -214,7 +222,7 @@ export function LtpShortfalls() {
                 )}
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => openApplication(selected.applicationId)}>View application</Button>
-                  {selected.status === "OPEN" && (
+                  {(selected.status === "OPEN" || selected.status === "REOPENED") && (
                     <Button className="flex-1" onClick={() => openRespond(selected)}><Send className="size-4" /> Respond</Button>
                   )}
                 </div>
@@ -258,14 +266,14 @@ export function LtpShortfalls() {
   );
 }
 
-function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfalls: Shortfall[]; onSelect: (s: Shortfall) => void; onRespond: (s: Shortfall) => void; onOpenApp: (id: string) => void }) {
+function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfalls: ShortfallWithApp[]; onSelect: (s: ShortfallWithApp) => void; onRespond: (s: ShortfallWithApp) => void; onOpenApp: (id: string) => void }) {
   if (shortfalls.length === 0) {
     return <div className="p-6"><EmptyState icon={Inbox} title="Nothing here" description="No shortfalls in this view." /></div>;
   }
   return (
     <ul className="divide-y divide-border">
       {shortfalls.map((s) => {
-        const overdue = new Date(s.dueDate).getTime() < Date.now() && s.status === "OPEN";
+        const overdue = new Date(s.dueDate).getTime() < Date.now() && (s.status === "OPEN" || s.status === "REOPENED");
         return (
           <li key={s.id} className="p-4 transition-colors hover:bg-muted/30">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -294,7 +302,7 @@ function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfa
               </button>
               <div className="flex items-center gap-2 shrink-0">
                 <ShortfallStatusBadge status={s.status} />
-                {s.status === "OPEN" && <Button size="sm" onClick={() => onRespond(s)}><Send className="size-3.5" /> Respond</Button>}
+                {(s.status === "OPEN" || s.status === "REOPENED") && <Button size="sm" onClick={() => onRespond(s)}><Send className="size-3.5" /> Respond</Button>}
                 <Button size="sm" variant="outline" onClick={() => onSelect(s)}>Details <ArrowRight className="size-3.5" /></Button>
               </div>
             </div>

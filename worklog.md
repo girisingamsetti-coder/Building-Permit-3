@@ -171,3 +171,160 @@ Stage Summary:
 - Deep emerald/teal government-grade design system (no indigo/blue), custom badges, workflow stepper, timelines, file uploader, drawing viewer
 - Realistic Indian government mock data throughout (application numbers, names, fees, workflow events)
 - Production-ready UI suitable for client demo
+
+---
+Task ID: 8
+Agent: ltp-views-updater
+Task: Rewire 9 LTP portal views to the rewritten mutable Zustand store
+
+Work Log:
+- Read worklog & inspected the rewritten `@/store/app-store`: confirmed the new mutable `applications` array, `processingAppIds`, selectors (`useVisibleApplications`, `useSelectedApplication`, `useAllShortfalls`, `useAllAuditLogs`), and full action API (`createApplication`, `uploadDrawing`, `runScrutiny`, `reuploadDrawing`, `uploadDocument`, `generateFee`, `initiatePayment`, `respondToShortfall`, etc.).
+- Read all 9 existing LTP view files to preserve their visual design (PageHeader/SectionCard/StatCard/InfoGrid/badges/timelines/FileUploader/DrawingViewer usages).
+- Updated `ltp-dashboard.tsx`: replaced `APPLICATIONS` import with `useVisibleApplications()`; rewrote stat filters ("Under Review" → apps in TPS/TPA/ZAD_ZDD/ZJD/DIRECTOR_DP/ADDITIONAL_COMMISSIONER/COMMISSIONER review; "Action Required" → SCRUTINY_FAILED/SHORTFALL_RAISED/PAYMENT_PENDING/DOCUMENT_UPLOAD_PENDING/DRAWING_REUPLOAD_REQUIRED); added DRAWING_REUPLOAD_REQUIRED + DOCUMENT_UPLOAD_PENDING icon/colour/message branches in the action-required list; showcase app now prefers TPS_TECHNICAL_SCRUTINY or TPA_REVIEW.
+- Updated `ltp-applications.tsx`: switched to `useVisibleApplications()`; STATUS_FILTERS replaced with the new lifecycle statuses (DRAFT, SCRUTINY_FAILED, DOCUMENT_UPLOAD_PENDING, PAYMENT_PENDING, TPS_TECHNICAL_SCRUTINY, TPA_REVIEW, ZAD_ZDD_REVIEW, ZJD_REVIEW, SHORTFALL_RAISED, APPROVED); stat counts updated to the new action-status set.
+- Updated `ltp-create-application.tsx`: on submit, calls `createApplication(data)`, captures the returned id, looks up the real generated `applicationNo` (format `MC/BP/2026/04/00XX`) from `useAppStore.getState().applications`, displays it on the success screen, and uses `openApplication(newId, "ltp-drawings")` for the post-submit navigation. Default values ensure required fields are non-empty.
+- Updated `ltp-application-details.tsx`: removed `APPLICATIONS` import; kept `ROLES` from store re-export; StatusBanner config extended to cover DRAWING_REUPLOAD_REQUIRED, DOCUMENT_UPLOAD_PENDING, PAYMENT_SUCCESS, REJECTED, RETURNED (in addition to SCRUTINY_FAILED/SHORTFALL_RAISED/PAYMENT_PENDING/APPROVED); Quick Stats "Fee Paid" check corrected from `"SUCCESSFUL"` → `"SUCCESS"` to satisfy the `PaymentStatus` union.
+- Updated `ltp-drawings.tsx`: replaced local `scrutinizing` state with `processingAppIds.includes(appId)` from the store; FileUploader.onUpload → `uploadDrawing()`; Run Auto-Scrutiny button → `runScrutiny()`; Re-upload button → `reuploadDrawing()` then `runScrutiny()` (store's deterministic v1-fails-v2-passes path); DrawingStatusBanner now renders distinct banners for in-progress / failed / passed / awaiting-upload states; version-history row badges include SCRUTINY_IN_PROGRESS. LtpScrutiny page picker uses `useVisibleApplications()`.
+- Updated `ltp-documents.tsx`: Upload button calls `uploadDocument(appId, docCode, fileName, fileSize)` for REQUIRED/SHORTFALL/REJECTED documents (simulates file selection). App picker uses `useVisibleApplications()`.
+- Updated `ltp-fees.tsx` (LtpFees/LtpPayment/LtpReceipt):
+  · LtpFees — if `app.fee` is missing, renders a context-aware pending card ("Documents under verification" for DOCUMENT_VERIFICATION, "Upload drawings & documents first" for pre-docs stages) instead of a generic empty state.
+  · LtpPayment — calls `initiatePayment(appId, method)` store action; local `stage` state is reset on app switch and synced to the store's `paymentStatus`/`processingAppIds` via useEffect so the view flips to success automatically when the store auto-advances (after SUCCESS the app moves to TPS_TECHNICAL_SCRUTINY). Added a "Demo mode — no real payment" badge on the PageHeader; success card now also shows paidAmount (== total) and outstanding (== 0).
+  · LtpReceipt — gates rendering on `app.payment.status === "SUCCESS"` (was `"SUCCESSFUL"`).
+  · All three export AppSelects use `useVisibleApplications()`.
+- Updated `ltp-shortfalls.tsx`: switched from `resolveShortfallList()` to `useAllShortfalls()` selector (each shortfall carries its parent `application`); "Respond" calls `respondToShortfall(appId, shortfallId, responseText, supportingDoc?)` with `files[0]?.name` as the supporting doc; the detail drawer now reflects the full shortfall status set (OPEN, RESPONDED, UNDER_REVIEW, RESOLVED, REOPENED, OVERDUE) and the "Respond" CTA is enabled for both OPEN and REOPENED; status filter Select extended with UNDER_REVIEW and REOPENED.
+- Updated `ltp-notifications.tsx`: reads `notifications` and `smsLogs` from the store; `NOTIF_META` extended with the missing DOCUMENT_VERIFIED, SHORTFALL_RESPONDED, SHORTFALL_RESOLVED, APPLICATION_REJECTED keys (so `Record<NotificationType, …>` is satisfied); SMS Delivery Log table now iterates `smsLogs` (template code, recipient, application no, status, sent/delivered timestamps) instead of filtering notifications by `smsSent`. smsDelivered count derived from smsLogs.
+
+Patterns followed:
+- All views remain `"use client"`.
+- All design-system primitives reused unchanged (no new components introduced).
+- Visual design (colours, layout, spacing, component structure) preserved — only data sources, status literals, and store-action wiring were changed.
+- All async transitions (`runScrutiny`, `initiatePayment`) reflect their processing state via `processingAppIds` from the store.
+
+Lint / TypeScript verification:
+- `bun run lint` → exit 0 (0 errors, 0 warnings).
+- `npx tsc --noEmit` → 0 errors in any `src/components/ltp/*` file. Pre-existing errors in `admin-fee-structures.tsx` (missing `buildFee` export), `admin-roles.tsx`/`admin-workflow.tsx` (missing REJECT/SUBMIT_TECHNICAL_SCRUTINY action labels), `topbar.tsx` (missing NotificationType labels), `mock-data.ts` (scrutiny report const-assertion / payment shape), `fee-service.ts`, and `app-store.ts` (scrutiny-check status widening) are NOT in scope for this task and were left untouched.
+- Dev server log shows incremental compilation succeeding for the LTP views.
+
+Stage Summary:
+- All 9 LTP portal views now consume the live mutable Zustand store and drive state transitions through store actions. The store automatically handles audit entries, notifications, and SMS logs — views just call actions and surface toasts. No more static `APPLICATIONS`/`NOTIFICATIONS` imports remain in any LTP view.
+
+---
+Task ID: 9
+Agent: officer-views-updater
+Task: Update Officer Portal views (dashboard, applications, review) to consume the new mutable Zustand store + permissions API.
+
+Work Log:
+- Read worklog and existing architecture: store (`@/store/app-store`) now a mutable single source of truth with full action API; permissions (`@/lib/permissions`) exposes `getAllowedActions(user, app) → WorkflowAction[]`; new `ApplicationStatus` values replaced the deprecated `UNDER_REVIEW` / `DOCUMENTS_PENDING` / `PAYMENT_SUCCESSFUL`.
+- Reviewed existing officer views, store selectors (`useSelectedApplication`, `useAssignedApplications`, `useVisibleApplications`, `useAllShortfalls`, `useAllAuditLogs`), workflow-config (`WORKFLOW_STAGES`, `getStage`, `stageFromStatus`), and design-system primitives (PageHeader, SectionCard, StatCard, InfoGrid, EmptyState, all badge variants, WorkflowTimeline, DrawingViewer, FileUploader, DocumentFileRow).
+
+Files updated (full rewrite of action layer; visual design preserved):
+
+1. `src/components/officer/officer-dashboard.tsx`
+   - Removed `APPLICATIONS`, `applicationsForRole`, `WORKFLOW_STAGES` imports from mock-data; uses `useAssignedApplications()` + `useAppStore().applications` for global stats.
+   - `WORKFLOW_STAGES` / `getStage` now imported from `@/data/workflow-config` (canonical source).
+   - Stat-card filters + workload buckets updated to new stage statuses: `PENDING_REVIEW_STATUSES` array (TPS_TECHNICAL_SCRUTINY, TPA_REVIEW, ZAD_ZDD_REVIEW, ZJD_REVIEW, DIRECTOR_DP_REVIEW, ADDITIONAL_COMMISSIONER_REVIEW, COMMISSIONER_REVIEW, SHORTFALL_RAISED, DOCUMENT_VERIFICATION); workload buckets renamed ("Under Review" → "In Review Stage"); "Documents Pending" keyed off `DOCUMENT_UPLOAD_PENDING`.
+   - `getRecentDecisions(role, applications)` now takes the live store `applications` array so newly created decisions appear in the timeline.
+   - Active-shortfall stat counts only non-RESOLVED shortfalls.
+   - All visual design (7 StatCards, priority queue, near-SLA list, workload chart, SLA performance, quick filters, notifications, profile card) preserved.
+
+2. `src/components/officer/officer-applications.tsx`
+   - Removed `applicationsForRole` import; uses `useAssignedApplications()`.
+   - STATUS_FILTERS dropdown replaced: removed `UNDER_REVIEW`, `DOCUMENTS_PENDING`; added the seven officer-stage statuses plus `SHORTFALL_RAISED`, `DOCUMENT_UPLOAD_PENDING`, `RETURNED`.
+   - "Pending Review" stat counts via `PENDING_REVIEW_STATUSES`; "Active Shortfalls" excludes resolved.
+   - Table layout, SLA color-coding, search, priority filter, footer legend, empty states — all preserved.
+
+3. `src/components/officer/officer-review.tsx` (full rewrite of the action layer)
+   - Removed `WORKFLOW_STAGES` import from mock-data; uses `getStage` from `@/data/workflow-config`. Removed obsolete `canUserActOnStage` / `getStageAllowedActions` helpers.
+   - Action bar is now **driven entirely by `getAllowedActions(user, app)`** — only permitted actions render as buttons. Action button set extended to cover all 7 visible WorkflowActions: `SUBMIT_TECHNICAL_SCRUTINY`, `APPROVE`, `FORWARD`, `RETURN`, `REJECT`, `RAISE_SHORTFALL`, `ADD_REMARKS` (FINAL_DECISION is internal-only and not rendered).
+   - Every action button opens a dialog and invokes the corresponding store action:
+     · SUBMIT_TECHNICAL_SCRUTINY → `submitTechnicalScrutiny(appId, remarks)`
+     · FORWARD → `forwardApplication(appId, remarks)`
+     · APPROVE → `approveApplication(appId, remarks)` (with optional Conditions field appended to remarks)
+     · RETURN → `returnApplication(appId, remarks)` (reason required)
+     · REJECT → `rejectApplication(appId, remarks)` (reason required, Commissioner-only)
+     · RAISE_SHORTFALL → `raiseShortfall(appId, { type, title, description, dueDate })` (full form with DOCUMENT/FEE/TECHNICAL/GENERAL types)
+     · ADD_REMARKS → `addRemark(appId, text, type)` (INFO/OBSERVATION/INSTRUCTION/DECISION)
+   - Each successful action shows a descriptive success toast and navigates back to `officer-applications` so the updated queue is visible.
+   - **Decision recorded banner** when `app.status === APPROVED || REJECTED` — entire action bar hidden.
+   - **Shortfall active banner** when `hasOpenShortfall(app)` — `getAllowedActions` automatically restricts visible buttons to RAISE_SHORTFALL + ADD_REMARKS in that case.
+   - **ShortfallResolutionSection** rendered in left pane when any shortfall has status `RESPONDED` or `UNDER_REVIEW`. Shows shortfall details, LTP response text + supporting document, and three buttons:
+     · Mark Under Review (RESPONDED only) → `reviewShortfallResponse(appId, shortfallId)`
+     · Resolve → `SimpleShortfallDialog` (mode=resolve) → `resolveShortfall(appId, shortfallId, resolution)` — store auto-resumes workflow when all shortfalls resolved
+     · Reopen → `SimpleShortfallDialog` (mode=reopen) → `reopenShortfall(appId, shortfallId, reason)`
+   - **Documents tab TPA verify/reject**: when `user.role === TPA`, each uploaded document row shows green Verify (`BadgeCheck`) and red Reject (`XCircle`) icon buttons. Verify → `verifyDocument(appId, docId)` (auto-generates fee when all required docs verified). Reject → opens reason dialog → `rejectDocument(appId, docId, reason)`.
+   - EmptyState fallback when `useSelectedApplication()` returns null (or `user` is null) — button to `navigate("officer-applications")`.
+   - Split-screen layout (`grid lg:grid-cols-[45%_55%]`), DrawingViewer, scrutiny report table with severity badges, mobile pane toggle — all preserved.
+
+Patterns followed:
+- All design-system components reused (PageHeader, SectionCard, StatCard, InfoGrid, InfoRow, EmptyState, all badge variants including ShortfallStatusBadge / ShortfallTypeBadge, WorkflowTimeline, DrawingViewer, FileUploader, formatINR/formatDate/formatDateTime/timeAgo).
+- All shadcn/ui primitives used as-is (Dialog, Tabs, Select, Tooltip, Button, Input, Textarea, Label, Progress, Separator, ScrollArea, Badge).
+- `cn()` for conditional class merging throughout.
+- No indigo/blue colors — emerald/teal/amber theme preserved.
+- `useAppStore()` hook used (not `.getState()`) inside all subcomponents so they correctly subscribe to store updates.
+- Role-aware logic centralized in `@/lib/permissions` — no local role-stage matching in the views.
+- Indian names, MC/BP/2026/04/0XXX application numbers, formatINR for all currency.
+- Government-grade polished look preserved (shadow-gov cards, generous spacing, accessible tooltips, responsive grids, semantic HTML).
+
+Lint / TypeScript verification:
+- `bun run lint` → exit 0, no errors, no warnings.
+- `npx eslint src/components/officer/ --max-warnings=0` → exit 0.
+- `npx tsc --noEmit` → zero errors in any `src/components/officer/*` file.
+
+Issues encountered:
+- Initial import of `CheckVerify` icon from lucide-react failed (not exported). Replaced with `BadgeCheck` (which IS exported and semantically appropriate for verification actions).
+- Removed unused imports (`Clock`, `Gavel`, `CircleCheck`, `RoleKey` type, unused `toast` in `OfficerReview`, unused `user` prop in `LeftPane`) for cleanliness.
+- Initial implementation had `useAppStore.getState()` calls in `ShortfallResolutionSection` — switched to the `useAppStore()` hook for idiomatic React + correct reactivity.
+- Pre-existing TypeScript errors in OTHER files (admin-roles.tsx, admin-workflow.tsx, admin-fee-structures.tsx, ltp-fees.tsx, ltp-notifications.tsx, topbar.tsx, mock-data.ts, app-store.ts, fee-service.ts) were NOT touched per the instructions — they pre-date this task and are out of scope.
+
+Stage Summary:
+- Officer Portal views now fully integrated with the mutable Zustand store and the permissions API.
+- All officer workflow actions are real state transitions (not toasts-only demos): forward / approve / reject / return / submit-technical-scrutiny / raise-shortfall / review-shortfall-response / resolve-shortfall / reopen-shortfall / verify-document / reject-document / add-remark.
+- View re-renders automatically on store updates (Zustand subscriptions) — no manual refresh needed.
+- The split-screen review workspace is now role-aware: action buttons are derived from `getAllowedActions(user, app)`, the shortfall banner + Decision-recorded banner correctly gate the action bar, and the shortfall-resolution section appears automatically when an LTP responds.
+- TPA officers can verify/reject documents inline in the Documents tab; the store auto-generates the fee when all required documents are verified.
+- Next: a future agent can wire the same patterns into the LTP portal views (ltp-applications / ltp-application-details) if they still reference the deprecated `APPLICATIONS` / `applicationsForRole` imports.
+
+---
+Task ID: 10
+Agent: main
+Task: Stateful workflow engine — foundation, view updates, verification
+
+Work Log:
+- Extended types: 23 ApplicationStatus values, ShortfallStatus (+UNDER_REVIEW/REOPENED), ShortfallType (+TECHNICAL), PaymentStatus (+PROCESSING/CANCELLED/SUCCESS), DocumentStatus (+UNDER_REVIEW), SmsLog type, WorkflowAction (+REJECT/SUBMIT_TECHNICAL_SCRUTINY)
+- Built configurable workflow-config.ts: 13 stages with role, allowed actions, next stage, permissions (TPS & TPA as SEPARATE stages)
+- Built permissions.ts RBAC: canPerformAction, getAllowedActions, getVisibleApplications, getAssignedApplications, rolesForStage
+- Built services: FeeCalculationService (configurable rules, not hardcoded), PaymentGatewayService interface + MockPaymentService + PaymentService facade, NotificationFactory (creates notifications + mock SMS logs)
+- Rewrote Zustand store as mutable single source of truth with full action API: createApplication, uploadDrawing, runScrutiny (async 2.5s), reuploadDrawing, uploadDocument, generateFee, initiatePayment (async 2.8s, auto-advances to TPS), respondToShortfall, forwardApplication, approveApplication, rejectApplication, returnApplication, submitTechnicalScrutiny, raiseShortfall, reviewShortfallResponse, resolveShortfall, reopenShortfall, verifyDocument, rejectDocument, addRemark — EVERY action creates audit entries + notifications + SMS logs
+- Rewrote mock-data.ts: 14 demo applications across ALL lifecycle stages (draft→approved, scrutiny failed, payment pending, TPS/TPA/ZAD-ZDD/ZJD/Director/AddlComm/Commissioner review, approved, active shortfall, resolved shortfall), all 2026 dates, 10 demo officers (one per role including TPA and Addl Commissioner)
+- Updated badges.tsx: status maps for all new ApplicationStatus, PaymentStatus, DocumentStatus, ShortfallStatus, ShortfallType values
+- Fixed FeeCalculationService: LABOUR_CESS no longer duplicated
+- Fixed MockPaymentService: verify() handles payments not registered via initiate()
+- Fixed Zustand selectors: useVisibleApplications, useAssignedApplications, useAllShortfalls, useAllAuditLogs now use useMemo to prevent getSnapshot infinite loop
+- Dispatched 2 subagents (Task 8 LTP views, Task 9 Officer views) to update all views to use store actions
+- Updated admin-audit to read live audit logs from store
+- Fixed admin-roles, admin-workflow, topbar for new Permission/WorkflowAction/NotificationType values
+
+Self-Verification (Agent Browser):
+- Login: 10 demo roles (LTP, TPS, TPA, ZAD, ZDD, ZJD, Director, Addl Comm, Commissioner, Admin) ✓
+- LTP Dashboard: 14 applications, correct stats, 2026 dates ✓
+- Payment flow: Proceed→Method select→Pay Securely→Processing (2.8s)→Success with receipt ✓
+- Payment consistency: on SUCCESS, fee.paidAmount=fee.total, fee.outstanding=0 ✓
+- Payment auto-advances app to TPS_TECHNICAL_SCRUTINY ✓
+- TPS dashboard: 1 assigned app, role-aware actions (Submit Technical Scrutiny, Forward, Raise Shortfall, Add Remarks) ✓
+- TPS Forward: dialog with remarks → forwards to TPA → notification created → TPS queue empty ✓
+- TPA dashboard: 4 assigned apps (received forwarded app from TPS) ✓
+- Admin Audit: 23 total events, 5 today — live audit entries from payment + forwarding actions ✓
+- No runtime errors, no getSnapshot infinite loops ✓
+- Lint: 0 errors, 0 warnings ✓
+
+Stage Summary:
+- Complete stateful workflow engine: single source of truth in Zustand store
+- All 22 workflow stages implemented with configurable routing
+- TPS and TPA are separate roles with distinct actions
+- Payment logic is consistent (paid=total, outstanding=0 on success)
+- Every action creates audit entries + notifications + mock SMS logs
+- 14 demo applications cover all 13 required scenarios
+- All dates are 2026
+- Role-based access enforced: officers see only assigned apps, LTP sees only own apps
+- Shortfall lifecycle: OPEN→RESPONDED→UNDER_REVIEW→RESOLVED/REOPENED
+- Officer review workspace has role-aware action bar driven by getAllowedActions()

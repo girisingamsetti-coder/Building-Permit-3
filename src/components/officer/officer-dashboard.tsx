@@ -2,13 +2,9 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/app-store";
-import {
-  APPLICATIONS,
-  ROLES,
-  WORKFLOW_STAGES,
-  applicationsForRole,
-} from "@/data/mock-data";
+import { useAppStore, useAssignedApplications } from "@/store/app-store";
+import { ROLES } from "@/data/mock-data";
+import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 import {
   PageHeader,
   StatCard,
@@ -55,7 +51,7 @@ import {
   History,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Application, RoleKey, WorkflowHistoryEntry } from "@/types";
+import type { Application, ApplicationStatus, RoleKey, WorkflowHistoryEntry } from "@/types";
 
 // ---------- Helpers ----------
 function daysRemaining(iso?: string): number | null {
@@ -72,40 +68,61 @@ function slaTone(days: number | null): { cls: string; label: string; tone: "ok" 
   return { cls: "text-success font-medium", label: `${days}d left`, tone: "ok" };
 }
 
+// Statuses that count as "pending review" for an officer (in-stage, awaiting action)
+const PENDING_REVIEW_STATUSES: ApplicationStatus[] = [
+  "TPS_TECHNICAL_SCRUTINY",
+  "TPA_REVIEW",
+  "ZAD_ZDD_REVIEW",
+  "ZJD_REVIEW",
+  "DIRECTOR_DP_REVIEW",
+  "ADDITIONAL_COMMISSIONER_REVIEW",
+  "COMMISSIONER_REVIEW",
+  "SHORTFALL_RAISED",
+  "DOCUMENT_VERIFICATION",
+];
+
+const STAGE_REVIEW_STATUSES: ApplicationStatus[] = [
+  "TPS_TECHNICAL_SCRUTINY",
+  "TPA_REVIEW",
+  "ZAD_ZDD_REVIEW",
+  "ZJD_REVIEW",
+  "DIRECTOR_DP_REVIEW",
+  "ADDITIONAL_COMMISSIONER_REVIEW",
+  "COMMISSIONER_REVIEW",
+];
+
 // ---------- Quick Filters config ----------
 const QUICK_FILTERS: { label: string; value: string; icon: typeof Filter }[] = [
   { label: "Urgent Priority", value: "URGENT", icon: Zap },
   { label: "Near SLA (≤7d)", value: "NEAR_SLA", icon: CalendarClock },
   { label: "Shortfall Open", value: "SHORTFALL", icon: FileWarning },
-  { label: "Under Review", value: "UNDER_REVIEW", icon: Clock },
+  { label: "In Review Stage", value: "IN_REVIEW", icon: Clock },
 ];
 
 export function OfficerDashboard() {
-  const { user, navigate, openApplication, notifications } = useAppStore();
+  const { user, navigate, openApplication, notifications, applications } = useAppStore();
   const { toast } = useToast();
+  const assigned = useAssignedApplications();
 
   const role: RoleKey | undefined = user?.role;
-  const assigned = React.useMemo(
-    () => (role ? applicationsForRole(role) : []),
-    [role]
-  );
 
   // Derived stats
   const stats = React.useMemo(() => {
     const totalAssigned = assigned.length;
-    const pending = assigned.filter((a) =>
-      ["UNDER_REVIEW", "DOCUMENTS_PENDING", "SHORTFALL_RAISED"].includes(a.status)
-    ).length;
-    const activeShortfalls = assigned.reduce((s, a) => s + a.shortfalls.length, 0);
+    const pending = assigned.filter((a) => PENDING_REVIEW_STATUSES.includes(a.status)).length;
+    const activeShortfalls = assigned.reduce(
+      (s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length,
+      0
+    );
     const nearSLA = assigned.filter((a) => {
       const d = daysRemaining(a.expectedSLA);
       return d !== null && d >= 0 && d <= 7;
     }).length;
-    const recentlyProcessed = getRecentDecisions(role ?? "TPS").length;
-    const approved = APPLICATIONS.filter((a) => a.status === "APPROVED").length;
-    const returned = APPLICATIONS.filter((a) => a.status === "RETURNED").length;
+    const recentlyProcessed = role ? getRecentDecisions(role, applications).length : 0;
+    const approved = applications.filter((a) => a.status === "APPROVED").length;
+    const returned = applications.filter((a) => a.status === "RETURNED").length;
     return { totalAssigned, pending, activeShortfalls, nearSLA, recentlyProcessed, approved, returned };
-  }, [assigned, role]);
+  }, [assigned, role, applications]);
 
   // Priority Queue (sorted: urgent first, then by SLA)
   const priorityQueue = React.useMemo(() => {
@@ -134,21 +151,21 @@ export function OfficerDashboard() {
   // Recent decisions timeline (from workflow history across all apps)
   const recentDecisions = React.useMemo(() => {
     if (!role) return [];
-    return getRecentDecisions(role).slice(0, 6);
-  }, [role]);
+    return getRecentDecisions(role, applications).slice(0, 6);
+  }, [role, applications]);
 
   // Workload by status (mini bar chart)
   const workload = React.useMemo(() => {
     const buckets: Record<string, number> = {
-      "Under Review": 0,
+      "In Review Stage": 0,
       "Shortfall": 0,
       "Documents Pending": 0,
       "Other": 0,
     };
     assigned.forEach((a) => {
-      if (a.status === "UNDER_REVIEW") buckets["Under Review"]++;
+      if (STAGE_REVIEW_STATUSES.includes(a.status)) buckets["In Review Stage"]++;
       else if (a.status === "SHORTFALL_RAISED") buckets["Shortfall"]++;
-      else if (a.status === "DOCUMENTS_PENDING") buckets["Documents Pending"]++;
+      else if (a.status === "DOCUMENT_UPLOAD_PENDING") buckets["Documents Pending"]++;
       else buckets["Other"]++;
     });
     const max = Math.max(1, ...Object.values(buckets));
@@ -400,7 +417,7 @@ export function OfficerDashboard() {
               {Object.entries(workload.buckets).map(([label, count]) => {
                 const pct = Math.round((count / workload.max) * 100);
                 const tone =
-                  label === "Under Review"
+                  label === "In Review Stage"
                     ? "bg-info"
                     : label === "Shortfall"
                     ? "bg-warning"
@@ -549,17 +566,21 @@ export function OfficerDashboard() {
   );
 }
 
-// ---------- Helper: extract recent decisions for a role ----------
-function getRecentDecisions(role: RoleKey): { app: Application; entry: WorkflowHistoryEntry }[] {
+// ---------- Helper: extract recent decisions for a role from store applications ----------
+function getRecentDecisions(
+  role: RoleKey,
+  apps: Application[]
+): { app: Application; entry: WorkflowHistoryEntry }[] {
   const out: { app: Application; entry: WorkflowHistoryEntry }[] = [];
-  for (const app of APPLICATIONS) {
+  for (const app of apps) {
     for (const entry of app.workflowHistory) {
       if (entry.status !== "COMPLETED") continue;
-      const stage = WORKFLOW_STAGES.find((s) => s.key === entry.stage);
+      const stage = getStage(entry.stage);
       if (!stage) continue;
       const stageRole = stage.role;
       const isMatch =
         role === stageRole ||
+        entry.actor.role === role ||
         ((role === "TPS" || role === "TPA") && (stageRole === "TPS" || stageRole === "TPA")) ||
         ((role === "ZAD" || role === "ZDD") && (stageRole === "ZAD" || stageRole === "ZDD"));
       if (isMatch && entry.timestamp) {

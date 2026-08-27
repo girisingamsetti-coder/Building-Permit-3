@@ -32,14 +32,23 @@ const STATUS_MAP: Record<
 > = {
   DRAFT: { label: "Draft", cls: "bg-muted text-muted-foreground border-border", icon: CircleDot },
   DRAWING_UPLOADED: { label: "Drawing Uploaded", cls: "bg-info/10 text-info border-info/30", icon: Info },
+  SCRUTINY_IN_PROGRESS: { label: "Scrutiny In Progress", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   SCRUTINY_FAILED: { label: "Scrutiny Failed", cls: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
+  DRAWING_REUPLOAD_REQUIRED: { label: "Re-upload Required", cls: "bg-destructive/10 text-destructive border-destructive/30", icon: FileWarning },
   SCRUTINY_PASSED: { label: "Scrutiny Passed", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
-  DOCUMENTS_PENDING: { label: "Documents Pending", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: Clock },
-  DOCUMENTS_VERIFIED: { label: "Documents Verified", cls: "bg-success/10 text-success border-success/30", icon: FileCheck2 },
+  DOCUMENT_UPLOAD_PENDING: { label: "Documents Pending", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: Clock },
+  DOCUMENT_VERIFICATION: { label: "Under Verification", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   FEE_GENERATED: { label: "Fee Generated", cls: "bg-info/10 text-info border-info/30", icon: Info },
   PAYMENT_PENDING: { label: "Payment Pending", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: Clock },
-  PAYMENT_SUCCESSFUL: { label: "Payment Successful", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
-  UNDER_REVIEW: { label: "Under Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  PAYMENT_PROCESSING: { label: "Payment Processing", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  PAYMENT_SUCCESS: { label: "Payment Successful", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
+  TPS_TECHNICAL_SCRUTINY: { label: "TPS Technical Scrutiny", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  TPA_REVIEW: { label: "TPA Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  ZAD_ZDD_REVIEW: { label: "ZAD/ZDD Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  ZJD_REVIEW: { label: "ZJD Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  DIRECTOR_DP_REVIEW: { label: "Director – DP Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  ADDITIONAL_COMMISSIONER_REVIEW: { label: "Addl. Commissioner Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  COMMISSIONER_REVIEW: { label: "Commissioner Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   SHORTFALL_RAISED: { label: "Shortfall Raised", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: AlertTriangle },
   APPROVED: { label: "Approved", cls: "bg-success/15 text-success border-success/40", icon: CheckCircle2 },
   REJECTED: { label: "Rejected", cls: "bg-destructive/15 text-destructive border-destructive/40", icon: XCircle },
@@ -68,10 +77,10 @@ export function StatusBadge({
 // ---------- Payment Status Badge ----------
 const PAYMENT_MAP: Record<PaymentStatus, { label: string; cls: string }> = {
   PENDING: { label: "Pending", cls: "bg-muted text-muted-foreground" },
-  INITIATED: { label: "Initiated", cls: "bg-info/10 text-info" },
   PROCESSING: { label: "Processing", cls: "bg-info/10 text-info" },
-  SUCCESSFUL: { label: "Successful", cls: "bg-success/10 text-success" },
+  SUCCESS: { label: "Successful", cls: "bg-success/10 text-success" },
   FAILED: { label: "Failed", cls: "bg-destructive/10 text-destructive" },
+  CANCELLED: { label: "Cancelled", cls: "bg-muted text-muted-foreground" },
   REFUNDED: { label: "Refunded", cls: "bg-muted text-muted-foreground" },
 };
 
@@ -84,6 +93,7 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
 const DOC_MAP: Record<DocumentStatus, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
   REQUIRED: { label: "Required", cls: "bg-muted text-muted-foreground border-border", icon: CircleDot },
   UPLOADED: { label: "Uploaded", cls: "bg-info/10 text-info border-info/30", icon: Info },
+  UNDER_REVIEW: { label: "Under Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   VERIFIED: { label: "Verified", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
   REJECTED: { label: "Rejected", cls: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
   SHORTFALL: { label: "Shortfall", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: FileWarning },
@@ -118,7 +128,9 @@ export function SeverityBadge({ severity }: { severity: ScrutinySeverity }) {
 const SF_STATUS_MAP: Record<ShortfallStatus, { label: string; cls: string }> = {
   OPEN: { label: "Open", cls: "bg-warning/15 text-warning-foreground border-warning/40" },
   RESPONDED: { label: "Responded", cls: "bg-info/10 text-info border-info/30" },
+  UNDER_REVIEW: { label: "Under Review", cls: "bg-info/10 text-info border-info/30" },
   RESOLVED: { label: "Resolved", cls: "bg-success/10 text-success border-success/30" },
+  REOPENED: { label: "Reopened", cls: "bg-destructive/10 text-destructive border-destructive/30" },
   OVERDUE: { label: "Overdue", cls: "bg-destructive/10 text-destructive border-destructive/30" },
 };
 
@@ -130,6 +142,7 @@ export function ShortfallStatusBadge({ status }: { status: ShortfallStatus }) {
 const SF_TYPE_MAP: Record<ShortfallType, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
   DOCUMENT: { label: "Document", cls: "bg-info/10 text-info", icon: FileWarning },
   FEE: { label: "Fee", cls: "bg-warning/15 text-warning-foreground", icon: AlertTriangle },
+  TECHNICAL: { label: "Technical", cls: "bg-destructive/10 text-destructive", icon: ShieldAlert },
   GENERAL: { label: "General", cls: "bg-muted text-muted-foreground", icon: ShieldAlert },
 };
 

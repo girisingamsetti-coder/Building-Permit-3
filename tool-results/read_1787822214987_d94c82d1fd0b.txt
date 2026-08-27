@@ -1,0 +1,1160 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore, useSelectedApplication } from "@/store/app-store";
+     6→import { ROLES, WORKFLOW_STAGES } from "@/data/mock-data";
+     7→import {
+     8→  PageHeader,
+     9→  SectionCard,
+    10→  InfoGrid,
+    11→  InfoRow,
+    12→  EmptyState,
+    13→} from "@/components/design-system/layout";
+    14→import {
+    15→  StatusBadge,
+    16→  PriorityBadge,
+    17→  RoleBadge,
+    18→  SeverityBadge,
+    19→  DocumentStatusBadge,
+    20→  PaymentStatusBadge,
+    21→  ShortfallStatusBadge,
+    22→  ShortfallTypeBadge,
+    23→} from "@/components/design-system/badges";
+    24→import {
+    25→  WorkflowStepper,
+    26→  WorkflowTimeline,
+    27→  formatDateTime,
+    28→  formatDate,
+    29→  formatINR,
+    30→  timeAgo,
+    31→} from "@/components/design-system/workflow";
+    32→import {
+    33→  DrawingViewer,
+    34→  FileUploader,
+    35→  DocumentFileRow,
+    36→  type UploadedFile,
+    37→} from "@/components/design-system/files";
+    38→import { Button } from "@/components/ui/button";
+    39→import { Badge } from "@/components/ui/badge";
+    40→import { Input } from "@/components/ui/input";
+    41→import { Label } from "@/components/ui/label";
+    42→import { Textarea } from "@/components/ui/textarea";
+    43→import { Separator } from "@/components/ui/separator";
+    44→import { Progress } from "@/components/ui/progress";
+    45→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    46→import {
+    47→  Dialog,
+    48→  DialogContent,
+    49→  DialogDescription,
+    50→  DialogFooter,
+    51→  DialogHeader,
+    52→  DialogTitle,
+    53→} from "@/components/ui/dialog";
+    54→import {
+    55→  Select,
+    56→  SelectContent,
+    57→  SelectItem,
+    58→  SelectTrigger,
+    59→  SelectValue,
+    60→} from "@/components/ui/select";
+    61→import {
+    62→  Tooltip,
+    63→  TooltipContent,
+    64→  TooltipTrigger,
+    65→} from "@/components/ui/tooltip";
+    66→import {
+    67→  FileSearch,
+    68→  ArrowLeft,
+    69→  ArrowRight,
+    70→  Clock,
+    71→  CalendarClock,
+    72→  ShieldCheck,
+    73→  CheckCircle2,
+    74→  ChevronRight,
+    75→  Send,
+    76→  AlertTriangle,
+    77→  MessageSquare,
+    78→  Gavel,
+    79→  User,
+    80→  Building2,
+    81→  MapPin,
+    82→  ReceiptIndianRupee,
+    83→  FolderClosed,
+    84→  Upload,
+    85→  Eye,
+    86→  Download,
+    87→  FileText,
+    88→  ScrollText,
+    89→  History,
+    90→  AlertCircle,
+    91→  Layers,
+    92→  ClipboardCheck,
+    93→  PanelLeft,
+    94→  PanelRight,
+    95→  Info,
+    96→  FileWarning,
+    97→  Ban,
+    98→  CircleCheck,
+    99→} from "lucide-react";
+   100→import { useToast } from "@/hooks/use-toast";
+   101→import type {
+   102→  Application,
+   103→  RoleKey,
+   104→  ShortfallType,
+   105→  WorkflowAction,
+   106→} from "@/types";
+   107→
+   108→// ---------- Helpers ----------
+   109→function daysRemaining(iso?: string): number | null {
+   110→  if (!iso) return null;
+   111→  const diff = new Date(iso).getTime() - Date.now();
+   112→  return Math.ceil(diff / 86400000);
+   113→}
+   114→
+   115→function slaTone(days: number | null): { cls: string; label: string } {
+   116→  if (days === null) return { cls: "text-muted-foreground", label: "—" };
+   117→  if (days < 0) return { cls: "text-destructive font-semibold", label: `Overdue ${Math.abs(days)}d` };
+   118→  if (days <= 3) return { cls: "text-destructive font-semibold", label: `${days}d left` };
+   119→  if (days <= 7) return { cls: "text-amber-600 dark:text-amber-400 font-semibold", label: `${days}d left` };
+   120→  return { cls: "text-success font-medium", label: `${days}d left` };
+   121→}
+   122→
+   123→/** Determine whether the user's role can act on the application's current stage. */
+   124→function canUserActOnStage(userRole: RoleKey, stageRole: RoleKey): boolean {
+   125→  if (userRole === stageRole) return true;
+   126→  if (
+   127→    (userRole === "TPS" || userRole === "TPA") &&
+   128→    (stageRole === "TPS" || stageRole === "TPA")
+   129→  )
+   130→    return true;
+   131→  if (
+   132→    (userRole === "ZAD" || userRole === "ZDD") &&
+   133→    (stageRole === "ZAD" || stageRole === "ZDD")
+   134→  )
+   135→    return true;
+   136→  return false;
+   137→}
+   138→
+   139→function getStageAllowedActions(app: Application): WorkflowAction[] {
+   140→  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
+   141→  return stage?.allowedActions ?? [];
+   142→}
+   143→
+   144→// ---------- Action button config ----------
+   145→type ActionKey = "APPROVE" | "FORWARD" | "RAISE_SHORTFALL" | "RETURN" | "ADD_REMARKS" | "FINAL_DECISION";
+   146→
+   147→const ACTION_CONFIG: Record<
+   148→  ActionKey,
+   149→  { label: string; icon: typeof CheckCircle2; variant: "default" | "destructive" | "outline" | "secondary"; tone: string; description: string }
+   150→> = {
+   151→  APPROVE: { label: "Approve", icon: CheckCircle2, variant: "outline", tone: "text-success", description: "Approve at this stage and forward to the next reviewing officer." },
+   152→  FORWARD: { label: "Forward", icon: Send, variant: "default", tone: "text-primary", description: "Forward this application to the next stage in the workflow." },
+   153→  RAISE_SHORTFALL: { label: "Raise Shortfall", icon: AlertTriangle, variant: "outline", tone: "text-amber-600 dark:text-amber-400", description: "Raise a shortfall requiring applicant response before proceeding." },
+   154→  RETURN: { label: "Return", icon: ArrowLeft, variant: "outline", tone: "text-destructive", description: "Return the application to the previous officer or applicant." },
+   155→  ADD_REMARKS: { label: "Add Remarks", icon: MessageSquare, variant: "outline", tone: "text-muted-foreground", description: "Add an observation, instruction or informational remark to the file." },
+   156→  FINAL_DECISION: { label: "Final Decision", icon: Gavel, variant: "default", tone: "text-primary", description: "Issue the final approval or rejection as the Commissioner." },
+   157→};
+   158→
+   159→const ALL_ACTIONS: ActionKey[] = ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "RETURN", "ADD_REMARKS", "FINAL_DECISION"];
+   160→
+   161→// ---------- Main component ----------
+   162→export function OfficerReview() {
+   163→  const app = useSelectedApplication();
+   164→  const { user, navigate, openApplication } = useAppStore();
+   165→  const { toast } = useToast();
+   166→
+   167→  // Mobile pane toggle
+   168→  const [mobilePane, setMobilePane] = React.useState<"details" | "documents">("details");
+   169→
+   170→  // Dialogs
+   171→  const [shortfallOpen, setShortfallOpen] = React.useState(false);
+   172→  const [remarksOpen, setRemarksOpen] = React.useState(false);
+   173→  const [decisionOpen, setDecisionOpen] = React.useState<null | "APPROVE" | "FORWARD" | "RETURN" | "FINAL_DECISION">(null);
+   174→
+   175→  if (!app) {
+   176→    return (
+   177→      <div className="space-y-6">
+   178→        <PageHeader
+   179→          title="Application Review"
+   180→          description="Open an application from your assigned queue to begin a split-screen review."
+   181→          icon={FileSearch}
+   182→          breadcrumbs={[
+   183→            { label: "Officer Workspace", onClick: () => navigate("officer-dashboard") },
+   184→            { label: "Application Review" },
+   185→          ]}
+   186→        />
+   187→        <EmptyState
+   188→          icon={FileWarning}
+   189→          title="No application selected for review"
+   190→          description="Pick an application from your assigned queue to view drawings, documents, scrutiny reports and take action."
+   191→          action={
+   192→            <Button size="sm" onClick={() => navigate("officer-applications")}>
+   193→              <ClipboardCheck className="size-4" /> Open assigned queue
+   194→            </Button>
+   195→          }
+   196→        />
+   197→      </div>
+   198→    );
+   199→  }
+   200→
+   201→  const userRole = user?.role ?? "TPS";
+   202→  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
+   203→  const stageRole = stage?.role ?? "TPS";
+   204→  const allowedActions = getStageAllowedActions(app);
+   205→  const canAct = canUserActOnStage(userRole, stageRole);
+   206→
+   207→  // Build action button list (visible only if relevant for this stage, enabled if canAct & in allowedActions)
+   208→  const actionButtons = ALL_ACTIONS.map((key) => {
+   209→    const cfg = ACTION_CONFIG[key];
+   210→    const inStage = allowedActions.includes(key);
+   211→    const enabled = canAct && inStage;
+   212→    return { key, cfg, inStage, enabled };
+   213→  }).filter((a) => a.inStage);
+   214→
+   215→  const days = daysRemaining(app.expectedSLA);
+   216→  const sla = slaTone(days);
+   217→
+   218→  function handleAction(key: ActionKey) {
+   219→    if (key === "RAISE_SHORTFALL") {
+   220→      setShortfallOpen(true);
+   221→      return;
+   222→    }
+   223→    if (key === "ADD_REMARKS") {
+   224→      setRemarksOpen(true);
+   225→      return;
+   226→    }
+   227→    if (key === "APPROVE" || key === "FORWARD" || key === "RETURN" || key === "FINAL_DECISION") {
+   228→      setDecisionOpen(key);
+   229→      return;
+   230→    }
+   231→  }
+   232→
+   233→  return (
+   234→    <div className="space-y-4">
+   235→      {/* Top header / bar */}
+   236→      <div className="space-y-3">
+   237→        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
+   238→          <button onClick={() => navigate("officer-dashboard")} className="hover:text-foreground transition-colors">Officer Workspace</button>
+   239→          <ChevronRight className="size-3" />
+   240→          <button onClick={() => navigate("officer-applications")} className="hover:text-foreground transition-colors">Assigned Queue</button>
+   241→          <ChevronRight className="size-3" />
+   242→          <button onClick={() => openApplication(app.id, "officer-review")} className="hover:text-foreground transition-colors font-mono">{app.applicationNo}</button>
+   243→        </nav>
+   244→
+   245→        {/* Application summary bar */}
+   246→        <div className="rounded-xl border border-border bg-card shadow-gov">
+   247→          <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between">
+   248→            {/* Left: identity */}
+   249→            <div className="flex items-start gap-3 min-w-0 flex-1">
+   250→              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+   251→                <FileText className="size-5" />
+   252→              </div>
+   253→              <div className="min-w-0 flex-1 space-y-1">
+   254→                <div className="flex flex-wrap items-center gap-2">
+   255→                  <h1 className="text-lg font-semibold tracking-tight font-mono">{app.applicationNo}</h1>
+   256→                  <StatusBadge status={app.status} />
+   257→                  <PriorityBadge priority={app.priority} />
+   258→                </div>
+   259→                <p className="text-sm text-muted-foreground truncate">{app.project.name}</p>
+   260→                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+   261→                  <span className="flex items-center gap-1"><MapPin className="size-3" /> {app.project.ward}</span>
+   262→                  <span className="flex items-center gap-1"><Building2 className="size-3" /> {app.project.propertyType.replace("_", " ").toLowerCase()}</span>
+   263→                  <span className="flex items-center gap-1"><User className="size-3" /> {app.applicant.name}</span>
+   264→                </div>
+   265→              </div>
+   266→            </div>
+   267→
+   268→            {/* Right: SLA + stage */}
+   269→            <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+   270→              <div className="flex flex-col items-end gap-0.5 rounded-lg border border-border bg-muted/30 px-3 py-1.5">
+   271→                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Current Stage</span>
+   272→                <span className="text-xs font-medium">{app.currentStageLabel}</span>
+   273→              </div>
+   274→              <div className="flex flex-col items-end gap-0.5 rounded-lg border border-border bg-muted/30 px-3 py-1.5">
+   275→                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Expected SLA</span>
+   276→                <span className={cn("text-xs font-semibold tabular-nums flex items-center gap-1", sla.cls)}>
+   277→                  <CalendarClock className="size-3" /> {sla.label}
+   278→                </span>
+   279→              </div>
+   280→              {app.assignedOfficer && (
+   281→                <div className="flex flex-col items-end gap-0.5 rounded-lg border border-border bg-muted/30 px-3 py-1.5">
+   282→                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">Assigned</span>
+   283→                  <span className="text-xs font-medium">{app.assignedOfficer.name}</span>
+   284→                </div>
+   285→              )}
+   286→            </div>
+   287→          </div>
+   288→
+   289→          {/* Action bar */}
+   290→          <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/20 px-4 py-3">
+   291→            <div className="flex items-center gap-2 text-xs text-muted-foreground mr-auto">
+   292→              <ShieldCheck className="size-3.5" />
+   293→              <span>
+   294→                {canAct ? (
+   295→                  <>You are authorised to act at this stage as <RoleBadge role={userRole} label={ROLES[userRole].title} /></>
+   296→                ) : (
+   297→                  <>Stage handled by <RoleBadge role={stageRole} label={ROLES[stageRole].title} /> — view-only access for your role</>
+   298→                )}
+   299→              </span>
+   300→            </div>
+   301→            {actionButtons.length === 0 ? (
+   302→              <span className="text-xs text-muted-foreground italic">No actions permitted at this stage.</span>
+   303→            ) : (
+   304→              actionButtons.map(({ key, cfg, enabled }) => {
+   305→                const Icon = cfg.icon;
+   306→                const button = (
+   307→                  <Button
+   308→                    key={key}
+   309→                    variant={cfg.variant}
+   310→                    size="sm"
+   311→                    disabled={!enabled}
+   312→                    onClick={() => enabled && handleAction(key)}
+   313→                    className={cn("gap-1.5", cfg.variant === "outline" && "border-current/30")}
+   314→                  >
+   315→                    <Icon className={cn("size-4", enabled && cfg.tone)} />
+   316→                    {cfg.label}
+   317→                  </Button>
+   318→                );
+   319→                if (!enabled) {
+   320→                  return (
+   321→                    <Tooltip key={key}>
+   322→                      <TooltipTrigger asChild>
+   323→                        <span>{button}</span>
+   324→                      </TooltipTrigger>
+   325→                      <TooltipContent>
+   326→                        <span>{cfg.description} — not permitted at this stage.</span>
+   327→                      </TooltipContent>
+   328→                    </Tooltip>
+   329→                  );
+   330→                }
+   331→                return button;
+   332→              })
+   333→            )}
+   334→          </div>
+   335→        </div>
+   336→      </div>
+   337→
+   338→      {/* Mobile pane toggle */}
+   339→      <div className="flex items-center gap-1 rounded-md border border-border bg-muted/30 p-1 lg:hidden">
+   340→        <Button
+   341→          variant={mobilePane === "details" ? "secondary" : "ghost"}
+   342→          size="sm"
+   343→          className="flex-1 gap-1.5"
+   344→          onClick={() => setMobilePane("details")}
+   345→        >
+   346→          <PanelLeft className="size-4" /> Details
+   347→        </Button>
+   348→        <Button
+   349→          variant={mobilePane === "documents" ? "secondary" : "ghost"}
+   350→          size="sm"
+   351→          className="flex-1 gap-1.5"
+   352→          onClick={() => setMobilePane("documents")}
+   353→        >
+   354→          <PanelRight className="size-4" /> Documents
+   355→        </Button>
+   356→      </div>
+   357→
+   358→      {/* Split-screen review workspace */}
+   359→      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[45%_55%]">
+   360→        {/* LEFT pane — application information */}
+   361→        <div className={cn("space-y-4 lg:block", mobilePane === "details" ? "block" : "hidden")}>
+   362→          <LeftPane app={app} />
+   363→        </div>
+   364→
+   365→        {/* RIGHT pane — tabbed viewer */}
+   366→        <div className={cn("space-y-4 lg:block", mobilePane === "documents" ? "block" : "hidden")}>
+   367→          <RightPane app={app} />
+   368→        </div>
+   369→      </div>
+   370→
+   371→      {/* Dialogs */}
+   372→      <ShortfallDialog open={shortfallOpen} onOpenChange={setShortfallOpen} app={app} />
+   373→      <RemarksDialog open={remarksOpen} onOpenChange={setRemarksOpen} app={app} />
+   374→      <DecisionDialog
+   375→        open={decisionOpen !== null}
+   376→        action={decisionOpen}
+   377→        app={app}
+   378→        onClose={() => setDecisionOpen(null)}
+   379→      />
+   380→    </div>
+   381→  );
+   382→}
+   383→
+   384→// ============================================================
+   385→// LEFT PANE — Application information
+   386→// ============================================================
+   387→function LeftPane({ app }: { app: Application }) {
+   388→  return (
+   389→    <>
+   390→      <SectionCard title="Application Information" icon={FileText}>
+   391→        <div className="space-y-3">
+   392→          <InfoGrid
+   393→            items={[
+   394→              { label: "Application No.", value: app.applicationNo, mono: true },
+   395→              { label: "Status", value: <StatusBadge status={app.status} showIcon={false} /> },
+   396→              { label: "Priority", value: <PriorityBadge priority={app.priority} /> },
+   397→              { label: "Progress", value: `${app.progress}%` },
+   398→              { label: "Submission Date", value: formatDate(app.submissionDate) },
+   399→              { label: "Last Updated", value: timeAgo(app.lastUpdated) },
+   400→              { label: "Expected SLA", value: formatDate(app.expectedSLA ?? "") },
+   401→              { label: "Current Stage", value: app.currentStageLabel },
+   402→            ]}
+   403→            columns={2}
+   404→          />
+   405→          <Separator />
+   406→          <div className="space-y-1.5">
+   407→            <div className="flex items-center justify-between text-xs">
+   408→              <span className="text-muted-foreground">Workflow progress</span>
+   409→              <span className="font-medium tabular-nums">{app.progress}%</span>
+   410→            </div>
+   411→            <Progress value={app.progress} className="h-1.5" />
+   412→          </div>
+   413→        </div>
+   414→      </SectionCard>
+   415→
+   416→      <SectionCard title="Applicant Details" icon={User}>
+   417→        <InfoGrid
+   418→          items={[
+   419→            { label: "Applicant Name", value: app.applicant.name },
+   420→            { label: "Contact", value: app.applicant.contact, mono: true },
+   421→            { label: "Email", value: app.applicant.email },
+   422→            { label: "Address", value: app.applicant.address },
+   423→            { label: "Submitted by LTP", value: app.ltpName },
+   424→            { label: "LTP License No.", value: "LTP-MC-2019-0457", mono: true },
+   425→          ]}
+   426→          columns={2}
+   427→        />
+   428→      </SectionCard>
+   429→
+   430→      <SectionCard title="Project Details" icon={Building2}>
+   431→        <InfoGrid
+   432→          items={[
+   433→            { label: "Project Name", value: app.project.name },
+   434→            { label: "Application Type", value: prettifyEnum(app.project.type) },
+   435→            { label: "Property Type", value: prettifyEnum(app.project.propertyType) },
+   436→            { label: "Land Use", value: app.project.landUse },
+   437→            { label: "Plot Area", value: `${app.project.plotArea.toLocaleString("en-IN")} sq.m` },
+   438→            { label: "Built-up Area", value: `${app.project.builtUpArea.toLocaleString("en-IN")} sq.m` },
+   439→            { label: "FAR Utilisation", value: `${(app.project.builtUpArea / app.project.plotArea).toFixed(2)} (perm. 1.50)` },
+   440→            { label: "Survey No.", value: app.project.surveyNo, mono: true },
+   441→            { label: "Ward", value: app.project.ward },
+   442→            { label: "Zone", value: app.project.zone },
+   443→          ]}
+   444→          columns={2}
+   445→        />
+   446→      </SectionCard>
+   447→
+   448→      <SectionCard title="Fee Summary" icon={ReceiptIndianRupee}>
+   449→        {app.fee ? (
+   450→          <div className="space-y-2">
+   451→            <InfoRow label="Fee Structure" value={<span className="text-xs">{app.fee.feeStructureName}</span>} />
+   452→            <InfoRow label="Generated On" value={formatDate(app.fee.generatedAt)} />
+   453→            <Separator />
+   454→            <div className="space-y-1.5">
+   455→              {app.fee.lineItems.map((li) => (
+   456→                <div key={li.componentCode} className="flex items-center justify-between text-xs">
+   457→                  <span className="text-muted-foreground">{li.name}</span>
+   458→                  <span className="font-mono tabular-nums">{formatINR(li.amount)}</span>
+   459→                </div>
+   460→              ))}
+   461→            </div>
+   462→            <Separator />
+   463→            <InfoRow label="Subtotal" value={<span className="font-mono tabular-nums">{formatINR(app.fee.subtotal)}</span>} />
+   464→            <InfoRow label="GST" value={<span className="font-mono tabular-nums">{formatINR(app.fee.gst)}</span>} />
+   465→            <div className="flex items-center justify-between rounded-md bg-primary/5 px-3 py-2">
+   466→              <span className="text-sm font-semibold">Total Payable</span>
+   467→              <span className="font-mono text-base font-bold text-primary">{formatINR(app.fee.total)}</span>
+   468→            </div>
+   469→            <div className="grid grid-cols-2 gap-2 pt-1 text-xs">
+   470→              <div className="rounded-md border border-success/30 bg-success/5 px-2 py-1.5">
+   471→                <p className="text-muted-foreground">Paid</p>
+   472→                <p className="font-mono font-semibold text-success">{formatINR(app.fee.paidAmount)}</p>
+   473→              </div>
+   474→              <div className="rounded-md border border-destructive/30 bg-destructive/5 px-2 py-1.5">
+   475→                <p className="text-muted-foreground">Outstanding</p>
+   476→                <p className="font-mono font-semibold text-destructive">{formatINR(app.fee.outstanding)}</p>
+   477→              </div>
+   478→            </div>
+   479→          </div>
+   480→        ) : (
+   481→          <EmptyState icon={ReceiptIndianRupee} title="Fees not generated" description="Fee details will appear here once generated." />
+   482→        )}
+   483→      </SectionCard>
+   484→
+   485→      <SectionCard title="Payment Status" icon={ReceiptIndianRupee}>
+   486→        {app.payment ? (
+   487→          <div className="space-y-2">
+   488→            <div className="flex items-center justify-between">
+   489→              <span className="text-xs text-muted-foreground">Status</span>
+   490→              <PaymentStatusBadge status={app.payment.status} />
+   491→            </div>
+   492→            <InfoRow label="Transaction ID" value={app.payment.transactionId || "—"} mono />
+   493→            <InfoRow label="Reference No." value={app.payment.referenceNo || "—"} mono />
+   494→            <InfoRow label="Amount" value={formatINR(app.payment.amount)} />
+   495→            <InfoRow label="Method / Gateway" value={`${app.payment.method} · ${app.payment.gateway}`} />
+   496→            {app.payment.completedAt && <InfoRow label="Completed At" value={formatDateTime(app.payment.completedAt)} />}
+   497→            {app.payment.receiptNo && (
+   498→              <Button size="sm" variant="outline" className="w-full">
+   499→                <Download className="size-3.5" /> Receipt {app.payment.receiptNo}
+   500→              </Button>
+   501→            )}
+   502→          </div>
+   503→        ) : (
+   504→          <p className="text-sm text-muted-foreground">No payment record yet.</p>
+   505→        )}
+   506→      </SectionCard>
+   507→
+   508→      <SectionCard title="Workflow History" description="Compact timeline of stage transitions" icon={History}>
+   509→        <WorkflowTimeline entries={app.workflowHistory} />
+   510→      </SectionCard>
+   511→
+   512→      <SectionCard
+   513→        title="Previous Remarks"
+   514→        description="Officer comments on this file"
+   515→        icon={MessageSquare}
+   516→      >
+   517→        {app.remarks.length === 0 ? (
+   518→          <p className="text-sm text-muted-foreground">No remarks yet from reviewing officers.</p>
+   519→        ) : (
+   520→          <ol className="space-y-3">
+   521→            {app.remarks.map((r) => {
+   522→              const typeCls = {
+   523→                INFO: "bg-info/10 text-info",
+   524→                OBSERVATION: "bg-muted text-muted-foreground",
+   525→                INSTRUCTION: "bg-warning/15 text-warning-foreground",
+   526→                DECISION: "bg-success/10 text-success",
+   527→              }[r.type];
+   528→              return (
+   529→                <li key={r.id} className="space-y-1">
+   530→                  <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+   531→                    <div className="flex items-center gap-2">
+   532→                      <span className="text-xs font-medium">{r.author.name}</span>
+   533→                      <RoleBadge role={r.author.role} />
+   534→                      <Badge className={cn("text-[9px]", typeCls)}>{r.type}</Badge>
+   535→                    </div>
+   536→                    <span className="text-[10px] text-muted-foreground">{formatDateTime(r.timestamp)}</span>
+   537→                  </div>
+   538→                  <p className="rounded-md bg-muted/40 px-3 py-2 text-xs text-foreground/90">{r.text}</p>
+   539→                </li>
+   540→              );
+   541→            })}
+   542→          </ol>
+   543→        )}
+   544→      </SectionCard>
+   545→    </>
+   546→  );
+   547→}
+   548→
+   549→// ============================================================
+   550→// RIGHT PANE — Tabbed viewer (Drawings / Documents / Scrutiny)
+   551→// ============================================================
+   552→function RightPane({ app }: { app: Application }) {
+   553→  return (
+   554→    <SectionCard
+   555→      title="Review Workspace"
+   556→      description="Drawings, documents and automated scrutiny findings"
+   557→      icon={FileSearch}
+   558→      noPadding
+   559→      contentClassName="p-4"
+   560→    >
+   561→      <Tabs defaultValue="drawings" className="space-y-3">
+   562→        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
+   563→          <TabsTrigger value="drawings" className="gap-1.5">
+   564→            <Layers className="size-3.5" /> Drawings
+   565→            <Badge variant="outline" className="text-[9px]">{app.drawings.length}</Badge>
+   566→          </TabsTrigger>
+   567→          <TabsTrigger value="documents" className="gap-1.5">
+   568→            <FolderClosed className="size-3.5" /> Documents
+   569→            <Badge variant="outline" className="text-[9px]">{app.documents.length}</Badge>
+   570→          </TabsTrigger>
+   571→          <TabsTrigger value="scrutiny" className="gap-1.5">
+   572→            <ScrollText className="size-3.5" /> Scrutiny Report
+   573→            {app.scrutinyReport && (
+   574→              <Badge className={cn("text-[9px]", app.scrutinyReport.status === "PASSED" ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive")}>
+   575→                {app.scrutinyReport.status}
+   576→              </Badge>
+   577→            )}
+   578→          </TabsTrigger>
+   579→        </TabsList>
+   580→
+   581→        {/* Drawings tab */}
+   582→        <TabsContent value="drawings" className="space-y-3">
+   583→          {app.drawings.length > 0 ? (
+   584→            <DrawingViewer drawings={app.drawings} />
+   585→          ) : (
+   586→            <EmptyState icon={Upload} title="No drawings uploaded" description="Drawings will appear here once uploaded by the LTP." />
+   587→          )}
+   588→        </TabsContent>
+   589→
+   590→        {/* Documents tab */}
+   591→        <TabsContent value="documents" className="space-y-3">
+   592→          <div className="overflow-hidden rounded-lg border border-border">
+   593→            <table className="w-full text-sm">
+   594→              <thead className="bg-muted/40">
+   595→                <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   596→                  <th className="px-3 py-2 font-medium">Document</th>
+   597→                  <th className="px-3 py-2 font-medium">Required</th>
+   598→                  <th className="px-3 py-2 font-medium">Status</th>
+   599→                  <th className="px-3 py-2 font-medium">Verified By</th>
+   600→                  <th className="px-3 py-2 font-medium text-right">Actions</th>
+   601→                </tr>
+   602→              </thead>
+   603→              <tbody className="divide-y divide-border">
+   604→                {app.documents.map((d) => (
+   605→                  <tr key={d.id} className="hover:bg-muted/30">
+   606→                    <td className="px-3 py-2.5">
+   607→                      <p className="text-xs font-medium">{d.name}</p>
+   608→                      <p className="font-mono text-[10px] text-muted-foreground">{d.code}</p>
+   609→                      {d.remarks && <p className="mt-0.5 text-[10px] text-destructive">{d.remarks}</p>}
+   610→                    </td>
+   611→                    <td className="px-3 py-2.5">
+   612→                      {d.required ? (
+   613→                        <Badge className="bg-destructive/10 text-destructive text-[9px]">Required</Badge>
+   614→                      ) : (
+   615→                        <Badge variant="outline" className="text-[9px]">Optional</Badge>
+   616→                      )}
+   617→                    </td>
+   618→                    <td className="px-3 py-2.5"><DocumentStatusBadge status={d.status} /></td>
+   619→                    <td className="px-3 py-2.5 text-xs">{d.verifiedBy ?? "—"}</td>
+   620→                    <td className="px-3 py-2.5 text-right">
+   621→                      <div className="flex justify-end gap-1">
+   622→                        <Button size="icon" variant="ghost" className="size-7"><Eye className="size-3.5" /></Button>
+   623→                        <Button size="icon" variant="ghost" className="size-7"><Download className="size-3.5" /></Button>
+   624→                      </div>
+   625→                    </td>
+   626→                  </tr>
+   627→                ))}
+   628→              </tbody>
+   629→            </table>
+   630→          </div>
+   631→        </TabsContent>
+   632→
+   633→        {/* Scrutiny tab */}
+   634→        <TabsContent value="scrutiny" className="space-y-3">
+   635→          {app.scrutinyReport ? (
+   636→            <ScrutinyReportView app={app} />
+   637→          ) : (
+   638→            <EmptyState icon={ScrollText} title="No scrutiny report" description="Scrutiny findings will appear here once drawings have been processed." />
+   639→          )}
+   640→        </TabsContent>
+   641→      </Tabs>
+   642→    </SectionCard>
+   643→  );
+   644→}
+   645→
+   646→// ============================================================
+   647→// Scrutiny Report view (compact)
+   648→// ============================================================
+   649→function ScrutinyReportView({ app }: { app: Application }) {
+   650→  const r = app.scrutinyReport!;
+   651→  return (
+   652→    <div className="space-y-3">
+   653→      {/* Summary banner */}
+   654→      <div className={cn("rounded-lg border p-3 text-sm", r.status === "PASSED" ? "border-success/30 bg-success/5 text-success" : "border-destructive/30 bg-destructive/5 text-destructive")}>
+   655→        <div className="flex items-start gap-2">
+   656→          {r.status === "PASSED" ? <CheckCircle2 className="size-4 mt-0.5" /> : <AlertCircle className="size-4 mt-0.5" />}
+   657→          <div>
+   658→            <p className="font-medium">{r.summary}</p>
+   659→            <p className="text-[11px] opacity-80 mt-1">Report {r.reportNo} · v{r.drawingVersion} · {formatDateTime(r.generatedAt)}</p>
+   660→          </div>
+   661→        </div>
+   662→      </div>
+   663→
+   664→      {/* Stats */}
+   665→      <div className="grid grid-cols-3 gap-2">
+   666→        <div className="rounded-lg bg-muted/40 p-3 text-center">
+   667→          <p className="text-xl font-semibold tabular-nums">{r.totalChecks}</p>
+   668→          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Total Checks</p>
+   669→        </div>
+   670→        <div className="rounded-lg bg-success/10 p-3 text-center">
+   671→          <p className="text-xl font-semibold tabular-nums text-success">{r.passed}</p>
+   672→          <p className="text-[10px] uppercase tracking-wide text-success/80">Passed</p>
+   673→        </div>
+   674→        <div className="rounded-lg bg-warning/15 p-3 text-center">
+   675→          <p className="text-xl font-semibold tabular-nums text-warning-foreground">{r.failed} / {r.warnings}</p>
+   676→          <p className="text-[10px] uppercase tracking-wide text-warning-foreground/80">Failed / Warn</p>
+   677→        </div>
+   678→      </div>
+   679→
+   680→      {/* Checks table */}
+   681→      <div className="overflow-hidden rounded-lg border border-border">
+   682→        <table className="w-full text-sm">
+   683→          <thead className="bg-muted/40">
+   684→            <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   685→              <th className="px-3 py-2 font-medium">Rule</th>
+   686→              <th className="px-3 py-2 font-medium">Category</th>
+   687→              <th className="px-3 py-2 font-medium">Severity</th>
+   688→              <th className="px-3 py-2 font-medium">Result</th>
+   689→            </tr>
+   690→          </thead>
+   691→          <tbody className="divide-y divide-border">
+   692→            {r.checks.map((c) => (
+   693→              <tr key={c.id} className="hover:bg-muted/30">
+   694→                <td className="px-3 py-2">
+   695→                  <p className="text-xs font-medium">{c.rule}</p>
+   696→                  <p className="text-[10px] text-muted-foreground">{c.message}</p>
+   697→                  {c.recommendation && (
+   698→                    <p className="mt-0.5 text-[10px] text-amber-700 dark:text-amber-400">↳ {c.recommendation}</p>
+   699→                  )}
+   700→                </td>
+   701→                <td className="px-3 py-2 text-xs text-muted-foreground">{c.category}</td>
+   702→                <td className="px-3 py-2"><SeverityBadge severity={c.severity} /></td>
+   703→                <td className="px-3 py-2">
+   704→                  {c.status === "PASS" && <Badge className="bg-success/15 text-success">Pass</Badge>}
+   705→                  {c.status === "FAIL" && <Badge className="bg-destructive text-white">Fail</Badge>}
+   706→                  {c.status === "WARNING" && <Badge className="bg-warning text-warning-foreground">Warning</Badge>}
+   707→                </td>
+   708→              </tr>
+   709→            ))}
+   710→          </tbody>
+   711→        </table>
+   712→      </div>
+   713→    </div>
+   714→  );
+   715→}
+   716→
+   717→// ============================================================
+   718→// Shortfall Dialog
+   719→// ============================================================
+   720→function ShortfallDialog({
+   721→  open,
+   722→  onOpenChange,
+   723→  app,
+   724→}: {
+   725→  open: boolean;
+   726→  onOpenChange: (v: boolean) => void;
+   727→  app: Application;
+   728→}) {
+   729→  const { toast } = useToast();
+   730→  const [type, setType] = React.useState<ShortfallType>("DOCUMENT");
+   731→  const [title, setTitle] = React.useState("");
+   732→  const [description, setDescription] = React.useState("");
+   733→  const [dueDate, setDueDate] = React.useState("");
+   734→  const [files, setFiles] = React.useState<UploadedFile[]>([]);
+   735→
+   736→  function reset() {
+   737→    setType("DOCUMENT");
+   738→    setTitle("");
+   739→    setDescription("");
+   740→    setDueDate("");
+   741→    setFiles([]);
+   742→  }
+   743→
+   744→  function handleSubmit() {
+   745→    if (!title.trim() || !description.trim()) {
+   746→      toast({
+   747→        title: "Required fields missing",
+   748→        description: "Please provide a title and description for the shortfall.",
+   749→      });
+   750→      return;
+   751→    }
+   752→    toast({
+   753→      title: "Shortfall raised",
+   754→      description: `Shortfall on ${app.applicationNo} (${type.toLowerCase()}) has been raised. Applicant notified via SMS & in-app.`,
+   755→    });
+   756→    reset();
+   757→    onOpenChange(false);
+   758→  }
+   759→
+   760→  return (
+   761→    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+   762→      <DialogContent className="sm:max-w-[560px]">
+   763→        <DialogHeader>
+   764→          <DialogTitle className="flex items-center gap-2">
+   765→            <AlertTriangle className="size-5 text-amber-500" />
+   766→            Raise Shortfall
+   767→          </DialogTitle>
+   768→          <DialogDescription>
+   769→            Raise a shortfall on <span className="font-mono font-medium text-foreground">{app.applicationNo}</span>. The applicant will be notified and the application will pause until resolution.
+   770→          </DialogDescription>
+   771→        </DialogHeader>
+   772→
+   773→        <div className="space-y-4">
+   774→          <div className="space-y-2">
+   775→            <Label>Shortfall Type</Label>
+   776→            <Select value={type} onValueChange={(v) => setType(v as ShortfallType)}>
+   777→              <SelectTrigger className="w-full">
+   778→                <SelectValue />
+   779→              </SelectTrigger>
+   780→              <SelectContent>
+   781→                <SelectItem value="DOCUMENT">Document — missing or invalid document</SelectItem>
+   782→                <SelectItem value="FEE">Fee — outstanding or incorrect fee</SelectItem>
+   783→                <SelectItem value="GENERAL">General — clarification or general query</SelectItem>
+   784→              </SelectContent>
+   785→            </Select>
+   786→          </div>
+   787→
+   788→          <div className="space-y-2">
+   789→            <Label htmlFor="sf-title">Title <span className="text-destructive">*</span></Label>
+   790→            <Input
+   791→              id="sf-title"
+   792→              value={title}
+   793→              onChange={(e) => setTitle(e.target.value)}
+   794→              placeholder="e.g. Structural stability certificate missing SE stamp"
+   795→            />
+   796→          </div>
+   797→
+   798→          <div className="space-y-2">
+   799→            <Label htmlFor="sf-desc">Description <span className="text-destructive">*</span></Label>
+   800→            <Textarea
+   801→              id="sf-desc"
+   802→              value={description}
+   803→              onChange={(e) => setDescription(e.target.value)}
+   804→              placeholder="Describe the shortfall in detail — what is missing, why it is required, and how the applicant should respond."
+   805→              className="min-h-24"
+   806→            />
+   807→          </div>
+   808→
+   809→          <div className="space-y-2">
+   810→            <Label htmlFor="sf-due">Response Due Date <span className="text-destructive">*</span></Label>
+   811→            <Input
+   812→              id="sf-due"
+   813→              type="date"
+   814→              value={dueDate}
+   815→              onChange={(e) => setDueDate(e.target.value)}
+   816→            />
+   817→            <p className="text-[11px] text-muted-foreground">Default response window is 7 calendar days from today.</p>
+   818→          </div>
+   819→
+   820→          <div className="space-y-2">
+   821→            <Label>Supporting Document (optional)</Label>
+   822→            <FileUploader
+   823→              label="Drop supporting file here"
+   824→              hint="PDF, JPG, PNG · max 50 MB"
+   825→              accept=".pdf,.jpg,.png"
+   826→              uploadedFiles={files}
+   827→              onUpload={(newFiles) => {
+   828→                setFiles((prev) => {
+   829→                  const map = new Map(prev.map((f) => [f.id, f]));
+   830→                  newFiles.forEach((f) => map.set(f.id, f));
+   831→                  return Array.from(map.values());
+   832→                });
+   833→              }}
+   834→              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+   835→            />
+   836→          </div>
+   837→        </div>
+   838→
+   839→        <DialogFooter>
+   840→          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+   841→          <Button onClick={handleSubmit} className="gap-1.5">
+   842→            <AlertTriangle className="size-4" /> Raise Shortfall
+   843→          </Button>
+   844→        </DialogFooter>
+   845→      </DialogContent>
+   846→    </Dialog>
+   847→  );
+   848→}
+   849→
+   850→// ============================================================
+   851→// Remarks Dialog
+   852→// ============================================================
+   853→function RemarksDialog({
+   854→  open,
+   855→  onOpenChange,
+   856→  app,
+   857→}: {
+   858→  open: boolean;
+   859→  onOpenChange: (v: boolean) => void;
+   860→  app: Application;
+   861→}) {
+   862→  const { toast } = useToast();
+   863→  const [type, setType] = React.useState<"INFO" | "OBSERVATION" | "INSTRUCTION" | "DECISION">("OBSERVATION");
+   864→  const [text, setText] = React.useState("");
+   865→
+   866→  function reset() {
+   867→    setType("OBSERVATION");
+   868→    setText("");
+   869→  }
+   870→
+   871→  function handleSubmit() {
+   872→    if (!text.trim()) {
+   873→      toast({
+   874→        title: "Remark text required",
+   875→        description: "Please write a remark before submitting.",
+   876→      });
+   877→      return;
+   878→    }
+   879→    toast({
+   880→      title: "Remark added",
+   881→      description: `Your ${type.toLowerCase()} on ${app.applicationNo} has been recorded in the file.`,
+   882→    });
+   883→    reset();
+   884→    onOpenChange(false);
+   885→  }
+   886→
+   887→  return (
+   888→    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
+   889→      <DialogContent className="sm:max-w-[520px]">
+   890→        <DialogHeader>
+   891→          <DialogTitle className="flex items-center gap-2">
+   892→            <MessageSquare className="size-5 text-primary" />
+   893→            Add Remark
+   894→          </DialogTitle>
+   895→          <DialogDescription>
+   896→            Add an observation, instruction or informational remark to <span className="font-mono font-medium text-foreground">{app.applicationNo}</span>. Remarks are visible to all downstream officers.
+   897→          </DialogDescription>
+   898→        </DialogHeader>
+   899→
+   900→        <div className="space-y-4">
+   901→          <div className="space-y-2">
+   902→            <Label>Remark Type</Label>
+   903→            <Select value={type} onValueChange={(v) => setType(v as typeof type)}>
+   904→              <SelectTrigger className="w-full">
+   905→                <SelectValue />
+   906→              </SelectTrigger>
+   907→              <SelectContent>
+   908→                <SelectItem value="INFO">Info — general informational note</SelectItem>
+   909→                <SelectItem value="OBSERVATION">Observation — noted finding, no action required</SelectItem>
+   910→                <SelectItem value="INSTRUCTION">Instruction — action requested from applicant/LTP</SelectItem>
+   911→                <SelectItem value="DECISION">Decision — records a review decision</SelectItem>
+   912→              </SelectContent>
+   913→            </Select>
+   914→          </div>
+   915→
+   916→          <div className="space-y-2">
+   917→            <Label htmlFor="remark-text">Remark <span className="text-destructive">*</span></Label>
+   918→            <Textarea
+   919→              id="remark-text"
+   920→              value={text}
+   921→              onChange={(e) => setText(e.target.value)}
+   922→              placeholder="Write your remark here…"
+   923→              className="min-h-28"
+   924→            />
+   925→          </div>
+   926→        </div>
+   927→
+   928→        <DialogFooter>
+   929→          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+   930→          <Button onClick={handleSubmit} className="gap-1.5">
+   931→            <MessageSquare className="size-4" /> Save Remark
+   932→          </Button>
+   933→        </DialogFooter>
+   934→      </DialogContent>
+   935→    </Dialog>
+   936→  );
+   937→}
+   938→
+   939→// ============================================================
+   940→// Decision Dialog (Approve / Forward / Return / Final Decision)
+   941→// ============================================================
+   942→function DecisionDialog({
+   943→  open,
+   944→  action,
+   945→  app,
+   946→  onClose,
+   947→}: {
+   948→  open: boolean;
+   949→  action: null | "APPROVE" | "FORWARD" | "RETURN" | "FINAL_DECISION";
+   950→  app: Application;
+   951→  onClose: () => void;
+   952→}) {
+   953→  const { toast } = useToast();
+   954→  const { navigate } = useAppStore();
+   955→  const [remarks, setRemarks] = React.useState("");
+   956→  const [decision, setDecision] = React.useState<"APPROVE" | "REJECT">("APPROVE");
+   957→  const [conditions, setConditions] = React.useState("");
+   958→
+   959→  React.useEffect(() => {
+   960→    if (open) {
+   961→      setRemarks("");
+   962→      setDecision("APPROVE");
+   963→      setConditions("");
+   964→    }
+   965→  }, [open, action]);
+   966→
+   967→  if (!action) return null;
+   968→
+   969→  const stage = WORKFLOW_STAGES.find((s) => s.key === app.currentStage);
+   970→  const nextStageLabel = stage?.nextStage
+   971→    ? WORKFLOW_STAGES.find((s) => s.key === stage.nextStage)?.label
+   972→    : undefined;
+   973→
+   974→  const cfg = ACTION_CONFIG[action];
+   975→  const Icon = cfg.icon;
+   976→
+   977→  const titleMap: Record<typeof action, string> = {
+   978→    APPROVE: "Approve & Forward",
+   979→    FORWARD: "Forward Application",
+   980→    RETURN: "Return Application",
+   981→    FINAL_DECISION: "Issue Final Decision",
+   982→  };
+   983→
+   984→  const descMap: Record<typeof action, string> = {
+   985→    APPROVE: nextStageLabel
+   986→      ? `Approve at the ${app.currentStageLabel} stage and forward to ${nextStageLabel}.`
+   987→      : `Approve at the ${app.currentStageLabel} stage.`,
+   988→    FORWARD: nextStageLabel
+   989→      ? `Forward this application to ${nextStageLabel}.`
+   990→      : `Forward this application to the next stage.`,
+   991→    RETURN: "Return the application to the previous officer or applicant. A reason is required.",
+   992→    FINAL_DECISION: "Issue the final approval or rejection as the Commissioner. This action is binding.",
+   993→  };
+   994→
+   995→  function handleSubmit() {
+   996→    if (action === "RETURN" && !remarks.trim()) {
+   997→      toast({
+   998→        title: "Reason required",
+   999→        description: "Please provide a reason for returning this application.",
+  1000→      });
+  1001→      return;
+  1002→    }
+  1003→    const actionLabel =
+  1004→      action === "FINAL_DECISION"
+  1005→        ? decision === "APPROVE" ? "Application approved" : "Application rejected"
+  1006→        : action === "APPROVE" ? "Application approved & forwarded"
+  1007→        : action === "FORWARD" ? "Application forwarded"
+  1008→        : "Application returned";
+  1009→
+  1010→    toast({
+  1011→      title: actionLabel,
+  1012→      description: `${app.applicationNo} — ${action === "FINAL_DECISION" && decision === "APPROVE" ? "Final approval granted" : action === "FINAL_DECISION" ? "Final rejection issued" : "Workflow updated"}. Applicant & officers notified via SMS & in-app.`,
+  1013→    });
+  1014→    onClose();
+  1015→    navigate("officer-applications");
+  1016→  }
+  1017→
+  1018→  return (
+  1019→    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+  1020→      <DialogContent className="sm:max-w-[560px]">
+  1021→        <DialogHeader>
+  1022→          <DialogTitle className="flex items-center gap-2">
+  1023→            <Icon className={cn("size-5", cfg.tone)} />
+  1024→            {titleMap[action]}
+  1025→          </DialogTitle>
+  1026→          <DialogDescription>{descMap[action]}</DialogDescription>
+  1027→        </DialogHeader>
+  1028→
+  1029→        <div className="space-y-4">
+  1030→          {/* Application context summary */}
+  1031→          <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-1.5">
+  1032→            <div className="flex items-center justify-between text-xs">
+  1033→              <span className="text-muted-foreground">Application</span>
+  1034→              <span className="font-mono font-medium">{app.applicationNo}</span>
+  1035→            </div>
+  1036→            <div className="flex items-center justify-between text-xs">
+  1037→              <span className="text-muted-foreground">Project</span>
+  1038→              <span className="font-medium truncate max-w-[300px]">{app.project.name}</span>
+  1039→            </div>
+  1040→            <div className="flex items-center justify-between text-xs">
+  1041→              <span className="text-muted-foreground">Current Stage</span>
+  1042→              <span className="font-medium">{app.currentStageLabel}</span>
+  1043→            </div>
+  1044→            {nextStageLabel && action !== "RETURN" && action !== "FINAL_DECISION" && (
+  1045→              <div className="flex items-center justify-between text-xs">
+  1046→                <span className="text-muted-foreground">Next Stage</span>
+  1047→                <span className="font-medium text-primary flex items-center gap-1">
+  1048→                  <ArrowRight className="size-3" /> {nextStageLabel}
+  1049→                </span>
+  1050→              </div>
+  1051→            )}
+  1052→          </div>
+  1053→
+  1054→          {/* Final decision radio (only for FINAL_DECISION) */}
+  1055→          {action === "FINAL_DECISION" && (
+  1056→            <div className="space-y-2">
+  1057→              <Label>Decision</Label>
+  1058→              <div className="grid grid-cols-2 gap-2">
+  1059→                <button
+  1060→                  type="button"
+  1061→                  onClick={() => setDecision("APPROVE")}
+  1062→                  className={cn(
+  1063→                    "flex items-center gap-2 rounded-lg border p-3 text-left transition-all",
+  1064→                    decision === "APPROVE"
+  1065→                      ? "border-success bg-success/5 ring-2 ring-success/20"
+  1066→                      : "border-border hover:border-success/40"
+  1067→                  )}
+  1068→                >
+  1069→                  <CircleCheck className={cn("size-5", decision === "APPROVE" ? "text-success" : "text-muted-foreground")} />
+  1070→                  <div>
+  1071→                    <p className="text-sm font-medium">Approve</p>
+  1072→                    <p className="text-[10px] text-muted-foreground">Grant final approval</p>
+  1073→                  </div>
+  1074→                </button>
+  1075→                <button
+  1076→                  type="button"
+  1077→                  onClick={() => setDecision("REJECT")}
+  1078→                  className={cn(
+  1079→                    "flex items-center gap-2 rounded-lg border p-3 text-left transition-all",
+  1080→                    decision === "REJECT"
+  1081→                      ? "border-destructive bg-destructive/5 ring-2 ring-destructive/20"
+  1082→                      : "border-border hover:border-destructive/40"
+  1083→                  )}
+  1084→                >
+  1085→                  <Ban className={cn("size-5", decision === "REJECT" ? "text-destructive" : "text-muted-foreground")} />
+  1086→                  <div>
+  1087→                    <p className="text-sm font-medium">Reject</p>
+  1088→                    <p className="text-[10px] text-muted-foreground">Issue final rejection</p>
+  1089→                  </div>
+  1090→                </button>
+  1091→              </div>
+  1092→            </div>
+  1093→          )}
+  1094→
+  1095→          {/* Conditions (only on approve/final-approve) */}
+  1096→          {((action === "FINAL_DECISION" && decision === "APPROVE") || action === "APPROVE") && (
+  1097→            <div className="space-y-2">
+  1098→              <Label htmlFor="cond">Conditions of Approval (optional)</Label>
+  1099→              <Textarea
+  1100→                id="cond"
+  1101→                value={conditions}
+  1102→                onChange={(e) => setConditions(e.target.value)}
+  1103→                placeholder="e.g. STP operational before occupancy; 10% area reserved for EWS…"
+  1104→                className="min-h-20"
+  1105→              />
+  1106→            </div>
+  1107→          )}
+  1108→
+  1109→          {/* Remarks / reason */}
+  1110→          <div className="space-y-2">
+  1111→            <Label htmlFor="dec-remarks">
+  1112→              {action === "RETURN" || (action === "FINAL_DECISION" && decision === "REJECT")
+  1113→                ? <>Reason <span className="text-destructive">*</span></>
+  1114→                : "Remarks (optional)"}
+  1115→            </Label>
+  1116→            <Textarea
+  1117→              id="dec-remarks"
+  1118→              value={remarks}
+  1119→              onChange={(e) => setRemarks(e.target.value)}
+  1120→              placeholder={
+  1121→                action === "RETURN"
+  1122→                  ? "Reason for returning — visible to applicant and previous officer…"
+  1123→                  : action === "FINAL_DECISION" && decision === "REJECT"
+  1124→                  ? "Reason for final rejection — visible to applicant and officers…"
+  1125→                  : "Optional remarks for the next reviewing officer…"
+  1126→              }
+  1127→              className="min-h-24"
+  1128→            />
+  1129→          </div>
+  1130→        </div>
+  1131→
+  1132→        <DialogFooter>
+  1133→          <Button variant="outline" onClick={onClose}>Cancel</Button>
+  1134→          <Button
+  1135→            variant={
+  1136→              action === "RETURN" || (action === "FINAL_DECISION" && decision === "REJECT")
+  1137→                ? "destructive"
+  1138→                : "default"
+  1139→            }
+  1140→            onClick={handleSubmit}
+  1141→            className="gap-1.5"
+  1142→          >
+  1143→            <Icon className="size-4" />
+  1144→            {action === "FINAL_DECISION"
+  1145→              ? decision === "APPROVE" ? "Grant Final Approval" : "Issue Final Rejection"
+  1146→              : action === "APPROVE" ? "Approve & Forward"
+  1147→              : action === "FORWARD" ? "Forward Application"
+  1148→              : "Return Application"}
+  1149→          </Button>
+  1150→        </DialogFooter>
+  1151→      </DialogContent>
+  1152→    </Dialog>
+  1153→  );
+  1154→}
+  1155→
+  1156→// ---------- Util ----------
+  1157→function prettifyEnum(s: string): string {
+  1158→  return s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  1159→}
+  1160→

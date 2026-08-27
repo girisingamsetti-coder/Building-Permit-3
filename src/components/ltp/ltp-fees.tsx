@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, useSelectedApplication } from "@/store/app-store";
+import { useAppStore, useSelectedApplication, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
   SectionCard,
@@ -40,11 +40,11 @@ import {
   IndianRupee,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Application } from "@/types";
+import type { Application, Payment } from "@/types";
 
 function useAppOrDefault(): Application | null {
   const sel = useSelectedApplication();
-  const apps = useAppStore((s) => s.applications);
+  const apps = useVisibleApplications();
   return sel ?? apps.find((a) => a.fee) ?? apps[0] ?? null;
 }
 
@@ -61,13 +61,57 @@ function AppSelect({ apps, current, view }: { apps: Application[]; current: Appl
 // FEE DETAILS
 // ============================================================
 export function LtpFees() {
-  const { navigate, applications } = useAppStore();
+  const { navigate } = useAppStore();
+  const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
-  if (!app || !app.fee) {
+  if (!app) {
     return (
       <div className="space-y-6">
         <PageHeader title="Fee Details" icon={ReceiptIndianRupee} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]} />
-        <EmptyState icon={ReceiptIndianRupee} title="No fee generated" description="Fees are generated automatically once documents are verified." />
+        <EmptyState icon={ReceiptIndianRupee} title="No applications" description="Create an application to view its fee details." />
+      </div>
+    );
+  }
+  // If fee is not generated yet, show a pending state
+  if (!app.fee) {
+    const isVerifying = app.status === "DOCUMENT_VERIFICATION";
+    const isDocPending = app.status === "DOCUMENT_UPLOAD_PENDING" || app.status === "DRAFT" || app.status === "DRAWING_UPLOADED" || app.status === "SCRUTINY_IN_PROGRESS" || app.status === "SCRUTINY_FAILED" || app.status === "DRAWING_REUPLOAD_REQUIRED" || app.status === "SCRUTINY_PASSED";
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Fee Details"
+          description="Invoice-style breakdown of all applicable fees and charges."
+          icon={ReceiptIndianRupee}
+          breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]}
+          actions={<AppSelect apps={visibleApps} current={app} view="ltp-fees" />}
+        />
+        <SectionCard title="Fee Not Generated Yet" icon={ReceiptIndianRupee}>
+          <div className="flex flex-col items-center gap-3 py-8 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-info/10 text-info">
+              <Clock className="size-6" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">
+                {isVerifying
+                  ? "Documents under verification"
+                  : isDocPending
+                  ? "Upload drawings & documents first"
+                  : "Fee generation pending"}
+              </p>
+              <p className="max-w-md text-sm text-muted-foreground">
+                {isVerifying
+                  ? "Fee will be auto-generated when all documents are verified by TPA. You will be notified once the fee is ready."
+                  : isDocPending
+                  ? "Complete drawing scrutiny and upload all required documents. Once verified, the fee will be auto-generated."
+                  : "The fee for this application will be generated automatically once the prerequisite stages are complete."}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("ltp-documents")}>View documents</Button>
+              <Button variant="outline" size="sm" onClick={() => navigate("ltp-application-details")}>Track application</Button>
+            </div>
+          </div>
+        </SectionCard>
       </div>
     );
   }
@@ -80,7 +124,7 @@ export function LtpFees() {
         description="Invoice-style breakdown of all applicable fees and charges."
         icon={ReceiptIndianRupee}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]}
-        actions={<AppSelect apps={applications} current={app} view="ltp-fees" />}
+        actions={<AppSelect apps={visibleApps} current={app} view="ltp-fees" />}
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -159,7 +203,7 @@ export function LtpFees() {
                 <p className="text-3xl font-bold text-primary">{formatINR(f.outstanding)}</p>
                 <p className="text-[11px] text-muted-foreground">of {formatINR(f.total)} total</p>
               </div>
-              {app.payment?.status === "SUCCESSFUL" ? (
+              {app.payment?.status === "SUCCESS" ? (
                 <div className="rounded-lg border border-success/30 bg-success/5 p-3 text-center text-success">
                   <CheckCircle2 className="mx-auto size-6" />
                   <p className="mt-1 text-sm font-medium">Payment Successful</p>
@@ -199,16 +243,29 @@ export function LtpFees() {
 type PayStage = "pending" | "method" | "processing" | "success" | "failed";
 
 export function LtpPayment() {
-  const { navigate, applications } = useAppStore();
+  const { navigate, initiatePayment: storeInitiatePayment } = useAppStore();
+  const visibleApps = useVisibleApplications();
+  const processingAppIds = useAppStore((s) => s.processingAppIds);
   const app = useAppOrDefault();
   const { toast } = useToast();
-  const [method, setMethod] = React.useState("UPI");
-  const [stage, setStage] = React.useState<PayStage>(app?.payment?.status === "SUCCESSFUL" ? "success" : "pending");
+  const [method, setMethod] = React.useState<Payment["method"]>("UPI");
   const appId = app?.id;
+  const paymentStatus = app?.payment?.status;
+  const isAlreadyPaid = paymentStatus === "SUCCESS";
+  const isProcessing = app ? processingAppIds.includes(app.id) : false;
+  const [stage, setStage] = React.useState<PayStage>(isAlreadyPaid ? "success" : "pending");
+
+  // Reset stage/method when switching applications
   React.useEffect(() => {
-    setStage(app?.payment?.status === "SUCCESSFUL" ? "success" : "pending");
+    setStage(paymentStatus === "SUCCESS" ? "success" : "pending");
     setMethod("UPI");
-  }, [appId, app?.payment?.status]);
+  }, [appId, paymentStatus]);
+
+  // Sync local stage with store payment status (auto-advances after SUCCESS)
+  React.useEffect(() => {
+    if (paymentStatus === "SUCCESS") setStage("success");
+    else if (paymentStatus === "PROCESSING" || isProcessing) setStage("processing");
+  }, [paymentStatus, isProcessing]);
 
   if (!app || !app.fee) {
     return (
@@ -220,11 +277,10 @@ export function LtpPayment() {
   }
 
   function initiatePayment() {
+    if (!app) return;
     setStage("processing");
-    setTimeout(() => {
-      setStage("success");
-      toast({ title: "Payment Successful", description: "Your payment has been verified and receipt generated." });
-    }, 2600);
+    storeInitiatePayment(app.id, method);
+    toast({ title: "Payment initiated", description: "Processing via mock payment gateway. Please wait…" });
   }
 
   const PAYMENT_STEPS = [
@@ -241,7 +297,8 @@ export function LtpPayment() {
         description="Secure online payment for your application fees."
         icon={CreditCard}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]}
-        actions={<AppSelect apps={applications} current={app} view="ltp-payment" />}
+        actions={<AppSelect apps={visibleApps} current={app} view="ltp-payment" />}
+        badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode — no real payment</Badge>}
       />
 
       {/* Payment progress stepper */}
@@ -298,7 +355,7 @@ export function LtpPayment() {
 
           {stage === "method" && (
             <SectionCard title="Select Payment Method" icon={Wallet}>
-              <RadioGroup value={method} onValueChange={setMethod} className="space-y-2">
+              <RadioGroup value={method} onValueChange={(v) => setMethod(v as Payment["method"])} className="space-y-2">
                 {[
                   { value: "UPI", label: "UPI", desc: "Google Pay, PhonePe, Paytm", icon: Smartphone },
                   { value: "NETBANKING", label: "Net Banking", desc: "All major banks", icon: Landmark },
@@ -345,6 +402,7 @@ export function LtpPayment() {
                   <ProcessingStep label="Verifying transaction" active />
                   <ProcessingStep label="Generating receipt" />
                 </div>
+                <p className="text-[10px] text-muted-foreground">Demo gateway · no real money is debited</p>
               </div>
             </SectionCard>
           )}
@@ -357,14 +415,17 @@ export function LtpPayment() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-semibold">Payment Verified</p>
-                  <p className="text-sm text-muted-foreground">Your payment has been successfully processed and verified.</p>
+                  <p className="text-sm text-muted-foreground">Your payment has been successfully processed and verified. The application has been forwarded for technical scrutiny.</p>
                 </div>
                 <div className="w-full max-w-sm space-y-2 rounded-lg border border-border bg-muted/30 p-4 text-left text-xs">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Transaction ID</span><span className="font-mono font-medium">{app.payment?.transactionId || "TXN882190459001"}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Reference No.</span><span className="font-mono font-medium">{app.payment?.referenceNo || "MAHGP/2025/555001"}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Transaction ID</span><span className="font-mono font-medium">{app.payment?.transactionId || "—"}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Reference No.</span><span className="font-mono font-medium">{app.payment?.referenceNo || "—"}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">Amount Paid</span><span className="font-mono font-medium text-success">{formatINR(app.fee.total)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Method</span><span className="font-medium">{method}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Receipt No.</span><span className="font-mono font-medium text-primary">{app.payment?.receiptNo || "RCP/2025/04/00999"}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Method</span><span className="font-medium">{app.payment?.method ?? method}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Receipt No.</span><span className="font-mono font-medium text-primary">{app.payment?.receiptNo || "—"}</span></div>
+                  <Separator className="my-1" />
+                  <div className="flex justify-between"><span className="text-muted-foreground">Paid Amount</span><span className="font-mono font-medium text-success">{formatINR(app.fee.paidAmount)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">{formatINR(app.fee.outstanding)}</span></div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
                   <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> Download Receipt</Button>
@@ -413,9 +474,10 @@ function ProcessingStep({ label, done, active }: { label: string; done?: boolean
 // RECEIPT
 // ============================================================
 export function LtpReceipt() {
-  const { navigate, applications } = useAppStore();
+  const { navigate } = useAppStore();
+  const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
-  if (!app || !app.payment || app.payment.status !== "SUCCESSFUL") {
+  if (!app || !app.payment || app.payment.status !== "SUCCESS") {
     return (
       <div className="space-y-6">
         <PageHeader title="Payment Receipt" icon={ScrollText} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]} />
@@ -434,7 +496,7 @@ export function LtpReceipt() {
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]}
         actions={
           <>
-            <AppSelect apps={applications} current={app} view="ltp-receipt" />
+            <AppSelect apps={visibleApps} current={app} view="ltp-receipt" />
             <Button variant="outline" size="sm"><Printer className="size-4" /> Print</Button>
             <Button size="sm"><Download className="size-4" /> Download PDF</Button>
           </>

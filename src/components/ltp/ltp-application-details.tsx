@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, useSelectedApplication } from "@/store/app-store";
-import { APPLICATIONS, ROLES } from "@/data/mock-data";
+import { useAppStore, useSelectedApplication, ROLES } from "@/store/app-store";
 import {
   PageHeader,
   SectionCard,
@@ -201,11 +200,19 @@ function StatusBanner({ app }: { app: Application }) {
       desc: `${app.scrutinyReport?.failed ?? 1} critical issue(s) found. Please re-upload corrected drawings.`,
       action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
     },
+    DRAWING_REUPLOAD_REQUIRED: {
+      icon: XCircle,
+      cls: "border-destructive/30 bg-destructive/5 text-destructive",
+      iconCls: "bg-destructive/10 text-destructive",
+      title: "Drawing re-upload required",
+      desc: "Scrutiny identified critical non-compliances. Please re-upload a corrected drawing.",
+      action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
+    },
     SHORTFALL_RAISED: {
       icon: AlertTriangle,
       cls: "border-warning/30 bg-warning/5 text-warning-foreground",
       iconCls: "bg-warning/15 text-warning-foreground",
-      title: `${app.shortfalls.length} shortfall(s) raised`,
+      title: `${app.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) raised`,
       desc: "Action required from you. Respond to the shortfalls to resume processing.",
       action: { label: "View shortfalls", view: "ltp-shortfalls" as const },
     },
@@ -217,13 +224,21 @@ function StatusBanner({ app }: { app: Application }) {
       desc: `Outstanding amount ${formatINR(app.fee?.outstanding ?? 0)}. Complete payment to initiate the approval workflow.`,
       action: { label: "Pay now", view: "ltp-payment" as const },
     },
-    DOCUMENTS_PENDING: {
+    DOCUMENT_UPLOAD_PENDING: {
       icon: AlertCircle,
       cls: "border-info/30 bg-info/5 text-info",
       iconCls: "bg-info/10 text-info",
       title: "Documents pending",
       desc: "Some required documents are yet to be uploaded or verified.",
       action: { label: "Upload documents", view: "ltp-documents" as const },
+    },
+    PAYMENT_SUCCESS: {
+      icon: CheckCircle2,
+      cls: "border-success/30 bg-success/5 text-success",
+      iconCls: "bg-success/10 text-success",
+      title: "Payment successful",
+      desc: "Your payment has been verified. The application is now in the approval pipeline.",
+      action: { label: "Track application", view: "ltp-application-details" as const },
     },
     APPROVED: {
       icon: CheckCircle2,
@@ -232,6 +247,22 @@ function StatusBanner({ app }: { app: Application }) {
       title: "Application approved",
       desc: "Your application has been approved. Download the permit below.",
       action: { label: "Download permit", view: "ltp-receipt" as const },
+    },
+    REJECTED: {
+      icon: XCircle,
+      cls: "border-destructive/30 bg-destructive/5 text-destructive",
+      iconCls: "bg-destructive/10 text-destructive",
+      title: "Application rejected",
+      desc: "Your application has been rejected. Contact the reviewing officer for details.",
+      action: { label: "View remarks", view: "ltp-application-details" as const },
+    },
+    RETURNED: {
+      icon: AlertCircle,
+      cls: "border-warning/30 bg-warning/5 text-warning-foreground",
+      iconCls: "bg-warning/15 text-warning-foreground",
+      title: "Application returned",
+      desc: "The application has been returned for correction. Please review the remarks and resubmit.",
+      action: { label: "View remarks", view: "ltp-application-details" as const },
     },
   } as const;
 
@@ -350,7 +381,7 @@ function OverviewTab({ app }: { app: Application }) {
             <Stat label="Drawings" value={`${app.drawings.length}`} sub={`${app.drawings[0]?.version ?? 0} versions`} />
             <Stat label="Documents" value={`${docsVerified}/${docsTotal}`} sub="verified" />
             <Stat label="Shortfalls" value={`${app.shortfalls.length}`} sub={app.shortfalls.length ? "open" : "none"} />
-            <Stat label="Fee Paid" value={app.payment?.status === "SUCCESSFUL" ? "Yes" : "No"} sub={app.payment ? formatINR(app.payment.amount) : "—"} />
+            <Stat label="Fee Paid" value={app.payment?.status === "SUCCESS" ? "Yes" : "No"} sub={app.payment ? formatINR(app.payment.amount) : "—"} />
           </div>
         </SectionCard>
       </div>
