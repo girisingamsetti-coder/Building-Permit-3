@@ -1,0 +1,951 @@
+     1→import type {
+     2→  Application,
+     3→  ApplicationStatus,
+     4→  AuditEntry,
+     5→  DocumentRecord,
+     6→  Drawing,
+     7→  FeeStructure,
+     8→  FeeComponent,
+     9→  NotificationRecord,
+    10→  Role,
+    11→  RoleKey,
+    12→  Shortfall,
+    13→  User,
+    14→  WorkflowStage,
+    15→  WorkflowStageKey,
+    16→} from "@/types";
+    17→
+    18→// ============================================================
+    19→// ROLES (RBAC)
+    20→// ============================================================
+    21→export const ROLES: Record<RoleKey, Role> = {
+    22→  LTP: {
+    23→    key: "LTP",
+    24→    title: "LTP",
+    25→    fullName: "Licensed Technical Person",
+    26→    description: "Creates and submits building approval applications on behalf of applicants.",
+    27→    level: 0,
+    28→    color: "emerald",
+    29→    permissions: ["application:create", "application:view_own", "drawing:upload", "document:upload", "payment:initiate", "remarks:add"],
+    30→  },
+    31→  TPS: {
+    32→    key: "TPS",
+    33→    title: "TPS",
+    34→    fullName: "Town Planning Supervisor",
+    35→    description: "Performs initial technical scrutiny of drawings and documents.",
+    36→    level: 1,
+    37→    color: "teal",
+    38→    permissions: ["application:view_all", "drawing:scrutinize", "document:verify", "workflow:forward", "shortfall:raise", "remarks:add"],
+    39→  },
+    40→  TPA: {
+    41→    key: "TPA",
+    42→    title: "TPA",
+    43→    fullName: "Town Planning Assistant",
+    44→    description: "Assists in technical scrutiny and document verification.",
+    45→    level: 1,
+    46→    color: "teal",
+    47→    permissions: ["application:view_all", "drawing:scrutinize", "document:verify", "workflow:forward", "shortfall:raise", "remarks:add"],
+    48→  },
+    49→  ZAD: {
+    50→    key: "ZAD",
+    51→    title: "ZAD",
+    52→    fullName: "Zonal Assistant Director",
+    53→    description: "Reviews applications at zonal level and raises shortfalls.",
+    54→    level: 2,
+    55→    color: "cyan",
+    56→    permissions: ["application:view_all", "workflow:forward", "shortfall:raise", "remarks:add"],
+    57→  },
+    58→  ZDD: {
+    59→    key: "ZDD",
+    60→    title: "ZDD",
+    61→    fullName: "Zonal Deputy Director",
+    62→    description: "Approves/forwards applications within the zone.",
+    63→    level: 2,
+    64→    color: "cyan",
+    65→    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "remarks:add"],
+    66→  },
+    67→  ZJD: {
+    68→    key: "ZJD",
+    69→    title: "ZJD",
+    70→    fullName: "Zonal Joint Director",
+    71→    description: "Reviews, approves, and may report fee shortfalls.",
+    72→    level: 3,
+    73→    color: "amber",
+    74→    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "remarks:add"],
+    75→  },
+    76→  DIRECTOR_DP: {
+    77→    key: "DIRECTOR_DP",
+    78→    title: "Director – DP",
+    79→    fullName: "Director of Town & Country Planning",
+    80→    description: "Director-level review, shortfall reporting and forwarding.",
+    81→    level: 4,
+    82→    color: "amber",
+    83→    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "remarks:add"],
+    84→  },
+    85→  ADDL_COMMISSIONER: {
+    86→    key: "ADDL_COMMISSIONER",
+    87→    title: "Addl. Commissioner",
+    88→    fullName: "Additional Commissioner",
+    89→    description: "Senior review and forwarding to Commissioner.",
+    90→    level: 5,
+    91→    color: "rose",
+    92→    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "remarks:add"],
+    93→  },
+    94→  COMMISSIONER: {
+    95→    key: "COMMISSIONER",
+    96→    title: "Commissioner",
+    97→    fullName: "Commissioner of the Authority",
+    98→    description: "Final authority — issues final approval or rejection.",
+    99→    level: 6,
+   100→    color: "rose",
+   101→    permissions: ["application:view_all", "workflow:approve", "workflow:return", "remarks:add"],
+   102→  },
+   103→  ADMIN: {
+   104→    key: "ADMIN",
+   105→    title: "Administrator",
+   106→    fullName: "System Administrator",
+   107→    description: "Manages users, roles, configuration, fee structures and audit.",
+   108→    level: 99,
+   109→    color: "slate",
+   110→    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage"],
+   111→  },
+   112→};
+   113→
+   114→// ============================================================
+   115→// USERS
+   116→// ============================================================
+   117→export const USERS: User[] = [
+   118→  {
+   119→    id: "u-ltp-01",
+   120→    name: "Ar. Vikram Deshpande",
+   121→    role: "LTP",
+   122→    email: "vikram.deshpande@studiolattice.in",
+   123→    phone: "+91 98220 14578",
+   124→    licenseNo: "LTP-MC-2019-0457",
+   125→    designation: "Architect & Licensed Technical Person",
+   126→    zone: "Zone IV — West",
+   127→    avatarColor: "emerald",
+   128→    department: "Private Practice",
+   129→    active: true,
+   130→    lastLogin: "2025-01-14T09:12:00",
+   131→  },
+   132→  {
+   133→    id: "u-tps-01",
+   134→    name: "Smt. Meena Kulkarni",
+   135→    role: "TPS",
+   136→    email: "meena.kulkarni@municipality.gov.in",
+   137→    phone: "+91 99230 87120",
+   138→    employeeId: "MUN-TPS-1042",
+   139→    designation: "Town Planning Supervisor",
+   140→    zone: "Zone IV — West",
+   141→    avatarColor: "teal",
+   142→    department: "Department of Town Planning",
+   143→    active: true,
+   144→    lastLogin: "2025-01-14T08:40:00",
+   145→  },
+   146→  {
+   147→    id: "u-zdd-01",
+   148→    name: "Shri. Ramesh Iyer",
+   149→    role: "ZDD",
+   150→    email: "ramesh.iyer@municipality.gov.in",
+   151→    phone: "+91 98190 33214",
+   152→    employeeId: "MUN-ZDD-0218",
+   153→    designation: "Zonal Deputy Director",
+   154→    zone: "Zone IV — West",
+   155→    avatarColor: "cyan",
+   156→    department: "Zonal Office — West",
+   157→    active: true,
+   158→    lastLogin: "2025-01-13T17:25:00",
+   159→  },
+   160→  {
+   161→    id: "u-zjd-01",
+   162→    name: "Smt. Anjali Rao",
+   163→    role: "ZJD",
+   164→    email: "anjali.rao@municipality.gov.in",
+   165→    phone: "+91 99700 51288",
+   166→    employeeId: "MUN-ZJD-0107",
+   167→    designation: "Zonal Joint Director",
+   168→    zone: "Zone IV — West",
+   169→    avatarColor: "amber",
+   170→    department: "Zonal Office — West",
+   171→    active: true,
+   172→    lastLogin: "2025-01-14T10:05:00",
+   173→  },
+   174→  {
+   175→    id: "u-dir-01",
+   176→    name: "Shri. Suresh Nair",
+   177→    role: "DIRECTOR_DP",
+   178→    email: "suresh.nair@municipality.gov.in",
+   179→    phone: "+91 98690 70011",
+   180→    employeeId: "MUN-DIR-0009",
+   181→    designation: "Director, Town & Country Planning",
+   182→    zone: "Head Office",
+   183→    avatarColor: "amber",
+   184→    department: "Directorate of Town Planning",
+   185→    active: true,
+   186→    lastLogin: "2025-01-14T09:55:00",
+   187→  },
+   188→  {
+   189→    id: "u-com-01",
+   190→    name: "Dr. Pratap Reddy",
+   191→    role: "COMMISSIONER",
+   192→    email: "pratap.reddy@municipality.gov.in",
+   193→    phone: "+91 98220 00001",
+   194→    employeeId: "MUN-COM-0001",
+   195→    designation: "Commissioner",
+   196→    zone: "Head Office",
+   197→    avatarColor: "rose",
+   198→    department: "Office of the Commissioner",
+   199→    active: true,
+   200→    lastLogin: "2025-01-14T11:20:00",
+   201→  },
+   202→  {
+   203→    id: "u-admin-01",
+   204→    name: "Shri. Kailash Patil",
+   205→    role: "ADMIN",
+   206→    email: "kailash.patil@municipality.gov.in",
+   207→    phone: "+91 99300 44881",
+   208→    employeeId: "MUN-ADM-0003",
+   209→    designation: "System Administrator",
+   210→    zone: "Head Office",
+   211→    avatarColor: "slate",
+   212→    department: "IT & e-Governance Cell",
+   213→    active: true,
+   214→    lastLogin: "2025-01-14T09:00:00",
+   215→  },
+   216→];
+   217→
+   218→// ============================================================
+   219→// WORKFLOW STAGES
+   220→// ============================================================
+   221→export const WORKFLOW_STAGES: WorkflowStage[] = [
+   222→  {
+   223→    key: "APPLICATION_CREATED",
+   224→    label: "Application Created",
+   225→    role: "LTP",
+   226→    order: 0,
+   227→    allowedActions: [],
+   228→    nextStage: "DRAWING_SCRUTINY",
+   229→    canRaiseShortfall: false,
+   230→    canApprove: false,
+   231→  },
+   232→  {
+   233→    key: "DRAWING_SCRUTINY",
+   234→    label: "Drawing Scrutiny",
+   235→    role: "TPS",
+   236→    order: 1,
+   237→    allowedActions: ["ADD_REMARKS"],
+   238→    nextStage: "DOCUMENTS",
+   239→    canRaiseShortfall: false,
+   240→    canApprove: false,
+   241→  },
+   242→  {
+   243→    key: "DOCUMENTS",
+   244→    label: "Documents",
+   245→    role: "TPS",
+   246→    order: 2,
+   247→    allowedActions: ["ADD_REMARKS"],
+   248→    nextStage: "FEE_GENERATED",
+   249→    canRaiseShortfall: false,
+   250→    canApprove: false,
+   251→  },
+   252→  {
+   253→    key: "FEE_GENERATED",
+   254→    label: "Fee Generated",
+   255→    role: "LTP",
+   256→    order: 3,
+   257→    allowedActions: [],
+   258→    nextStage: "PAYMENT",
+   259→    canRaiseShortfall: false,
+   260→    canApprove: false,
+   261→  },
+   262→  {
+   263→    key: "PAYMENT",
+   264→    label: "Payment",
+   265→    role: "LTP",
+   266→    order: 4,
+   267→    allowedActions: [],
+   268→    nextStage: "TPA_TPS",
+   269→    canRaiseShortfall: false,
+   270→    canApprove: false,
+   271→  },
+   272→  {
+   273→    key: "TPA_TPS",
+   274→    label: "TPA / TPS Review",
+   275→    role: "TPS",
+   276→    order: 5,
+   277→    allowedActions: ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "ADD_REMARKS", "RETURN"],
+   278→    nextStage: "ZAD_ZDD",
+   279→    canRaiseShortfall: true,
+   280→    canApprove: true,
+   281→  },
+   282→  {
+   283→    key: "ZAD_ZDD",
+   284→    label: "ZAD / ZDD Review",
+   285→    role: "ZDD",
+   286→    order: 6,
+   287→    allowedActions: ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "ADD_REMARKS", "RETURN"],
+   288→    nextStage: "ZJD",
+   289→    canRaiseShortfall: true,
+   290→    canApprove: true,
+   291→  },
+   292→  {
+   293→    key: "ZJD",
+   294→    label: "ZJD Review",
+   295→    role: "ZJD",
+   296→    order: 7,
+   297→    allowedActions: ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "ADD_REMARKS"],
+   298→    nextStage: "DIRECTOR_DP",
+   299→    canRaiseShortfall: true,
+   300→    canApprove: true,
+   301→  },
+   302→  {
+   303→    key: "DIRECTOR_DP",
+   304→    label: "Director – DP",
+   305→    role: "DIRECTOR_DP",
+   306→    order: 8,
+   307→    allowedActions: ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "ADD_REMARKS"],
+   308→    nextStage: "ADDL_COMMISSIONER",
+   309→    canRaiseShortfall: true,
+   310→    canApprove: true,
+   311→  },
+   312→  {
+   313→    key: "ADDL_COMMISSIONER",
+   314→    label: "Addl. Commissioner",
+   315→    role: "ADDL_COMMISSIONER",
+   316→    order: 9,
+   317→    allowedActions: ["APPROVE", "FORWARD", "RAISE_SHORTFALL", "ADD_REMARKS"],
+   318→    nextStage: "COMMISSIONER",
+   319→    canRaiseShortfall: true,
+   320→    canApprove: true,
+   321→  },
+   322→  {
+   323→    key: "COMMISSIONER",
+   324→    label: "Commissioner",
+   325→    role: "COMMISSIONER",
+   326→    order: 10,
+   327→    allowedActions: ["FINAL_DECISION", "RETURN", "ADD_REMARKS"],
+   328→    nextStage: "FINAL_DECISION",
+   329→    canRaiseShortfall: false,
+   330→    canApprove: true,
+   331→  },
+   332→  {
+   333→    key: "FINAL_DECISION",
+   334→    label: "Final Decision",
+   335→    role: "COMMISSIONER",
+   336→    order: 11,
+   337→    allowedActions: [],
+   338→    canRaiseShortfall: false,
+   339→    canApprove: false,
+   340→  },
+   341→];
+   342→
+   343→// ============================================================
+   344→// FEE STRUCTURES & COMPONENTS
+   345→// ============================================================
+   346→export const FEE_STRUCTURES: FeeStructure[] = [
+   347→  {
+   348→    id: "fs-bp-res-2025",
+   349→    name: "Building Permission — Residential (2025)",
+   350→    applicationType: "BUILDING_PERMISSION",
+   351→    description: "Applicable to residential building permission applications on plots up to 1,000 sq.m.",
+   352→    active: true,
+   353→    effectiveFrom: "2025-04-01",
+   354→  },
+   355→  {
+   356→    id: "fs-bp-com-2025",
+   357→    name: "Building Permission — Commercial (2025)",
+   358→    applicationType: "BUILDING_PERMISSION",
+   359→    description: "Applicable to commercial building permission applications.",
+   360→    active: true,
+   361→    effectiveFrom: "2025-04-01",
+   362→  },
+   363→  {
+   364→    id: "fs-layout-2025",
+   365→    name: "Layout Approval (2025)",
+   366→    applicationType: "LAYOUT_APPROVAL",
+   367→    description: "Group housing & layout approval fee structure.",
+   368→    active: true,
+   369→    effectiveFrom: "2025-04-01",
+   370→  },
+   371→];
+   372→
+   373→export const FEE_COMPONENTS: FeeComponent[] = [
+   374→  { id: "fc-1", name: "Application Fee", code: "APP_FEE", description: "Base processing fee per application", basis: "FIXED", rate: 2500 },
+   375→  { id: "fc-2", name: "Scrutiny Fee", code: "SCRUTINY_FEE", description: "Per sq.m scrutiny charge on built-up area", basis: "AREA_BASED", rate: 45, unit: "sq.m" },
+   376→  { id: "fc-3", name: "Development Fee", code: "DEV_FEE", description: "Infrastructure development charge", basis: "AREA_BASED", rate: 120, unit: "sq.m" },
+   377→  { id: "fc-4", name: "Processing Fee", code: "PROC_FEE", description: "Administrative processing fee", basis: "FIXED", rate: 1500 },
+   378→  { id: "fc-5", name: "Document Verification Fee", code: "DOC_FEE", description: "Per-document verification charge", basis: "FIXED", rate: 800 },
+   379→  { id: "fc-6", name: "Labour Cess", code: "LABOUR_CESS", description: "1% of development fee — statutory", basis: "PERCENTAGE", rate: 1 },
+   380→];
+   381→
+   382→// ============================================================
+   383→// HELPERS
+   384→// ============================================================
+   385→export function buildDrawings(): Drawing[] {
+   386→  return [
+   387→    {
+   388→      id: "dw-1",
+   389→      fileName: "Site_Plan_GroundFloor_v3.dwg",
+   390→      fileType: "DWG",
+   391→      fileSize: "8.4 MB",
+   392→      version: 3,
+   393→      uploadedAt: "2025-01-12T11:20:00",
+   394→      uploadedBy: "Ar. Vikram Deshpande",
+   395→      status: "SCRUTINY_PASSED",
+   396→      notes: "Revised setback per scrutiny remarks v2.",
+   397→    },
+   398→    {
+   399→      id: "dw-2",
+   400→      fileName: "Site_Plan_GroundFloor_v2.dwg",
+   401→      fileType: "DWG",
+   402→      fileSize: "8.1 MB",
+   403→      version: 2,
+   404→      uploadedAt: "2025-01-08T15:42:00",
+   405→      uploadedBy: "Ar. Vikram Deshpande",
+   406→      status: "SUPERSEDED",
+   407→      notes: "Superseded — front setback non-compliant.",
+   408→    },
+   409→    {
+   410→      id: "dw-3",
+   411→      fileName: "Site_Plan_GroundFloor_v1.dwg",
+   412→      fileType: "DWG",
+   413→      fileSize: "7.9 MB",
+   414→      version: 1,
+   415→      uploadedAt: "2025-01-05T09:30:00",
+   416→      uploadedBy: "Ar. Vikram Deshpande",
+   417→      status: "SUPERSEDED",
+   418→      notes: "Initial submission.",
+   419→    },
+   420→  ];
+   421→}
+   422→
+   423→export function buildScrutinyReport(version: number, passed: boolean) {
+   424→  const checks = [
+   425→    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL" as const, status: passed ? "PASS" : "FAIL" as const, message: passed ? "Front setback 6.2 m exceeds minimum 6.0 m." : "Front setback 5.4 m is below minimum 6.0 m.", recommendation: passed ? undefined : "Increase front setback to a minimum of 6.0 m." },
+   426→    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "Rear setback 4.1 m compliant.", },
+   427→    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "3.2 m compliant." },
+   428→    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR" as const, status: "PASS" as const, message: "3.0 m compliant." },
+   429→    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR" as const, status: "PASS" as const, message: "Coverage 58% within 60% limit." },
+   430→    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL" as const, status: "PASS" as const, message: "Achieved FAR 1.42 against permissible 1.50." },
+   431→    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR" as const, status: "PASS" as const, message: "Building height 14.8 m within 15 m limit." },
+   432→    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR" as const, status: "PASS" as const, message: "24 ECS provided, 22 required." },
+   433→    { id: "sc-9", rule: "Rain Water Harvesting", category: "Sustainability", severity: "MINOR" as const, status: "PASS" as const, message: "RWH pit shown at NE corner." },
+   434→    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR" as const, status: passed ? "PASS" : "WARNING" as const, message: passed ? "STP of 30 KLD provided." : "STP capacity calculation sheet not attached." },
+   435→    { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL" as const, status: "PASS" as const, message: "Stair width 1.8 m compliant." },
+   436→    { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR" as const, status: "PASS" as const, message: "Refuge area provided at 7th floor." },
+   437→    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR" as const, status: "WARNING" as const, message: "Indicate tree species on landscape plan." },
+   438→    { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR" as const, status: "PASS" as const, message: "1:12 ramp at main entrance." },
+   439→    { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "WARNING" as const, status: "PASS" as const, message: "Title block and north arrow present." },
+   440→  ];
+   441→  const failed = checks.filter((c) => c.status === "FAIL").length;
+   442→  const warnings = checks.filter((c) => c.status === "WARNING").length;
+   443→  return {
+   444→    reportNo: `SCR/2025/${Math.floor(1000 + Math.random() * 9000)}`,
+   445→    drawingVersion: version,
+   446→    generatedAt: "2025-01-12T16:05:00",
+   447→    status: (failed === 0 ? "PASSED" : "FAILED") as "PASSED" | "FAILED",
+   448→    summary: passed
+   449→      ? "Drawing scrutiny completed successfully. All critical and major checks passed. Two minor advisories noted for compliance during construction."
+   450→      : "Scrutiny identified 1 critical non-compliance. Drawing must be corrected and re-uploaded before proceeding.",
+   451→    totalChecks: checks.length,
+   452→    passed: checks.length - failed - warnings,
+   453→    failed,
+   454→    warnings,
+   455→    checks,
+   456→  };
+   457→}
+   458→
+   459→export function buildDocuments(stage: "early" | "verified" | "shortfall"): DocumentRecord[] {
+   460→  const base: DocumentRecord[] = [
+   461→    { id: "d-1", name: "7/12 Land Extract", code: "DOC_712", required: true, status: "VERIFIED", uploadedAt: "2025-01-06T10:00:00", version: 1, fileSize: "1.2 MB", verifiedBy: "Smt. Meena Kulkarni", verifiedAt: "2025-01-09T14:20:00" },
+   462→    { id: "d-2", name: "Property Card / Mutation", code: "DOC_PROP_CARD", required: true, status: "VERIFIED", uploadedAt: "2025-01-06T10:05:00", version: 1, fileSize: "0.9 MB", verifiedBy: "Smt. Meena Kulkarni", verifiedAt: "2025-01-09T14:22:00" },
+   463→    { id: "d-3", name: "Architectural Drawings (stamped)", code: "DOC_ARCH", required: true, status: "VERIFIED", uploadedAt: "2025-01-12T11:25:00", version: 3, fileSize: "8.4 MB", verifiedBy: "Smt. Meena Kulkarni", verifiedAt: "2025-01-13T09:10:00" },
+   464→    { id: "d-4", name: "Structural Drawings & Stability Certificate", code: "DOC_STRUCT", required: true, status: stage === "shortfall" ? "SHORTFALL" : "VERIFIED", uploadedAt: stage === "shortfall" ? undefined : "2025-01-12T11:30:00", version: stage === "shortfall" ? undefined : 1, fileSize: stage === "shortfall" ? undefined : "6.1 MB", verifiedBy: stage === "shortfall" ? undefined : "Smt. Meena Kulkarni", verifiedAt: stage === "shortfall" ? undefined : "2025-01-13T09:15:00", remarks: stage === "shortfall" ? "Structural stability certificate missing licensed SE stamp." : undefined },
+   465→    { id: "d-5", name: "NOC from Fire Department", code: "DOC_FIRE_NOC", required: true, status: stage === "early" ? "REQUIRED" : "VERIFIED", uploadedAt: stage === "early" ? undefined : "2025-01-13T16:40:00", version: stage === "early" ? undefined : 1, fileSize: stage === "early" ? undefined : "0.7 MB", verifiedBy: stage === "early" ? undefined : "Smt. Meena Kulkarni", verifiedAt: stage === "early" ? undefined : "2025-01-14T10:00:00" },
+   466→    { id: "d-6", name: "Environmental Clearance", code: "DOC_ENV", required: false, status: stage === "early" ? "REQUIRED" : "UPLOADED", uploadedAt: stage === "early" ? undefined : "2025-01-13T16:42:00", version: stage === "early" ? undefined : 1, fileSize: stage === "early" ? undefined : "1.4 MB" },
+   467→    { id: "d-7", name: "Heritage NOC (if applicable)", code: "DOC_HERITAGE", required: false, status: "REQUIRED" },
+   468→    { id: "d-8", name: "Society / Landowner Authorization", code: "DOC_AUTH", required: true, status: "VERIFIED", uploadedAt: "2025-01-06T10:08:00", version: 1, fileSize: "0.5 MB", verifiedBy: "Smt. Meena Kulkarni", verifiedAt: "2025-01-09T14:25:00" },
+   469→    { id: "d-9", name: "Demand Draft / Fee Receipt", code: "DOC_FEE", required: true, status: stage === "early" ? "REQUIRED" : "VERIFIED", uploadedAt: stage === "early" ? undefined : "2025-01-15T12:10:00", version: stage === "early" ? undefined : 1, fileSize: stage === "early" ? undefined : "0.3 MB", verifiedBy: stage === "early" ? undefined : "System" },
+   470→    { id: "d-10", name: "Affidavit — Ownership", code: "DOC_AFFIDAVIT", required: true, status: "VERIFIED", uploadedAt: "2025-01-06T10:10:00", version: 1, fileSize: "0.4 MB", verifiedBy: "Smt. Meena Kulkarni", verifiedAt: "2025-01-09T14:30:00" },
+   471→  ];
+   472→  return base;
+   473→}
+   474→
+   475→export function buildFee(area: number) {
+   476→  const items = [
+   477→    { componentCode: "APP_FEE", name: "Application Fee", description: "Base processing fee", basis: "Fixed", rate: 2500, quantity: 1, amount: 2500 },
+   478→    { componentCode: "SCRUTINY_FEE", name: "Scrutiny Fee", description: `Built-up area × ₹45/sq.m`, basis: "Area based", rate: 45, quantity: area, amount: area * 45 },
+   479→    { componentCode: "DEV_FEE", name: "Development Fee", description: `Built-up area × ₹120/sq.m`, basis: "Area based", rate: 120, quantity: area, amount: area * 120 },
+   480→    { componentCode: "PROC_FEE", name: "Processing Fee", description: "Administrative processing", basis: "Fixed", rate: 1500, quantity: 1, amount: 1500 },
+   481→    { componentCode: "DOC_FEE", name: "Document Verification Fee", description: "10 documents × ₹800", basis: "Fixed", rate: 800, quantity: 10, amount: 8000 },
+   482→  ];
+   483→  const subtotal = items.reduce((s, i) => s + i.amount, 0);
+   484→  const labourCess = Math.round((items[2].amount * 0.01) * 100) / 100;
+   485→  const gst = 0;
+   486→  const total = subtotal + labourCess + gst;
+   487→  return {
+   488→    feeStructureId: "fs-bp-res-2025",
+   489→    feeStructureName: "Building Permission — Residential (2025)",
+   490→    generatedAt: "2025-01-14T18:00:00",
+   491→    lineItems: [...items, { componentCode: "LABOUR_CESS", name: "Labour Cess", description: "1% of Development Fee (statutory)", basis: "Percentage", rate: 1, quantity: items[2].amount, amount: labourCess }],
+   492→    subtotal,
+   493→    gst,
+   494→    total,
+   495→    paidAmount: 0,
+   496→    outstanding: total,
+   497→    currency: "INR",
+   498→  };
+   499→}
+   500→
+   501→// ============================================================
+   502→// APPLICATIONS
+   503→// ============================================================
+   504→function workflowHistory(
+   505→  appNo: string,
+   506→  current: WorkflowStageKey,
+   507→  status: ApplicationStatus
+   508→) {
+   509→  const order = WORKFLOW_STAGES.find((s) => s.key === current)!.order;
+   510→  const entries: import("@/types").WorkflowHistoryEntry[] = [];
+   511→  const stages = WORKFLOW_STAGES.slice(0, Math.max(order + 1, 1));
+   512→  const actors: Record<string, { name: string; role: RoleKey }> = {
+   513→    APPLICATION_CREATED: { name: "Ar. Vikram Deshpande", role: "LTP" },
+   514→    DRAWING_SCRUTINY: { name: "System (Auto-Scrutiny)", role: "TPS" },
+   515→    DOCUMENTS: { name: "Smt. Meena Kulkarni", role: "TPS" },
+   516→    FEE_GENERATED: { name: "System (Fee Engine)", role: "TPS" },
+   517→    PAYMENT: { name: "Ar. Vikram Deshpande", role: "LTP" },
+   518→    TPA_TPS: { name: "Smt. Meena Kulkarni", role: "TPS" },
+   519→    ZAD_ZDD: { name: "Shri. Ramesh Iyer", role: "ZDD" },
+   520→    ZJD: { name: "Smt. Anjali Rao", role: "ZJD" },
+   521→    DIRECTOR_DP: { name: "Shri. Suresh Nair", role: "DIRECTOR_DP" },
+   522→    ADDL_COMMISSIONER: { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" },
+   523→    COMMISSIONER: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
+   524→    FINAL_DECISION: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
+   525→  };
+   526→  const actions: Record<string, string> = {
+   527→    APPLICATION_CREATED: "Application submitted",
+   528→    DRAWING_SCRUTINY: status === "SCRUTINY_FAILED" ? "Scrutiny failed — re-upload required" : "Scrutiny passed",
+   529→    DOCUMENTS: status === "DOCUMENTS_PENDING" ? "Documents under verification" : "Documents verified",
+   530→    FEE_GENERATED: "Fee generated",
+   531→    PAYMENT: status === "PAYMENT_PENDING" ? "Payment pending" : "Payment received",
+   532→    TPA_TPS: "Forwarded to ZAD/ZDD",
+   533→    ZAD_ZDD: "Forwarded to ZJD",
+   534→    ZJD: "Forwarded to Director – DP",
+   535→    DIRECTOR_DP: "Forwarded to Addl. Commissioner",
+   536→    ADDL_COMMISSIONER: "Forwarded to Commissioner",
+   537→    COMMISSIONER: status === "APPROVED" ? "Application approved" : status === "REJECTED" ? "Application rejected" : "Under final review",
+   538→    FINAL_DECISION: status === "APPROVED" ? "Final approval granted" : status === "REJECTED" ? "Final rejection issued" : "Awaiting final decision",
+   539→  };
+   540→  stages.forEach((s, idx) => {
+   541→    const isCurrent = s.key === current;
+   542→    const isFuture = idx > order;
+   543→    entries.push({
+   544→      id: `wf-${appNo}-${idx}`,
+   545→      stage: s.key,
+   546→      stageLabel: s.label,
+   547→      actor: actors[s.key],
+   548→      action: actions[s.key],
+   549→      remarks: isCurrent && status === "SHORTFALL_RAISED" ? "Shortfall raised — response awaited." : undefined,
+   550→      timestamp: isFuture ? "" : `2025-01-${String(5 + idx * 2).padStart(2, "0")}T${10 + idx}:00:00`,
+   551→      status: isCurrent ? "CURRENT" : isFuture ? "PENDING" : status === "RETURNED" && isCurrent ? "RETURNED" : "COMPLETED",
+   552→      duration: isFuture ? undefined : `${1 + idx}d`,
+   553→    });
+   554→  });
+   555→  return entries;
+   556→}
+   557→
+   558→function auditLog(appNo: string): AuditEntry[] {
+   559→  return [
+   560→    { id: "a1", user: "Ar. Vikram Deshpande", role: "LTP", action: "Application created", entity: "Application", entityId: appNo, timestamp: "2025-01-05T09:28:00", newStatus: "DRAFT", ip: "103.21.58.10", device: "Chrome / Windows" },
+   561→    { id: "a2", user: "Ar. Vikram Deshpande", role: "LTP", action: "Drawing v1 uploaded", entity: "Drawing", entityId: appNo, timestamp: "2025-01-05T09:30:00", ip: "103.21.58.10", device: "Chrome / Windows" },
+   562→    { id: "a3", user: "System", role: "TPS", action: "Auto-scrutiny executed (v1)", entity: "ScrutinyReport", entityId: appNo, timestamp: "2025-01-05T09:31:00", oldStatus: "DRAFT", newStatus: "SCRUTINY_FAILED", ip: "10.0.0.4", device: "System" },
+   563→    { id: "a4", user: "Ar. Vikram Deshpande", role: "LTP", action: "Drawing v2 uploaded", entity: "Drawing", entityId: appNo, timestamp: "2025-01-08T15:42:00", ip: "103.21.58.10", device: "Chrome / Windows" },
+   564→    { id: "a5", user: "Ar. Vikram Deshpande", role: "LTP", action: "Drawing v3 uploaded", entity: "Drawing", entityId: appNo, timestamp: "2025-01-12T11:20:00", ip: "103.21.58.10", device: "Chrome / Windows" },
+   565→    { id: "a6", user: "System", role: "TPS", action: "Auto-scrutiny executed (v3)", entity: "ScrutinyReport", entityId: appNo, timestamp: "2025-01-12T16:05:00", oldStatus: "SCRUTINY_FAILED", newStatus: "SCRUTINY_PASSED", ip: "10.0.0.4", device: "System" },
+   566→    { id: "a7", user: "Smt. Meena Kulkarni", role: "TPS", action: "Documents verified", entity: "Document", entityId: appNo, timestamp: "2025-01-14T10:00:00", oldStatus: "DOCUMENTS_PENDING", newStatus: "DOCUMENTS_VERIFIED", ip: "10.0.0.18", device: "Edge / Windows" },
+   567→    { id: "a8", user: "System", role: "TPS", action: "Fee calculated", entity: "ApplicationFee", entityId: appNo, timestamp: "2025-01-14T18:00:00", oldStatus: "DOCUMENTS_VERIFIED", newStatus: "FEE_GENERATED", ip: "10.0.0.4", device: "System" },
+   568→    { id: "a9", user: "Ar. Vikram Deshpande", role: "LTP", action: "Payment initiated", entity: "Payment", entityId: appNo, timestamp: "2025-01-15T12:05:00", oldStatus: "FEE_GENERATED", newStatus: "PAYMENT_PENDING", ip: "103.21.58.10", device: "Chrome / Windows" },
+   569→    { id: "a10", user: "Payment Gateway", role: "TPS", action: "Payment verified", entity: "Payment", entityId: appNo, timestamp: "2025-01-15T12:09:00", oldStatus: "PAYMENT_PENDING", newStatus: "PAYMENT_SUCCESSFUL", ip: "10.0.0.4", device: "Webhook" },
+   570→    { id: "a11", user: "Smt. Meena Kulkarni", role: "TPS", action: "Forwarded to ZAD/ZDD", entity: "Application", entityId: appNo, timestamp: "2025-01-16T11:00:00", oldStatus: "PAYMENT_SUCCESSFUL", newStatus: "UNDER_REVIEW", ip: "10.0.0.18", device: "Edge / Windows" },
+   571→  ];
+   572→}
+   573→
+   574→export const APPLICATIONS: Application[] = [
+   575→  {
+   576→    id: "app-1",
+   577→    applicationNo: "MC/BP/2025/04/0184",
+   578→    applicant: { name: "Shri. Anand Joshi", contact: "+91 98900 11223", email: "anand.joshi@gmail.com", address: "Plot 14, Baner Road, Pune — 411045" },
+   579→    ltpId: "u-ltp-01",
+   580→    ltpName: "Ar. Vikram Deshpande",
+   581→    project: {
+   582→      name: "Residential Apartment — Greenfield Residency",
+   583→      type: "BUILDING_PERMISSION",
+   584→      propertyType: "RESIDENTIAL",
+   585→      plotArea: 1250,
+   586→      builtUpArea: 1780,
+   587→      landUse: "Residential (R1)",
+   588→      ward: "Ward 14 — Baner",
+   589→      zone: "Zone IV — West",
+   590→      surveyNo: "Hissa 14/2, Baner",
+   591→      address: "Plot 14, Baner Road, Pune — 411045",
+   592→    },
+   593→    status: "UNDER_REVIEW",
+   594→    currentStage: "ZAD_ZDD",
+   595→    currentStageLabel: "ZAD / ZDD Review",
+   596→    assignedOfficer: { name: "Shri. Ramesh Iyer", role: "ZDD" },
+   597→    submissionDate: "2025-01-05T09:28:00",
+   598→    lastUpdated: "2025-01-16T11:00:00",
+   599→    expectedSLA: "2025-02-05",
+   600→    priority: "NORMAL",
+   601→    progress: 62,
+   602→    fee: buildFee(1780),
+   603→    payment: {
+   604→      id: "pay-1",
+   605→      transactionId: "TXN882190457712",
+   606→      referenceNo: "MAHGP/2025/554812",
+   607→      status: "SUCCESSFUL",
+   608→      amount: 267850,
+   609→      method: "NETBANKING",
+   610→      gateway: "BillDesk (Sandbox)",
+   611→      initiatedAt: "2025-01-15T12:05:00",
+   612→      completedAt: "2025-01-15T12:09:00",
+   613→      receiptNo: "RCP/2025/04/00921",
+   614→      verified: true,
+   615→    },
+   616→    drawings: buildDrawings(),
+   617→    scrutinyReport: buildScrutinyReport(3, true),
+   618→    documents: buildDocuments("verified"),
+   619→    shortfalls: [],
+   620→    workflowHistory: workflowHistory("MC/BP/2025/04/0184", "ZAD_ZDD", "UNDER_REVIEW"),
+   621→    auditLog: auditLog("MC/BP/2025/04/0184"),
+   622→    remarks: [
+   623→      { id: "r1", author: { name: "Smt. Meena Kulkarni", role: "TPS" }, text: "Drawings comply with DCR. FAR utilisation 94.6%. Forwarding to Zonal office.", timestamp: "2025-01-16T10:58:00", type: "DECISION" },
+   624→      { id: "r2", author: { name: "System", role: "TPS" }, text: "Scrutiny v3 passed with 2 advisories.", timestamp: "2025-01-12T16:05:00", type: "INFO" },
+   625→    ],
+   626→  },
+   627→  {
+   628→    id: "app-2",
+   629→    applicationNo: "MC/BP/2025/03/0098",
+   630→    applicant: { name: "M/s Crescent Retail Pvt Ltd", contact: "+91 90210 44556", email: "projects@crescentretail.in", address: "Survey 88, Aundh, Pune — 411007" },
+   631→    ltpId: "u-ltp-01",
+   632→    ltpName: "Ar. Vikram Deshpande",
+   633→    project: {
+   634→      name: "Crescent Plaza — Commercial",
+   635→      type: "BUILDING_PERMISSION",
+   636→      propertyType: "COMMERCIAL",
+   637→      plotArea: 2100,
+   638→      builtUpArea: 6400,
+   639→      landUse: "Commercial (C1)",
+   640→      ward: "Ward 09 — Aundh",
+   641→      zone: "Zone III — North",
+   642→      surveyNo: "88, Aundh",
+   643→      address: "Survey 88, Aundh, Pune — 411007",
+   644→    },
+   645→    status: "SHORTFALL_RAISED",
+   646→    currentStage: "TPA_TPS",
+   647→    currentStageLabel: "TPA / TPS Review",
+   648→    assignedOfficer: { name: "Smt. Meena Kulkarni", role: "TPS" },
+   649→    submissionDate: "2025-01-03T14:10:00",
+   650→    lastUpdated: "2025-01-15T17:40:00",
+   651→    expectedSLA: "2025-01-29",
+   652→    priority: "HIGH",
+   653→    progress: 48,
+   654→    fee: buildFee(6400),
+   655→    payment: {
+   656→      id: "pay-2",
+   657→      transactionId: "TXN882190458001",
+   658→      referenceNo: "MAHGP/2025/554920",
+   659→      status: "SUCCESSFUL",
+   660→      amount: 853300,
+   661→      method: "UPI",
+   662→      gateway: "BillDesk (Sandbox)",
+   663→      initiatedAt: "2025-01-13T10:00:00",
+   664→      completedAt: "2025-01-13T10:02:00",
+   665→      receiptNo: "RCP/2025/03/00478",
+   666→      verified: true,
+   667→    },
+   668→    drawings: buildDrawings(),
+   669→    scrutinyReport: buildScrutinyReport(3, true),
+   670→    documents: buildDocuments("shortfall"),
+   671→    shortfalls: [
+   672→      {
+   673→        id: "sf-1",
+   674→        shortfallId: "SF/2025/0142",
+   675→        type: "DOCUMENT",
+   676→        title: "Structural Stability Certificate — missing SE stamp",
+   677→        description: "The structural stability certificate uploaded on 12-Jan does not bear the stamp and signature of a Licensed Structural Engineer. Re-upload a properly stamped certificate.",
+   678→        raisedBy: { name: "Smt. Meena Kulkarni", role: "TPS" },
+   679→        raisedAt: "2025-01-15T17:38:00",
+   680→        dueDate: "2025-01-22",
+   681→        status: "OPEN",
+   682→        applicationId: "app-2",
+   683→        applicationNo: "MC/BP/2025/03/0098",
+   684→      },
+   685→    ],
+   686→    workflowHistory: workflowHistory("MC/BP/2025/03/0098", "TPA_TPS", "SHORTFALL_RAISED"),
+   687→    auditLog: auditLog("MC/BP/2025/03/0098"),
+   688→    remarks: [
+   689→      { id: "r3", author: { name: "Smt. Meena Kulkarni", role: "TPS" }, text: "Structural certificate requires licensed SE stamp. Shortfall SF/2025/0142 raised.", timestamp: "2025-01-15T17:38:00", type: "INSTRUCTION" },
+   690→    ],
+   691→  },
+   692→  {
+   693→    id: "app-3",
+   694→    applicationNo: "MC/BP/2025/04/0201",
+   695→    applicant: { name: "Shri. Deepak Shahane", contact: "+91 98225 67890", email: "deepak.shahane@gmail.com", address: "Plot 7, Kothrud, Pune — 411038" },
+   696→    ltpId: "u-ltp-01",
+   697→    ltpName: "Ar. Vikram Deshpande",
+   698→    project: {
+   699→      name: "Shahane Bungalow — G+1",
+   700→      type: "BUILDING_PERMISSION",
+   701→      propertyType: "RESIDENTIAL",
+   702→      plotArea: 420,
+   703→      builtUpArea: 560,
+   704→      landUse: "Residential (R2)",
+   705→      ward: "Ward 22 — Kothrud",
+   706→      zone: "Zone II — South",
+   707→      surveyNo: "7/1, Kothrud",
+   708→      address: "Plot 7, Kothrud, Pune — 411038",
+   709→    },
+   710→    status: "PAYMENT_PENDING",
+   711→    currentStage: "PAYMENT",
+   712→    currentStageLabel: "Payment",
+   713→    submissionDate: "2025-01-11T11:00:00",
+   714→    lastUpdated: "2025-01-15T18:00:00",
+   715→    expectedSLA: "2025-01-30",
+   716→    priority: "NORMAL",
+   717→    progress: 38,
+   718→    fee: buildFee(560),
+   719→    payment: {
+   720→      id: "pay-3",
+   721→      transactionId: "",
+   722→      referenceNo: "",
+   723→      status: "PENDING",
+   724→      amount: 83960,
+   725→      method: "NETBANKING",
+   726→      gateway: "BillDesk (Sandbox)",
+   727→      verified: false,
+   728→    },
+   729→    drawings: buildDrawings(),
+   730→    scrutinyReport: buildScrutinyReport(3, true),
+   731→    documents: buildDocuments("verified"),
+   732→    shortfalls: [],
+   733→    workflowHistory: workflowHistory("MC/BP/2025/04/0201", "PAYMENT", "PAYMENT_PENDING"),
+   734→    auditLog: auditLog("MC/BP/2025/04/0201"),
+   735→    remarks: [],
+   736→  },
+   737→  {
+   738→    id: "app-4",
+   739→    applicationNo: "MC/BP/2025/01/0033",
+   740→    applicant: { name: "Smt. Sunita Kulkarni", contact: "+91 91450 33210", email: "sunita.k@gmail.com", address: "Plot 22, Kalyani Nagar, Pune — 411006" },
+   741→    ltpId: "u-ltp-01",
+   742→    ltpName: "Ar. Vikram Deshpande",
+   743→    project: {
+   744→      name: "Kulkarni Residence — Redevelopment",
+   745→      type: "REVISION_PERMISSION",
+   746→      propertyType: "RESIDENTIAL",
+   747→      plotArea: 600,
+   748→      builtUpArea: 980,
+   749→      landUse: "Residential (R1)",
+   750→      ward: "Ward 11 — Kalyani Nagar",
+   751→      zone: "Zone IV — West",
+   752→      surveyNo: "22, Kalyani Nagar",
+   753→      address: "Plot 22, Kalyani Nagar, Pune — 411006",
+   754→    },
+   755→    status: "APPROVED",
+   756→    currentStage: "FINAL_DECISION",
+   757→    currentStageLabel: "Final Decision",
+   758→    assignedOfficer: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
+   759→    submissionDate: "2024-12-18T10:00:00",
+   760→    lastUpdated: "2025-01-09T16:30:00",
+   761→    expectedSLA: "2025-01-17",
+   762→    priority: "NORMAL",
+   763→    progress: 100,
+   764→    fee: buildFee(980),
+   765→    payment: {
+   766→      id: "pay-4",
+   767→      transactionId: "TXN882190451200",
+   768→      referenceNo: "MAHGP/2024/548001",
+   769→      status: "SUCCESSFUL",
+   770→      amount: 142400,
+   771→      method: "CARD",
+   772→      gateway: "BillDesk (Sandbox)",
+   773→      initiatedAt: "2024-12-22T12:00:00",
+   774→      completedAt: "2024-12-22T12:03:00",
+   775→      receiptNo: "RCP/2024/12/00880",
+   776→      verified: true,
+   777→    },
+   778→    drawings: buildDrawings(),
+   779→    scrutinyReport: buildScrutinyReport(3, true),
+   780→    documents: buildDocuments("verified"),
+   781→    shortfalls: [],
+   782→    workflowHistory: workflowHistory("MC/BP/2025/01/0033", "FINAL_DECISION", "APPROVED"),
+   783→    auditLog: auditLog("MC/BP/2025/01/0033"),
+   784→    remarks: [
+   785→      { id: "r4", author: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, text: "Approved. Conditions: STP operational before occupancy; 10% area reserved for EWS.", timestamp: "2025-01-09T16:30:00", type: "DECISION" },
+   786→    ],
+   787→  },
+   788→  {
+   789→    id: "app-5",
+   790→    applicationNo: "MC/BP/2025/04/0212",
+   791→    applicant: { name: "Shri. Nikhil Tamhane", contact: "+91 99700 88112", email: "nikhil.tamhane@gmail.com", address: "Plot 3, Wakad, Pune — 411057" },
+   792→    ltpId: "u-ltp-01",
+   793→    ltpName: "Ar. Vikram Deshpande",
+   794→    project: {
+   795→      name: "Tamhane Row Houses (4 units)",
+   796→      type: "BUILDING_PERMISSION",
+   797→      propertyType: "RESIDENTIAL",
+   798→      plotArea: 780,
+   799→      builtUpArea: 1240,
+   800→      landUse: "Residential (R2)",
+   801→      ward: "Ward 27 — Wakad",
+   802→      zone: "Zone IV — West",
+   803→      surveyNo: "3, Wakad",
+   804→      address: "Plot 3, Wakad, Pune — 411057",
+   805→    },
+   806→    status: "SCRUTINY_FAILED",
+   807→    currentStage: "DRAWING_SCRUTINY",
+   808→    currentStageLabel: "Drawing Scrutiny",
+   809→    submissionDate: "2025-01-14T13:20:00",
+   810→    lastUpdated: "2025-01-14T13:22:00",
+   811→    expectedSLA: "2025-02-03",
+   812→    priority: "URGENT",
+   813→    progress: 12,
+   814→    drawings: [
+   815→      { id: "dw-5a", fileName: "RowHouse_v1.dwg", fileType: "DWG", fileSize: "6.2 MB", version: 1, uploadedAt: "2025-01-14T13:20:00", uploadedBy: "Ar. Vikram Deshpande", status: "SCRUTINY_FAILED", notes: "Failed — parking shortfall & FAR excess." },
+   816→    ],
+   817→    scrutinyReport: buildScrutinyReport(1, false),
+   818→    documents: buildDocuments("early"),
+   819→    shortfalls: [],
+   820→    workflowHistory: workflowHistory("MC/BP/2025/04/0212", "DRAWING_SCRUTINY", "SCRUTINY_FAILED"),
+   821→    auditLog: auditLog("MC/BP/2025/04/0212"),
+   822→    remarks: [],
+   823→  },
+   824→  {
+   825→    id: "app-6",
+   826→    applicationNo: "MC/BP/2025/04/0225",
+   827→    applicant: { name: "M/s Hillview Developers", contact: "+91 90110 22001", email: "admin@hillview.in", address: "Survey 41, Bavdhan, Pune — 411021" },
+   828→    ltpId: "u-ltp-01",
+   829→    ltpName: "Ar. Vikram Deshpande",
+   830→    project: {
+   831→      name: "Hillview Heights — Group Housing",
+   832→      type: "LAYOUT_APPROVAL",
+   833→      propertyType: "RESIDENTIAL",
+   834→      plotArea: 5400,
+   835→      builtUpArea: 12200,
+   836→      landUse: "Residential (R1)",
+   837→      ward: "Ward 19 — Bavdhan",
+   838→      zone: "Zone IV — West",
+   839→      surveyNo: "41, Bavdhan",
+   840→      address: "Survey 41, Bavdhan, Pune — 411021",
+   841→    },
+   842→    status: "DOCUMENTS_PENDING",
+   843→    currentStage: "DOCUMENTS",
+   844→    currentStageLabel: "Documents",
+   845→    assignedOfficer: { name: "Smt. Meena Kulkarni", role: "TPS" },
+   846→    submissionDate: "2025-01-10T09:00:00",
+   847→    lastUpdated: "2025-01-15T11:30:00",
+   848→    expectedSLA: "2025-02-02",
+   849→    priority: "HIGH",
+   850→    progress: 28,
+   851→    drawings: buildDrawings(),
+   852→    scrutinyReport: buildScrutinyReport(3, true),
+   853→    documents: buildDocuments("early"),
+   854→    shortfalls: [],
+   855→    workflowHistory: workflowHistory("MC/BP/2025/04/0225", "DOCUMENTS", "DOCUMENTS_PENDING"),
+   856→    auditLog: auditLog("MC/BP/2025/04/0225"),
+   857→    remarks: [],
+   858→  },
+   859→  {
+   860→    id: "app-7",
+   861→    applicationNo: "MC/BP/2025/04/0240",
+   862→    applicant: { name: "Shri. Prakash More", contact: "+91 98190 55612", email: "prakash.more@gmail.com", address: "Plot 9, Hadapsar, Pune — 411028" },
+   863→    ltpId: "u-ltp-01",
+   864→    ltpName: "Ar. Vikram Deshpande",
+   865→    project: {
+   866→      name: "More Industries — Small Scale Unit",
+   867→      type: "BUILDING_PERMISSION",
+   868→      propertyType: "INDUSTRIAL",
+   869→      plotArea: 900,
+   870→      builtUpArea: 1500,
+   871→      landUse: "Industrial (I1)",
+   872→      ward: "Ward 31 — Hadapsar",
+   873→      zone: "Zone I — East",
+   874→      surveyNo: "9, Hadapsar",
+   875→      address: "Plot 9, Hadapsar, Pune — 411028",
+   876→    },
+   877→    status: "DRAFT",
+   878→    currentStage: "APPLICATION_CREATED",
+   879→    currentStageLabel: "Application Created",
+   880→    submissionDate: "2025-01-16T15:00:00",
+   881→    lastUpdated: "2025-01-16T15:00:00",
+   882→    expectedSLA: "2025-02-15",
+   883→    priority: "NORMAL",
+   884→    progress: 5,
+   885→    drawings: [],
+   886→    documents: buildDocuments("early"),
+   887→    shortfalls: [],
+   888→    workflowHistory: workflowHistory("MC/BP/2025/04/0240", "APPLICATION_CREATED", "DRAFT"),
+   889→    auditLog: auditLog("MC/BP/2025/04/0240"),
+   890→    remarks: [],
+   891→  },
+   892→];
+   893→
+   894→// ============================================================
+   895→// NOTIFICATIONS
+   896→// ============================================================
+   897→export const NOTIFICATIONS: NotificationRecord[] = [
+   898→  { id: "n1", type: "APPLICATION_FORWARDED", title: "Application forwarded to ZAD/ZDD", message: "MC/BP/2025/04/0184 has been forwarded to Shri. Ramesh Iyer (ZDD) for review.", timestamp: "2025-01-16T11:00:00", read: false, applicationId: "app-1", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   899→  { id: "n2", type: "SHORTFALL_RAISED", title: "Shortfall raised — action required", message: "Shortfall SF/2025/0142 raised on MC/BP/2025/03/0098. Structural certificate needs SE stamp.", timestamp: "2025-01-15T17:38:00", read: false, applicationId: "app-2", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   900→  { id: "n3", type: "FEE_GENERATED", title: "Fee generated", message: "Fee of ₹2,67,850 generated for MC/BP/2025/04/0184. Proceed to payment.", timestamp: "2025-01-14T18:00:00", read: true, applicationId: "app-1", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   901→  { id: "n4", type: "SCRUTINY_PASSED", title: "Drawing scrutiny passed", message: "Scrutiny of v3 drawing for MC/BP/2025/04/0184 passed with 2 advisories.", timestamp: "2025-01-12T16:05:00", read: true, applicationId: "app-1", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   902→  { id: "n5", type: "SCRUTINY_FAILED", title: "Scrutiny failed — re-upload required", message: "MC/BP/2025/04/0212 failed scrutiny: front setback non-compliant.", timestamp: "2025-01-14T13:22:00", read: false, applicationId: "app-5", smsSent: true, smsStatus: "FAILED", channel: "IN_APP" },
+   903→  { id: "n6", type: "PAYMENT_SUCCESSFUL", title: "Payment successful", message: "Payment of ₹2,67,850 received for MC/BP/2025/04/0184. Receipt RCP/2025/04/00921 generated.", timestamp: "2025-01-15T12:09:00", read: true, applicationId: "app-1", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   904→  { id: "n7", type: "APPLICATION_APPROVED", title: "Application approved", message: "MC/BP/2025/01/0033 has been approved by the Commissioner.", timestamp: "2025-01-09T16:30:00", read: true, applicationId: "app-4", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP" },
+   905→  { id: "n8", type: "DOCUMENTS_REQUIRED", title: "Documents pending verification", message: "MC/BP/2025/04/0225 awaiting upload of Fire NOC and Environmental Clearance.", timestamp: "2025-01-15T11:30:00", read: true, applicationId: "app-6", smsSent: false, channel: "IN_APP" },
+   906→];
+   907→
+   908→// ============================================================
+   909→// SMS TEMPLATES
+   910→// ============================================================
+   911→export const SMS_TEMPLATES = [
+   912→  { id: "t1", code: "SMS_APP_SUBMIT", name: "Application Submitted", template: "Dear {name}, your building permission application {appNo} has been submitted successfully. Track at municipality.gov.in/track — Municipal Authority.", type: "TRANSACTIONAL", active: true },
+   913→  { id: "t2", code: "SMS_SCRUTINY_FAIL", name: "Scrutiny Failed", template: "Dear {name}, scrutiny for {appNo} has FAILED. Please re-upload corrected drawings. Ref: {reportNo}.", type: "TRANSACTIONAL", active: true },
+   914→  { id: "t3", code: "SMS_SCRUTINY_PASS", name: "Scrutiny Passed", template: "Dear {name}, scrutiny for {appNo} has PASSED. Upload required documents to proceed.", type: "TRANSACTIONAL", active: true },
+   915→  { id: "t4", code: "SMS_FEE_GEN", name: "Fee Generated", template: "Dear {name}, fee of ₹{amount} generated for {appNo}. Pay online within 15 days.", type: "TRANSACTIONAL", active: true },
+   916→  { id: "t5", code: "SMS_PAY_OK", name: "Payment Successful", template: "Dear {name}, payment of ₹{amount} received for {appNo}. Receipt {receiptNo}. Approval workflow initiated.", type: "TRANSACTIONAL", active: true },
+   917→  { id: "t6", code: "SMS_SHORTFALL", name: "Shortfall Raised", template: "Dear {name}, a shortfall has been raised on {appNo}. Respond within {dueDate} to avoid delay.", type: "TRANSACTIONAL", active: true },
+   918→  { id: "t7", code: "SMS_FORWARD", name: "Application Forwarded", template: "Dear {name}, {appNo} forwarded to {stage}. Current status: under review.", type: "TRANSACTIONAL", active: true },
+   919→  { id: "t8", code: "SMS_APPROVED", name: "Application Approved", template: "Dear {name}, your application {appNo} has been APPROVED. Permit no: {permitNo}.", type: "TRANSACTIONAL", active: true },
+   920→  { id: "t9", code: "SMS_REJECTED", name: "Application Rejected", template: "Dear {name}, your application {appNo} has been REJECTED. Reason: {reason}.", type: "TRANSACTIONAL", active: true },
+   921→];
+   922→
+   923→// ============================================================
+   924→// OFFICER ASSIGNMENTS (for officer portal)
+   925→// ============================================================
+   926→export function applicationsForRole(role: RoleKey): Application[] {
+   927→  if (role === "TPS" || role === "TPA") {
+   928→    return APPLICATIONS.filter((a) => ["UNDER_REVIEW", "SHORTFALL_RAISED", "DOCUMENTS_PENDING"].includes(a.status) && (a.currentStage === "TPA_TPS" || a.currentStage === "DOCUMENTS" || a.currentStage === "DRAWING_SCRUTINY"));
+   929→  }
+   930→  if (role === "ZAD" || role === "ZDD") {
+   931→    return APPLICATIONS.filter((a) => a.currentStage === "ZAD_ZDD");
+   932→  }
+   933→  if (role === "ZJD") {
+   934→    return APPLICATIONS.filter((a) => a.currentStage === "ZJD");
+   935→  }
+   936→  if (role === "DIRECTOR_DP") {
+   937→    return APPLICATIONS.filter((a) => a.currentStage === "DIRECTOR_DP");
+   938→  }
+   939→  if (role === "ADDL_COMMISSIONER") {
+   940→    return APPLICATIONS.filter((a) => a.currentStage === "ADDL_COMMISSIONER");
+   941→  }
+   942→  if (role === "COMMISSIONER") {
+   943→    return APPLICATIONS.filter((a) => a.currentStage === "COMMISSIONER");
+   944→  }
+   945→  return [];
+   946→}
+   947→
+   948→export function resolveShortfallList(): Shortfall[] {
+   949→  return APPLICATIONS.flatMap((a) => a.shortfalls);
+   950→}
+   951→
