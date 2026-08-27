@@ -7,6 +7,14 @@ import { ROLES } from "@/data/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -16,7 +24,6 @@ import {
 } from "@/components/ui/card";
 import {
   Building2,
-  ShieldCheck,
   Mail,
   Lock,
   ArrowRight,
@@ -28,10 +35,8 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Zap,
-  Award,
-  Clock,
-  FileCheck2,
+  ShieldCheck,
+  ChevronDown,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -40,12 +45,10 @@ import {
   InputOTPSlot,
   InputOTPSeparator,
 } from "@/components/ui/input-otp";
-import { RoleBadge } from "@/components/design-system/badges";
+import type { RoleKey } from "@/types";
 
 export function AuthScreen() {
-  const { authStage, setAuthStage, pendingEmail, setPendingEmail, login, loginAsRole } =
-    useAppStore();
-  const { toast } = useToast();
+  const { authStage, setAuthStage, pendingEmail, setPendingEmail } = useAppStore();
 
   if (authStage === "forgot") return <ForgotPassword onBack={() => setAuthStage("login")} />;
   if (authStage === "otp")
@@ -60,6 +63,32 @@ export function AuthScreen() {
 }
 
 // ============================================================
+// SHARED BRANDING
+// ============================================================
+function BrandLogo({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div
+        className={cn(
+          "flex items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm",
+          compact ? "size-9" : "size-10"
+        )}
+      >
+        <Building2 className={compact ? "size-5" : "size-5.5"} />
+      </div>
+      <div className="leading-tight">
+        <p className={cn("font-semibold tracking-tight", compact ? "text-sm" : "text-base")}>
+          LTP Approval
+        </p>
+        <p className="text-[11px] text-muted-foreground">
+          Building Permit Management System
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
 // LOGIN
 // ============================================================
 function LoginForm() {
@@ -68,223 +97,327 @@ function LoginForm() {
   const [email, setEmail] = React.useState("ltp@demo.gov.in");
   const [password, setPassword] = React.useState("demo1234");
   const [showPw, setShowPw] = React.useState(false);
+  const [remember, setRemember] = React.useState(true);
   const [error, setError] = React.useState("");
+  const [emailError, setEmailError] = React.useState("");
+  const [pwError, setPwError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [demoRole, setDemoRole] = React.useState<string>("");
+
+  function validate(): boolean {
+    let ok = true;
+    setEmailError("");
+    setPwError("");
+    if (!email.trim()) {
+      setEmailError("Please enter your registered email address.");
+      ok = false;
+    }
+    if (!password) {
+      setPwError("Please enter your password.");
+      ok = false;
+    }
+    return ok;
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!validate()) return;
     setError("");
     setLoading(true);
     setTimeout(() => {
       const res = login(email, password);
       setLoading(false);
       if (!res.ok) {
-        setError(res.error ?? "Login failed");
+        setError(res.error ?? "Incorrect email or password.");
         return;
       }
       toast({
         title: "Welcome back",
-        description: "You have signed in to the LTP Approval Workflow Portal.",
+        description: "You have signed in to LTP Approval.",
       });
     }, 600);
   }
 
+  function handleDemoRoleSelect(value: string) {
+    setDemoRole(value);
+    const role = value as RoleKey;
+    const cred = DEMO_CREDENTIALS.find((c) => c.role === role);
+    if (cred) {
+      setEmail(cred.email);
+      setPassword(cred.password);
+      toast({
+        title: "Demo credentials loaded",
+        description: `${ROLES[role].fullName} — click Sign In to continue.`,
+      });
+    }
+  }
+
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden">
-      {/* Left brand panel */}
-      <div className="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-sidebar p-10 text-sidebar-foreground lg:flex">
-        <div className="absolute inset-0 bg-grid opacity-[0.07]" />
-        <div className="absolute -right-24 -top-24 size-96 rounded-full bg-sidebar-primary/20 blur-3xl" />
-        <div className="absolute -bottom-32 -left-20 size-96 rounded-full bg-primary/10 blur-3xl" />
+    <div className="relative flex min-h-screen w-full overflow-hidden bg-background">
+      {/* ---------- LEFT: branding panel (desktop only) ---------- */}
+      <aside className="relative hidden w-[42%] flex-col justify-between overflow-hidden bg-sidebar px-10 py-10 text-sidebar-foreground lg:flex xl:w-[40%]">
+        <div className="absolute inset-0 bg-grid opacity-[0.06]" />
+        <div className="absolute -right-20 -top-20 size-72 rounded-full bg-sidebar-primary/15 blur-3xl" />
 
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground shadow-lg">
-            <Building2 className="size-6" />
-          </div>
-          <div>
-            <p className="text-base font-semibold leading-tight">Municipal Authority</p>
-            <p className="text-xs text-sidebar-foreground/60">Directorate of Town & Country Planning</p>
-          </div>
-        </div>
-
-        <div className="relative z-10 space-y-6">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-sidebar-border bg-sidebar-accent/40 px-3 py-1 text-xs">
-              <ShieldCheck className="size-3.5 text-sidebar-primary" />
-              <span className="text-sidebar-foreground/80">Government of India · e-Governance Initiative</span>
-            </div>
-            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-balance">
-              Integrated Building &amp; Project Approval Workflow Portal
-            </h1>
-            <p className="max-w-md text-sm leading-relaxed text-sidebar-foreground/70">
-              Submit applications, upload drawings, complete scrutiny, pay fees and
-              track approvals through a transparent multi-level workflow — for Licensed
-              Technical Persons and municipal officers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 max-w-md">
-            {[
-              { icon: Award, label: "7 approval stages", desc: "LTP → Commissioner" },
-              { icon: FileCheck2, label: "Auto-scrutiny", desc: "DCR rule engine" },
-              { icon: Clock, label: "SLA tracking", desc: "Real-time visibility" },
-              { icon: ShieldCheck, label: "Audit-ready", desc: "Full traceability" },
-            ].map((f) => (
-              <div
-                key={f.label}
-                className="rounded-xl border border-sidebar-border bg-sidebar-accent/30 p-3 backdrop-blur"
-              >
-                <f.icon className="size-5 text-sidebar-primary" />
-                <p className="mt-2 text-sm font-medium">{f.label}</p>
-                <p className="text-[11px] text-sidebar-foreground/60">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex items-center gap-4 text-[11px] text-sidebar-foreground/50">
-          <span>v2.4.1 · Build 2025.01</span>
-          <span>·</span>
-          <span>NIC-compliant secure portal</span>
-        </div>
-      </div>
-
-      {/* Right form panel */}
-      <div className="flex w-full flex-col items-center justify-center bg-background px-4 py-10 lg:w-1/2">
-        <div className="w-full max-w-md space-y-6">
-          <div className="lg:hidden flex items-center gap-2.5">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        {/* Top: logo */}
+        <div className="relative z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
               <Building2 className="size-5" />
             </div>
-            <div>
-              <p className="text-sm font-semibold">Municipal Authority</p>
-              <p className="text-xs text-muted-foreground">Approval Workflow Portal</p>
+            <div className="leading-tight">
+              <p className="text-base font-semibold tracking-tight">LTP Approval</p>
+              <p className="text-[11px] text-sidebar-foreground/60">
+                Building Permit Management System
+              </p>
             </div>
           </div>
+        </div>
 
-          <div className="space-y-1.5">
-            <h2 className="text-2xl font-semibold tracking-tight">Sign in to your account</h2>
-            <p className="text-sm text-muted-foreground">
-              Use your registered credentials to access the portal.
+        {/* Center: branding */}
+        <div className="relative z-10 space-y-5">
+          <div className="inline-flex items-center gap-2 rounded-full border border-sidebar-border bg-sidebar-accent/40 px-3 py-1 text-[11px]">
+            <ShieldCheck className="size-3.5 text-sidebar-primary" />
+            <span className="text-sidebar-foreground/80">Digital Government Service</span>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold leading-snug tracking-tight text-balance xl:text-3xl">
+              Online Building Permit Application &amp; Approval Portal
+            </h1>
+            <p className="max-w-sm text-sm leading-relaxed text-sidebar-foreground/65">
+              A unified digital platform for Licensed Technical Persons and
+              approval officers to submit, scrutinise and approve building permit
+              applications.
             </p>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-xs font-medium">
-                Email address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@gov.in"
-                  className="h-10 pl-9"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-xs font-medium">
-                  Password
-                </Label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPendingEmail(email);
-                    setAuthStage("forgot");
-                  }}
-                  className="text-xs font-medium text-primary hover:underline"
-                >
-                  Forgot password?
-                </button>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type={showPw ? "text" : "password"}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="h-10 pl-9 pr-9"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-                <AlertCircle className="size-4 shrink-0" />
-                {error}
-              </div>
-            )}
-
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" /> Signing in…
-                </>
-              ) : (
-                <>
-                  Sign in <ArrowRight className="size-4" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Demo role quick access */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-dashed border-border" />
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-background px-3 text-[11px] uppercase tracking-wider text-muted-foreground">
-                <Zap className="mr-1 inline size-3 text-amber-500" />
-                Quick demo role access
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            {DEMO_CREDENTIALS.slice(0, 6).map((c) => (
-              <button
-                key={c.role}
-                onClick={() => loginAsRole(c.role)}
-                className="group flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-left transition-all hover:border-primary/40 hover:shadow-gov"
-              >
-                <span className="flex-1 min-w-0">
-                  <span className="block truncate text-xs font-medium text-foreground">
-                    {ROLES[c.role].title}
-                  </span>
-                  <span className="block truncate text-[10px] text-muted-foreground">
-                    {c.email}
-                  </span>
-                </span>
-                <ArrowRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </button>
-            ))}
-          </div>
-
-          <p className="text-center text-[11px] leading-relaxed text-muted-foreground">
-            By signing in, you agree to the terms of use and acknowledge that all actions
-            are recorded for audit purposes. This is a demonstration portal — no real
-            payments or SMS are processed.
-          </p>
         </div>
-      </div>
+
+        {/* Bottom: minimal footer */}
+        <div className="relative z-10 space-y-1">
+          <div className="h-px w-12 rounded-full bg-sidebar-primary/40" />
+          <p className="text-[11px] text-sidebar-foreground/50">
+            LTP Approval · Building Permit Management System
+          </p>
+          <p className="text-[10px] text-sidebar-foreground/40">© 2026</p>
+        </div>
+      </aside>
+
+      {/* ---------- RIGHT: login card ---------- */}
+      <main className="flex w-full flex-col lg:w-[58%] xl:w-[60%]">
+        <div className="flex min-h-screen flex-col">
+          {/* Mobile branding header */}
+          <div className="border-b border-border bg-sidebar px-5 py-3.5 lg:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
+                <Building2 className="size-5" />
+              </div>
+              <div className="leading-tight">
+                <p className="text-sm font-semibold text-sidebar-foreground">LTP Approval</p>
+                <p className="text-[10px] text-sidebar-foreground/60">
+                  Building Permit Management System
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Login card */}
+          <div className="flex flex-1 items-center justify-center px-5 py-8 sm:px-8">
+            <div className="w-full max-w-[400px] space-y-6">
+              {/* Header */}
+              <div className="space-y-1.5">
+                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                  Welcome back
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Sign in to your account to continue.
+                </p>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+                {/* Email / Mobile */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-medium">
+                    Email / Mobile Number
+                  </Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="email"
+                      type="text"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError("");
+                        setError("");
+                      }}
+                      placeholder="Enter your registered email or mobile number"
+                      className={cn(
+                        "h-10 pl-9",
+                        emailError && "border-destructive focus-visible:ring-destructive/20"
+                      )}
+                      aria-invalid={!!emailError}
+                      autoComplete="username"
+                    />
+                  </div>
+                  {emailError && (
+                    <p className="flex items-center gap-1 text-[11px] text-destructive">
+                      <AlertCircle className="size-3" />
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs font-medium">
+                    Password
+                  </Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      id="password"
+                      type={showPw ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPwError("");
+                        setError("");
+                      }}
+                      placeholder="Enter password"
+                      className={cn(
+                        "h-10 pl-9 pr-9",
+                        pwError && "border-destructive focus-visible:ring-destructive/20"
+                      )}
+                      aria-invalid={!!pwError}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((s) => !s)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showPw ? "Hide password" : "Show password"}
+                    >
+                      {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                  {pwError && (
+                    <p className="flex items-center gap-1 text-[11px] text-destructive">
+                      <AlertCircle className="size-3" />
+                      {pwError}
+                    </p>
+                  )}
+                </div>
+
+                {/* Remember + Forgot */}
+                <div className="flex items-center justify-between">
+                  <label
+                    htmlFor="remember"
+                    className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground select-none"
+                  >
+                    <Checkbox
+                      id="remember"
+                      checked={remember}
+                      onCheckedChange={(v) => setRemember(v === true)}
+                    />
+                    Remember me
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPendingEmail(email);
+                      setAuthStage("forgot");
+                    }}
+                    className="text-xs font-medium text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+
+                {/* General error */}
+                {error && (
+                  <div
+                    role="alert"
+                    className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
+                  >
+                    <AlertCircle className="size-4 shrink-0" />
+                    {error}
+                  </div>
+                )}
+
+                {/* Submit */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Signing in…
+                    </>
+                  ) : (
+                    <>
+                      Sign In <ArrowRight className="size-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              {/* Security note */}
+              <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+                <ShieldCheck className="size-3" />
+                Secure access to the Building Permit Management System
+              </p>
+
+              {/* Demo / Development Access */}
+              <div className="space-y-2.5 rounded-lg border border-dashed border-border bg-muted/20 p-3.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-foreground">Demo access</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      Demo / Development Access
+                    </p>
+                  </div>
+                </div>
+                <Select value={demoRole} onValueChange={handleDemoRoleSelect}>
+                  <SelectTrigger className="h-9 w-full text-xs">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEMO_CREDENTIALS.map((c) => (
+                      <SelectItem key={c.role} value={c.role} className="text-xs">
+                        <span className="font-medium">{ROLES[c.role].title}</span>
+                        <span className="text-muted-foreground"> — {c.label.split("—")[0].trim()}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {demoRole && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => loginAsRole(demoRole as RoleKey)}
+                  >
+                    Sign in as {ROLES[demoRole as RoleKey].title}
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="border-t border-border pt-4 text-center">
+                <p className="text-[11px] text-muted-foreground">
+                  LTP Approval · Building Permit Management System
+                </p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground/70">© 2026</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
@@ -465,10 +598,10 @@ function OtpScreen({ email, onBack }: { email: string; onBack: () => void }) {
                 <>
                   <Loader2 className="size-4 animate-spin" /> Verifying…
                 </>
-              ) : (
-                <>Verify &amp; continue</>
-              )}
-            </Button>
+                ) : (
+                  <>Verify &amp; continue</>
+                )}
+              </Button>
           </form>
           <button
             onClick={onBack}

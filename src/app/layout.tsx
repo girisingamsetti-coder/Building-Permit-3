@@ -14,18 +14,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LTP Approval Workflow Portal | Municipal Authority",
+  title: "LTP Approval — Building Permit Management System",
   description:
-    "Integrated online approval workflow portal for Licensed Technical Persons (LTP) — application submission, drawing scrutiny, fee payment and multi-level building approval workflow.",
+    "Online Building Permit Application & Approval Portal for Licensed Technical Persons (LTP) and approval officers.",
   keywords: [
-    "LTP Portal",
-    "Building Approval",
-    "Municipal Authority",
+    "LTP Approval",
+    "Building Permit Management System",
+    "Building Permit",
     "Approval Workflow",
     "Scrutiny",
     "Government e-Service",
   ],
-  authors: [{ name: "Municipal Authority Digital Services" }],
+  authors: [{ name: "LTP Approval" }],
   icons: {
     icon: "/logo.svg",
   },
