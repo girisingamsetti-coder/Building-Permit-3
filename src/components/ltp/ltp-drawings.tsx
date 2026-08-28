@@ -9,6 +9,7 @@ import {
   EmptyState,
   InfoGrid,
 } from "@/components/design-system/layout";
+import { PageBackButton } from "@/components/design-system/back-button";
 import {
   StatusBadge,
   SeverityBadge,
@@ -92,7 +93,8 @@ export function LtpDrawings() {
   if (!app) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings" }]} />
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+      <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings" }]} />
         <EmptyState icon={FileWarning} title="No applications" description="Create an application first to upload drawings." action={<Button size="sm" onClick={() => navigate("ltp-create-application")}>New Application</Button>} />
       </div>
     );
@@ -142,6 +144,7 @@ export function LtpDrawings() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title="Drawings & Scrutiny"
         description="Upload, version and scrutinise your project drawings against Development Control Regulations."

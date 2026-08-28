@@ -41,22 +41,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col min-w-0">
         <Topbar />
         <main className="flex flex-1 flex-col overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 animate-fade-in-up">
+          <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 animate-fade-in-up">
             {children}
           </div>
           <footer className="mt-auto border-t border-border bg-muted/30 px-4 py-3 sm:px-6 lg:px-8">
-            <div className="mx-auto flex w-full max-w-[1600px] flex-col items-center justify-between gap-2 text-[11px] text-muted-foreground sm:flex-row">
+            <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center justify-between gap-2 text-[11px] text-muted-foreground sm:flex-row">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-foreground/70">Municipal Authority — LTP Approval Workflow Portal</span>
+                <span className="font-medium text-foreground/70">LTP Approval · Building Permit Management System</span>
                 <span className="hidden sm:inline">·</span>
-                <span className="hidden sm:inline">© 2025 Directorate of Town &amp; Country Planning</span>
+                <span className="hidden sm:inline">© 2026</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="inline-flex items-center gap-1"><span className="size-1.5 rounded-full bg-success" /> All systems operational</span>
                 <span className="hidden sm:inline">·</span>
                 <span className="hidden sm:inline">v2.4.1</span>
-                <span className="hidden sm:inline">·</span>
-                <span className="hidden sm:inline">NIC e-Governance</span>
               </div>
             </div>
           </footer>

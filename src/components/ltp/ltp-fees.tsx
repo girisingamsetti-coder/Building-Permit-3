@@ -9,6 +9,7 @@ import {
   EmptyState,
   InfoGrid,
 } from "@/components/design-system/layout";
+import { PageBackButton } from "@/components/design-system/back-button";
 import { StatusBadge, PaymentStatusBadge } from "@/components/design-system/badges";
 import { formatDateTime, formatDate, formatINR, timeAgo } from "@/components/design-system/workflow";
 import { Button } from "@/components/ui/button";
@@ -119,6 +120,7 @@ export function LtpFees() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title="Fee Details"
         description="Invoice-style breakdown of all applicable fees and charges."
@@ -292,6 +294,7 @@ export function LtpPayment() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title="Payment"
         description="Secure online payment for your application fees."
@@ -480,6 +483,7 @@ export function LtpReceipt() {
   if (!app || !app.payment || app.payment.status !== "SUCCESS") {
     return (
       <div className="space-y-6">
+        <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
         <PageHeader title="Payment Receipt" icon={ScrollText} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]} />
         <EmptyState icon={ScrollText} title="No receipt available" description="Receipts are generated after a successful payment." action={<Button size="sm" onClick={() => navigate("ltp-payment")}>Go to payment</Button>} />
       </div>
@@ -489,6 +493,7 @@ export function LtpReceipt() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title="Payment Receipt"
         description="Official receipt for your payment transaction."

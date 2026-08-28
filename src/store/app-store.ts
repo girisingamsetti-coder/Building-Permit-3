@@ -84,6 +84,8 @@ interface AppState {
   theme: "light" | "dark";
   // processing flags
   processingAppIds: string[]; // apps currently being processed (scrutiny/payment)
+  // navigation history (for smart back button)
+  viewHistory: ViewKey[];
 
   // ---- auth actions ----
   login: (email: string, password: string) => { ok: boolean; error?: string };
@@ -95,6 +97,7 @@ interface AppState {
   // ---- navigation ----
   navigate: (view: ViewKey) => void;
   openApplication: (id: string, view?: ViewKey) => void;
+  goBack: () => void;
   setSidebarCollapsed: (v: boolean) => void;
   setMobileNavOpen: (v: boolean) => void;
   toggleTheme: () => void;
@@ -226,6 +229,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   mobileNavOpen: false,
   theme: "light",
   processingAppIds: [],
+  viewHistory: [],
 
   // ---- AUTH ----
   login: (email, password) => {
@@ -234,25 +238,36 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
     const user = USERS.find((u) => u.role === cred.role)!;
     const portal = portalForRole(cred.role);
-    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal });
+    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
     return { ok: true };
   },
 
   loginAsRole: (role) => {
     const user = USERS.find((u) => u.role === role)!;
     const portal = portalForRole(role);
-    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal });
+    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
   },
 
   logout: () =>
-    set({ user: null, isAuthenticated: false, authStage: "login", view: "login", selectedApplicationId: null, mobileNavOpen: false }),
+    set({ user: null, isAuthenticated: false, authStage: "login", view: "login", selectedApplicationId: null, mobileNavOpen: false, viewHistory: [] }),
 
   setAuthStage: (authStage) => set({ authStage }),
   setPendingEmail: (pendingEmail) => set({ pendingEmail }),
 
   // ---- NAVIGATION ----
-  navigate: (view) => set({ view, mobileNavOpen: false }),
-  openApplication: (id, view) => set({ selectedApplicationId: id, view: view ?? "ltp-application-details" }),
+  navigate: (view) => set((s) => ({ view, mobileNavOpen: false, viewHistory: [...s.viewHistory, s.view].slice(-20) })),
+  openApplication: (id, view) => set((s) => ({
+    selectedApplicationId: id,
+    view: view ?? "ltp-application-details",
+    mobileNavOpen: false,
+    viewHistory: [...s.viewHistory, s.view].slice(-20),
+  })),
+  goBack: () => set((s) => {
+    if (s.viewHistory.length === 0) return {};
+    const history = [...s.viewHistory];
+    const previous = history.pop()!;
+    return { view: previous, viewHistory: history, mobileNavOpen: false };
+  }),
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
   setMobileNavOpen: (mobileNavOpen) => set({ mobileNavOpen }),
   toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),

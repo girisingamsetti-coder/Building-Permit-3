@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import { useAppStore, useVisibleApplications } from "@/store/app-store";
 import {
   PageHeader,
-  StatCard,
   SectionCard,
   EmptyState,
 } from "@/components/design-system/layout";
+import { KpiCard } from "@/components/design-system/kpi-card";
 import {
   StatusBadge,
   PriorityBadge,
@@ -21,7 +21,6 @@ import {
   timeAgo,
 } from "@/components/design-system/workflow";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,8 +44,8 @@ import {
   ChevronRight,
   CircleDollarSign,
   Activity,
+  FileText,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import type { Application } from "@/types";
 
 export function LtpDashboard() {
@@ -70,6 +69,7 @@ export function LtpDashboard() {
     "DRAWING_REUPLOAD_REQUIRED",
   ] as const;
 
+  // Derive all stats from the same applications dataset (single source of truth)
   const stats = {
     total: apps.length,
     draft: apps.filter((a) => a.status === "DRAFT").length,
@@ -106,21 +106,68 @@ export function LtpDashboard() {
         }
       />
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-        <StatCard label="Total Applications" value={stats.total} icon={FileStack} accent="primary" onClick={() => navigate("ltp-applications")} />
-        <StatCard label="Drafts" value={stats.draft} icon={Inbox} accent="info" />
-        <StatCard label="Under Review" value={stats.underReview} icon={Clock} accent="info" />
-        <StatCard label="Action Required" value={stats.action} icon={AlertTriangle} accent="warning" onClick={() => navigate("ltp-applications")} />
-        <StatCard label="Approved" value={stats.approved} icon={CheckCircle2} accent="success" />
-        <StatCard label="Shortfalls" value={stats.shortfalls} icon={FileWarning} accent="warning" onClick={() => navigate("ltp-shortfalls")} />
-        <StatCard label="Pending Payments" value={stats.pendingPayment} icon={CreditCard} accent="amber" onClick={() => navigate("ltp-payment")} />
+      {/* ===== KPI Cards — responsive grid =====
+           Desktop (xl+): 7 columns
+           Large (lg): 4 columns
+           Tablet (sm): 2 columns
+           Mobile: 2 columns (compact) */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+        <KpiCard
+          label="Total Applications"
+          value={stats.total}
+          icon={FileStack}
+          accent="primary"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiCard
+          label="Drafts"
+          value={stats.draft}
+          icon={Inbox}
+          accent="info"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiCard
+          label="Under Review"
+          value={stats.underReview}
+          icon={Clock}
+          accent="teal"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiCard
+          label="Action Required"
+          value={stats.action}
+          icon={AlertTriangle}
+          accent="amber"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiCard
+          label="Approved"
+          value={stats.approved}
+          icon={CheckCircle2}
+          accent="success"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiCard
+          label="Shortfalls"
+          value={stats.shortfalls}
+          icon={FileWarning}
+          accent="danger"
+          onClick={() => navigate("ltp-shortfalls")}
+        />
+        <KpiCard
+          label="Pending Payments"
+          value={stats.pendingPayment}
+          icon={CreditCard}
+          accent="orange"
+          onClick={() => navigate("ltp-payment")}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Left col (2/3) */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Action required */}
+      {/* ===== Main + Right Rail grid (72% / 28%) ===== */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
+        {/* ===== Main content ===== */}
+        <div className="space-y-6 min-w-0">
+          {/* Action Required */}
           <SectionCard
             title="Action Required"
             description="Applications that need your immediate attention"
@@ -139,14 +186,14 @@ export function LtpDashboard() {
                   <li key={a.id}>
                     <button
                       onClick={() => openApplication(a.id)}
-                      className="flex w-full items-center gap-3 py-3 text-left transition-colors hover:bg-muted/40"
+                      className="flex w-full items-center gap-3 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none"
                     >
                       <div
                         className={cn(
                           "flex size-10 shrink-0 items-center justify-center rounded-lg",
                           (a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED") && "bg-destructive/10 text-destructive",
                           a.status === "SHORTFALL_RAISED" && "bg-warning/15 text-warning-foreground",
-                          a.status === "PAYMENT_PENDING" && "bg-amber-500/15 text-amber-600",
+                          a.status === "PAYMENT_PENDING" && "bg-orange-500/15 text-orange-600",
                           a.status === "DOCUMENT_UPLOAD_PENDING" && "bg-info/10 text-info"
                         )}
                       >
@@ -157,10 +204,10 @@ export function LtpDashboard() {
                       </div>
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-sm font-medium truncate">{a.applicationNo}</p>
+                          <p className="font-mono text-xs font-semibold text-foreground">{a.applicationNo}</p>
                           <StatusBadge status={a.status} showIcon={false} />
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{a.project.name}</p>
+                        <p className="text-sm font-medium truncate">{a.project.name}</p>
                         <p className="text-[11px] text-muted-foreground">
                           {(a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED") && "Re-upload corrected drawings to proceed"}
                           {a.status === "SHORTFALL_RAISED" && `${a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) awaiting your response`}
@@ -168,8 +215,8 @@ export function LtpDashboard() {
                           {a.status === "DOCUMENT_UPLOAD_PENDING" && "Upload remaining required documents"}
                         </p>
                       </div>
-                      <div className="hidden sm:flex flex-col items-end gap-1">
-                        <span className="text-[11px] text-muted-foreground">Updated {timeAgo(a.lastUpdated)}</span>
+                      <div className="hidden sm:flex flex-col items-end gap-1 shrink-0">
+                        <span className="text-[11px] text-muted-foreground whitespace-nowrap">Updated {timeAgo(a.lastUpdated)}</span>
                         <ArrowRight className="size-4 text-muted-foreground" />
                       </div>
                     </button>
@@ -179,7 +226,7 @@ export function LtpDashboard() {
             )}
           </SectionCard>
 
-          {/* Recent applications */}
+          {/* Recent Applications */}
           <SectionCard
             title="Recent Applications"
             description="Your most recently updated applications"
@@ -190,54 +237,74 @@ export function LtpDashboard() {
               </Button>
             }
           >
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                    <th className="pb-2 pr-3 font-medium">Application No.</th>
-                    <th className="pb-2 pr-3 font-medium">Project</th>
-                    <th className="pb-2 pr-3 font-medium">Status</th>
-                    <th className="pb-2 pr-3 font-medium">Stage</th>
-                    <th className="pb-2 pr-3 font-medium">Updated</th>
-                    <th className="pb-2 font-medium text-right">Action</th>
+                    <th className="pb-2 pr-3 font-medium min-w-[120px]">Application No.</th>
+                    <th className="pb-2 pr-3 font-medium min-w-[180px]">Project</th>
+                    <th className="pb-2 pr-3 font-medium min-w-[110px]">Status</th>
+                    <th className="pb-2 pr-3 font-medium min-w-[120px]">Stage</th>
+                    <th className="pb-2 pr-3 font-medium whitespace-nowrap">Updated</th>
+                    <th className="pb-2 font-medium text-right w-16">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {recent.map((a) => (
-                    <tr key={a.id} className="group transition-colors hover:bg-muted/40">
-                      <td className="py-2.5 pr-3">
-                        <button
-                          onClick={() => openApplication(a.id)}
-                          className="font-mono text-xs font-medium text-primary hover:underline"
-                        >
-                          {a.applicationNo}
-                        </button>
+                    <tr
+                      key={a.id}
+                      onClick={() => openApplication(a.id)}
+                      className="group cursor-pointer transition-colors hover:bg-muted/40"
+                    >
+                      <td className="py-3 pr-3">
+                        <p className="font-mono text-xs font-semibold text-primary group-hover:underline">{a.applicationNo}</p>
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                           <MapPin className="size-2.5" /> {a.project.ward}
                         </div>
                       </td>
-                      <td className="py-2.5 pr-3 max-w-[200px]">
+                      <td className="py-3 pr-3 max-w-[200px]">
                         <p className="truncate text-xs font-medium">{a.project.name}</p>
                         <p className="text-[10px] text-muted-foreground">{a.project.propertyType.replace("_", " ").toLowerCase()}</p>
                       </td>
-                      <td className="py-2.5 pr-3"><StatusBadge status={a.status} showIcon={false} /></td>
-                      <td className="py-2.5 pr-3">
-                        <span className="text-xs">{a.currentStageLabel}</span>
-                      </td>
-                      <td className="py-2.5 pr-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(a.lastUpdated)}</td>
-                      <td className="py-2.5 text-right">
-                        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => openApplication(a.id)}>
-                          Open <ArrowRight className="size-3" />
-                        </Button>
+                      <td className="py-3 pr-3"><StatusBadge status={a.status} showIcon={false} /></td>
+                      <td className="py-3 pr-3"><span className="text-xs">{a.currentStageLabel}</span></td>
+                      <td className="py-3 pr-3 text-xs text-muted-foreground whitespace-nowrap">{timeAgo(a.lastUpdated)}</td>
+                      <td className="py-3 text-right">
+                        <ArrowRight className="size-4 text-muted-foreground inline group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile cards */}
+            <div className="sm:hidden divide-y divide-border">
+              {recent.map((a) => (
+                <button
+                  key={a.id}
+                  onClick={() => openApplication(a.id)}
+                  className="flex w-full items-center gap-3 py-3 text-left active:bg-muted/40"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <FileText className="size-4" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-mono text-xs font-semibold text-primary truncate">{a.applicationNo}</p>
+                      <StatusBadge status={a.status} showIcon={false} />
+                    </div>
+                    <p className="text-xs font-medium truncate">{a.project.name}</p>
+                    <p className="text-[10px] text-muted-foreground">{a.currentStageLabel} · {timeAgo(a.lastUpdated)}</p>
+                  </div>
+                  <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                </button>
+              ))}
+            </div>
           </SectionCard>
 
-          {/* Workflow timeline showcase */}
+          {/* Live Workflow Tracker */}
           {showcaseApp && (
             <SectionCard
               title="Live Workflow Tracker"
@@ -251,11 +318,11 @@ export function LtpDashboard() {
             >
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-medium">{showcaseApp.project.name}</p>
-                    <p className="text-xs text-muted-foreground">{showcaseApp.applicationNo} · {showcaseApp.project.propertyType.replace("_", " ")}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{showcaseApp.project.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{showcaseApp.applicationNo} · {showcaseApp.project.propertyType.replace("_", " ")}</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <StatusBadge status={showcaseApp.status} />
                     <PriorityBadge priority={showcaseApp.priority} />
                   </div>
@@ -267,7 +334,7 @@ export function LtpDashboard() {
                 </div>
                 <Separator />
                 <WorkflowStepper currentStage={showcaseApp.currentStage} status={showcaseApp.status === "APPROVED" ? "COMPLETED" : "CURRENT"} />
-                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
                   <div className="flex items-center gap-2">
                     <CalendarClock className="size-3.5 text-muted-foreground" />
                     <span className="text-muted-foreground">Expected SLA:</span>
@@ -275,7 +342,7 @@ export function LtpDashboard() {
                   </div>
                   {showcaseApp.assignedOfficer && (
                     <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground">Assigned to:</span>
+                      <span className="text-muted-foreground">Assigned:</span>
                       <span className="font-medium">{showcaseApp.assignedOfficer.name}</span>
                       <RoleBadge role={showcaseApp.assignedOfficer.role} />
                     </div>
@@ -286,32 +353,32 @@ export function LtpDashboard() {
           )}
         </div>
 
-        {/* Right col (1/3) */}
-        <div className="space-y-6">
-          {/* Quick actions */}
+        {/* ===== Right rail ===== */}
+        <div className="space-y-6 min-w-0">
+          {/* Quick Actions */}
           <SectionCard title="Quick Actions" icon={Sparkles} noPadding>
             <div className="grid grid-cols-2 gap-2 p-3">
               {[
                 { label: "New Application", icon: FilePlus2, view: "ltp-create-application" as const, accent: "bg-primary/10 text-primary" },
                 { label: "Upload Drawing", icon: Layers, view: "ltp-drawings" as const, accent: "bg-info/10 text-info" },
-                { label: "Pay Fees", icon: CircleDollarSign, view: "ltp-payment" as const, accent: "bg-amber-500/15 text-amber-600" },
+                { label: "Pay Fees", icon: CircleDollarSign, view: "ltp-payment" as const, accent: "bg-orange-500/15 text-orange-600" },
                 { label: "Shortfalls", icon: FileWarning, view: "ltp-shortfalls" as const, accent: "bg-warning/15 text-warning-foreground" },
               ].map((a) => (
                 <button
                   key={a.label}
                   onClick={() => navigate(a.view)}
-                  className="group flex flex-col items-start gap-2 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-gov"
+                  className="group flex h-[72px] flex-col items-start justify-center gap-1.5 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-gov focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 >
-                  <div className={cn("flex size-8 items-center justify-center rounded-md", a.accent)}>
+                  <div className={cn("flex size-7 items-center justify-center rounded-md", a.accent)}>
                     <a.icon className="size-4" />
                   </div>
-                  <span className="text-xs font-medium">{a.label}</span>
+                  <span className="text-xs font-medium leading-tight">{a.label}</span>
                 </button>
               ))}
             </div>
           </SectionCard>
 
-          {/* Recent notifications */}
+          {/* Recent Notifications */}
           <SectionCard
             title="Recent Notifications"
             icon={Bell}

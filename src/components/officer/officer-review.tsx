@@ -13,6 +13,7 @@ import {
   InfoRow,
   EmptyState,
 } from "@/components/design-system/layout";
+import { PageBackButton } from "@/components/design-system/back-button";
 import {
   StatusBadge,
   PriorityBadge,
@@ -224,6 +225,7 @@ export function OfficerReview() {
   if (!app || !user) {
     return (
       <div className="space-y-6">
+        <PageBackButton fallbackView="officer-applications" fallbackLabel="Assigned Queue" />
         <PageHeader
           title="Application Review"
           description="Open an application from your assigned queue to begin a split-screen review."
@@ -281,6 +283,7 @@ export function OfficerReview() {
     <div className="space-y-4">
       {/* Top header / bar */}
       <div className="space-y-3">
+        <PageBackButton fallbackView="officer-applications" fallbackLabel="Assigned Queue" />
         <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
           <button onClick={() => navigate("officer-dashboard")} className="hover:text-foreground transition-colors">Officer Workspace</button>
           <ChevronRight className="size-3" />

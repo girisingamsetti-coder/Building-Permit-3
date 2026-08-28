@@ -8,6 +8,7 @@ import {
   SectionCard,
   EmptyState,
 } from "@/components/design-system/layout";
+import { PageBackButton } from "@/components/design-system/back-button";
 import {
   ShortfallStatusBadge,
   ShortfallTypeBadge,
@@ -111,6 +112,7 @@ export function LtpShortfalls() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-dashboard" fallbackLabel="Dashboard" />
       <PageHeader
         title="Shortfall Center"
         description="Manage all shortfalls raised on your applications — respond, attach documents and track resolution."

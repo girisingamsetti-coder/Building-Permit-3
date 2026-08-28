@@ -70,6 +70,7 @@ import {
   Flag,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
 
 export function LtpApplicationDetails() {
@@ -79,6 +80,7 @@ export function LtpApplicationDetails() {
   if (!app) {
     return (
       <div className="space-y-6">
+        <PageBackButton fallbackView="ltp-applications" />
         <PageHeader
           title="Application Details"
           icon={FileText}
@@ -96,6 +98,7 @@ export function LtpApplicationDetails() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title={app.applicationNo}
         description={app.project.name}
