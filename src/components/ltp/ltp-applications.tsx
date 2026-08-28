@@ -40,6 +40,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import type { Application, ApplicationStatus } from "@/types";
+import { NewApplicationModal } from "@/components/ltp/new-application/new-application-modal";
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "ALL", label: "All statuses" },
@@ -61,6 +62,7 @@ export function LtpApplications() {
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState("ALL");
   const [view, setView] = React.useState<"table" | "grid">("table");
+  const [newAppOpen, setNewAppOpen] = React.useState(false);
 
   const apps = React.useMemo(() => {
     let list = visibleApps;
@@ -93,7 +95,7 @@ export function LtpApplications() {
         icon={FileStack}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Applications" }]}
         actions={
-          <Button size="sm" onClick={() => window.open("/?view=ltp-create-application", "_blank", "noopener,noreferrer")}>
+          <Button size="sm" onClick={() => setNewAppOpen(true)}>
             <FilePlus2 className="size-4" /> New Application
           </Button>
         }
@@ -147,7 +149,7 @@ export function LtpApplications() {
               icon={FileText}
               title="No applications found"
               description="Try adjusting your filters or create a new application."
-              action={<Button size="sm" onClick={() => navigate("ltp-create-application")}><FilePlus2 className="size-4" /> New Application</Button>}
+              action={<Button size="sm" onClick={() => setNewAppOpen(true)}><FilePlus2 className="size-4" /> New Application</Button>}
             />
           </div>
         ) : view === "table" ? (
@@ -204,6 +206,9 @@ export function LtpApplications() {
           </div>
         )}
       </SectionCard>
+
+      {/* New Application Modal */}
+      <NewApplicationModal open={newAppOpen} onOpenChange={setNewAppOpen} />
     </div>
   );
 }
