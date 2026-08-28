@@ -93,7 +93,7 @@ export function LtpApplications() {
         icon={FileStack}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Applications" }]}
         actions={
-          <Button size="sm" onClick={() => navigate("ltp-create-application")}>
+          <Button size="sm" onClick={() => window.open("/?view=ltp-create-application", "_blank", "noopener,noreferrer")}>
             <FilePlus2 className="size-4" /> New Application
           </Button>
         }

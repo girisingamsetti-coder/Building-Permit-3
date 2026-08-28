@@ -2,19 +2,16 @@ import type { Portal, ViewKey } from "@/types";
 import {
   LayoutDashboard,
   FileStack,
-  FilePlus2,
   Upload,
   FileSearch,
   FolderClosed,
   ReceiptIndianRupee,
   CreditCard,
-  ScrollText,
   AlertTriangle,
   Bell,
   User,
   CircleHelp,
   ClipboardCheck,
-  Inbox,
   Settings,
   Users,
   ShieldCheck,
@@ -47,7 +44,6 @@ export const NAV: Record<Portal, NavGroup[]> = {
       label: "Applications",
       items: [
         { view: "ltp-applications", label: "My Applications", icon: FileStack },
-        { view: "ltp-create-application", label: "New Application", icon: FilePlus2 },
       ],
     },
     {

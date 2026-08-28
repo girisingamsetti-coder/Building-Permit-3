@@ -72,7 +72,22 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
 };
 
 export default function Home() {
-  const { isAuthenticated, view, navigate, portal } = useAppStore();
+  const { isAuthenticated, view, navigate, loginAsRole } = useAppStore();
+
+  // On initial load: if URL has ?view=ltp-create-application, auto-login as LTP
+  // (supports opening the wizard in a new tab from My Applications)
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const viewParam = params.get("view");
+    if (viewParam === "ltp-create-application") {
+      // Auto-login as LTP if not authenticated (for new-tab wizard access)
+      if (!useAppStore.getState().isAuthenticated) {
+        loginAsRole("LTP");
+      }
+      navigate("ltp-create-application");
+    }
+  }, []);
 
   // Scroll to top on view change
   React.useEffect(() => {

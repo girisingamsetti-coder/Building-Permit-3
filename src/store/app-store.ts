@@ -8,6 +8,8 @@ import type {
   ApplicationType,
   Applicant,
   AuditEntry,
+  DocumentStatus,
+  Drawing,
   NotificationRecord,
   Payment,
   Portal,
@@ -118,6 +120,9 @@ interface AppState {
     zone: string;
     surveyNo: string;
     address: string;
+    drawingFileName?: string;
+    drawingFileSize?: string;
+    uploadedDocCodes?: string[];
   }) => string;
 
   uploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
@@ -280,6 +285,42 @@ export const useAppStore = create<AppState>((set, get) => ({
     const applicationNo = `MC/BP/2026/04/${seq}`;
     const now = nowISO();
 
+    // Build drawings array if a drawing was uploaded in the wizard
+    const drawings: Drawing[] = data.drawingFileName
+      ? [{
+          id: genId("dw"),
+          fileName: data.drawingFileName,
+          fileType: "DWG" as const,
+          fileSize: data.drawingFileSize ?? "0 MB",
+          version: 1,
+          uploadedAt: now,
+          uploadedBy: user.name,
+          status: "PENDING_SCRUTINY" as const,
+        }]
+      : [];
+
+    // Build documents array, marking uploaded docs as UPLOADED
+    const baseDocs = [
+      { id: genId("doc"), name: "7/12 Land Extract", code: "DOC_712", required: true },
+      { id: genId("doc"), name: "Property Card / Mutation", code: "DOC_PROP_CARD", required: true },
+      { id: genId("doc"), name: "Architectural Drawings (stamped)", code: "DOC_ARCH", required: true },
+      { id: genId("doc"), name: "Structural Drawings & Stability Certificate", code: "DOC_STRUCT", required: true },
+      { id: genId("doc"), name: "NOC from Fire Department", code: "DOC_FIRE_NOC", required: true },
+      { id: genId("doc"), name: "Environmental Clearance", code: "DOC_ENV", required: false },
+      { id: genId("doc"), name: "Society / Landowner Authorization", code: "DOC_AUTH", required: true },
+      { id: genId("doc"), name: "Affidavit — Ownership", code: "DOC_AFFIDAVIT", required: true },
+    ];
+    const uploadedCodes = data.uploadedDocCodes ?? [];
+    const documents = baseDocs.map((d) => ({
+      ...d,
+      status: (uploadedCodes.includes(d.code) ? "UPLOADED" : "REQUIRED") as DocumentStatus,
+      ...(uploadedCodes.includes(d.code) ? { uploadedAt: now, version: 1, fileSize: "1.2 MB" } : {}),
+    }));
+
+    // Determine initial status: if drawing uploaded → DRAWING_UPLOADED, else DRAFT
+    const initialStatus: ApplicationStatus = drawings.length > 0 ? "DRAWING_UPLOADED" : "DRAFT";
+    const initialStage: WorkflowStageKey = drawings.length > 0 ? "DRAWING_SCRUTINY" : "APPLICATION_CREATED";
+
     const app: Application = {
       id,
       applicationNo,
@@ -298,25 +339,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         surveyNo: data.surveyNo,
         address: data.address,
       },
-      status: "DRAFT",
-      currentStage: "APPLICATION_CREATED",
-      currentStageLabel: "Application Created",
+      status: initialStatus,
+      currentStage: initialStage,
+      currentStageLabel: drawings.length > 0 ? "Drawing Scrutiny" : "Application Created",
       submissionDate: now,
       lastUpdated: now,
       expectedSLA: new Date(Date.now() + 30 * 86400000).toISOString(),
       priority: data.builtUpArea > 5000 ? "HIGH" : "NORMAL",
-      progress: 0,
-      drawings: [],
-      documents: [
-        { id: genId("doc"), name: "7/12 Land Extract", code: "DOC_712", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "Property Card / Mutation", code: "DOC_PROP_CARD", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "Architectural Drawings (stamped)", code: "DOC_ARCH", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "Structural Drawings & Stability Certificate", code: "DOC_STRUCT", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "NOC from Fire Department", code: "DOC_FIRE_NOC", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "Environmental Clearance", code: "DOC_ENV", required: false, status: "REQUIRED" },
-        { id: genId("doc"), name: "Society / Landowner Authorization", code: "DOC_AUTH", required: true, status: "REQUIRED" },
-        { id: genId("doc"), name: "Affidavit — Ownership", code: "DOC_AFFIDAVIT", required: true, status: "REQUIRED" },
-      ],
+      progress: drawings.length > 0 ? 8 : 0,
+      drawings,
+      documents,
       shortfalls: [],
       workflowHistory: [{
         id: genId("wf"),
@@ -326,7 +358,15 @@ export const useAppStore = create<AppState>((set, get) => ({
         action: "Application created",
         timestamp: now,
         status: "COMPLETED",
-      }],
+      }, ...(drawings.length > 0 ? [{
+        id: genId("wf"),
+        stage: "DRAWING_SCRUTINY" as WorkflowStageKey,
+        stageLabel: "Drawing Scrutiny",
+        actor: { name: user.name, role: user.role },
+        action: "Drawing v1 uploaded — awaiting scrutiny",
+        timestamp: now,
+        status: "CURRENT" as const,
+      }] : [])],
       auditLog: [{
         id: genId("audit"),
         user: user.name,
@@ -335,10 +375,22 @@ export const useAppStore = create<AppState>((set, get) => ({
         entity: "Application",
         entityId: applicationNo,
         timestamp: now,
-        newStatus: "DRAFT",
+        newStatus: initialStatus,
         ip: "103.21.58.10",
         device: "Chrome / Windows",
-      }],
+      }, ...(drawings.length > 0 ? [{
+        id: genId("audit"),
+        user: user.name,
+        role: user.role,
+        action: "Drawing v1 uploaded",
+        entity: "Drawing",
+        entityId: applicationNo,
+        timestamp: now,
+        oldStatus: "DRAFT",
+        newStatus: "DRAWING_UPLOADED",
+        ip: "103.21.58.10",
+        device: "Chrome / Windows",
+      }] : [])],
       remarks: [],
     };
 
