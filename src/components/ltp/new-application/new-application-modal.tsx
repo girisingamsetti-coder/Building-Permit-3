@@ -242,7 +242,7 @@ export function NewApplicationModal({
     <>
       <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent
-          className="flex max-h-[90vh] w-[96vw] max-w-[1000px] flex-col gap-0 overflow-hidden rounded-xl p-0 sm:max-h-[90vh]"
+          className="flex max-h-[90vh] w-[96vw] max-w-[1200px] flex-col gap-0 overflow-hidden rounded-xl p-0 sm:max-h-[90vh]"
           showCloseButton={false}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
@@ -257,7 +257,7 @@ export function NewApplicationModal({
           </DialogDescription>
 
           {/* Header (fixed) */}
-          <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
+          <div className="flex items-start justify-between gap-3 border-b border-border px-6 py-4">
             <div className="flex items-center gap-2.5">
               <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <FilePlus2 className="size-4.5" />
@@ -278,13 +278,13 @@ export function NewApplicationModal({
 
           {/* Stepper (fixed) */}
           {!submitted && (
-            <div className="border-b border-border bg-muted/20 px-5 py-3">
+            <div className="border-b border-border bg-muted/20 px-6 py-3">
               <WizardStepper steps={STEPS} currentStep={step} />
             </div>
           )}
 
           {/* Content (scrollable) */}
-          <div className="flex-1 overflow-y-auto px-5 py-5">
+          <div className="flex-1 overflow-y-auto px-6 py-5">
             {submitted ? (
               <div className="flex flex-col items-center gap-4 py-8 text-center">
                 <div className="flex size-16 items-center justify-center rounded-full bg-success/10 text-success">
@@ -384,7 +384,7 @@ export function NewApplicationModal({
 
           {/* Footer (fixed) */}
           {!submitted && (
-            <div className="flex items-center justify-between gap-2 border-t border-border bg-muted/20 px-5 py-3">
+            <div className="flex items-center justify-between gap-2 border-t border-border bg-muted/20 px-6 py-3">
               <Button variant="ghost" size="sm" onClick={handleClose}>
                 Cancel
               </Button>

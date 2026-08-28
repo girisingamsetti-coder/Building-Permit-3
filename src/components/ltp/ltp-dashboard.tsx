@@ -9,6 +9,7 @@ import {
   EmptyState,
 } from "@/components/design-system/layout";
 import { KpiCard } from "@/components/design-system/kpi-card";
+import { NewApplicationModal } from "@/components/ltp/new-application/new-application-modal";
 import {
   StatusBadge,
   PriorityBadge,
@@ -60,6 +61,7 @@ function ViewAllLink({ onClick, label = "View all" }: { onClick: () => void; lab
 export function LtpDashboard() {
   const { user, navigate, openApplication } = useAppStore();
   const apps = useVisibleApplications();
+  const [newAppOpen, setNewAppOpen] = React.useState(false);
 
   const REVIEW_STATUSES = [
     "TPS_TECHNICAL_SCRUTINY",
@@ -107,7 +109,7 @@ export function LtpDashboard() {
             <Button variant="outline" size="sm" onClick={() => navigate("ltp-applications")}>
               <FileStack className="size-4" /> View all
             </Button>
-            <Button size="sm" onClick={() => navigate("ltp-create-application")}>
+            <Button size="sm" onClick={() => setNewAppOpen(true)}>
               <FilePlus2 className="size-4" /> New Application
             </Button>
           </>
@@ -309,14 +311,14 @@ export function LtpDashboard() {
           <SectionCard title="Quick Actions" icon={Sparkles} noPadding>
             <div className="grid grid-cols-2 gap-2 p-3">
               {[
-                { label: "New Application", icon: FilePlus2, view: "ltp-create-application" as const, accent: "bg-primary/10 text-primary" },
+                { label: "New Application", icon: FilePlus2, view: null as const, accent: "bg-primary/10 text-primary" },
                 { label: "Upload Drawing", icon: Layers, view: "ltp-drawings" as const, accent: "bg-info/10 text-info" },
                 { label: "Pay Fees", icon: CircleDollarSign, view: "ltp-payment" as const, accent: "bg-orange-500/15 text-orange-600" },
                 { label: "Shortfalls", icon: FileWarning, view: "ltp-shortfalls" as const, accent: "bg-warning/15 text-warning-foreground" },
               ].map((a) => (
                 <button
                   key={a.label}
-                  onClick={() => navigate(a.view)}
+                  onClick={() => a.view ? navigate(a.view) : setNewAppOpen(true)}
                   className="group flex h-[72px] flex-col items-start justify-center gap-1.5 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-gov focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                 >
                   <div className={cn("flex size-7 items-center justify-center rounded-md", a.accent)}>
@@ -363,6 +365,9 @@ export function LtpDashboard() {
           </SectionCard>
         </div>
       </div>
+
+      {/* New Application Modal (shared) */}
+      <NewApplicationModal open={newAppOpen} onOpenChange={setNewAppOpen} />
     </div>
   );
 }
