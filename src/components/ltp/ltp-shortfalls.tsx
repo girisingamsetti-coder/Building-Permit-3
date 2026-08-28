@@ -279,7 +279,13 @@ function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfa
         return (
           <li key={s.id} className="p-4 transition-colors hover:bg-muted/30">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <button onClick={() => onSelect(s)} className="flex items-start gap-3 text-left flex-1 min-w-0">
+              <div
+                onClick={() => onSelect(s)}
+                className="flex items-start gap-3 text-left flex-1 min-w-0 cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(s); } }}
+              >
                 <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-lg", s.status === "RESOLVED" ? "bg-success/10 text-success" : overdue ? "bg-destructive/10 text-destructive" : "bg-warning/15 text-warning-foreground")}>
                   <AlertTriangle className="size-5" />
                 </div>
@@ -293,7 +299,15 @@ function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfa
                   <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
                     <span className="font-mono">{s.shortfallId}</span>
                     <span>·</span>
-                    <button onClick={(e) => { e.stopPropagation(); onOpenApp(s.applicationId); }} className="font-mono text-primary hover:underline">{s.applicationNo}</button>
+                    <span
+                      onClick={(e) => { e.stopPropagation(); onOpenApp(s.applicationId); }}
+                      className="font-mono text-primary hover:underline cursor-pointer"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onOpenApp(s.applicationId); } }}
+                    >
+                      {s.applicationNo}
+                    </span>
                     <span>·</span>
                     <span>Raised by {s.raisedBy.name}</span>
                     <RoleBadge role={s.raisedBy.role} />
@@ -301,7 +315,7 @@ function ShortfallList({ shortfalls, onSelect, onRespond, onOpenApp }: { shortfa
                     <span className="flex items-center gap-1"><CalendarClock className="size-3" /> Due {formatDate(s.dueDate)}</span>
                   </div>
                 </div>
-              </button>
+              </div>
               <div className="flex items-center gap-2 shrink-0">
                 <ShortfallStatusBadge status={s.status} />
                 {(s.status === "OPEN" || s.status === "REOPENED") && <Button size="sm" onClick={() => onRespond(s)}><Send className="size-3.5" /> Respond</Button>}
