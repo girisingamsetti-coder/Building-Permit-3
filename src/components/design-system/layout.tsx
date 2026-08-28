@@ -93,19 +93,19 @@ export function SectionCard({
   return (
     <Card className={cn("shadow-gov", className)}>
       {(title || action) && (
-        <CardHeader className="flex-row items-center justify-between gap-2 space-y-0 border-b border-border/60">
-          <div className="flex items-center gap-2.5">
+        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 border-b border-border/60 py-4">
+          <div className="flex items-start gap-2.5 min-w-0">
             {Icon && (
-              <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="size-4" />
               </div>
             )}
-            <div className="space-y-0.5">
-              {title && <CardTitle className="text-base">{title}</CardTitle>}
-              {description && <CardDescription className="text-xs">{description}</CardDescription>}
+            <div className="space-y-0.5 min-w-0">
+              {title && <CardTitle className="text-base leading-tight">{title}</CardTitle>}
+              {description && <CardDescription className="text-xs leading-tight">{description}</CardDescription>}
             </div>
           </div>
-          {action}
+          {action && <div className="shrink-0">{action}</div>}
         </CardHeader>
       )}
       <CardContent className={cn(noPadding ? "p-0" : "", contentClassName)}>{children}</CardContent>

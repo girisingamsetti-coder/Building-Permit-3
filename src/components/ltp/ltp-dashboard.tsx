@@ -23,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   FileStack,
   FilePlus2,
@@ -33,7 +32,6 @@ import {
   CreditCard,
   Inbox,
   ArrowRight,
-  Bell,
   TrendingUp,
   CalendarClock,
   Building2,
@@ -46,10 +44,21 @@ import {
   Activity,
   FileText,
 } from "lucide-react";
-import type { Application } from "@/types";
+
+// Compact "View all" text-link component for section headers
+function ViewAllLink({ onClick, label = "View all" }: { onClick: () => void; label?: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-0.5 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 rounded-sm whitespace-nowrap"
+    >
+      {label} <ChevronRight className="size-3.5" />
+    </button>
+  );
+}
 
 export function LtpDashboard() {
-  const { user, navigate, openApplication, notifications } = useAppStore();
+  const { user, navigate, openApplication } = useAppStore();
   const apps = useVisibleApplications();
 
   const REVIEW_STATUSES = [
@@ -85,7 +94,6 @@ export function LtpDashboard() {
     .filter((a) => (ACTION_STATUSES as readonly string[]).includes(a.status))
     .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
   const showcaseApp = apps.find((a) => a.status === "TPS_TECHNICAL_SCRUTINY" || a.status === "TPA_REVIEW") ?? apps[0];
-  const recentNotifs = notifications.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -106,64 +114,18 @@ export function LtpDashboard() {
         }
       />
 
-      {/* ===== KPI Cards — responsive grid =====
-           Desktop (xl+): 7 columns
-           Large (lg): 4 columns
-           Tablet (sm): 2 columns
-           Mobile: 2 columns (compact) */}
+      {/* ===== KPI Cards ===== */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
-        <KpiCard
-          label="Total Applications"
-          value={stats.total}
-          icon={FileStack}
-          accent="primary"
-          onClick={() => navigate("ltp-applications")}
-        />
-        <KpiCard
-          label="Drafts"
-          value={stats.draft}
-          icon={Inbox}
-          accent="info"
-          onClick={() => navigate("ltp-applications")}
-        />
-        <KpiCard
-          label="Under Review"
-          value={stats.underReview}
-          icon={Clock}
-          accent="teal"
-          onClick={() => navigate("ltp-applications")}
-        />
-        <KpiCard
-          label="Action Required"
-          value={stats.action}
-          icon={AlertTriangle}
-          accent="amber"
-          onClick={() => navigate("ltp-applications")}
-        />
-        <KpiCard
-          label="Approved"
-          value={stats.approved}
-          icon={CheckCircle2}
-          accent="success"
-          onClick={() => navigate("ltp-applications")}
-        />
-        <KpiCard
-          label="Shortfalls"
-          value={stats.shortfalls}
-          icon={FileWarning}
-          accent="danger"
-          onClick={() => navigate("ltp-shortfalls")}
-        />
-        <KpiCard
-          label="Pending Payments"
-          value={stats.pendingPayment}
-          icon={CreditCard}
-          accent="orange"
-          onClick={() => navigate("ltp-payment")}
-        />
+        <KpiCard label="Total Applications" value={stats.total} icon={FileStack} accent="primary" onClick={() => navigate("ltp-applications")} />
+        <KpiCard label="Drafts" value={stats.draft} icon={Inbox} accent="info" onClick={() => navigate("ltp-applications")} />
+        <KpiCard label="Under Review" value={stats.underReview} icon={Clock} accent="teal" onClick={() => navigate("ltp-applications")} />
+        <KpiCard label="Action Required" value={stats.action} icon={AlertTriangle} accent="amber" onClick={() => navigate("ltp-applications")} />
+        <KpiCard label="Approved" value={stats.approved} icon={CheckCircle2} accent="success" onClick={() => navigate("ltp-applications")} />
+        <KpiCard label="Shortfalls" value={stats.shortfalls} icon={FileWarning} accent="danger" onClick={() => navigate("ltp-shortfalls")} />
+        <KpiCard label="Pending Payments" value={stats.pendingPayment} icon={CreditCard} accent="orange" onClick={() => navigate("ltp-payment")} />
       </div>
 
-      {/* ===== Main + Right Rail grid (72% / 28%) ===== */}
+      {/* ===== Main + Right Rail grid ===== */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
         {/* ===== Main content ===== */}
         <div className="space-y-6 min-w-0">
@@ -172,11 +134,7 @@ export function LtpDashboard() {
             title="Action Required"
             description="Applications that need your immediate attention"
             icon={AlertTriangle}
-            action={
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("ltp-applications")}>
-                View all <ChevronRight className="size-3.5" />
-              </Button>
-            }
+            action={<ViewAllLink onClick={() => navigate("ltp-applications")} />}
           >
             {actionRequired.length === 0 ? (
               <EmptyState icon={CheckCircle2} title="All caught up!" description="No applications require action right now." />
@@ -231,11 +189,7 @@ export function LtpDashboard() {
             title="Recent Applications"
             description="Your most recently updated applications"
             icon={Activity}
-            action={
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("ltp-applications")}>
-                View all <ChevronRight className="size-3.5" />
-              </Button>
-            }
+            action={<ViewAllLink onClick={() => navigate("ltp-applications")} />}
           >
             {/* Desktop table */}
             <div className="hidden sm:block overflow-x-auto">
@@ -310,11 +264,7 @@ export function LtpDashboard() {
               title="Live Workflow Tracker"
               description={`Tracking ${showcaseApp.applicationNo} through the approval pipeline`}
               icon={TrendingUp}
-              action={
-                <Button variant="ghost" size="sm" className="text-xs" onClick={() => openApplication(showcaseApp.id)}>
-                  Details <ChevronRight className="size-3.5" />
-                </Button>
-              }
+              action={<ViewAllLink onClick={() => openApplication(showcaseApp.id)} label="Details" />}
             >
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
@@ -378,38 +328,7 @@ export function LtpDashboard() {
             </div>
           </SectionCard>
 
-          {/* Recent Notifications */}
-          <SectionCard
-            title="Recent Notifications"
-            icon={Bell}
-            action={
-              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("ltp-notifications")}>
-                All <ChevronRight className="size-3.5" />
-              </Button>
-            }
-            noPadding
-          >
-            <ScrollArea className="h-[280px]">
-              <ul className="divide-y divide-border">
-                {recentNotifs.map((n) => (
-                  <li key={n.id} className={cn("p-3 transition-colors hover:bg-muted/40", !n.read && "bg-primary/[0.03]")}>
-                    <div className="flex items-start gap-2.5">
-                      <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full", n.read ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary")}>
-                        <Bell className="size-3.5" />
-                      </span>
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <p className={cn("text-xs leading-tight", !n.read && "font-semibold")}>{n.title}</p>
-                        <p className="text-[11px] text-muted-foreground line-clamp-2">{n.message}</p>
-                        <p className="text-[10px] text-muted-foreground">{timeAgo(n.timestamp)}</p>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </ScrollArea>
-          </SectionCard>
-
-          {/* LTP profile summary */}
+          {/* Your License */}
           <SectionCard title="Your License" icon={Building2}>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
