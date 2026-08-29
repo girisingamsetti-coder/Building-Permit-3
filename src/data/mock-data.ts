@@ -1,5 +1,6 @@
 import type {
   Application,
+  ApplicationFee,
   ApplicationStatus,
   AuditEntry,
   DocumentRecord,
@@ -276,7 +277,30 @@ function makeDocuments(stage: "early" | "partial" | "verified" | "shortfall"): D
   return base;
 }
 
-function makeFee(builtUpArea: number, docCount: number, paid: boolean) {
+function makeFee(builtUpArea: number, docCount: number, paid: boolean, totalOverride?: number) {
+  if (totalOverride) {
+    // Create a fee with a specific total amount
+    const appFee: ApplicationFee = {
+      feeStructureId: "fs-bp-res-2026",
+      feeStructureName: "Building Permission — Residential (2026)",
+      generatedAt: "2026-08-20T18:00:00",
+      lineItems: [
+        { componentCode: "APP_FEE", name: "Application Fee", description: "Base processing fee", basis: "Fixed", rate: 2500, quantity: 1, amount: 2500 },
+        { componentCode: "SCRUTINY_FEE", name: "Scrutiny Fee", description: "Built-up area × rate", basis: "Area based", rate: 45, quantity: builtUpArea, amount: builtUpArea * 45 },
+        { componentCode: "DEV_FEE", name: "Development Fee", description: "Built-up area × rate", basis: "Area based", rate: 120, quantity: builtUpArea, amount: builtUpArea * 120 },
+        { componentCode: "PROC_FEE", name: "Processing Fee", description: "Administrative", basis: "Fixed", rate: 1500, quantity: 1, amount: 1500 },
+        { componentCode: "DOC_FEE", name: "Document Verification Fee", description: "Per document", basis: "Fixed", rate: 800, quantity: docCount, amount: 800 * docCount },
+      ],
+      subtotal: 0,
+      gst: 0,
+      total: totalOverride,
+      paidAmount: paid ? totalOverride : 0,
+      outstanding: paid ? 0 : totalOverride,
+      currency: "INR",
+    };
+    appFee.subtotal = appFee.lineItems.reduce((s, li) => s + li.amount, 0);
+    return appFee;
+  }
   const result = feeService.calculate({
     applicationType: "BUILDING_PERMISSION",
     propertyType: "RESIDENTIAL",
@@ -646,6 +670,97 @@ export const SEED_APPLICATIONS: Application[] = [
       { id: "r-14-1", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "Fire NOC expired. Shortfall raised.", timestamp: "2026-01-09T09:00:00", type: "INSTRUCTION" },
       { id: "r-14-2", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "Renewed NOC verified. Resolving shortfall and forwarding to ZAD/ZDD.", timestamp: "2026-01-11T14:00:00", type: "DECISION" },
     ],
+  }),
+
+  // ============================================================
+  // 11 ADDITIONAL PENDING PAYMENT APPLICATIONS
+  // ============================================================
+  buildApp("app-17", "MC/BP/2026/04/0017", "Riverstone Commercial Complex", "COMMERCIAL", 2850, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-15T10:00:00", "2026-08-15T10:05:00", "2026-08-16T14:00:00", "2026-08-20T18:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-15T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-16T14:00:00", "SCR/2026/0017"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(2850, 8, false, 245600),
+    payment: { id: "pay-17", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-18", "MC/BP/2026/04/0018", "Maple Residency", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-14T09:00:00", "2026-08-14T09:05:00", "2026-08-15T11:00:00", "2026-08-19T18:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-14T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-15T11:00:00", "SCR/2026/0018"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(980, 8, false, 98450),
+    payment: { id: "pay-18", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-19", "MC/BP/2026/04/0019", "Sai Heights Apartments", "RESIDENTIAL", 2100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-13T10:00:00", "2026-08-13T10:05:00", "2026-08-14T14:00:00", "2026-08-18T18:00:00"], "Shri. Arjun Reddy", "+91 98220 14511", "arjun.reddy@email.com", "Hadapsar, Pune — 411028", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-13T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-14T14:00:00", "SCR/2026/0019"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(2100, 8, false, 218750),
+    payment: { id: "pay-19", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-20", "MC/BP/2026/04/0020", "Green Valley Villas", "RESIDENTIAL", 3200, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-12T09:00:00", "2026-08-12T09:05:00", "2026-08-13T11:00:00", "2026-08-17T18:00:00"], "Smt. Nisha Menon", "+91 98220 14512", "nisha.menon@email.com", "Kothrud, Pune — 411038", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-12T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-13T11:00:00", "SCR/2026/0020"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(3200, 8, false, 142800),
+    payment: { id: "pay-20", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-21", "MC/BP/2026/04/0021", "Metro Business Centre", "COMMERCIAL", 3750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-11T10:00:00", "2026-08-11T10:05:00", "2026-08-12T14:00:00", "2026-08-16T18:00:00"], "Shri. Amit Verma", "+91 98220 14513", "amit.verma@email.com", "Aundh, Pune — 411007", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-11T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-12T14:00:00", "SCR/2026/0021"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(3750, 8, false, 326480),
+    payment: { id: "pay-21", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-22", "MC/BP/2026/04/0022", "Lakeview Enclave", "RESIDENTIAL", 1280, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-10T09:00:00", "2026-08-10T09:05:00", "2026-08-11T11:00:00", "2026-08-15T18:00:00"], "Smt. Asha Rao", "+91 98220 14514", "asha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-10T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-11T11:00:00", "SCR/2026/0022"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(1280, 8, false, 136920),
+    payment: { id: "pay-22", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-23", "MC/BP/2026/04/0023", "Pinnacle Industrial Park", "INDUSTRIAL", 4400, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-09T10:00:00", "2026-08-09T10:05:00", "2026-08-10T14:00:00", "2026-08-14T18:00:00"], "Shri. Suresh Reddy", "+91 98220 14515", "suresh.reddy@email.com", "Hadapsar, Pune — 411028", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-09T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-10T14:00:00", "SCR/2026/0023"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(4400, 8, false, 415750),
+    payment: { id: "pay-23", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-24", "MC/BP/2026/04/0024", "Sunrise Layout Extension", "RESIDENTIAL", 2750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-08T09:00:00", "2026-08-08T09:05:00", "2026-08-09T11:00:00", "2026-08-13T18:00:00"], "Smt. Pooja Deshmukh", "+91 98220 14516", "pooja.deshmukh@email.com", "Wakad, Pune — 411057", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-08T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-09T11:00:00", "SCR/2026/0024"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(2750, 8, false, 189640),
+    payment: { id: "pay-24", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-25", "MC/BP/2026/04/0025", "Heritage Commercial Plaza", "COMMERCIAL", 4100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-07T10:00:00", "2026-08-07T10:05:00", "2026-08-08T14:00:00", "2026-08-12T18:00:00"], "Shri. Vivek Nair", "+91 98220 14517", "vivek.nair@email.com", "Baner, Pune — 411045", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-07T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-08T14:00:00", "SCR/2026/0025"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(4100, 8, false, 372850),
+    payment: { id: "pay-25", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-26", "MC/BP/2026/04/0026", "Silver Oak Residency", "RESIDENTIAL", 1180, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-06T09:00:00", "2026-08-06T09:05:00", "2026-08-07T11:00:00", "2026-08-11T18:00:00"], "Smt. Neha Rao", "+91 98220 14518", "neha.rao@email.com", "Kothrud, Pune — 411038", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-06T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-07T11:00:00", "SCR/2026/0026"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(1180, 8, false, 164300),
+    payment: { id: "pay-26", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+
+  buildApp("app-27", "MC/BP/2026/04/0027", "Eastern Trade Hub", "COMMERCIAL", 2950, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-05T10:00:00", "2026-08-05T10:05:00", "2026-08-06T14:00:00", "2026-08-10T18:00:00"], "Shri. Rohit Iyer", "+91 98220 14519", "rohit.iyer@email.com", "Hadapsar, Pune — 411028", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-05T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-08-06T14:00:00", "SCR/2026/0027"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(2950, 8, false, 296450),
+    payment: { id: "pay-27", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 ];
 
