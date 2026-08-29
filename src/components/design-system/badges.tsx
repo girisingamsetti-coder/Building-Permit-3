@@ -115,8 +115,6 @@ const SEVERITY_MAP: Record<ScrutinySeverity, { label: string; cls: string }> = {
   CRITICAL: { label: "Critical", cls: "bg-destructive text-white border-transparent" },
   MAJOR: { label: "Major", cls: "bg-orange-600 text-white border-transparent" },
   MINOR: { label: "Minor", cls: "bg-amber-500 text-white border-transparent" },
-  WARNING: { label: "Warning", cls: "bg-yellow-400 text-yellow-950 border-transparent" },
-  PASSED: { label: "Passed", cls: "bg-success text-success-foreground border-transparent" },
 };
 
 export function SeverityBadge({ severity }: { severity: ScrutinySeverity }) {

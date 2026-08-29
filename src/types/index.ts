@@ -170,7 +170,9 @@ export interface Drawing {
 }
 
 // ---------- Scrutiny ----------
-export type ScrutinySeverity = "CRITICAL" | "MAJOR" | "MINOR" | "WARNING" | "PASSED";
+// Severity describes the importance of a rule (not the outcome).
+// Result (status field) describes the outcome: PASS / FAIL / WARNING.
+export type ScrutinySeverity = "CRITICAL" | "MAJOR" | "MINOR";
 
 export interface ScrutinyCheck {
   id: string;
@@ -186,7 +188,7 @@ export interface ScrutinyReport {
   reportNo: string;
   drawingVersion: number;
   generatedAt: string;
-  status: "PASSED" | "FAILED";
+  status: "PASSED" | "FAILED" | "PASSED_WITH_WARNINGS";
   summary: string;
   totalChecks: number;
   passed: number;

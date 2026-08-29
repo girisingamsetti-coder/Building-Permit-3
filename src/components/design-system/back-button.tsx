@@ -49,10 +49,12 @@ export function PageBackButton({
   fallbackView,
   fallbackLabel,
   className,
+  compact = false,
 }: {
   fallbackView?: ViewKey;
   fallbackLabel?: string;
   className?: string;
+  compact?: boolean;
 }) {
   const { viewHistory, goBack, navigate } = useAppStore();
 
@@ -73,6 +75,22 @@ export function PageBackButton({
 
   // Don't render if no history and no fallback
   if (!hasHistory && !fallbackView) return null;
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleBack}
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50",
+          className
+        )}
+        aria-label={`Go back to ${label}`}
+        title={`Go back to ${label}`}
+      >
+        <ArrowLeft className="size-4" />
+      </button>
+    );
+  }
 
   return (
     <Button

@@ -207,20 +207,22 @@ function makeScrutinyReport(version: number, passed: boolean, date: string) {
     { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
     { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR", status: "WARNING", message: "Indicate tree species on landscape plan." },
     { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
-    { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "WARNING", status: "PASS", message: "Title block and north arrow present." },
+    { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "MINOR", status: "PASS", message: "Title block and north arrow present." },
   ];
   const failed = checks.filter((c) => c.status === "FAIL").length;
   const warnings = checks.filter((c) => c.status === "WARNING").length;
+  const passedCount = checks.filter((c) => c.status === "PASS").length;
+  const totalChecks = checks.length;
+  const overallStatus: import("@/types").ScrutinyReport["status"] = failed > 0 ? "FAILED" : warnings > 0 ? "PASSED_WITH_WARNINGS" : "PASSED";
+  const summary = `${totalChecks} compliance checks were evaluated. ${passedCount} passed, ${failed} failed, and ${warnings} warning${warnings === 1 ? "" : "s"} require${warnings === 1 ? "s" : ""} attention.`;
   const report: import("@/types").ScrutinyReport = {
     reportNo: `SCR/2026/${String(Math.floor(1000 + Math.random() * 9000))}`,
     drawingVersion: version,
     generatedAt: date,
-    status: failed === 0 ? "PASSED" : "FAILED",
-    summary: passed
-      ? "Drawing scrutiny completed successfully. All critical and major checks passed. Minor advisories noted for compliance during construction."
-      : "Scrutiny identified 1 critical non-compliance. Drawing must be corrected and re-uploaded before proceeding.",
-    totalChecks: checks.length,
-    passed: checks.length - failed - warnings,
+    status: overallStatus,
+    summary,
+    totalChecks,
+    passed: passedCount,
     failed,
     warnings,
     checks,

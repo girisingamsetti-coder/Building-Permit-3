@@ -56,6 +56,7 @@ import {
   ArrowRight,
   Info,
   Building2,
+  ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Application } from "@/types";
@@ -356,6 +357,7 @@ export function LtpScrutiny() {
   const { navigate, openApplication } = useAppStore();
   const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
+
   if (!app || !app.scrutinyReport) {
     return (
       <div className="space-y-6">
@@ -365,86 +367,139 @@ export function LtpScrutiny() {
       </div>
     );
   }
+
   const r = app.scrutinyReport;
+  const drawing = app.drawings.find((d) => d.version === r.drawingVersion);
+
+  // Derive all values from the checks array
+  const totalChecks = r.checks.length;
+  const passedCount = r.checks.filter((c) => c.status === "PASS").length;
+  const failedCount = r.checks.filter((c) => c.status === "FAIL").length;
+  const warningCount = r.checks.filter((c) => c.status === "WARNING").length;
+
+  // Severity distribution — only Critical, Major, Minor (NOT Warning, NOT Passed)
+  const severityCounts = {
+    CRITICAL: r.checks.filter((c) => c.severity === "CRITICAL").length,
+    MAJOR: r.checks.filter((c) => c.severity === "MAJOR").length,
+    MINOR: r.checks.filter((c) => c.severity === "MINOR").length,
+  };
+
+  // Category summary
   const grouped = r.checks.reduce((acc, c) => {
     (acc[c.category] ??= []).push(c);
     return acc;
   }, {} as Record<string, typeof r.checks>);
 
+  // Overall status display
+  const statusConfig = {
+    PASSED: { label: "Scrutiny Passed", cls: "border-success/30 bg-success/5", iconCls: "bg-success/10 text-success", badge: "bg-success text-success-foreground", Icon: CheckCircle2 },
+    PASSED_WITH_WARNINGS: { label: "Passed with Warnings", cls: "border-amber-500/30 bg-amber-500/5", iconCls: "bg-amber-500/10 text-amber-600", badge: "bg-amber-500 text-white", Icon: AlertTriangle },
+    FAILED: { label: "Scrutiny Failed", cls: "border-destructive/30 bg-destructive/5", iconCls: "bg-destructive/10 text-destructive", badge: "bg-destructive text-white", Icon: XCircle },
+  };
+  const sCfg = statusConfig[r.status];
+  const SIcon = sCfg.Icon;
+
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" />
+      {/* Compact navigation: icon + breadcrumb */}
+      <div className="flex items-center gap-3">
+        <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" compact />
+        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
+          <button onClick={() => navigate("ltp-dashboard")} className="hover:text-foreground transition-colors">LTP Portal</button>
+          <ChevronRight className="size-3" />
+          <button onClick={() => navigate("ltp-applications")} className="hover:text-foreground transition-colors">My Applications</button>
+          <ChevronRight className="size-3" />
+          <button onClick={() => openApplication(app.id, "ltp-application-details")} className="hover:text-foreground transition-colors font-mono">{app.applicationNo}</button>
+          <ChevronRight className="size-3" />
+          <span className="text-foreground font-medium">Scrutiny Report</span>
+        </nav>
+      </div>
+
       <PageHeader
         title="Scrutiny Report"
-        description="Automated validation of drawings against Development Control Regulations"
+        description={r.reportNo}
         icon={ScrollText}
-        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Scrutiny Report" }]}
         actions={<ApplicationSelector currentApp={app} view="ltp-scrutiny" apps={visibleApps} />}
       />
 
       {/* Application Context Bar */}
       <ApplicationContextBar app={app} />
 
-      {/* Summary */}
-      <div className={cn("rounded-xl border p-5", r.status === "PASSED" ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>
+      {/* Report summary header */}
+      <div className={cn("rounded-xl border p-5", sCfg.cls)}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
-            <div className={cn("flex size-12 items-center justify-center rounded-xl", r.status === "PASSED" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive")}>
-              {r.status === "PASSED" ? <CheckCircle2 className="size-6" /> : <XCircle className="size-6" />}
+            <div className={cn("flex size-12 items-center justify-center rounded-xl", sCfg.iconCls)}>
+              <SIcon className="size-6" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <p className="text-lg font-semibold">{r.reportNo}</p>
-                {r.status === "PASSED" ? <Badge className="bg-success text-success-foreground">Passed</Badge> : <Badge className="bg-destructive text-white">Failed</Badge>}
+                <Badge className={sCfg.badge}>{sCfg.label}</Badge>
               </div>
-              <p className="text-sm text-muted-foreground">Drawing v{r.drawingVersion} · Generated {formatDateTime(r.generatedAt)}</p>
+              <p className="text-sm text-muted-foreground">
+                Drawing: {drawing?.fileName ?? `v${r.drawingVersion}`} · Version v{r.drawingVersion} · Generated {formatDateTime(r.generatedAt)}
+              </p>
               <p className="text-sm">{r.summary}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm"><Download className="size-4" /> Download PDF</Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("ltp-drawings")}>
+              <Eye className="size-4" /> View Drawing
+            </Button>
             {r.status === "FAILED" && <Button size="sm" onClick={() => navigate("ltp-drawings")}><Upload className="size-4" /> Re-upload</Button>}
           </div>
         </div>
       </div>
 
-      {/* Stats */}
+      {/* KPI cards — Total / Passed / Failed / Warnings */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <ScrutinyStatCard label="Total Checks" value={r.totalChecks} icon={Layers} cls="bg-muted text-muted-foreground" />
-        <ScrutinyStatCard label="Passed" value={r.passed} icon={CheckCircle2} cls="bg-success/10 text-success" />
-        <ScrutinyStatCard label="Failed" value={r.failed} icon={XCircle} cls="bg-destructive/10 text-destructive" />
-        <ScrutinyStatCard label="Warnings" value={r.warnings} icon={AlertTriangle} cls="bg-warning/15 text-warning-foreground" />
+        <ScrutinyStatCard label="Total Checks" value={totalChecks} icon={Layers} cls="bg-muted text-muted-foreground" />
+        <ScrutinyStatCard label="Passed" value={passedCount} icon={CheckCircle2} cls="bg-success/10 text-success" />
+        <ScrutinyStatCard label="Failed" value={failedCount} icon={XCircle} cls="bg-destructive/10 text-destructive" />
+        <ScrutinyStatCard label="Warnings" value={warningCount} icon={AlertTriangle} cls="bg-amber-500/15 text-amber-600" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
-          <SectionCard title="Detailed Checks" description="Rule-by-rule validation results" icon={ScrollText} noPadding>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
+        {/* Main: Detailed Checks */}
+        <div className="min-w-0 space-y-6">
+          <SectionCard title="Detailed Checks" description={`${totalChecks} checks evaluated`} icon={ScrollText} noPadding>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
+                <colgroup>
+                  <col className="w-[22%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[24%]" />
+                  <col className="w-[24%]" />
+                </colgroup>
                 <thead className="bg-muted/40">
                   <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                     <th className="px-4 py-2.5 font-medium">Rule</th>
                     <th className="px-4 py-2.5 font-medium">Category</th>
-                    <th className="px-4 py-2.5 font-medium">Severity</th>
-                    <th className="px-4 py-2.5 font-medium">Result</th>
+                    <th className="px-4 py-2.5 font-medium text-center">Severity</th>
+                    <th className="px-4 py-2.5 font-medium text-center">Result</th>
+                    <th className="px-4 py-2.5 font-medium">Observation</th>
                     <th className="px-4 py-2.5 font-medium">Recommendation</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {r.checks.map((c) => (
-                    <tr key={c.id} className={cn("hover:bg-muted/30", c.status === "FAIL" && "bg-destructive/[0.02]")}>
-                      <td className="px-4 py-3">
-                        <p className="text-xs font-medium">{c.rule}</p>
-                        <p className="text-[10px] text-muted-foreground">{c.message}</p>
+                    <tr key={c.id} className={cn("hover:bg-muted/30 h-14", c.status === "FAIL" && "bg-destructive/[0.02]")}>
+                      <td className="px-4 py-2">
+                        <p className="text-xs font-medium leading-tight">{c.rule}</p>
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">{c.category}</td>
-                      <td className="px-4 py-3"><SeverityBadge severity={c.severity} /></td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-2 text-xs text-muted-foreground">{c.category}</td>
+                      <td className="px-4 py-2 text-center"><SeverityBadge severity={c.severity} /></td>
+                      <td className="px-4 py-2 text-center">
                         {c.status === "PASS" && <Badge className="bg-success/15 text-success">Pass</Badge>}
                         {c.status === "FAIL" && <Badge className="bg-destructive text-white">Fail</Badge>}
-                        {c.status === "WARNING" && <Badge className="bg-warning text-warning-foreground">Warning</Badge>}
+                        {c.status === "WARNING" && <Badge className="bg-amber-500 text-white">Warning</Badge>}
                       </td>
-                      <td className="px-4 py-3 text-[11px] text-muted-foreground">{c.recommendation ?? "—"}</td>
+                      <td className="px-4 py-2 text-[11px] text-muted-foreground">{c.message}</td>
+                      <td className="px-4 py-2 text-[11px] text-muted-foreground">{c.recommendation ?? "—"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -453,12 +508,36 @@ export function LtpScrutiny() {
           </SectionCard>
         </div>
 
-        <div className="space-y-6">
+        {/* Right rail: Result Summary + Severity Distribution + By Category */}
+        <div className="space-y-6 min-w-0">
+          {/* Result Summary */}
+          <SectionCard title="Result Summary" icon={CheckCircle2}>
+            <ul className="space-y-2.5 text-xs">
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Passed</span>
+                <Badge className="bg-success/10 text-success">{passedCount}</Badge>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Warnings</span>
+                <Badge className="bg-amber-500/15 text-amber-600">{warningCount}</Badge>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Failed</span>
+                <Badge className="bg-destructive/10 text-destructive">{failedCount}</Badge>
+              </li>
+              <li className="flex items-center justify-between border-t border-border pt-2">
+                <span className="text-muted-foreground">Total</span>
+                <Badge className="bg-muted text-muted-foreground">{totalChecks}</Badge>
+              </li>
+            </ul>
+          </SectionCard>
+
+          {/* Severity Distribution — only Critical, Major, Minor */}
           <SectionCard title="Severity Distribution" icon={AlertTriangle}>
             <ul className="space-y-2.5">
-              {(["CRITICAL", "MAJOR", "MINOR", "WARNING", "PASSED"] as const).map((sev) => {
-                const count = r.checks.filter((c) => c.severity === sev).length;
-                const pct = Math.round((count / r.totalChecks) * 100);
+              {(["CRITICAL", "MAJOR", "MINOR"] as const).map((sev) => {
+                const count = severityCounts[sev];
+                const pct = totalChecks > 0 ? Math.round((count / totalChecks) * 100) : 0;
                 return (
                   <li key={sev} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
@@ -472,17 +551,24 @@ export function LtpScrutiny() {
             </ul>
           </SectionCard>
 
+          {/* By Category */}
           <SectionCard title="By Category" icon={Layers}>
             <ul className="space-y-2">
               {Object.entries(grouped).map(([cat, checks]) => {
-                const fails = checks.filter((c) => c.status === "FAIL").length;
+                const catPassed = checks.filter((c) => c.status === "PASS").length;
+                const catFailed = checks.filter((c) => c.status === "FAIL").length;
+                const catWarn = checks.filter((c) => c.status === "WARNING").length;
                 return (
-                  <li key={cat} className="flex items-center justify-between text-xs">
-                    <span className="font-medium">{cat}</span>
-                    <span className="flex items-center gap-2">
+                  <li key={cat} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium">{cat}</span>
                       <span className="text-muted-foreground">{checks.length} checks</span>
-                      {fails > 0 ? <Badge className="bg-destructive/10 text-destructive text-[9px]">{fails} fail</Badge> : <Badge className="bg-success/10 text-success text-[9px]">all pass</Badge>}
-                    </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {catFailed > 0 && <Badge className="bg-destructive/10 text-destructive text-[9px]">{catFailed} fail</Badge>}
+                      {catWarn > 0 && <Badge className="bg-amber-500/15 text-amber-600 text-[9px]">{catWarn} warn</Badge>}
+                      {catFailed === 0 && catWarn === 0 && <Badge className="bg-success/10 text-success text-[9px]">all pass</Badge>}
+                    </div>
                   </li>
                 );
               })}
