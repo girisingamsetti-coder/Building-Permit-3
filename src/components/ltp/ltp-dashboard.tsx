@@ -134,14 +134,14 @@ export function LtpDashboard() {
           <Button size="sm" onClick={() => setNewAppOpen(true)}>
             <FilePlus2 className="size-4" /> New Application
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate("ltp-applications")}>
-            <FileStack className="size-4" /> My Applications
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate("ltp-documents")}>
-            <Layers className="size-4" /> Upload Documents
+          <Button variant="outline" size="sm" onClick={() => navigate("ltp-drawings")}>
+            <Upload className="size-4" /> Upload Drawing &amp; Documents
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigate("ltp-payment")}>
-            <CreditCard className="size-4" /> Pending Payments
+            <CreditCard className="size-4" /> Pay Fees
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("ltp-shortfalls")}>
+            <FileWarning className="size-4" /> Shortfalls
           </Button>
         </div>
       </div>
