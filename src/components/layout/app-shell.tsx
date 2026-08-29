@@ -41,11 +41,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col min-w-0">
         <Topbar />
         <main className="flex flex-1 flex-col overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 animate-fade-in-up">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10 animate-fade-in-up">
             {children}
           </div>
-          <footer className="mt-auto border-t border-border bg-muted/30 px-4 py-3 sm:px-6 lg:px-8">
-            <div className="mx-auto flex w-full max-w-[1440px] flex-col items-center justify-between gap-2 text-[11px] text-muted-foreground sm:flex-row">
+          <footer className="mt-auto border-t border-border bg-muted/30 px-4 py-3 sm:px-6 lg:px-8 xl:px-10">
+            <div className="flex w-full flex-col items-center justify-between gap-2 text-[11px] text-muted-foreground sm:flex-row">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-foreground/70">LTP Approval · Building Permit Management System</span>
                 <span className="hidden sm:inline">·</span>
