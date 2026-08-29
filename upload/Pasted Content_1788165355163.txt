@@ -1,0 +1,1979 @@
+PERFORM A COMPLETE PROJECT-WIDE QA, FUNCTIONAL AUDIT, UI/UX ALIGNMENT AUDIT, RESPONSIVE AUDIT, DATA-CONSISTENCY AUDIT, RBAC AUDIT, AND WORKFLOW REGRESSION TEST OF THE ENTIRE EXISTING LTP APPROVAL / BUILDING PERMIT MANAGEMENT SYSTEM.
+
+THIS IS A FINAL QUALITY-CONTROL AND RECTIFICATION TASK.
+
+DO NOT REBUILD THE APPLICATION FROM SCRATCH.
+
+DO NOT CHANGE THE CORE BUSINESS REQUIREMENTS.
+
+DO NOT REMOVE VALID EXISTING FUNCTIONALITY.
+
+DO NOT MAKE UNRELATED DESIGN CHANGES.
+
+The goal is to inspect the ENTIRE PROJECT and identify and fix every visible, functional, navigational, data, alignment, spacing, workflow, permission, and responsiveness issue that can be found.
+
+==================================================
+PART 1 — COMPLETE PROJECT AUDIT
+==================================================
+
+Audit the entire application, not just one screen.
+
+Inspect every:
+
+- account / role
+- dashboard
+- module
+- sub-module
+- page
+- card
+- tile
+- table
+- form
+- modal
+- drawer
+- dropdown
+- tab
+- accordion
+- wizard
+- upload interface
+- status badge
+- button
+- breadcrumb
+- back button
+- pagination
+- search
+- filter
+- notification
+- workflow tracker
+- empty state
+- loading state
+- error state
+- success state
+
+Do not assume a screen is correct merely because it renders.
+
+==================================================
+PART 2 — ALL USER ACCOUNTS / ROLES
+==================================================
+
+Audit all existing roles individually:
+
+1. System Administrator / ADMIN
+2. LTP
+3. TPS
+4. TPA
+5. ZAD
+6. ZDD
+7. ZJD
+8. Director – DP
+9. Additional Commissioner
+10. Commissioner
+
+If the project contains additional configured roles, audit those as well.
+
+Each role must be tested independently.
+
+==================================================
+PART 3 — ROLE-BY-ROLE TEST
+==================================================
+
+For EVERY role verify:
+
+Login
+↓
+Dashboard
+↓
+Navigation
+↓
+Sidebar
+↓
+Search
+↓
+Notifications
+↓
+Profile
+↓
+Applicable modules
+↓
+Application queue
+↓
+Application details
+↓
+Actions
+↓
+Workflow transitions
+↓
+Back navigation
+↓
+Logout
+
+Verify that each role sees only what it is supposed to see.
+
+==================================================
+PART 4 — FUNCTIONAL BUG AUDIT
+==================================================
+
+Search for and fix:
+
+- dead buttons
+- buttons with no click behavior
+- links going to wrong pages
+- incorrect route parameters
+- stale application context
+- missing application IDs
+- incorrect selected application
+- incorrect status updates
+- data not refreshing
+- data disappearing after navigation
+- newly created applications not appearing
+- created records not persisted
+- duplicated records
+- duplicate application IDs
+- duplicate application numbers
+- incorrect counters
+- inconsistent statuses
+- wrong applicant names
+- wrong project names
+- wrong documents
+- wrong fee records
+- wrong payment records
+- incorrect notifications
+- broken search
+- broken filters
+- broken pagination
+- broken uploads
+- broken downloads
+- broken previews
+- broken modals
+- broken forms
+- broken validation
+- incorrect redirects
+- wrong role access
+- incorrect role permissions
+- workflow stages being skipped
+- workflow stages appearing in wrong order
+- stale UI after state changes
+- incorrect success/failure handling
+- console errors
+- runtime errors
+- TypeScript errors
+- unhandled promises
+- React warnings
+- broken responsive behavior
+
+Fix root causes, not visual symptoms.
+
+==================================================
+PART 5 — GLOBAL DESIGN SYSTEM AUDIT
+==================================================
+
+Inspect whether the project uses a consistent design system.
+
+Standardize where appropriate:
+
+- colors
+- font family
+- font sizes
+- font weights
+- border radius
+- borders
+- shadows
+- icon sizes
+- card padding
+- section spacing
+- field heights
+- button heights
+- table row heights
+- page margins
+- grid gaps
+- modal dimensions
+
+Do NOT redesign the visual identity.
+
+Keep:
+
+LTP Approval
+Building Permit Management System
+
+with the current professional government-enterprise visual language.
+
+==================================================
+PART 6 — REMOVE EXCESSIVE EMPTY SPACE
+==================================================
+
+Audit EVERY page for excessive empty space.
+
+Check:
+
+- between cards
+- between tiles
+- between page heading and content
+- between sections
+- inside cards
+- inside tables
+- above/below buttons
+- between form fields
+- inside modals
+- inside dropdowns
+- between sidebar and main content
+- left/right page margins
+- right rail gaps
+- table header spacing
+- footer spacing
+- workflow tracker spacing
+
+Remove unnecessary empty space.
+
+IMPORTANT:
+
+Do NOT remove all whitespace.
+
+Keep professional breathing room.
+
+The objective is:
+
+COMPACT + CLEAN + BALANCED
+
+not:
+
+CRAMPED
+
+==================================================
+PART 7 — PAGE CONTAINER WIDTH
+==================================================
+
+Standardize the main application page container.
+
+Use the available workspace efficiently.
+
+Recommended:
+
+width: 100%
+
+max-width:
+1600px–1700px
+
+margin:
+0 auto
+
+padding:
+24px–32px
+
+Do NOT use unnecessarily narrow containers.
+
+Do NOT leave excessive blank space on large screens.
+
+==================================================
+PART 8 — SIDEBAR + MAIN CONTENT
+==================================================
+
+The layout must consistently follow:
+
+Sidebar
+↓
+small page margin
+↓
+wide main workspace
+
+Do not create:
+
+Sidebar
+↓
+large empty area
+↓
+narrow workspace
+
+Use the full available viewport efficiently.
+
+==================================================
+PART 9 — CARD ALIGNMENT
+==================================================
+
+Audit every card in every module.
+
+Each card must have:
+
+- aligned edges
+- consistent width within its grid
+- consistent internal padding
+- consistent header alignment
+- properly positioned actions
+- no content overflow
+- no overlapping elements
+
+Cards in the same row should have equal height where they are intended to be a card group.
+
+Do NOT force equal height where content naturally requires different heights.
+
+==================================================
+PART 10 — TILE ALIGNMENT
+==================================================
+
+Audit every tile/button grid.
+
+Examples:
+
+Quick Actions
+Configuration Overview
+Application Type selectors
+Role selectors
+Permission controls
+Dashboard shortcuts
+
+Tiles must have:
+
+- equal width
+- equal height
+- consistent gap
+- aligned icon
+- aligned text
+- aligned action area
+
+Use proper CSS Grid/Flex.
+
+Do NOT position tiles manually with absolute coordinates.
+
+==================================================
+PART 11 — NO CARD OVERLAPPING
+==================================================
+
+Search the entire project for layout techniques causing overlaps:
+
+- absolute positioning
+- negative margins
+- fixed heights
+- improper overflow
+- z-index hacks
+- conflicting grid sizes
+- flex shrinking
+- fixed-width children
+- nested containers with incompatible widths
+
+Fix the underlying layout.
+
+Do NOT solve overlap just by increasing z-index.
+
+==================================================
+PART 12 — GRID STANDARDIZATION
+==================================================
+
+Use consistent responsive grids.
+
+Typical patterns:
+
+4 KPI cards:
+4 columns desktop
+2 columns tablet
+1 column mobile
+
+3 application cards:
+3 columns desktop
+2 columns tablet
+1 column mobile
+
+2-column content:
+Main 70–72%
+Right 28–30%
+
+Use:
+
+gap:
+16–24px
+
+depending on component size.
+
+==================================================
+PART 13 — DASHBOARD AUDIT — LTP
+==================================================
+
+Inspect the LTP dashboard completely.
+
+Verify:
+
+- Welcome section
+- action buttons
+- KPI cards
+- My Applications
+- application cards
+- pagination
+- Live Workflow Tracker
+- application selector
+- Quick Actions where configured
+
+No duplicate actions.
+
+No excessive whitespace.
+
+All applications must be accessible.
+
+Pagination must work.
+
+Live Workflow Tracker must use selected application data.
+
+==================================================
+PART 14 — DASHBOARD AUDIT — ADMIN
+==================================================
+
+Inspect only the Admin dashboard for admin-specific quality.
+
+Verify:
+
+- useful KPI cards
+- system health
+- administrative actions
+- audit activity
+- configuration overview
+- pending admin actions
+
+Remove unnecessary applicant-facing data.
+
+Fix all card overlaps.
+
+Fix all grids.
+
+==================================================
+PART 15 — ROLE DASHBOARDS
+==================================================
+
+For:
+
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+verify each dashboard uses:
+
+- correct role-specific applications
+- correct counts
+- correct action queue
+- correct current stage
+- correct permissions
+- correct SLA information
+- correct workflow status
+
+Do not use global application counts when the role should see only assigned applications.
+
+==================================================
+PART 16 — MY APPLICATIONS
+==================================================
+
+Verify:
+
+- all created applications appear
+- newly created applications appear immediately
+- different applicants are preserved
+- correct project names
+- correct application numbers
+- correct status
+- correct current stage
+- correct updated date
+- correct actions
+
+Verify pagination.
+
+Verify search.
+
+Verify filters.
+
+Verify opening an application preserves applicationId.
+
+==================================================
+PART 17 — NEW APPLICATION WIZARD
+==================================================
+
+Audit the entire wizard:
+
+Details
+→ Project
+→ Drawing
+→ Documents
+→ Review
+
+Verify:
+
+- modal is sufficiently wide
+- fields are properly aligned
+- two-column grid where appropriate
+- fields use full available width
+- labels align
+- errors align
+- buttons align
+- stepper is aligned
+- footer is aligned
+- internal scrolling works
+- background blur works
+- application creation works
+- save draft works
+- validation works
+- submit works
+
+After Submit:
+
+application must appear immediately in shared application state.
+
+==================================================
+PART 18 — DRAWINGS & SCRUTINY
+==================================================
+
+Audit:
+
+- application selector
+- application context
+- upload
+- re-upload
+- version history
+- drawing viewer
+- scrutiny generation
+- scrutiny result
+- failed scrutiny
+- passed scrutiny
+- warnings
+- report generation
+- report view
+- download
+- application linkage
+
+If scrutiny fails:
+
+LTP must be able to re-upload.
+
+New version must be created.
+
+Old version must remain in history.
+
+==================================================
+PART 19 — SCRUTINY REPORT
+==================================================
+
+Verify every report references the correct:
+
+applicationId
+drawingId
+drawingVersion
+project
+applicant
+
+No mismatched records.
+
+Audit:
+
+- total checks
+- passed
+- failed
+- warning
+- severity
+- recommendations
+- report status
+
+The report must correctly determine whether the application can proceed.
+
+==================================================
+PART 20 — DOCUMENTS
+==================================================
+
+Audit:
+
+- application selector
+- application context
+- required documents
+- optional documents
+- Quick Upload
+- document type selection
+- file validation
+- upload progress
+- duplicate uploads
+- versioning
+- replacement
+- preview
+- download
+- verification
+- rejection
+- shortfall
+- compliance percentage
+- counters
+- filtering
+- search
+- document history
+
+Critical rule:
+
+UPLOADED != VERIFIED
+
+Uploaded documents should be:
+
+Pending Verification
+
+until authorized verification occurs.
+
+==================================================
+PART 21 — DOCUMENT APPLICATION LINK
+==================================================
+
+Every document must use:
+
+applicationId
+
+Never allow documents from another application to appear under the selected application.
+
+Test switching applications.
+
+==================================================
+PART 22 — FEE MODULE
+==================================================
+
+Audit:
+
+- fee generation
+- fee structure
+- fee components
+- calculation
+- application context
+- paid amount
+- outstanding amount
+- fee status
+- application linkage
+- fee detail
+- payment navigation
+
+Fee calculations must use the configured fee structure.
+
+Do not silently change generated historical fees after configuration changes.
+
+==================================================
+PART 23 — PAYMENTS
+==================================================
+
+Audit:
+
+- pending payments
+- payment listing
+- payment details
+- application context
+- fee amount
+- paid amount
+- outstanding
+- payment states
+- payment flow
+- processing
+- success
+- failure
+- receipt
+- return navigation
+- payment history
+- dashboard synchronization
+
+Successful payment must:
+
+- set payment SUCCESS
+- set paid amount
+- set outstanding to 0 when fully paid
+- generate receipt
+- advance application workflow
+- notify relevant users
+- create audit event
+- update dashboard
+- update My Applications
+- remove application from pending payments
+
+==================================================
+PART 24 — PAYMENT NAVIGATION
+==================================================
+
+Verify:
+
+Payments
+→ Payment Details
+→ Proceed to Payment
+→ Success
+→ Payments listing
+
+After success:
+
+the listing must show:
+
+Success
+Outstanding ₹0
+View Receipt
+
+NOT:
+
+Pay Now
+
+==================================================
+PART 25 — SHORTFALLS
+==================================================
+
+Audit:
+
+- shortfall creation
+- application association
+- document association
+- shortfall status
+- response
+- attachments
+- resolution
+- notifications
+- workflow return
+- search
+- filters
+- details
+- back navigation
+
+No shortfall may exist without a valid applicationId.
+
+==================================================
+PART 26 — NOTIFICATIONS
+==================================================
+
+Audit notifications for:
+
+- application creation
+- drawing upload
+- scrutiny pass/fail
+- document upload
+- document verification
+- rejection
+- shortfall
+- fee generation
+- payment
+- workflow forwarding
+- approval
+- rejection
+- final decision
+
+Each notification must reference the correct application.
+
+==================================================
+PART 27 — GLOBAL SEARCH
+==================================================
+
+Audit the global search.
+
+Search must find:
+
+Applications
+Projects
+Applicants
+Documents
+Scrutiny Reports
+Payments
+Shortfalls
+Officers
+
+Search by:
+
+Application Number
+Project
+Applicant
+Document
+Report Number
+Payment Reference
+Shortfall ID
+Officer
+
+Search results must route to the correct application/context.
+
+No incorrect application navigation.
+
+==================================================
+PART 28 — HELP & SUPPORT
+==================================================
+
+Audit all functions:
+
+User Guide
+Live Chat
+Helpline
+FAQ
+Contact Support
+Resources
+Raise a Ticket
+My Support Tickets
+
+Verify:
+
+buttons work
+links work
+accordion works
+phone/email actions work
+ticket submission works
+ticket records persist
+application context is preserved
+resources open correctly
+
+No dead buttons.
+
+==================================================
+PART 29 — ADMINISTRATION
+==================================================
+
+Audit:
+
+Users
+Roles & Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification/SMS
+System Settings
+Audit Logs
+System Health
+
+Every admin control must actually work.
+
+==================================================
+PART 30 — RBAC
+==================================================
+
+This is critical.
+
+Test permission changes from Admin.
+
+Example:
+
+Admin
+→ disable TPS technical scrutiny permission
+→ Save
+
+TPS login:
+
+Scrutinize action must be unavailable.
+
+Then:
+
+Admin
+→ enable permission
+
+TPS:
+
+Scrutinize must return.
+
+This must affect:
+
+- sidebar
+- route guards
+- buttons
+- actions
+- underlying authorization
+- direct URL access
+
+Do not implement RBAC using UI hiding alone.
+
+==================================================
+PART 31 — ROLE CHANGE TEST
+==================================================
+
+Admin changes:
+
+User A
+LTP → TPS
+
+Verify user behaves as TPS.
+
+Then:
+
+TPS → TPA
+
+Verify TPA permissions.
+
+Do not retain old permissions.
+
+==================================================
+PART 32 — USER ACTIVATION
+==================================================
+
+Admin deactivates user.
+
+Verify login is blocked.
+
+Admin reactivates.
+
+Verify login works again.
+
+==================================================
+PART 33 — WORKFLOW AUDIT
+==================================================
+
+Verify complete workflow:
+
+LTP
+→ Drawing
+→ Scrutiny
+→ Re-upload if failed
+→ Scrutiny Pass
+→ Documents
+→ Verification
+→ Fee
+→ Payment
+→ TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director – DP
+→ Additional Commissioner
+→ Commissioner
+→ Final Decision
+
+No invalid skips.
+
+No wrong transitions.
+
+==================================================
+PART 34 — LIVE WORKFLOW TRACKER
+==================================================
+
+Verify Live Workflow Tracker reflects:
+
+selected application
+current stage
+current role
+progress
+completed stages
+active stage
+pending stages
+shortfall state
+failure state
+approval state
+
+Every workflow action must update the tracker.
+
+==================================================
+PART 35 — TABLE ALIGNMENT AUDIT
+==================================================
+
+Inspect EVERY table in the project.
+
+Check:
+
+- header alignment
+- column widths
+- row height
+- cell padding
+- text wrapping
+- action buttons
+- status badges
+- dates
+- numeric alignment
+- no clipping
+- no excessive whitespace
+
+Use consistent table spacing.
+
+Suggested:
+
+cell padding:
+10–14px
+
+Avoid rows becoming unnecessarily tall.
+
+Long text should wrap deliberately.
+
+==================================================
+PART 36 — TABLE WIDTH
+==================================================
+
+Tables should use the available card width efficiently.
+
+Do NOT leave large empty areas.
+
+Do NOT compress important fields.
+
+Recommended principle:
+
+important identity columns:
+more width
+
+small metadata:
+less width
+
+actions:
+fixed reasonable width
+
+==================================================
+PART 37 — FORM ALIGNMENT AUDIT
+==================================================
+
+Inspect every form.
+
+All forms must have:
+
+consistent label position
+consistent input height
+consistent field spacing
+consistent column widths
+consistent error area
+consistent button alignment
+
+No random field widths.
+
+Use:
+
+width: 100%
+
+inside grid columns.
+
+==================================================
+PART 38 — MODAL AUDIT
+==================================================
+
+Inspect every modal.
+
+Verify:
+
+- width
+- height
+- centering
+- padding
+- header
+- close button
+- content scroll
+- footer
+- buttons
+- backdrop
+- blur
+- responsive layout
+
+No modal should:
+
+- overflow viewport
+- clip buttons
+- create horizontal scroll
+- have huge empty areas
+- have cramped fields
+
+==================================================
+PART 39 — DROPDOWN AUDIT
+==================================================
+
+Inspect every dropdown/select/popover.
+
+Verify:
+
+- width
+- alignment
+- search
+- selected state
+- keyboard navigation
+- scroll
+- clipping
+- z-index
+- mobile behavior
+
+No dropdown should open outside the visible viewport.
+
+==================================================
+PART 40 — BREADCRUMB / BACK BUTTON AUDIT
+==================================================
+
+Every module must use the hierarchical back navigation.
+
+Do NOT use browser history as the primary application back mechanism.
+
+Examples:
+
+Documents
+→ Document Details
+→ Back
+→ Documents
+
+Drawings
+→ Drawing Details
+→ Scrutiny Report
+→ Back
+→ Drawing Details
+
+Fees
+→ Fee Details
+→ Back
+→ Fees
+
+Application
+→ Documents
+→ Back
+→ Application Details
+
+No misleading:
+
+Back to Fees
+on Documents
+
+==================================================
+PART 41 — HEADER ALIGNMENT
+==================================================
+
+Inspect:
+
+global search
+role selector
+notification icon
+profile
+page title
+breadcrumb
+
+Make sure header controls align vertically.
+
+No overlap.
+
+No excessive horizontal spacing.
+
+==================================================
+PART 42 — SIDEBAR AUDIT
+==================================================
+
+Check:
+
+- logo
+- branding
+- section headings
+- icons
+- labels
+- active state
+- submenu
+- collapse behavior
+- bottom user card
+
+No text clipping.
+
+No unnecessary sidebar width.
+
+No inconsistent active states.
+
+==================================================
+PART 43 — FOOTER AUDIT
+==================================================
+
+Footer must:
+
+- align with page
+- not overlap content
+- remain unobtrusive
+- use correct LTP Approval branding
+
+No unnecessary blank area above footer.
+
+==================================================
+PART 44 — RESPONSIVE AUDIT
+==================================================
+
+Test every major page at:
+
+1920 × 1080
+1600 × 900
+1440 × 900
+1366 × 768
+1280 × 800
+1024 × 768
+768 × 1024
+480 × 900
+390 × 844
+
+Fix:
+
+- overflow
+- clipping
+- broken cards
+- broken grids
+- tiny fields
+- hidden buttons
+- broken tables
+- modal overflow
+- dropdown overflow
+- header collisions
+
+==================================================
+PART 45 — MOBILE AUDIT
+==================================================
+
+On mobile:
+
+Cards:
+1 column
+
+Forms:
+1 column
+
+Tables:
+responsive/card or controlled horizontal scroll
+
+Modals:
+96vw maximum
+
+Buttons:
+fit viewport
+
+No horizontal page scrolling.
+
+==================================================
+PART 46 — DATA CONSISTENCY AUDIT
+==================================================
+
+Verify single sources of truth for:
+
+Applications
+Users
+Roles
+Permissions
+Drawings
+Documents
+Scrutiny Reports
+Fees
+Payments
+Shortfalls
+Notifications
+Workflow
+Audit Logs
+
+Do NOT maintain duplicated datasets in multiple modules.
+
+==================================================
+PART 47 — APPLICATION ID AUDIT
+==================================================
+
+Every related record must reference:
+
+applicationId
+
+For example:
+
+Drawing → applicationId
+Document → applicationId
+Scrutiny → applicationId
+Fee → applicationId
+Payment → applicationId
+Shortfall → applicationId
+Notification → applicationId
+Workflow Event → applicationId
+Audit Event → applicationId
+
+Fix orphaned/mismatched records.
+
+==================================================
+PART 48 — STATUS CONSISTENCY AUDIT
+==================================================
+
+Use one centralized status model.
+
+Prevent contradictions such as:
+
+Payment Successful + Outstanding > 0
+
+Scrutiny Passed + Re-upload Required
+
+Documents Complete + Verification Pending
+
+Fee Not Generated + Payment Successful
+
+Approved + Current Stage TPS
+
+Commissioner Approved + Application still pending
+
+==================================================
+PART 49 — WORKFLOW TRANSITION VALIDATION
+==================================================
+
+Use centralized workflow transition logic.
+
+Concept:
+
+canTransition(
+currentStage,
+action,
+currentRole
+)
+
+No component should directly mutate workflow stage without validation.
+
+==================================================
+PART 50 — LOADING STATES
+==================================================
+
+Every async operation should have appropriate loading state.
+
+Examples:
+
+Uploading...
+Saving...
+Loading documents...
+Loading applications...
+Processing payment...
+Loading workflow...
+
+Do not show stale data while new data is loading.
+
+==================================================
+PART 51 — ERROR STATES
+==================================================
+
+Every critical operation must have a useful error state.
+
+Examples:
+
+Upload failed
+Save failed
+Payment failed
+Search failed
+Permission update failed
+Workflow action failed
+Document verification failed
+
+Show a meaningful message and retry action where appropriate.
+
+==================================================
+PART 52 — SUCCESS STATES
+==================================================
+
+Every major successful action should provide feedback.
+
+Examples:
+
+Application created successfully
+Document uploaded successfully
+Document verified
+Fee generated
+Payment successful
+Shortfall submitted
+Permission updated
+User created
+
+==================================================
+PART 53 — EMPTY STATES
+==================================================
+
+Every list must have a sensible empty state.
+
+Examples:
+
+No applications
+No pending payments
+No documents
+No notifications
+No shortfalls
+No support tickets
+No audit events
+
+Do not display empty cards containing unexplained whitespace.
+
+==================================================
+PART 54 — SEARCH + FILTER + PAGINATION
+==================================================
+
+Where a module supports all three:
+
+correct order is:
+
+Dataset
+↓
+Search/filter
+↓
+Sort
+↓
+Pagination
+↓
+Render
+
+Do not paginate before filtering.
+
+Reset page to 1 when filters change.
+
+==================================================
+PART 55 — DUPLICATE DATA AUDIT
+==================================================
+
+Search for:
+
+duplicate applications
+duplicate IDs
+duplicate application numbers
+duplicate uploaded files
+duplicate notifications
+duplicate workflow events
+duplicate audit events
+
+Fix accidental duplication.
+
+==================================================
+PART 56 — DATE CONSISTENCY
+==================================================
+
+Use one consistent date format per portal.
+
+Prefer:
+
+29 Aug 2026
+
+For timestamps where required:
+
+29 Aug 2026, 10:32 AM
+
+Do not randomly mix date formats.
+
+==================================================
+PART 57 — CURRENCY CONSISTENCY
+==================================================
+
+Use INR consistently:
+
+₹1,73,276
+
+Align numeric amounts correctly in tables.
+
+Do not mix:
+
+₹1,73,276
+INR 173276
+1,73,276 Rs
+
+unless context specifically requires it.
+
+==================================================
+PART 58 — TYPOGRAPHY AUDIT
+==================================================
+
+Check for:
+
+- inconsistent font sizes
+- random bold text
+- inconsistent headings
+- inconsistent capitalization
+- inconsistent status labels
+- inconsistent button casing
+
+Standardize without changing the overall visual language.
+
+==================================================
+PART 59 — ICON AUDIT
+==================================================
+
+Icons should:
+
+- match the function
+- use consistent size
+- align with text
+- have accessible labels when icon-only
+
+Do not use unrelated icons.
+
+==================================================
+PART 60 — ACCESSIBILITY AUDIT
+==================================================
+
+Verify:
+
+- keyboard navigation
+- focus states
+- form labels
+- aria labels
+- button labels
+- modal accessibility
+- accordion accessibility
+- dropdown keyboard support
+- sufficient visual contrast
+- icon-only button descriptions
+
+==================================================
+PART 61 — SECURITY / AUTHORIZATION AUDIT
+==================================================
+
+Verify unauthorized users cannot access:
+
+Admin routes
+Admin actions
+other users' applications
+restricted application information
+unauthorized workflow transitions
+
+Do not depend only on hiding sidebar items.
+
+==================================================
+PART 62 — PERFORMANCE AUDIT
+==================================================
+
+Check for:
+
+- unnecessary re-renders
+- repeated data fetching
+- infinite effects
+- memory leaks
+- excessive DOM
+- duplicate subscriptions
+- stale listeners
+
+Do not sacrifice correctness.
+
+==================================================
+PART 63 — CONSOLE AUDIT
+==================================================
+
+The final project must have:
+
+0 uncaught runtime errors
+
+0 major console errors
+
+0 broken imports
+
+0 missing components
+
+0 missing route errors
+
+0 hydration warnings where applicable
+
+0 unresolved promise warnings
+
+==================================================
+PART 64 — ROUTE AUDIT
+==================================================
+
+Test every route.
+
+No:
+
+404
+blank screen
+incorrect component
+incorrect application context
+broken dynamic route
+
+Every route must resolve correctly.
+
+==================================================
+PART 65 — ROLE SWITCH AUDIT
+==================================================
+
+Use the existing Demo Role selector.
+
+Switch through every role.
+
+Verify:
+
+dashboard
+permissions
+menu
+application visibility
+actions
+workflow state
+
+Changing role must not corrupt shared data.
+
+==================================================
+PART 66 — END-TO-END NEW APPLICATION TEST
+==================================================
+
+Create ONE completely new application.
+
+Use a fresh unique application number.
+
+Then perform:
+
+LTP
+→ Create Application
+→ Save
+→ Submit
+→ Verify application appears
+
+→ Upload Drawing
+
+→ Scrutiny
+
+Force:
+
+FAILED
+
+→ Re-upload corrected drawing
+
+→ Scrutiny
+
+Force:
+
+PASSED
+
+→ Upload all required documents
+
+→ Verification
+
+Verify all required documents through the authorized role
+
+→ Fee generated
+
+→ Payment pending
+
+→ Pay
+
+→ Payment success
+
+→ Receipt
+
+→ TPS
+
+→ TPA
+
+→ ZAD/ZDD
+
+→ ZJD
+
+→ Director – DP
+
+→ Additional Commissioner
+
+→ Commissioner
+
+→ Final Decision
+
+→ Approved
+
+At EVERY stage verify:
+
+applicationId
+status
+currentStage
+assignedRole
+assignedUser
+updatedAt
+notifications
+audit
+Live Workflow Tracker
+
+==================================================
+PART 67 — CROSS-MODULE CONSISTENCY TEST
+==================================================
+
+Use the same test application.
+
+At every stage verify the application is consistent in:
+
+Dashboard
+My Applications
+Application Details
+Drawings
+Scrutiny
+Documents
+Fees
+Payments
+Shortfalls
+Notifications
+Workflow
+Audit
+
+No page should show stale stage or wrong applicant/project.
+
+==================================================
+PART 68 — 2–3 APPLICATIONS PER ROLE
+==================================================
+
+For every role, maintain at least 2–3 usable demo applications.
+
+These should represent different states where appropriate.
+
+LTP:
+2–3 pre-workflow applications
+
+TPS:
+2–3 technical scrutiny applications
+
+TPA:
+2–3 TPA review applications
+
+ZAD/ZDD:
+2–3 review applications
+
+ZJD:
+2–3 applications
+
+Director:
+2–3 applications
+
+Additional Commissioner:
+2–3 applications
+
+Commissioner:
+2–3 final-review applications
+
+Admin:
+configuration/test users
+
+Do not make all records identical.
+
+==================================================
+PART 69 — ADMIN RBAC REGRESSION
+==================================================
+
+Test:
+
+Permission ON
+→ action available
+
+Permission OFF
+→ action unavailable
+
+Role changed
+→ permissions change
+
+User deactivated
+→ login blocked
+
+User reactivated
+→ login restored
+
+==================================================
+PART 70 — VISUAL PAGE-BY-PAGE CHECKLIST
+==================================================
+
+For EVERY PAGE answer internally:
+
+1. Are cards aligned?
+2. Are widths consistent?
+3. Are heights appropriate?
+4. Is spacing consistent?
+5. Is there unnecessary empty space?
+6. Is any content overlapping?
+7. Are buttons aligned?
+8. Are tables aligned?
+9. Are fields aligned?
+10. Are headers aligned?
+11. Is the page using available width?
+12. Is the content responsive?
+13. Is the back button correct?
+14. Is application context correct?
+15. Are all actions functional?
+16. Are permissions correct?
+17. Are loading/error/empty states correct?
+
+Fix every issue found.
+
+==================================================
+PART 71 — DO NOT BLINDLY REMOVE SPACE
+==================================================
+
+Do not reduce spacing to zero.
+
+Maintain:
+
+- readable text
+- accessible click targets
+- professional margins
+- clear grouping
+
+Only remove:
+
+unnecessary
+inconsistent
+accidental
+excessive
+
+space.
+
+==================================================
+PART 72 — DO NOT OVERLOAD CARDS
+==================================================
+
+Do not cram too much information into one card just to remove whitespace.
+
+If a card has empty space because the content naturally fits, keep a balanced layout.
+
+==================================================
+PART 73 — NO RANDOM UI CHANGES
+==================================================
+
+Do not:
+
+- add gradients
+- add decorative illustrations
+- add unnecessary charts
+- add fake statistics
+- add unnecessary animations
+- introduce a new theme
+- change existing branding
+
+Focus on quality, consistency and functionality.
+
+==================================================
+PART 74 — FINAL BUILD
+==================================================
+
+After corrections:
+
+run lint
+
+run build
+
+run type checking
+
+check console
+
+check all routes
+
+check all role logins
+
+Check that the application starts normally.
+
+==================================================
+PART 75 — FINAL REGRESSION REPORT
+==================================================
+
+After all fixes, provide a concise report containing:
+
+TOTAL PAGES AUDITED:
+<number>
+
+TOTAL ROLES AUDITED:
+<number>
+
+TOTAL MODULES AUDITED:
+<number>
+
+FUNCTIONAL ISSUES FOUND:
+<number>
+
+FUNCTIONAL ISSUES FIXED:
+<number>
+
+UI/ALIGNMENT ISSUES FOUND:
+<number>
+
+UI/ALIGNMENT ISSUES FIXED:
+<number>
+
+OVERLAPPING ELEMENTS FIXED:
+<number>
+
+EXCESSIVE SPACING ISSUES FIXED:
+<number>
+
+RBAC ISSUES FOUND:
+<number>
+
+RBAC ISSUES FIXED:
+<number>
+
+WORKFLOW ISSUES FOUND:
+<number>
+
+WORKFLOW ISSUES FIXED:
+<number>
+
+DATA-CONSISTENCY ISSUES FOUND:
+<number>
+
+DATA-CONSISTENCY ISSUES FIXED:
+<number>
+
+RESPONSIVE ISSUES FOUND:
+<number>
+
+RESPONSIVE ISSUES FIXED:
+<number>
+
+CONSOLE ERRORS:
+<number>
+
+LINT:
+PASS / FAIL
+
+BUILD:
+PASS / FAIL
+
+TYPE CHECK:
+PASS / FAIL
+
+==================================================
+PART 76 — FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The project is NOT considered complete unless:
+
+- all major routes work
+- all role logins work
+- RBAC works
+- permission changes propagate
+- application creation works
+- new applications appear everywhere
+- drawing upload works
+- scrutiny works
+- failed scrutiny re-upload works
+- scrutiny pass works
+- document upload works
+- document verification works
+- rejection works
+- replacement/versioning works
+- shortfalls work
+- fee generation works
+- payments work
+- payment success works
+- receipt works
+- application advances after payment
+- every approval stage works
+- Live Workflow Tracker updates
+- notifications work
+- audit works
+- search works
+- filters work
+- pagination works
+- Help & Support works
+- every major card is aligned
+- every tile is aligned
+- every table is aligned
+- every form is aligned
+- no cards overlap
+- no content overlaps
+- no unexplained excessive spacing exists
+- no major horizontal overflow exists
+- responsive behavior works
+- no critical console errors exist
+- lint passes
+- build passes
+- type checking passes
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+Treat the existing LTP Approval / Building Permit Management System as a real
+enterprise application undergoing final UAT and pre-production quality review.
+
+DO NOT make isolated cosmetic patches.
+
+Inspect the entire codebase and application behavior.
+
+Find the ROOT CAUSE of each issue.
+
+Fix the ROOT CAUSE.
+
+Ensure all accounts, modules, cards, tiles, tables, forms, workflows, data,
+permissions, navigation, and responsive layouts work together as ONE
+CONSISTENT SYSTEM.
+
+Most importantly:
+
+REMOVE ACCIDENTAL EMPTY SPACE.
+
+REMOVE MISALIGNMENT.
+
+REMOVE OVERLAPPING.
+
+REMOVE DUPLICATE DATA.
+
+REMOVE DEAD BUTTONS.
+
+REMOVE WRONG NAVIGATION.
+
+REMOVE WRONG ROLE ACCESS.
+
+REMOVE STALE WORKFLOW STATES.
+
+REMOVE INCONSISTENT APPLICATION DATA.
+
+KEEP PROFESSIONAL WHITESPACE.
+
+KEEP READABILITY.
+
+KEEP ACCESSIBILITY.
+
+KEEP THE EXISTING LTP APPROVAL DESIGN LANGUAGE.
+
+The final result must be clean, aligned, compact, responsive, functional,
+consistent, and ready for comprehensive client demonstration/UAT.

@@ -1,0 +1,1847 @@
+Perform a COMPLETE functional, data, and UI/UX audit of the existing Documents module in the LTP Approval / Building Permit Management System.
+
+IMPORTANT:
+Do NOT rebuild the application.
+Do NOT redesign unrelated modules.
+Do NOT change authentication.
+Do NOT change the Dashboard.
+Do NOT change the New Application wizard.
+Do NOT change Payments.
+Do NOT change Fees.
+Do NOT change Drawings & Scrutiny.
+Do NOT change Shortfalls.
+Do NOT change Notifications.
+
+ONLY audit and improve the Documents module and its related application-specific document functionality.
+
+This is NOT just a visual task.
+
+You must verify and fix:
+
+- document application association
+- quick upload
+- document type selection
+- file upload state
+- upload progress
+- duplicate uploads
+- versioning
+- document status
+- verification workflow
+- shortfall relationship
+- application context
+- counters
+- compliance calculation
+- document filtering
+- search
+- preview
+- download
+- replace
+- delete/remove where permitted
+- UI alignment
+- responsive layout
+- navigation
+
+==================================================
+1. CORE BUSINESS RULE
+==================================================
+
+Every document MUST belong to a specific application.
+
+Document relationship:
+
+Application
+   ↓
+Document
+   ↓
+Document Version
+   ↓
+Verification / Shortfall
+
+Every document record must contain at least:
+
+documentId
+applicationId
+documentTypeId
+documentType
+fileName
+fileSize
+version
+status
+uploadedBy
+uploadedAt
+verifiedBy
+verifiedAt
+rejectionReason where applicable
+shortfallId where applicable
+
+Do NOT create generic documents without applicationId.
+
+==================================================
+2. APPLICATION CONTEXT
+==================================================
+
+The Documents page must clearly show the selected application.
+
+At the top display:
+
+Application:
+MC/BP/2026/04/0003
+
+Project:
+Shahane Bunglow — G+1
+
+Applicant:
+Shri. Deepak Shahane
+
+Application Type:
+Building Permission
+
+Current Stage:
+Document Upload & Verification
+
+The application context must be clearly visible above the document content.
+
+==================================================
+3. APPLICATION SELECTOR
+==================================================
+
+Keep the application selector.
+
+It must display:
+
+Application Number
+Project Name
+Applicant
+
+Example:
+
+MC/BP/2026/04/0003
+Shahane Bunglow — G+1
+Shri. Deepak Shahane
+
+The selector must support search by:
+
+Application Number
+Project Name
+Applicant
+
+When the application changes:
+
+ALL document data must change.
+
+Do not retain the previous application's documents.
+
+==================================================
+4. NO CROSS-APPLICATION DATA MIXING
+==================================================
+
+This is critical.
+
+Application A documents must NEVER appear under Application B.
+
+Use:
+
+applicationId
+
+as the relationship.
+
+Do not use:
+
+project name
+applicant name
+display application number
+
+as the internal primary relationship.
+
+==================================================
+5. QUICK UPLOAD — FIX FULLY
+==================================================
+
+The current Quick Upload functionality is not reliable.
+
+Make it a complete application-specific upload workflow.
+
+The Quick Upload card should clearly display:
+
+Quick Upload
+
+For Application:
+MC/BP/2026/04/0003
+
+Project:
+Shahane Bunglow — G+1
+
+Then:
+
+Document Type *
+[ Select document type ▼ ]
+
+Upload File *
+[ Drop document here ]
+[ Browse Files ]
+
+Supported:
+
+PDF, JPG, PNG
+
+Maximum file size:
+10 MB
+
+The upload cannot proceed unless:
+
+1. application is selected
+2. document type is selected
+3. valid file is selected
+
+==================================================
+6. QUICK UPLOAD MUST UPDATE THE MAIN TABLE
+==================================================
+
+This is very important.
+
+When a document is uploaded through Quick Upload:
+
+the document MUST immediately appear in:
+
+Required Documents
+
+for the SAME application.
+
+Example:
+
+Selected application:
+MC/BP/2026/04/0003
+
+Selected document:
+Property Card / Mutation
+
+Uploaded file:
+Property_Card_v2.pdf
+
+After upload the table should show:
+
+Property Card / Mutation
+Status: Uploaded / Pending Verification
+Version: v2
+Uploaded By: current LTP
+Date: current date
+
+Do not leave the upload visible only inside the Quick Upload card.
+
+==================================================
+7. REMOVE DUPLICATE / UNRELATED UPLOAD ITEMS
+==================================================
+
+The current Quick Upload area shows duplicate uploaded files such as:
+
+Replit_AI_App_Guide...
+
+This should NOT happen unless those are genuinely the same selected document version.
+
+Fix the upload queue.
+
+Each selected file should appear once.
+
+Do not duplicate the same file automatically.
+
+Each upload item should show:
+
+File Name
+Document Type
+Version
+Size
+Progress
+Status
+Remove
+
+==================================================
+8. UPLOAD QUEUE
+==================================================
+
+During upload:
+
+Show:
+
+Property Card / Mutation
+Property_Card_v2.pdf
+2.4 MB
+Uploading...
+██████████ 68%
+
+After success:
+
+Uploaded
+100%
+
+Then:
+
+Pending Verification
+
+Do not automatically mark it Verified.
+
+==================================================
+9. DOCUMENT STATUS MODEL
+==================================================
+
+Use the following statuses:
+
+REQUIRED
+UPLOADED
+PENDING_VERIFICATION
+VERIFIED
+REJECTED
+SHORTFALL
+
+Important:
+
+UPLOADED does NOT equal VERIFIED.
+
+Uploaded documents that have not yet been verified should display:
+
+Pending Verification
+
+or
+
+Uploaded — Pending Verification
+
+==================================================
+10. FIX THE CURRENT COUNTER LOGIC
+==================================================
+
+The current screenshot shows:
+
+Required:
+7
+
+Verified:
+0
+
+Pending:
+0
+
+Compliance:
+0%
+
+This is inconsistent because the documents are already displayed as Uploaded.
+
+If the 7 required documents are uploaded but not verified, the correct summary should be:
+
+Required:
+7
+
+Verified:
+0
+
+Pending Verification:
+7
+
+Compliance:
+0%
+
+If 4 are verified:
+
+Required:
+7
+
+Verified:
+4
+
+Pending Verification:
+3
+
+Compliance:
+57.1%
+
+Calculate these values from the actual document data.
+
+Do NOT hardcode them.
+
+==================================================
+11. REQUIRED VS OPTIONAL
+==================================================
+
+Separate:
+
+Required Documents
+
+Optional Documents
+
+Do not allow optional documents to distort required compliance.
+
+Example:
+
+Required:
+7
+
+Optional:
+1
+
+If 7 required documents exist and none verified:
+
+Required:
+7
+Verified:
+0
+Pending Verification:
+7
+Compliance:
+0%
+
+Optional:
+1
+
+Do not count the optional document as a required pending document.
+
+==================================================
+12. COMPLIANCE FORMULA
+==================================================
+
+Use:
+
+verifiedRequiredDocuments
+/
+totalRequiredDocuments
+× 100
+
+Example:
+
+4 / 7 × 100 = 57.1%
+
+Display:
+
+4 of 7 required documents verified
+
+57.1%
+
+Do NOT calculate compliance from uploaded documents.
+
+==================================================
+13. DOCUMENT COUNTERS
+==================================================
+
+Top KPI cards should show:
+
+Required
+Verified
+Pending Verification
+Compliance
+
+All must derive from the selected application.
+
+Definitions:
+
+Required =
+count of required documents
+
+Verified =
+required documents with VERIFIED
+
+Pending Verification =
+required documents with UPLOADED or PENDING_VERIFICATION
+
+Compliance =
+verified required / required
+
+Rejected and Shortfall should be handled separately.
+
+==================================================
+14. REQUIRED DOCUMENT TABLE
+==================================================
+
+The table should contain:
+
+Document
+Requirement
+Status
+Version
+Uploaded By
+Verified By
+Date
+Actions
+
+All columns must be properly aligned.
+
+==================================================
+15. DOCUMENT NAME COLUMN
+==================================================
+
+The document name column should clearly show:
+
+Title
+
+and smaller document code if available.
+
+Example:
+
+Structural Drawings & Stability Certificate
+
+DOC_STRUCT
+
+Do not unnecessarily wrap the title.
+
+Give the document column enough horizontal width.
+
+==================================================
+16. REQUIREMENT COLUMN
+==================================================
+
+Display:
+
+Required
+
+or:
+
+Optional
+
+with consistent badges.
+
+Do not confuse:
+
+Requirement
+
+with:
+
+Status
+
+==================================================
+17. STATUS COLUMN
+==================================================
+
+Use only actual document status.
+
+Examples:
+
+Required
+Uploaded
+Pending Verification
+Verified
+Rejected
+Shortfall
+
+Do not show "Uploaded" if the document has never been uploaded.
+
+Do not show "Verified" unless an officer verified it.
+
+==================================================
+18. VERSION COLUMN
+==================================================
+
+Every upload version must be tracked.
+
+Example:
+
+v1
+v2
+v3
+
+If the current version is v3:
+
+v1 = Superseded
+v2 = Superseded
+v3 = Current
+
+Do not overwrite previous versions.
+
+==================================================
+19. REPLACE DOCUMENT
+==================================================
+
+For an already uploaded document:
+
+provide:
+
+[ Replace ]
+
+When replacing:
+
+1. old version remains in history
+2. new version is created
+3. current version becomes the new upload
+4. old version becomes Superseded
+5. new version becomes Pending Verification
+
+Example:
+
+v1 — Verified
+v2 — Current / Pending Verification
+
+Do not silently replace the existing file.
+
+==================================================
+20. VERSION HISTORY
+==================================================
+
+Add/retain a version history view for each document.
+
+Show:
+
+Version
+File Name
+Uploaded By
+Date
+Status
+Remarks
+
+Example:
+
+v1
+Property_Card_v1.pdf
+20 Aug 2026
+Verified
+
+v2
+Property_Card_v2.pdf
+29 Aug 2026
+Pending Verification
+
+==================================================
+21. PREVIEW
+==================================================
+
+The eye/preview action should work.
+
+For supported files:
+
+PDF
+JPG
+PNG
+
+open a document preview modal/viewer.
+
+Show:
+
+Application
+Document Type
+File Name
+Version
+
+Do not preview a document belonging to another application.
+
+==================================================
+22. DOWNLOAD
+==================================================
+
+Download action should download the selected/current document version.
+
+Do not download the wrong version.
+
+==================================================
+23. DELETE / REMOVE
+==================================================
+
+If removal is allowed:
+
+do not immediately delete without confirmation.
+
+Show:
+
+Remove document?
+
+This will remove the uploaded version from the current submission.
+
+[Cancel] [Remove]
+
+Do not delete historical verified versions unless the workflow allows it.
+
+Prefer marking a version as superseded rather than destroying history.
+
+==================================================
+24. DOCUMENT TYPE SELECTION
+==================================================
+
+Document type dropdown must contain configurable document types.
+
+Example:
+
+7/12 Land Extract
+Property Card / Mutation
+Architectural Drawings
+Structural Drawings & Stability Certificate
+NOC from Fire Department
+Environmental Clearance
+Society / Landowner Authorization
+Affidavit — Ownership
+
+Do not hardcode these as legally official requirements.
+
+They are configurable demo requirements.
+
+==================================================
+25. DOCUMENT TYPE / FILE VALIDATION
+==================================================
+
+Validate:
+
+file selected
+allowed file type
+file size
+document type selected
+
+Example:
+
+Invalid:
+
+.exe
+
+Show:
+
+Unsupported file type.
+
+Supported:
+PDF, JPG, PNG
+
+Do not allow invalid uploads.
+
+==================================================
+26. DUPLICATE DOCUMENT CHECK
+==================================================
+
+If the same document type already has a current upload:
+
+Do not silently create another duplicate current version.
+
+Show:
+
+A current version already exists.
+
+Choose:
+
+[ Replace Existing ]
+[ Cancel ]
+
+If multiple versions are allowed, create a new version intentionally.
+
+==================================================
+27. UPLOAD FOR CORRECT APPLICATION
+==================================================
+
+Before upload, clearly show:
+
+You are uploading:
+
+Property Card / Mutation
+
+For:
+
+MC/BP/2026/04/0003
+Shahane Bunglow — G+1
+
+This is important to prevent user mistakes.
+
+==================================================
+28. APPLICATION LOCK
+==================================================
+
+The upload action must be disabled if no application is selected.
+
+Show:
+
+Please select an application before uploading a document.
+
+==================================================
+29. DOCUMENT STATUS AFTER UPLOAD
+==================================================
+
+After upload:
+
+Status:
+Pending Verification
+
+NOT:
+
+Verified
+
+The LTP uploads.
+
+Authorized officer verifies.
+
+==================================================
+30. OFFICER VERIFICATION
+==================================================
+
+Where officer workflows exist, allow verification actions based on role.
+
+Officer can:
+
+Verify
+Reject
+Raise Shortfall
+
+LTP should not automatically verify their own uploaded document unless the business workflow explicitly allows it.
+
+==================================================
+31. REJECTION
+==================================================
+
+If an officer rejects a document:
+
+Status:
+Rejected
+
+Require:
+
+Rejection Reason
+
+Example:
+
+Document is illegible.
+
+The LTP should then see:
+
+Rejected
+Reason:
+Document is illegible.
+
+Action:
+
+[ Replace Document ]
+
+==================================================
+32. SHORTFALL
+==================================================
+
+If a document has a shortfall:
+
+Status:
+Shortfall
+
+The shortfall record must reference:
+
+applicationId
+documentId
+documentVersionId
+
+The LTP should be able to resolve it from the Shortfall Center.
+
+==================================================
+33. QUICK UPLOAD → SHORTFALL RELATIONSHIP
+==================================================
+
+If a rejected/shortfall document is replaced:
+
+The new version should remain associated with the same:
+
+applicationId
+documentTypeId
+
+Create a new version.
+
+Do not create a new unrelated document record.
+
+==================================================
+34. DOCUMENT FILTERS
+==================================================
+
+Add useful filters:
+
+All
+Required
+Optional
+Pending Verification
+Verified
+Rejected
+Shortfall
+
+Search:
+
+Document Name
+Document Code
+
+==================================================
+35. APPLICATION-SPECIFIC SEARCH
+==================================================
+
+Search must only search documents belonging to the currently selected application.
+
+Do not display documents from another application.
+
+==================================================
+36. DOCUMENT COMPLIANCE CARD
+==================================================
+
+Keep the Document Compliance Progress card.
+
+Make it accurate.
+
+Example:
+
+4 of 7 required documents verified
+
+57.1%
+
+Progress bar:
+57.1%
+
+Do not display:
+
+0 of 7
+
+when the underlying verification state says otherwise.
+
+==================================================
+37. VERIFICATION STATUS CARD
+==================================================
+
+The Verification Status card must show:
+
+Verified
+Pending Verification
+Required
+Shortfall
+Rejected
+
+Example:
+
+Verified              4
+Pending Verification 3
+Required               7
+Shortfall              0
+Rejected               0
+
+Values must be mathematically consistent.
+
+==================================================
+38. QUICK UPLOAD CARD ALIGNMENT
+==================================================
+
+The right Quick Upload card must align vertically with the main Required Documents card.
+
+Use the same top alignment.
+
+==================================================
+39. RIGHT COLUMN
+==================================================
+
+Use approximately:
+
+Main content:
+72%
+
+Right column:
+28%
+
+Gap:
+20–24px
+
+Main:
+
+Document Compliance
+Required Documents
+
+Right:
+
+Quick Upload
+Verification Status
+
+Do not make the right column unnecessarily narrow.
+
+==================================================
+40. PAGE WIDTH
+==================================================
+
+Use the full available page width.
+
+Recommended:
+
+max-width:
+1600–1700px
+
+width:
+100%
+
+padding:
+24–32px
+
+Do not leave excessive left/right whitespace.
+
+==================================================
+41. KPI CARDS
+==================================================
+
+Top 4 KPI cards:
+
+Required
+Verified
+Pending Verification
+Compliance
+
+All cards:
+
+equal width
+equal height
+same padding
+same icon size
+
+Desktop:
+4 columns
+
+Tablet:
+2 columns
+
+Mobile:
+1 column
+
+==================================================
+42. CARD ALIGNMENT
+==================================================
+
+All major cards must share:
+
+same left edge
+same right edge
+consistent spacing
+
+Do not create arbitrary card widths.
+
+==================================================
+43. DOCUMENT TABLE ALIGNMENT
+==================================================
+
+Use controlled column widths.
+
+Recommended:
+
+Document:
+30%
+
+Requirement:
+10%
+
+Status:
+16%
+
+Version:
+8%
+
+Uploaded/Verified:
+12%
+
+Date:
+10%
+
+Actions:
+14%
+
+Adjust based on actual screen width.
+
+Do not let action buttons overlap.
+
+==================================================
+44. CARD HEADER ALIGNMENT
+==================================================
+
+Each card header should have:
+
+icon
+title
+subtitle
+actions where required
+
+Use consistent header heights.
+
+==================================================
+45. QUICK UPLOAD VISUAL DESIGN
+==================================================
+
+Use:
+
+Document Type
+[ Select document type ▼ ]
+
+Upload area:
+
+┌───────────────────────────────────┐
+│                                   │
+│          Upload icon              │
+│                                   │
+│      Drop document here           │
+│                                   │
+│       Browse Files                │
+│                                   │
+│      PDF, JPG, PNG · max 10 MB    │
+│                                   │
+└───────────────────────────────────┘
+
+After file selected:
+
+File:
+Property_Card_v2.pdf
+
+2.4 MB
+
+[ Remove ]
+
+[ Upload Document ]
+
+Do not upload automatically before the user has selected document type and confirmed the file.
+
+==================================================
+46. UPLOAD PROGRESS
+==================================================
+
+Use a clear progress indicator.
+
+Example:
+
+Uploading
+██████████████░░░░
+78%
+
+Then:
+
+Upload successful
+
+Status:
+Pending Verification
+
+==================================================
+47. MULTIPLE FILES
+==================================================
+
+Do not allow accidental duplicate queue entries.
+
+Each upload queue item should have:
+
+- unique file reference
+- document type
+- progress
+- cancel/remove
+
+Do not display the same file multiple times.
+
+==================================================
+48. DOCUMENT TABLE UPDATE
+==================================================
+
+After upload:
+
+Update:
+
+Required count
+Uploaded state
+Pending Verification count
+Compliance where applicable
+Document list
+Version
+
+No browser refresh should be required.
+
+==================================================
+49. EMPTY STATE
+==================================================
+
+If a selected application has no uploaded documents:
+
+Required Documents
+
+No documents uploaded yet.
+
+Use the Quick Upload card to begin.
+
+Do not show fake uploaded rows.
+
+==================================================
+50. ERROR STATE
+==================================================
+
+If upload fails:
+
+Upload failed.
+
+Reason:
+File too large / unsupported format / network issue
+
+[Retry]
+
+Do not create a partial document record.
+
+==================================================
+51. LOADING STATE
+==================================================
+
+When switching applications:
+
+Do not show the previous application's document records.
+
+Show:
+
+Loading documents...
+
+Then render the selected application's data.
+
+==================================================
+52. APPLICATION CHANGE
+==================================================
+
+When switching from:
+
+MC/BP/2026/04/0003
+
+to:
+
+MC/BP/2026/04/0004
+
+the entire Documents module should refresh to Application 0004.
+
+Change:
+
+- application context
+- document list
+- counters
+- compliance
+- quick upload association
+- verification status
+
+==================================================
+53. BACK NAVIGATION
+==================================================
+
+Use the project's hierarchical navigation behavior.
+
+If opened from:
+
+My Applications
+→ Application Details
+→ Documents
+
+Back should return to:
+
+Application Details
+
+If opened as a root module:
+
+Documents
+
+use the correct root-level parent.
+
+Do NOT use browser history as the primary in-page Back behavior.
+
+==================================================
+54. VIEW APPLICATION
+==================================================
+
+Keep:
+
+[ View Application ]
+
+in the application context card.
+
+It must open the SAME selected application.
+
+Do not navigate to another application.
+
+==================================================
+55. APPLICATION STATUS
+==================================================
+
+Show the application's current status/stage correctly.
+
+Example:
+
+Drawing Uploaded
+or
+Document Upload & Verification
+or
+Shortfall Raised
+
+Do not show an unrelated stage.
+
+==================================================
+56. DOCUMENT WORKFLOW
+==================================================
+
+The document stage must follow the workflow:
+
+Scrutiny Passed
+↓
+Document Upload
+↓
+Document Verification
+↓
+All Required Documents Accepted
+↓
+Fee Generation
+
+Do NOT allow the Documents page to imply that documents are complete simply because files were uploaded.
+
+==================================================
+57. FEE GENERATION CONNECTION
+==================================================
+
+Once all required documents satisfy the configured completion rule:
+
+allow:
+
+Fee Generation
+
+If documents are still:
+
+Pending Verification
+Rejected
+Shortfall
+
+do NOT mark the document stage complete.
+
+==================================================
+58. SHORTFALL CONNECTION
+==================================================
+
+If a document shortfall exists:
+
+Documents module should clearly indicate:
+
+Shortfall:
+1
+
+Action:
+
+[ View Shortfall ]
+
+Clicking should open the related shortfall for the SAME application/document.
+
+==================================================
+59. NOTIFICATIONS
+==================================================
+
+When a document is:
+
+Uploaded
+Verified
+Rejected
+Shortfall Raised
+
+create a notification tied to the application.
+
+Examples:
+
+"Document uploaded for MC/BP/2026/04/0003."
+
+"Structural Stability Certificate verified for MC/BP/2026/04/0003."
+
+"Document shortfall raised for MC/BP/2026/04/0003."
+
+Do not create generic notifications without application context.
+
+==================================================
+60. AUDIT LOG
+==================================================
+
+Record:
+
+Document Uploaded
+Document Replaced
+Document Verified
+Document Rejected
+Shortfall Raised
+Document Shortfall Resolved
+
+Each event must include:
+
+applicationId
+documentId
+actor
+role
+timestamp
+action
+
+==================================================
+61. SEARCH PROJECT FOR DOCUMENT BUGS
+==================================================
+
+Audit the code for:
+
+- hardcoded document arrays
+- duplicate upload state
+- document counts calculated independently
+- missing applicationId
+- wrong application context
+- stale selected application state
+- upload queue duplication
+- incorrect status mapping
+- incorrect compliance calculation
+- broken versioning
+- incorrect navigation
+- broken file removal
+
+Fix the underlying causes.
+
+Do not only change visible text.
+
+==================================================
+62. DATA SOURCE
+==================================================
+
+Use the shared application/document state.
+
+Do NOT maintain separate document data for:
+
+Documents page
+Application Details
+Shortfalls
+Notifications
+
+All should reference the same document records.
+
+==================================================
+63. DOCUMENT MODEL
+==================================================
+
+Use a structure similar to:
+
+{
+  id: "doc_000123",
+  applicationId: "app_000003",
+  documentTypeId: "DOC_PROP_CARD",
+  documentType: "Property Card / Mutation",
+  currentVersion: 2,
+  status: "PENDING_VERIFICATION",
+  versions: [
+    {
+      version: 1,
+      fileName: "Property_Card_v1.pdf",
+      status: "SUPERSEDED"
+    },
+    {
+      version: 2,
+      fileName: "Property_Card_v2.pdf",
+      status: "PENDING_VERIFICATION"
+    }
+  ]
+}
+
+Adapt this to the existing application's architecture.
+
+==================================================
+64. ROLE RULES
+==================================================
+
+LTP:
+
+Can:
+- upload document
+- replace document
+- view status
+- view rejection
+- respond to shortfall
+
+Officer/Verifier:
+
+Can:
+- view
+- verify
+- reject
+- raise shortfall
+
+Do not allow unauthorized actions.
+
+Use the existing role system.
+
+==================================================
+65. DOCUMENT TABLE ACTIONS
+==================================================
+
+For LTP:
+
+Pending:
+View
+Replace
+
+Verified:
+View
+Download
+
+Rejected:
+View
+Replace
+
+Shortfall:
+View
+Resolve
+
+Do not show Verify to LTP.
+
+==================================================
+66. FILE NAME DISPLAY
+==================================================
+
+Use clean file names.
+
+Do not display meaningless duplicated names unless those are actual files.
+
+Show:
+
+Property_Card_v2.pdf
+
+rather than:
+
+Replit_AI_App_Guide...
+Replit_AI_App_Guide...
+
+unless that is genuinely the uploaded filename.
+
+==================================================
+67. DATE/TIME
+==================================================
+
+Use consistent date formatting across the module.
+
+Example:
+
+29 Aug 2026, 10:32 AM
+
+Do not randomly mix date formats.
+
+==================================================
+68. RESPONSIVE LAYOUT
+==================================================
+
+Desktop:
+
+4 KPI cards
+
+Main:
+72%
+
+Right:
+28%
+
+Tablet:
+
+2 KPI cards per row
+
+Main content can become full width if necessary.
+
+Mobile:
+
+1 KPI card per row
+1 column document layout
+Quick Upload below document list
+No horizontal overflow
+
+==================================================
+69. VISUAL QUALITY
+==================================================
+
+Use existing LTP Approval style:
+
+- white cards
+- subtle borders
+- modest shadows
+- deep green primary
+- restrained amber
+- clean typography
+- professional icons
+- consistent corner radius
+
+Do not introduce:
+
+- gradients
+- glassmorphism
+- excessive rounded cards
+- unnecessary animation
+- decorative graphics
+
+==================================================
+70. FINAL PAGE STRUCTURE
+==================================================
+
+The final page should look approximately like:
+
+Documents
+Upload, verify and track all required documents for your application.
+
+[ Application Context ]
+
+[ Required ] [ Verified ] [ Pending Verification ] [ Compliance ]
+
+[ Document Compliance Progress ]
+
+┌──────────────────────────────────────────┐ ┌──────────────────────┐
+│ Required Documents                       │ │ Quick Upload         │
+│                                          │ │                      │
+│ Search           Filter                  │ │ For Application      │
+│                                          │ │ MC/BP/...            │
+│ Document | Req | Status | Ver | Actions  │ │                      │
+│                                          │ │ Document Type        │
+│ 7/12 ...                                 │ │ [ Select ▼ ]         │
+│ Property Card                            │ │                      │
+│ Architectural Drawings                   │ │ [ Upload Area ]      │
+│ Structural Certificate                   │ │                      │
+│ ...                                      │ │ [Upload Document]    │
+└──────────────────────────────────────────┘ └──────────────────────┘
+
+                                            ┌──────────────────────┐
+                                            │ Verification Status  │
+                                            │                      │
+                                            │ Verified       0     │
+                                            │ Pending        7     │
+                                            │ Required       7     │
+                                            │ Shortfall      0     │
+                                            └──────────────────────┘
+
+==================================================
+71. FINAL ACCEPTANCE TEST — QUICK UPLOAD
+==================================================
+
+Test:
+
+Select application:
+MC/BP/2026/04/0003
+
+Select:
+Property Card / Mutation
+
+Select:
+Property_Card_v2.pdf
+
+Click:
+
+Upload Document
+
+Expected:
+
+Upload completes.
+
+Document appears in the document table.
+
+Status:
+
+Pending Verification
+
+Version:
+
+new version
+
+Application:
+
+MC/BP/2026/04/0003
+
+No duplicate queue item.
+
+==================================================
+72. FINAL ACCEPTANCE TEST — COUNTERS
+==================================================
+
+If:
+
+7 required
+0 verified
+7 uploaded/pending verification
+
+Expected:
+
+Required: 7
+Verified: 0
+Pending Verification: 7
+Compliance: 0%
+
+==================================================
+73. FINAL ACCEPTANCE TEST — VERIFICATION
+==================================================
+
+Officer verifies 1 document.
+
+Expected:
+
+Required: 7
+Verified: 1
+Pending Verification: 6
+Compliance: 14.3%
+
+Update immediately.
+
+==================================================
+74. FINAL ACCEPTANCE TEST — REJECTION
+==================================================
+
+Officer rejects one document.
+
+Expected:
+
+Rejected:
+1
+
+LTP sees:
+
+Rejected
+
+Reason
+
+[Replace Document]
+
+Do not count rejected as verified.
+
+==================================================
+75. FINAL ACCEPTANCE TEST — REPLACEMENT
+==================================================
+
+LTP replaces rejected document.
+
+Expected:
+
+Old version:
+Rejected / Superseded
+
+New version:
+Pending Verification
+
+No duplicate document type record unless the architecture intentionally allows one.
+
+==================================================
+76. FINAL ACCEPTANCE TEST — APPLICATION SWITCH
+==================================================
+
+Select:
+
+MC/BP/2026/04/0004
+
+Expected:
+
+Entire page updates to Application 0004.
+
+No documents from Application 0003 remain visible.
+
+Quick Upload now says:
+
+For Application:
+MC/BP/2026/04/0004
+
+==================================================
+77. FINAL ACCEPTANCE TEST — SHORTFALL
+==================================================
+
+Raise shortfall for:
+
+Structural Drawings & Stability Certificate
+
+Expected:
+
+Document status:
+Shortfall
+
+Shortfall Center contains the same applicationId and documentId.
+
+Resolve from Shortfall Center.
+
+Return to Documents.
+
+Status updates correctly.
+
+==================================================
+78. FINAL ACCEPTANCE TEST — FEE WORKFLOW
+==================================================
+
+If required documents are not complete:
+
+Fee Generation remains unavailable.
+
+When all required documents are accepted according to the configured rule:
+
+Fee Generation becomes available.
+
+Do not unlock fees simply because files were uploaded.
+
+==================================================
+79. FINAL ACCEPTANCE TEST — ALIGNMENT
+==================================================
+
+Verify:
+
+- all four KPI cards have equal dimensions
+- compliance card uses full width
+- required documents card and Quick Upload start at same vertical position
+- right-side cards align
+- table columns remain aligned
+- buttons align
+- no clipped text
+- no overlapping elements
+- no excessive empty space
+
+==================================================
+80. FINAL ACCEPTANCE TEST — RESPONSIVE
+==================================================
+
+Test:
+
+1920px
+1600px
+1440px
+1366px
+1280px
+1024px
+768px
+480px
+390px
+
+No:
+
+- horizontal overflow
+- clipped document names
+- broken upload area
+- overlapping controls
+- broken card widths
+
+==================================================
+81. IMPORTANT FINAL RULE
+==================================================
+
+Do not fix this module by changing only the visible numbers or labels.
+
+Fix the actual document state and data relationships.
+
+The required workflow is:
+
+Application Selected
+↓
+Required Documents Loaded
+↓
+LTP Uploads Document
+↓
+Document Status = Pending Verification
+↓
+Officer Reviews
+├── Verify
+├── Reject
+└── Shortfall
+↓
+If Rejected → LTP Replaces
+↓
+If Shortfall → LTP Resolves
+↓
+All Required Documents Accepted
+↓
+Document Stage Complete
+↓
+Fee Generation
+
+Every step must remain associated with the SAME applicationId.
+
+Make the entire Documents module functional, application-specific, data-consistent, visually aligned, and ready for integration with the real backend.
+The most important fixes from your screenshot
+
+Your current state appears to be something like:
+
+Required        7
+Verified        0
+Pending         0
+Compliance      0%
+
+8 document rows
+↓
+most say Uploaded
+
+That should instead behave according to the actual state. For example, immediately after LTP uploads all 7 required documents:
+
+Required              7
+Verified              0
+Pending Verification  7
+Compliance            0%
+
+Then an officer verifies 3:
+
+Required              7
+Verified              3
+Pending Verification  4
+Compliance            42.9%
+
+That distinction is important for your client workflow because uploading documents and verifying documents are two different stages. The LTP performs the upload; the appropriate officer performs verification.

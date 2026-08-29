@@ -1,0 +1,2009 @@
+Redesign the ENTIRE Drawings & Scrutiny module of the existing
+LTP Approval / Building Permit Management System.
+
+IMPORTANT:
+
+This is a UI/UX redesign plus functional cleanup for ONLY the
+Drawings & Scrutiny module.
+
+Do NOT redesign:
+- Dashboard
+- My Applications
+- Documents
+- Fees
+- Payments
+- Shortfalls
+- Notifications
+- Help & Support
+- Administration
+- Authentication
+
+Do NOT change the core business workflow.
+
+Do NOT remove existing drawing, scrutiny, versioning, upload, report,
+or application functionality.
+
+The goal is to replace the current messy Drawings & Scrutiny interface
+with a clean, professional, modern government-enterprise interface with:
+
+- perfect alignment
+- consistent widths
+- consistent spacing
+- clean hierarchy
+- no overlapping elements
+- no excessive empty space
+- clear application context
+- clear drawing viewer
+- clear upload workflow
+- clear version history
+- clear scrutiny status
+- clear scrutiny report
+- responsive design
+
+==================================================
+1. CURRENT PROBLEM
+==================================================
+
+The current Drawings & Scrutiny page is visually crowded.
+
+Problems to fix:
+
+- too many competing areas
+- inconsistent card widths
+- uneven spacing
+- drawing viewer does not dominate enough
+- upload card feels disconnected
+- version history is visually cramped
+- scrutiny summary is separated from the main workflow
+- application information is repeated unnecessarily
+- action buttons are not organized clearly
+- page has inconsistent vertical rhythm
+- some sections have too much blank space
+- some sections are too compressed
+- visual hierarchy is weak
+
+Redesign the page structure from the ground up while preserving existing functionality.
+
+==================================================
+2. DESIGN PRINCIPLE
+==================================================
+
+The page should communicate the workflow clearly:
+
+Application Context
+↓
+Scrutiny Status / Action
+↓
+Drawing Workspace
+↓
+Drawing Upload + Versions
+↓
+Scrutiny Report
+
+The drawing viewer should be the primary workspace.
+
+==================================================
+3. PAGE CONTAINER
+==================================================
+
+Use the available screen width efficiently.
+
+Recommended:
+
+width:
+100%
+
+max-width:
+1600–1700px
+
+margin:
+0 auto
+
+padding:
+24–32px
+
+Do NOT leave excessive left/right whitespace.
+
+Do NOT use a narrow centered page.
+
+==================================================
+4. PAGE HEADER
+==================================================
+
+Create a clean page header.
+
+Left:
+
+Drawings & Scrutiny
+
+Subtitle:
+
+Upload, manage and scrutinize project drawings against
+Development Control Regulations.
+
+Right:
+
+Application selector
+
+Example:
+
+[ MC/BP/2026/04/0002 ▼ ]
+
+The selector must clearly show:
+
+Application Number
+Project Name
+Applicant
+
+Example:
+
+MC/BP/2026/04/0002
+Tamhane Row Houses
+Smt. Priya Tamhane
+
+==================================================
+5. BREADCRUMB
+==================================================
+
+Use:
+
+LTP Portal
+→ Drawings & Scrutiny
+
+Do not use misleading parent labels.
+
+If opened from an application:
+
+Application
+→ Drawings & Scrutiny
+
+Back should return to the correct parent within the module hierarchy.
+
+==================================================
+6. APPLICATION CONTEXT CARD
+==================================================
+
+Immediately below the header, show ONE compact application context card.
+
+Example:
+
+┌─────────────────────────────────────────────────────────────┐
+│ MC/BP/2026/04/0002      Scrutiny Failed                    │
+│ Tamhane Row Houses                                          │
+│ Building Permission · Residential · Applicant: Smt. Priya… │
+│ Current Stage: Drawing Scrutiny                             │
+│                                                             │
+│                                      [ View Application ]    │
+└─────────────────────────────────────────────────────────────┘
+
+Do NOT repeat application information in multiple large cards.
+
+==================================================
+7. STATUS / ACTION ALERT
+==================================================
+
+Show an alert only when action is needed.
+
+For failed scrutiny:
+
+┌─────────────────────────────────────────────────────────────┐
+│ ⚠ Scrutiny Failed                              [Re-upload] │
+│ Drawing requires correction before the application can      │
+│ proceed.                                                     │
+└─────────────────────────────────────────────────────────────┘
+
+For passed scrutiny:
+
+┌─────────────────────────────────────────────────────────────┐
+│ ✓ Scrutiny Passed                              [Documents] │
+│ Drawing scrutiny completed successfully.                    │
+└─────────────────────────────────────────────────────────────┘
+
+For pending scrutiny:
+
+show:
+
+Scrutiny Pending
+
+For in-progress:
+
+show:
+
+Scrutiny In Progress
+
+Do NOT show conflicting alerts.
+
+==================================================
+8. MAIN WORKSPACE LAYOUT
+==================================================
+
+Use a TWO-COLUMN layout.
+
+Desktop:
+
+LEFT:
+70–72%
+
+RIGHT:
+28–30%
+
+Gap:
+20–24px
+
+LEFT:
+Drawing Viewer
+
+RIGHT:
+Upload Drawing
+Version History
+
+Below the main workspace:
+
+Latest Scrutiny Report
+
+Do NOT create too many nested cards.
+
+==================================================
+9. DRAWING VIEWER
+==================================================
+
+The Drawing Viewer must be the largest visual element.
+
+Example:
+
+┌───────────────────────────────────────────────────────────┐
+│ Drawing Viewer                              [v2 ▼]       │
+│                                                          │
+│ [Zoom −] [100%] [Zoom +] [Reset] [Fit] [Download]       │
+│                                                          │
+│                                                          │
+│                    DRAWING                                │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+│                                                          │
+└───────────────────────────────────────────────────────────┘
+
+Use the available height effectively.
+
+Do not make the viewer excessively short.
+
+==================================================
+10. DRAWING TOOLBAR
+==================================================
+
+Drawing toolbar must be compact.
+
+Controls:
+
+Zoom Out
+Zoom Level
+Zoom In
+Reset
+Fit to Screen
+Download
+
+Use icon buttons with tooltips.
+
+Align every button vertically.
+
+Do not allow toolbar controls to wrap unnecessarily on desktop.
+
+==================================================
+11. DRAWING VERSION SELECTOR
+==================================================
+
+Place version selector at the top-left of the viewer:
+
+[ v2 ▼ ]
+
+Dropdown should show:
+
+v3 — Current
+v2 — Superseded
+v1 — Superseded
+
+Each version should show:
+
+version
+file name
+date
+status
+
+Example:
+
+v3
+Site_Plan_v3.dwg
+29 Aug 2026
+Passed
+
+==================================================
+12. CURRENT DRAWING INFORMATION
+==================================================
+
+Inside or below the viewer show compact metadata:
+
+File:
+RowHouse_v2.dwg
+
+Version:
+v2
+
+Size:
+6.2 MB
+
+Uploaded:
+29 Aug 2026
+
+Status:
+Failed
+
+Do not repeat this information unnecessarily.
+
+==================================================
+13. DRAWING UPLOAD CARD
+==================================================
+
+Redesign the upload area.
+
+Title:
+
+Upload Drawing
+
+Subtitle:
+
+For MC/BP/2026/04/0002
+
+Show application:
+
+Tamhane Row Houses
+
+Then upload area:
+
+┌───────────────────────────────────────────┐
+│                                           │
+│              Upload icon                  │
+│                                           │
+│           Drop drawing here               │
+│                                           │
+│              Browse Files                 │
+│                                           │
+│       DWG · DXF · PDF · max 50 MB         │
+│                                           │
+└───────────────────────────────────────────┘
+
+Button:
+
+[ Run Auto-Scrutiny ]
+
+Keep all elements aligned.
+
+==================================================
+14. APPLICATION CONTEXT IN UPLOAD
+==================================================
+
+Before uploading, always display:
+
+You are uploading a drawing for:
+
+Application:
+MC/BP/2026/04/0002
+
+Project:
+Tamhane Row Houses
+
+This prevents the user from accidentally uploading a drawing
+to the wrong application.
+
+==================================================
+15. FILE VALIDATION
+==================================================
+
+Allow only configured formats:
+
+DWG
+DXF
+PDF
+
+Maximum:
+
+50 MB
+
+Validate:
+
+- file type
+- file size
+- file name
+- application selected
+
+Show inline validation.
+
+Example:
+
+Unsupported drawing format.
+
+Maximum file size is 50 MB.
+
+==================================================
+16. UPLOAD PROCESS
+==================================================
+
+When selected:
+
+show:
+
+File Name
+File Size
+Upload progress
+
+Example:
+
+RowHouse_v2.dwg
+6.2 MB
+
+Uploading
+██████████████░░░░
+78%
+
+After upload:
+
+Upload complete
+
+Version:
+v2
+
+Status:
+Pending Scrutiny
+
+Do NOT automatically mark the drawing as Passed.
+
+==================================================
+17. RUN AUTO-SCRUTINY
+==================================================
+
+After a successful drawing upload, allow:
+
+[ Run Auto-Scrutiny ]
+
+When clicked:
+
+button becomes:
+
+Running Scrutiny...
+
+Show progress/state.
+
+After completion:
+
+generate a scrutiny report linked to:
+
+applicationId
+drawingId
+drawingVersion
+
+==================================================
+18. SCRUTINY STATES
+==================================================
+
+Use clear structured states:
+
+NOT_UPLOADED
+UPLOADED
+SCRUTINY_PENDING
+SCRUTINY_IN_PROGRESS
+PASSED
+PASSED_WITH_WARNINGS
+FAILED
+
+Do not mix these with application workflow labels.
+
+==================================================
+19. FAILED SCRUTINY
+==================================================
+
+If failed:
+
+show prominently:
+
+Scrutiny Failed
+
+Then:
+
+Issue:
+Front setback non-compliant
+
+and:
+
+[ Re-upload Corrected Drawing ]
+
+Do NOT allow the application to proceed to documents until scrutiny passes.
+
+==================================================
+20. PASSED SCRUTINY
+==================================================
+
+If passed:
+
+show:
+
+Scrutiny Passed
+
+and:
+
+[ Proceed to Documents ]
+
+or use the existing workflow action.
+
+Do not show:
+
+Re-upload Drawing
+
+unless a revision is specifically needed.
+
+==================================================
+21. PASSED WITH WARNINGS
+==================================================
+
+If:
+
+PASSED_WITH_WARNINGS
+
+show:
+
+Scrutiny Passed with Warnings
+
+Display the warnings clearly.
+
+Do not treat warnings as failures.
+
+==================================================
+22. VERSION HISTORY
+==================================================
+
+Version History should be a compact card in the right column.
+
+Example:
+
+Version History
+
+v3  Current     Passed
+v2  Superseded  Failed
+v1  Superseded  Failed
+
+Each row:
+
+version
+file name
+date
+status
+
+Clicking a version should make it the selected viewer version.
+
+==================================================
+23. VERSION HISTORY RULE
+==================================================
+
+Never overwrite an older drawing.
+
+When re-uploading:
+
+v1
+→ Failed
+
+v2
+→ Pending Scrutiny
+
+If v2 passes:
+
+v2
+→ Passed
+
+Previous versions remain preserved.
+
+==================================================
+24. RE-UPLOAD
+==================================================
+
+Re-upload should always create a new version.
+
+Do NOT replace the old file in place.
+
+Example:
+
+Current:
+v1 Failed
+
+After re-upload:
+
+v1 Failed
+v2 Pending Scrutiny
+
+==================================================
+25. LATEST SCRUTINY REPORT
+==================================================
+
+Place Latest Scrutiny Report below the drawing workspace.
+
+Use a clean full-width card.
+
+Header:
+
+Latest Scrutiny Report
+
+Right side:
+
+Status badge
+[ Full Report ]
+[ Download PDF ]
+
+==================================================
+26. REPORT SUMMARY
+==================================================
+
+Show three compact summary blocks:
+
+Total Checks
+Passed
+Issues
+
+Example:
+
+15
+Total Checks
+
+14
+Passed
+
+1
+Issues
+
+Do not use huge KPI cards.
+
+Keep them compact.
+
+==================================================
+27. SCRUTINY REPORT CONTENT
+==================================================
+
+Show:
+
+Report Number
+Drawing Version
+Generated Date
+Status
+
+Example:
+
+SCR/2026/0001
+Drawing v2
+29 Aug 2026, 11:32 AM
+Failed
+
+==================================================
+28. SCRUTINY CHECK TABLE
+==================================================
+
+Show detailed checks in a clean table.
+
+Columns:
+
+Rule
+Category
+Severity
+Result
+Recommendation
+
+Example:
+
+Front Setback Compliance
+Setbacks
+Critical
+Failed
+Maintain minimum setback
+
+Avoid unnecessary columns.
+
+==================================================
+29. TABLE ALIGNMENT
+==================================================
+
+Table must have:
+
+consistent column widths
+compact row height
+aligned badges
+proper text wrapping
+aligned numeric/status fields
+
+Do not allow recommendations to push other columns out of alignment.
+
+==================================================
+30. SCRUTINY SUMMARY
+==================================================
+
+Add a compact summary area:
+
+Critical
+Major
+Minor
+Warnings
+
+Use horizontal bars or compact labels if useful.
+
+Do not create large charts.
+
+==================================================
+31. REPORT STATUS LOGIC
+==================================================
+
+A report is:
+
+PASSED
+when no blocking issue exists.
+
+FAILED
+when a blocking issue exists.
+
+PASSED_WITH_WARNINGS
+when only non-blocking warnings exist.
+
+Do not determine report status manually from display text.
+
+==================================================
+32. APPLICATION WORKFLOW CONNECTION
+==================================================
+
+Drawing scrutiny must control the application workflow.
+
+If:
+
+FAILED
+
+then:
+
+application.currentStage =
+DRAWING_REUPLOAD_REQUIRED
+
+If:
+
+PASSED
+
+then:
+
+application.currentStage =
+DOCUMENT_UPLOAD
+
+If:
+
+PASSED_WITH_WARNINGS
+
+then:
+
+application.currentStage =
+DOCUMENT_UPLOAD
+
+but preserve warnings.
+
+==================================================
+33. APPLICATION ID CONSISTENCY
+==================================================
+
+Every drawing and scrutiny report MUST contain:
+
+applicationId
+
+Every action must use:
+
+applicationId
+
+Do not use display application number as the internal relationship.
+
+==================================================
+34. DRAWING ID CONSISTENCY
+==================================================
+
+Each drawing must have:
+
+drawingId
+applicationId
+version
+
+Each scrutiny report must have:
+
+scrutinyReportId
+applicationId
+drawingId
+drawingVersion
+
+==================================================
+35. NO CROSS-APPLICATION DRAWINGS
+==================================================
+
+If user switches application:
+
+MC/BP/2026/04/0002
+→ MC/BP/2026/04/0005
+
+ALL of the following must update:
+
+Drawing Viewer
+Version History
+Upload Context
+Scrutiny Report
+Status
+Counts
+
+Do not show drawings from Application 0002 under Application 0005.
+
+==================================================
+36. APPLICATION SELECTOR
+==================================================
+
+The application selector should support:
+
+search
+application number
+project
+applicant
+
+When changed:
+
+load only the selected application's drawing data.
+
+==================================================
+37. SEARCH APPLICATION
+==================================================
+
+Example:
+
+Search:
+
+Tamhane
+
+Show:
+
+MC/BP/2026/04/0002
+Tamhane Row Houses
+Smt. Priya Tamhane
+
+Click:
+
+load that application's Drawings & Scrutiny.
+
+==================================================
+38. EMPTY STATE
+==================================================
+
+If no drawing exists:
+
+Drawing Viewer:
+
+No drawing uploaded yet.
+
+Upload a drawing to begin scrutiny.
+
+The upload panel remains available.
+
+==================================================
+39. FAILED STATE
+==================================================
+
+If the latest drawing failed:
+
+Viewer:
+
+latest failed drawing
+
+Right:
+
+Re-upload corrected drawing
+
+Report:
+
+Failed
+
+Do not hide the failed report.
+
+==================================================
+40. PASSED STATE
+==================================================
+
+If passed:
+
+Viewer:
+
+latest passed drawing
+
+Right:
+
+Version History
+
+Report:
+
+Passed
+
+Show:
+
+Proceed to Documents
+
+where appropriate.
+
+==================================================
+41. LOADING STATE
+==================================================
+
+When switching applications:
+
+Show:
+
+Loading drawing data...
+
+Do not display the previous application's drawing while loading.
+
+==================================================
+42. ERROR STATE
+==================================================
+
+If drawing upload fails:
+
+Drawing upload failed.
+
+Reason:
+
+Unsupported file / file too large / upload error
+
+[ Retry ]
+
+Do not create a corrupted drawing record.
+
+==================================================
+43. NO DEAD BUTTONS
+==================================================
+
+Every visible action must work:
+
+View Application
+Upload Drawing
+Browse Files
+Run Auto-Scrutiny
+Re-upload Drawing
+Zoom
+Reset
+Fit
+Download
+Select Version
+Full Report
+Download PDF
+Proceed to Documents
+
+No decorative buttons.
+
+==================================================
+44. VIEW APPLICATION
+==================================================
+
+View Application must open the SAME selected application.
+
+Do not navigate to another application.
+
+==================================================
+45. DOWNLOAD DRAWING
+==================================================
+
+Download must use the currently selected drawing version.
+
+Do not download the wrong version.
+
+==================================================
+46. DOWNLOAD REPORT
+==================================================
+
+Download PDF must correspond to the CURRENT scrutiny report.
+
+Do not download a report belonging to an earlier application.
+
+==================================================
+47. FULL REPORT
+==================================================
+
+Full Report should open the complete scrutiny report for:
+
+applicationId
+drawingId
+reportId
+
+Do not open a generic report.
+
+==================================================
+48. BACK NAVIGATION
+==================================================
+
+Use proper hierarchical navigation.
+
+Examples:
+
+My Applications
+→ Application Details
+→ Drawings & Scrutiny
+→ Back
+
+must return to:
+
+Application Details
+
+If Drawings & Scrutiny is opened directly:
+
+Back should return to its correct parent module according to the existing
+routing structure.
+
+Do NOT use misleading back labels.
+
+==================================================
+49. TOP-LEVEL CARD COUNT
+==================================================
+
+Do NOT create separate large cards for:
+
+Total drawings
+Total versions
+Total reports
+Failed drawings
+Passed drawings
+
+unless those statistics are genuinely required.
+
+The page should focus on the active drawing and current scrutiny.
+
+==================================================
+50. REMOVE UNNECESSARY SPACE
+==================================================
+
+Remove excessive spacing:
+
+between header and context
+between context and alert
+between alert and workspace
+inside upload card
+between upload and version cards
+inside report summary
+between report sections
+
+Keep professional spacing.
+
+Target:
+
+16–24px section gaps.
+
+==================================================
+51. ALIGNMENT
+==================================================
+
+All major sections should share the same horizontal boundaries.
+
+The left edge of:
+
+Header
+Application Context
+Drawing Viewer
+Latest Report
+
+must align.
+
+The right edge must also align.
+
+==================================================
+52. RIGHT COLUMN ALIGNMENT
+==================================================
+
+Upload Drawing and Version History should:
+
+start at the same x-position
+
+have consistent width
+
+have consistent vertical spacing
+
+not overlap.
+
+==================================================
+53. DRAWING VIEWER WIDTH
+==================================================
+
+The viewer should be the dominant area.
+
+Do not make the viewer smaller than necessary.
+
+Recommended:
+
+70–72% desktop width.
+
+==================================================
+54. UPLOAD CARD WIDTH
+==================================================
+
+The right upload card should have enough width for:
+
+Application context
+file drop area
+buttons
+
+Do not compress text.
+
+==================================================
+55. CARD HEIGHT
+==================================================
+
+Do not force unnecessary equal heights.
+
+Drawing Viewer:
+large natural height.
+
+Upload:
+content-driven.
+
+Version History:
+content-driven.
+
+Latest Report:
+content-driven.
+
+Only grouped summary blocks should have equal height.
+
+==================================================
+56. CARD STYLE
+==================================================
+
+Use the current LTP Approval design language:
+
+white
+subtle border
+moderate radius
+light shadow
+deep green primary
+restrained warning red/amber
+professional icons
+
+Do not introduce:
+
+gradients
+glassmorphism
+large illustrations
+flashy animation
+
+==================================================
+57. STATUS COLORS
+==================================================
+
+Use consistent semantics:
+
+Passed:
+green
+
+Passed with warnings:
+amber
+
+Failed:
+red
+
+Pending:
+neutral/blue
+
+In Progress:
+blue/teal
+
+Do not change colors randomly.
+
+==================================================
+58. DRAWING TOOLBAR ICONS
+==================================================
+
+All viewer controls should:
+
+same size
+same height
+same spacing
+
+Use tooltips.
+
+Example:
+
+Zoom out
+Zoom in
+Reset
+Fit
+Download
+
+==================================================
+59. RESPONSIVE DESIGN
+==================================================
+
+Desktop:
+
+70/30 split.
+
+Tablet:
+
+viewer full width
+
+upload/version below
+
+Mobile:
+
+single column
+
+Order:
+
+Application Context
+↓
+Status
+↓
+Drawing Viewer
+↓
+Upload Drawing
+↓
+Version History
+↓
+Scrutiny Report
+
+==================================================
+60. MOBILE VIEWER
+==================================================
+
+The drawing viewer must remain usable.
+
+Controls can wrap or use a compact toolbar.
+
+Do not create horizontal page scrolling.
+
+==================================================
+61. MOBILE UPLOAD
+==================================================
+
+Upload card:
+
+full width
+
+Drop area:
+
+full width
+
+buttons:
+
+full width where appropriate.
+
+==================================================
+62. MOBILE REPORT
+==================================================
+
+Report summary:
+
+3 compact blocks stacked or 3-column if space allows.
+
+Table must remain readable.
+
+==================================================
+63. TABLET
+==================================================
+
+At tablet width:
+
+viewer:
+
+100%
+
+right-side cards:
+
+100% below viewer
+
+Do not squeeze the viewer and upload card into tiny columns.
+
+==================================================
+64. ACCESSIBILITY
+==================================================
+
+All controls:
+
+keyboard accessible
+
+visible focus state
+
+tooltips for icon-only buttons
+
+accessible labels
+
+==================================================
+65. DRAWING FILE NAME
+==================================================
+
+Display long filenames cleanly.
+
+Example:
+
+Site_Plan_GroundFloor_v3.dwg
+
+If too long:
+
+truncate visually with tooltip.
+
+Do NOT allow text to overflow card boundaries.
+
+==================================================
+66. VERSION STATUS
+==================================================
+
+Version history must clearly indicate:
+
+Current
+Superseded
+Failed
+Passed
+Pending Scrutiny
+
+Do not confuse "Current" with "Passed".
+
+==================================================
+67. SCRUTINY REPORT VERSION LINK
+==================================================
+
+Every report should clearly show:
+
+Drawing:
+v2
+
+This guarantees the user knows which drawing was scrutinized.
+
+==================================================
+68. SCRUTINY CHECK COUNTS
+==================================================
+
+Calculate dynamically:
+
+totalChecks
+passed
+failed
+warnings
+
+Do not hardcode these numbers.
+
+==================================================
+69. SCRUTINY ISSUE DETAIL
+==================================================
+
+For failed checks, show:
+
+Rule
+Severity
+Actual Value
+Required Value
+Recommendation
+
+Example:
+
+Front Setback
+Required: 6.0 m
+Actual: 5.4 m
+Severity: Critical
+Recommendation: Increase setback to required minimum.
+
+Use real configured scrutiny data where available.
+
+==================================================
+70. DEMO SCRUTINY DATA
+==================================================
+
+Existing demo applications should contain different scrutiny outcomes.
+
+Include multiple examples such as:
+
+1. Passed
+2. Passed with warnings
+3. Failed front setback
+4. Failed FAR
+5. Failed ground coverage
+6. Failed height restriction
+7. Failed parking requirement
+8. Multiple critical issues
+
+Do NOT make every report identical.
+
+==================================================
+71. MULTIPLE APPLICATION TEST
+==================================================
+
+Test at least 5 applications.
+
+Each must have different:
+
+- drawing
+- version
+- scrutiny result
+- report
+- application status
+
+Switch between them.
+
+==================================================
+72. APPLICATION-SPECIFIC TEST
+==================================================
+
+Application A:
+
+Failed
+
+Application B:
+
+Passed
+
+Application C:
+
+Passed with warnings
+
+Switch:
+
+A → B → C → A
+
+Verify all drawing data changes correctly.
+
+==================================================
+73. FAILED SCRUTINY TEST
+==================================================
+
+Application:
+
+MC/BP/2026/04/0002
+
+Upload v1.
+
+Run scrutiny.
+
+Result:
+
+FAILED
+
+Reason:
+
+Front setback non-compliant.
+
+Expected:
+
+status = FAILED
+
+workflow = REUPLOAD REQUIRED
+
+button = Re-upload Drawing
+
+==================================================
+74. RE-UPLOAD TEST
+==================================================
+
+Upload:
+
+v2
+
+Expected:
+
+v1 = Failed
+v2 = Pending Scrutiny
+
+Run scrutiny.
+
+Result:
+
+PASSED
+
+Expected:
+
+v1 = Failed
+v2 = Passed
+
+Application:
+
+Document Upload
+
+==================================================
+75. PASSED TEST
+==================================================
+
+Select an application with passed scrutiny.
+
+Expected:
+
+No red failure alert.
+
+Show:
+
+Scrutiny Passed
+
+Latest report:
+
+Passed
+
+Action:
+
+Proceed to Documents
+
+==================================================
+76. PASSED WITH WARNINGS TEST
+==================================================
+
+Expected:
+
+Scrutiny Passed with Warnings
+
+Show warnings.
+
+Allow application to proceed.
+
+Do not mark as Failed.
+
+==================================================
+77. APPLICATION SWITCH TEST
+==================================================
+
+Select Application 0002.
+
+Note:
+
+drawing
+version
+report
+
+Switch to Application 0005.
+
+Verify none of 0002's drawing/report data remains visible.
+
+==================================================
+78. DATA PERSISTENCE
+==================================================
+
+Upload a drawing.
+
+Navigate away.
+
+Return to Drawings & Scrutiny.
+
+Verify:
+
+drawing still exists
+version exists
+status is correct
+
+If demo mode uses browser persistence, persist appropriately.
+
+==================================================
+79. CROSS-MODULE UPDATE
+==================================================
+
+When scrutiny passes:
+
+Documents module should unlock according to the workflow.
+
+When scrutiny fails:
+
+Documents must remain unavailable according to workflow.
+
+Update shared application state.
+
+==================================================
+80. NOTIFICATIONS
+==================================================
+
+Important events should create application-specific notifications:
+
+Drawing Uploaded
+Scrutiny Started
+Scrutiny Passed
+Scrutiny Passed with Warnings
+Scrutiny Failed
+Re-upload Required
+
+Notification must include:
+
+applicationNumber
+project
+event
+timestamp
+
+==================================================
+81. AUDIT EVENTS
+==================================================
+
+Create audit records for:
+
+Drawing Uploaded
+Drawing Replaced
+Scrutiny Started
+Scrutiny Completed
+Scrutiny Failed
+Scrutiny Passed
+Scrutiny Re-upload
+
+Each:
+
+applicationId
+drawingId
+actor
+timestamp
+action
+
+==================================================
+82. NO HARD-CODED ACTIVE APPLICATION
+==================================================
+
+Remove hardcoded values such as:
+
+MC/BP/2026/04/0002
+
+from components wherever they represent the selected application.
+
+Use the shared selected application state.
+
+==================================================
+83. NO DUPLICATE DATASETS
+==================================================
+
+Do not create separate drawing data for:
+
+Dashboard
+Drawings page
+Scrutiny report
+Application detail
+
+Use shared drawing/report state.
+
+==================================================
+84. DRAWING DATA MODEL
+==================================================
+
+Each drawing should contain:
+
+drawingId
+applicationId
+version
+fileName
+fileSize
+status
+uploadedBy
+uploadedAt
+
+==================================================
+85. SCRUTINY DATA MODEL
+==================================================
+
+Each report should contain:
+
+scrutinyReportId
+applicationId
+drawingId
+drawingVersion
+status
+totalChecks
+passedChecks
+failedChecks
+warnings
+checks[]
+generatedAt
+generatedBy
+
+==================================================
+86. UI LOADING
+==================================================
+
+Use skeleton/loading states when:
+
+loading application
+loading drawing
+running scrutiny
+uploading file
+loading report
+
+Do not freeze the interface.
+
+==================================================
+87. UI ERROR
+==================================================
+
+Use clean inline error messages.
+
+Example:
+
+Unable to run scrutiny.
+
+Please try again.
+
+[ Retry ]
+
+Do not show raw technical errors to normal users.
+
+==================================================
+88. SUCCESS FEEDBACK
+==================================================
+
+After upload:
+
+Drawing uploaded successfully.
+
+After scrutiny:
+
+Scrutiny completed.
+
+After pass:
+
+Scrutiny passed. The application can proceed to document submission.
+
+After fail:
+
+Scrutiny failed. Please review the report and upload a corrected drawing.
+
+==================================================
+89. NO MODAL OVERUSE
+==================================================
+
+Do not use unnecessary modal dialogs.
+
+Use inline sections for:
+
+upload
+status
+report
+
+Use modal only where it materially improves the workflow.
+
+==================================================
+90. FINAL PAGE TARGET
+==================================================
+
+The redesigned page should follow this structure:
+
+Drawings & Scrutiny
+Upload, manage and scrutinize project drawings...
+
+[ Application Selector ]
+
+┌──────────────────────────────────────────────────────────────┐
+│ MC/BP/2026/04/0002       Scrutiny Failed                    │
+│ Tamhane Row Houses                                           │
+│ Building Permission · Residential · Smt. Priya Tamhane      │
+│ Current Stage: Drawing Scrutiny                              │
+│                                      [View Application]      │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ ⚠ Scrutiny Failed                         [Re-upload Drawing]│
+│ Drawing requires correction before proceeding.               │
+└──────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────┐ ┌──────────────────┐
+│ Drawing Viewer                           │ │ Upload Drawing   │
+│                                          │ │                  │
+│ [v1 ▼]         [−] 100% [+] [Fit]       │ │ For Application  │
+│                                          │ │ MC/BP/...        │
+│                                          │ │                  │
+│              DRAWING                     │ │ [Upload Area]    │
+│                                          │ │                  │
+│                                          │ │ [Run Scrutiny]   │
+│                                          │ │                  │
+└──────────────────────────────────────────┘ └──────────────────┘
+
+                                             ┌──────────────────┐
+                                             │ Version History  │
+                                             │                  │
+                                             │ v1 Failed        │
+                                             │ v2 Pending       │
+                                             └──────────────────┘
+
+┌──────────────────────────────────────────────────────────────┐
+│ Latest Scrutiny Report                     [Full Report]     │
+│                                               [Download PDF] │
+│                                                              │
+│ [15 Total]     [14 Passed]     [1 Issue]                    │
+│                                                              │
+│ Rule | Category | Severity | Result | Recommendation         │
+│ ...                                                          │
+└──────────────────────────────────────────────────────────────┘
+
+==================================================
+91. FINAL UI RULE
+==================================================
+
+The page must feel like ONE WORKSPACE.
+
+Do NOT make it feel like:
+
+card
+card
+card
+card
+card
+
+Instead:
+
+Application context
+↓
+Current action/status
+↓
+Drawing workspace
+↓
+Upload/version controls
+↓
+Scrutiny result
+
+Use hierarchy rather than excessive cards.
+
+==================================================
+92. FINAL ALIGNMENT CHECK
+==================================================
+
+Verify:
+
+- all major cards share the same container width
+- viewer and right column start at same vertical point
+- upload card and version card align
+- report card aligns with viewer
+- buttons line up
+- toolbars line up
+- application information aligns
+- no clipped text
+- no overlapping controls
+- no uneven random gaps
+
+==================================================
+93. FINAL SPACING CHECK
+==================================================
+
+Use consistent spacing:
+
+Page sections:
+20–24px
+
+Card internal padding:
+20px
+
+Control gaps:
+8–12px
+
+Table row padding:
+10–12px
+
+Do not use excessive empty space.
+
+==================================================
+94. FINAL RESPONSIVE CHECK
+==================================================
+
+Test:
+
+1920px
+1600px
+1440px
+1366px
+1280px
+1024px
+768px
+480px
+390px
+
+Verify no:
+
+- overflow
+- clipping
+- overlap
+- tiny fields
+- broken viewer
+- broken upload
+- broken report
+- broken buttons
+
+==================================================
+95. FINAL FUNCTIONAL TEST
+==================================================
+
+Test:
+
+Application Selection
+Drawing Upload
+File Validation
+Upload Progress
+Version Creation
+Run Scrutiny
+Scrutiny Pass
+Scrutiny Fail
+Re-upload
+Version History
+Report Generation
+Report Download
+Drawing Download
+Application Navigation
+Back Navigation
+Application Switching
+Data Persistence
+
+==================================================
+96. FINAL WORKFLOW TEST
+==================================================
+
+Complete:
+
+Create Application
+↓
+Upload Drawing v1
+↓
+Scrutiny Failed
+↓
+Review Report
+↓
+Upload Drawing v2
+↓
+Scrutiny Passed
+↓
+Proceed to Documents
+
+Verify all states and modules update correctly.
+
+==================================================
+97. FINAL QUALITY CHECK
+==================================================
+
+Run:
+
+lint
+build
+type check
+
+Check browser console.
+
+There must be no:
+
+React errors
+TypeScript errors
+broken imports
+route errors
+unhandled promise errors
+duplicate state issues
+
+==================================================
+98. IMPORTANT IMPLEMENTATION RULE
+==================================================
+
+Do not fix this by simply changing CSS.
+
+Audit the actual component structure and data flow.
+
+Fix:
+
+layout structure
+state management
+application context
+drawing relationships
+scrutiny state
+versioning
+navigation
+responsive behavior
+
+where required.
+
+==================================================
+99. FINAL GOAL
+==================================================
+
+The Drawings & Scrutiny module must become a clean, professional,
+application-specific drawing workspace.
+
+The user should always understand:
+
+WHICH APPLICATION?
+↓
+WHICH DRAWING VERSION?
+↓
+WHAT IS THE SCRUTINY STATUS?
+↓
+WHAT ACTION IS REQUIRED?
+↓
+WHAT IS THE LATEST SCRUTINY REPORT?
+↓
+CAN THE APPLICATION PROCEED?
+
+Preserve all existing valid functionality while making the complete
+Drawings & Scrutiny module clean, aligned, compact, responsive,
+application-specific, and ready for client demonstration.

@@ -38,6 +38,7 @@ import {
   CheckCircle2,
   Clock,
   ChevronRight,
+  ChevronLeft,
   CircleDollarSign,
   Upload,
   FileText,
@@ -106,8 +107,27 @@ export function LtpDashboard() {
     shortfallRaised: apps.reduce((s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length, 0),
   };
 
-  // Recent applications (sorted by lastUpdated, show up to 9)
-  const recentApps = [...apps].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated)).slice(0, 9);
+  // All applications sorted by lastUpdated (most recent first)
+  const sortedApps = React.useMemo(
+    () => [...apps].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated)),
+    [apps]
+  );
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const appsPerPage = 9;
+  const totalApps = sortedApps.length;
+  const totalPages = Math.ceil(totalApps / appsPerPage);
+  const startIndex = (currentPage - 1) * appsPerPage;
+  const endIndex = Math.min(startIndex + appsPerPage, totalApps);
+  const currentApps = sortedApps.slice(startIndex, endIndex);
+
+  // Reset to page 1 if current page exceeds total pages (e.g. after data changes)
+  React.useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(1);
+    }
+  }, [totalPages, currentPage]);
 
   // Dynamic tracker app
   const trackerApp = React.useMemo(() => {
@@ -197,7 +217,7 @@ export function LtpDashboard() {
         }
         noPadding
       >
-        {recentApps.length === 0 ? (
+        {sortedApps.length === 0 ? (
           <div className="p-6">
             <EmptyState
               icon={FileStack}
@@ -207,15 +227,67 @@ export function LtpDashboard() {
             />
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
-            {recentApps.map((app) => (
-              <ApplicationCard
-                key={app.id}
-                app={app}
-                onClick={() => openApplication(app.id)}
-                onAction={(view) => openApplication(app.id, view)}
-              />
-            ))}
+          <div className="p-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {currentApps.map((app) => (
+                <ApplicationCard
+                  key={app.id}
+                  app={app}
+                  onClick={() => openApplication(app.id)}
+                  onAction={(view) => openApplication(app.id, view)}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Showing {startIndex + 1}–{endIndex} of {totalApps} applications
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+                    aria-label="Previous page"
+                  >
+                    <ChevronLeft className="size-4" />
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={cn(
+                        "flex size-8 items-center justify-center rounded-md border text-xs font-medium transition-colors",
+                        page === currentPage
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                      )}
+                      aria-label={`Page ${page}`}
+                      aria-current={page === currentPage ? "page" : undefined}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+                    aria-label="Next page"
+                  >
+                    <ChevronRight className="size-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+            {totalPages <= 1 && totalApps > 0 && (
+              <div className="mt-5 border-t border-border pt-4">
+                <p className="text-xs text-muted-foreground">
+                  Showing {startIndex + 1}–{endIndex} of {totalApps} applications
+                </p>
+              </div>
+            )}
           </div>
         )}
       </SectionCard>

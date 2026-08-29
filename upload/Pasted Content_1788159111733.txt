@@ -1,0 +1,2069 @@
+Perform a COMPLETE SYSTEM ADMINISTRATOR-ONLY audit and correction of the existing
+LTP Approval / Building Permit Management System.
+
+IMPORTANT SCOPE RULE:
+
+THIS TASK APPLIES ONLY TO THE SYSTEM ADMINISTRATOR / ADMIN CONSOLE.
+
+Do NOT change the LTP dashboard.
+Do NOT change TPS dashboard.
+Do NOT change TPA dashboard.
+Do NOT change ZAD/ZDD dashboard.
+Do NOT change ZJD dashboard.
+Do NOT change Director – DP dashboard.
+Do NOT change Additional Commissioner dashboard.
+Do NOT change Commissioner dashboard.
+
+You may modify shared services/state/RBAC infrastructure when REQUIRED so that
+administrator configuration correctly affects other roles, but do not redesign
+those users' dashboards in this task.
+
+The primary objectives are:
+
+1. Fix all System Administrator functionality.
+2. Fix Roles & Permissions so changes actually affect other logins.
+3. Fix user/role access propagation.
+4. Fix configuration modules so they are functional.
+5. Fix overlapping cards and broken layout.
+6. Redesign ONLY the System Administrator dashboard to show useful admin information.
+7. Remove unnecessary information from the System Administrator dashboard.
+8. Ensure all admin configuration uses one source of truth.
+9. Verify the complete admin → role → permission → workflow relationship.
+10. Perform a full regression test of the Admin Console.
+
+==================================================
+PART A — SYSTEM ADMINISTRATOR DASHBOARD REDESIGN
+==================================================
+
+The current Administrator dashboard contains too many sections, excessive
+information, and some overlapping cards.
+
+Do NOT try to preserve every current dashboard section.
+
+Create a cleaner System Administrator dashboard focused on:
+
+ACCESS CONTROL
+CONFIGURATION
+WORKFLOW
+SYSTEM HEALTH
+AUDIT
+PENDING ADMIN ACTIONS
+
+==================================================
+1. ADMIN DASHBOARD HEADER
+==================================================
+
+Show:
+
+Administration
+
+Centralized control centre for users, roles, permissions,
+workflow configuration, integrations and system monitoring.
+
+Right side:
+
+[ View Audit ]
+[ System Settings ]
+
+Keep the actions compact.
+
+==================================================
+2. ADMIN KPI CARDS
+==================================================
+
+Use ONLY useful administrator KPIs.
+
+Recommended:
+
+Total Users
+Active Users
+Roles
+Pending Access Requests
+Workflow Stages
+Active Alerts
+Audit Events Today
+System Health
+
+Do NOT show applicant-centric information such as:
+
+Pending Payments
+Scrutiny Pending
+Shortfalls
+Total Applications
+
+unless those statistics are genuinely useful for system administration.
+
+Those belong to operational user dashboards.
+
+==================================================
+3. KPI CARD GRID
+==================================================
+
+Use:
+
+Desktop:
+4 columns
+
+Tablet:
+2 columns
+
+Mobile:
+1 column
+
+Do NOT create 7 or 8 narrow cards in one row if they become too compressed.
+
+All cards must have:
+
+equal width
+equal height
+consistent padding
+consistent icon placement
+consistent typography
+consistent footer alignment
+
+==================================================
+4. ADMIN DASHBOARD LAYOUT
+==================================================
+
+Use:
+
+ROW 1:
+Admin KPI Cards
+
+ROW 2:
+System Health
+Admin Actions / Configuration Alerts
+
+ROW 3:
+Recent Audit Activity
+Pending Administrative Actions
+
+ROW 4:
+Configuration Overview
+
+Do not stack many unrelated cards into one oversized region.
+
+==================================================
+5. REMOVE UNNECESSARY DASHBOARD CONTENT
+==================================================
+
+Remove/relocate dashboard information that is not directly useful to a System
+Administrator.
+
+Do NOT show large applicant-oriented operational panels.
+
+The administrator dashboard should answer:
+
+Who has access?
+Who is active/inactive?
+Are there permission issues?
+Are workflow stages configured?
+Are integrations healthy?
+What changed recently?
+Are there pending admin tasks?
+Are any system components degraded?
+
+==================================================
+PART B — FIX ALL ADMIN CARDS / OVERLAPPING UI
+==================================================
+
+The screenshots show cards/sections colliding and creating visual overlap.
+
+Audit the entire Admin Dashboard.
+
+==================================================
+6. SINGLE PAGE CONTAINER
+==================================================
+
+Use one consistent page container.
+
+Recommended:
+
+width: 100%
+max-width: 1600px–1700px
+margin: 0 auto
+padding: 24px–32px
+
+All major dashboard sections must share the same horizontal boundaries.
+
+==================================================
+7. CARD GRID
+==================================================
+
+Do NOT manually position admin cards.
+
+Use CSS Grid/Flex layout.
+
+Never use absolute positioning for major dashboard cards.
+
+Preferred patterns:
+
+grid-template-columns:
+repeat(4, minmax(0, 1fr))
+
+or
+
+repeat(2, minmax(0, 1fr))
+
+depending on section.
+
+==================================================
+8. CARD GAP
+==================================================
+
+Use a consistent gap:
+
+20px–24px
+
+Do not use arbitrary card margins.
+
+==================================================
+9. CARD HEIGHT
+==================================================
+
+Cards should use natural content height unless they belong to an equal-size KPI row.
+
+Do NOT force random heights.
+
+Do NOT use fixed heights that cause content to overflow.
+
+==================================================
+10. OVERLAP PREVENTION
+==================================================
+
+Search the Admin Console for:
+
+position:absolute
+negative margins
+fixed heights
+overflow:hidden
+z-index hacks
+manual top/left placement
+hardcoded widths
+nested grids with conflicting dimensions
+
+Remove/repair the causes of overlap.
+
+Do NOT solve overlap simply by increasing z-index.
+
+==================================================
+11. MAIN + RIGHT COLUMN
+==================================================
+
+Where a two-column admin section is required:
+
+Main:
+70–72%
+
+Right:
+28–30%
+
+Gap:
+20–24px
+
+Both columns must start at the same vertical position.
+
+==================================================
+12. RECENT AUDIT + ADMIN ACTIONS
+==================================================
+
+If Recent Audit Activity is shown beside Pending Administrative Actions,
+both cards must align properly.
+
+No card should overlap or extend into another section.
+
+==================================================
+PART C — RBAC / ROLES & PERMISSIONS
+==================================================
+
+THIS IS THE MOST IMPORTANT FUNCTIONAL REQUIREMENT.
+
+The current Roles & Permissions changes made by System Administrator
+are not reflecting in other logins.
+
+Fix the underlying RBAC implementation.
+
+==================================================
+13. SINGLE SOURCE OF TRUTH FOR ROLES
+==================================================
+
+Create one authoritative roles configuration.
+
+Roles:
+
+ADMIN
+
+LTP
+
+TPS
+
+TPA
+
+ZAD
+
+ZDD
+
+ZJD
+
+DIRECTOR_DP
+
+ADDITIONAL_COMMISSIONER
+
+COMMISSIONER
+
+Do not maintain separate role definitions in individual pages.
+
+==================================================
+14. SINGLE SOURCE OF TRUTH FOR PERMISSIONS
+==================================================
+
+Permissions must exist in one centralized RBAC source.
+
+Example permissions:
+
+users.view
+users.create
+users.edit
+users.activate
+users.deactivate
+
+roles.view
+roles.create
+roles.edit
+
+permissions.view
+permissions.assign
+
+applications.view
+applications.create
+applications.edit
+applications.delete
+
+drawings.view
+drawings.upload
+drawings.replace
+drawings.scrutinize
+
+documents.view
+documents.upload
+documents.verify
+documents.reject
+documents.shortfall
+
+fees.view
+fees.generate
+fees.edit
+
+payments.view
+payments.initiate
+payments.verify
+
+shortfalls.view
+shortfalls.create
+shortfalls.resolve
+
+workflow.view
+workflow.approve
+workflow.reject
+workflow.forward
+
+audit.view
+audit.export
+
+system_settings.view
+system_settings.edit
+
+notifications.view
+notifications.edit
+
+sms.view
+sms.edit
+
+application_types.view
+application_types.edit
+
+fee_structures.view
+fee_structures.edit
+
+Do not hardcode permissions separately into components.
+
+==================================================
+15. ROLE-PERMISSION MAPPING
+==================================================
+
+Maintain one role → permission mapping.
+
+Example concept:
+
+LTP:
+applications.view
+applications.create
+drawings.upload
+documents.upload
+payments.initiate
+shortfalls.view
+shortfalls.resolve
+
+TPS:
+applications.view
+drawings.view
+drawings.scrutinize
+documents.view
+workflow.approve
+workflow.forward
+shortfalls.create
+
+TPA:
+applications.view
+documents.view
+documents.verify
+documents.reject
+shortfalls.create
+workflow.approve
+workflow.forward
+
+etc.
+
+Use the existing business rules and client workflow.
+
+Do NOT invent unauthorized approval permissions.
+
+==================================================
+16. ADMIN ROLE
+==================================================
+
+System Administrator should have administrative permissions for:
+
+Users
+Roles
+Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification/SMS
+System Settings
+Audit Logs
+System Health
+
+Do NOT automatically give Admin every operational approval role unless the
+existing security model explicitly requires that.
+
+Administrative authority and business approval authority are different concepts.
+
+==================================================
+17. PERMISSION CHANGES MUST PROPAGATE
+==================================================
+
+When Admin changes a permission:
+
+example:
+
+TPS
+drawings.scrutinize
+= disabled
+
+then a TPS login must immediately reflect the change.
+
+The TPS user should:
+
+not see
+OR
+not be able to execute
+
+the Scrutinize action.
+
+Changing a permission must affect:
+
+sidebar visibility
+page access
+button visibility
+action authorization
+route guards
+API/service checks where applicable
+
+==================================================
+18. DO NOT RELY ONLY ON UI HIDING
+==================================================
+
+This is critical.
+
+Do NOT implement permissions only by:
+
+if (!canEdit) hideButton()
+
+The permission must also be enforced in the underlying action/service layer.
+
+A user must not be able to bypass permissions by:
+
+direct route
+query parameter
+manual URL
+programmatic action
+browser console
+stale state
+
+Use centralized authorization checks.
+
+==================================================
+19. ROUTE GUARDS
+==================================================
+
+Implement route-level authorization.
+
+Example:
+
+/admin/users
+→ ADMIN only
+
+/admin/roles
+→ ADMIN only
+
+/admin/fee-structures
+→ ADMIN
+
+/admin/workflow-stages
+→ ADMIN
+
+Do not allow unauthorized users to open admin routes directly.
+
+==================================================
+20. ACTION GUARDS
+==================================================
+
+Also protect individual actions.
+
+Example:
+
+TPS
+
+Can:
+Review technical scrutiny
+
+Cannot:
+Open Administrator > Users
+
+Cannot:
+Modify fee structures
+
+Cannot:
+Modify role permissions
+
+==================================================
+21. ROLE SWITCHER
+==================================================
+
+The existing Demo Role selector must use the SAME RBAC configuration.
+
+Do not create separate demo-only permissions.
+
+Changing role should load that role's actual permission set.
+
+==================================================
+22. PERMISSION UPDATE FLOW
+==================================================
+
+Admin:
+
+Users
+→ Select user
+→ Edit Role / Permissions
+→ Save
+
+Then:
+
+1. Persist permission assignment.
+2. Update central RBAC state.
+3. Recalculate effective permissions.
+4. Update affected user's session/demo session.
+5. Update sidebar.
+6. Update route guards.
+7. Update action visibility.
+8. Update audit log.
+9. Show success message.
+
+==================================================
+23. EFFECTIVE PERMISSIONS
+==================================================
+
+If the system supports:
+
+Role permissions
++
+User-specific overrides
+
+calculate effective permissions centrally.
+
+Example:
+
+Effective Permissions =
+Role Permissions
++
+Allowed Overrides
+-
+Denied Overrides
+
+Do not calculate different permission sets in every page.
+
+==================================================
+24. USER STATUS
+==================================================
+
+Administrator should be able to manage:
+
+ACTIVE
+INACTIVE
+PENDING
+SUSPENDED
+
+If a user is INACTIVE:
+
+that user's login must be blocked.
+
+If a user is SUSPENDED:
+
+login must be blocked.
+
+If a user is ACTIVE:
+
+login allowed according to permissions.
+
+==================================================
+25. USER ROLE ASSIGNMENT
+==================================================
+
+When Admin changes:
+
+User A
+LTP
+→ TPS
+
+the next login/session must behave as TPS.
+
+Do not leave the old LTP permissions active.
+
+==================================================
+26. ROLE CHANGE AUDIT
+==================================================
+
+Record:
+
+User
+Previous Role
+New Role
+Changed By
+Changed At
+Reason if configured
+
+Example:
+
+User:
+Ramesh Kumar
+
+Previous:
+LTP
+
+New:
+TPS
+
+Changed By:
+Shri. Kailash Patil
+
+==================================================
+27. PERMISSION CHANGE AUDIT
+==================================================
+
+When Admin changes a permission:
+
+record:
+
+Role/User
+Permission
+Old Value
+New Value
+Changed By
+Timestamp
+
+Example:
+
+TPS
+drawings.scrutinize
+Enabled → Disabled
+Changed by Admin
+
+==================================================
+PART D — ADMIN USERS MODULE
+==================================================
+
+Audit the Users page.
+
+==================================================
+28. USER LIST
+==================================================
+
+Show:
+
+Name
+Email
+Role
+Status
+Last Login
+Created
+Actions
+
+Actions:
+
+View
+Edit
+Activate
+Deactivate
+Reset Access where permitted
+
+==================================================
+29. USER SEARCH
+==================================================
+
+Search by:
+
+Name
+Email
+Role
+Status
+
+==================================================
+30. USER FILTER
+==================================================
+
+Filters:
+
+All
+Active
+Inactive
+Pending
+Suspended
+
+Role filter:
+
+All
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+Admin
+
+==================================================
+31. ADD USER
+==================================================
+
+Add User must be functional.
+
+Required:
+
+Name
+Email
+Phone where configured
+Role
+Status
+
+After creation:
+
+user appears in shared user store
+login becomes available if ACTIVE
+role permissions are applied
+audit event is created
+
+==================================================
+32. EDIT USER
+==================================================
+
+Changes must persist.
+
+Do NOT update only the visible table.
+
+==================================================
+PART E — ROLES & PERMISSIONS MODULE
+==================================================
+
+The Roles & Permissions page must actually control the system.
+
+==================================================
+33. ROLE LIST
+==================================================
+
+Show:
+
+Role
+Description
+Users
+Permissions
+Status
+
+Actions:
+
+View
+Edit
+
+==================================================
+34. PERMISSION MATRIX
+==================================================
+
+Create a proper permission matrix.
+
+Rows:
+
+Users
+Applications
+Drawings
+Documents
+Fees
+Payments
+Shortfalls
+Workflow
+Audit
+Notifications
+SMS
+Settings
+
+Columns can represent:
+
+View
+Create
+Edit
+Delete
+Approve
+Verify
+Forward
+Configure
+
+Only show actions that make sense for each module.
+
+==================================================
+35. SAVE PERMISSIONS
+==================================================
+
+When Admin changes a permission:
+
+click:
+
+Save Changes
+
+must actually persist the change.
+
+Show:
+
+Permissions updated successfully.
+
+Then recalculate:
+
+effective permissions
+
+for affected users.
+
+==================================================
+36. PERMISSION PREVIEW
+==================================================
+
+Add:
+
+Preview Access
+
+for a selected role/user.
+
+Show:
+
+Can access:
+Dashboard
+Applications
+Drawings
+Documents
+etc.
+
+Can perform:
+Upload
+Verify
+Approve
+Forward
+Configure
+etc.
+
+This is very useful for admin verification.
+
+==================================================
+PART F — APPLICATION TYPES
+==================================================
+
+Application Types must be configurable by Admin.
+
+Examples:
+
+Building Permission
+Layout Approval
+Occupancy Certificate
+Revision Permission
+Development Permit
+Demolition Permit
+
+Admin can:
+
+View
+Create
+Edit
+Activate/Deactivate
+
+Changes must reflect in New Application wizard.
+
+If Admin deactivates:
+
+Demolition Permit
+
+it should not appear as an available option for new applications.
+
+Do not delete historical application records.
+
+==================================================
+PART G — FEE STRUCTURES
+==================================================
+
+Fee Structures must be functional.
+
+Admin should be able to:
+
+View
+Create
+Edit
+Activate/Deactivate
+
+A fee structure should contain:
+
+feeStructureId
+name
+applicationType
+propertyType where applicable
+effectiveFrom
+effectiveTo
+components
+status
+
+Components may contain:
+
+name
+basis
+rate
+quantity rule
+minimum
+maximum
+percentage where applicable
+
+When active fee structure changes:
+
+future fee generation should use the active configured structure.
+
+Existing generated fees must NOT silently change.
+
+==================================================
+PART H — WORKFLOW STAGES
+==================================================
+
+Workflow Stages must be functional.
+
+Default client workflow:
+
+LTP
+→ TPS
+→ TPA
+→ ZAD / ZDD
+→ ZJD
+→ Director – DP
+→ Additional Commissioner
+→ Commissioner
+→ Final Decision
+
+Admin should be able to configure:
+
+stage name
+role
+sequence
+active/inactive
+SLA configuration
+allowed actions
+shortfall allowed
+fee shortfall allowed
+parallel/serial where supported
+
+Do NOT allow arbitrary dangerous workflow changes without validation.
+
+==================================================
+37. WORKFLOW VALIDATION
+==================================================
+
+Prevent:
+
+duplicate sequence
+missing role
+inactive required stage
+circular workflow
+unreachable final stage
+
+If invalid:
+
+show clear validation error.
+
+==================================================
+38. WORKFLOW PROPAGATION
+==================================================
+
+Workflow configuration must affect NEW workflow instances.
+
+Do not retroactively corrupt in-progress applications unless explicitly supported.
+
+Existing applications should retain their workflow version/configuration where appropriate.
+
+==================================================
+PART I — NOTIFICATION / SMS ADMIN
+==================================================
+
+Notification/SMS templates must be functional.
+
+Admin can manage templates for events such as:
+
+Application Created
+Drawing Uploaded
+Scrutiny Passed
+Scrutiny Failed
+Documents Required
+Document Verified
+Document Rejected
+Shortfall Raised
+Shortfall Resolved
+Fee Generated
+Payment Successful
+Application Forwarded
+Application Approved
+Application Rejected
+
+Each template should contain:
+
+templateId
+event
+channel
+title/message
+active
+updatedBy
+updatedAt
+
+==================================================
+39. TEMPLATE VARIABLES
+==================================================
+
+Support variables such as:
+
+{{applicationNumber}}
+{{projectName}}
+{{applicantName}}
+{{currentStage}}
+{{status}}
+{{amount}}
+
+Validate variables before save.
+
+==================================================
+40. SMS TEST
+==================================================
+
+Admin should be able to test a template in DEMO mode.
+
+Do not send real SMS.
+
+Show simulated result.
+
+==================================================
+PART J — SYSTEM SETTINGS
+==================================================
+
+Audit System Settings.
+
+Settings should be centralized.
+
+Examples:
+
+Portal Name
+Portal Subtitle
+Date Format
+Currency
+File Size Limits
+Allowed Drawing Formats
+Allowed Document Formats
+Session Timeout
+Notification Settings
+Demo Mode
+
+Do not hardcode these values throughout components.
+
+==================================================
+41. BRANDING
+==================================================
+
+Keep:
+
+LTP Approval
+Building Permit Management System
+
+Do not reintroduce:
+
+Municipal Authority
+Approval Workflow Portal
+
+Changing branding in System Settings, if configurable, should update the
+portal consistently.
+
+==================================================
+PART K — AUDIT LOGS
+==================================================
+
+Audit Logs are critical for System Administrator.
+
+Every administrative change must produce an audit event.
+
+Examples:
+
+User Created
+User Updated
+User Activated
+User Deactivated
+Role Assigned
+Permission Changed
+Fee Structure Updated
+Workflow Stage Updated
+Application Type Updated
+Notification Template Updated
+System Setting Updated
+Login
+Failed Login
+Configuration Change
+
+==================================================
+42. AUDIT RECORD
+==================================================
+
+Use:
+
+auditId
+actorUserId
+actorRole
+action
+targetType
+targetId
+oldValue
+newValue
+timestamp
+ipAddress/demoSource where configured
+
+Do not fabricate audit data dynamically every time the page loads.
+
+==================================================
+43. AUDIT FILTERS
+==================================================
+
+Admin should be able to filter:
+
+Date
+Actor
+Action
+Module
+Target
+Role
+
+Search:
+
+User
+Application
+Action
+Target ID
+
+==================================================
+PART L — SYSTEM HEALTH
+==================================================
+
+System Health should show useful administration information only.
+
+Examples:
+
+API Gateway
+Database
+File/Object Storage
+Notification Service
+Payment Integration
+Authentication Service
+
+Statuses:
+
+Operational
+Degraded
+Unavailable
+
+These are DEMO/monitoring states unless real integrations exist.
+
+Do not claim real-time infrastructure health if no real monitoring backend exists.
+
+==================================================
+44. NO FAKE PERFORMANCE CLAIMS
+==================================================
+
+Do not display misleading values such as:
+
+99.94% uptime
+
+unless actually calculated from real monitoring data.
+
+For demo mode, label:
+
+Demo monitoring data
+
+or use clearly simulated information.
+
+==================================================
+PART M — ADMIN CONFIGURATION OVERVIEW
+==================================================
+
+Keep a compact Configuration Overview.
+
+Useful cards:
+
+Users
+Roles & Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification/SMS
+Audit Logs
+System Settings
+
+Each card:
+
+shows count/status
+has a clear action
+opens the correct admin module
+
+All cards must have equal visual treatment.
+
+==================================================
+45. CONFIGURATION OVERVIEW GRID
+==================================================
+
+Use:
+
+4 columns on desktop
+
+2 columns on tablet
+
+1 column on mobile
+
+No overlap.
+
+==================================================
+46. REMOVE DUPLICATE ADMIN MODULE CARDS
+==================================================
+
+Do not show:
+
+Configuration Overview
+AND
+Manage Modules
+AND
+another duplicate list
+
+if they contain the same modules.
+
+Keep ONE clear configuration navigation section.
+
+==================================================
+PART N — ADMIN DASHBOARD PENDING ACTIONS
+==================================================
+
+Add a compact:
+
+Administrative Attention
+
+section.
+
+Examples:
+
+3 pending user approvals
+2 inactive configuration warnings
+1 workflow validation issue
+1 degraded integration
+
+Each item should link to the appropriate admin module.
+
+Do not fill this section with arbitrary fake counts.
+
+Values must derive from configuration/data.
+
+==================================================
+PART O — SEARCH
+==================================================
+
+The global search for Admin must be permission-aware.
+
+Search:
+
+Users
+Roles
+Permissions
+Applications
+Workflow Stages
+Fee Structures
+Application Types
+Audit Events
+
+Results must respect Admin permissions.
+
+==================================================
+PART P — NAVIGATION
+==================================================
+
+Use the existing hierarchical navigation behavior.
+
+Admin root:
+
+Administration
+↓
+Users
+↓
+User Details
+
+Back:
+
+User Details → Users
+
+Administration
+→ Roles & Permissions
+→ Role Details
+
+Back:
+
+Role Details → Roles & Permissions
+
+Administration
+→ Fee Structures
+→ Fee Structure Details
+
+Back:
+
+Fee Structure Details → Fee Structures
+
+Do not use browser history as the primary in-page Back behavior.
+
+==================================================
+PART Q — ADMIN DATA CONSISTENCY
+==================================================
+
+There must be one shared source of truth for:
+
+Users
+Roles
+Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification Templates
+System Settings
+
+Do NOT duplicate these datasets in separate components.
+
+==================================================
+PART R — RBAC TESTING
+==================================================
+
+Perform the following tests.
+
+TEST 1
+
+Admin disables:
+
+TPS
+drawings.scrutinize
+
+Save.
+
+Switch to TPS.
+
+Verify:
+
+Scrutinize action unavailable.
+
+==================================================
+TEST 2
+
+Admin disables:
+
+LTP
+payments.initiate
+
+Switch to LTP.
+
+Verify:
+
+Pay Now/Proceed to Payment unavailable.
+
+==================================================
+TEST 3
+
+Admin deactivates:
+
+User A
+
+Switch/login as User A.
+
+Expected:
+
+login blocked.
+
+==================================================
+TEST 4
+
+Admin changes:
+
+User A
+LTP → TPS
+
+Login as User A.
+
+Expected:
+
+TPS interface and TPS permissions.
+
+NOT LTP.
+
+==================================================
+TEST 5
+
+Admin adds:
+
+new permission
+
+Save.
+
+Verify the affected role/user can use it.
+
+==================================================
+TEST 6
+
+Admin removes:
+
+permission.
+
+Verify the role/user can no longer execute the action.
+
+==================================================
+TEST 7
+
+Admin modifies Application Type:
+
+Deactivate Demolition Permit.
+
+Open New Application wizard.
+
+Expected:
+
+Demolition Permit unavailable for new applications.
+
+Historical applications remain intact.
+
+==================================================
+TEST 8
+
+Admin modifies active fee structure.
+
+Create a NEW fee.
+
+Expected:
+
+new fee uses new configuration.
+
+Existing generated fee remains unchanged.
+
+==================================================
+TEST 9
+
+Admin changes workflow sequence.
+
+Create NEW application after the change.
+
+Expected:
+
+new application follows new workflow configuration.
+
+Existing in-progress applications retain their configured workflow version.
+
+==================================================
+TEST 10
+
+Admin changes Notification Template.
+
+Trigger corresponding event.
+
+Expected:
+
+new template is used.
+
+==================================================
+PART S — CROSS-MODULE RBAC TEST
+==================================================
+
+Test all roles:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+
+For each role verify:
+
+Login
+Dashboard
+Sidebar
+Routes
+Application queue
+Available actions
+Workflow permissions
+Document permissions
+Shortfall permissions
+Payment permissions
+Approval permissions
+
+No unauthorized role should gain access.
+
+==================================================
+PART T — CARD ALIGNMENT AUDIT
+==================================================
+
+Audit every Admin Console card.
+
+Required:
+
+same left/right boundaries
+consistent width
+consistent padding
+consistent gap
+no overlap
+no clipping
+no overflow
+no hidden content
+no card extending beyond parent
+no negative margin hacks
+
+==================================================
+47. CARD RESPONSIVENESS
+==================================================
+
+At:
+
+1920px
+1600px
+1440px
+1366px
+1280px
+1024px
+768px
+480px
+390px
+
+Verify:
+
+No overlap
+No horizontal overflow
+No broken grids
+No clipped titles
+No buttons leaving cards
+No content hidden unintentionally
+
+==================================================
+48. ADMIN TABLES
+==================================================
+
+For Users / Roles / Audit / Config tables:
+
+Use controlled column widths.
+
+Use horizontal scrolling only when genuinely necessary.
+
+Do not let long text overlap neighboring columns.
+
+==================================================
+49. ADMIN MODALS
+==================================================
+
+For Add User / Edit User / Permission Configuration:
+
+use the same modal design system.
+
+Modal:
+
+wide enough for content
+properly centered
+light background blur
+fixed header/footer
+scrollable content
+no clipped buttons
+
+==================================================
+50. SAVE / CANCEL
+==================================================
+
+Every admin edit form must clearly provide:
+
+Cancel
+Save Changes
+
+Successful save:
+
+show confirmation.
+
+Failed save:
+
+show error.
+
+Do not close the modal before successful save.
+
+==================================================
+PART U — ERROR HANDLING
+==================================================
+
+No admin action should silently fail.
+
+Examples:
+
+Permission update failed
+User creation failed
+Fee structure invalid
+Workflow configuration invalid
+Template invalid
+
+Show useful error messages.
+
+Do not leave partial state.
+
+==================================================
+PART V — ADMIN SESSION
+==================================================
+
+When admin changes configuration:
+
+Admin remains logged in.
+
+Do not unexpectedly reset the admin session.
+
+==================================================
+PART W — DEMO MODE
+==================================================
+
+The admin console is a DEMO environment unless a real backend is connected.
+
+Clearly distinguish:
+
+Demo data
+Demo system health
+Demo SMS
+Demo payment gateway
+
+Do not claim real government integrations or real infrastructure status.
+
+==================================================
+PART X — DEVELOPER DIAGNOSTIC
+==================================================
+
+Add a developer-only diagnostic utility if appropriate.
+
+It should allow inspection of:
+
+Current User
+Current Role
+Effective Permissions
+Assigned Role
+Active/Inactive
+Workflow Stage Access
+
+This must NOT be visible to ordinary users.
+
+==================================================
+PART Y — FINAL ADMIN DASHBOARD TARGET
+==================================================
+
+The final System Administrator dashboard should be approximately:
+
+Administration
+Centralized control centre for users, access, workflow and configuration.
+
+                         [View Audit] [System Settings]
+
+┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
+│ Users      │ │ Active     │ │ Roles      │ │ Pending    │
+│  ...       │ │ Users      │ │  ...       │ │ Access     │
+└────────────┘ └────────────┘ └────────────┘ └────────────┘
+
+┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐
+│ Workflow   │ │ Alerts     │ │ Audit      │ │ Health     │
+│ Stages     │ │ ...        │ │ Today      │ │ Status     │
+└────────────┘ └────────────┘ └────────────┘ └────────────┘
+
+┌──────────────────────────────────────┐ ┌──────────────────────┐
+│ System Health                        │ │ Administrative       │
+│                                      │ │ Attention             │
+│ API        Operational               │ │                      │
+│ Database   Operational               │ │ Pending users        │
+│ Storage    Operational               │ │ Permission warnings  │
+│ Payment    Demo/Operational           │ │ Workflow issues      │
+│ SMS        Demo/Operational           │ │                      │
+└──────────────────────────────────────┘ └──────────────────────┘
+
+┌──────────────────────────────────────┐ ┌──────────────────────┐
+│ Recent Audit Activity                │ │ Configuration         │
+│                                      │ │ Overview              │
+│ User created                         │ │ Users                 │
+│ Permission updated                   │ │ Roles & Permissions   │
+│ Workflow changed                     │ │ Application Types     │
+│ Fee structure updated                │ │ Fee Structures        │
+│                                      │ │ Workflow Stages       │
+│                                      │ │ Notification/SMS      │
+│                                      │ │ Audit Logs             │
+│                                      │ │ System Settings       │
+└──────────────────────────────────────┘ └──────────────────────┘
+
+==================================================
+PART Z — CRITICAL END-TO-END ADMIN TEST
+==================================================
+
+Use one complete test scenario.
+
+1. Login as System Administrator.
+
+2. Create a demo user:
+
+Name:
+Test TPS User
+
+Role:
+TPS
+
+Status:
+ACTIVE
+
+3. Assign:
+
+drawings.scrutinize = ENABLED
+
+4. Login/switch to TPS.
+
+Verify:
+
+Scrutinize available.
+
+5. Return to Admin.
+
+Disable:
+
+drawings.scrutinize
+
+6. Return to TPS.
+
+Verify:
+
+Scrutinize unavailable.
+
+7. Re-enable.
+
+Verify:
+
+Scrutinize available again.
+
+8. Change user role:
+
+TPS → TPA
+
+9. Login/switch.
+
+Verify:
+
+TPA permissions are active.
+
+TPS permissions are not active.
+
+10. Deactivate the user.
+
+11. Attempt login.
+
+Expected:
+
+Access denied / account inactive.
+
+12. Reactivate.
+
+13. Verify login works again.
+
+==================================================
+PART AA — WORKFLOW CONFIGURATION TEST
+==================================================
+
+Admin config:
+
+TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director
+→ Additional Commissioner
+→ Commissioner
+
+Create a new application.
+
+Verify it follows the configured workflow.
+
+Do not alter old in-progress applications accidentally.
+
+==================================================
+PART AB — FEE STRUCTURE TEST
+==================================================
+
+Admin edits fee structure.
+
+Create new application reaching fee generation.
+
+Verify:
+
+new fee uses new structure.
+
+Check existing fee.
+
+Verify:
+
+existing fee is unchanged.
+
+==================================================
+PART AC — APPLICATION TYPE TEST
+==================================================
+
+Admin disables one Application Type.
+
+Open New Application.
+
+Verify it disappears.
+
+Re-enable.
+
+Verify it returns.
+
+==================================================
+PART AD — NOTIFICATION TEST
+==================================================
+
+Admin changes notification template.
+
+Trigger relevant event.
+
+Verify new template is used.
+
+==================================================
+PART AE — AUDIT TEST
+==================================================
+
+Perform:
+
+Create User
+Change Role
+Change Permission
+Deactivate User
+Edit Fee Structure
+Edit Workflow
+Edit Application Type
+Edit Notification Template
+
+Verify each action appears in Audit Logs.
+
+==================================================
+PART AF — ADMIN ACCESS SECURITY
+==================================================
+
+Verify that:
+
+LTP cannot open Admin routes.
+
+TPS cannot open Admin routes.
+
+TPA cannot open Admin routes.
+
+Other officer roles cannot open Admin routes.
+
+Only ADMIN with required permissions can access the Admin Console.
+
+Do not rely on sidebar hiding.
+
+Test direct URL access.
+
+==================================================
+PART AG — FINAL BUILD / QUALITY CHECK
+==================================================
+
+Before finishing:
+
+Run lint.
+
+Run build.
+
+Check browser console.
+
+No:
+
+TypeScript errors
+runtime errors
+unhandled promise rejections
+React warnings
+duplicate state subscriptions
+infinite render loops
+
+==================================================
+PART AH — FINAL ADMIN TEST MATRIX
+==================================================
+
+Test:
+
+Users
+Create
+Edit
+Activate
+Deactivate
+
+Roles
+View
+Edit
+
+Permissions
+Grant
+Revoke
+Save
+Propagate
+
+Application Types
+Create
+Edit
+Activate
+Deactivate
+
+Fee Structures
+Create
+Edit
+Activate
+Deactivate
+
+Workflow
+View
+Edit
+Validate
+
+Notification/SMS
+View
+Edit
+Test
+
+System Settings
+View
+Edit
+
+Audit Logs
+View
+Filter
+Search
+
+System Health
+View
+
+==================================================
+PART AI — FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The System Administrator module is NOT complete unless:
+
+1. Admin dashboard is clean and no cards overlap.
+2. Cards have consistent alignment and dimensions.
+3. Unnecessary operational data is removed from Admin dashboard.
+4. Users module is functional.
+5. User activation/deactivation works.
+6. Role changes persist.
+7. Permission changes persist.
+8. Permission changes affect actual users.
+9. UI visibility respects permissions.
+10. Route guards respect permissions.
+11. Action guards respect permissions.
+12. Role switching uses the same RBAC source.
+13. Application Types configuration works.
+14. Fee Structures configuration works.
+15. Workflow Stages configuration works.
+16. Notification/SMS configuration works.
+17. System Settings works.
+18. Audit logging works.
+19. Admin changes create audit entries.
+20. New configurations affect new workflow instances correctly.
+21. Existing in-progress applications are not corrupted.
+22. Search works.
+23. Filters work.
+24. Admin tables align correctly.
+25. Admin modals align correctly.
+26. Responsive layouts work.
+27. No direct URL bypass exists.
+28. No unauthorized role can access admin functionality.
+29. No console errors.
+30. Lint passes.
+31. Build passes.
+
+==================================================
+FINAL GOAL
+==================================================
+
+The System Administrator should function as the CENTRAL GOVERNANCE LAYER of
+the LTP Approval platform.
+
+The administrator must be able to control:
+
+USERS
+↓
+ROLES
+↓
+PERMISSIONS
+↓
+APPLICATION TYPES
+↓
+FEE STRUCTURES
+↓
+WORKFLOW
+↓
+NOTIFICATIONS / SMS
+↓
+SYSTEM SETTINGS
+↓
+AUDIT
+
+And every configuration change must actually affect the relevant parts of
+the application.
+
+Do not create UI-only controls.
+
+Do not create duplicate configuration sources.
+
+Do not leave dead buttons.
+
+Do not use hardcoded permissions.
+
+Do not use hardcoded workflow states.
+
+Do not use browser history as authorization.
+
+Make the Admin Console function as a real centralized administration layer.

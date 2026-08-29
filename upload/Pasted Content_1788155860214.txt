@@ -1,0 +1,2568 @@
+Perform a COMPLETE END-TO-END FUNCTIONAL AUDIT, DATA-CONSISTENCY AUDIT, ROLE/PERMISSION AUDIT, WORKFLOW AUDIT, AND UI STATE AUDIT of the existing LTP Approval / Building Permit Management System.
+
+THIS IS NOW A CRITICAL WORKFLOW TESTING AND CORRECTION TASK.
+
+Do NOT rebuild the project from scratch.
+
+Do NOT redesign unrelated UI.
+
+Do NOT change the existing visual design unless a UI change is required to correctly represent workflow state.
+
+The goal is to make the complete application workflow work from START TO FINISH across every role.
+
+==================================================
+PART A — CRITICAL BUG: NEW APPLICATION NOT SHOWING
+==================================================
+
+A recently created application is not appearing consistently in the system.
+
+This must be investigated and fixed at the SOURCE.
+
+When an LTP creates a new application and submits it:
+
+the application must immediately appear in the SAME shared application dataset used by:
+
+- Dashboard
+- My Applications
+- Application Details
+- Drawings & Scrutiny
+- Documents
+- Fees
+- Payments
+- Shortfalls
+- Notifications
+- Live Workflow Tracker
+- Role queues/inboxes
+- Search
+
+Do NOT fix this by adding the new application manually to one page.
+
+==================================================
+1. SINGLE SOURCE OF TRUTH
+==================================================
+
+There must be ONE application store/data source.
+
+Do NOT maintain separate arrays for:
+
+dashboardApplications
+myApplications
+paymentApplications
+documentApplications
+workflowApplications
+roleApplications
+
+Every module must reference the same application record.
+
+Use:
+
+applicationId
+
+as the stable primary internal identifier.
+
+==================================================
+2. APPLICATION CREATION
+==================================================
+
+When LTP completes:
+
+New Application wizard
+→ Submit Application
+
+perform all of the following:
+
+1. Generate unique applicationId.
+2. Generate unique application number.
+3. Create application record.
+4. Set initial status.
+5. Set initial workflow stage.
+6. Create workflow history entry.
+7. Make application immediately available to My Applications.
+8. Update Dashboard counters.
+9. Update dashboard My Applications.
+10. Make it available to the correct initial workflow queue where appropriate.
+11. Create initial notification.
+12. Preserve all form data.
+13. Persist it using the project's actual shared persistence mechanism.
+
+==================================================
+3. PERSISTENCE
+==================================================
+
+Audit how application state is currently stored.
+
+If backend/database exists:
+use the backend/database as source of truth.
+
+If the project is currently frontend/demo-only:
+use a centralized store with durable browser persistence such as localStorage/session abstraction where appropriate.
+
+Do NOT rely only on component-local React state.
+
+Do NOT store new applications only inside the New Application modal.
+
+After closing/reloading/navigation, the newly created application must still exist in demo mode.
+
+==================================================
+4. NEW APPLICATION IMMEDIATE VISIBILITY TEST
+==================================================
+
+Test:
+
+LTP
+→ New Application
+→ Complete wizard
+→ Submit
+
+Then immediately verify:
+
+Dashboard total count +1
+
+My Applications contains new record
+
+Search can find new application
+
+Application Details can open it
+
+Live Workflow Tracker can select it
+
+Documents can open for it
+
+Drawings can open for it
+
+Fees can open for it after applicable stage
+
+Notifications contain it
+
+==================================================
+5. APPLICATION NUMBER
+==================================================
+
+Generate unique application numbers.
+
+Example:
+
+MC/BP/2026/04/0028
+MC/BP/2026/04/0029
+MC/BP/2026/04/0030
+
+Do not duplicate existing records.
+
+==================================================
+6. INITIAL STATE
+==================================================
+
+New application should begin with:
+
+status:
+APPLICATION_CREATED
+
+workflowStage:
+DRAWING_UPLOAD
+
+The LTP must then upload the drawing.
+
+Do not immediately send a newly created application to officer review.
+
+==================================================
+PART B — COMPLETE CLIENT WORKFLOW
+==================================================
+
+Implement and verify this exact workflow:
+
+LTP
+↓
+Create Application
+↓
+Upload Drawing
+↓
+Scrutiny Report Generated
+↓
+LTP Reviews Scrutiny
+↓
+IF FAILED
+    ↓
+LTP Re-uploads Drawing
+    ↓
+Scrutiny Runs Again
+    ↓
+New Scrutiny Report
+    ↓
+Repeat until Pass
+↓
+Scrutiny Passed
+↓
+LTP Uploads Required Documents
+↓
+Documents Verified
+↓
+Fee Generated
+↓
+LTP Pays Fee
+↓
+Payment Successful
+↓
+Application enters approval workflow
+↓
+TPS
+↓
+TPA
+↓
+ZAD / ZDD
+↓
+ZJD
+↓
+Director – DP
+↓
+Additional Commissioner
+↓
+Commissioner
+↓
+Final Decision
+
+This must be an actual state transition chain.
+
+==================================================
+PART C — SCRUTINY
+==================================================
+
+After LTP uploads the drawing:
+
+DRAWING_UPLOADED
+
+→ SCRUTINY_IN_PROGRESS
+
+→ SCRUTINY_REPORT_GENERATED
+
+The LTP must be able to review the report.
+
+==================================================
+7. SCRUTINY FAILED
+==================================================
+
+If:
+
+scrutinyResult = FAILED
+
+then:
+
+application.workflowStage =
+DRAWING_REUPLOAD_REQUIRED
+
+Show:
+
+Scrutiny Failed
+Correction required
+
+[ Review Report ]
+
+[ Re-upload Drawing ]
+
+Do NOT allow:
+
+Documents
+Fee Generation
+Payment
+Officer Approval
+
+until scrutiny passes.
+
+==================================================
+8. SCRUTINY RE-UPLOAD
+==================================================
+
+LTP uploads corrected drawing.
+
+Create a NEW drawing version.
+
+Example:
+
+v1 → Failed
+v2 → Pending Scrutiny
+
+Run scrutiny again.
+
+Generate:
+
+SCR/2026/0029
+
+for v2.
+
+Do NOT overwrite v1.
+
+==================================================
+9. SCRUTINY PASS
+==================================================
+
+When:
+
+scrutinyResult = PASSED
+
+or:
+
+PASSED_WITH_WARNINGS
+
+then:
+
+application.workflowStage =
+DOCUMENT_UPLOAD
+
+Show:
+
+Scrutiny Passed
+
+[ Proceed to Documents ]
+
+==================================================
+PART D — DOCUMENT WORKFLOW
+==================================================
+
+After scrutiny passes:
+
+LTP must upload all required documents.
+
+Each required document must belong to:
+
+applicationId
+
+and:
+
+documentTypeId
+
+==================================================
+10. DOCUMENT UPLOAD
+==================================================
+
+LTP:
+
+Select document type
+→ Upload file
+
+Document state:
+
+PENDING_VERIFICATION
+
+Do NOT automatically mark uploaded documents as verified.
+
+==================================================
+11. DOCUMENT VERIFICATION
+==================================================
+
+The responsible officer/verification role must be able to:
+
+View
+Verify
+Reject
+Raise Shortfall
+
+If verified:
+
+document.status =
+VERIFIED
+
+If rejected:
+
+document.status =
+REJECTED
+
+If shortfall:
+
+document.status =
+SHORTFALL
+
+==================================================
+12. DOCUMENT COMPLETION
+==================================================
+
+Do not move the application to fee generation unless all required documents satisfy the configured completion rule.
+
+Example:
+
+7 required documents
+
+7 accepted/verified
+
+Then:
+
+DOCUMENTS_COMPLETED
+
+Only then:
+
+FEE_GENERATION
+
+==================================================
+13. DOCUMENT COUNTERS
+==================================================
+
+Calculate:
+
+Required
+Verified
+Pending Verification
+Rejected
+Shortfall
+Compliance %
+
+from the actual document records.
+
+No hardcoded numbers.
+
+==================================================
+PART E — FEE GENERATION
+==================================================
+
+Once document completion requirements are satisfied:
+
+Generate fee automatically.
+
+Application:
+
+MC/BP/2026/04/0028
+
+Fee:
+
+Generated
+
+Payment status:
+
+PAYMENT_PENDING
+
+The generated fee must belong to the same applicationId.
+
+==================================================
+14. FEE RECORD
+==================================================
+
+Create:
+
+feeId
+applicationId
+feeStructureId
+lineItems
+totalAmount
+paidAmount
+outstandingAmount
+status
+generatedAt
+
+==================================================
+PART F — PAYMENT
+==================================================
+
+LTP opens payment.
+
+Payment states:
+
+PAYMENT_PENDING
+PAYMENT_PROCESSING
+PAYMENT_SUCCESS
+PAYMENT_FAILED
+PARTIALLY_PAID
+
+If payment succeeds:
+
+paidAmount = totalAmount
+outstandingAmount = 0
+payment.status = SUCCESS
+
+==================================================
+15. AFTER PAYMENT
+==================================================
+
+After successful payment:
+
+1. Generate receipt.
+2. Update application.
+3. Create notification.
+4. Create SMS event.
+5. Create audit event.
+6. Advance application workflow.
+7. Add application to TPS queue.
+8. Remove it from payment-pending queue.
+9. Update Dashboard.
+10. Update My Applications.
+11. Update Live Workflow Tracker.
+
+Next workflow stage:
+
+TPS_TECHNICAL_SCRUTINY
+
+==================================================
+PART G — ROLE WORKFLOW
+==================================================
+
+The client has the following roles:
+
+1. LTP
+2. TPS
+3. TPA
+4. ZAD
+5. ZDD
+6. ZJD
+7. Director – DP
+8. Additional Commissioner
+9. Commissioner
+
+Each role must have:
+
+- own login/demo user
+- own dashboard/inbox
+- own application queue
+- own permitted actions
+- own pending work
+- correct workflow transitions
+
+==================================================
+16. ROLE ISOLATION
+==================================================
+
+An application must appear in a role's queue ONLY when that role is the current workflow owner/actor.
+
+Example:
+
+Current stage:
+TPS Technical Scrutiny
+
+The application should appear in:
+
+TPS queue
+
+It should NOT simultaneously appear in:
+
+TPA queue
+ZAD queue
+ZJD queue
+Director queue
+Additional Commissioner queue
+Commissioner queue
+
+unless there is an explicitly configured parallel task.
+
+==================================================
+17. TPS ROLE
+==================================================
+
+TPS receives applications after successful LTP payment.
+
+TPS should see:
+
+Pending Technical Scrutiny
+
+Application:
+MC/BP/2026/04/0028
+
+Actions:
+
+View Application
+View Drawings
+View Documents
+Technical Scrutiny
+Submit Technical Scrutiny Report
+
+==================================================
+18. TPS TECHNICAL SCRUTINY
+==================================================
+
+TPS should be able to:
+
+Review drawing
+Review documents
+Enter technical observations
+Submit technical scrutiny report
+
+Possible results:
+
+APPROVED
+SHORTFALL
+RETURNED
+
+If approved:
+
+Application moves to:
+
+TPA_REVIEW
+
+If shortfall:
+
+Application moves to:
+
+SHORTFALL_RAISED
+
+and returns to appropriate previous/action owner according to configured workflow.
+
+==================================================
+19. TPA ROLE
+==================================================
+
+TPA receives applications after TPS completes the technical scrutiny step.
+
+The TPA dashboard should show:
+
+Pending TPA Reviews
+
+The TPA should be able to:
+
+View application
+View TPS technical scrutiny report
+Review documents
+Raise document shortfall
+Raise fee shortfall
+Approve / Forward
+
+IMPORTANT:
+
+The client requirement states:
+
+"Technical Scrutiny report is submitted by TPS"
+
+Therefore TPS submits the technical scrutiny report.
+
+TPA reviews that report as part of the TPA review stage.
+
+Do not incorrectly make TPA submit the TPS technical scrutiny report.
+
+==================================================
+20. TPA DECISION
+==================================================
+
+TPA actions:
+
+APPROVE / FORWARD
+SHORTFALL
+FEE_SHORTFALL
+
+If approved:
+
+next stage:
+
+ZAD_ZDD_REVIEW
+
+If shortfall:
+
+application goes to the correct shortfall resolution path.
+
+==================================================
+21. ZAD / ZDD
+==================================================
+
+Create role-aware queues:
+
+ZAD Review
+ZDD Review
+
+Where the application is assigned to either ZAD or ZDD according to the workflow configuration.
+
+Actions:
+
+View Application
+Review
+Raise Shortfall
+Fee Shortfall
+Approve / Forward
+
+If approved:
+
+next stage:
+
+ZJD_REVIEW
+
+==================================================
+22. ZJD
+==================================================
+
+ZJD dashboard:
+
+Pending ZJD Review
+
+Actions:
+
+Approve
+Shortfall
+Fee Shortfall
+Forward
+
+The client requirement says:
+
+"Fee Shortfall can be done by ZJD or just reported and sent to Next Level"
+
+Therefore implement the configured option:
+
+Fee Shortfall
+
+and allow:
+
+1. Raise Fee Shortfall
+
+OR
+
+2. Report Fee Issue and Forward
+
+Do not assume every fee issue must stop the workflow.
+
+Make the behavior configurable.
+
+==================================================
+23. DIRECTOR – DP
+==================================================
+
+Director – DP receives the application only after the previous stage forwards it.
+
+Actions:
+
+Review
+Shortfall
+Approve / Forward
+
+Client requirement:
+
+"Shortfall can be done by Director or just reported and sent to Next Level"
+
+Therefore support both:
+
+Raise Shortfall
+
+OR
+
+Report and Forward
+
+Make the configured behavior clear.
+
+==================================================
+24. ADDITIONAL COMMISSIONER
+==================================================
+
+Receives application after Director – DP.
+
+Actions:
+
+Review
+Shortfall if configured
+Approve / Forward
+
+After approval:
+
+COMMISIONER_REVIEW
+
+==================================================
+25. COMMISSIONER
+==================================================
+
+Commissioner is the final approval role.
+
+Actions:
+
+Approve
+Reject
+Return/Shortfall where configured
+
+After approval:
+
+FINAL_DECISION
+APPROVED
+
+Create:
+
+final approval record
+workflow completion
+notification
+SMS
+audit log
+
+==================================================
+PART H — LIVE WORKFLOW TRACKER
+==================================================
+
+The Live Workflow Tracker must NEVER be hardcoded to one application.
+
+It must show the selected application's actual workflow state.
+
+Example:
+
+Application:
+MC/BP/2026/04/0028
+
+Current Stage:
+TPA Review
+
+Tracker:
+
+✓ Application Created
+✓ Drawing Scrutiny
+✓ Documents
+✓ Fee Generated
+✓ Payment
+✓ TPS Technical Scrutiny
+● TPA Review
+○ ZAD / ZDD
+○ ZJD
+○ Director – DP
+○ Additional Commissioner
+○ Commissioner
+○ Final Decision
+
+==================================================
+26. LIVE TRACKER UPDATE
+==================================================
+
+After EVERY workflow action:
+
+update:
+
+currentStage
+status
+assignedRole
+assignedUser
+progress
+updatedAt
+workflowHistory
+
+The Dashboard Live Workflow Tracker must immediately reflect the new stage.
+
+No page refresh should be required where shared state permits.
+
+==================================================
+27. TRACKER EXAMPLES
+==================================================
+
+Application A:
+
+Current:
+TPS Technical Scrutiny
+
+Application B:
+
+Current:
+TPA Review
+
+Application C:
+
+Current:
+ZAD / ZDD Review
+
+Application D:
+
+Current:
+ZJD Review
+
+Application E:
+
+Current:
+Director – DP Review
+
+Application F:
+
+Current:
+Additional Commissioner
+
+Application G:
+
+Current:
+Commissioner
+
+Application H:
+
+Approved
+
+Each tracker must display the correct state independently.
+
+==================================================
+PART I — MULTIPLE APPLICATION TEST DATA
+==================================================
+
+Create 2–3 DEMO applications for EVERY role/stage so the workflow can be properly tested.
+
+Do NOT create 2–3 copies with identical data.
+
+Use different:
+
+- applicants
+- projects
+- application types
+- zones
+- drawing versions
+- scrutiny outcomes
+- document states
+- assigned officers
+
+==================================================
+28. APPLICATION DISTRIBUTION
+==================================================
+
+Create at least:
+
+3 LTP-side applications
+
+at different pre-workflow stages:
+
+1. Drawing Upload
+2. Scrutiny Failed / Re-upload Required
+3. Documents Pending
+
+==================================================
+29. TPS TEST APPLICATIONS
+==================================================
+
+Create 3 applications currently at:
+
+TPS Technical Scrutiny
+
+Example:
+
+TPS-001
+MC/BP/2026/04/0031
+Green Valley Apartments
+
+TPS-002
+MC/BP/2026/04/0032
+Orchid Commercial Tower
+
+TPS-003
+MC/BP/2026/04/0033
+Lakeview Residency
+
+Each must have:
+
+successful payment
+documents completed
+drawing passed
+current stage = TPS Technical Scrutiny
+
+==================================================
+30. TPA TEST APPLICATIONS
+==================================================
+
+Create 3 applications at:
+
+TPA Review
+
+Examples:
+
+MC/BP/2026/04/0034
+Sunrise Enclave
+
+MC/BP/2026/04/0035
+Metro Business Hub
+
+MC/BP/2026/04/0036
+Pinecrest Residency
+
+These should already have:
+
+TPS report completed
+
+==================================================
+31. ZAD / ZDD TEST APPLICATIONS
+==================================================
+
+Create 3 applications:
+
+MC/BP/2026/04/0037
+Riverstone Commercial Complex
+
+MC/BP/2026/04/0038
+Heritage Layout
+
+MC/BP/2026/04/0039
+Maple Heights
+
+Current stage:
+
+ZAD / ZDD Review
+
+==================================================
+32. ZJD TEST APPLICATIONS
+==================================================
+
+Create 3:
+
+MC/BP/2026/04/0040
+Sai Business Park
+
+MC/BP/2026/04/0041
+Hillview Apartments
+
+MC/BP/2026/04/0042
+Eastern Trade Centre
+
+Current:
+
+ZJD Review
+
+==================================================
+33. DIRECTOR TEST APPLICATIONS
+==================================================
+
+Create 3:
+
+MC/BP/2026/04/0043
+Pinnacle Corporate Plaza
+
+MC/BP/2026/04/0044
+Greenfield Township
+
+MC/BP/2026/04/0045
+Silver Oak Residency
+
+Current:
+
+Director – DP Review
+
+==================================================
+34. ADDITIONAL COMMISSIONER TEST APPLICATIONS
+==================================================
+
+Create 3:
+
+MC/BP/2026/04/0046
+Crescent Business Park
+
+MC/BP/2026/04/0047
+Westend Heights
+
+MC/BP/2026/04/0048
+Royal Residency
+
+Current:
+
+Additional Commissioner
+
+==================================================
+35. COMMISSIONER TEST APPLICATIONS
+==================================================
+
+Create 3:
+
+MC/BP/2026/04/0049
+Capital Square
+
+MC/BP/2026/04/0050
+Lakefront Towers
+
+MC/BP/2026/04/0051
+Sunrise Corporate Centre
+
+Current:
+
+Commissioner Review
+
+==================================================
+36. APPROVED APPLICATIONS
+==================================================
+
+Create at least 3 completed applications:
+
+MC/BP/2026/04/0052
+Approved
+
+MC/BP/2026/04/0053
+Approved
+
+MC/BP/2026/04/0054
+Approved
+
+These must have:
+
+all workflow stages completed
+final decision
+sanction/approval record
+receipt/payment record
+complete audit trail
+
+==================================================
+PART J — LTP TEST APPLICATIONS
+==================================================
+
+Create LTP-side examples demonstrating different states.
+
+LTP Application A:
+DRAWING_UPLOAD
+
+Action:
+Upload Drawing
+
+LTP Application B:
+SCRUTINY_FAILED
+
+Action:
+Review Report / Re-upload Drawing
+
+LTP Application C:
+SCRUTINY_PASSED
+
+Action:
+Upload Documents
+
+LTP Application D:
+DOCUMENTS_PENDING_VERIFICATION
+
+Action:
+Track Documents
+
+LTP Application E:
+PAYMENT_PENDING
+
+Action:
+Pay Fees
+
+==================================================
+37. FULL FAILED SCRUTINY TEST
+==================================================
+
+At least one application must demonstrate:
+
+LTP creates application
+
+→ Upload Drawing
+
+→ Scrutiny Failed
+
+Failure:
+Front setback non-compliance
+
+→ LTP re-uploads drawing
+
+v2
+
+→ Scrutiny runs again
+
+→ Scrutiny Passed
+
+→ Documents become available
+
+This scenario MUST work interactively.
+
+==================================================
+38. FULL DOCUMENT TEST
+==================================================
+
+At least one application must demonstrate:
+
+Scrutiny Passed
+
+→ Upload 7 required documents
+
+→ Documents Pending Verification
+
+→ Officer verifies documents one by one
+
+→ 1 rejected
+
+→ LTP replaces rejected document
+
+→ officer verifies replacement
+
+→ all required documents verified
+
+→ Fee Generated
+
+==================================================
+39. FULL PAYMENT TEST
+==================================================
+
+At least one application:
+
+Documents complete
+
+→ Fee Generated
+
+→ Payment Pending
+
+→ LTP Pay Now
+
+→ Payment Processing
+
+→ Payment Successful
+
+→ Receipt generated
+
+→ TPS queue
+
+This must update all modules.
+
+==================================================
+40. ROLE-BY-ROLE WORKFLOW TEST
+==================================================
+
+Use separate demo users for every role.
+
+Example:
+
+LTP:
+Ar. Vikram Deshpande
+
+TPS:
+Smt. Meena Kulkarni
+
+TPA:
+Shri. Ramesh Iyer
+
+ZAD:
+Shri. Rajesh Patil
+
+ZDD:
+Smt. Anjali Rao
+
+ZJD:
+Shri. Suresh Reddy
+
+Director – DP:
+Shri. Amit Verma
+
+Additional Commissioner:
+Smt. Kavita Sharma
+
+Commissioner:
+Shri. Prakash Nair
+
+These are demo users only.
+
+==================================================
+41. ROLE LOGIN TEST
+==================================================
+
+For every role:
+
+Login
+
+Verify:
+
+correct role displayed
+correct dashboard
+correct queue
+correct applications
+correct actions
+
+==================================================
+42. PERMISSION TEST
+==================================================
+
+LTP must NOT be able to:
+
+Approve at TPS
+Approve at TPA
+Approve at ZJD
+Approve at Commissioner
+
+TPS must NOT be able to:
+
+perform Commissioner approval
+
+TPA must NOT be able to:
+
+perform ZJD/Director/Commissioner approval
+
+Each role must only see its permitted actions.
+
+==================================================
+43. TRANSITION TEST
+==================================================
+
+TPS approves:
+
+TPS
+↓
+TPA
+
+TPA approves:
+
+TPA
+↓
+ZAD/ZDD
+
+ZAD/ZDD approves:
+
+ZAD/ZDD
+↓
+ZJD
+
+ZJD approves:
+
+ZJD
+↓
+Director – DP
+
+Director approves:
+
+Director
+↓
+Additional Commissioner
+
+Additional Commissioner approves:
+
+Additional Commissioner
+↓
+Commissioner
+
+Commissioner approves:
+
+Commissioner
+↓
+Final Decision
+
+==================================================
+44. NO SKIPPED STAGES
+==================================================
+
+An application must NOT jump:
+
+TPS
+→ Commissioner
+
+or:
+
+TPA
+→ Director
+
+unless the workflow configuration explicitly allows it.
+
+The default configured workflow must follow the client's sequence.
+
+==================================================
+45. SHORTFALL TEST
+==================================================
+
+At every configured stage where shortfalls are allowed:
+
+Officer raises shortfall.
+
+Application becomes:
+
+SHORTFALL_RAISED
+
+The correct party receives notification/action.
+
+When resolved:
+
+application returns to the configured stage.
+
+Do not skip the required stage.
+
+==================================================
+46. FEE SHORTFALL TEST
+==================================================
+
+Test fee shortfall separately.
+
+Where allowed:
+
+ZJD
+or
+Director – DP
+
+can:
+
+Raise Fee Shortfall
+
+OR:
+
+Report Fee Issue and Forward
+
+depending on configuration.
+
+Ensure the application does not become stuck.
+
+==================================================
+47. WORKFLOW HISTORY
+==================================================
+
+Every transition must create a history event.
+
+Example:
+
+Application Created
+LTP
+29 Aug 2026
+
+Drawing Uploaded
+LTP
+29 Aug 2026
+
+Scrutiny Completed
+System
+29 Aug 2026
+
+Documents Verified
+TPS/TPA as configured
+30 Aug 2026
+
+Fee Generated
+System
+30 Aug 2026
+
+Payment Successful
+LTP
+30 Aug 2026
+
+Forwarded to TPS
+System
+30 Aug 2026
+
+Technical Scrutiny Approved
+TPS
+30 Aug 2026
+
+Forwarded to TPA
+System
+30 Aug 2026
+
+etc.
+
+==================================================
+48. AUDIT LOG
+==================================================
+
+Record:
+
+actor
+role
+applicationId
+action
+previousStage
+newStage
+timestamp
+remarks
+
+Do not allow workflow changes without an audit record.
+
+==================================================
+49. NOTIFICATIONS
+==================================================
+
+Every important transition must generate a notification.
+
+Examples:
+
+Application submitted
+Drawing scrutiny completed
+Scrutiny failed
+Re-upload required
+Scrutiny passed
+Documents required
+Document verified
+Document rejected
+Shortfall raised
+Shortfall resolved
+Fee generated
+Payment successful
+Application forwarded to TPS
+TPS approved
+TPA approved
+ZAD/ZDD approved
+ZJD approved
+Director approved
+Additional Commissioner approved
+Commissioner approved
+Final decision issued
+
+Every notification must include application number.
+
+==================================================
+50. SMS EVENTS
+==================================================
+
+Generate mock SMS events for each important application status change.
+
+Do not claim real SMS delivery.
+
+Example:
+
+"Application MC/BP/2026/04/0028 has been forwarded to TPS Technical Scrutiny."
+
+==================================================
+51. DASHBOARD COUNTS
+==================================================
+
+Each role dashboard must calculate:
+
+Pending
+In Progress
+Action Required
+Completed
+Shortfalls
+
+from actual assigned applications.
+
+Do NOT use global counts for every role.
+
+==================================================
+52. ROLE-SPECIFIC COUNTS
+==================================================
+
+LTP dashboard:
+
+Applications
+Scrutiny Pending
+Documents Pending
+Payments Pending
+Shortfalls
+
+TPS dashboard:
+
+Assigned Technical Scrutiny
+Completed
+Shortfalls
+Overdue
+
+TPA dashboard:
+
+Pending Reviews
+Fee Shortfalls
+Document Shortfalls
+Completed
+
+ZAD/ZDD:
+
+Pending Reviews
+Shortfalls
+Completed
+
+ZJD:
+
+Pending Reviews
+Fee Shortfalls
+Completed
+
+Director:
+
+Pending Reviews
+Shortfalls
+Completed
+
+Additional Commissioner:
+
+Pending Reviews
+Completed
+
+Commissioner:
+
+Pending Final Decisions
+Approved
+Rejected
+Returned
+
+Use shared application data.
+
+==================================================
+53. LIVE WORKFLOW UPDATE
+==================================================
+
+After every officer action:
+
+refresh/update:
+
+Dashboard
+My Applications
+Role Queue
+Live Workflow Tracker
+Application Details
+Notifications
+Audit Log
+
+No stale workflow state.
+
+==================================================
+54. APPLICATION SEARCH
+==================================================
+
+Global search must find newly created applications immediately.
+
+Search by:
+
+Application Number
+Project
+Applicant
+Document
+Scrutiny Report
+Payment
+Shortfall
+
+==================================================
+55. APPLICATION VISIBILITY
+==================================================
+
+Visibility must follow role and ownership.
+
+LTP:
+applications submitted by/available to the LTP
+
+TPS:
+applications assigned to TPS
+
+TPA:
+applications forwarded to TPA
+
+etc.
+
+Do not show every application to every role unless Admin.
+
+==================================================
+56. WORKFLOW ASSIGNMENT
+==================================================
+
+When application moves to next stage:
+
+automatically assign it to the correct next-role queue.
+
+Example:
+
+TPS approves
+
+→ remove from TPS pending queue
+
+→ assign to TPA queue
+
+→ create notification for TPA
+
+→ Live Tracker current stage = TPA Review
+
+==================================================
+57. ASSIGNED USER
+==================================================
+
+Where applicable, assign a specific demo officer.
+
+Example:
+
+TPA Review
+Assigned to:
+Shri. Ramesh Iyer
+
+The assignment must be visible.
+
+==================================================
+58. SLA
+==================================================
+
+Each workflow stage should have configurable SLA metadata.
+
+Show:
+
+Expected SLA
+Assigned Officer
+Stage Start Date
+Elapsed Days
+Overdue if applicable
+
+Do not invent legal SLA guarantees.
+
+Use demo/configurable values.
+
+==================================================
+59. APPLICATION DETAIL TIMELINE
+==================================================
+
+Application Details should display the complete timeline.
+
+Example:
+
+✓ Application Created
+✓ Drawing Uploaded
+✓ Scrutiny Passed
+✓ Documents Verified
+✓ Fee Generated
+✓ Payment Successful
+✓ TPS Technical Scrutiny
+● TPA Review
+○ ZAD / ZDD
+○ ZJD
+○ Director – DP
+○ Additional Commissioner
+○ Commissioner
+○ Final Decision
+
+The active stage must always reflect actual state.
+
+==================================================
+60. DATA CONSISTENCY RULES
+==================================================
+
+Never allow:
+
+Payment Successful + Payment Pending
+
+Scrutiny Passed + Drawing Re-upload Required
+
+All Documents Verified + Documents Pending
+
+Fee Not Generated + Payment Successful
+
+Commissioner Approved + Current Stage = TPS
+
+Application Approved + Workflow incomplete
+
+Assigned role != current workflow owner
+
+==================================================
+61. STATE TRANSITION VALIDATION
+==================================================
+
+Create a centralized workflow transition validator.
+
+Concept:
+
+canTransition(
+  currentStage,
+  action,
+  currentRole
+)
+
+Do not let components arbitrarily modify stage.
+
+Only valid transitions are allowed.
+
+==================================================
+62. EXAMPLE TRANSITIONS
+==================================================
+
+LTP:
+
+APPLICATION_CREATED
+→ DRAWING_UPLOAD
+
+LTP:
+
+DRAWING_UPLOAD
+→ SCRUTINY_IN_PROGRESS
+
+SYSTEM:
+
+SCRUTINY_IN_PROGRESS
+→ SCRUTINY_REPORT_GENERATED
+
+SYSTEM:
+
+SCRUTINY_REPORT_GENERATED
+→ SCRUTINY_FAILED
+OR
+→ SCRUTINY_PASSED
+
+LTP:
+
+SCRUTINY_FAILED
+→ DRAWING_REUPLOAD_REQUIRED
+
+LTP:
+
+SCRUTINY_PASSED
+→ DOCUMENT_UPLOAD
+
+SYSTEM/OFFICER:
+
+DOCUMENT_UPLOAD
+→ DOCUMENT_VERIFICATION
+
+SYSTEM:
+
+DOCUMENT_VERIFICATION
+→ FEE_GENERATION
+
+SYSTEM:
+
+FEE_GENERATION
+→ PAYMENT_PENDING
+
+LTP:
+
+PAYMENT_PENDING
+→ PAYMENT_PROCESSING
+
+SYSTEM:
+
+PAYMENT_PROCESSING
+→ PAYMENT_SUCCESS
+
+SYSTEM:
+
+PAYMENT_SUCCESS
+→ TPS_TECHNICAL_SCRUTINY
+
+TPS:
+
+TPS_TECHNICAL_SCRUTINY
+→ TPA_REVIEW
+
+TPA:
+
+TPA_REVIEW
+→ ZAD_ZDD_REVIEW
+
+ZAD/ZDD:
+
+ZAD_ZDD_REVIEW
+→ ZJD_REVIEW
+
+ZJD:
+
+ZJD_REVIEW
+→ DIRECTOR_DP_REVIEW
+
+Director:
+
+DIRECTOR_DP_REVIEW
+→ ADDITIONAL_COMMISSIONER
+
+Additional Commissioner:
+
+ADDITIONAL_COMMISSIONER
+→ COMMISSIONER
+
+Commissioner:
+
+COMMISSIONER
+→ FINAL_DECISION
+
+==================================================
+63. TERMINAL STATES
+==================================================
+
+Terminal states:
+
+APPROVED
+REJECTED
+
+Once:
+
+APPROVED
+
+the application must not re-enter:
+
+TPS
+TPA
+ZAD
+ZJD
+Director
+Additional Commissioner
+
+unless a specifically configured revision process exists.
+
+==================================================
+64. REOPEN / RETURN
+==================================================
+
+If a role returns an application:
+
+record:
+
+returnedBy
+returnedRole
+reason
+returnedAt
+previousStage
+targetStage
+
+Do not simply change status text.
+
+==================================================
+65. DATABASE/STATE RELATIONSHIPS
+==================================================
+
+Application:
+
+applicationId
+
+Drawing:
+
+drawingId
+applicationId
+
+Document:
+
+documentId
+applicationId
+
+Scrutiny:
+
+scrutinyReportId
+applicationId
+drawingId
+
+Fee:
+
+feeId
+applicationId
+
+Payment:
+
+paymentId
+applicationId
+feeId
+
+Workflow History:
+
+workflowEventId
+applicationId
+
+Shortfall:
+
+shortfallId
+applicationId
+documentId if applicable
+
+Notification:
+
+notificationId
+applicationId
+
+Audit:
+
+auditId
+applicationId
+
+==================================================
+66. NEW APPLICATION REGRESSION TEST
+==================================================
+
+Create a new application now.
+
+Verify:
+
+It appears on Dashboard.
+
+It appears in My Applications.
+
+It appears in search.
+
+It can be opened.
+
+It can upload drawing.
+
+It gets scrutiny.
+
+It can upload documents.
+
+It can generate fees.
+
+It can pay.
+
+It enters TPS.
+
+==================================================
+67. FULL END-TO-END REGRESSION TEST
+==================================================
+
+Test ONE new application through the ENTIRE workflow.
+
+Application:
+
+MC/BP/2026/04/0055
+
+Test:
+
+LTP
+→ Create Application
+→ Submit
+
+LTP
+→ Upload Drawing
+
+System
+→ Scrutiny
+
+LTP
+→ Review Report
+
+Force:
+FAILED
+
+LTP
+→ Re-upload corrected drawing
+
+System
+→ Re-scrutiny
+
+Force:
+PASSED WITH WARNINGS
+
+LTP
+→ Upload required documents
+
+Officer
+→ Verify documents
+
+System
+→ Generate Fee
+
+LTP
+→ Pay Fee
+
+System
+→ Receipt
+
+System
+→ Forward to TPS
+
+TPS
+→ Technical Scrutiny
+
+TPS
+→ Approve
+
+TPA
+→ Review
+
+TPA
+→ Approve
+
+ZAD/ZDD
+→ Review
+
+ZAD/ZDD
+→ Approve
+
+ZJD
+→ Review
+
+ZJD
+→ Approve
+
+Director – DP
+→ Review
+
+Director
+→ Approve
+
+Additional Commissioner
+→ Review
+
+Additional Commissioner
+→ Approve
+
+Commissioner
+→ Review
+
+Commissioner
+→ Approve
+
+Final:
+
+APPROVED
+
+==================================================
+68. FULL DATA CHECK AFTER FINAL APPROVAL
+==================================================
+
+After application reaches Approved:
+
+Dashboard:
+updated
+
+My Applications:
+Approved
+
+Live Workflow:
+Final Decision / Approved
+
+TPS queue:
+not present
+
+TPA queue:
+not present
+
+ZAD/ZDD:
+not present
+
+ZJD:
+not present
+
+Director:
+not present
+
+Additional Commissioner:
+not present
+
+Commissioner:
+completed
+
+Receipt:
+present
+
+Audit:
+complete
+
+Workflow History:
+complete
+
+Notifications:
+present
+
+==================================================
+69. TEST EVERY ROLE WITH 2–3 APPLICATIONS
+==================================================
+
+This is mandatory.
+
+For each role:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+
+create/assign at least 2–3 demo applications.
+
+Do NOT give identical records.
+
+Each role must have:
+
+- pending application
+- completed or processed application
+- action-required/shortfall case where applicable
+
+==================================================
+70. TEST ROLE SWITCHING
+==================================================
+
+Use the existing Demo Role selector.
+
+Switch:
+
+LTP
+→ TPS
+→ TPA
+→ ZAD
+→ ZDD
+→ ZJD
+→ Director – DP
+→ Additional Commissioner
+→ Commissioner
+
+Verify each role sees the correct applications.
+
+Changing role must NOT change the application state incorrectly.
+
+==================================================
+71. ROLE SWITCH MUST NOT RESET DATA
+==================================================
+
+If TPS approves Application 0055.
+
+Then switch to TPA.
+
+Application 0055 must appear in TPA queue.
+
+Switch back to TPS.
+
+Application 0055 must no longer appear as pending TPS work.
+
+==================================================
+72. LIVE TRACKER CROSS-ROLE TEST
+==================================================
+
+Application 0055:
+
+LTP:
+Payment
+
+After successful payment:
+TPS Technical Scrutiny
+
+After TPS approval:
+TPA Review
+
+After TPA approval:
+ZAD/ZDD
+
+After ZAD/ZDD:
+ZJD
+
+After ZJD:
+Director – DP
+
+After Director:
+Additional Commissioner
+
+After Additional Commissioner:
+Commissioner
+
+After Commissioner:
+Approved
+
+The Live Workflow Tracker must reflect each transition.
+
+==================================================
+73. UI STATE TEST
+==================================================
+
+All buttons must change based on the current state.
+
+Examples:
+
+TPS pending:
+[ Review ]
+
+TPS completed:
+no pending action
+
+TPA pending:
+[ Review ]
+
+Payment pending:
+[ Pay Now ]
+
+Payment success:
+[ View Receipt ]
+
+Scrutiny failed:
+[ Re-upload Drawing ]
+
+Documents pending:
+[ Upload Documents ]
+
+Approved:
+[ View Sanction ]
+
+Do not show invalid actions.
+
+==================================================
+74. NO DEAD BUTTONS
+==================================================
+
+Audit every workflow action button.
+
+Every visible action must:
+
+- perform a real state transition
+- open the correct module
+- open the correct application
+- or display a clear demo state
+
+No dead buttons.
+
+==================================================
+75. NO HARD-CODED CURRENT APPLICATION
+==================================================
+
+Remove any hardcoded:
+
+selectedApplicationId
+currentStage
+currentApplication
+currentWorkflow
+
+from dashboard/demo components.
+
+Use shared state.
+
+==================================================
+76. DATA REFRESH
+==================================================
+
+After each mutation:
+
+update shared state.
+
+All subscribing components must rerender.
+
+Do not require manual full-page browser refresh.
+
+If the app reloads in demo mode, persisted data should remain.
+
+==================================================
+77. ERROR HANDLING
+==================================================
+
+If a workflow action fails:
+
+do not partially mutate the application.
+
+Show:
+
+Unable to complete this action.
+
+[Retry]
+
+Do not leave:
+
+application.stage updated
+but
+workflow history missing
+
+or:
+
+payment success
+but
+receipt missing.
+
+Use atomic-style updates within the demo architecture.
+
+==================================================
+78. AUDIT TOOLING
+==================================================
+
+Add a developer/demo diagnostic utility if appropriate.
+
+It should be possible to inspect:
+
+applicationId
+currentStage
+assignedRole
+assignedUser
+status
+paymentStatus
+documentStatus
+scrutinyStatus
+
+This is for testing only.
+
+Do not expose developer controls to normal users.
+
+==================================================
+79. FINAL DATA INTEGRITY AUDIT
+==================================================
+
+After all test cases verify:
+
+Every application has applicationId.
+
+Every drawing references applicationId.
+
+Every document references applicationId.
+
+Every fee references applicationId.
+
+Every payment references applicationId.
+
+Every scrutiny report references applicationId.
+
+Every workflow event references applicationId.
+
+Every notification references applicationId.
+
+Every shortfall references applicationId.
+
+No orphan records.
+
+No duplicate IDs.
+
+No duplicate application numbers.
+
+==================================================
+80. FINAL PERFORMANCE/RENDER CHECK
+==================================================
+
+Verify that:
+
+creating an application
+uploading a document
+verifying a document
+running scrutiny
+payment success
+role transition
+
+do not cause stale components.
+
+No infinite loops.
+
+No unnecessary rerender loops.
+
+No console errors.
+
+==================================================
+81. FINAL TEST MATRIX
+==================================================
+
+Run a complete matrix:
+
+LTP
+2–3 applications
+
+TPS
+2–3 applications
+
+TPA
+2–3 applications
+
+ZAD
+2–3 applications
+
+ZDD
+2–3 applications
+
+ZJD
+2–3 applications
+
+Director – DP
+2–3 applications
+
+Additional Commissioner
+2–3 applications
+
+Commissioner
+2–3 applications
+
+Test:
+
+View
+Review
+Approve
+Reject
+Shortfall
+Fee Shortfall
+Forward
+Document Verify
+Payment
+Drawing Re-upload
+
+where applicable.
+
+==================================================
+82. REQUIRED FINAL TEST REPORT
+==================================================
+
+After implementing fixes, provide a concise test report inside the development environment showing:
+
+Applications created:
+count
+
+Applications visible in My Applications:
+count
+
+Applications visible in role queues:
+count
+
+Scrutiny tests:
+passed / failed
+
+Document upload tests:
+passed / failed
+
+Document verification tests:
+passed / failed
+
+Payment tests:
+passed / failed
+
+Workflow transition tests:
+passed / failed
+
+Live Tracker tests:
+passed / failed
+
+Permission tests:
+passed / failed
+
+Search tests:
+passed / failed
+
+Data consistency tests:
+passed / failed
+
+Console errors:
+count
+
+Build:
+passed / failed
+
+Lint:
+passed / failed
+
+==================================================
+83. CRITICAL ACCEPTANCE CRITERIA
+==================================================
+
+The project is NOT considered complete unless:
+
+1. A newly created application immediately appears in My Applications.
+2. A newly created application survives navigation/reload in demo mode.
+3. A drawing can be uploaded.
+4. Scrutiny report is generated.
+5. LTP can review the report.
+6. Failed scrutiny forces re-upload.
+7. Re-upload creates a new drawing version.
+8. Re-scrutiny creates a new report.
+9. Passed scrutiny unlocks documents.
+10. Required documents can be uploaded.
+11. Uploaded documents become Pending Verification.
+12. Authorized user can verify them.
+13. Rejected documents can be replaced.
+14. Shortfalls work.
+15. All required documents completion triggers fee generation.
+16. Fee appears for the correct application.
+17. Payment can be completed.
+18. Receipt is generated.
+19. Payment success moves application to TPS.
+20. TPS receives the application.
+21. TPS can complete technical scrutiny.
+22. Application then moves to TPA.
+23. TPA can complete review.
+24. Application then moves to ZAD/ZDD.
+25. Application then moves to ZJD.
+26. Application then moves to Director – DP.
+27. Application then moves to Additional Commissioner.
+28. Application then moves to Commissioner.
+29. Commissioner final approval completes application.
+30. Live Workflow Tracker updates after every transition.
+31. Notifications update after every major transition.
+32. SMS events update after every major transition.
+33. Audit history is complete.
+34. Each role sees only its correct queue.
+35. Invalid role actions are unavailable.
+36. At least 2–3 applications exist for each role/stage.
+37. Search finds newly created applications.
+38. Dashboard counts remain consistent.
+39. My Applications and role queues remain consistent.
+40. No application data is lost or replaced accidentally.
+
+==================================================
+FINAL GOAL
+==================================================
+
+The LTP Approval system must behave as ONE connected workflow system.
+
+The complete lifecycle is:
+
+LTP
+↓
+Application
+↓
+Drawing
+↓
+Scrutiny
+↓
+Re-upload if failed
+↓
+Scrutiny Pass
+↓
+Documents
+↓
+Verification
+↓
+Fee
+↓
+Payment
+↓
+TPS
+↓
+TPA
+↓
+ZAD / ZDD
+↓
+ZJD
+↓
+Director – DP
+↓
+Additional Commissioner
+↓
+Commissioner
+↓
+Final Decision
+
+Every transition must:
+
+- update the application
+- update the assigned role
+- update the workflow tracker
+- update dashboards
+- update queues
+- update notifications
+- create an audit event
+- preserve application context
+
+Do not treat this as a collection of screens.
+
+It must function as one stateful, role-based approval workflow.

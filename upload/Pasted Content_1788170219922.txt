@@ -1,0 +1,2008 @@
+PERFORM A COMPLETE UI, FUNCTIONALITY, SEARCH, FILTER, SORTING, PAGINATION,
+AND RESPONSIVE-DESIGN IMPROVEMENT OF THE EXISTING
+MY APPLICATIONS / APPLICATIONS MODULE.
+
+IMPORTANT:
+Do NOT change the Dashboard.
+Do NOT change Payments.
+Do NOT change Documents.
+Do NOT change Drawings & Scrutiny.
+Do NOT change Fees.
+Do NOT change Shortfalls.
+Do NOT change Administration.
+Do NOT change Authentication.
+Do NOT change the main application workflow.
+
+ONLY modify the My Applications / Applications module.
+
+The goal is to make this module:
+
+- clean
+- compact
+- professional
+- easy to scan
+- properly aligned
+- fully functional
+- responsive
+- free from unnecessary cards/tiles
+- easy to search
+- easy to filter
+- easy to sort
+- easy to paginate
+
+==================================================
+1. REDUCE CARD / TILE COUNT
+==================================================
+
+The current My Applications page contains too many cards/tiles.
+
+Keep ONLY these 4 summary cards:
+
+1. Total Applications
+2. Active
+3. Action Required
+4. Approved
+
+Remove unnecessary top summary cards such as:
+
+Drafts
+Pending Payments
+Scrutiny Pending
+Shortfalls
+Rejected
+etc.
+
+These statuses must remain accessible through the application list,
+search and filters, but should NOT occupy large summary tiles.
+
+==================================================
+2. SUMMARY CARD DESIGN
+==================================================
+
+Desktop:
+
+4 equal-width cards in one row.
+
+Tablet:
+
+2 × 2
+
+Mobile:
+
+1 column
+
+Cards must have:
+
+- equal width
+- equal height
+- consistent padding
+- consistent icon position
+- consistent typography
+- compact height
+
+Recommended height:
+
+90–110px
+
+Do NOT create tall KPI cards.
+
+==================================================
+3. SUMMARY CARD CONTENT
+==================================================
+
+Keep cards minimal.
+
+Example:
+
+[ icon ]
+
+25
+TOTAL APPLICATIONS
+
+Do not place long descriptions or multiple statistics inside the cards.
+
+==================================================
+4. SUMMARY COUNTS
+==================================================
+
+Counts must be dynamically calculated from the complete role-visible application
+dataset.
+
+Example:
+
+25 applications
+
+Page 1 contains only 10 applications.
+
+The Total Applications card must still show:
+
+25
+
+NOT:
+
+10
+
+The summary cards must NOT be calculated from the current page only.
+
+==================================================
+5. NO DUPLICATE INFORMATION
+==================================================
+
+Do not repeat the same information in multiple large sections.
+
+For example:
+
+Do NOT create:
+
+Pending Payments summary card
++
+Large Pending Payments section
++
+Another Pending Payments tile
+
+Detailed states belong in:
+
+- application status
+- search
+- status filter
+- application list
+
+==================================================
+6. PAGE STRUCTURE
+==================================================
+
+The My Applications page should follow this hierarchy:
+
+Page Header
+↓
+4 Compact Summary Cards
+↓
+Search / Sort / Status / View Toolbar
+↓
+Applications Table or Grid
+↓
+Pagination
+
+Do NOT insert additional large cards between these sections.
+
+==================================================
+7. PAGE HEADER
+==================================================
+
+Keep:
+
+My Applications
+
+Subtitle:
+
+All building and project approval applications you have submitted.
+
+Right side:
+
+[ + New Application ]
+
+Keep the header compact.
+
+Do not add unnecessary action buttons.
+
+==================================================
+8. NEW APPLICATION BUTTON
+==================================================
+
+The existing:
+
++ New Application
+
+button must continue working.
+
+Clicking it must open the existing New Application wizard/modal.
+
+Do NOT:
+
+- open a new browser tab
+- create a duplicate wizard
+- create a separate application workflow
+
+Use the existing NewApplicationModal.
+
+==================================================
+9. SEARCH / FILTER TOOLBAR
+==================================================
+
+Create ONE compact toolbar directly above the application list.
+
+Desktop layout:
+
+LEFT:
+
+[ Search applications... ]
+
+RIGHT:
+
+[ Updated (newest) ▼ ]
+[ All Statuses ▼ ]
+[ List ] [ Grid ]
+
+Example:
+
+┌────────────────────────────────────────────────────────────────────┐
+│ Search applications...   [Updated (newest) ▼] [All Statuses ▼] [☷][▦] │
+└────────────────────────────────────────────────────────────────────┘
+
+Everything must be on one horizontal row when screen width allows.
+
+==================================================
+10. SEARCH FIELD
+==================================================
+
+Keep the search field wide.
+
+Placeholder:
+
+Search by application no, project, applicant, type, status...
+
+Search must be functional.
+
+Search by:
+
+- Application Number
+- Project Name
+- Applicant Name
+- Application Type
+- Status
+- Current Stage
+
+Search the COMPLETE role-visible application dataset.
+
+Do NOT search only the currently displayed page.
+
+==================================================
+11. SEARCH PROCESSING ORDER
+==================================================
+
+Use this exact order:
+
+All Applications
+↓
+Role Visibility
+↓
+Search
+↓
+Status Filter
+↓
+Other Filters
+↓
+Sort
+↓
+Pagination
+↓
+Display
+
+Do NOT paginate before filtering.
+
+==================================================
+12. STATUS FILTER
+==================================================
+
+Make:
+
+[ All Statuses ▼ ]
+
+fully functional.
+
+Dropdown should include the existing application states as appropriate:
+
+All Statuses
+Draft
+Application Created
+Drawing Uploaded
+Scrutiny Pending
+Scrutiny Failed
+Scrutiny Passed
+Documents Pending
+Document Verification
+Fee Generated
+Payment Pending
+Payment Processing
+Payment Successful
+TPS Technical Scrutiny
+TPA Review
+ZAD / ZDD Review
+ZJD Review
+Director – DP Review
+Additional Commissioner Review
+Commissioner Review
+Shortfall Raised
+Rejected
+Approved
+
+Use the project's existing structured status values.
+
+Do NOT create a second status system.
+
+==================================================
+13. STATUS FILTER MUST USE REAL STATE
+==================================================
+
+Do NOT filter only by display text.
+
+Examples:
+
+Payment Pending:
+
+payment.status === "PAYMENT_PENDING"
+
+Scrutiny Failed:
+
+scrutiny.status === "FAILED"
+
+Scrutiny Pending:
+
+scrutiny.status === "PENDING"
+
+Scrutiny Passed:
+
+scrutiny.status === "PASSED"
+
+Approved:
+
+final decision/status === "APPROVED"
+
+Rejected:
+
+final decision/status === "REJECTED"
+
+Shortfall Raised:
+
+application has an active unresolved shortfall
+
+Workflow stages:
+
+use:
+
+application.currentStage
+
+==================================================
+14. IMPORTANT STATUS DISTINCTIONS
+==================================================
+
+Do NOT classify these as the same state:
+
+Scrutiny Failed ≠ Rejected
+
+Commissioner Review ≠ Approved
+
+Payment Pending ≠ Payment Successful
+
+Documents Pending ≠ Documents Verified
+
+Shortfall Raised ≠ Rejected
+
+Use the correct business state.
+
+==================================================
+15. STATUS FILTER ACTIVE STATE
+==================================================
+
+When a status is selected:
+
+Example:
+
+[ Payment Pending ▼ ]
+
+the selected filter must be visually obvious.
+
+Do NOT continue displaying:
+
+[ All Statuses ▼ ]
+
+after a specific status is selected.
+
+==================================================
+16. CLEAR FILTERS
+==================================================
+
+When search/filter/sort is active, provide:
+
+[ Clear Filters ]
+
+or a compact clear icon.
+
+Clicking it must restore:
+
+- full role-visible dataset
+- All Statuses
+- default sort
+- Page 1
+
+==================================================
+17. STATUS FILTER COUNTS
+==================================================
+
+If practical, show dynamic counts inside the dropdown.
+
+Example:
+
+All Statuses          39
+Payment Pending       12
+Scrutiny Failed        3
+Documents Pending      5
+Under Review           8
+Approved               4
+
+Counts must be dynamically calculated.
+
+Do NOT hardcode them.
+
+==================================================
+18. SORTING
+==================================================
+
+Keep the sort control:
+
+[ Updated (newest) ▼ ]
+
+Options:
+
+Updated (newest)
+Updated (oldest)
+Application Number (A–Z)
+Application Number (Z–A)
+Project Name (A–Z)
+Project Name (Z–A)
+
+Sort using actual application fields.
+
+==================================================
+19. SORT BEFORE PAGINATION
+==================================================
+
+The correct order is:
+
+Role filtering
+↓
+Search
+↓
+Status filtering
+↓
+Sorting
+↓
+Pagination
+
+Do NOT sort only the visible page.
+
+==================================================
+20. VIEW TOGGLE
+==================================================
+
+Keep:
+
+List View
+Grid View
+
+Use compact icon buttons:
+
+[☷] [▦]
+
+The selected view must have a clear active state.
+
+Both views must use the SAME:
+
+- search
+- filters
+- sorting
+- pagination
+- application dataset
+
+Do NOT create separate datasets for List and Grid view.
+
+==================================================
+21. TOOLBAR ALIGNMENT
+==================================================
+
+All toolbar controls must have:
+
+- same height
+- same vertical alignment
+- same border radius
+- consistent icon size
+- consistent typography
+- consistent spacing
+
+Recommended:
+
+38–40px height
+
+Gap:
+
+8–12px
+
+No control should be taller or shorter than another.
+
+==================================================
+22. SEARCH WIDTH
+==================================================
+
+Search should consume most available width.
+
+Recommended:
+
+Search:
+60–70%
+
+Sort:
+120–150px
+
+Status:
+180–220px
+
+View:
+80px
+
+Use flexible layout.
+
+Do NOT allow filters to overflow.
+
+==================================================
+23. TOOLBAR TABLE ALIGNMENT
+==================================================
+
+The left edge of the search field must align exactly with the left edge
+of the application table.
+
+The right edge of the view controls must align with the right edge
+of the application table.
+
+Do not allow controls to extend beyond the application card/container.
+
+==================================================
+24. FILTER DROPDOWN
+==================================================
+
+The status dropdown must be wide enough for long labels such as:
+
+Additional Commissioner Review
+Director – DP Review
+ZAD / ZDD Review
+
+Do not clip text.
+
+Recommended minimum:
+
+180–220px
+
+==================================================
+25. DROPDOWN BEHAVIOR
+==================================================
+
+Dropdown must:
+
+- open directly beneath the control
+- remain within viewport
+- not shift the entire layout
+- not create horizontal overflow
+- support keyboard navigation
+
+Support:
+
+Arrow Up
+Arrow Down
+Enter
+Escape
+
+==================================================
+26. APPLICATION LIST IS THE PRIMARY CONTENT
+==================================================
+
+The application table/list should occupy the majority of the page.
+
+Do not make the page look like a dashboard full of tiles.
+
+The purpose of this module is:
+
+view
+search
+filter
+sort
+open
+manage applications
+
+==================================================
+27. TABLE DEFAULT VIEW
+==================================================
+
+Use the table as the default view.
+
+Columns:
+
+Application No.
+Project
+Applicant
+Status
+Current Stage
+Priority
+Updated
+Action
+
+Do NOT add unnecessary columns.
+
+==================================================
+28. TABLE ROW HEIGHT
+==================================================
+
+Keep rows compact.
+
+Recommended:
+
+56–68px
+
+Cell padding:
+
+10–12px vertical
+12–16px horizontal
+
+Do not create unnecessarily tall rows.
+
+==================================================
+29. APPLICATION NUMBER COLUMN
+==================================================
+
+Example:
+
+MC/BP/2026/04/0002
+
+Use medium/semibold typography.
+
+Do not duplicate the application number elsewhere in the row.
+
+==================================================
+30. PROJECT COLUMN
+==================================================
+
+Show:
+
+Tamhane Row Houses
+
+Secondary information:
+
+Building Permission · Residential
+
+Keep the secondary text small and subtle.
+
+Do not add long descriptions.
+
+==================================================
+31. APPLICANT COLUMN
+==================================================
+
+Show:
+
+Smt. Priya Tamhane
+
+Keep the content concise.
+
+==================================================
+32. STATUS COLUMN
+==================================================
+
+Show ONE primary status badge.
+
+Examples:
+
+Payment Pending
+Scrutiny Failed
+Documents Pending
+TPS Technical Scrutiny
+TPA Review
+Approved
+
+Do NOT place multiple large status badges in one row.
+
+==================================================
+33. CURRENT STAGE
+==================================================
+
+Show actual current workflow stage.
+
+Examples:
+
+Drawing Scrutiny
+Document Upload & Verification
+Payment
+TPS Technical Scrutiny
+TPA Review
+ZAD / ZDD Review
+ZJD Review
+Director – DP Review
+Additional Commissioner Review
+Commissioner Review
+
+Do not duplicate the same information unnecessarily.
+
+==================================================
+34. PRIORITY
+==================================================
+
+Keep Priority ONLY if it is actually used.
+
+Values:
+
+Normal
+High
+Urgent
+
+Use compact badges.
+
+==================================================
+35. UPDATED
+==================================================
+
+Use consistent formatting:
+
+28 Aug 2026
+
+or:
+
+28 Aug 2026, 10:32 AM
+
+Use one standard date format across the module.
+
+==================================================
+36. ACTION COLUMN
+==================================================
+
+Keep actions minimal.
+
+Default:
+
+[ Open → ]
+
+Context-specific primary actions may override Open.
+
+Examples:
+
+Payment Pending
+→ [ Pay Now ]
+
+Scrutiny Failed
+→ [ Re-upload ]
+
+Documents Pending
+→ [ Upload Documents ]
+
+Shortfall Raised
+→ [ Resolve ]
+
+Approved
+→ [ View ]
+
+Do not display multiple redundant buttons.
+
+==================================================
+37. GRID / CARD VIEW
+==================================================
+
+If Grid View already exists, make the cards compact.
+
+Each card should contain ONLY:
+
+Application Number
+Project
+Applicant
+Status
+Current Stage
+Updated
+Primary Action
+
+Remove repeated labels and decorative content.
+
+==================================================
+38. GRID VIEW LAYOUT
+==================================================
+
+Desktop:
+
+3 columns
+
+Tablet:
+
+2 columns
+
+Mobile:
+
+1 column
+
+Recommended card height:
+
+220–260px maximum
+
+Do NOT create huge application cards.
+
+==================================================
+39. CARD INTERNAL SPACING
+==================================================
+
+Use:
+
+16px card padding
+12–16px section spacing
+8px metadata spacing
+
+Do not leave large empty spaces inside cards.
+
+==================================================
+40. PAGINATION
+==================================================
+
+Keep pagination.
+
+Desktop:
+
+10 applications per page.
+
+Example:
+
+Showing 1–10 of 25 applications
+
+[‹] [1] [2] [3] [›]
+
+Pagination must be based on the filtered dataset.
+
+==================================================
+41. DYNAMIC PAGINATION
+==================================================
+
+Calculate:
+
+totalPages =
+Math.ceil(filteredApplications.length / applicationsPerPage)
+
+Do NOT hardcode the number of pages.
+
+If there are:
+
+25 applications:
+
+Page 1:
+1–10
+
+Page 2:
+11–20
+
+Page 3:
+21–25
+
+If there are 39:
+
+Page 1:
+1–10
+
+Page 2:
+11–20
+
+Page 3:
+21–30
+
+Page 4:
+31–39
+
+==================================================
+42. PAGINATION POSITION
+==================================================
+
+Place pagination at the bottom of the application table/card container.
+
+Desktop:
+
+LEFT:
+Showing 1–10 of 39 applications
+
+RIGHT:
+[‹] [1] [2] [3] [4] [›]
+
+Everything aligned on one row.
+
+==================================================
+43. FILTERED RESULT COUNT
+==================================================
+
+The result count must reflect the current filtered dataset.
+
+Example:
+
+All:
+Showing 1–10 of 39 applications
+
+Payment Pending:
+Showing 1–10 of 12 applications
+
+Search "Kulkarni":
+Showing 1–4 of 4 applications
+
+Do NOT continue showing 39 after filtering.
+
+==================================================
+44. PAGINATION RESET
+==================================================
+
+If the user is on Page 3 and changes:
+
+Search
+Status
+Filter
+
+reset to:
+
+Page 1
+
+Do not show an empty page.
+
+==================================================
+45. FILTER PERSISTENCE
+==================================================
+
+When moving:
+
+Page 1
+→ Page 2
+
+preserve:
+
+Search
+Status
+Sort
+View mode
+
+Do not reset them on page change.
+
+==================================================
+46. APPLICATION ID
+==================================================
+
+Every action must use the real:
+
+applicationId
+
+Do NOT use array index or row index as application identity.
+
+This must remain correct after:
+
+search
+filter
+sorting
+pagination
+view switching
+
+==================================================
+47. APPLICATION DETAIL
+==================================================
+
+Clicking:
+
+Open
+
+must open the exact selected application.
+
+Use:
+
+applicationId
+
+Do not open Application 1 simply because the selected row was index 0
+on the current page.
+
+==================================================
+48. BACK NAVIGATION
+==================================================
+
+When:
+
+My Applications
+→ Application Details
+
+Back must return to:
+
+My Applications
+
+Where practical, preserve:
+
+current page
+search
+status filter
+sort
+view mode
+
+Example:
+
+Page 2
+→ Application Details
+→ Back
+
+should return to Page 2.
+
+==================================================
+49. DASHBOARD VIEW ALL
+==================================================
+
+If Dashboard contains:
+
+View all →
+
+it must continue opening:
+
+My Applications
+
+The Applications module handles:
+
+Search
+Filter
+Sort
+Pagination
+List/Grid
+
+==================================================
+50. ROLE VISIBILITY
+==================================================
+
+Applications must respect logged-in role.
+
+LTP:
+own applications
+
+TPS:
+assigned TPS applications
+
+TPA:
+assigned TPA applications
+
+ZAD/ZDD:
+assigned applications
+
+ZJD:
+assigned applications
+
+Director:
+assigned applications
+
+Additional Commissioner:
+assigned applications
+
+Commissioner:
+assigned applications
+
+Admin:
+according to permissions
+
+Apply pagination ONLY AFTER role filtering.
+
+==================================================
+51. ROLE FILTER ORDER
+==================================================
+
+Use:
+
+All Applications
+↓
+Role Visibility
+↓
+Search
+↓
+Status Filter
+↓
+Sort
+↓
+Pagination
+
+Do not expose applications outside the user's permitted visibility.
+
+==================================================
+52. NEW APPLICATION DATA UPDATE
+==================================================
+
+When a new application is successfully created:
+
+1. Update shared application dataset.
+2. Increase total count.
+3. Recalculate summary cards.
+4. Recalculate pagination.
+5. Make the application searchable.
+6. Make it filterable.
+7. Display it according to sorting.
+8. Do NOT duplicate the record.
+
+==================================================
+53. PAYMENT UPDATE
+==================================================
+
+If a Payment Pending application completes payment:
+
+Update the shared application state.
+
+Then:
+
+Payment Pending filter
+
+must remove it.
+
+The application must appear under its new appropriate state.
+
+Do not leave stale filtered results.
+
+==================================================
+54. SCRUTINY UPDATE
+==================================================
+
+If:
+
+Scrutiny Failed
+→ Re-upload
+→ Scrutiny Passed
+
+then:
+
+Scrutiny Failed filter
+
+must no longer include the application.
+
+The application must appear with its new status/stage.
+
+==================================================
+55. SHORTFALL UPDATE
+==================================================
+
+When a shortfall is raised:
+
+Shortfall Raised filter
+
+must include the application.
+
+When all active shortfalls are resolved:
+
+Shortfall Raised filter
+
+must remove it.
+
+==================================================
+56. APPROVAL UPDATE
+==================================================
+
+When an application reaches:
+
+Approved
+
+it must:
+
+appear under Approved
+not appear under active review stages
+show correct current stage
+use correct action
+
+Do not leave stale review status.
+
+==================================================
+57. NO DUPLICATE DATASETS
+==================================================
+
+Do NOT create separate arrays such as:
+
+paymentPendingApplications
+approvedApplications
+scrutinyFailedApplications
+page1Applications
+page2Applications
+page3Applications
+
+Use the central application dataset and derived selectors.
+
+==================================================
+58. CENTRALIZED FILTERING
+==================================================
+
+Use a centralized filtering/selecting function.
+
+Conceptually:
+
+getFilteredApplications({
+  applications,
+  role,
+  searchQuery,
+  statusFilter,
+  sortBy
+})
+
+Then:
+
+filteredApplications
+↓
+paginatedApplications
+
+Do not duplicate filtering logic across components.
+
+==================================================
+59. APPLICATION DATA MODEL
+==================================================
+
+Each application should preserve:
+
+applicationId
+applicationNumber
+projectName
+applicantName
+applicationType
+propertyType
+status
+currentStage
+priority
+updatedAt
+
+Do not change existing data structures unnecessarily.
+
+==================================================
+60. SUMMARY DATA MODEL
+==================================================
+
+Summary cards must calculate from the complete role-visible application
+dataset.
+
+Example:
+
+Total Applications
+Active
+Action Required
+Approved
+
+Do not calculate these from only the current page.
+
+==================================================
+61. NO EXCESSIVE EMPTY SPACE
+==================================================
+
+Remove unnecessary whitespace:
+
+- between summary cards
+- between summary cards and toolbar
+- between toolbar and table
+- inside application cards
+- inside table rows
+- between table and pagination
+- around buttons
+- between filters
+- around page heading
+
+However:
+
+DO NOT remove all spacing.
+
+Keep enough spacing for readability and accessibility.
+
+The target is:
+
+COMPACT + CLEAN + BALANCED
+
+not cramped.
+
+==================================================
+62. PAGE WIDTH
+==================================================
+
+Use the available workspace efficiently.
+
+Recommended:
+
+width: 100%
+
+max-width:
+1600–1700px
+
+margin:
+0 auto
+
+padding:
+24–32px
+
+Do not use unnecessarily narrow containers.
+
+==================================================
+63. TABLE WIDTH
+==================================================
+
+The table should use the available width efficiently.
+
+Do not leave a large blank area on either side.
+
+Columns should have sensible proportions.
+
+Suggested:
+
+Application No.:
+16%
+
+Project:
+22%
+
+Applicant:
+18%
+
+Status:
+14%
+
+Current Stage:
+15%
+
+Priority:
+7%
+
+Updated:
+8%
+
+Action:
+10%
+
+Adjust as necessary based on actual viewport.
+
+==================================================
+64. CARD ALIGNMENT
+==================================================
+
+All summary cards:
+
+same width
+same height
+
+Toolbar:
+
+same left/right boundary as application table
+
+Pagination:
+
+same left/right boundary as application table
+
+No component should protrude outside its container.
+
+==================================================
+65. RESPONSIVE TOOLBAR
+==================================================
+
+Desktop:
+
+Search + Sort + Status + View
+one row.
+
+Tablet:
+
+Search may occupy first row.
+
+Sort + Status + View
+second row.
+
+Mobile:
+
+Search full width.
+
+Below:
+
+Sort
+Status
+View
+
+No tiny controls.
+
+No horizontal scroll.
+
+==================================================
+66. RESPONSIVE SUMMARY CARDS
+==================================================
+
+Desktop:
+
+4 columns
+
+Tablet:
+
+2 × 2
+
+Mobile:
+
+1 × 4 vertically
+
+No card overlap.
+
+==================================================
+67. RESPONSIVE TABLE
+==================================================
+
+Desktop:
+
+normal table
+
+Tablet:
+
+responsive table or controlled horizontal scrolling
+
+Mobile:
+
+use the best existing responsive pattern:
+
+compact cards
+or
+controlled horizontal table
+
+Do NOT allow the entire webpage to have uncontrolled horizontal scrolling.
+
+==================================================
+68. TYPOGRAPHY
+==================================================
+
+Keep typography compact.
+
+Application Number:
+13–14px medium/semibold
+
+Project:
+14–15px semibold
+
+Metadata:
+12–13px
+
+Status:
+12px
+
+Buttons:
+13px
+
+Do not use oversized text.
+
+==================================================
+69. FILTER CONTROL STYLE
+==================================================
+
+Use the current LTP Approval visual language:
+
+- white background
+- subtle border
+- deep green active state
+- moderate radius
+- small icons
+- professional typography
+- restrained shadows
+
+Do not introduce:
+
+gradients
+glassmorphism
+large animations
+flashy effects
+
+==================================================
+70. ACCESSIBILITY
+==================================================
+
+Search:
+
+accessible label:
+Search applications
+
+Status:
+
+accessible label:
+Application status filter
+
+List:
+
+aria-label="List view"
+
+Grid:
+
+aria-label="Grid view"
+
+Pagination:
+
+aria-label="Previous page"
+aria-label="Next page"
+
+Support keyboard navigation.
+
+==================================================
+71. LOADING STATE
+==================================================
+
+If application data is loading:
+
+show skeleton rows/cards.
+
+Do NOT display random placeholder application data.
+
+==================================================
+72. ERROR STATE
+==================================================
+
+If applications cannot be loaded:
+
+show:
+
+Unable to load applications.
+
+[ Retry ]
+
+Do not show a blank page.
+
+==================================================
+73. EMPTY STATE
+==================================================
+
+If no applications exist:
+
+No applications submitted yet.
+
+[ + New Application ]
+
+If search/filter produces no results:
+
+No applications found.
+
+Try changing your search or filters.
+
+[ Clear Filters ]
+
+Do not show empty application cards.
+
+==================================================
+74. SEARCH + STATUS TEST
+==================================================
+
+Given:
+
+39 applications
+
+Search:
+
+Kulkarni
+
+Status:
+
+Payment Pending
+
+Expected:
+
+only Kulkarni applications with Payment Pending.
+
+==================================================
+75. STATUS FILTER TEST
+==================================================
+
+Select:
+
+Payment Pending
+
+Expected:
+
+only payment-pending applications.
+
+Pagination and result count must update.
+
+==================================================
+76. SORT TEST
+==================================================
+
+Select:
+
+Payment Pending
+
+Then:
+
+Updated (oldest)
+
+Expected:
+
+pending applications sorted oldest first.
+
+==================================================
+77. PAGINATION TEST
+==================================================
+
+With 39 applications:
+
+Page 1:
+1–10
+
+Page 2:
+11–20
+
+Page 3:
+21–30
+
+Page 4:
+31–39
+
+Verify Previous/Next/page numbers.
+
+==================================================
+78. FILTER + PAGINATION TEST
+==================================================
+
+If 12 applications are Payment Pending:
+
+Page 1:
+1–10
+
+Page 2:
+11–12
+
+Result:
+
+Showing 1–10 of 12 applications
+
+==================================================
+79. VIEW SWITCH TEST
+==================================================
+
+Select:
+
+Payment Pending
+
+Then:
+
+List → Grid
+
+Expected:
+
+same filtered applications.
+
+Search/filter/sort state must remain unchanged.
+
+==================================================
+80. APPLICATION OPEN TEST
+==================================================
+
+From Page 2:
+
+Open an application.
+
+Verify:
+
+correct applicationId
+correct project
+correct applicant
+correct status
+correct current stage
+
+Then Back.
+
+Expected:
+
+return to My Applications.
+
+==================================================
+81. NEW APPLICATION TEST
+==================================================
+
+Create a new application.
+
+Verify:
+
+Total Applications increases.
+
+New application appears in My Applications.
+
+Search finds it.
+
+Status filter finds it when applicable.
+
+Pagination recalculates.
+
+No duplicate record is created.
+
+==================================================
+82. PAYMENT STATUS TEST
+==================================================
+
+Take a Payment Pending application.
+
+Complete payment.
+
+Return to My Applications.
+
+Expected:
+
+Payment Pending filter no longer contains it.
+
+Application shows updated workflow state.
+
+==================================================
+83. SCRUTINY STATUS TEST
+==================================================
+
+Take a Scrutiny Failed application.
+
+Re-upload corrected drawing.
+
+Pass scrutiny.
+
+Return to My Applications.
+
+Expected:
+
+Scrutiny Failed filter no longer contains it.
+
+Application shows new stage.
+
+==================================================
+84. SHORTFALL TEST
+==================================================
+
+Raise a shortfall.
+
+Expected:
+
+Shortfall Raised filter includes application.
+
+Resolve shortfall.
+
+Expected:
+
+Shortfall Raised filter removes it if no unresolved shortfall remains.
+
+==================================================
+85. ROLE TEST
+==================================================
+
+For each role:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+Admin
+
+verify the Applications page only shows permitted applications.
+
+Pagination must be applied after role visibility filtering.
+
+==================================================
+86. DATA CONSISTENCY
+==================================================
+
+The same application record must be used by:
+
+Dashboard
+My Applications
+Application Details
+Documents
+Drawings
+Fees
+Payments
+Shortfalls
+Workflow
+Notifications
+
+Do not create an Applications-page-only copy.
+
+==================================================
+87. APPLICATION ACTION CONSISTENCY
+==================================================
+
+Every action must reference:
+
+applicationId
+
+Do not use:
+
+array index
+row number
+page index
+
+as identity.
+
+==================================================
+88. NO BROKEN NAVIGATION
+==================================================
+
+Check every application navigation path.
+
+My Applications
+→ Application Details
+→ Drawings
+→ Documents
+→ Fees
+→ Payments
+→ Shortfall
+
+Each should preserve the selected application's context.
+
+==================================================
+89. NO BROKEN BACK BUTTON
+==================================================
+
+Back should return to the correct parent within the same module hierarchy.
+
+Do not use misleading labels such as:
+
+Back to Fees
+
+when the actual parent is:
+
+My Applications.
+
+==================================================
+90. FINAL VISUAL TARGET
+==================================================
+
+The page should look like a professional application-management screen:
+
+My Applications                            [+ New Application]
+
+All building and project approval applications you have submitted.
+
+┌────────────────┐ ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
+│ Total          │ │ Active         │ │ Action Required│ │ Approved       │
+│ 25             │ │ 20             │ │ 4              │ │ 1              │
+└────────────────┘ └────────────────┘ └────────────────┘ └────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────┐
+│ Search applications...      [Updated ▼] [All Statuses ▼] [☷] [▦]       │
+├──────────────────────────────────────────────────────────────────────────┤
+│ Application │ Project │ Applicant │ Status │ Stage │ Priority │ Action │
+├──────────────────────────────────────────────────────────────────────────┤
+│ 0001        │ ...     │ ...       │ Draft  │ ...   │ Normal   │ Open   │
+│ 0002        │ ...     │ ...       │ Pending│ ...   │ Normal   │ Open   │
+│ 0003        │ ...     │ ...       │ Failed │ ...   │ High     │ Open   │
+│ ...                                                                    │
+│ 0010        │ ...     │ ...       │ ...    │ ...   │ ...      │ Open   │
+└──────────────────────────────────────────────────────────────────────────┘
+
+Showing 1–10 of 25 applications
+
+                              [‹] [1] [2] [3] [›]
+
+==================================================
+91. FINAL DESIGN PRINCIPLES
+==================================================
+
+The My Applications page should NOT look like a dashboard full of tiles.
+
+It should look like a professional application-management system.
+
+Priority:
+
+1. Application list
+2. Search
+3. Status filtering
+4. Sorting
+5. Pagination
+6. Application actions
+
+Summary cards should remain secondary and compact.
+
+==================================================
+92. FINAL ACCEPTANCE TEST
+==================================================
+
+Before finishing, verify ALL of the following:
+
+UI:
+
+- 4 summary cards only
+- cards aligned
+- cards equal width
+- cards compact
+- no overlapping
+- no excessive empty space
+- toolbar aligned
+- search aligned
+- status filter aligned
+- sort aligned
+- view toggle aligned
+- table aligned
+- pagination aligned
+- responsive layout works
+
+FUNCTIONAL:
+
+- search works
+- status filter works
+- sort works
+- list view works
+- grid view works
+- search + status works
+- status + sort works
+- search + status + sort works
+- pagination works
+- filter pagination works
+- result count works
+- new application appears
+- payment updates appear
+- scrutiny updates appear
+- shortfall updates appear
+- application opening works
+- back navigation works
+
+DATA:
+
+- no duplicate datasets
+- no duplicate application IDs
+- no index-based identity
+- correct applicationId everywhere
+- correct applicant
+- correct project
+- correct status
+- correct stage
+- correct role visibility
+
+RESPONSIVE:
+
+Test:
+
+1920px
+1600px
+1440px
+1366px
+1280px
+1024px
+768px
+480px
+390px
+
+Verify:
+
+- no horizontal page overflow
+- no clipped text
+- no overlapping controls
+- no broken cards
+- no broken tables
+- no broken pagination
+
+QUALITY:
+
+- no console errors
+- no runtime errors
+- no broken imports
+- lint passes
+- build passes
+
+==================================================
+FINAL GOAL
+==================================================
+
+Make the My Applications module compact, professional and fully functional.
+
+Reduce unnecessary cards and tiles.
+
+Keep only:
+
+Total Applications
+Active
+Action Required
+Approved
+
+Then make the application list the primary content with:
+
+SEARCH
++
+SORT
++
+STATUS FILTER
++
+LIST/GRID
++
+PAGINATION
+
+All controls must be perfectly aligned and use available space efficiently.
+
+Every application must remain accessible.
+
+Every filter must operate on real application state.
+
+Every action must use the correct applicationId.
+
+Do not change unrelated modules.
+Do not duplicate data.
+Do not hardcode counts.
+Do not hardcode pages.
+Do not leave dead controls.
+
+Make the entire My Applications module clean, compact, aligned, responsive,
+and production-quality.
