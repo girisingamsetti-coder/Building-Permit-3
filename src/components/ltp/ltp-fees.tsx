@@ -524,8 +524,8 @@ export function LtpReceipt() {
                 <Building2 className="size-6" />
               </div>
               <div>
-                <p className="text-sm font-semibold">Municipal Authority</p>
-                <p className="text-[11px] text-sidebar-foreground/60">Directorate of Town &amp; Country Planning</p>
+                <p className="text-sm font-semibold">LTP Approval</p>
+                <p className="text-[11px] text-sidebar-foreground/60">Building Permit Management System</p>
               </div>
             </div>
             <div className="text-right">

@@ -225,7 +225,7 @@ export function AdminUsers() {
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="name">Full name <span className="text-destructive">*</span></Label>
-                      <Input id="name" placeholder="e.g. Shri. Anand Joshi" required />
+                      <Input id="name" placeholder="e.g. Shri. Rakesh Kulkarni" required />
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="email">Email <span className="text-destructive">*</span></Label>

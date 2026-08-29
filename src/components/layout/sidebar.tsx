@@ -34,10 +34,10 @@ export function Sidebar() {
         {!collapsed && (
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight text-sidebar-foreground">
-              Municipal Authority
+              LTP Approval
             </p>
             <p className="truncate text-[11px] text-sidebar-foreground/60">
-              Approval Workflow Portal
+              Building Permit Management System
             </p>
           </div>
         )}

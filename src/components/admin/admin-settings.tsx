@@ -98,7 +98,7 @@ export function AdminSettings() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Authority name" id="auth-name" defaultValue="Municipal Corporation of Pune" />
-            <Field label="Portal name" id="portal-name" defaultValue="LTP Approval Workflow Portal" />
+            <Field label="Portal name" id="portal-name" defaultValue="LTP Approval" />
             <Field label="Jurisdiction" id="jurisdiction" defaultValue="Maharashtra, India" />
             <div className="space-y-1.5">
               <Label htmlFor="tz">Timezone</Label>
