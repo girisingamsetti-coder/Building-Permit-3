@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, DEMO_CREDENTIALS } from "@/store/app-store";
-import { ROLES } from "@/data/mock-data";
+import { useAppStore, DEMO_CREDENTIALS, useVisibleApplications } from "@/store/app-store";
+import { ROLES, USERS } from "@/data/mock-data";
 import {
   Bell,
   Search,
@@ -19,6 +19,14 @@ import {
   MessageSquare,
   ShieldCheck,
   Zap,
+  X,
+  FileText,
+  FileStack,
+  ScrollText,
+  AlertTriangle,
+  CreditCard,
+  Building2,
+  FileWarning,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +43,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { timeAgo } from "@/components/design-system/workflow";
 import { RoleBadge } from "@/components/design-system/badges";
 import { useToast } from "@/hooks/use-toast";
-import type { NotificationType, RoleKey } from "@/types";
+import type { NotificationType, RoleKey, ViewKey } from "@/types";
 
 const NOTIF_ICON: Record<NotificationType, string> = {
   APPLICATION_SUBMITTED: "FileStack",
@@ -63,6 +71,318 @@ const SMS_STATUS_CLS: Record<string, string> = {
   PENDING: "bg-muted text-muted-foreground",
 };
 
+// ============================================================
+// SEARCH RESULT TYPES
+// ============================================================
+interface SearchResult {
+  category: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  subtitle: string;
+  meta?: string;
+  applicationId?: string;
+  view: ViewKey;
+}
+
+// ============================================================
+// SEARCH LOGIC
+// ============================================================
+function useGlobalSearch(query: string): { results: SearchResult[]; loading: boolean } {
+  const apps = useVisibleApplications();
+  const [results, setResults] = React.useState<SearchResult[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout>>();
+
+  React.useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!query || query.trim().length < 2) {
+      setResults([]);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    debounceRef.current = setTimeout(() => {
+      const q = query.trim().toLowerCase();
+      const found: SearchResult[] = [];
+
+      // 1. Applications
+      apps.forEach((app) => {
+        const matches =
+          app.applicationNo.toLowerCase().includes(q) ||
+          app.project.name.toLowerCase().includes(q) ||
+          app.applicant.name.toLowerCase().includes(q) ||
+          app.project.type.toLowerCase().includes(q) ||
+          app.status.toLowerCase().includes(q) ||
+          app.currentStageLabel.toLowerCase().includes(q);
+        if (matches) {
+          found.push({
+            category: "Applications",
+            icon: FileStack,
+            title: app.applicationNo,
+            subtitle: app.project.name,
+            meta: `Applicant: ${app.applicant.name}`,
+            applicationId: app.id,
+            view: "ltp-application-details" as ViewKey,
+          });
+        }
+      });
+
+      // 2. Documents
+      apps.forEach((app) => {
+        app.documents.forEach((doc) => {
+          if (
+            doc.name.toLowerCase().includes(q) ||
+            doc.code.toLowerCase().includes(q)
+          ) {
+            found.push({
+              category: "Documents",
+              icon: FileText,
+              title: doc.name,
+              subtitle: app.applicationNo,
+              meta: `${app.project.name} · ${doc.status}`,
+              applicationId: app.id,
+              view: "ltp-documents" as ViewKey,
+            });
+          }
+        });
+      });
+
+      // 3. Scrutiny Reports
+      apps.forEach((app) => {
+        if (app.scrutinyReport) {
+          const r = app.scrutinyReport;
+          const drawing = app.drawings.find((d) => d.version === r.drawingVersion);
+          if (
+            r.reportNo.toLowerCase().includes(q) ||
+            (drawing?.fileName.toLowerCase().includes(q) ?? false) ||
+            app.applicationNo.toLowerCase().includes(q) ||
+            app.project.name.toLowerCase().includes(q)
+          ) {
+            found.push({
+              category: "Scrutiny Reports",
+              icon: ScrollText,
+              title: r.reportNo,
+              subtitle: app.applicationNo,
+              meta: `${app.project.name} · ${r.status}`,
+              applicationId: app.id,
+              view: "ltp-scrutiny" as ViewKey,
+            });
+          }
+        }
+      });
+
+      // 4. Shortfalls
+      apps.forEach((app) => {
+        app.shortfalls.forEach((sf) => {
+          if (
+            sf.shortfallId.toLowerCase().includes(q) ||
+            sf.title.toLowerCase().includes(q) ||
+            sf.description.toLowerCase().includes(q) ||
+            sf.type.toLowerCase().includes(q) ||
+            app.applicationNo.toLowerCase().includes(q)
+          ) {
+            found.push({
+              category: "Shortfalls",
+              icon: AlertTriangle,
+              title: sf.shortfallId,
+              subtitle: app.applicationNo,
+              meta: `${sf.title} · ${sf.status}`,
+              applicationId: app.id,
+              view: "ltp-shortfalls" as ViewKey,
+            });
+          }
+        });
+      });
+
+      // 5. Payments
+      apps.forEach((app) => {
+        if (app.payment) {
+          const p = app.payment;
+          if (
+            (p.transactionId || "").toLowerCase().includes(q) ||
+            (p.referenceNo || "").toLowerCase().includes(q) ||
+            (p.receiptNo || "").toLowerCase().includes(q) ||
+            app.applicationNo.toLowerCase().includes(q) ||
+            app.project.name.toLowerCase().includes(q)
+          ) {
+            found.push({
+              category: "Payments",
+              icon: CreditCard,
+              title: p.receiptNo || p.transactionId || p.referenceNo || "—",
+              subtitle: app.applicationNo,
+              meta: `${app.project.name} · ${p.status}`,
+              applicationId: app.id,
+              view: "ltp-payment" as ViewKey,
+            });
+          }
+        }
+      });
+
+      // 6. Officers
+      USERS.forEach((officer) => {
+        if (
+          officer.name.toLowerCase().includes(q) ||
+          officer.role.toLowerCase().includes(q) ||
+          (officer.employeeId || "").toLowerCase().includes(q)
+        ) {
+          found.push({
+            category: "Officers",
+            icon: ShieldCheck,
+            title: officer.name,
+            subtitle: ROLES[officer.role].fullName,
+            meta: officer.zone || officer.department || "",
+            view: "officer-applications" as ViewKey,
+          });
+        }
+      });
+
+      // Sort: exact matches first, then prefix, then partial
+      found.sort((a, b) => {
+        const aExact = a.title.toLowerCase() === q ? 0 : a.title.toLowerCase().startsWith(q) ? 1 : 2;
+        const bExact = b.title.toLowerCase() === q ? 0 : b.title.toLowerCase().startsWith(q) ? 1 : 2;
+        return aExact - bExact;
+      });
+
+      setResults(found);
+      setLoading(false);
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query, apps]);
+
+  return { results, loading };
+}
+
+// ============================================================
+// SEARCH DROPDOWN COMPONENT
+// ============================================================
+function SearchDropdown({
+  query,
+  results,
+  loading,
+  onSelect,
+  onClose,
+}: {
+  query: string;
+  results: SearchResult[];
+  loading: boolean;
+  onSelect: (result: SearchResult) => void;
+  onClose: () => void;
+}) {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  // Group results by category
+  const grouped = React.useMemo(() => {
+    const groups: Record<string, SearchResult[]> = {};
+    results.forEach((r) => {
+      (groups[r.category] ??= []).push(r);
+    });
+    return groups;
+  }, [results]);
+
+  // Flatten for keyboard navigation
+  const flatResults = React.useMemo(() => Object.values(grouped).flat(), [grouped]);
+
+  // Reset active index when results change
+  React.useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  // Keyboard navigation
+  React.useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveIndex((i) => Math.min(i + 1, flatResults.length - 1));
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveIndex((i) => Math.max(i - 1, 0));
+      } else if (e.key === "Enter" && flatResults[activeIndex]) {
+        e.preventDefault();
+        onSelect(flatResults[activeIndex]);
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [flatResults, activeIndex, onSelect, onClose]);
+
+  if (!query || query.trim().length < 2) return null;
+
+  // Limit results per category
+  const MAX_PER_CATEGORY: Record<string, number> = {
+    Applications: 5,
+    Documents: 3,
+    "Scrutiny Reports": 3,
+    Shortfalls: 3,
+    Payments: 3,
+    Officers: 3,
+  };
+
+  let runningIndex = 0;
+
+  return (
+    <div
+      ref={scrollRef}
+      className="absolute left-0 right-0 top-full z-50 mt-1 max-h-[400px] overflow-y-auto rounded-lg border border-border bg-popover shadow-gov-lg"
+    >
+      {loading ? (
+        <div className="p-4 text-center text-sm text-muted-foreground">Searching…</div>
+      ) : flatResults.length === 0 ? (
+        <div className="p-4 text-center text-sm text-muted-foreground">
+          No results found for &ldquo;{query}&rdquo;
+          <p className="mt-1 text-xs">Try: application number, project, applicant, document or report number.</p>
+        </div>
+      ) : (
+        <div className="p-2">
+          {Object.entries(grouped).map(([category, items]) => {
+            const limited = items.slice(0, MAX_PER_CATEGORY[category] ?? 3);
+            return (
+              <div key={category} className="mb-1">
+                <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{category}</p>
+                {limited.map((result) => {
+                  const idx = runningIndex++;
+                  const isActive = idx === activeIndex;
+                  return (
+                    <button
+                      key={`${category}-${idx}`}
+                      onClick={() => onSelect(result)}
+                      onMouseEnter={() => setActiveIndex(idx)}
+                      className={cn(
+                        "flex w-full items-start gap-2.5 rounded-md px-2 py-2 text-left transition-colors",
+                        isActive ? "bg-accent" : "hover:bg-muted/50"
+                      )}
+                    >
+                      <result.icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium text-foreground">{result.title}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">{result.subtitle}</p>
+                        {result.meta && <p className="truncate text-[10px] text-muted-foreground">{result.meta}</p>}
+                      </div>
+                    </button>
+                  );
+                })}
+                {items.length > (MAX_PER_CATEGORY[category] ?? 3) && (
+                  <p className="px-2 py-0.5 text-[10px] text-muted-foreground">+{items.length - (MAX_PER_CATEGORY[category] ?? 3)} more</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// MAIN TOPBAR
+// ============================================================
 export function Topbar() {
   const {
     user,
@@ -82,6 +402,47 @@ export function Topbar() {
   const { toast } = useToast();
   const unread = notifications.filter((n) => !n.read).length;
 
+  // Search state
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchOpen, setSearchOpen] = React.useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
+  const { results, loading } = useGlobalSearch(searchQuery);
+
+  // "/" keyboard shortcut to focus search
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "/" && document.activeElement?.tagName !== "INPUT" && document.activeElement?.tagName !== "TEXTAREA") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Click outside to close search
+  React.useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setSearchOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleSearchSelect(result: SearchResult) {
+    setSearchOpen(false);
+    setSearchQuery("");
+    if (result.applicationId) {
+      openApplication(result.applicationId, result.view);
+    } else {
+      navigate(result.view);
+    }
+    toast({ title: `Opening ${result.title}`, description: result.subtitle });
+  }
+
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-5">
       {/* Mobile menu */}
@@ -94,14 +455,49 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Search */}
-      <div className="relative hidden flex-1 max-w-md sm:block">
+      {/* Search — now functional */}
+      <div ref={searchContainerRef} className="relative hidden flex-1 max-w-md sm:block">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
-          type="search"
+          ref={searchInputRef}
+          type="text"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setSearchOpen(true);
+          }}
+          onFocus={() => setSearchOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setSearchOpen(false);
+              searchInputRef.current?.blur();
+            }
+          }}
           placeholder="Search applications, officers, documents…"
-          className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
+          className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
         />
+        {searchQuery && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setSearchOpen(false);
+              searchInputRef.current?.focus();
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Clear search"
+          >
+            <X className="size-4" />
+          </button>
+        )}
+        {searchOpen && (
+          <SearchDropdown
+            query={searchQuery}
+            results={results}
+            loading={loading}
+            onSelect={handleSearchSelect}
+            onClose={() => setSearchOpen(false)}
+          />
+        )}
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
