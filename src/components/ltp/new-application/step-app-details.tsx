@@ -101,18 +101,18 @@ export function ApplicationDetailsStep({
       </div>
 
       {/* Applicant fields — strict 2-column grid */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
         <Field label="Applicant Name" required error={errors.applicantName}>
-          <Input className="h-11" value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Ar. Vikram Deshpande" />
+          <Input className="h-11 w-full" value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Ar. Vikram Deshpande" />
         </Field>
         <Field label="Mobile Number" required error={errors.applicantContact}>
-          <Input className="h-11" value={data.applicantContact} onChange={(e) => update("applicantContact", e.target.value)} placeholder="+91 98XXX XXXXX" />
+          <Input className="h-11 w-full" value={data.applicantContact} onChange={(e) => update("applicantContact", e.target.value)} placeholder="+91 98XXX XXXXX" />
         </Field>
         <Field label="Email Address" error={errors.applicantEmail}>
-          <Input className="h-11" type="email" value={data.applicantEmail} onChange={(e) => update("applicantEmail", e.target.value)} placeholder="applicant@email.com" />
+          <Input className="h-11 w-full" type="email" value={data.applicantEmail} onChange={(e) => update("applicantEmail", e.target.value)} placeholder="applicant@email.com" />
         </Field>
         <Field label="LTP License Number">
-          <Input className="h-11" value={data.ltpLicense} onChange={(e) => update("ltpLicense", e.target.value)} placeholder="LTP-MC-XXXX-XXXX" />
+          <Input className="h-11 w-full" value={data.ltpLicense} onChange={(e) => update("ltpLicense", e.target.value)} placeholder="LTP-MC-XXXX-XXXX" />
         </Field>
       </div>
     </div>

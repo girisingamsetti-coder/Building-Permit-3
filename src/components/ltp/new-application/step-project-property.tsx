@@ -46,13 +46,13 @@ export function ProjectPropertyStep({
           <Building2 className="size-4 text-primary" />
           <h4 className="text-sm font-semibold">Project Information</h4>
         </div>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           <Field label="Project Name" required error={errors.projectName}>
-            <Input className="h-11" value={data.projectName} onChange={(e) => update("projectName", e.target.value)} placeholder="e.g. Greenfield Residency" />
+            <Input className="h-11 w-full" value={data.projectName} onChange={(e) => update("projectName", e.target.value)} placeholder="e.g. Greenfield Residency" />
           </Field>
           <Field label="Project Type">
             <Select defaultValue="NEW">
-              <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-11 w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="NEW">New Construction</SelectItem>
                 <SelectItem value="ADDITION">Addition / Alteration</SelectItem>
@@ -62,7 +62,7 @@ export function ProjectPropertyStep({
           </Field>
           <Field label="Building Use">
             <Select defaultValue="RESIDENTIAL">
-              <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-11 w-full"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="RESIDENTIAL">Residential</SelectItem>
                 <SelectItem value="COMMERCIAL">Commercial</SelectItem>
@@ -73,16 +73,16 @@ export function ProjectPropertyStep({
             </Select>
           </Field>
           <Field label="Built-up Area (sq.m)" required error={errors.builtUpArea}>
-            <Input className="h-11" type="number" value={data.builtUpArea} onChange={(e) => update("builtUpArea", e.target.value)} placeholder="e.g. 1780" />
+            <Input className="h-11 w-full" type="number" value={data.builtUpArea} onChange={(e) => update("builtUpArea", e.target.value)} placeholder="e.g. 1780" />
           </Field>
           <Field label="Plot Area (sq.m)" required error={errors.plotArea}>
-            <Input className="h-11" type="number" value={data.plotArea} onChange={(e) => update("plotArea", e.target.value)} placeholder="e.g. 1250" />
+            <Input className="h-11 w-full" type="number" value={data.plotArea} onChange={(e) => update("plotArea", e.target.value)} placeholder="e.g. 1250" />
           </Field>
           <Field label="Number of Floors">
-            <Input className="h-11" type="number" value={data.numFloors} onChange={(e) => update("numFloors", e.target.value)} placeholder="e.g. 7" />
+            <Input className="h-11 w-full" type="number" value={data.numFloors} onChange={(e) => update("numFloors", e.target.value)} placeholder="e.g. 7" />
           </Field>
           <Field label="Number of Units">
-            <Input className="h-11" type="number" value={data.numUnits} onChange={(e) => update("numUnits", e.target.value)} placeholder="e.g. 14" />
+            <Input className="h-11 w-full" type="number" value={data.numUnits} onChange={(e) => update("numUnits", e.target.value)} placeholder="e.g. 14" />
           </Field>
         </div>
       </div>
@@ -95,16 +95,16 @@ export function ProjectPropertyStep({
           <MapPin className="size-4 text-primary" />
           <h4 className="text-sm font-semibold">Property Information</h4>
         </div>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
           <Field label="Survey Number" required error={errors.surveyNo}>
-            <Input className="h-11" value={data.surveyNo} onChange={(e) => update("surveyNo", e.target.value)} placeholder="e.g. Hissa 14/2" />
+            <Input className="h-11 w-full" value={data.surveyNo} onChange={(e) => update("surveyNo", e.target.value)} placeholder="e.g. Hissa 14/2" />
           </Field>
           <Field label="Plot Number">
-            <Input className="h-11" value={data.plotNo} onChange={(e) => update("plotNo", e.target.value)} placeholder="e.g. Plot 14" />
+            <Input className="h-11 w-full" value={data.plotNo} onChange={(e) => update("plotNo", e.target.value)} placeholder="e.g. Plot 14" />
           </Field>
           <Field label="Ward" required error={errors.ward}>
             <Select value={data.ward} onValueChange={(v) => update("ward", v)}>
-              <SelectTrigger className="h-11"><SelectValue placeholder="Select ward" /></SelectTrigger>
+              <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Select ward" /></SelectTrigger>
               <SelectContent>
                 {["Ward 09 — Aundh", "Ward 14 — Baner", "Ward 11 — Kalyani Nagar", "Ward 19 — Bavdhan", "Ward 22 — Kothrud", "Ward 27 — Wakad", "Ward 31 — Hadapsar"].map((w) => (
                   <SelectItem key={w} value={w}>{w}</SelectItem>
@@ -114,7 +114,7 @@ export function ProjectPropertyStep({
           </Field>
           <Field label="Zone" required error={errors.zone}>
             <Select value={data.zone} onValueChange={(v) => update("zone", v)}>
-              <SelectTrigger className="h-11"><SelectValue placeholder="Select zone" /></SelectTrigger>
+              <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Select zone" /></SelectTrigger>
               <SelectContent>
                 {["Zone I — East", "Zone II — South", "Zone III — North", "Zone IV — West"].map((z) => (
                   <SelectItem key={z} value={z}>{z}</SelectItem>
@@ -123,16 +123,16 @@ export function ProjectPropertyStep({
             </Select>
           </Field>
           <Field label="Village / Locality">
-            <Input className="h-11" value={data.locality} onChange={(e) => update("locality", e.target.value)} placeholder="e.g. Baner" />
+            <Input className="h-11 w-full" value={data.locality} onChange={(e) => update("locality", e.target.value)} placeholder="e.g. Baner" />
           </Field>
           <Field label="District">
-            <Input className="h-11" value={data.district} onChange={(e) => update("district", e.target.value)} placeholder="e.g. Pune" />
+            <Input className="h-11 w-full" value={data.district} onChange={(e) => update("district", e.target.value)} placeholder="e.g. Pune" />
           </Field>
           <Field label="State">
-            <Input className="h-11" value={data.state} onChange={(e) => update("state", e.target.value)} placeholder="e.g. Maharashtra" />
+            <Input className="h-11 w-full" value={data.state} onChange={(e) => update("state", e.target.value)} placeholder="e.g. Maharashtra" />
           </Field>
           <Field label="PIN Code">
-            <Input className="h-11" value={data.pincode} onChange={(e) => update("pincode", e.target.value)} placeholder="e.g. 411045" />
+            <Input className="h-11 w-full" value={data.pincode} onChange={(e) => update("pincode", e.target.value)} placeholder="e.g. 411045" />
           </Field>
         </div>
       </div>
