@@ -43,13 +43,13 @@ export function ApplicationDetailsStep({
   errors: Record<string, string>;
 }) {
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {/* Application Type */}
       <div className="space-y-2">
         <Label className="text-xs font-medium">
           Application Type <span className="text-destructive">*</span>
         </Label>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {APP_TYPES.map((t) => (
             <button
               key={t.value}
@@ -100,19 +100,19 @@ export function ApplicationDetailsStep({
         </div>
       </div>
 
-      {/* Applicant fields */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Applicant fields — strict 2-column grid */}
+      <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
         <Field label="Applicant Name" required error={errors.applicantName}>
-          <Input value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Ar. Vikram Deshpande" />
+          <Input className="h-11" value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Ar. Vikram Deshpande" />
         </Field>
         <Field label="Mobile Number" required error={errors.applicantContact}>
-          <Input value={data.applicantContact} onChange={(e) => update("applicantContact", e.target.value)} placeholder="+91 98XXX XXXXX" />
+          <Input className="h-11" value={data.applicantContact} onChange={(e) => update("applicantContact", e.target.value)} placeholder="+91 98XXX XXXXX" />
         </Field>
         <Field label="Email Address" error={errors.applicantEmail}>
-          <Input type="email" value={data.applicantEmail} onChange={(e) => update("applicantEmail", e.target.value)} placeholder="applicant@email.com" />
+          <Input className="h-11" type="email" value={data.applicantEmail} onChange={(e) => update("applicantEmail", e.target.value)} placeholder="applicant@email.com" />
         </Field>
         <Field label="LTP License Number">
-          <Input value={data.ltpLicense} onChange={(e) => update("ltpLicense", e.target.value)} placeholder="LTP-MC-XXXX-XXXX" />
+          <Input className="h-11" value={data.ltpLicense} onChange={(e) => update("ltpLicense", e.target.value)} placeholder="LTP-MC-XXXX-XXXX" />
         </Field>
       </div>
     </div>
@@ -126,7 +126,9 @@ function Field({ label, required, error, children }: { label: string; required?:
         {label} {required && <span className="text-destructive">*</span>}
       </Label>
       {children}
-      {error && <p className="text-[11px] text-destructive">{error}</p>}
+      <div className="min-h-[16px]">
+        {error && <p className="text-[11px] text-destructive">{error}</p>}
+      </div>
     </div>
   );
 }

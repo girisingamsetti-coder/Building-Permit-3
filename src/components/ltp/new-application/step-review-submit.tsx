@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ChevronRight } from "lucide-react";
 import type { AppDetailsData } from "./step-app-details";
 import type { ProjectPropertyData } from "./step-project-property";
@@ -81,28 +80,31 @@ export function ReviewSubmitStep({
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Review all details before submitting. Click "Edit" on any section to go back.
       </p>
-      {sections.map((section, idx) => (
-        <div key={idx} className="rounded-lg border border-border bg-muted/20 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-semibold">{section.title}</p>
-            <Button size="sm" variant="ghost" className="h-6 text-[11px]" onClick={() => onEdit(section.step)}>
-              Edit <ChevronRight className="size-3" />
-            </Button>
+      {/* Two-column summary grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {sections.map((section, idx) => (
+          <div key={idx} className="rounded-lg border border-border bg-muted/20 p-4">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-semibold">{section.title}</p>
+              <Button size="sm" variant="ghost" className="h-6 text-[11px]" onClick={() => onEdit(section.step)}>
+                Edit <ChevronRight className="size-3" />
+              </Button>
+            </div>
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+              {section.items.map((item, i) => (
+                <div key={i} className="space-y-0.5">
+                  <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">{item.label}</dt>
+                  <dd className="text-xs font-medium text-foreground truncate">{item.value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-          <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-            {section.items.map((item, i) => (
-              <div key={i} className="space-y-0.5">
-                <dt className="text-[10px] uppercase tracking-wide text-muted-foreground">{item.label}</dt>
-                <dd className="text-xs font-medium text-foreground truncate">{item.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
