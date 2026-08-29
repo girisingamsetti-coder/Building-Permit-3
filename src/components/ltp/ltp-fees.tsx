@@ -42,7 +42,25 @@ import {
   IndianRupee,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Application, Payment } from "@/types";
+import type { Application, Payment, ViewKey } from "@/types";
+
+// ============================================================
+// PAYMENT STAT CARD
+// ============================================================
+function PaymentStatCard({ icon: Icon, value, label, subtext, accent }: { icon: React.ComponentType<{ className?: string }>; value: string | number; label: string; subtext: string; accent: string }) {
+  return (
+    <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-gov">
+      <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-lg", accent)}>
+        <Icon className="size-5" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-2xl font-bold tabular-nums leading-none">{value}</p>
+        <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="text-[10px] text-muted-foreground">{subtext}</p>
+      </div>
+    </div>
+  );
+}
 
 function useAppOrDefault(): Application | null {
   const sel = useSelectedApplication();
@@ -249,44 +267,196 @@ export function LtpFees() {
 type PayStage = "pending" | "method" | "processing" | "success" | "failed";
 
 export function LtpPayment() {
-  const { navigate, initiatePayment: storeInitiatePayment } = useAppStore();
+  const { navigate, openApplication, initiatePayment: storeInitiatePayment, selectedApplicationId } = useAppStore();
   const visibleApps = useVisibleApplications();
   const processingAppIds = useAppStore((s) => s.processingAppIds);
-  const app = useAppOrDefault();
   const { toast } = useToast();
-  const [method, setMethod] = React.useState<Payment["method"]>("UPI");
-  const appId = app?.id;
-  const paymentStatus = app?.payment?.status;
-  const isAlreadyPaid = paymentStatus === "SUCCESS";
-  const isProcessing = app ? processingAppIds.includes(app.id) : false;
-  const [stage, setStage] = React.useState<PayStage>(isAlreadyPaid ? "success" : "pending");
 
-  // Reset stage/method when switching applications
-  React.useEffect(() => {
-    setStage(paymentStatus === "SUCCESS" ? "success" : "pending");
-    setMethod("UPI");
-  }, [appId, paymentStatus]);
+  // If a specific app is selected and it has a fee, show the payment flow for it
+  const selectedApp = selectedApplicationId
+    ? visibleApps.find((a) => a.id === selectedApplicationId)
+    : null;
+  const isPaymentFlow = selectedApp && selectedApp.fee;
 
-  // Sync local stage with store payment status (auto-advances after SUCCESS)
-  React.useEffect(() => {
-    if (paymentStatus === "SUCCESS") setStage("success");
-    else if (paymentStatus === "PROCESSING" || isProcessing) setStage("processing");
-  }, [paymentStatus, isProcessing]);
+  // All apps with fees (for the payments listing)
+  const appsWithFees = visibleApps.filter((a) => a.fee);
+  const pendingPayments = appsWithFees.filter((a) =>
+    a.payment?.status === "PENDING" || a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED"
+  );
+  const paidApps = appsWithFees.filter((a) => a.payment?.status === "SUCCESS");
+  const totalOutstanding = pendingPayments.reduce((sum, a) => sum + (a.fee?.outstanding ?? 0), 0);
 
-  if (!app || !app.fee) {
-    return (
-      <div className="space-y-6">
-        <PageHeader title="Payment" icon={CreditCard} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]} />
-        <EmptyState icon={CreditCard} title="No payment due" description="There is no outstanding payment for this application." />
-      </div>
-    );
+  // ===== Payment flow view (for a specific app) =====
+  if (isPaymentFlow && selectedApp) {
+    return <PaymentFlow app={selectedApp} navigate={navigate} storeInitiatePayment={storeInitiatePayment} processingAppIds={processingAppIds} toast={toast} />;
   }
 
+  // ===== Payments listing view =====
+  return (
+    <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+      <PageHeader
+        title="Payment"
+        description="Manage application fees, outstanding amounts and payment receipts."
+        icon={CreditCard}
+        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]}
+        badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode</Badge>}
+      />
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <PaymentStatCard icon={Clock} value={pendingPayments.length} label="PENDING PAYMENTS" subtext="Applications awaiting payment" accent="bg-amber-500/10 text-amber-600" />
+        <PaymentStatCard icon={IndianRupee} value={formatINR(totalOutstanding)} label="TOTAL OUTSTANDING" subtext="Across pending applications" accent="bg-destructive/10 text-destructive" />
+        <PaymentStatCard icon={CheckCircle2} value={paidApps.length} label="PAID APPLICATIONS" subtext="Payment successfully completed" accent="bg-success/10 text-success" />
+        <PaymentStatCard icon={CreditCard} value={paidApps.length} label="PAYMENT COMPLETED" subtext="Successful transactions" accent="bg-primary/10 text-primary" />
+      </div>
+
+      {/* Pending Payments */}
+      {pendingPayments.length > 0 && (
+        <SectionCard title="Pending Payments" description="Applications requiring fee payment" icon={Clock}>
+          <div className="space-y-3">
+            {pendingPayments.map((app) => (
+              <div key={app.id} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-mono text-xs font-semibold text-primary">{app.applicationNo}</p>
+                      <StatusBadge status={app.status} showIcon={false} />
+                    </div>
+                    <p className="text-sm font-medium">{app.project.name}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {app.project.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())} · {app.applicant.name}
+                    </p>
+                  </div>
+                  <div className="shrink-0 space-y-1 text-right">
+                    <div className="flex items-center justify-between gap-4 text-xs">
+                      <span className="text-muted-foreground">Fee Generated</span>
+                      <span className="font-mono font-medium">{formatINR(app.fee!.total)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 text-xs">
+                      <span className="text-muted-foreground">Paid</span>
+                      <span className="font-mono text-success">{formatINR(app.fee!.paidAmount)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 text-xs">
+                      <span className="text-muted-foreground">Outstanding</span>
+                      <span className="font-mono font-semibold text-destructive">{formatINR(app.fee!.outstanding)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+                  <span className="text-[11px] text-muted-foreground">Generated: {formatDate(app.fee!.generatedAt)}</span>
+                  <Button
+                    size="sm"
+                    onClick={() => openApplication(app.id, "ltp-payment")}
+                  >
+                    <CreditCard className="size-3.5" />
+                    {app.fee!.paidAmount > 0 ? "Pay Remaining" : "Pay Now"}
+                    <ArrowRight className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Payment History / All Applications with Fees */}
+      {appsWithFees.length > 0 && (
+        <SectionCard title="Payment Applications" description="All applications with fee records" icon={ReceiptIndianRupee} noPadding>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/40">
+                <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <th className="px-4 py-2.5 font-medium">Application No.</th>
+                  <th className="px-4 py-2.5 font-medium">Project</th>
+                  <th className="px-4 py-2.5 font-medium">Applicant</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Total Fee</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Paid</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Outstanding</th>
+                  <th className="px-4 py-2.5 font-medium">Status</th>
+                  <th className="px-4 py-2.5 font-medium text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {appsWithFees.map((app) => {
+                  const isPaid = app.payment?.status === "SUCCESS";
+                  const isPending = app.payment?.status === "PENDING" || app.status === "PAYMENT_PENDING" || app.status === "FEE_GENERATED";
+                  return (
+                    <tr key={app.id} className="hover:bg-muted/30 h-14">
+                      <td className="px-4 py-2">
+                        <button onClick={() => openApplication(app.id, "ltp-application-details")} className="font-mono text-xs font-semibold text-primary hover:underline">
+                          {app.applicationNo}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 text-xs truncate max-w-[180px]">{app.project.name}</td>
+                      <td className="px-4 py-2 text-xs truncate max-w-[140px]">{app.applicant.name}</td>
+                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums">{formatINR(app.fee!.total)}</td>
+                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums text-success">{formatINR(app.fee!.paidAmount)}</td>
+                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums text-destructive">{formatINR(app.fee!.outstanding)}</td>
+                      <td className="px-4 py-2">
+                        {isPaid && <Badge className="bg-success/10 text-success">Success</Badge>}
+                        {isPending && <Badge className="bg-amber-500/15 text-amber-600">Pending</Badge>}
+                        {!isPaid && !isPending && <Badge variant="outline">{app.payment?.status ?? "—"}</Badge>}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        {isPending && (
+                          <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => openApplication(app.id, "ltp-payment")}>
+                            {app.fee!.paidAmount > 0 ? "Pay Remaining" : "Pay Now"}
+                          </Button>
+                        )}
+                        {isPaid && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openApplication(app.id, "ltp-receipt")}>
+                            View Receipt
+                          </Button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Empty state */}
+      {appsWithFees.length === 0 && (
+        <EmptyState icon={CreditCard} title="No payment records" description="Applications with generated fees will appear here." />
+      )}
+    </div>
+  );
+}
+
+// ============================================================
+// PAYMENT FLOW — for a specific application
+// ============================================================
+function PaymentFlow({
+  app,
+  navigate,
+  storeInitiatePayment,
+  processingAppIds,
+  toast,
+}: {
+  app: Application;
+  navigate: (view: ViewKey) => void;
+  storeInitiatePayment: (appId: string, method: Payment["method"]) => void;
+  processingAppIds: string[];
+  toast: (params: { title: string; description?: string; variant?: "default" | "destructive" }) => void;
+}) {
+  const [method, setMethod] = React.useState<Payment["method"]>("UPI");
+  const isProcessing = processingAppIds.includes(app.id);
+  const isAlreadyPaid = app.payment?.status === "SUCCESS";
+  const [stage, setStage] = React.useState<"pending" | "method" | "processing" | "success">(isAlreadyPaid ? "success" : "pending");
+
+  React.useEffect(() => {
+    if (app.payment?.status === "SUCCESS") setStage("success");
+    else if (isProcessing) setStage("processing");
+  }, [app.payment?.status, isProcessing]);
+
   function initiatePayment() {
-    if (!app) return;
     setStage("processing");
     storeInitiatePayment(app.id, method);
-    toast({ title: "Payment initiated", description: "Processing via mock payment gateway. Please wait…" });
+    toast({ title: "Payment initiated", description: `Processing payment for ${app.applicationNo}…` });
   }
 
   const PAYMENT_STEPS = [
@@ -298,24 +468,41 @@ export function LtpPayment() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-fees" fallbackLabel="Fees" />
+      <PageBackButton fallbackView="ltp-payment" fallbackLabel="Payments" />
       <PageHeader
         title="Payment"
-        description="Secure online payment for your application fees."
+        description={`MC/BP/2026/04/000${app.applicationNo.slice(-1)}`}
         icon={CreditCard}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]}
-        actions={<AppSelect apps={visibleApps} current={app} view="ltp-payment" />}
         badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode — no real payment</Badge>}
       />
 
       {/* Application Context Bar */}
-      <ApplicationContextBar app={app} />
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-gov sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Building2 className="size-5" />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-sm font-semibold text-primary">{app.applicationNo}</span>
+              <StatusBadge status={app.status} showIcon={false} />
+            </div>
+            <p className="text-sm font-medium truncate">{app.project.name}</p>
+            <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
+              <span>{app.project.type.replace(/_/g, " ").toLowerCase()}</span>
+              <span>·</span>
+              <span>Applicant: {app.applicant.name}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Payment progress stepper */}
       <div className="rounded-xl border border-border bg-card p-4 shadow-gov">
         <ol className="flex items-center justify-between">
           {PAYMENT_STEPS.map((s, idx) => {
-            const currentIdx = PAYMENT_STEPS.findIndex((p) => p.key === (stage === "failed" ? "processing" : stage));
+            const currentIdx = PAYMENT_STEPS.findIndex((p) => p.key === stage);
             const isActive = idx === currentIdx;
             const isDone = idx < currentIdx;
             return (
@@ -345,7 +532,7 @@ export function LtpPayment() {
                   </div>
                   <StatusBadge status={app.status} showIcon={false} />
                 </div>
-                {app.fee.lineItems.map((li) => (
+                {app.fee!.lineItems.map((li) => (
                   <div key={li.componentCode} className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">{li.name}</span>
                     <span className="font-mono tabular-nums">₹{li.amount.toLocaleString("en-IN")}</span>
@@ -354,7 +541,15 @@ export function LtpPayment() {
                 <Separator />
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">Total Payable</span>
-                  <span className="font-mono text-xl font-bold text-primary">{formatINR(app.fee.total)}</span>
+                  <span className="font-mono text-xl font-bold text-primary">{formatINR(app.fee!.total)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Paid Amount</span>
+                  <span className="font-mono text-success">{formatINR(app.fee!.paidAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Outstanding</span>
+                  <span className="font-mono font-semibold text-destructive">{formatINR(app.fee!.outstanding)}</span>
                 </div>
                 <Button className="w-full" size="lg" onClick={() => setStage("method")}>
                   Proceed to Payment <ArrowRight className="size-4" />
@@ -385,11 +580,11 @@ export function LtpPayment() {
               <div className="mt-4 flex gap-2">
                 <Button variant="outline" onClick={() => setStage("pending")}>Back</Button>
                 <Button className="flex-1" size="lg" onClick={initiatePayment}>
-                  <Lock className="size-4" /> Pay {formatINR(app.fee.total)} Securely
+                  <Lock className="size-4" /> Pay {formatINR(app.fee!.outstanding)} Securely
                 </Button>
               </div>
               <p className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
-                <ShieldCheck className="size-3" /> Payment is processed on a secure gateway. We do not store card details.
+                <ShieldCheck className="size-3" /> Demo mode: no real payment is processed.
               </p>
             </SectionCard>
           )}
@@ -397,14 +592,12 @@ export function LtpPayment() {
           {stage === "processing" && (
             <SectionCard title="Processing Payment" icon={Loader2}>
               <div className="flex flex-col items-center gap-4 py-10 text-center">
-                <div className="relative">
-                  <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-                    <Loader2 className="size-8 animate-spin text-primary" />
-                  </div>
+                <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+                  <Loader2 className="size-8 animate-spin text-primary" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-base font-semibold">Processing your payment…</p>
-                  <p className="text-sm text-muted-foreground">Please do not refresh or close this page. Verifying transaction with the bank.</p>
+                  <p className="text-sm text-muted-foreground">Verifying transaction for {app.applicationNo}.</p>
                 </div>
                 <div className="w-full max-w-xs space-y-1.5 text-left text-xs">
                   <ProcessingStep label="Connecting to payment gateway" done />
@@ -425,20 +618,18 @@ export function LtpPayment() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-semibold">Payment Verified</p>
-                  <p className="text-sm text-muted-foreground">Your payment has been successfully processed and verified. The application has been forwarded for technical scrutiny.</p>
+                  <p className="text-sm text-muted-foreground">Your payment has been processed. The application has been forwarded for technical scrutiny.</p>
                 </div>
                 <div className="w-full max-w-sm space-y-2 rounded-lg border border-border bg-muted/30 p-4 text-left text-xs">
+                  <div className="flex justify-between"><span className="text-muted-foreground">Application</span><span className="font-mono font-medium text-primary">{app.applicationNo}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">Transaction ID</span><span className="font-mono font-medium">{app.payment?.transactionId || "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Reference No.</span><span className="font-mono font-medium">{app.payment?.referenceNo || "—"}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Amount Paid</span><span className="font-mono font-medium text-success">{formatINR(app.fee.total)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Method</span><span className="font-medium">{app.payment?.method ?? method}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Amount Paid</span><span className="font-mono font-medium text-success">{formatINR(app.fee!.total)}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">Receipt No.</span><span className="font-mono font-medium text-primary">{app.payment?.receiptNo || "—"}</span></div>
                   <Separator className="my-1" />
-                  <div className="flex justify-between"><span className="text-muted-foreground">Paid Amount</span><span className="font-mono font-medium text-success">{formatINR(app.fee.paidAmount)}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">{formatINR(app.fee.outstanding)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">₹0</span></div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> Download Receipt</Button>
+                  <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> View Receipt</Button>
                   <Button onClick={() => navigate("ltp-application-details")}>Track Application <ArrowRight className="size-4" /></Button>
                 </div>
               </div>
@@ -462,7 +653,7 @@ export function LtpPayment() {
             </ul>
             <div className="mt-3 rounded-md border border-warning/30 bg-warning/5 p-2 text-[10px] text-warning-foreground">
               <AlertCircle className="mr-1 inline size-3" />
-              Demo mode: no real payment is processed. Status is simulated for demonstration.
+              Demo mode: no real payment is processed.
             </div>
           </SectionCard>
         </div>
