@@ -25,6 +25,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   FileStack,
   FilePlus2,
   Clock,
@@ -44,7 +51,11 @@ import {
   CircleDollarSign,
   Activity,
   FileText,
+  ShieldCheck,
+  User,
+  Briefcase,
 } from "lucide-react";
+import type { Application } from "@/types";
 
 // Compact "View all" text-link component for section headers
 function ViewAllLink({ onClick, label = "View all" }: { onClick: () => void; label?: string }) {
@@ -62,6 +73,7 @@ export function LtpDashboard() {
   const { user, navigate, openApplication } = useAppStore();
   const apps = useVisibleApplications();
   const [newAppOpen, setNewAppOpen] = React.useState(false);
+  const [trackerAppId, setTrackerAppId] = React.useState<string>("");
 
   const REVIEW_STATUSES = [
     "TPS_TECHNICAL_SCRUTINY",
@@ -95,7 +107,12 @@ export function LtpDashboard() {
   const actionRequired = apps
     .filter((a) => (ACTION_STATUSES as readonly string[]).includes(a.status))
     .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
-  const showcaseApp = apps.find((a) => a.status === "TPS_TECHNICAL_SCRUTINY" || a.status === "TPA_REVIEW") ?? apps[0];
+
+  // Dynamic tracker app: use selected, or default to one under review
+  const trackerApp = React.useMemo(() => {
+    if (trackerAppId) return apps.find((a) => a.id === trackerAppId) ?? null;
+    return apps.find((a) => a.status === "TPS_TECHNICAL_SCRUTINY" || a.status === "TPA_REVIEW") ?? apps[0] ?? null;
+  }, [trackerAppId, apps]);
 
   return (
     <div className="space-y-6">
@@ -260,47 +277,94 @@ export function LtpDashboard() {
             </div>
           </SectionCard>
 
-          {/* Live Workflow Tracker */}
-          {showcaseApp && (
+          {/* Live Workflow Tracker — DYNAMIC */}
+          {trackerApp ? (
             <SectionCard
               title="Live Workflow Tracker"
-              description={`Tracking ${showcaseApp.applicationNo} through the approval pipeline`}
+              description="Track the selected application through the approval pipeline"
               icon={TrendingUp}
-              action={<ViewAllLink onClick={() => openApplication(showcaseApp.id)} label="Details" />}
+              action={
+                <Select value={trackerApp.id} onValueChange={(id) => setTrackerAppId(id)}>
+                  <SelectTrigger className="h-8 w-[220px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {apps.map((a) => (
+                      <SelectItem key={a.id} value={a.id} className="text-xs">
+                        <div className="flex flex-col">
+                          <span className="font-mono font-medium">{a.applicationNo}</span>
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[260px]">
+                            {a.project.name} · {a.applicant.name}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              }
             >
               <div className="space-y-4">
+                {/* Selected application context */}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{showcaseApp.project.name}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{showcaseApp.applicationNo} · {showcaseApp.project.propertyType.replace("_", " ")}</p>
+                    <p className="text-sm font-medium truncate">{trackerApp.project.name}</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {trackerApp.applicationNo} · {trackerApp.applicant.name}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <StatusBadge status={showcaseApp.status} />
-                    <PriorityBadge priority={showcaseApp.priority} />
+                    <StatusBadge status={trackerApp.status} />
+                    <PriorityBadge priority={trackerApp.priority} />
                   </div>
                 </div>
-                <Progress value={showcaseApp.progress} className="h-1.5" />
+
+                {/* Progress */}
+                <Progress value={trackerApp.progress} className="h-1.5" />
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground">Progress</span>
-                  <span className="font-medium tabular-nums">{showcaseApp.progress}% complete</span>
+                  <span className="font-medium tabular-nums">{trackerApp.progress}% complete</span>
                 </div>
+
                 <Separator />
-                <WorkflowStepper currentStage={showcaseApp.currentStage} status={showcaseApp.status === "APPROVED" ? "COMPLETED" : "CURRENT"} />
+
+                {/* Workflow stepper — dynamically reflects selected app's stage */}
+                <WorkflowStepper
+                  currentStage={trackerApp.currentStage}
+                  status={
+                    trackerApp.status === "APPROVED" ? "COMPLETED" :
+                    trackerApp.status === "REJECTED" ? "FAILED" :
+                    trackerApp.status === "SHORTFALL_RAISED" ? "SHORTFALL" :
+                    trackerApp.status === "SCRUTINY_FAILED" ? "FAILED" :
+                    trackerApp.status === "RETURNED" ? "RETURNED" :
+                    "CURRENT"
+                  }
+                />
+
+                {/* SLA + assigned officer */}
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs">
                   <div className="flex items-center gap-2">
                     <CalendarClock className="size-3.5 text-muted-foreground" />
                     <span className="text-muted-foreground">Expected SLA:</span>
-                    <span className="font-medium">{formatDate(showcaseApp.expectedSLA ?? "")}</span>
+                    <span className="font-medium">{formatDate(trackerApp.expectedSLA ?? "")}</span>
                   </div>
-                  {showcaseApp.assignedOfficer && (
+                  {trackerApp.assignedOfficer && (
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">Assigned:</span>
-                      <span className="font-medium">{showcaseApp.assignedOfficer.name}</span>
-                      <RoleBadge role={showcaseApp.assignedOfficer.role} />
+                      <span className="font-medium">{trackerApp.assignedOfficer.name}</span>
+                      <RoleBadge role={trackerApp.assignedOfficer.role} />
                     </div>
                   )}
                 </div>
+
+                {/* View Application button */}
+                <Button variant="outline" size="sm" className="w-full" onClick={() => openApplication(trackerApp.id)}>
+                  <ArrowRight className="size-4" /> View Application
+                </Button>
               </div>
+            </SectionCard>
+          ) : (
+            <SectionCard title="Live Workflow Tracker" description="No applications to track" icon={TrendingUp}>
+              <EmptyState icon={TrendingUp} title="No applications available" description="Create an application to track its workflow." />
             </SectionCard>
           )}
         </div>
@@ -330,9 +394,10 @@ export function LtpDashboard() {
             </div>
           </SectionCard>
 
-          {/* Your License */}
+          {/* Your License — Enhanced with Application Overview */}
           <SectionCard title="Your License" icon={Building2}>
             <div className="space-y-3">
+              {/* Profile header */}
               <div className="flex items-center gap-3">
                 <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
                   {(user?.name ?? "LTP").split(" ").map((p) => p[0]).slice(0, 2).join("")}
@@ -343,7 +408,10 @@ export function LtpDashboard() {
                 </div>
                 <RoleBadge role="LTP" />
               </div>
+
               <Separator />
+
+              {/* License details */}
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <p className="text-muted-foreground">License No.</p>
@@ -353,14 +421,42 @@ export function LtpDashboard() {
                   <p className="text-muted-foreground">Zone</p>
                   <p className="font-medium">{user?.zone}</p>
                 </div>
-                <div className="col-span-2">
-                  <p className="text-muted-foreground">Last login</p>
+                <div>
+                  <p className="text-muted-foreground">License Status</p>
+                  <span className="inline-flex items-center gap-1 text-success font-medium">
+                    <span className="size-1.5 rounded-full bg-success" /> Active
+                  </span>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Last Login</p>
                   <p className="font-medium">{user?.lastLogin ? formatDateTime(user.lastLogin) : "—"}</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" className="w-full" onClick={() => navigate("ltp-profile")}>
-                View full profile
-              </Button>
+
+              <Separator />
+
+              {/* Application Overview — derived from shared dataset */}
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Application Overview</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <OverviewStat label="Active" value={stats.total - stats.approved} icon={FileStack} />
+                  <OverviewStat label="Action Required" value={stats.action} icon={AlertTriangle} />
+                  <OverviewStat label="Under Review" value={stats.underReview} icon={Clock} />
+                  <OverviewStat label="Approved" value={stats.approved} icon={CheckCircle2} />
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Quick links */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => navigate("ltp-profile")}>
+                  <User className="size-3.5" /> View Profile
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => navigate("ltp-applications")}>
+                  <Briefcase className="size-3.5" /> Applications
+                </Button>
+              </div>
             </div>
           </SectionCard>
         </div>
@@ -368,6 +464,19 @@ export function LtpDashboard() {
 
       {/* New Application Modal (shared) */}
       <NewApplicationModal open={newAppOpen} onOpenChange={setNewAppOpen} />
+    </div>
+  );
+}
+
+// Compact stat for the License card
+function OverviewStat({ label, value, icon: Icon }: { label: string; value: number; icon: React.ComponentType<{ className?: string }> }) {
+  return (
+    <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-2.5 py-1.5">
+      <Icon className="size-3.5 text-muted-foreground shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold tabular-nums leading-tight">{value}</p>
+        <p className="text-[10px] text-muted-foreground leading-tight truncate">{label}</p>
+      </div>
     </div>
   );
 }
