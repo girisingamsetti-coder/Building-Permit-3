@@ -10,6 +10,7 @@ import {
   InfoGrid,
 } from "@/components/design-system/layout";
 import { PageBackButton } from "@/components/design-system/back-button";
+import { ApplicationContextBar, ApplicationSelector } from "@/components/design-system/app-context";
 import {
   StatusBadge,
   SeverityBadge,
@@ -29,6 +30,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Upload,
   Eye,
@@ -55,26 +64,7 @@ function useAppOrDefault(): Application | null {
   const sel = useSelectedApplication();
   const apps = useVisibleApplications();
   if (sel) return sel;
-  // default to one with drawings
   return apps.find((a) => a.drawings.length > 0) ?? apps[0] ?? null;
-}
-
-function AppPicker({ apps, current }: { apps: Application[]; current: Application | null }) {
-  const { openApplication } = useAppStore();
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs text-muted-foreground">Application:</span>
-      <select
-        value={current?.id ?? ""}
-        onChange={(e) => openApplication(e.target.value, "ltp-drawings")}
-        className="h-8 rounded-md border border-input bg-background px-2 text-xs font-mono"
-      >
-        {apps.map((a) => (
-          <option key={a.id} value={a.id}>{a.applicationNo}</option>
-        ))}
-      </select>
-    </div>
-  );
 }
 
 // ============================================================
@@ -87,35 +77,41 @@ export function LtpDrawings() {
   const app = useAppOrDefault();
   const { toast } = useToast();
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
+  const [confirmUpload, setConfirmUpload] = React.useState<UploadedFile | null>(null);
 
   const isProcessing = app ? processingAppIds.includes(app.id) : false;
 
   if (!app) {
     return (
       <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
-      <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings" }]} />
-        <EmptyState icon={FileWarning} title="No applications" description="Create an application first to upload drawings." action={<Button size="sm" onClick={() => navigate("ltp-create-application")}>New Application</Button>} />
+        <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+        <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings" }]} />
+        <EmptyState icon={FileWarning} title="No applications" description="Create an application first to upload drawings." action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Go to My Applications</Button>} />
       </div>
     );
   }
 
   function handleUpload(newFiles: UploadedFile[]) {
-    // Track locally for the FileUploader UI
     setFiles((prev) => {
       const map = new Map(prev.map((f) => [f.id, f]));
       newFiles.forEach((f) => map.set(f.id, f));
       return Array.from(map.values());
     });
-    // Persist to store: upload first new file as next drawing version
-    if (!app) return;
+    // Show confirmation dialog for the first file
     const first = newFiles[0];
-    if (!first) return;
-    uploadDrawing(app.id, first.name, first.size || `${(5 + Math.random() * 3).toFixed(1)} MB`);
+    if (first && first.status === "done") {
+      setConfirmUpload(first);
+    }
+  }
+
+  function confirmAndUpload() {
+    if (!app || !confirmUpload) return;
+    uploadDrawing(app.id, confirmUpload.name, confirmUpload.size || `${(5 + Math.random() * 3).toFixed(1)} MB`);
     toast({
-      title: "Drawing uploaded",
-      description: `${first.name} has been uploaded. Run auto-scrutiny to validate.`,
+      title: "Drawing uploaded successfully",
+      description: `${confirmUpload.name} → ${app.applicationNo}`,
     });
+    setConfirmUpload(null);
   }
 
   function handleRunScrutiny() {
@@ -123,22 +119,19 @@ export function LtpDrawings() {
     runScrutiny(app.id);
     toast({
       title: "Scrutiny started",
-      description: "Auto-scrutiny is running. This takes a few seconds.",
+      description: `Auto-scrutiny running for ${app.applicationNo}.`,
     });
   }
 
   function handleReupload() {
     if (!app) return;
-    // Simulate re-upload of a corrected drawing
     const fileName = `Drawing_v${app.drawings.length + 1}_corrected.dwg`;
     const fileSize = `${(5 + Math.random() * 3).toFixed(1)} MB`;
     reuploadDrawing(app.id, fileName, fileSize);
     toast({
       title: "Drawing re-uploaded",
-      description: `${fileName} uploaded. Auto-scrutiny will run automatically.`,
+      description: `${fileName} → ${app.applicationNo}. New version created.`,
     });
-    // Store reuploadDrawing calls uploadDrawing which sets status to DRAWING_UPLOADED.
-    // Trigger scrutiny explicitly after a short delay (matches demo deterministic v2+ pass)
     setTimeout(() => runScrutiny(app.id), 400);
   }
 
@@ -150,22 +143,29 @@ export function LtpDrawings() {
         description="Upload, version and scrutinise your project drawings against Development Control Regulations."
         icon={Upload}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings & Scrutiny" }]}
-        actions={<AppPicker apps={visibleApps} current={app} />}
+        actions={<ApplicationSelector currentApp={app} view="ltp-drawings" apps={visibleApps} />}
       />
+
+      {/* Application Context Bar */}
+      <ApplicationContextBar app={app} />
 
       {/* Status banner */}
       <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <SectionCard title="Drawing Viewer" description="Zoom, rotate, switch versions" icon={Eye}>
+          <SectionCard
+            title="Drawing Viewer"
+            description={app.drawings.length > 0 ? `Viewing ${app.drawings[app.drawings.length - 1]?.fileName}` : "No drawings yet"}
+            icon={Eye}
+          >
             <DrawingViewer drawings={app.drawings.length ? app.drawings : [{ id: "empty", fileName: "No drawing", fileType: "PDF", fileSize: "0", version: 0, uploadedAt: "", uploadedBy: "", status: "PENDING_SCRUTINY" }]} />
           </SectionCard>
 
           {app.scrutinyReport && (
             <SectionCard
               title="Latest Scrutiny Report"
-              description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion}`}
+              description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion} · ${app.applicationNo}`}
               icon={ScrollText}
               action={
                 <div className="flex items-center gap-2">
@@ -184,10 +184,15 @@ export function LtpDrawings() {
         </div>
 
         <div className="space-y-6">
-          <SectionCard title="Upload Drawing" description="DWG, DXF or PDF · max 50 MB" icon={Upload}>
+          <SectionCard title="Upload Drawing" description={`For: ${app.applicationNo}`} icon={Upload}>
+            <div className="mb-3 rounded-md border border-info/30 bg-info/5 px-3 py-2 text-[11px] text-info">
+              <p className="font-medium">You are uploading to:</p>
+              <p className="font-mono">{app.applicationNo}</p>
+              <p>{app.project.name}</p>
+            </div>
             <FileUploader
               label="Drop drawing here"
-              hint="Supported: DWG, DXF, PDF"
+              hint="Supported: DWG, DXF, PDF · max 50 MB"
               accept=".dwg,.dxf,.pdf"
               uploadedFiles={files}
               onUpload={handleUpload}
@@ -200,7 +205,7 @@ export function LtpDrawings() {
             )}
           </SectionCard>
 
-          <SectionCard title="Version History" icon={History} noPadding>
+          <SectionCard title="Version History" description={`Drawings for ${app.applicationNo}`} icon={History} noPadding>
             <ul className="divide-y divide-border">
               {app.drawings.map((d) => (
                 <li key={d.id} className="p-3">
@@ -226,6 +231,45 @@ export function LtpDrawings() {
           </SectionCard>
         </div>
       </div>
+
+      {/* Upload Confirmation Dialog */}
+      <Dialog open={!!confirmUpload} onOpenChange={(o) => !o && setConfirmUpload(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload Drawing</DialogTitle>
+            <DialogDescription>Confirm the upload details below.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3 text-xs">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Application:</span>
+              <span className="font-mono font-medium text-primary">{app.applicationNo}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Project:</span>
+              <span className="font-medium">{app.project.name}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">File:</span>
+              <span className="font-medium">{confirmUpload?.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Size:</span>
+              <span className="font-medium">{confirmUpload?.size}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Version:</span>
+              <span className="font-medium">v{app.drawings.length + 1}</span>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmUpload(null)}>Cancel</Button>
+            <Button onClick={confirmAndUpload}>
+              <Upload className="size-4" /> Upload Drawing
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -238,7 +282,7 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info"><RotateCw className="size-5 animate-spin" /></div>
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-info">Auto-Scrutiny In Progress</p>
-            <p className="text-xs text-info/80">Validating drawing against Development Control Regulations. This takes a few seconds…</p>
+            <p className="text-xs text-info/80">Validating drawing against Development Control Regulations for {app.applicationNo}. This takes a few seconds…</p>
           </div>
         </div>
       </div>
@@ -253,6 +297,7 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-destructive">Scrutiny Failed — Re-upload Required</p>
             <p className="text-xs text-destructive/80">{app.scrutinyReport?.summary ?? "Critical non-compliances were identified. Please re-upload a corrected drawing."}</p>
+            <p className="text-[10px] text-destructive/60 font-mono">Re-uploading for: {app.applicationNo}</p>
           </div>
         </div>
         <Button variant="destructive" size="sm" onClick={onReupload} disabled={scrutinizing}>
@@ -271,7 +316,7 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
             <p className="text-xs text-success/80">{app.scrutinyReport?.summary ?? "Drawing complies with all critical and major DCR checks."}</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" className="border-success/30">Proceed to documents <ArrowRight className="size-4" /></Button>
+        <Button variant="outline" size="sm" className="border-success/30" onClick={() => useAppStore.getState().navigate("ltp-documents")}>Proceed to documents <ArrowRight className="size-4" /></Button>
       </div>
     );
   }
@@ -282,7 +327,7 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info"><Info className="size-5" /></div>
           <div className="space-y-0.5">
             <p className="text-sm font-semibold text-info">Drawing Uploaded — Run Scrutiny</p>
-            <p className="text-xs text-info/80">Run auto-scrutiny to validate the drawing against DCR rules.</p>
+            <p className="text-xs text-info/80">Run auto-scrutiny to validate the drawing against DCR rules for {app.applicationNo}.</p>
           </div>
         </div>
         <Button size="sm" onClick={onScrutinize} disabled={scrutinizing}>
@@ -297,7 +342,7 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
         <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10 text-info"><Info className="size-5" /></div>
         <div className="space-y-0.5">
           <p className="text-sm font-semibold text-info">Awaiting Drawing Upload</p>
-          <p className="text-xs text-info/80">Upload your drawing to begin automated scrutiny against DCR rules.</p>
+          <p className="text-xs text-info/80">Upload a drawing for {app.applicationNo} to begin automated scrutiny against DCR rules.</p>
         </div>
       </div>
     </div>
@@ -314,6 +359,7 @@ export function LtpScrutiny() {
   if (!app || !app.scrutinyReport) {
     return (
       <div className="space-y-6">
+        <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" />
         <PageHeader title="Scrutiny Report" icon={ScrollText} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Scrutiny" }]} />
         <EmptyState icon={ScrollText} title="No scrutiny report" description="Run scrutiny on a drawing to generate a report." />
       </div>
@@ -327,13 +373,17 @@ export function LtpScrutiny() {
 
   return (
     <div className="space-y-6">
+      <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" />
       <PageHeader
         title="Scrutiny Report"
         description="Automated validation of drawings against Development Control Regulations"
         icon={ScrollText}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Scrutiny Report" }]}
-        actions={<AppPicker apps={visibleApps} current={app} />}
+        actions={<ApplicationSelector currentApp={app} view="ltp-scrutiny" apps={visibleApps} />}
       />
+
+      {/* Application Context Bar */}
+      <ApplicationContextBar app={app} />
 
       {/* Summary */}
       <div className={cn("rounded-xl border p-5", r.status === "PASSED" ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5")}>

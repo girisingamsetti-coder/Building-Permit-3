@@ -10,6 +10,7 @@ import {
   InfoGrid,
 } from "@/components/design-system/layout";
 import { PageBackButton } from "@/components/design-system/back-button";
+import { ApplicationContextBar } from "@/components/design-system/app-context";
 import { StatusBadge, PaymentStatusBadge } from "@/components/design-system/badges";
 import { formatDateTime, formatDate, formatINR, timeAgo } from "@/components/design-system/workflow";
 import { Button } from "@/components/ui/button";
@@ -128,6 +129,9 @@ export function LtpFees() {
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]}
         actions={<AppSelect apps={visibleApps} current={app} view="ltp-fees" />}
       />
+
+      {/* Application Context Bar */}
+      <ApplicationContextBar app={app} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
@@ -294,7 +298,7 @@ export function LtpPayment() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+      <PageBackButton fallbackView="ltp-fees" fallbackLabel="Fees" />
       <PageHeader
         title="Payment"
         description="Secure online payment for your application fees."
@@ -303,6 +307,9 @@ export function LtpPayment() {
         actions={<AppSelect apps={visibleApps} current={app} view="ltp-payment" />}
         badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode — no real payment</Badge>}
       />
+
+      {/* Application Context Bar */}
+      <ApplicationContextBar app={app} />
 
       {/* Payment progress stepper */}
       <div className="rounded-xl border border-border bg-card p-4 shadow-gov">
@@ -493,7 +500,7 @@ export function LtpReceipt() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+      <PageBackButton fallbackView="ltp-payment" fallbackLabel="Payments" />
       <PageHeader
         title="Payment Receipt"
         description="Official receipt for your payment transaction."
