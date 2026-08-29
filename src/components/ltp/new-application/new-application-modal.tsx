@@ -242,7 +242,7 @@ export function NewApplicationModal({
     <>
       <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
         <DialogContent
-          className="flex max-h-[90vh] w-[96vw] max-w-[1280px] flex-col gap-0 overflow-hidden rounded-xl p-0"
+          className="flex max-h-[90vh] w-[96vw] max-w-[1280px] sm:max-w-[1280px] flex-col gap-0 overflow-hidden rounded-xl p-0"
           showCloseButton={false}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
