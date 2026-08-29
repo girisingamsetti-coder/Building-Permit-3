@@ -41,7 +41,6 @@ import {
   CircleDollarSign,
   Upload,
   FileText,
-  Sparkles,
 } from "lucide-react";
 import type { Application, ApplicationStatus, ViewKey } from "@/types";
 
@@ -120,14 +119,30 @@ export function LtpDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* ===== Welcome Header (minimal — no action buttons) ===== */}
-      <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-5 shadow-gov">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
-          {(user?.name ?? "LTP").split(" ").map((p) => p[0]).slice(0, 2).join("")}
+      {/* ===== Welcome / Action Bar ===== */}
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5 shadow-gov sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+            {(user?.name ?? "LTP").split(" ").map((p) => p[0]).slice(0, 2).join("")}
+          </div>
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">Welcome back, {user?.name?.split(" ").slice(-1)[0] === "Deshpande" ? "Ar. Deshpande" : user?.name}</h1>
+            <p className="text-xs text-muted-foreground">LTP (Applicant) · {today}</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-lg font-semibold tracking-tight">Welcome back, {user?.name?.split(" ").slice(-1)[0] === "Deshpande" ? "Ar. Deshpande" : user?.name}</h1>
-          <p className="text-xs text-muted-foreground">LTP (Applicant) · {today}</p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button size="sm" onClick={() => setNewAppOpen(true)}>
+            <FilePlus2 className="size-4" /> New Application
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("ltp-applications")}>
+            <FileStack className="size-4" /> My Applications
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("ltp-documents")}>
+            <Layers className="size-4" /> Upload Documents
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("ltp-payment")}>
+            <CreditCard className="size-4" /> Pending Payments
+          </Button>
         </div>
       </div>
 
@@ -167,73 +182,43 @@ export function LtpDashboard() {
         />
       </div>
 
-      {/* ===== My Applications + Quick Actions (side by side on desktop) ===== */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
-        {/* My Applications */}
-        <div className="min-w-0">
-          <SectionCard
-            title="My Applications"
-            description="Recent applications submitted by you"
-            icon={FileStack}
-            action={
-              <button
-                onClick={() => navigate("ltp-applications")}
-                className="inline-flex items-center gap-0.5 text-xs font-semibold text-primary hover:underline whitespace-nowrap"
-              >
-                View all <ChevronRight className="size-3.5" />
-              </button>
-            }
-            noPadding
+      {/* ===== My Applications ===== */}
+      <SectionCard
+        title="My Applications"
+        description="Recent applications submitted by you"
+        icon={FileStack}
+        action={
+          <button
+            onClick={() => navigate("ltp-applications")}
+            className="inline-flex items-center gap-0.5 text-xs font-semibold text-primary hover:underline whitespace-nowrap"
           >
-            {recentApps.length === 0 ? (
-              <div className="p-6">
-                <EmptyState
-                  icon={FileStack}
-                  title="No applications submitted yet"
-                  description="Create your first building permit application to get started."
-                  action={<Button size="sm" onClick={() => setNewAppOpen(true)}><FilePlus2 className="size-4" /> New Application</Button>}
-                />
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-2">
-                {recentApps.slice(0, 6).map((app) => (
-                  <ApplicationCard
-                    key={app.id}
-                    app={app}
-                    onClick={() => openApplication(app.id)}
-                    onAction={(view) => openApplication(app.id, view)}
-                  />
-                ))}
-              </div>
-            )}
-          </SectionCard>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="space-y-6">
-          <SectionCard title="Quick Actions" icon={Sparkles} noPadding>
-            <div className="grid grid-cols-2 gap-2 p-3">
-              {[
-                { label: "New Application", icon: FilePlus2, view: null as const, accent: "bg-primary/10 text-primary" },
-                { label: "Upload Drawing", icon: Layers, view: "ltp-drawings" as const, accent: "bg-info/10 text-info" },
-                { label: "Pay Fees", icon: CircleDollarSign, view: "ltp-payment" as const, accent: "bg-orange-500/15 text-orange-600" },
-                { label: "Shortfalls", icon: FileWarning, view: "ltp-shortfalls" as const, accent: "bg-warning/15 text-warning-foreground" },
-              ].map((a) => (
-                <button
-                  key={a.label}
-                  onClick={() => a.view ? navigate(a.view) : setNewAppOpen(true)}
-                  className="group flex h-[72px] flex-col items-start justify-center gap-1.5 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-gov focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                >
-                  <div className={cn("flex size-7 items-center justify-center rounded-md", a.accent)}>
-                    <a.icon className="size-4" />
-                  </div>
-                  <span className="text-xs font-medium leading-tight">{a.label}</span>
-                </button>
-              ))}
-            </div>
-          </SectionCard>
-        </div>
-      </div>
+            View all <ChevronRight className="size-3.5" />
+          </button>
+        }
+        noPadding
+      >
+        {recentApps.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              icon={FileStack}
+              title="No applications submitted yet"
+              description="Create your first building permit application to get started."
+              action={<Button size="sm" onClick={() => setNewAppOpen(true)}><FilePlus2 className="size-4" /> New Application</Button>}
+            />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 xl:grid-cols-3">
+            {recentApps.map((app) => (
+              <ApplicationCard
+                key={app.id}
+                app={app}
+                onClick={() => openApplication(app.id)}
+                onAction={(view) => openApplication(app.id, view)}
+              />
+            ))}
+          </div>
+        )}
+      </SectionCard>
 
       {/* ===== Live Workflow Tracker ===== */}
       {trackerApp && (
