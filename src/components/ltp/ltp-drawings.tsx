@@ -9,7 +9,7 @@ import {
   EmptyState,
   InfoGrid,
 } from "@/components/design-system/layout";
-import { PageBackButton } from "@/components/design-system/back-button";
+import { PageBackButton, PageBreadcrumb, type BreadcrumbItem } from "@/components/design-system/back-button";
 import { ApplicationContextBar, ApplicationSelector } from "@/components/design-system/app-context";
 import {
   StatusBadge,
@@ -56,7 +56,6 @@ import {
   ArrowRight,
   Info,
   Building2,
-  ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Application } from "@/types";
@@ -401,19 +400,15 @@ export function LtpScrutiny() {
 
   return (
     <div className="space-y-6">
-      {/* Compact navigation: icon + breadcrumb */}
-      <div className="flex items-center gap-3">
-        <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" compact />
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
-          <button onClick={() => navigate("ltp-dashboard")} className="hover:text-foreground transition-colors">LTP Portal</button>
-          <ChevronRight className="size-3" />
-          <button onClick={() => navigate("ltp-applications")} className="hover:text-foreground transition-colors">My Applications</button>
-          <ChevronRight className="size-3" />
-          <button onClick={() => openApplication(app.id, "ltp-application-details")} className="hover:text-foreground transition-colors font-mono">{app.applicationNo}</button>
-          <ChevronRight className="size-3" />
-          <span className="text-foreground font-medium">Scrutiny Report</span>
-        </nav>
-      </div>
+      {/* Compact breadcrumb navigation */}
+      <PageBreadcrumb
+        items={[
+          { label: "My Applications", view: "ltp-applications" },
+          { label: app.applicationNo, applicationId: app.id, view: "ltp-application-details" },
+          { label: "Drawings & Scrutiny", applicationId: app.id, view: "ltp-drawings" },
+          { label: "Scrutiny Report" },
+        ]}
+      />
 
       <PageHeader
         title="Scrutiny Report"
