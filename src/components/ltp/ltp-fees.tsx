@@ -272,18 +272,11 @@ export function LtpPayment() {
   const processingAppIds = useAppStore((s) => s.processingAppIds);
   const { toast } = useToast();
 
-  // If a specific app is selected, has a fee, AND payment is not yet successful, show the payment flow
-  // If payment is already successful, show the payments listing (with View Receipt option)
+  // If a specific app is selected and it has a fee, show the payment flow for it
   const selectedApp = selectedApplicationId
     ? visibleApps.find((a) => a.id === selectedApplicationId)
     : null;
-  const isPaymentFlow = selectedApp && selectedApp.fee && selectedApp.payment?.status !== "SUCCESS" && selectedApp.status !== "TPS_TECHNICAL_SCRUTINY";
-
-  // Clear selection helper — returns to payments listing
-  function returnToPaymentsListing() {
-    useAppStore.setState({ selectedApplicationId: null });
-    navigate("ltp-payment");
-  }
+  const isPaymentFlow = selectedApp && selectedApp.fee;
 
   // All apps with fees (for the payments listing)
   const appsWithFees = visibleApps.filter((a) => a.fee);
@@ -295,7 +288,7 @@ export function LtpPayment() {
 
   // ===== Payment flow view (for a specific app) =====
   if (isPaymentFlow && selectedApp) {
-    return <PaymentFlow app={selectedApp} navigate={navigate} returnToPaymentsListing={returnToPaymentsListing} storeInitiatePayment={storeInitiatePayment} processingAppIds={processingAppIds} toast={toast} />;
+    return <PaymentFlow app={selectedApp} navigate={navigate} storeInitiatePayment={storeInitiatePayment} processingAppIds={processingAppIds} toast={toast} />;
   }
 
   // ===== Payments listing view =====
@@ -440,14 +433,12 @@ export function LtpPayment() {
 function PaymentFlow({
   app,
   navigate,
-  returnToPaymentsListing,
   storeInitiatePayment,
   processingAppIds,
   toast,
 }: {
   app: Application;
   navigate: (view: ViewKey) => void;
-  returnToPaymentsListing: () => void;
   storeInitiatePayment: (appId: string, method: Payment["method"]) => void;
   processingAppIds: string[];
   toast: (params: { title: string; description?: string; variant?: "default" | "destructive" }) => void;
@@ -456,26 +447,11 @@ function PaymentFlow({
   const isProcessing = processingAppIds.includes(app.id);
   const isAlreadyPaid = app.payment?.status === "SUCCESS";
   const [stage, setStage] = React.useState<"pending" | "method" | "processing" | "success">(isAlreadyPaid ? "success" : "pending");
-  const hasNavigatedRef = React.useRef(false);
 
   React.useEffect(() => {
-    if (app.payment?.status === "SUCCESS") {
-      setStage("success");
-      // Auto-navigate back to Payments listing after showing success briefly
-      if (!hasNavigatedRef.current) {
-        hasNavigatedRef.current = true;
-        toast({
-          title: "Payment successful",
-          description: `Application ${app.applicationNo} has been updated. Approval workflow initiated.`,
-        });
-        setTimeout(() => {
-          returnToPaymentsListing();
-        }, 1500);
-      }
-    } else if (isProcessing) {
-      setStage("processing");
-    }
-  }, [app.payment?.status, isProcessing, returnToPaymentsListing, toast, app.applicationNo]);
+    if (app.payment?.status === "SUCCESS") setStage("success");
+    else if (isProcessing) setStage("processing");
+  }, [app.payment?.status, isProcessing]);
 
   function initiatePayment() {
     setStage("processing");
@@ -653,7 +629,7 @@ function PaymentFlow({
                   <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">₹0</span></div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <Button variant="outline" onClick={() => { useAppStore.getState().openApplication(app.id, "ltp-receipt"); }}><Download className="size-4" /> View Receipt</Button>
+                  <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> View Receipt</Button>
                   <Button onClick={() => navigate("ltp-application-details")}>Track Application <ArrowRight className="size-4" /></Button>
                 </div>
               </div>
