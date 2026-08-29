@@ -446,9 +446,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       set((s) => ({
         applications: updateApp(s.applications, appId, (app) => {
           const latest = app.drawings[app.drawings.length - 1];
-          // Deterministic: v1 fails, v2+ passes (so LTP experiences fail→reupload→pass)
-          const passed = latest.version >= 2;
-          const report = buildScrutinyResult(latest.version, passed);
+          // Deterministic: v1 fails (front setback), v2+ passes with warnings (so LTP experiences fail→reupload→pass)
+          const scenario = latest.version >= 2 ? "passed_warnings" : "front_setback";
+          const report = buildScrutinyResult(latest.version, scenario);
+          const passed = report.status !== "FAILED";
           let updated: Application = { ...app, scrutinyReport: report };
           updated = { ...updated, drawings: updated.drawings.map((d) => d.id === latest.id ? { ...d, status: passed ? "SCRUTINY_PASSED" as const : "SCRUTINY_FAILED" as const } : d) };
           const newStatus = passed ? "SCRUTINY_PASSED" : "SCRUTINY_FAILED";
@@ -973,21 +974,54 @@ function statusForStage(stage: WorkflowStageKey): ApplicationStatus {
   return map[stage] ?? "DRAFT";
 }
 
-function buildScrutinyResult(version: number, passed: boolean): ScrutinyReport {
+// Scrutiny scenario types for varied failure reasons
+type ScrutinyScenario = "front_setback" | "ground_coverage" | "far_fsi" | "parking" | "height" | "side_setback" | "passed_warnings" | "passed";
+
+function buildScrutinyResult(version: number, scenario: ScrutinyScenario = "passed"): ScrutinyReport {
   const checks: ScrutinyCheck[] = [
-    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL", status: passed ? "PASS" : "FAIL", message: passed ? "Front setback 6.2 m exceeds minimum 6.0 m." : "Front setback 5.4 m is below minimum 6.0 m.", recommendation: passed ? undefined : "Increase front setback to a minimum of 6.0 m." },
-    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "Rear setback 4.1 m compliant." },
-    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.2 m compliant." },
-    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.0 m compliant." },
-    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR", status: "PASS", message: "Coverage 58% within 60% limit." },
-    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL", status: "PASS", message: "Achieved FAR 1.42 against permissible 1.50." },
-    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR", status: "PASS", message: "Building height 14.8 m within 15 m limit." },
-    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR", status: "PASS", message: "24 ECS provided, 22 required." },
+    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL",
+      status: scenario === "front_setback" ? "FAIL" : "PASS",
+      message: scenario === "front_setback" ? "Front setback 4.8 m is below minimum 6.0 m." : "Front setback 6.2 m exceeds minimum 6.0 m.",
+      recommendation: scenario === "front_setback" ? "Increase front setback to a minimum of 6.0 m." : undefined,
+      expectedValue: "6.0 m", observedValue: scenario === "front_setback" ? "4.8 m" : "6.2 m" },
+    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "Rear setback 4.1 m compliant.", expectedValue: "3.0 m", observedValue: "4.1 m" },
+    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR",
+      status: scenario === "side_setback" ? "FAIL" : "PASS",
+      message: scenario === "side_setback" ? "Side setback 1.9 m is below required 3.0 m." : "3.2 m compliant.",
+      recommendation: scenario === "side_setback" ? "Revise side setback to minimum 3.0 m." : undefined,
+      expectedValue: "3.0 m", observedValue: scenario === "side_setback" ? "1.9 m" : "3.2 m" },
+    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.0 m compliant.", expectedValue: "3.0 m", observedValue: "3.0 m" },
+    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR",
+      status: scenario === "ground_coverage" ? "FAIL" : "PASS",
+      message: scenario === "ground_coverage" ? "Coverage 68% exceeds permissible 60%." : "Coverage 58% within 60% limit.",
+      recommendation: scenario === "ground_coverage" ? "Reduce ground coverage within permissible limit." : undefined,
+      expectedValue: "60%", observedValue: scenario === "ground_coverage" ? "68%" : "58%" },
+    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL",
+      status: scenario === "far_fsi" ? "FAIL" : "PASS",
+      message: scenario === "far_fsi" ? "Achieved FAR 1.82 exceeds permissible 1.50." : "Achieved FAR 1.42 against permissible 1.50.",
+      recommendation: scenario === "far_fsi" ? "Revise built-up area to reduce FAR within permissible limit." : undefined,
+      expectedValue: "1.50", observedValue: scenario === "far_fsi" ? "1.82" : "1.42" },
+    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR",
+      status: scenario === "height" ? "FAIL" : "PASS",
+      message: scenario === "height" ? "Building height 18.4 m exceeds permissible 15 m." : "Building height 14.8 m within 15 m limit.",
+      recommendation: scenario === "height" ? "Revise building height to within permissible limit." : undefined,
+      expectedValue: "15 m", observedValue: scenario === "height" ? "18.4 m" : "14.8 m" },
+    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR",
+      status: scenario === "parking" ? "FAIL" : "PASS",
+      message: scenario === "parking" ? "16 ECS provided, 24 required." : "24 ECS provided, 22 required.",
+      recommendation: scenario === "parking" ? "Provide required parking spaces (24 ECS)." : undefined,
+      expectedValue: "24 ECS", observedValue: scenario === "parking" ? "16 ECS" : "24 ECS" },
     { id: "sc-9", rule: "Rain Water Harvesting", category: "Sustainability", severity: "MINOR", status: "PASS", message: "RWH pit shown at NE corner." },
-    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR", status: passed ? "PASS" : "WARNING", message: passed ? "STP of 30 KLD provided." : "STP capacity calculation sheet not attached.", recommendation: passed ? undefined : "Attach STP capacity calculation." },
+    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR",
+      status: scenario === "passed_warnings" ? "WARNING" : "PASS",
+      message: scenario === "passed_warnings" ? "STP capacity calculation sheet not attached." : "STP of 30 KLD provided.",
+      recommendation: scenario === "passed_warnings" ? "Attach STP capacity calculation." : undefined },
     { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL", status: "PASS", message: "Stair width 1.8 m compliant." },
     { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
-    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR", status: "WARNING", message: "Indicate tree species on landscape plan." },
+    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR",
+      status: scenario === "passed_warnings" ? "WARNING" : "PASS",
+      message: scenario === "passed_warnings" ? "Landscape plan missing tree species details." : "Tree species indicated on landscape plan.",
+      recommendation: scenario === "passed_warnings" ? "Add tree species details to landscape plan." : undefined },
     { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
     { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "MINOR", status: "PASS", message: "Title block and north arrow present." },
   ];
@@ -996,12 +1030,7 @@ function buildScrutinyResult(version: number, passed: boolean): ScrutinyReport {
   const warnings = checks.filter((c) => c.status === "WARNING").length;
   const passedCount = checks.filter((c) => c.status === "PASS").length;
   const totalChecks = checks.length;
-  // Overall status logic:
-  // If any FAIL → FAILED
-  // Else if any WARNING → PASSED_WITH_WARNINGS
-  // Else → PASSED
   const overallStatus: ScrutinyReport["status"] = failed > 0 ? "FAILED" : warnings > 0 ? "PASSED_WITH_WARNINGS" : "PASSED";
-  // Data-driven summary message
   const summary = `${totalChecks} compliance checks were evaluated. ${passedCount} passed, ${failed} failed, and ${warnings} warning${warnings === 1 ? "" : "s"} require${warnings === 1 ? "s" : ""} attention.`;
   return {
     reportNo: `SCR/2026/${String(Math.floor(1000 + Math.random() * 9000))}`,

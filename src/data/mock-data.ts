@@ -191,21 +191,53 @@ function makeDrawings(versions: { v: number; passed: boolean; date: string }[]):
   }));
 }
 
-function makeScrutinyReport(version: number, passed: boolean, date: string) {
+type ScrutinyScenario = "front_setback" | "ground_coverage" | "far_fsi" | "parking" | "height" | "side_setback" | "passed_warnings" | "passed";
+
+function makeScrutinyReport(version: number, scenario: ScrutinyScenario, date: string, reportNo?: string) {
   const checks: import("@/types").ScrutinyCheck[] = [
-    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL", status: passed ? "PASS" : "FAIL", message: passed ? "Front setback 6.2 m exceeds minimum 6.0 m." : "Front setback 5.4 m is below minimum 6.0 m.", recommendation: passed ? undefined : "Increase front setback to a minimum of 6.0 m." },
-    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "Rear setback 4.1 m compliant." },
-    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.2 m compliant." },
-    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.0 m compliant." },
-    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR", status: "PASS", message: "Coverage 58% within 60% limit." },
-    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL", status: "PASS", message: "Achieved FAR 1.42 against permissible 1.50." },
-    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR", status: "PASS", message: "Building height 14.8 m within 15 m limit." },
-    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR", status: "PASS", message: "24 ECS provided, 22 required." },
+    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL",
+      status: scenario === "front_setback" ? "FAIL" : "PASS",
+      message: scenario === "front_setback" ? "Front setback 4.8 m is below minimum 6.0 m." : "Front setback 6.2 m exceeds minimum 6.0 m.",
+      recommendation: scenario === "front_setback" ? "Increase front setback to a minimum of 6.0 m." : undefined,
+      expectedValue: "6.0 m", observedValue: scenario === "front_setback" ? "4.8 m" : "6.2 m" },
+    { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "Rear setback 4.1 m compliant.", expectedValue: "3.0 m", observedValue: "4.1 m" },
+    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR",
+      status: scenario === "side_setback" ? "FAIL" : "PASS",
+      message: scenario === "side_setback" ? "Side setback 1.9 m is below required 3.0 m." : "3.2 m compliant.",
+      recommendation: scenario === "side_setback" ? "Revise side setback to minimum 3.0 m." : undefined,
+      expectedValue: "3.0 m", observedValue: scenario === "side_setback" ? "1.9 m" : "3.2 m" },
+    { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.0 m compliant.", expectedValue: "3.0 m", observedValue: "3.0 m" },
+    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR",
+      status: scenario === "ground_coverage" ? "FAIL" : "PASS",
+      message: scenario === "ground_coverage" ? "Coverage 68% exceeds permissible 60%." : "Coverage 58% within 60% limit.",
+      recommendation: scenario === "ground_coverage" ? "Reduce ground coverage within permissible limit." : undefined,
+      expectedValue: "60%", observedValue: scenario === "ground_coverage" ? "68%" : "58%" },
+    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL",
+      status: scenario === "far_fsi" ? "FAIL" : "PASS",
+      message: scenario === "far_fsi" ? "Achieved FAR 1.82 exceeds permissible 1.50." : "Achieved FAR 1.42 against permissible 1.50.",
+      recommendation: scenario === "far_fsi" ? "Revise built-up area to reduce FAR within permissible limit." : undefined,
+      expectedValue: "1.50", observedValue: scenario === "far_fsi" ? "1.82" : "1.42" },
+    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR",
+      status: scenario === "height" ? "FAIL" : "PASS",
+      message: scenario === "height" ? "Building height 18.4 m exceeds permissible 15 m." : "Building height 14.8 m within 15 m limit.",
+      recommendation: scenario === "height" ? "Revise building height to within permissible limit." : undefined,
+      expectedValue: "15 m", observedValue: scenario === "height" ? "18.4 m" : "14.8 m" },
+    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR",
+      status: scenario === "parking" ? "FAIL" : "PASS",
+      message: scenario === "parking" ? "16 ECS provided, 24 required." : "24 ECS provided, 22 required.",
+      recommendation: scenario === "parking" ? "Provide required parking spaces (24 ECS)." : undefined,
+      expectedValue: "24 ECS", observedValue: scenario === "parking" ? "16 ECS" : "24 ECS" },
     { id: "sc-9", rule: "Rain Water Harvesting", category: "Sustainability", severity: "MINOR", status: "PASS", message: "RWH pit shown at NE corner." },
-    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR", status: passed ? "PASS" : "WARNING", message: passed ? "STP of 30 KLD provided." : "STP capacity calculation sheet not attached.", recommendation: passed ? undefined : "Attach STP capacity calculation." },
+    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR",
+      status: scenario === "passed_warnings" ? "WARNING" : "PASS",
+      message: scenario === "passed_warnings" ? "STP capacity calculation sheet not attached." : "STP of 30 KLD provided.",
+      recommendation: scenario === "passed_warnings" ? "Attach STP capacity calculation." : undefined },
     { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL", status: "PASS", message: "Stair width 1.8 m compliant." },
     { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
-    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR", status: "WARNING", message: "Indicate tree species on landscape plan." },
+    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR",
+      status: scenario === "passed_warnings" ? "WARNING" : "PASS",
+      message: scenario === "passed_warnings" ? "Landscape plan missing tree species details." : "Tree species indicated on landscape plan.",
+      recommendation: scenario === "passed_warnings" ? "Add tree species details to landscape plan." : undefined },
     { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
     { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "MINOR", status: "PASS", message: "Title block and north arrow present." },
   ];
@@ -216,7 +248,7 @@ function makeScrutinyReport(version: number, passed: boolean, date: string) {
   const overallStatus: import("@/types").ScrutinyReport["status"] = failed > 0 ? "FAILED" : warnings > 0 ? "PASSED_WITH_WARNINGS" : "PASSED";
   const summary = `${totalChecks} compliance checks were evaluated. ${passedCount} passed, ${failed} failed, and ${warnings} warning${warnings === 1 ? "" : "s"} require${warnings === 1 ? "s" : ""} attention.`;
   const report: import("@/types").ScrutinyReport = {
-    reportNo: `SCR/2026/${String(Math.floor(1000 + Math.random() * 9000))}`,
+    reportNo: reportNo ?? `SCR/2026/${String(Math.floor(1000 + Math.random() * 9000))}`,
     drawingVersion: version,
     generatedAt: date,
     status: overallStatus,
@@ -451,21 +483,21 @@ export const SEED_APPLICATIONS: Application[] = [
   // 2. SCRUTINY FAILED — drawing failed, re-upload needed
   buildApp("app-2", "MC/BP/2026/04/0002", "Tamhane Row Houses", "RESIDENTIAL", 1240, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-18T13:20:00", "2026-01-18T13:22:00"], {
     drawings: [{ id: "dw-2-1", fileName: "RowHouse_v1.dwg", fileType: "DWG", fileSize: "6.2 MB", version: 1, uploadedAt: "2026-01-18T13:20:00", uploadedBy: "Ar. Vikram Deshpande", status: "SCRUTINY_FAILED", notes: "Failed — front setback non-compliant." }],
-    scrutiny: makeScrutinyReport(1, false, "2026-01-18T13:22:00"),
+    scrutiny: makeScrutinyReport(1, "front_setback", "2026-01-18T13:22:00", "SCR/2026/0001"),
     documents: makeDocuments("early"),
   }),
 
   // 3. SCRUTINY PASSED → DOCUMENT_UPLOAD_PENDING
   buildApp("app-3", "MC/BP/2026/04/0003", "Shahane Bungalow — G+1", "RESIDENTIAL", 560, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-15T09:00:00", "2026-01-15T09:05:00", "2026-01-15T11:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-15T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-15T11:00:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-15T11:00:00", "SCR/2026/0003"),
     documents: makeDocuments("early"),
   }),
 
   // 4. PAYMENT_PENDING — fee generated, awaiting payment
   buildApp("app-4", "MC/BP/2026/04/0004", "Kulkarni Residence — Redevelopment", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-12T10:00:00", "2026-01-12T10:05:00", "2026-01-13T14:00:00", "2026-01-14T18:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-12T10:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-12T11:00:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-12T11:00:00", "SCR/2026/0004"),
     documents: makeDocuments("verified"),
     fee: makeFee(980, 8, false),
     payment: { id: "pay-4", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
@@ -474,7 +506,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 5. TPS_TECHNICAL_SCRUTINY — payment done, at TPS
   buildApp("app-5", "MC/BP/2026/04/0005", "Greenfield Residency — Apartment", "RESIDENTIAL", 1780, "TPS_TECHNICAL_SCRUTINY", "TPS_TECHNICAL_SCRUTINY", { name: "Smt. Meena Kulkarni", role: "TPS" }, ["2026-01-05T09:28:00", "2026-01-05T09:30:00", "2026-01-05T09:31:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T12:00:00", "2026-01-09T16:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:30:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-05T09:31:00"),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-05T09:31:00", "SCR/2026/0005"),
     documents: makeDocuments("verified"),
     fee: (() => { const f = makeFee(1780, 8, true); return f; })(),
     payment: makePayment(267850, true, "2026-01-08"),
@@ -484,7 +516,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 6. TPA_REVIEW — TPS forwarded, at TPA
   buildApp("app-6", "MC/BP/2026/04/0006", "Crescent Plaza — Commercial", "COMMERCIAL", 6400, "TPA_REVIEW", "TPA_REVIEW", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-04T10:00:00", "2026-01-04T10:05:00", "2026-01-04T10:06:00", "2026-01-05T11:00:00", "2026-01-06T09:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-04T10:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-04T10:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-04T10:06:00", "SCR/2026/0006"),
     documents: makeDocuments("verified"),
     fee: makeFee(6400, 8, true),
     payment: makePayment(853300, true, "2026-01-06"),
@@ -494,7 +526,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 7. ZAD_ZDD_REVIEW
   buildApp("app-7", "MC/BP/2026/04/0007", "Hillview Heights — Group Housing", "RESIDENTIAL", 12200, "ZAD_ZDD_REVIEW", "ZAD_ZDD_REVIEW", { name: "Shri. Ramesh Iyer", role: "ZDD" }, ["2026-01-03T10:00:00", "2026-01-03T10:05:00", "2026-01-03T10:06:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-03T10:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-03T10:06:00"),
+    scrutiny: makeScrutinyReport(1, "ground_coverage", "2026-01-03T10:06:00", "SCR/2026/0007"),
     documents: makeDocuments("verified"),
     fee: makeFee(12200, 8, true),
     payment: makePayment(1618300, true, "2026-01-05"),
@@ -504,7 +536,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 8. ZJD_REVIEW
   buildApp("app-8", "MC/BP/2026/04/0008", "Sunrise Apartments — G+4", "RESIDENTIAL", 3200, "ZJD_REVIEW", "ZJD_REVIEW", { name: "Smt. Anjali Rao", role: "ZJD" }, ["2026-01-02T09:00:00", "2026-01-02T09:05:00", "2026-01-02T09:06:00", "2026-01-03T11:00:00", "2026-01-04T10:00:00", "2026-01-05T14:00:00", "2026-01-06T09:00:00", "2026-01-07T11:00:00", "2026-01-08T15:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-02T09:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T09:06:00", "SCR/2026/0008"),
     documents: makeDocuments("verified"),
     fee: makeFee(3200, 8, true),
     payment: makePayment(446600, true, "2026-01-04"),
@@ -514,7 +546,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 9. DIRECTOR_DP_REVIEW
   buildApp("app-9", "MC/BP/2026/04/0009", "Riverside Towers — Commercial", "COMMERCIAL", 8900, "DIRECTOR_DP_REVIEW", "DIRECTOR_DP_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR_DP" }, ["2026-01-02T08:00:00", "2026-01-02T08:05:00", "2026-01-02T08:06:00", "2026-01-03T10:00:00", "2026-01-04T09:00:00", "2026-01-05T13:00:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T09:00:00", "2026-01-09T11:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T08:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-02T08:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T08:06:00", "SCR/2026/0009"),
     documents: makeDocuments("verified"),
     fee: makeFee(8900, 8, true),
     payment: makePayment(1186300, true, "2026-01-04"),
@@ -524,7 +556,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 10. ADDITIONAL_COMMISSIONER_REVIEW
   buildApp("app-10", "MC/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-01T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-01T09:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-01T09:06:00", "SCR/2026/0010"),
     documents: makeDocuments("verified"),
     fee: makeFee(4500, 8, true),
     payment: makePayment(616300, true, "2026-01-03"),
@@ -534,7 +566,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 11. COMMISSIONER_REVIEW
   buildApp("app-11", "MC/BP/2026/04/0011", "Metro Business Centre", "COMMERCIAL", 11200, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-28T09:00:00", "2025-12-28T09:05:00", "2025-12-28T09:06:00", "2025-12-29T11:00:00", "2025-12-30T10:00:00", "2026-01-01T14:00:00", "2026-01-02T09:00:00", "2026-01-03T11:00:00", "2026-01-04T15:00:00", "2026-01-05T10:00:00", "2026-01-06T14:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-28T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2025-12-28T09:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2025-12-28T09:06:00", "SCR/2026/0011"),
     documents: makeDocuments("verified"),
     fee: makeFee(11200, 8, true),
     payment: makePayment(1486300, true, "2025-12-30"),
@@ -544,7 +576,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 12. APPROVED
   buildApp("app-12", "MC/BP/2026/04/0012", "Sai Nagar Row Houses", "RESIDENTIAL", 1800, "APPROVED", "FINAL_DECISION", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-20T09:00:00", "2025-12-20T09:05:00", "2025-12-20T09:06:00", "2025-12-21T11:00:00", "2025-12-22T10:00:00", "2025-12-23T14:00:00", "2025-12-24T09:00:00", "2025-12-25T11:00:00", "2025-12-26T15:00:00", "2025-12-27T10:00:00", "2025-12-28T14:00:00", "2025-12-29T16:30:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-20T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2025-12-20T09:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2025-12-20T09:06:00", "SCR/2026/0012"),
     documents: makeDocuments("verified"),
     fee: makeFee(1800, 8, true),
     payment: makePayment(271300, true, "2025-12-22"),
@@ -558,7 +590,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 13. SHORTFALL_RAISED — active shortfall at TPA review
   buildApp("app-13", "MC/BP/2026/04/0013", "Orchid Greens — Group Housing", "RESIDENTIAL", 6800, "SHORTFALL_RAISED", "TPA_REVIEW", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-11T14:00:00", "2026-01-12T09:00:00", "2026-01-13T15:00:00", "2026-01-14T11:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-10T10:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-10T10:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-10T10:06:00", "SCR/2026/0013"),
     documents: makeDocuments("shortfall"),
     fee: makeFee(6800, 8, true),
     payment: makePayment(906300, true, "2026-01-12"),
@@ -582,7 +614,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // 14. Shortfall resolved, back in workflow (ZAD_ZDD_REVIEW with resolved shortfall)
   buildApp("app-14", "MC/BP/2026/04/0014", "Pinnacle Corporate Park", "COMMERCIAL", 7600, "ZAD_ZDD_REVIEW", "ZAD_ZDD_REVIEW", { name: "Shri. Ramesh Iyer", role: "ZDD" }, ["2026-01-05T09:00:00", "2026-01-05T09:05:00", "2026-01-05T09:06:00", "2026-01-06T11:00:00", "2026-01-07T10:00:00", "2026-01-08T14:00:00", "2026-01-09T09:00:00", "2026-01-12T15:00:00"], {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, true, "2026-01-05T09:06:00"),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-05T09:06:00", "SCR/2026/0014"),
     documents: makeDocuments("verified"),
     fee: makeFee(7600, 8, true),
     payment: makePayment(1010300, true, "2026-01-07"),

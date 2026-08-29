@@ -182,6 +182,8 @@ export interface ScrutinyCheck {
   status: "PASS" | "FAIL" | "WARNING";
   message: string;
   recommendation?: string;
+  expectedValue?: string;
+  observedValue?: string;
 }
 
 export interface ScrutinyReport {
