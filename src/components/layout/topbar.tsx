@@ -91,7 +91,7 @@ function useGlobalSearch(query: string): { results: SearchResult[]; loading: boo
   const apps = useVisibleApplications();
   const [results, setResults] = React.useState<SearchResult[]>([]);
   const [loading, setLoading] = React.useState(false);
-  const debounceRef = React.useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   React.useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

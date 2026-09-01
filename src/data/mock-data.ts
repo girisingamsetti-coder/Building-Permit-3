@@ -2,6 +2,7 @@ import type {
   Application,
   ApplicationFee,
   ApplicationStatus,
+  ApplicationTypeConfig,
   AuditEntry,
   DocumentRecord,
   Drawing,
@@ -14,6 +15,7 @@ import type {
   ScrutinyReport,
   Shortfall,
   SmsLog,
+  SystemSettings,
   User,
   WorkflowHistoryEntry,
   WorkflowStageKey,
@@ -122,16 +124,16 @@ export const ROLES: Record<RoleKey, Role> = {
 // USERS — demo officers for every role (2026)
 // ============================================================
 export const USERS: User[] = [
-  { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14578", licenseNo: "LTP-MC-2019-0457", designation: "Architect & Licensed Technical Person", zone: "Zone IV — West", avatarColor: "emerald", department: "Private Practice", active: true, lastLogin: "2026-01-20T09:12:00" },
-  { id: "u-tps-01", name: "Smt. Meena Kulkarni", role: "TPS", email: "tps@demo.gov.in", phone: "+91 99230 87120", employeeId: "MUN-TPS-1042", designation: "Town Planning Supervisor", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, lastLogin: "2026-01-20T08:40:00" },
-  { id: "u-tpa-01", name: "Shri. Rajesh Patil", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 98700 33214", employeeId: "MUN-TPA-0218", designation: "Town Planning Assistant", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, lastLogin: "2026-01-20T09:00:00" },
-  { id: "u-zad-01", name: "Shri. Suresh Kadam", role: "ZAD", email: "zad@demo.gov.in", phone: "+91 98190 44521", employeeId: "MUN-ZAD-0156", designation: "Zonal Assistant Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, lastLogin: "2026-01-19T17:25:00" },
-  { id: "u-zdd-01", name: "Shri. Ramesh Iyer", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 98190 33214", employeeId: "MUN-ZDD-0218", designation: "Zonal Deputy Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, lastLogin: "2026-01-19T17:25:00" },
-  { id: "u-zjd-01", name: "Smt. Anjali Rao", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 99700 51288", employeeId: "MUN-ZJD-0107", designation: "Zonal Joint Director", zone: "Zone IV — West", avatarColor: "amber", department: "Zonal Office — West", active: true, lastLogin: "2026-01-20T10:05:00" },
-  { id: "u-dir-01", name: "Shri. Suresh Nair", role: "DIRECTOR_DP", email: "director@demo.gov.in", phone: "+91 98690 70011", employeeId: "MUN-DIR-0009", designation: "Director, Town & Country Planning", zone: "Head Office", avatarColor: "amber", department: "Directorate of Town Planning", active: true, lastLogin: "2026-01-20T09:55:00" },
-  { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, lastLogin: "2026-01-20T10:30:00" },
-  { id: "u-com-01", name: "Dr. Pratap Reddy", role: "COMMISSIONER", email: "commissioner@demo.gov.in", phone: "+91 98220 00001", employeeId: "MUN-COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, lastLogin: "2026-01-20T11:20:00" },
-  { id: "u-admin-01", name: "Shri. Kailash Patil", role: "ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, lastLogin: "2026-01-20T09:00:00" },
+  { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14578", licenseNo: "LTP-MC-2019-0457", designation: "Architect & Licensed Technical Person", zone: "Zone IV — West", avatarColor: "emerald", department: "Private Practice", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:12:00" },
+  { id: "u-tps-01", name: "Smt. Meena Kulkarni", role: "TPS", email: "tps@demo.gov.in", phone: "+91 99230 87120", employeeId: "MUN-TPS-1042", designation: "Town Planning Supervisor", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:40:00" },
+  { id: "u-tpa-01", name: "Shri. Rajesh Patil", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 98700 33214", employeeId: "MUN-TPA-0218", designation: "Town Planning Assistant", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
+  { id: "u-zad-01", name: "Shri. Suresh Kadam", role: "ZAD", email: "zad@demo.gov.in", phone: "+91 98190 44521", employeeId: "MUN-ZAD-0156", designation: "Zonal Assistant Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-19T17:25:00" },
+  { id: "u-zdd-01", name: "Shri. Ramesh Iyer", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 98190 33214", employeeId: "MUN-ZDD-0218", designation: "Zonal Deputy Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-19T17:25:00" },
+  { id: "u-zjd-01", name: "Smt. Anjali Rao", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 99700 51288", employeeId: "MUN-ZJD-0107", designation: "Zonal Joint Director", zone: "Zone IV — West", avatarColor: "amber", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:05:00" },
+  { id: "u-dir-01", name: "Shri. Suresh Nair", role: "DIRECTOR_DP", email: "director@demo.gov.in", phone: "+91 98690 70011", employeeId: "MUN-DIR-0009", designation: "Director, Town & Country Planning", zone: "Head Office", avatarColor: "amber", department: "Directorate of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:55:00" },
+  { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:30:00" },
+  { id: "u-com-01", name: "Dr. Pratap Reddy", role: "COMMISSIONER", email: "commissioner@demo.gov.in", phone: "+91 98220 00001", employeeId: "MUN-COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T11:20:00" },
+  { id: "u-admin-01", name: "Shri. Kailash Patil", role: "ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -788,6 +790,33 @@ export const SEED_SMS_LOGS: SmsLog[] = SEED_NOTIFICATIONS.filter((n) => n.smsSen
   applicationNo: n.applicationNo,
   isMock: true,
 }));
+
+// ============================================================
+// APPLICATION TYPE CONFIGURATION (admin-configurable)
+// ============================================================
+export const SEED_APPLICATION_TYPES: ApplicationTypeConfig[] = [
+  { key: "BUILDING_PERMISSION", name: "Building Permission", description: "New building construction permit", active: true, typicalDuration: "30 days" },
+  { key: "LAYOUT_APPROVAL", name: "Layout Approval", description: "Land subdivision / layout sanction", active: true, typicalDuration: "45 days" },
+  { key: "OCCUPANCY_CERTIFICATE", name: "Occupancy Certificate", description: "Post-construction occupancy approval", active: true, typicalDuration: "15 days" },
+  { key: "REVISION_PERMISSION", name: "Revision Permission", description: "Revision to an approved plan", active: true, typicalDuration: "21 days" },
+  { key: "DEVELOPMENT_PERMIT", name: "Development Permit", description: "Land development permission", active: true, typicalDuration: "60 days" },
+  { key: "DEMOLITION_PERMIT", name: "Demolition Permit", description: "Permission for building demolition", active: false, typicalDuration: "10 days" },
+];
+
+// ============================================================
+// SYSTEM SETTINGS (admin-configurable, single source of truth)
+// ============================================================
+export const SEED_SYSTEM_SETTINGS: SystemSettings = {
+  portalName: "LTP Approval",
+  portalSubtitle: "Building Permit Management System",
+  dateFormat: "DD MMM YYYY",
+  currency: "INR",
+  maxFileSizeMB: 10,
+  allowedDrawingFormats: ["DWG", "DXF", "PDF"],
+  allowedDocumentFormats: ["PDF", "JPG", "PNG"],
+  sessionTimeoutMinutes: 30,
+  demoMode: true,
+};
 
 // Backward-compatible exports
 export const APPLICATIONS = SEED_APPLICATIONS;

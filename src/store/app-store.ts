@@ -6,21 +6,26 @@ import type {
   Application,
   ApplicationStatus,
   ApplicationType,
+  ApplicationTypeConfig,
   Applicant,
   AuditEntry,
+  AdminAuditEntry,
   DocumentStatus,
   Drawing,
   NotificationRecord,
   Payment,
+  Permission,
   Portal,
   ProjectInfo,
   Remark,
+  Role,
   RoleKey,
   ScrutinyCheck,
   ScrutinyReport,
   Shortfall,
   ShortfallType,
   SmsLog,
+  SystemSettings,
   User,
   ViewKey,
   WorkflowHistoryEntry,
@@ -33,6 +38,8 @@ import {
   USERS,
   DEMO_CREDENTIALS,
   ROLES,
+  SEED_APPLICATION_TYPES,
+  SEED_SYSTEM_SETTINGS,
 } from "@/data/mock-data";
 import { WORKFLOW_STAGES, getStage, stageFromStatus } from "@/data/workflow-config";
 import {
@@ -80,6 +87,13 @@ interface AppState {
   applications: Application[];
   notifications: NotificationRecord[];
   smsLogs: SmsLog[];
+  // ---- RBAC / Admin state (single source of truth) ----
+  users: User[];
+  roles: Record<RoleKey, Role>;
+  adminAuditLog: AdminAuditEntry[];
+  applicationTypes: ApplicationTypeConfig[];
+  systemSettings: SystemSettings;
+  workflowStageOverrides: Record<string, { role?: RoleKey; allowedActions?: string[]; canApprove?: boolean; canRaiseShortfall?: boolean }>;
   // sidebar
   sidebarCollapsed: boolean;
   mobileNavOpen: boolean;
@@ -158,6 +172,24 @@ interface AppState {
   // ---- notifications ----
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+
+  // ---- admin: user management ----
+  createUser: (data: { name: string; email: string; phone: string; role: RoleKey; designation?: string; zone?: string; employeeId?: string; licenseNo?: string }) => { ok: boolean; error?: string; userId?: string };
+  updateUser: (userId: string, data: Partial<Pick<User, "name" | "email" | "phone" | "designation" | "zone" | "employeeId" | "licenseNo">>) => void;
+  setUserRole: (userId: string, newRole: RoleKey, reason?: string) => void;
+  activateUser: (userId: string) => void;
+  deactivateUser: (userId: string, reason?: string) => void;
+  suspendUser: (userId: string, reason?: string) => void;
+  deleteUser: (userId: string) => void;
+
+  // ---- admin: role & permissions ----
+  updateRolePermission: (role: RoleKey, permission: Permission, enabled: boolean) => void;
+
+  // ---- admin: configuration ----
+  toggleApplicationType: (key: ApplicationType, active: boolean) => void;
+  updateApplicationType: (key: ApplicationType, data: Partial<Pick<ApplicationTypeConfig, "name" | "description" | "typicalDuration">>) => void;
+  updateSystemSettings: (data: Partial<SystemSettings>) => void;
+  updateWorkflowStage: (stageKey: string, data: { role?: RoleKey; allowedActions?: string[]; canApprove?: boolean; canRaiseShortfall?: boolean }) => void;
 }
 
 // ============================================================
@@ -230,6 +262,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   applications: SEED_APPLICATIONS,
   notifications: SEED_NOTIFICATIONS,
   smsLogs: SEED_SMS_LOGS,
+  // RBAC / admin state — seeded from mock-data, mutable
+  users: USERS,
+  roles: { ...ROLES } as Record<RoleKey, Role>,
+  adminAuditLog: [] as AdminAuditEntry[],
+  applicationTypes: SEED_APPLICATION_TYPES,
+  systemSettings: SEED_SYSTEM_SETTINGS,
+  workflowStageOverrides: {} as Record<string, { role?: RoleKey; allowedActions?: string[]; canApprove?: boolean; canRaiseShortfall?: boolean }>,
   sidebarCollapsed: false,
   mobileNavOpen: false,
   theme: "light",
@@ -241,16 +280,24 @@ export const useAppStore = create<AppState>((set, get) => ({
     const cred = DEMO_CREDENTIALS.find((c) => c.email === email.trim().toLowerCase());
     if (!cred) return { ok: false, error: "No account found with this email." };
     if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
-    const user = USERS.find((u) => u.role === cred.role)!;
-    const portal = portalForRole(cred.role);
-    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
+    const storeUsers = get().users;
+    const user = storeUsers.find((u) => u.role === cred.role) ?? storeUsers.find((u) => u.email === cred.email);
+    if (!user) return { ok: false, error: "User account not found. Contact the administrator." };
+    if (!user.active || user.status === "INACTIVE") return { ok: false, error: "Your account has been deactivated. Contact the administrator." };
+    if (user.status === "SUSPENDED") return { ok: false, error: "Your account has been suspended. Contact the administrator." };
+    if (user.status === "PENDING") return { ok: false, error: "Your account is pending approval. Please try again later." };
+    const portal = portalForRole(user.role);
+    set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
+    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
     return { ok: true };
   },
 
   loginAsRole: (role) => {
-    const user = USERS.find((u) => u.role === role)!;
+    const user = get().users.find((u) => u.role === role);
+    if (!user) return;
     const portal = portalForRole(role);
-    set({ user, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
+    set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
+    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
   },
 
   logout: () =>
@@ -897,6 +944,179 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({ notifications: s.notifications.map((n) => n.id === id ? { ...n, read: true } : n) })),
   markAllNotificationsRead: () =>
     set((s) => ({ notifications: s.notifications.map((n) => ({ ...n, read: true })) })),
+
+  // ---- ADMIN: USER MANAGEMENT ----
+  createUser: (data) => {
+    const admin = get().user;
+    if (!admin) return { ok: false, error: "Not authenticated." };
+    const exists = get().users.some((u) => u.email.toLowerCase() === data.email.trim().toLowerCase());
+    if (exists) return { ok: false, error: "A user with this email already exists." };
+    const userId = genId("u");
+    const newUser: User = {
+      id: userId, name: data.name, email: data.email.trim().toLowerCase(), phone: data.phone,
+      role: data.role, designation: data.designation, zone: data.zone, employeeId: data.employeeId,
+      licenseNo: data.licenseNo, avatarColor: "slate", department: data.designation,
+      active: true, status: "ACTIVE", createdAt: nowISO(),
+    };
+    set((s) => ({ users: [...s.users, newUser], adminAuditLog: [{
+      id: genId("aaudit"), user: admin.name, role: admin.role, action: "User created", entity: "User", entityId: newUser.email,
+      targetType: "User", targetId: userId, newValue: `${newUser.name} (${newUser.role})`, timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+    }, ...s.adminAuditLog] }));
+    return { ok: true, userId };
+  },
+
+  updateUser: (userId, data) => {
+    const admin = get().user!;
+    set((s) => ({
+      users: s.users.map((u) => u.id === userId ? { ...u, ...data } : u),
+      user: s.user && s.user.id === userId ? { ...s.user, ...data } : s.user,
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "User updated", entity: "User",
+        entityId: get().users.find((u) => u.id === userId)?.email ?? userId, targetType: "User", targetId: userId,
+        newValue: JSON.stringify(data), timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  setUserRole: (userId, newRole, reason) => {
+    const admin = get().user!;
+    const target = get().users.find((u) => u.id === userId);
+    if (!target) return;
+    const oldRole = target.role;
+    set((s) => ({
+      users: s.users.map((u) => u.id === userId ? { ...u, role: newRole } : u),
+      user: s.user && s.user.id === userId ? { ...s.user, role: newRole } : s.user,
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "Role changed", entity: "User",
+        entityId: target.email, targetType: "User", targetId: userId, oldValue: oldRole, newValue: newRole,
+        remarks: reason, timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  activateUser: (userId) => {
+    const admin = get().user!;
+    const target = get().users.find((u) => u.id === userId);
+    if (!target) return;
+    set((s) => ({
+      users: s.users.map((u) => u.id === userId ? { ...u, active: true, status: "ACTIVE" as const } : u),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "User activated", entity: "User",
+        entityId: target.email, targetType: "User", targetId: userId, oldValue: target.status, newValue: "ACTIVE",
+        timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  deactivateUser: (userId, reason) => {
+    const admin = get().user!;
+    const target = get().users.find((u) => u.id === userId);
+    if (!target) return;
+    set((s) => ({
+      users: s.users.map((u) => u.id === userId ? { ...u, active: false, status: "INACTIVE" as const } : u),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "User deactivated", entity: "User",
+        entityId: target.email, targetType: "User", targetId: userId, oldValue: target.status, newValue: "INACTIVE",
+        remarks: reason, timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  suspendUser: (userId, reason) => {
+    const admin = get().user!;
+    const target = get().users.find((u) => u.id === userId);
+    if (!target) return;
+    set((s) => ({
+      users: s.users.map((u) => u.id === userId ? { ...u, active: false, status: "SUSPENDED" as const } : u),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "User suspended", entity: "User",
+        entityId: target.email, targetType: "User", targetId: userId, oldValue: target.status, newValue: "SUSPENDED",
+        remarks: reason, timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  deleteUser: (userId) => {
+    const admin = get().user!;
+    const target = get().users.find((u) => u.id === userId);
+    if (!target) return;
+    set((s) => ({
+      users: s.users.filter((u) => u.id !== userId),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "User deleted", entity: "User",
+        entityId: target.email, targetType: "User", targetId: userId, oldValue: target.name, timestamp: nowISO(),
+        ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  // ---- ADMIN: ROLE & PERMISSIONS ----
+  updateRolePermission: (role, permission, enabled) => {
+    const admin = get().user!;
+    const roleObj = get().roles[role];
+    if (!roleObj) return;
+    const oldPerms = roleObj.permissions;
+    const newPerms = enabled ? Array.from(new Set([...oldPerms, permission])) : oldPerms.filter((p) => p !== permission);
+    set((s) => ({
+      roles: { ...s.roles, [role]: { ...s.roles[role], permissions: newPerms } },
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: `Permission ${enabled ? "enabled" : "disabled"}`,
+        entity: "Permission", entityId: `${role} → ${permission}`, targetType: "Permission", targetId: role,
+        oldValue: enabled ? "disabled" : "enabled", newValue: enabled ? "enabled" : "disabled", timestamp: nowISO(),
+        ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  // ---- ADMIN: CONFIGURATION ----
+  toggleApplicationType: (key, active) => {
+    const admin = get().user!;
+    set((s) => ({
+      applicationTypes: s.applicationTypes.map((t) => t.key === key ? { ...t, active } : t),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: `Application type ${active ? "activated" : "deactivated"}`,
+        entity: "ApplicationType", entityId: key, targetType: "ApplicationType", targetId: key,
+        oldValue: active ? "inactive" : "active", newValue: active ? "active" : "inactive", timestamp: nowISO(),
+        ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  updateApplicationType: (key, data) => {
+    const admin = get().user!;
+    set((s) => ({
+      applicationTypes: s.applicationTypes.map((t) => t.key === key ? { ...t, ...data } : t),
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "Application type updated", entity: "ApplicationType",
+        entityId: key, targetType: "ApplicationType", targetId: key, newValue: JSON.stringify(data), timestamp: nowISO(),
+        ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  updateSystemSettings: (data) => {
+    const admin = get().user!;
+    set((s) => ({
+      systemSettings: { ...s.systemSettings, ...data },
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "System settings updated", entity: "SystemSetting",
+        entityId: "global", targetType: "SystemSetting", targetId: "global", newValue: JSON.stringify(data), timestamp: nowISO(),
+        ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
+
+  updateWorkflowStage: (stageKey, data) => {
+    const admin = get().user!;
+    set((s) => ({
+      workflowStageOverrides: { ...s.workflowStageOverrides, [stageKey]: { ...s.workflowStageOverrides[stageKey], ...data } },
+      adminAuditLog: [{
+        id: genId("aaudit"), user: admin.name, role: admin.role, action: "Workflow stage updated", entity: "WorkflowStage",
+        entityId: stageKey, targetType: "WorkflowStage", targetId: stageKey, newValue: JSON.stringify(data),
+        remarks: "Applies to new workflow instances only.", timestamp: nowISO(), ip: "103.21.58.10", device: "Chrome / Windows",
+      }, ...s.adminAuditLog],
+    }));
+  },
 }));
 
 // ============================================================

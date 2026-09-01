@@ -85,6 +85,7 @@ const EXTRA_USERS: User[] = [
     avatarColor: "teal",
     department: "Department of Town Planning",
     active: true,
+    status: "ACTIVE",
     lastLogin: "2025-01-16T09:22:00",
   },
   {
@@ -99,6 +100,7 @@ const EXTRA_USERS: User[] = [
     avatarColor: "cyan",
     department: "Zonal Office — West",
     active: true,
+    status: "ACTIVE",
     lastLogin: "2025-01-15T18:10:00",
   },
   {
@@ -113,6 +115,7 @@ const EXTRA_USERS: User[] = [
     avatarColor: "rose",
     department: "Office of the Commissioner",
     active: true,
+    status: "ACTIVE",
     lastLogin: "2025-01-14T16:40:00",
   },
   {
@@ -127,6 +130,7 @@ const EXTRA_USERS: User[] = [
     avatarColor: "emerald",
     department: "Private Practice",
     active: false,
+    status: "INACTIVE",
     lastLogin: "2024-12-22T11:15:00",
   },
 ];

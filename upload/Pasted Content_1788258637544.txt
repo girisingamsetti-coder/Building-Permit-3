@@ -1,0 +1,1912 @@
+PERFORM A COMPLETE ADMINISTRATOR CRUD, CONFIGURATION PROPAGATION,
+ROLE-SPECIFIC VISIBILITY, DATA PERSISTENCE, AND REGRESSION AUDIT
+OF THE SYSTEM ADMINISTRATOR CONSOLE.
+
+IMPORTANT:
+
+This task is primarily for the SYSTEM ADMINISTRATOR / ADMIN CONSOLE.
+
+The main problem is:
+
+1. Edit buttons exist but are not actually working.
+2. Changes made through Edit are not reflected in the relevant user logins/modules.
+3. Add/create functionality is inconsistent.
+4. Delete actions are not working.
+5. Some configuration screens appear to change visually but do not change
+   the actual application behavior.
+6. Data is likely duplicated between admin modules and operational modules.
+
+Do NOT merely change button styling.
+
+Find and fix the ROOT CAUSE.
+
+==================================================
+1. COMPLETE ADMIN CRUD AUDIT
+==================================================
+
+Audit every System Administrator module that contains:
+
+Add
+Create
+Edit
+Update
+Delete
+Activate
+Deactivate
+Enable
+Disable
+Save
+Reset
+Assign
+Remove
+Configure
+
+Inspect:
+
+Users
+Roles & Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification / SMS
+System Settings
+Audit Logs where applicable
+Any additional configurable admin module
+
+For EACH module verify:
+
+Create
+Read
+Update
+Delete
+Activate/Deactivate
+Persistence
+Validation
+Authorization
+Audit logging
+Cross-module propagation
+
+==================================================
+2. NO UI-ONLY EDITS
+==================================================
+
+When the administrator clicks:
+
+Edit
+
+the actual data record must become editable.
+
+When:
+
+Save Changes
+
+is clicked:
+
+the underlying shared data must be updated.
+
+Do NOT simply update local component state.
+
+Do NOT make the modal close while the old data remains unchanged.
+
+==================================================
+3. SINGLE SOURCE OF TRUTH
+==================================================
+
+Create/use one authoritative data source for each entity.
+
+Entities:
+
+User
+Role
+Permission
+Application Type
+Fee Structure
+Workflow Stage
+Notification Template
+SMS Template
+System Setting
+
+Do NOT maintain separate copies such as:
+
+adminUsers
+dashboardUsers
+loginUsers
+
+adminRoles
+loginRoles
+
+adminFeeStructures
+feeStructures
+
+adminWorkflow
+applicationWorkflow
+
+etc.
+
+The admin console and operational modules must reference the same
+configuration source.
+
+==================================================
+4. USER EDIT FUNCTIONALITY
+==================================================
+
+Admin:
+
+Users
+→ Select User
+→ Edit
+
+The Edit form should allow appropriate fields such as:
+
+Name
+Email
+Mobile
+Role
+Status
+
+depending on current architecture.
+
+Click:
+
+Save Changes
+
+Expected:
+
+1. User record updates.
+2. User list updates.
+3. Audit log created.
+4. Shared user store updates.
+5. Login/session behavior reflects the change.
+6. Role permissions recalculate if role changed.
+
+==================================================
+5. USER ROLE CHANGE
+==================================================
+
+Example:
+
+User:
+Test User
+
+Current role:
+LTP
+
+Admin changes:
+
+LTP
+→ TPS
+
+Save.
+
+Expected:
+
+The next login/session for that user behaves as TPS.
+
+It must NOT still behave as LTP.
+
+Update:
+
+role
+effective permissions
+navigation
+route access
+available actions
+dashboard
+workflow permissions
+
+==================================================
+6. USER STATUS CHANGE
+==================================================
+
+Admin changes:
+
+ACTIVE
+→ INACTIVE
+
+Save.
+
+Expected:
+
+User cannot log in.
+
+Admin changes:
+
+INACTIVE
+→ ACTIVE
+
+Save.
+
+Expected:
+
+user can log in again.
+
+Do not implement this only visually.
+
+Actual login authorization must check current user status.
+
+==================================================
+7. DELETE USER
+==================================================
+
+If user deletion is supported:
+
+Click:
+
+Delete
+
+Show confirmation:
+
+Delete this user?
+
+This action cannot be undone.
+
+[Cancel] [Delete]
+
+After confirmation:
+
+remove/deactivate according to the project's data model.
+
+IMPORTANT:
+
+Do not physically destroy historical audit/workflow records associated with
+the user.
+
+If the user has historical activity, prefer soft-delete/deactivate unless
+the system specifically requires permanent deletion.
+
+After deletion/deactivation:
+
+User list updates.
+
+Login access updates.
+
+Permissions update.
+
+Audit event is created.
+
+==================================================
+8. ADD USER
+==================================================
+
+Admin:
+
+Users
+→ Add User
+
+Create new user.
+
+After Save:
+
+The user must appear in Users.
+
+If ACTIVE:
+
+the user should be able to log in using the existing demo authentication
+mechanism.
+
+The assigned role must immediately determine:
+
+sidebar
+dashboard
+permissions
+module access
+actions
+
+==================================================
+9. ROLES & PERMISSIONS — EDIT
+==================================================
+
+Admin:
+
+Roles & Permissions
+→ Select Role
+→ Edit
+
+Changing permission must update the central role-permission mapping.
+
+Example:
+
+TPS
+
+Permission:
+
+drawings.scrutinize
+
+Change:
+
+Enabled
+→ Disabled
+
+Save.
+
+Expected:
+
+TPS user can no longer perform scrutiny.
+
+The change must affect:
+
+sidebar visibility where appropriate
+route guards
+button visibility
+action authorization
+underlying service/action validation
+
+==================================================
+10. PERMISSION PROPAGATION
+==================================================
+
+Do NOT require manually editing every TPS user.
+
+Role permission changes must automatically affect users assigned to that role.
+
+Example:
+
+Role:
+TPS
+
+Permission:
+documents.verify
+
+ON
+
+All TPS users inherit this permission.
+
+Change:
+
+OFF
+
+All TPS users lose the permission.
+
+Use:
+
+Role Permissions
++
+User Overrides if supported
+
+to calculate effective permissions centrally.
+
+==================================================
+11. USER-SPECIFIC PERMISSION OVERRIDE
+==================================================
+
+If the existing architecture supports individual user overrides:
+
+calculate:
+
+Effective Permissions =
+Role Permissions
++
+Allowed Overrides
+-
+Denied Overrides
+
+Make this calculation central.
+
+Do not implement separate permission calculations in individual pages.
+
+==================================================
+12. DIRECT URL SECURITY
+==================================================
+
+Disabling a permission must not merely hide a button.
+
+Test direct route access.
+
+Example:
+
+TPS permission:
+
+drawings.scrutinize = OFF
+
+Try directly accessing the relevant route/action.
+
+Expected:
+
+Access denied
+
+or
+
+action unavailable
+
+Do not allow permission bypass through URL.
+
+==================================================
+13. APPLICATION TYPES — EDIT
+==================================================
+
+Admin:
+
+Application Types
+→ Edit
+
+Fields may include:
+
+Name
+Description
+Category
+Active/Inactive
+
+When saved:
+
+the Application Type list updates.
+
+If an Application Type is active:
+
+it appears in New Application.
+
+If deactivated:
+
+it must no longer appear for NEW applications.
+
+IMPORTANT:
+
+Do not alter historical applications that already use the deactivated
+application type.
+
+Historical records must remain intact.
+
+==================================================
+14. APPLICATION TYPES — ADD
+==================================================
+
+Admin can create a new application type.
+
+Example:
+
+Building Regularization
+
+After Save:
+
+New Application wizard should immediately show it for eligible new
+applications.
+
+No hardcoded list should override the configuration.
+
+==================================================
+15. APPLICATION TYPES — DELETE
+==================================================
+
+Before deleting:
+
+check whether existing applications use the type.
+
+If historical records depend on it:
+
+prefer:
+
+Deactivate
+
+instead of physical deletion.
+
+Show:
+
+This application type is used by existing applications and cannot be
+permanently deleted. Deactivate it instead?
+
+==================================================
+16. FEE STRUCTURES — EDIT
+==================================================
+
+Admin:
+
+Fee Structures
+→ Edit
+
+Changes must modify the central active configuration.
+
+Fee structure may contain:
+
+Name
+Application Type
+Property Type
+Effective From
+Effective To
+Components
+Rates
+Basis
+Status
+
+Save must persist the actual configuration.
+
+==================================================
+17. FEE STRUCTURE PROPAGATION
+==================================================
+
+When a fee structure is changed:
+
+NEW fee generation must use the updated configuration.
+
+Example:
+
+Old:
+
+Application Fee = ₹2,500
+
+Admin changes:
+
+Application Fee = ₹3,000
+
+A NEW application reaching fee generation must use:
+
+₹3,000
+
+Do not modify an already generated historical fee unless explicitly
+requested.
+
+==================================================
+18. FEE STRUCTURE VERSIONING
+==================================================
+
+Do not silently rewrite historical fee calculations.
+
+Use:
+
+Fee Structure Version
+
+Example:
+
+Building Permission Residential
+v1
+
+Building Permission Residential
+v2
+
+Existing fee generated under v1 remains linked to v1.
+
+New applications use active v2.
+
+==================================================
+19. FEE STRUCTURE DELETE
+==================================================
+
+Do not permanently delete a fee structure that is referenced by existing
+fees.
+
+Instead:
+
+Deactivate
+
+Preserve historical records.
+
+==================================================
+20. WORKFLOW STAGES — EDIT
+==================================================
+
+Admin:
+
+Workflow Stages
+→ Edit
+
+Editable configuration may include:
+
+Stage Name
+Role
+Sequence
+SLA
+Active/Inactive
+Allowed Actions
+Shortfall Allowed
+Fee Shortfall Allowed
+
+Save must update the central workflow configuration.
+
+==================================================
+21. WORKFLOW PROPAGATION
+==================================================
+
+NEW applications must use the currently active workflow configuration.
+
+Existing in-progress applications should NOT be corrupted.
+
+Use workflow versioning if required.
+
+Example:
+
+Workflow v1:
+LTP
+→ TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director
+→ Additional Commissioner
+→ Commissioner
+
+Admin creates Workflow v2.
+
+New applications:
+v2
+
+Existing applications:
+remain on v1 where appropriate.
+
+==================================================
+22. WORKFLOW VALIDATION
+==================================================
+
+Prevent saving invalid configuration.
+
+Examples:
+
+duplicate sequence
+missing role
+missing first stage
+missing final stage
+inactive required stage
+circular workflow
+
+Show clear validation.
+
+==================================================
+23. WORKFLOW STAGE DELETE
+==================================================
+
+Do not delete a workflow stage that existing applications depend on.
+
+Instead:
+
+Deactivate
+
+or:
+
+Create a new workflow version without that stage.
+
+Historical workflow history must remain intact.
+
+==================================================
+24. NOTIFICATION TEMPLATE — EDIT
+==================================================
+
+Admin:
+
+Notification / SMS
+→ Edit Template
+
+Update:
+
+Subject
+Message
+Active/Inactive
+Channel
+Event
+
+Save must persist.
+
+==================================================
+25. NOTIFICATION PROPAGATION
+==================================================
+
+When the event occurs:
+
+the latest active template should be used for NEW events.
+
+Example:
+
+Event:
+
+Payment Successful
+
+Admin changes template.
+
+Next successful payment should use the updated template.
+
+Existing historical notifications do not need to change.
+
+==================================================
+26. TEMPLATE VARIABLES
+==================================================
+
+Support:
+
+{{applicationNumber}}
+{{projectName}}
+{{applicantName}}
+{{currentStage}}
+{{status}}
+{{amount}}
+
+Validate variables.
+
+Do not allow broken/unrecognized variables to be saved without warning.
+
+==================================================
+27. SYSTEM SETTINGS — EDIT
+==================================================
+
+Admin:
+
+System Settings
+→ Edit
+
+Changes must update the central settings.
+
+Examples:
+
+Portal Name
+Portal Subtitle
+File Size Limit
+Allowed File Formats
+Date Format
+Currency
+Demo Mode
+Session Timeout
+Notification Preferences
+
+Do not hardcode the same setting in components.
+
+==================================================
+28. SETTINGS PROPAGATION
+==================================================
+
+Example:
+
+Admin changes:
+
+Portal Name
+
+from:
+
+LTP Approval
+
+to:
+
+LTP Approval Portal
+
+Expected:
+
+all applicable portal branding updates.
+
+Do not modify unrelated branding unless setting is intended to be global.
+
+==================================================
+29. FILE SIZE CONFIGURATION
+==================================================
+
+If Admin changes:
+
+Maximum Document Size:
+10 MB → 20 MB
+
+Document upload validation must reflect 20 MB for NEW uploads.
+
+Same principle for drawing file limits.
+
+==================================================
+30. ALLOWED FILE TYPES
+==================================================
+
+If Admin configures:
+
+Documents:
+PDF, JPG, PNG
+
+the Documents module must use the same configuration.
+
+Do not hardcode another list in the upload component.
+
+==================================================
+31. DELETE / DEACTIVATE RULE
+==================================================
+
+Before ANY destructive operation:
+
+determine whether the record has historical dependencies.
+
+If yes:
+
+prefer soft-delete/deactivate.
+
+If no:
+
+allow deletion where appropriate.
+
+Always confirm destructive actions.
+
+==================================================
+32. DELETE CONFIRMATION
+==================================================
+
+Use a consistent confirmation modal.
+
+Example:
+
+Delete Application Type?
+
+Are you sure you want to delete "Demolition Permit"?
+
+[Cancel]
+[Delete]
+
+Use warning styling.
+
+Do NOT delete immediately after clicking the icon.
+
+==================================================
+33. DELETE ERROR HANDLING
+==================================================
+
+If delete is prevented because of dependencies:
+
+show:
+
+Cannot delete this configuration because it is being used by existing
+records.
+
+Use:
+
+Deactivate
+
+where appropriate.
+
+==================================================
+34. SAVE VALIDATION
+==================================================
+
+Every Edit/Create form must validate:
+
+required fields
+duplicate values
+invalid formats
+invalid numbers
+invalid sequences
+missing relationships
+
+Do not allow invalid configuration to be saved.
+
+==================================================
+35. SAVE STATE
+==================================================
+
+When saving:
+
+button:
+
+Saving...
+
+Disable duplicate clicks.
+
+After success:
+
+Changes saved successfully.
+
+After failure:
+
+Unable to save changes.
+
+The form should remain open so the user can correct the issue.
+
+==================================================
+36. CANCEL
+==================================================
+
+Cancel must discard unsaved changes.
+
+Do not accidentally persist edits before Save.
+
+==================================================
+37. UNSAVED CHANGES
+==================================================
+
+If a form has changed and the administrator clicks Close:
+
+show:
+
+Discard unsaved changes?
+
+[Continue Editing]
+[Discard]
+
+Use this only where useful.
+
+==================================================
+38. EDIT MODALS
+==================================================
+
+All Admin edit/create modals must have:
+
+consistent width
+consistent padding
+proper labels
+aligned fields
+scrollable content
+fixed footer
+Save / Cancel aligned
+no overflow
+no clipped fields
+
+==================================================
+39. ADMIN TABLE ACTIONS
+==================================================
+
+Every table action must work.
+
+For example:
+
+View
+Edit
+Delete
+Activate
+Deactivate
+Assign
+
+must each perform the intended action.
+
+Do NOT leave icons as decorative elements.
+
+==================================================
+40. ACTION FEEDBACK
+==================================================
+
+After:
+
+Edit
+Delete
+Add
+Activate
+Deactivate
+Assign
+
+show a clear toast/banner.
+
+Examples:
+
+User updated successfully.
+
+Role permissions updated successfully.
+
+Application type deactivated.
+
+Fee structure updated.
+
+Workflow stage saved.
+
+==================================================
+41. AUDIT LOGGING
+==================================================
+
+Every admin mutation MUST create an audit event.
+
+Events:
+
+USER_CREATED
+USER_UPDATED
+USER_DEACTIVATED
+USER_REACTIVATED
+ROLE_UPDATED
+PERMISSION_CHANGED
+APPLICATION_TYPE_CREATED
+APPLICATION_TYPE_UPDATED
+APPLICATION_TYPE_DEACTIVATED
+FEE_STRUCTURE_CREATED
+FEE_STRUCTURE_UPDATED
+FEE_STRUCTURE_DEACTIVATED
+WORKFLOW_UPDATED
+NOTIFICATION_TEMPLATE_UPDATED
+SYSTEM_SETTING_UPDATED
+
+==================================================
+42. AUDIT DETAILS
+==================================================
+
+Store:
+
+auditId
+actorUserId
+actorRole
+action
+targetType
+targetId
+oldValue
+newValue
+timestamp
+
+Use safe structured values where possible.
+
+Do not store passwords/secrets.
+
+==================================================
+43. DATA PROPAGATION MATRIX
+==================================================
+
+For each admin configuration verify:
+
+ADMIN CHANGE
+↓
+CENTRAL DATA
+↓
+AFFECTED MODULE
+↓
+AFFECTED USER ROLE
+↓
+VISIBLE RESULT
+
+Examples:
+
+Permission change
+→ RBAC store
+→ TPS
+→ TPS user
+→ button/action changes
+
+Application Type change
+→ configuration store
+→ New Application
+→ LTP
+→ option changes
+
+Fee Structure change
+→ fee config
+→ Fee Generation
+→ LTP
+→ calculated amount changes
+
+Workflow change
+→ workflow config
+→ newly created applications
+→ role queues
+→ sequence changes
+
+Notification change
+→ notification config
+→ event
+→ relevant users
+→ message changes
+
+System Setting
+→ settings store
+→ configured modules
+→ all applicable roles
+→ setting reflected
+
+==================================================
+44. CROSS-MODULE REFRESH
+==================================================
+
+After an admin change:
+
+do not require a full page refresh if shared state can update immediately.
+
+All relevant consumers should react to the change.
+
+If persistence requires reload:
+
+verify that after reload the new configuration still exists.
+
+==================================================
+45. PERSISTENCE
+==================================================
+
+Audit whether Admin changes currently live only in:
+
+component state
+modal state
+temporary arrays
+
+Move them to the existing authoritative persistence mechanism.
+
+For demo mode, use the project's existing persistent store/local storage
+approach where appropriate.
+
+For production architecture, use the backend/database.
+
+Do NOT create a second database.
+
+==================================================
+46. ADMIN USER DATA TEST
+==================================================
+
+Create:
+
+Test TPS User
+
+Role:
+TPS
+
+Then edit:
+
+Name
+Role
+Status
+
+Verify changes appear everywhere.
+
+==================================================
+47. ADMIN PERMISSION TEST
+==================================================
+
+Disable:
+
+TPS technical scrutiny
+
+Verify TPS cannot perform it.
+
+Re-enable.
+
+Verify TPS can perform it.
+
+==================================================
+48. APPLICATION TYPE TEST
+==================================================
+
+Create:
+
+Building Regularization
+
+Verify it appears in New Application.
+
+Deactivate it.
+
+Verify it disappears from NEW Application.
+
+Historical applications remain intact.
+
+==================================================
+49. FEE STRUCTURE TEST
+==================================================
+
+Edit a fee component.
+
+Generate a NEW fee.
+
+Verify new value is used.
+
+Open an OLD fee.
+
+Verify historical value remains correct.
+
+==================================================
+50. WORKFLOW TEST
+==================================================
+
+Change workflow configuration for NEW applications.
+
+Create new application.
+
+Verify it follows the configured workflow.
+
+Check an existing in-progress application.
+
+Verify it is not corrupted.
+
+==================================================
+51. NOTIFICATION TEST
+==================================================
+
+Edit:
+
+Payment Successful
+
+template.
+
+Trigger demo payment success.
+
+Verify the new template is used.
+
+==================================================
+52. SYSTEM SETTINGS TEST
+==================================================
+
+Edit a setting.
+
+Navigate to affected module.
+
+Verify change is reflected.
+
+Refresh browser.
+
+Verify change persists.
+
+==================================================
+53. DELETE TEST
+==================================================
+
+Create a disposable demo record.
+
+Delete it.
+
+Verify:
+
+record disappears
+search no longer finds it
+related list updates
+audit event created
+
+Then test a record with dependencies.
+
+Expected:
+
+delete blocked
+
+or:
+
+deactivate offered.
+
+==================================================
+54. ACTIVATION TEST
+==================================================
+
+Deactivate:
+
+Application Type
+Fee Structure
+User
+
+Verify each affected system behavior.
+
+Reactivate.
+
+Verify behavior returns.
+
+==================================================
+55. SEARCH AFTER EDIT
+==================================================
+
+Edit a record.
+
+Search for it immediately.
+
+Expected:
+
+updated record returned.
+
+==================================================
+56. FILTER AFTER EDIT
+==================================================
+
+Change status/role/category.
+
+Apply filter.
+
+Expected:
+
+record appears under new filter.
+
+==================================================
+57. SORT AFTER EDIT
+==================================================
+
+Change:
+
+UpdatedAt
+
+Expected:
+
+sorting reflects the new updated date.
+
+==================================================
+58. NO STALE UI
+==================================================
+
+After Save, there must be no stale cards/tables.
+
+All visible admin lists must immediately reflect the saved data.
+
+==================================================
+59. NO DUPLICATE RECORDS
+==================================================
+
+A double click on Save must NOT create duplicate records.
+
+Disable button while saving.
+
+==================================================
+60. NO ID COLLISIONS
+==================================================
+
+Every new record must have unique:
+
+id
+
+Do not generate duplicate IDs.
+
+==================================================
+61. NO ARRAY-INDEX IDENTITY
+==================================================
+
+Do not identify records by table row index.
+
+Use:
+
+userId
+roleId
+permissionId
+applicationTypeId
+feeStructureId
+workflowStageId
+templateId
+settingId
+
+==================================================
+62. ROLE EFFECTIVE PERMISSION TEST
+==================================================
+
+For every role:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+verify:
+
+effective permissions
+
+after an Admin change.
+
+==================================================
+63. ADMIN CANNOT BREAK LIVE WORKFLOW
+==================================================
+
+Configuration changes must be validated before activation.
+
+Do not allow an invalid configuration to make the whole application
+workflow unusable.
+
+==================================================
+64. ERROR RECOVERY
+==================================================
+
+If a configuration save fails:
+
+old valid configuration remains active.
+
+Do NOT partially apply changes.
+
+==================================================
+65. VERSIONING
+==================================================
+
+Where configuration affects historical business records:
+
+use versioning.
+
+Important entities:
+
+Fee Structure
+Workflow
+
+Do not rewrite historical results.
+
+==================================================
+66. CONFIGURATION EFFECTIVE DATE
+==================================================
+
+For Fee Structures where applicable:
+
+support:
+
+Effective From
+
+New records use active structure based on effective date.
+
+Existing generated fees remain unchanged.
+
+==================================================
+67. ROLE ASSIGNMENT EFFECTIVE DATE
+==================================================
+
+User role changes should affect that user's future login/session.
+
+Historical audit events should preserve the previous role.
+
+==================================================
+68. ADMIN DASHBOARD
+==================================================
+
+Update Admin Dashboard counters from the actual data.
+
+For example:
+
+Total Users
+Active Users
+Roles
+Application Types
+Fee Structures
+Workflow Stages
+Pending Access
+Audit Events Today
+
+No hardcoded counts.
+
+==================================================
+69. CONFIGURATION OVERVIEW
+==================================================
+
+Admin dashboard cards such as:
+
+Users
+Roles & Permissions
+Application Types
+Fee Structures
+Workflow Stages
+Notification/SMS
+Audit Logs
+System Settings
+
+must show actual counts.
+
+Clicking each card opens the correct module.
+
+==================================================
+70. CARD ALIGNMENT
+==================================================
+
+Ensure all Admin configuration cards:
+
+same width
+same height where appropriate
+same padding
+same gap
+no overlap
+no clipping
+
+Use CSS Grid.
+
+Do NOT use absolute positioning.
+
+==================================================
+71. ADMIN TABLE ALIGNMENT
+==================================================
+
+All Admin tables:
+
+consistent row height
+consistent cell padding
+correct column width
+aligned action buttons
+proper badge alignment
+no clipped values
+
+==================================================
+72. ADMIN FORM ALIGNMENT
+==================================================
+
+All Admin forms:
+
+2-column layout where appropriate
+
+full-width fields inside columns
+
+labels aligned
+
+inputs equal height
+
+errors directly beneath fields
+
+buttons aligned in footer
+
+==================================================
+73. RESPONSIVE ADMIN UI
+==================================================
+
+Test:
+
+1920
+1600
+1440
+1366
+1280
+1024
+768
+480
+390
+
+Ensure:
+
+no horizontal overflow
+no card overlap
+no modal clipping
+no table breakage
+no hidden buttons
+no unusable dropdowns
+
+==================================================
+74. SECURITY
+==================================================
+
+Only authorized administrators can:
+
+create users
+edit users
+delete/deactivate users
+edit roles
+edit permissions
+edit fee structures
+edit workflow
+edit settings
+
+Do not rely only on hiding controls.
+
+Protect actual actions/routes.
+
+==================================================
+75. FINAL CRUD MATRIX
+==================================================
+
+Test each module:
+
+USERS
+Create ✅
+Read ✅
+Update ✅
+Deactivate ✅
+Reactivate ✅
+Delete/Soft Delete ✅
+
+ROLES & PERMISSIONS
+Read ✅
+Update ✅
+Grant ✅
+Revoke ✅
+Propagate ✅
+
+APPLICATION TYPES
+Create ✅
+Read ✅
+Update ✅
+Activate ✅
+Deactivate ✅
+Delete/Soft Delete ✅
+
+FEE STRUCTURES
+Create ✅
+Read ✅
+Update ✅
+Activate ✅
+Deactivate ✅
+Versioning ✅
+
+WORKFLOW STAGES
+Create/Configure ✅
+Read ✅
+Update ✅
+Activate ✅
+Deactivate ✅
+Validation ✅
+Versioning ✅
+
+NOTIFICATION/SMS
+Create/Edit ✅
+Read ✅
+Activate/Deactivate ✅
+Test ✅
+
+SYSTEM SETTINGS
+Read ✅
+Update ✅
+Persist ✅
+Propagate ✅
+
+AUDIT
+Create automatically ✅
+Read ✅
+Filter ✅
+Search ✅
+
+==================================================
+76. FINAL CROSS-LOGIN TEST
+==================================================
+
+TEST USER 1:
+
+Admin changes TPS permission.
+
+Login as TPS.
+
+Verify behavior.
+
+TEST USER 2:
+
+Admin changes LTP application type availability.
+
+Login as LTP.
+
+Open New Application.
+
+Verify updated application type list.
+
+TEST USER 3:
+
+Admin changes fee structure.
+
+Login as LTP.
+
+Complete an application until fee generation.
+
+Verify new fee structure is used.
+
+TEST USER 4:
+
+Admin changes workflow.
+
+Create a NEW application.
+
+Verify new workflow.
+
+TEST USER 5:
+
+Admin deactivates user.
+
+Attempt login.
+
+Verify access denied.
+
+==================================================
+77. FINAL DELETE TEST
+==================================================
+
+For every admin module with Delete:
+
+1. Create demo record.
+2. Edit it.
+3. Verify edit.
+4. Delete it.
+5. Verify removal.
+6. Verify audit log.
+7. Verify affected modules.
+8. Verify search no longer returns record.
+
+For records with historical dependencies:
+
+verify deletion is safely blocked or replaced by deactivation.
+
+==================================================
+78. FINAL EDIT TEST
+==================================================
+
+For EVERY module containing Edit:
+
+1. Open Edit.
+2. Change one field.
+3. Save.
+4. Close.
+5. Reopen.
+6. Verify change persisted.
+7. Refresh browser.
+8. Verify change still exists.
+9. Open affected user/module.
+10. Verify propagation.
+
+==================================================
+79. FINAL ADD TEST
+==================================================
+
+For EVERY module supporting Add/Create:
+
+Create record.
+
+Verify:
+
+list
+search
+filter
+related module
+affected role
+audit
+
+==================================================
+80. FINAL CONFIGURATION TEST
+==================================================
+
+Make one controlled change to each configurable area:
+
+User
+Role
+Permission
+Application Type
+Fee Structure
+Workflow Stage
+Notification Template
+System Setting
+
+Verify each change reaches the intended consumer.
+
+==================================================
+81. FINAL CODE AUDIT
+==================================================
+
+Search the codebase for:
+
+hardcoded users
+hardcoded roles
+hardcoded permissions
+hardcoded application types
+hardcoded fee structures
+hardcoded workflow stages
+hardcoded notification templates
+hardcoded system settings
+
+Replace only the configuration that should be dynamically managed.
+
+Do NOT unnecessarily remove demo seed data.
+
+==================================================
+82. FINAL ARCHITECTURE RULE
+==================================================
+
+The system should follow:
+
+ADMIN CONFIGURATION
+        ↓
+CENTRAL DATA / CONFIG STORE
+        ↓
+EFFECTIVE CONFIGURATION
+        ↓
+ROLE / MODULE CONSUMERS
+        ↓
+USER INTERFACE + ACTION AUTHORIZATION
+
+NOT:
+
+ADMIN PAGE
+        ↓
+LOCAL STATE ONLY
+
+==================================================
+83. FINAL REGRESSION
+==================================================
+
+After all changes verify:
+
+Admin dashboard
+Users
+Roles
+Permissions
+Application Types
+Fee Structures
+Workflow
+Notification/SMS
+System Settings
+Audit Logs
+
+Then verify affected operational modules:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+==================================================
+84. FINAL BUILD
+==================================================
+
+Run:
+
+type check
+lint
+build
+
+Check:
+
+browser console
+server console
+runtime errors
+broken routes
+
+Expected:
+
+0 critical errors.
+
+==================================================
+85. FINAL REPORT
+==================================================
+
+Return a concise report:
+
+Modules audited:
+<number>
+
+Edit actions found:
+<number>
+
+Edit actions fixed:
+<number>
+
+Create actions tested:
+<number>
+
+Delete actions tested:
+<number>
+
+Delete/deactivation issues fixed:
+<number>
+
+Permission propagation issues fixed:
+<number>
+
+Cross-login propagation tests:
+<number passed>
+
+Workflow configuration tests:
+<number passed>
+
+Fee structure propagation tests:
+<number passed>
+
+Application type propagation tests:
+<number passed>
+
+Notification propagation tests:
+<number passed>
+
+System settings propagation tests:
+<number passed>
+
+Audit events verified:
+<number>
+
+Console errors:
+<number>
+
+Type Check:
+PASS / FAIL
+
+Lint:
+PASS / FAIL
+
+Build:
+PASS / FAIL
+
+==================================================
+FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The Admin Console is NOT complete unless:
+
+1. Every Edit option that is supposed to work actually works.
+2. Every Save operation persists the change.
+3. Every Add/Create option works.
+4. Every Delete option either safely deletes or correctly blocks/deactivates.
+5. Permission changes affect real user behavior.
+6. Role changes affect real user behavior.
+7. Application Type changes affect NEW Application creation.
+8. Fee Structure changes affect NEW fee generation.
+9. Workflow changes affect NEW workflow instances.
+10. Notification changes affect NEW events.
+11. System Setting changes affect intended consumers.
+12. Existing historical records remain consistent.
+13. Deleted/deactivated records do not unexpectedly break history.
+14. Every admin mutation is audited.
+15. No configuration is controlled only by local component state.
+16. No duplicate configuration datasets exist.
+17. No UI-only permissions exist.
+18. Direct route/action authorization works.
+19. Cross-login testing passes.
+20. No stale UI after changes.
+21. No duplicate records on repeated Save.
+22. Cards and tables remain properly aligned.
+23. No excessive layout overflow is introduced.
+24. Lint passes.
+25. Build passes.
+26. No critical console/runtime errors exist.
+
+FINAL OBJECTIVE:
+
+Make the System Administrator Console a REAL configuration and management
+layer for the LTP Approval / Building Permit Management System.
+
+When an Administrator edits something, the change must actually exist.
+
+When an Administrator deletes/deactivates something, the system must
+actually respond.
+
+When an Administrator changes configuration, the appropriate user login
+and module must reflect the change.
+
+Do not implement fake CRUD.
+
+Do not implement UI-only configuration.
+
+Do not create duplicate datasets.
+
+Fix the underlying data flow and propagation architecture.

@@ -1,6 +1,8 @@
 import type {
   Application,
   ApplicationStatus,
+  Permission,
+  Role,
   RoleKey,
   User,
   WorkflowAction,
@@ -10,13 +12,33 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 
 // ============================================================
 // RBAC — Role-Based Access Control
-// Single source of truth for what each role can see and do.
 // ============================================================
 
 export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "ADMIN" {
   if (role === "ADMIN") return "ADMIN";
   if (role === "LTP") return "LTP";
   return "OFFICER";
+}
+
+// Centralized permission check — reads from the store's mutable roles record.
+export function getEffectivePermissions(user: User, roles: Record<RoleKey, Role>): Set<Permission> {
+  const rolePerms = new Set<Permission>(roles[user.role]?.permissions ?? []);
+  const overrides = user.permissionOverrides ?? {};
+  (overrides.allowed ?? []).forEach((p) => rolePerms.add(p));
+  (overrides.denied ?? []).forEach((p) => rolePerms.delete(p));
+  return rolePerms;
+}
+
+export function hasPermission(user: User, permission: Permission, roles: Record<RoleKey, Role>): boolean {
+  return getEffectivePermissions(user, roles).has(permission);
+}
+
+export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
+  const adminViews = ["admin-dashboard", "admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates", "admin-audit", "admin-settings"];
+  if (adminViews.includes(view)) {
+    return user.role === "ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
+  }
+  return true;
 }
 
 // Which roles can act on a given stage (some stages accept multiple roles)

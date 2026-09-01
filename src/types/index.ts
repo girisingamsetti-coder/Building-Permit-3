@@ -30,9 +30,12 @@ export type Permission =
   | "application:view_own"
   | "application:view_all"
   | "drawing:upload"
+  | "drawing:view"
   | "drawing:scrutinize"
   | "document:upload"
+  | "document:view"
   | "document:verify"
+  | "document:reject"
   | "fee:calculate"
   | "fee:manage"
   | "payment:initiate"
@@ -42,6 +45,7 @@ export type Permission =
   | "workflow:return"
   | "workflow:reject"
   | "shortfall:raise"
+  | "shortfall:view"
   | "shortfall:resolve"
   | "remarks:add"
   | "user:manage"
@@ -51,6 +55,8 @@ export type Permission =
   | "notifications:manage";
 
 // ---------- Users ----------
+export type UserStatus = "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
+
 export interface User {
   id: string;
   name: string;
@@ -64,7 +70,10 @@ export interface User {
   avatarColor: string;
   department?: string;
   active: boolean;
+  status: UserStatus;
   lastLogin?: string;
+  createdAt?: string;
+  permissionOverrides?: { allowed?: Permission[]; denied?: Permission[] };
 }
 
 // ---------- Applications ----------
@@ -433,6 +442,36 @@ export interface AuditEntry {
   remarks?: string;
   ip?: string;
   device?: string;
+}
+
+// ---------- Admin Audit ----------
+export interface AdminAuditEntry extends AuditEntry {
+  targetType: string;
+  targetId: string;
+  oldValue?: string;
+  newValue?: string;
+}
+
+// ---------- Application Type Configuration ----------
+export interface ApplicationTypeConfig {
+  key: ApplicationType;
+  name: string;
+  description: string;
+  active: boolean;
+  typicalDuration: string;
+}
+
+// ---------- System Settings ----------
+export interface SystemSettings {
+  portalName: string;
+  portalSubtitle: string;
+  dateFormat: string;
+  currency: string;
+  maxFileSizeMB: number;
+  allowedDrawingFormats: string[];
+  allowedDocumentFormats: string[];
+  sessionTimeoutMinutes: number;
+  demoMode: boolean;
 }
 
 export interface Remark {
