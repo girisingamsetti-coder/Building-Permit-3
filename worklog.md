@@ -48,3 +48,30 @@ Stage Summary:
 - Clean, minimal, government digital-service design (deep green + subtle saffron accent, no excessive gradients/graphics)
 - Compact demo role dropdown replaces the previous 6 large role cards
 - All existing functionality preserved: auth, demo roles, forgot password, OTP, routing
+
+---
+Task ID: 24
+Agent: main
+Task: Fix the development server permanently (re-application after container restart reverted the previous supervisor fix).
+
+DIAGNOSIS:
+- The supervising .zscripts/dev.sh written in Task 16 was reverted to the old unsupervised version by a container restart (the platform's /start.sh restores project files from a build archive at boot).
+- The old dev.sh has no crash-restart, no flock single-instance, and a `trap cleanup EXIT` that kills the server on script exit.
+- Current state: supervisor DEAD, next dev alive but hung (HTTP 000 — listening on 3000 but not serving). Root cause: supervisor was OOM-killed during a heavy task, leaving an orphaned/hung dev server with nothing to restart it.
+
+FIX (re-applied):
+1. .zscripts/dev.sh — rewrote as supervising dev script (flock single-instance, restart-on-crash loop, idempotent bun install + db:push, mini-services, no trap-kills-server, logs to dev.log).
+2. next.config.ts — re-added `allowedDevOrigins: ["localhost", "127.0.0.1"]` (also lost in the restart).
+3. DEVELOPMENT.md — re-created with authoritative server configuration.
+4. Launched the supervisor via `setsid --fork` (re-parents to PID 1, survives command/task end — proven in Task 16).
+
+VERIFICATION:
+- Server starts: HTTP 200 on 0.0.0.0:3000 ✓
+- Cross-command persistence: supervisor + server ALIVE in subsequent Bash commands ✓
+- Crash recovery: SIGKILL'd the server → supervisor auto-restarted it in ~9s → HTTP 200 ✓
+- App renders: browser shows login/dashboard ✓
+- Post-config-change: HMR picks up next.config.ts change, server stays alive ✓
+- Lint: 0 errors/0 warnings ✓
+
+Root cause of previous issue: supervisor script reverted by container restart → no supervision → hung server with no recovery.
+Files changed: .zscripts/dev.sh, next.config.ts, DEVELOPMENT.md.
