@@ -279,30 +279,11 @@ function makeDocuments(stage: "early" | "partial" | "verified" | "shortfall"): D
   return base;
 }
 
-function makeFee(builtUpArea: number, docCount: number, paid: boolean, totalOverride?: number) {
-  if (totalOverride) {
-    // Create a fee with a specific total amount
-    const appFee: ApplicationFee = {
-      feeStructureId: "fs-bp-res-2026",
-      feeStructureName: "Building Permission — Residential (2026)",
-      generatedAt: "2026-08-20T18:00:00",
-      lineItems: [
-        { componentCode: "APP_FEE", name: "Application Fee", description: "Base processing fee", basis: "Fixed", rate: 2500, quantity: 1, amount: 2500 },
-        { componentCode: "SCRUTINY_FEE", name: "Scrutiny Fee", description: "Built-up area × rate", basis: "Area based", rate: 45, quantity: builtUpArea, amount: builtUpArea * 45 },
-        { componentCode: "DEV_FEE", name: "Development Fee", description: "Built-up area × rate", basis: "Area based", rate: 120, quantity: builtUpArea, amount: builtUpArea * 120 },
-        { componentCode: "PROC_FEE", name: "Processing Fee", description: "Administrative", basis: "Fixed", rate: 1500, quantity: 1, amount: 1500 },
-        { componentCode: "DOC_FEE", name: "Document Verification Fee", description: "Per document", basis: "Fixed", rate: 800, quantity: docCount, amount: 800 * docCount },
-      ],
-      subtotal: 0,
-      gst: 0,
-      total: totalOverride,
-      paidAmount: paid ? totalOverride : 0,
-      outstanding: paid ? 0 : totalOverride,
-      currency: "INR",
-    };
-    appFee.subtotal = appFee.lineItems.reduce((s, li) => s + li.amount, 0);
-    return appFee;
-  }
+function makeFee(builtUpArea: number, docCount: number, paid: boolean, _totalOverride?: number) {
+  // All fees are computed via the centralized fee-service engine so that
+  // subtotal + tax = total is ALWAYS mathematically consistent.
+  // The _totalOverride parameter is retained for call-site compatibility but
+  // intentionally unused — hardcoded totals caused line-item/total mismatches.
   const result = feeService.calculate({
     applicationType: "BUILDING_PERMISSION",
     propertyType: "RESIDENTIAL",
@@ -765,6 +746,23 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-27", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 ];
+
+// ============================================================
+// FEE ↔ PAYMENT CONSISTENCY
+// Ensure Payment.amount = Fee.total and Fee.paidAmount/outstanding
+// are mathematically consistent for all seed applications.
+// subtotal + totalGST = total, total - paid = outstanding.
+// ============================================================
+SEED_APPLICATIONS.forEach((app) => {
+  if (!app.fee) return;
+  if (app.payment && app.payment.status === "SUCCESS") {
+    app.fee.paidAmount = app.fee.total;
+    app.fee.outstanding = 0;
+    app.payment.amount = app.fee.total;
+  } else {
+    app.fee.outstanding = Math.max(0, app.fee.total - (app.fee.paidAmount ?? 0));
+  }
+});
 
 // Seed notifications
 export const SEED_NOTIFICATIONS: NotificationRecord[] = [

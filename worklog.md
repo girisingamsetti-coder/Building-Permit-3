@@ -532,3 +532,81 @@ Stage Summary:
 - Store-driven (no UI-only state): reads from `useVisibleApplications()`; navigation via `openApplication`/`navigate`; New Application via `createApplication` in the modal — all persistence stays in the Zustand store, consistent with the admin-CRUD rigor from the pasted spec ("no UI-only configuration", "single source of truth").
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
 - Build not run per sandbox rule ("never use `bun run build`"); equivalent verification done via tsc + lint + agent-browser end-to-end test.
+
+---
+Task ID: 13
+Agent: main
+Task: Complete functional, data-consistency, calculation, GST, navigation, and UI/UX audit of the Fees module. Fix GST showing ₹0, configurable tax model, correct calculation, clean UI, perfect alignment, application-specific fees. Test fee calc, GST breakdown, payment flow, application switch, back navigation, responsive. Run lint + tsc.
+
+Work Log:
+1. Inspected existing Fees module: `ltp-fees.tsx` (802 lines, 3 exports: LtpFees, LtpPayment, LtpReceipt), `fee-service.ts`, `fee-config.ts`, `payment-service.ts`, types, store `generateFee`/`initiatePayment` actions, mock-data `makeFee`/`makePayment`/`buildApp` functions.
+2. ROOT CAUSE found: `fee-service.ts` line 87 hardcoded `const gst = 0; // government fees — no GST`. No configurable tax model existed. ApplicationFee type had only `gst` field (no cgst/sgst/igst breakdown). FeeStructure had no taxConfig.
+3. Types (`src/types/index.ts`):
+   - Added `TaxType = "CGST_SGST" | "IGST" | "ZERO_TAX"`
+   - Added `TaxConfig = { taxApplicable, taxType, cgstRate?, sgstRate?, igstRate?, label? }`
+   - Extended `FeeStructure` with `propertyType?`, `effectiveTo?`, `version?`, `taxConfig?`
+   - Extended `FeeLineItem` with `base?`, `ratePercent?` (for percentage-based items like labour cess)
+   - Extended `ApplicationFee` with `feeStructureVersion?`, `taxableAmount`, `taxApplicable`, `taxType`, `cgst`, `sgst`, `igst`, `cess`, `totalGST`, `taxConfig?` (snapshot for historical immutability). Kept legacy `gst` field = totalGST for backward compat.
+4. Fee config (`src/data/fee-config.ts`):
+   - Added `DEMO_TAX_CGST_SGST` (CGST 9% + AP SGST 9% — demo intra-state AP scenario per spec section 11)
+   - Added `DEMO_TAX_IGST` (IGST 18% — interstate)
+   - Added `DEMO_TAX_NOT_APPLICABLE` (tax-exempt)
+   - Attached `propertyType`, `version: "2026 v1"`, `taxConfig` to each FeeStructure
+   - Residential → CGST_SGST 9%/9%, Commercial → IGST 18%, Layout → ZERO_TAX
+5. Fee service (`src/services/fee-service.ts`) — FULL REWRITE of calculation engine:
+   - `findStructure` now matches BOTH applicationType + propertyType (falls back to type-only)
+   - `calculate()` returns `taxableAmount`, `cgst`, `sgst`, `igst`, `cess`, `totalGST`, `taxApplicable`, `taxType`, `taxConfig`
+   - Tax computed from `structure.taxConfig`: CGST_SGST → cgst = round(taxable * cgstRate / 100), sgst similarly; IGST → igst = round(taxable * igstRate / 100); ZERO_TAX → all 0
+   - Labour Cess computed as 1% of DEV_FEE with `base` and `ratePercent` fields for proper display
+   - Consistent rounding: `Math.round()` on each line-item amount and each tax component
+   - `toApplicationFee()` snapshots the taxConfig into the ApplicationFee (historical immutability — admin tax changes don't alter existing fees)
+6. Mock-data consistency fix (`src/data/mock-data.ts`):
+   - `makeFee`: removed the `totalOverride` branch that created inconsistent fees (line items didn't sum to override total). All fees now computed via the service engine.
+   - Added `SEED_APPLICATIONS.forEach` sync step: for paid apps, syncs `payment.amount = fee.total`, `fee.paidAmount = fee.total`, `fee.outstanding = 0`. For pending apps, ensures `outstanding = total - paidAmount`. This fixes the receipt showing wrong amounts (Payment.amount was hardcoded and didn't match fee total).
+7. UI (`src/components/ltp/ltp-fees.tsx`) — COMPLETE REWRITE (967 lines):
+   - **ApplicationContextCard**: prominent card showing all 7 fields (Application Number, Project, Applicant, Application Type, Property Type, Current Stage, Status) in a responsive 2/4/7-column grid. Shown once at top.
+   - **Fee Breakdown card** (72% width on desktop): invoice header band (Fee Breakdown + structure name + generated date + payment status badge), 4-column invoice meta row (App No, Fee Structure, Generated On, Status), line-item table with balanced columns (# 5%, Component 32%, Basis 18%, Rate 14%, Qty 11%, Amount 20%), bold `font-bold` + `border-b-2` headers, 52px row height, right-aligned numbers. Summary at bottom: Subtotal, Labour Cess included note, Taxable Amount, CGST @ 9% / AP SGST @ 9% / Total GST (or IGST @ 18% or "Not Applicable"), Total Payable (strong typography), Paid, Outstanding.
+   - **Payment Status card** (28% width): compact — status badge, Outstanding Amount (large ₹), Total Fee + Paid rows, Pay Now button (or "Payment Successful" + View Receipt), demo mode note.
+   - **Fee Structure card** (28% width): compact key-value layout — Structure, Application Type, Property Type, Version, Built-up Area, Effective From, Tax (CGST 9% + AP SGST 9% or "Not Applicable" badge).
+   - **Layout**: `xl:grid-cols-[72fr_28fr]` for desktop 72/28 split, `grid-cols-1` for tablet/mobile (cards stack: App Context → Fee Breakdown → Payment Status → Fee Structure).
+   - **Tax display**: `renderTaxLines()` helper renders CGST/SGST/Total GST for CGST_SGST, IGST for IGST, "Not Applicable" for ZERO_TAX. Never shows misleading ₹0 without context.
+   - **Labour Cess**: displayed as rate "1%" (not ₹1), qty = base amount (1,17,600), amount = ₹1,176. Description shows "1% of Development Fee (statutory)".
+   - **Payment flow** (LtpPayment): updated Payment Summary to show CGST/SGST breakdown. Payment status states: PENDING, PROCESSING, SUCCESS, FAILED, PARTIALLY_PAID.
+   - **Receipt** (LtpReceipt): updated to show CGST @ 9% / AP SGST @ 9% breakdown (or IGST or "Not Applicable") instead of just "GST ₹0".
+   - **Back navigation**: removed misleading `fallbackLabel="Applications"` / "Payments" props — labels now come from VIEW_LABELS hierarchy: LtpFees → "Back to Application", LtpPayment → "Back to Fees", LtpReceipt → "Back to Payment".
+   - **Responsive**: mobile (390×844) single column, desktop (1440×900) 72/28 grid. Table has `overflow-x-auto`. Application selector uses shadcn Select with app no + project + applicant.
+   - **Accessibility**: `aria-label` on app selector, semantic table headers, status badges with proper colors.
+
+Self-Verification (Agent Browser end-to-end):
+- Logged in as LTP → navigated to Fees ✓
+- Application Context card: all 7 fields shown (MC/BP/2026/04/0004, Kulkarni Residence, Smt. Sunita Kulkarni, Building Permission, Residential, Payment, Payment Pending) ✓
+- Fee Breakdown: 6 line items (App Fee ₹2,500, Scrutiny ₹44,100, Development ₹1,17,600, Processing ₹1,500, Doc Verification ₹6,400, Labour Cess ₹1,176) ✓
+- Labour Cess: rate shown as "1%" (not ₹1), qty 1,17,600 (base), amount ₹1,176, description "1% of Development Fee (statutory)" ✓
+- Math: Subtotal ₹1,73,276 + CGST ₹15,595 + SGST ₹15,595 = Total ₹2,04,466 ✓ (exact match)
+- Payment Status: "Payment Pending", Outstanding ₹2,04,466, Total ₹2,04,466, Paid ₹0, Pay Now button ✓
+- Fee Structure card: Structure, App Type, Property Type, Version "2026 v1", Built-up Area 980 sq.m, Effective From 01 Apr 2026, Tax "CGST 9% + AP SGST 9%" ✓
+- Payment flow: Pay Now → Payment Summary (with CGST/SGST breakdown) → Proceed → Select Method → Pay Securely → Processing → Payment Successful (Amount Paid ₹2,04,466, Outstanding ₹0, Receipt generated) ✓
+- Post-payment Fees page: "Payment Successful", Outstanding ₹0, Paid ₹2,04,466, "View Receipt" button (not Pay Now) ✓
+- Application switch: app-4 → app-7 (Hillview, 12,200 sq.m) — Subtotal ₹20,38,040, CGST ₹1,83,424, SGST ₹1,83,424, Total ₹24,04,888. No stale app-4 data ✓
+- Fee-payment sync: app-5 (paid) — Subtotal ₹3,06,236 + GST ₹55,122 = Total ₹3,61,358, Paid ₹3,61,358, Outstanding ₹0 ✓
+- Receipt: Subtotal ₹3,06,236 + CGST ₹27,561 + SGST ₹27,561 = Total Paid ₹3,61,358 (Payment.amount synced to Fee.total) ✓
+- Back navigation: "Back to Application" (correct per PARENT_VIEW hierarchy) ✓
+- Responsive mobile (390×844): all 4 cards stacked, table horizontally scrollable ✓
+- Responsive desktop (1440×900): 72/28 grid active ✓
+- 0 console / runtime errors throughout ✓
+
+Stage Summary:
+- Files changed: `src/types/index.ts`, `src/data/fee-config.ts`, `src/services/fee-service.ts`, `src/data/mock-data.ts`, `src/components/ltp/ltp-fees.tsx`
+- Fee calculation issues found: 3 (GST hardcoded 0, no configurable tax model, inconsistent totalOverride) → fixed: 3
+- GST/tax issues found: 4 (no TaxConfig type, no CGST/SGST/IGST breakdown, no tax-not-applicable mode, no tax snapshot) → fixed: 4
+- UI alignment issues found: 8 (unbalanced table cols, excessive whitespace, Payment Status too separate, Fee Structure empty space, no application context, totals not visually clear, no 72/28 layout, misleading back labels) → fixed: 8
+- Hardcoded fee values removed: 11 (totalOverride values: 245600, 98450, 218750, 142800, 326480, 136920, 415750, 189640, 372850, 164300, 296450)
+- Cross-application issues fixed: 2 (stale data on switch, payment.amount != fee.total)
+- Payment integration issues: 0 (existing flow worked, just needed tax breakdown display)
+- Navigation issues: 2 (misleading back labels) → fixed: 2
+- Console errors: 0
+- Type Check: PASS ✓
+- Lint: PASS (0 errors, 0 warnings) ✓
+- Build: not run per sandbox rule — equivalent verification via tsc + lint + agent-browser e2e test ✓
+- Tax model is now configurable (CGST_SGST / IGST / ZERO_TAX) with admin-editable rates, demo defaults (CGST 9% + AP SGST 9%), and historical immutability (taxConfig snapshot on each ApplicationFee)
+- All fee math is mathematically consistent: subtotal + totalGST = total, total - paid = outstanding

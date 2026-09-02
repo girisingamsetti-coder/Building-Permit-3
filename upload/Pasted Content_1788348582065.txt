@@ -1,0 +1,1743 @@
+PERFORM A COMPLETE FUNCTIONAL, DATA-CONSISTENCY, CALCULATION, GST,
+NAVIGATION, AND UI/UX AUDIT OF THE FEES MODULE IN THE EXISTING
+LTP APPROVAL / BUILDING PERMIT MANAGEMENT SYSTEM.
+
+IMPORTANT:
+
+Modify ONLY the Fees module and the closely related fee-generation/payment
+integration required for correctness.
+
+Do NOT redesign:
+- Dashboard
+- My Applications
+- Drawings & Scrutiny
+- Documents
+- Shortfalls
+- Notifications
+- Administration
+- Authentication
+
+Do NOT break the existing application workflow.
+
+The current Fee Details screen has:
+
+- inconsistent alignment
+- too much unused space
+- fee table columns are not balanced
+- totals are not visually clear
+- Payment Status card is too separate from the fee summary
+- Fee Structure card has excessive empty space
+- GST is showing ₹0
+- the fee calculation/data does not appear reliable
+- application context needs to be clearer
+- the page needs a cleaner professional government-enterprise layout
+
+The goal is:
+
+CORRECT DATA
++
+CORRECT CALCULATION
++
+CONFIGURABLE GST/TAX
++
+CLEAN UI
++
+PERFECT ALIGNMENT
++
+APPLICATION-SPECIFIC FEES
+
+==================================================
+1. APPLICATION CONTEXT
+==================================================
+
+Every Fee page MUST clearly identify the application.
+
+Display prominently:
+
+Application Number:
+MC/BP/2026/04/0004
+
+Project:
+Kulkarni Residence — Redevelopment
+
+Applicant:
+Smt. Sunita Kulkarni
+
+Application Type:
+Building Permission
+
+Property Type:
+Residential
+
+Current Stage:
+Payment
+
+Status:
+Payment Pending
+
+The same application context must be used by:
+
+Fees
+Payments
+Application Details
+Dashboard
+My Applications
+
+==================================================
+2. APPLICATION SELECTOR
+==================================================
+
+Keep the application selector at the top.
+
+It must display:
+
+Application Number
+Project Name
+Applicant
+
+When the selected application changes:
+
+ALL fee data must update.
+
+Do NOT show fees belonging to another application.
+
+Use:
+
+applicationId
+
+as the internal relationship.
+
+==================================================
+3. SINGLE SOURCE OF TRUTH
+==================================================
+
+Fee data must not be separately hardcoded into the UI.
+
+Use one authoritative fee record:
+
+feeId
+applicationId
+feeStructureId
+feeStructureVersion
+lineItems
+taxableAmount
+cgst
+sgst
+igst
+cess
+totalAmount
+paidAmount
+outstandingAmount
+status
+generatedAt
+
+Do not maintain separate fake fee totals in individual components.
+
+==================================================
+4. FEE GENERATION
+==================================================
+
+Fees must be generated from:
+
+Application
++
+Active Fee Structure
++
+Application-specific calculation inputs
+
+For example:
+
+Built-up Area
+Plot Area
+Property Type
+Application Type
+
+must be taken from the application record.
+
+==================================================
+5. FEE STRUCTURE
+==================================================
+
+Fee Structure should contain:
+
+feeStructureId
+name
+applicationType
+propertyType
+effectiveFrom
+effectiveTo
+status
+components
+tax configuration
+
+Example components:
+
+Application Fee
+Scrutiny Fee
+Development Fee
+Processing Fee
+Document Verification Fee
+Labour Cess
+
+Do not hardcode the line item amounts inside the Fee Details component.
+
+==================================================
+6. FEE COMPONENT MODEL
+==================================================
+
+Each fee component should contain:
+
+name
+basis
+rate
+quantity
+calculationRule
+amount
+
+Examples:
+
+Application Fee
+basis: Fixed
+rate: ₹2,500
+quantity: 1
+amount: ₹2,500
+
+Scrutiny Fee
+basis: Area Based
+rate: ₹45 / sq.m
+quantity: built-up area
+amount: calculated dynamically
+
+Development Fee
+basis: Area Based
+rate: ₹120 / sq.m
+quantity: built-up area
+amount: calculated dynamically
+
+Processing Fee
+basis: Fixed
+rate: ₹1,500
+quantity: 1
+
+Document Verification Fee
+basis: Fixed / Per Document
+rate: configured value
+quantity: verified/relevant document count
+
+Labour Cess
+basis: Percentage
+rate: configured percentage
+base: configured taxable component
+
+==================================================
+7. REMOVE INCORRECT HARD-CODED VALUES
+==================================================
+
+Audit the current values.
+
+Do NOT simply make the UI show a different number.
+
+Trace:
+
+fee structure
+→ calculation
+→ tax
+→ subtotal
+→ total
+→ payment
+
+Fix the actual calculation.
+
+==================================================
+8. CALCULATION ENGINE
+==================================================
+
+Use a centralized calculation function.
+
+Concept:
+
+calculateFee(application, feeStructure)
+
+Returns:
+
+{
+  lineItems,
+  taxableAmount,
+  cgst,
+  sgst,
+  igst,
+  cess,
+  totalAmount
+}
+
+Do NOT calculate individual values in multiple components.
+
+==================================================
+9. ROUNDING
+==================================================
+
+Use consistent monetary rounding.
+
+Each amount should be rounded appropriately.
+
+Do not create:
+
+₹1,73,275.999
+
+and display:
+
+₹1,73,276
+
+while storing a different total.
+
+Stored and displayed totals must remain consistent.
+
+==================================================
+10. GST / TAX MODEL
+==================================================
+
+DO NOT hard-code GST as universally applicable to all government building
+permit fees.
+
+The system must support configurable tax applicability.
+
+Use:
+
+taxApplicable: true/false
+
+taxType:
+
+CGST_SGST
+IGST
+ZERO_TAX
+
+taxRate
+
+cgstRate
+sgstRate
+igstRate
+
+==================================================
+11. AP INTRA-STATE DEMO CONFIGURATION
+==================================================
+
+For a DEMO taxable intra-state Andhra Pradesh scenario, configure:
+
+CGST:
+9%
+
+AP SGST:
+9%
+
+Combined GST:
+18%
+
+IMPORTANT:
+
+Treat this as a configurable DEMO taxable scenario.
+
+Do NOT label 18% as universally legally applicable to every building
+permission fee.
+
+The system must allow an administrator to configure:
+
+GST applicable
+GST not applicable
+CGST/SGST
+IGST
+other approved tax treatment
+
+according to the final client/legal configuration.
+
+==================================================
+12. GST DISPLAY
+==================================================
+
+If tax is applicable:
+
+Fee Subtotal:
+₹X
+
+CGST @ 9%:
+₹Y
+
+AP SGST @ 9%:
+₹Y
+
+Total GST:
+₹Z
+
+Total Payable:
+₹Total
+
+If tax is not applicable:
+
+GST:
+₹0
+
+and clearly indicate:
+
+Tax not applicable
+
+Do NOT simply display ₹0 without explaining why.
+
+==================================================
+13. GST CALCULATION
+==================================================
+
+If:
+
+taxableAmount = ₹100,000
+
+and configured demo tax:
+
+CGST = 9%
+SGST = 9%
+
+then:
+
+CGST = ₹9,000
+SGST = ₹9,000
+
+Total GST = ₹18,000
+
+Grand Total = ₹118,000
+
+Use the actual fee calculation as the base.
+
+==================================================
+14. GST CONFIGURATION
+==================================================
+
+Keep tax configuration in the centralized Fee Structure.
+
+Example:
+
+{
+  taxApplicable: true,
+  taxType: "CGST_SGST",
+  cgstRate: 9,
+  sgstRate: 9
+}
+
+Do not hardcode 9 and 9 inside the UI.
+
+==================================================
+15. INTERSTATE SUPPORT
+==================================================
+
+If the application is configured as interstate and applicable:
+
+use:
+
+IGST
+
+instead of CGST + SGST.
+
+Do not display CGST and SGST simultaneously with IGST.
+
+==================================================
+16. HISTORICAL FEE IMMUTABILITY
+==================================================
+
+Once a fee is generated:
+
+the fee must preserve:
+
+feeStructureVersion
+tax configuration
+line-item amounts
+tax amounts
+total amount
+
+Changing the admin fee configuration later must NOT silently modify an
+already generated fee.
+
+==================================================
+17. FEE STRUCTURE VERSIONING
+==================================================
+
+Example:
+
+Building Permission — Residential
+Version 1
+
+Later:
+
+Version 2
+
+Existing generated fees remain linked to Version 1.
+
+New applications use Version 2.
+
+==================================================
+18. FEE BREAKDOWN UI
+==================================================
+
+Redesign the main Fee Breakdown card.
+
+Use:
+
+┌──────────────────────────────────────────────────────────────┐
+│ Fee Breakdown                                                 │
+│ Building Permission — Residential                            │
+│ Generated: 14 Jan 2026                                       │
+├──────────────────────────────────────────────────────────────┤
+│ Application No. | Fee Structure | Generated On | Status      │
+├──────────────────────────────────────────────────────────────┤
+│ MC/BP/...       | BP Residential | 14 Jan      | Pending      │
+└──────────────────────────────────────────────────────────────┘
+
+Below:
+
+Fee line-item table.
+
+==================================================
+19. FEE TABLE
+==================================================
+
+Columns:
+
+#
+Component
+Basis
+Rate
+Qty
+Amount
+
+Use balanced widths.
+
+Recommended:
+
+#
+6%
+
+Component
+32%
+
+Basis
+18%
+
+Rate
+14%
+
+Qty
+10%
+
+Amount
+20%
+
+Adjust according to actual viewport.
+
+==================================================
+20. TABLE ALIGNMENT
+==================================================
+
+Requirements:
+
+- headers aligned
+- numbers right aligned
+- quantity centered/right aligned
+- amount right aligned
+- status badges vertically centered
+- consistent row height
+- no excessive cell padding
+- no clipping
+
+==================================================
+21. TABLE ROW HEIGHT
+==================================================
+
+Use approximately:
+
+48–60px
+
+Do not create unnecessarily tall rows.
+
+Descriptions can appear as smaller secondary text.
+
+==================================================
+22. COMPONENT DESCRIPTION
+==================================================
+
+Example:
+
+Application Fee
+Base processing fee
+
+Do not repeat unnecessary descriptions.
+
+==================================================
+23. FEE SUMMARY
+==================================================
+
+At the bottom-right of the main fee card:
+
+Subtotal
+₹1,72,100
+
+CGST @ 9%
+₹15,489
+
+AP SGST @ 9%
+₹15,489
+
+Total GST
+₹30,978
+
+Total Payable
+₹2,03,078
+
+Paid
+₹0
+
+Outstanding
+₹2,03,078
+
+The actual amounts MUST be calculated.
+
+Do NOT use these example numbers if they don't match the actual configured
+fee components.
+
+==================================================
+24. TOTAL VISUAL HIERARCHY
+==================================================
+
+The most important number should be:
+
+Total Payable
+
+Use strong typography.
+
+Then:
+
+Paid
+
+Outstanding
+
+Outstanding should be clearly visible when payment is pending.
+
+==================================================
+25. PAYMENT STATUS CARD
+==================================================
+
+Redesign the right-side Payment Status card.
+
+It should be compact and vertically aligned with the main Fee Breakdown card.
+
+Example:
+
+Payment Status
+
+Payment Pending
+
+Outstanding
+
+₹1,73,276
+
+Total Fee
+₹1,73,276
+
+Paid
+₹0
+
+[ Pay Now → ]
+
+Do not create a huge empty card.
+
+==================================================
+26. PAYMENT BUTTON
+==================================================
+
+If:
+
+outstandingAmount > 0
+
+show:
+
+Pay Now
+
+If:
+
+outstandingAmount === 0
+
+show:
+
+Payment Successful
+
+[ View Receipt ]
+
+Do not show Pay Now after complete payment.
+
+==================================================
+27. PAYMENT STATUS STATES
+==================================================
+
+Support:
+
+PENDING
+PROCESSING
+SUCCESS
+FAILED
+PARTIALLY_PAID
+
+Show the correct UI for each.
+
+==================================================
+28. FEE STRUCTURE CARD
+==================================================
+
+Redesign Fee Structure card.
+
+Show only useful information:
+
+Structure:
+Building Permission — Residential
+
+Application Type:
+Building Permission
+
+Property Type:
+Residential
+
+Version:
+2026 v1
+
+Built-up Area:
+980 sq.m
+
+Effective From:
+01 Apr 2025
+
+Tax:
+CGST 9% + AP SGST 9%
+or:
+Tax Not Applicable
+
+Do not leave a huge empty area.
+
+==================================================
+29. FEE STRUCTURE CARD ALIGNMENT
+==================================================
+
+Use compact key-value layout.
+
+Example:
+
+Structure        Building Permission — Residential
+Application      Building Permission
+Property         Residential
+Version          v1
+Built-up Area    980 sq.m
+Tax              CGST 9% + AP SGST 9%
+
+All values should align consistently.
+
+==================================================
+30. PAGE LAYOUT
+==================================================
+
+Use:
+
+Main content:
+72%
+
+Right:
+28%
+
+Gap:
+20–24px
+
+Main:
+Fee Breakdown
+
+Right:
+Payment Status
+Fee Structure
+
+Both columns must start at the same vertical position.
+
+==================================================
+31. PAGE WIDTH
+==================================================
+
+Use:
+
+width: 100%
+max-width: 1600–1700px
+margin: 0 auto
+padding: 24–32px
+
+Use available space efficiently.
+
+Do not leave excessive left/right whitespace.
+
+==================================================
+32. HEADER ALIGNMENT
+==================================================
+
+Page:
+
+Fee Details
+
+Subtitle:
+
+Invoice-style breakdown of all applicable fees and charges.
+
+Application selector:
+
+right aligned.
+
+All must share the same horizontal grid.
+
+==================================================
+33. BREADCRUMB
+==================================================
+
+Use:
+
+LTP Portal
+→ Fees
+
+If opened from application:
+
+Application
+→ Fees
+
+Back should return to the correct parent.
+
+Do not use misleading Back links.
+
+==================================================
+34. APPLICATION CONTEXT CARD
+==================================================
+
+Show the application context once.
+
+Do not repeat the application number in multiple unnecessary large areas.
+
+Use:
+
+Application
+Project
+Applicant
+Type
+Property
+Stage
+Status
+
+==================================================
+35. FEE STATUS
+==================================================
+
+Status should match actual payment state.
+
+Examples:
+
+Payment Pending
+Payment Successful
+Partially Paid
+
+Do not show:
+
+Payment Pending
+
+after successful payment.
+
+==================================================
+36. AMOUNT CONSISTENCY
+==================================================
+
+Verify:
+
+subtotal
++
+taxes
++
+cess
+=
+total payable
+
+Then:
+
+total payable
+-
+paid amount
+=
+outstanding amount
+
+The equations must hold exactly.
+
+==================================================
+37. EXAMPLE VALIDATION
+==================================================
+
+Example:
+
+Application Fee:
+₹2,500
+
+Scrutiny:
+₹44,100
+
+Development:
+₹1,17,600
+
+Processing:
+₹1,500
+
+Document Verification:
+₹6,400
+
+Labour Cess:
+₹1,176
+
+Subtotal:
+calculate actual sum.
+
+Then apply configured tax treatment.
+
+Do NOT assume the screenshot's total is correct.
+
+The total must be mathematically derived.
+
+==================================================
+38. LABOUR CESS
+==================================================
+
+Do NOT display:
+
+Rate:
+₹1
+
+Qty:
+117,600
+
+if the intended rule is percentage-based.
+
+Represent it correctly.
+
+Example:
+
+Labour Cess
+Basis:
+1% of Development Fee
+
+Rate:
+1%
+
+Base:
+₹117,600
+
+Amount:
+₹1,176
+
+Use the actual configured rule.
+
+==================================================
+39. GST LINE ITEMS
+==================================================
+
+GST should NOT be represented as:
+
+GST:
+₹0
+
+without an explanation.
+
+Instead:
+
+CGST @ 9%
+₹...
+
+AP SGST @ 9%
+₹...
+
+or:
+
+GST Not Applicable
+
+depending on fee configuration.
+
+==================================================
+40. TAX BASE
+==================================================
+
+Clearly identify the taxable base.
+
+Example:
+
+Taxable Amount:
+₹1,72,100
+
+CGST @ 9%:
+₹15,489
+
+AP SGST @ 9%:
+₹15,489
+
+Total:
+₹2,03,078
+
+Only use these numbers if the actual fee structure produces them.
+
+==================================================
+41. TAX EXEMPT / NOT APPLICABLE MODE
+==================================================
+
+Support:
+
+taxApplicable = false
+
+Display:
+
+GST:
+Not Applicable
+
+Do not fabricate tax.
+
+==================================================
+42. FEE GENERATION WORKFLOW
+==================================================
+
+Fee generation should occur only after the configured document completion
+condition is satisfied.
+
+Workflow:
+
+Documents accepted
+↓
+Fee generated
+↓
+Payment pending
+↓
+Payment
+↓
+Payment successful
+↓
+Workflow continues
+
+Do not generate fees before required documents are complete unless the
+configured workflow explicitly permits it.
+
+==================================================
+43. PAYMENT LINK
+==================================================
+
+Fee Details:
+
+Pay Now
+
+must open the same application's Payment flow.
+
+Use:
+
+applicationId
+feeId
+
+Do not accidentally pay another application's fee.
+
+==================================================
+44. AFTER PAYMENT
+==================================================
+
+After successful payment:
+
+Fee page should show:
+
+Status:
+Payment Successful
+
+Paid:
+full amount
+
+Outstanding:
+₹0
+
+Action:
+
+View Receipt
+
+Payment page should return to:
+
+Payments listing
+
+and Fee page should update accordingly.
+
+==================================================
+45. CROSS-MODULE CONSISTENCY
+==================================================
+
+Use the same fee record in:
+
+Fees
+Payments
+Application Details
+Dashboard
+My Applications
+Notifications
+Audit Logs
+
+No duplicate fee records.
+
+==================================================
+46. SEARCH / APPLICATION SWITCHING
+==================================================
+
+If user switches application:
+
+all fee data must refresh:
+
+Fee Breakdown
+Payment Status
+Fee Structure
+Amounts
+Status
+
+No stale previous application data.
+
+==================================================
+47. LOADING STATE
+==================================================
+
+When loading fee details:
+
+show skeleton.
+
+Do not briefly display previous application's fee.
+
+==================================================
+48. ERROR STATE
+==================================================
+
+If fee cannot load:
+
+Unable to load fee details.
+
+[ Retry ]
+
+==================================================
+49. EMPTY STATE
+==================================================
+
+If selected application has no generated fee:
+
+No fee generated yet.
+
+Fee will be generated after the required application/document conditions
+are satisfied.
+
+Do not show a fake ₹0 fee breakdown.
+
+==================================================
+50. NO HARD-CODED TOTALS
+==================================================
+
+Search the codebase for:
+
+173276
+172100
+44100
+117600
+307836
+28000
+etc.
+
+Do not keep screenshot/demo totals hardcoded inside the Fee Details component.
+
+Use seed/demo data only in the centralized data layer.
+
+==================================================
+51. NO HARDCODED GST
+==================================================
+
+Do not search/replace:
+
+GST = 0
+
+with:
+
+GST = 18%
+
+The tax must come from the fee structure/configuration.
+
+==================================================
+52. ADMIN FEE CONFIGURATION CONNECTION
+==================================================
+
+If the Administrator changes:
+
+Application Fee
+Scrutiny Fee
+Development Fee
+Processing Fee
+Document Fee
+Labour Cess
+Tax configuration
+
+NEW fee generation must reflect the updated configuration.
+
+Existing fees remain unchanged.
+
+==================================================
+53. TAX CONFIGURATION CONNECTION
+==================================================
+
+If Admin changes demo tax configuration:
+
+CGST:
+9%
+SGST:
+9%
+
+to another configured value,
+
+new fees must calculate using the new setting.
+
+Do NOT alter existing generated fee records.
+
+==================================================
+54. CURRENCY
+==================================================
+
+Use:
+
+₹
+
+and Indian number formatting:
+
+₹1,73,276
+
+Do not mix:
+
+INR 173276
+Rs. 173276
+₹173276
+
+==================================================
+55. ALIGNMENT OF SUMMARY
+==================================================
+
+Use a consistent right-aligned money column.
+
+Example:
+
+Subtotal                         ₹1,72,100
+CGST @ 9%                           ₹15,489
+AP SGST @ 9%                        ₹15,489
+Total Payable                    ₹2,03,078
+Paid                                   ₹0
+Outstanding                      ₹2,03,078
+
+==================================================
+56. PAYMENT STATUS ALIGNMENT
+==================================================
+
+Keep:
+
+Payment Pending
+
+above the amount.
+
+Use:
+
+Outstanding Amount
+
+₹1,73,276
+
+[ Pay Now → ]
+
+Do not leave large blank regions.
+
+==================================================
+57. FEE STRUCTURE SPACING
+==================================================
+
+Use compact rows.
+
+Example:
+
+Structure
+Building Permission — Residential
+
+Application Type
+Building Permission
+
+Property Type
+Residential
+
+Version
+2026 v1
+
+Built-up Area
+980 sq.m
+
+Tax
+CGST 9% + AP SGST 9%
+
+==================================================
+58. CARD BORDERS
+==================================================
+
+Use consistent:
+
+border
+radius
+shadow
+padding
+
+All cards should visually belong to the same design system.
+
+==================================================
+59. CARD WIDTH
+==================================================
+
+Main fee card:
+wide
+
+Right cards:
+consistent width
+
+No card should be unnecessarily narrow.
+
+==================================================
+60. NO OVERLAPPING
+==================================================
+
+Check:
+
+fee table
+summary
+payment card
+fee structure
+
+for:
+
+overflow
+text clipping
+button overflow
+misaligned columns
+overlapping borders
+
+Fix root cause.
+
+==================================================
+61. RESPONSIVE LAYOUT
+==================================================
+
+Desktop:
+
+72/28 split
+
+Tablet:
+
+Fee Breakdown:
+full width
+
+Payment Status:
+full width
+
+Fee Structure:
+full width
+
+Mobile:
+
+single column
+
+Order:
+
+Application Context
+↓
+Fee Breakdown
+↓
+Payment Status
+↓
+Fee Structure
+
+No horizontal page scrolling.
+
+==================================================
+62. TABLET
+==================================================
+
+Do not squeeze the fee table into tiny columns.
+
+Allow controlled horizontal table scrolling if necessary.
+
+Do not make the entire page horizontally scroll.
+
+==================================================
+63. BUTTON ALIGNMENT
+==================================================
+
+Buttons:
+
+Pay Now
+View Receipt
+View Application
+
+must have consistent:
+
+height
+padding
+radius
+font size
+
+==================================================
+64. PAGE SPACING
+==================================================
+
+Use:
+
+Page section gap:
+20–24px
+
+Card padding:
+20px
+
+Table cell padding:
+10–12px vertical
+
+Control gap:
+8–12px
+
+Do not create huge gaps.
+
+==================================================
+65. PAGE HEIGHT
+==================================================
+
+Do not create unnecessarily tall cards.
+
+Let content determine card height.
+
+==================================================
+66. FEE DETAILS PAGE TARGET
+==================================================
+
+Use this structure:
+
+Fee Details
+Invoice-style breakdown of all applicable fees and charges.
+
+                         [Application ▼]
+
+┌──────────────────────────────────────────────────────────────┐
+│ MC/BP/2026/04/0004     Payment Pending                       │
+│ Kulkarni Residence — Redevelopment                           │
+│ Building Permission · Residential · Smt. Sunita Kulkarni     │
+│ Current Stage: Payment                      [View Application]│
+└──────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────┐ ┌─────────────────────┐
+│ Fee Breakdown                         │ │ Payment Status      │
+│                                       │ │                     │
+│ Application No.                       │ │ Payment Pending     │
+│ Fee Structure                         │ │                     │
+│ Generated On                          │ │ Outstanding         │
+│                                       │ │ ₹1,73,276           │
+│ Component | Basis | Rate | Qty | Amt  │ │                     │
+│                                       │ │ [ Pay Now → ]       │
+│ Application Fee                       │ └─────────────────────┘
+│ Scrutiny Fee                          │
+│ Development Fee                       │ ┌─────────────────────┐
+│ Processing Fee                        │ │ Fee Structure      │
+│ Document Verification                 │ │                     │
+│ Labour Cess                           │ │ Structure           │
+│                                       │ │ Application Type    │
+│                                       │ │ Property Type       │
+│                     Subtotal ₹...     │ │ Version             │
+│                     CGST @ 9% ₹...    │ │ Built-up Area       │
+│                     AP SGST @ 9% ₹... │ │ Tax                 │
+│                     Total ₹...        │ └─────────────────────┘
+│                     Paid ₹...
+│                     Outstanding ₹...
+└───────────────────────────────────────┘
+
+==================================================
+67. IMPORTANT TAX DISCLAIMER IN UI
+==================================================
+
+Do NOT write text such as:
+
+"Government building permit fees always attract 18% GST."
+
+That is not a safe assumption.
+
+Use configurable wording such as:
+
+Tax treatment:
+As configured for this fee structure
+
+or, in demo mode:
+
+Demo tax configuration:
+CGST 9% + AP SGST 9%
+
+==================================================
+68. FINAL CALCULATION TEST
+==================================================
+
+Create a test application.
+
+Generate a fee.
+
+Manually calculate:
+
+all line items
+subtotal
+tax
+total
+paid
+outstanding
+
+Compare UI values with calculation engine.
+
+They must match exactly.
+
+==================================================
+69. ZERO GST TEST
+==================================================
+
+Configure:
+
+taxApplicable = false
+
+Generate NEW fee.
+
+Expected:
+
+GST:
+Not Applicable
+
+No CGST/SGST amount.
+
+Do not show misleading ₹0 without context.
+
+==================================================
+70. TAXABLE TEST
+==================================================
+
+Configure DEMO:
+
+taxApplicable = true
+CGST = 9%
+AP SGST = 9%
+
+Generate NEW fee.
+
+Expected:
+
+CGST = taxableAmount × 9%
+
+AP SGST = taxableAmount × 9%
+
+Total GST =
+CGST + AP SGST
+
+Total =
+taxable/subtotal amount + tax
+
+==================================================
+71. PAYMENT TEST
+==================================================
+
+Generate fee.
+
+Payment Pending.
+
+Click:
+
+Pay Now
+
+Complete demo payment.
+
+Expected:
+
+Payment Successful
+
+Paid = Total
+
+Outstanding = 0
+
+Fee status = Paid/Successful
+
+Payments module updates.
+
+Receipt generated.
+
+==================================================
+72. HISTORICAL FEE TEST
+==================================================
+
+Generate Fee Version 1.
+
+Then Admin changes fee structure/tax.
+
+Generate Fee Version 2 for a NEW application.
+
+Verify:
+
+Fee Version 1:
+unchanged
+
+Fee Version 2:
+uses new configuration
+
+==================================================
+73. APPLICATION SWITCH TEST
+==================================================
+
+Application A:
+₹X
+
+Switch to Application B:
+₹Y
+
+Expected:
+
+NO stale A data.
+
+Everything belongs to B.
+
+==================================================
+74. NAVIGATION TEST
+==================================================
+
+Fees
+→ Fee Details
+→ Pay Now
+→ Payment
+→ Success
+→ Payments listing
+
+Back from Fee Details:
+
+returns to correct parent.
+
+No incorrect:
+
+Back to Applications
+
+if the actual parent is different.
+
+==================================================
+75. FINAL DATA VALIDATION
+==================================================
+
+For every generated fee verify:
+
+subtotal + tax + cess = total
+
+total - paid = outstanding
+
+No negative outstanding.
+
+No inconsistent statuses.
+
+==================================================
+76. FINAL BUILD / QUALITY CHECK
+==================================================
+
+Run:
+
+type check
+lint
+build
+
+Check browser console.
+
+No:
+
+runtime errors
+calculation errors
+broken imports
+route errors
+stale state
+duplicate fee records
+
+==================================================
+77. FINAL REPORT
+==================================================
+
+Provide:
+
+Fee calculation issues found:
+<number>
+
+Fee calculation issues fixed:
+<number>
+
+GST/tax issues found:
+<number>
+
+GST/tax issues fixed:
+<number>
+
+UI alignment issues found:
+<number>
+
+UI alignment issues fixed:
+<number>
+
+Hardcoded fee values removed:
+<number>
+
+Cross-application issues fixed:
+<number>
+
+Payment integration issues:
+<number>
+
+Navigation issues:
+<number>
+
+Console errors:
+<number>
+
+Type Check:
+PASS / FAIL
+
+Lint:
+PASS / FAIL
+
+Build:
+PASS / FAIL
+
+==================================================
+FINAL GOAL
+==================================================
+
+The Fees module must become:
+
+CORRECT
+APPLICATION-SPECIFIC
+CONFIGURABLE
+MATHEMATICALLY CONSISTENT
+GST/TAX-AWARE
+CLEAN
+COMPACT
+PROFESSIONAL
+RESPONSIVE
+
+The user must always understand:
+
+WHICH APPLICATION?
+↓
+WHICH FEE STRUCTURE?
+↓
+WHAT ARE THE FEE COMPONENTS?
+↓
+WHAT IS THE TAX TREATMENT?
+↓
+WHAT IS THE TOTAL?
+↓
+HOW MUCH IS PAID?
+↓
+HOW MUCH IS OUTSTANDING?
+↓
+CAN I PAY?
+
+Do not merely redesign the screen.
+
+Fix the actual fee calculation and data relationships.

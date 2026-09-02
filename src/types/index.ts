@@ -232,13 +232,29 @@ export interface DocumentRecord {
 }
 
 // ---------- Fees ----------
+// Configurable tax model — NOT hardcoded. Admin can configure per fee structure.
+export type TaxType = "CGST_SGST" | "IGST" | "ZERO_TAX";
+
+export interface TaxConfig {
+  taxApplicable: boolean;
+  taxType: TaxType;
+  cgstRate?: number; // percentage, e.g. 9 for 9%
+  sgstRate?: number; // percentage
+  igstRate?: number; // percentage (used when taxType === "IGST")
+  label?: string;    // human-readable, e.g. "CGST 9% + AP SGST 9%"
+}
+
 export interface FeeStructure {
   id: string;
   name: string;
   applicationType: ApplicationType;
+  propertyType?: PropertyType; // when set, structure applies only to this property type
   description: string;
   active: boolean;
   effectiveFrom: string;
+  effectiveTo?: string;
+  version?: string; // e.g. "2026 v1"
+  taxConfig?: TaxConfig; // configurable tax treatment
 }
 
 export interface FeeComponent {
@@ -259,19 +275,36 @@ export interface FeeLineItem {
   rate: number;
   quantity: number;
   amount: number;
+  base?: number;   // for percentage-based items (e.g. labour cess base = development fee)
+  ratePercent?: number; // for percentage-based items (e.g. 1 for 1%)
 }
 
+// ApplicationFee — the immutable, persisted fee record.
+// Tax config is snapshotted at generation time (historical immutability).
 export interface ApplicationFee {
   feeStructureId: string;
   feeStructureName: string;
+  feeStructureVersion?: string;
   generatedAt: string;
   lineItems: FeeLineItem[];
   subtotal: number;
+  taxableAmount: number;  // base on which tax is computed (typically = subtotal)
+  // Tax breakdown — configurable
+  taxApplicable: boolean;
+  taxType: TaxType; // "CGST_SGST" | "IGST" | "ZERO_TAX"
+  cgst: number;
+  sgst: number;
+  igst: number;
+  cess: number;     // labour cess (already in line items, duplicated here for summary)
+  totalGST: number; // cgst + sgst + igst
+  // Legacy single gst field (kept for backward compat — equals totalGST)
   gst: number;
   total: number;
   paidAmount: number;
   outstanding: number;
   currency: string;
+  // Snapshot of the tax config at generation time
+  taxConfig?: TaxConfig;
 }
 
 // ---------- Payments ----------

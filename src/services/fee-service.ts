@@ -5,6 +5,7 @@ import type {
   FeeLineItem,
   FeeStructure,
   PropertyType,
+  TaxConfig,
 } from "@/types";
 import { FEE_COMPONENTS, FEE_STRUCTURES } from "@/data/fee-config";
 
@@ -12,6 +13,14 @@ import { FEE_COMPONENTS, FEE_STRUCTURES } from "@/data/fee-config";
 // FEE CALCULATION SERVICE
 // Accepts application data and returns a fully computed fee object.
 // Uses configurable fee rules — NOT hardcoded business logic.
+//
+// TAX MODEL (configurable via FeeStructure.taxConfig):
+//   taxApplicable: true/false
+//   taxType: "CGST_SGST" | "IGST" | "ZERO_TAX"
+//
+// ROUNDING:
+//   Each line-item amount and each tax component is individually
+//   rounded with Math.round so stored + displayed values match.
 // ============================================================
 
 export interface FeeCalculationInput {
@@ -26,12 +35,25 @@ export interface FeeCalculationResult {
   feeStructure: FeeStructure;
   lineItems: FeeLineItem[];
   subtotal: number;
-  gst: number;
-  labourCess: number;
+  taxableAmount: number;
+  // Tax breakdown
+  taxApplicable: boolean;
+  taxType: "CGST_SGST" | "IGST" | "ZERO_TAX";
+  cgst: number;
+  sgst: number;
+  igst: number;
+  cess: number;
+  totalGST: number;
+  gst: number; // legacy = totalGST
   total: number;
   paidAmount: number;
   outstanding: number;
   currency: string;
+  taxConfig: TaxConfig;
+}
+
+function round(n: number): number {
+  return Math.round(n);
 }
 
 export class FeeCalculationService {
@@ -43,16 +65,20 @@ export class FeeCalculationService {
     this.components = components;
   }
 
-  /** Find the active fee structure for an application type */
-  findStructure(applicationType: ApplicationType): FeeStructure | undefined {
-    return this.structures.find(
-      (s) => s.applicationType === applicationType && s.active
+  /** Find the active fee structure for an application type (+ optional property type) */
+  findStructure(applicationType: ApplicationType, propertyType?: PropertyType): FeeStructure | undefined {
+    // Prefer a structure that matches BOTH applicationType AND propertyType
+    const byTypeAndProperty = this.structures.find(
+      (s) => s.applicationType === applicationType && s.active && s.propertyType === propertyType
     );
+    if (byTypeAndProperty) return byTypeAndProperty;
+    // Fall back to any active structure for the application type
+    return this.structures.find((s) => s.applicationType === applicationType && s.active && !s.propertyType);
   }
 
   /** Calculate fee for an application */
   calculate(input: FeeCalculationInput): FeeCalculationResult | null {
-    const structure = this.findStructure(input.applicationType);
+    const structure = this.findStructure(input.applicationType, input.propertyType);
     if (!structure) return null;
 
     const lineItems: FeeLineItem[] = [];
@@ -66,9 +92,10 @@ export class FeeCalculationService {
 
     const subtotal = lineItems.reduce((sum, li) => sum + li.amount, 0);
 
-    // Labour cess = 1% of development fee (statutory)
+    // Labour cess = 1% of development fee (statutory) — added as a line item
     const devFeeItem = lineItems.find((li) => li.componentCode === "DEV_FEE");
-    const labourCess = devFeeItem ? Math.round(devFeeItem.amount * 0.01) : 0;
+    const devFeeAmount = devFeeItem?.amount ?? 0;
+    const labourCess = devFeeAmount > 0 ? round((devFeeAmount * 0.01)) : 0;
     if (labourCess > 0) {
       const cessComponent = this.components.find((c) => c.code === "LABOUR_CESS");
       if (cessComponent) {
@@ -78,25 +105,62 @@ export class FeeCalculationService {
           description: "1% of Development Fee (statutory)",
           basis: "Percentage",
           rate: 1,
-          quantity: devFeeItem?.amount ?? 0,
+          ratePercent: 1,
+          base: devFeeAmount,
+          quantity: devFeeAmount,
           amount: labourCess,
         });
       }
     }
 
-    const gst = 0; // government fees — no GST
-    const total = subtotal + labourCess + gst;
+    // Recompute subtotal AFTER adding labour cess (cess is part of subtotal)
+    const subtotalWithCess = lineItems.reduce((sum, li) => sum + li.amount, 0);
+    const taxableAmount = subtotalWithCess;
+
+    // ===== Configurable tax computation =====
+    const taxConfig: TaxConfig = structure.taxConfig ?? {
+      taxApplicable: false,
+      taxType: "ZERO_TAX",
+      label: "Tax Not Applicable",
+    };
+
+    let cgst = 0;
+    let sgst = 0;
+    let igst = 0;
+
+    if (taxConfig.taxApplicable) {
+      if (taxConfig.taxType === "CGST_SGST") {
+        const cgstRate = taxConfig.cgstRate ?? 0;
+        const sgstRate = taxConfig.sgstRate ?? 0;
+        cgst = round((taxableAmount * cgstRate) / 100);
+        sgst = round((taxableAmount * sgstRate) / 100);
+      } else if (taxConfig.taxType === "IGST") {
+        const igstRate = taxConfig.igstRate ?? 0;
+        igst = round((taxableAmount * igstRate) / 100);
+      }
+    }
+
+    const totalGST = cgst + sgst + igst;
+    const total = taxableAmount + totalGST;
 
     return {
       feeStructure: structure,
       lineItems,
-      subtotal,
-      gst,
-      labourCess,
+      subtotal: subtotalWithCess,
+      taxableAmount,
+      taxApplicable: taxConfig.taxApplicable,
+      taxType: taxConfig.taxType,
+      cgst,
+      sgst,
+      igst,
+      cess: labourCess,
+      totalGST,
+      gst: totalGST, // legacy field
       total,
       paidAmount: 0,
       outstanding: total,
       currency: "INR",
+      taxConfig,
     };
   }
 
@@ -114,7 +178,7 @@ export class FeeCalculationService {
           basis: "Fixed",
           rate: comp.rate,
           quantity,
-          amount: comp.rate * quantity,
+          amount: round(comp.rate * quantity),
         };
       }
       case "AREA_BASED": {
@@ -126,19 +190,21 @@ export class FeeCalculationService {
           basis: "Area based",
           rate: comp.rate,
           quantity: area,
-          amount: comp.rate * area,
+          amount: round(comp.rate * area),
         };
       }
       case "PERCENTAGE": {
         // Percentage of development fee
         const devFee = input.builtUpArea * 120;
-        const amount = Math.round((devFee * comp.rate) / 100);
+        const amount = round((devFee * comp.rate) / 100);
         return {
           componentCode: comp.code,
           name: comp.name,
           description: `${comp.rate}% of Development Fee`,
           basis: "Percentage",
           rate: comp.rate,
+          ratePercent: comp.rate,
+          base: devFee,
           quantity: devFee,
           amount,
         };
@@ -155,7 +221,7 @@ export class FeeCalculationService {
           basis: "Slab",
           rate: comp.rate,
           quantity: 1,
-          amount,
+          amount: round(amount),
         };
       }
       default:
@@ -168,14 +234,24 @@ export class FeeCalculationService {
     return {
       feeStructureId: result.feeStructure.id,
       feeStructureName: result.feeStructure.name,
+      feeStructureVersion: result.feeStructure.version,
       generatedAt: new Date().toISOString(),
       lineItems: result.lineItems,
       subtotal: result.subtotal,
-      gst: result.gst,
+      taxableAmount: result.taxableAmount,
+      taxApplicable: result.taxApplicable,
+      taxType: result.taxType,
+      cgst: result.cgst,
+      sgst: result.sgst,
+      igst: result.igst,
+      cess: result.cess,
+      totalGST: result.totalGST,
+      gst: result.totalGST,
       total: result.total,
       paidAmount,
       outstanding: Math.max(0, result.total - paidAmount),
       currency: result.currency,
+      taxConfig: result.taxConfig,
     };
   }
 }

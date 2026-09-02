@@ -1,0 +1,803 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore, useSelectedApplication, useVisibleApplications } from "@/store/app-store";
+     6→import {
+     7→  PageHeader,
+     8→  SectionCard,
+     9→  EmptyState,
+    10→  InfoGrid,
+    11→} from "@/components/design-system/layout";
+    12→import { PageBackButton } from "@/components/design-system/back-button";
+    13→import { ApplicationContextBar } from "@/components/design-system/app-context";
+    14→import { StatusBadge, PaymentStatusBadge } from "@/components/design-system/badges";
+    15→import { formatDateTime, formatDate, formatINR, timeAgo } from "@/components/design-system/workflow";
+    16→import { Button } from "@/components/ui/button";
+    17→import { Badge } from "@/components/ui/badge";
+    18→import { Separator } from "@/components/ui/separator";
+    19→import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+    20→import { Label } from "@/components/ui/label";
+    21→import {
+    22→  ReceiptIndianRupee,
+    23→  CreditCard,
+    24→  ScrollText,
+    25→  CheckCircle2,
+    26→  Clock,
+    27→  Loader2,
+    28→  XCircle,
+    29→  Download,
+    30→  ShieldCheck,
+    31→  Landmark,
+    32→  Smartphone,
+    33→  Wallet,
+    34→  Building2,
+    35→  FileCheck2,
+    36→  Printer,
+    37→  Share2,
+    38→  AlertCircle,
+    39→  Lock,
+    40→  Check,
+    41→  ArrowRight,
+    42→  IndianRupee,
+    43→} from "lucide-react";
+    44→import { useToast } from "@/hooks/use-toast";
+    45→import type { Application, Payment, ViewKey } from "@/types";
+    46→
+    47→// ============================================================
+    48→// PAYMENT STAT CARD
+    49→// ============================================================
+    50→function PaymentStatCard({ icon: Icon, value, label, subtext, accent }: { icon: React.ComponentType<{ className?: string }>; value: string | number; label: string; subtext: string; accent: string }) {
+    51→  return (
+    52→    <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 shadow-gov">
+    53→      <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-lg", accent)}>
+    54→        <Icon className="size-5" />
+    55→      </div>
+    56→      <div className="min-w-0 flex-1">
+    57→        <p className="text-2xl font-bold tabular-nums leading-none">{value}</p>
+    58→        <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+    59→        <p className="text-[10px] text-muted-foreground">{subtext}</p>
+    60→      </div>
+    61→    </div>
+    62→  );
+    63→}
+    64→
+    65→function useAppOrDefault(): Application | null {
+    66→  const sel = useSelectedApplication();
+    67→  const apps = useVisibleApplications();
+    68→  return sel ?? apps.find((a) => a.fee) ?? apps[0] ?? null;
+    69→}
+    70→
+    71→function AppSelect({ apps, current, view }: { apps: Application[]; current: Application; view: "ltp-fees" | "ltp-payment" | "ltp-receipt" }) {
+    72→  const { openApplication } = useAppStore();
+    73→  return (
+    74→    <select value={current.id} onChange={(e) => openApplication(e.target.value, view)} className="h-8 rounded-md border border-input bg-background px-2 text-xs font-mono">
+    75→      {apps.map((a) => <option key={a.id} value={a.id}>{a.applicationNo}</option>)}
+    76→    </select>
+    77→  );
+    78→}
+    79→
+    80→// ============================================================
+    81→// FEE DETAILS
+    82→// ============================================================
+    83→export function LtpFees() {
+    84→  const { navigate } = useAppStore();
+    85→  const visibleApps = useVisibleApplications();
+    86→  const app = useAppOrDefault();
+    87→  if (!app) {
+    88→    return (
+    89→      <div className="space-y-6">
+    90→        <PageHeader title="Fee Details" icon={ReceiptIndianRupee} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]} />
+    91→        <EmptyState icon={ReceiptIndianRupee} title="No applications" description="Create an application to view its fee details." />
+    92→      </div>
+    93→    );
+    94→  }
+    95→  // If fee is not generated yet, show a pending state
+    96→  if (!app.fee) {
+    97→    const isVerifying = app.status === "DOCUMENT_VERIFICATION";
+    98→    const isDocPending = app.status === "DOCUMENT_UPLOAD_PENDING" || app.status === "DRAFT" || app.status === "DRAWING_UPLOADED" || app.status === "SCRUTINY_IN_PROGRESS" || app.status === "SCRUTINY_FAILED" || app.status === "DRAWING_REUPLOAD_REQUIRED" || app.status === "SCRUTINY_PASSED";
+    99→    return (
+   100→      <div className="space-y-6">
+   101→        <PageHeader
+   102→          title="Fee Details"
+   103→          description="Invoice-style breakdown of all applicable fees and charges."
+   104→          icon={ReceiptIndianRupee}
+   105→          breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]}
+   106→          actions={<AppSelect apps={visibleApps} current={app} view="ltp-fees" />}
+   107→        />
+   108→        <SectionCard title="Fee Not Generated Yet" icon={ReceiptIndianRupee}>
+   109→          <div className="flex flex-col items-center gap-3 py-8 text-center">
+   110→            <div className="flex size-12 items-center justify-center rounded-full bg-info/10 text-info">
+   111→              <Clock className="size-6" />
+   112→            </div>
+   113→            <div className="space-y-1">
+   114→              <p className="text-sm font-semibold">
+   115→                {isVerifying
+   116→                  ? "Documents under verification"
+   117→                  : isDocPending
+   118→                  ? "Upload drawings & documents first"
+   119→                  : "Fee generation pending"}
+   120→              </p>
+   121→              <p className="max-w-md text-sm text-muted-foreground">
+   122→                {isVerifying
+   123→                  ? "Fee will be auto-generated when all documents are verified by TPA. You will be notified once the fee is ready."
+   124→                  : isDocPending
+   125→                  ? "Complete drawing scrutiny and upload all required documents. Once verified, the fee will be auto-generated."
+   126→                  : "The fee for this application will be generated automatically once the prerequisite stages are complete."}
+   127→              </p>
+   128→            </div>
+   129→            <div className="flex gap-2">
+   130→              <Button variant="outline" size="sm" onClick={() => navigate("ltp-documents")}>View documents</Button>
+   131→              <Button variant="outline" size="sm" onClick={() => navigate("ltp-application-details")}>Track application</Button>
+   132→            </div>
+   133→          </div>
+   134→        </SectionCard>
+   135→      </div>
+   136→    );
+   137→  }
+   138→  const f = app.fee;
+   139→
+   140→  return (
+   141→    <div className="space-y-6">
+   142→      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+   143→      <PageHeader
+   144→        title="Fee Details"
+   145→        description="Invoice-style breakdown of all applicable fees and charges."
+   146→        icon={ReceiptIndianRupee}
+   147→        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Fees" }]}
+   148→        actions={<AppSelect apps={visibleApps} current={app} view="ltp-fees" />}
+   149→      />
+   150→
+   151→      {/* Application Context Bar */}
+   152→      <ApplicationContextBar app={app} />
+   153→
+   154→      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   155→        <div className="lg:col-span-2">
+   156→          <SectionCard title="Fee Breakdown" description={`${f.feeStructureName} · generated ${formatDate(f.generatedAt)}`} icon={ReceiptIndianRupee}>
+   157→            {/* Invoice header */}
+   158→            <div className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+   159→              <div>
+   160→                <p className="text-xs text-muted-foreground">Application No.</p>
+   161→                <p className="font-mono text-sm font-medium text-primary">{app.applicationNo}</p>
+   162→              </div>
+   163→              <div>
+   164→                <p className="text-xs text-muted-foreground">Fee Structure</p>
+   165→                <p className="text-sm font-medium">{f.feeStructureName}</p>
+   166→              </div>
+   167→              <div>
+   168→                <p className="text-xs text-muted-foreground">Generated On</p>
+   169→                <p className="text-sm font-medium">{formatDate(f.generatedAt)}</p>
+   170→              </div>
+   171→              <div>
+   172→                <p className="text-xs text-muted-foreground">Status</p>
+   173→                <PaymentStatusBadge status={app.payment?.status ?? "PENDING"} />
+   174→              </div>
+   175→            </div>
+   176→
+   177→            {/* Line items */}
+   178→            <div className="overflow-hidden rounded-lg border border-border">
+   179→              <table className="w-full text-sm">
+   180→                <thead className="bg-muted/40">
+   181→                  <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   182→                    <th className="px-4 py-2.5 font-medium">#</th>
+   183→                    <th className="px-4 py-2.5 font-medium">Component</th>
+   184→                    <th className="px-4 py-2.5 font-medium">Basis</th>
+   185→                    <th className="px-4 py-2.5 font-medium text-right">Rate</th>
+   186→                    <th className="px-4 py-2.5 font-medium text-right">Qty</th>
+   187→                    <th className="px-4 py-2.5 font-medium text-right">Amount</th>
+   188→                  </tr>
+   189→                </thead>
+   190→                <tbody className="divide-y divide-border">
+   191→                  {f.lineItems.map((li, idx) => (
+   192→                    <tr key={li.componentCode} className="hover:bg-muted/30">
+   193→                      <td className="px-4 py-3 text-xs text-muted-foreground">{idx + 1}</td>
+   194→                      <td className="px-4 py-3">
+   195→                        <p className="text-xs font-medium">{li.name}</p>
+   196→                        <p className="text-[10px] text-muted-foreground">{li.description}</p>
+   197→                      </td>
+   198→                      <td className="px-4 py-3 text-xs text-muted-foreground">{li.basis}</td>
+   199→                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">₹{li.rate.toLocaleString("en-IN")}</td>
+   200→                      <td className="px-4 py-3 text-right font-mono text-xs tabular-nums">{li.quantity.toLocaleString("en-IN")}</td>
+   201→                      <td className="px-4 py-3 text-right font-mono text-xs font-medium tabular-nums">₹{li.amount.toLocaleString("en-IN")}</td>
+   202→                    </tr>
+   203→                  ))}
+   204→                </tbody>
+   205→              </table>
+   206→            </div>
+   207→
+   208→            {/* Totals */}
+   209→            <div className="mt-4 flex justify-end">
+   210→              <div className="w-full max-w-xs space-y-2">
+   211→                <div className="flex items-center justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-mono tabular-nums">{formatINR(f.subtotal)}</span></div>
+   212→                <div className="flex items-center justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="font-mono tabular-nums">{formatINR(f.gst)}</span></div>
+   213→                <Separator />
+   214→                <div className="flex items-center justify-between"><span className="font-semibold">Total Payable</span><span className="font-mono text-lg font-bold text-primary">{formatINR(f.total)}</span></div>
+   215→                <div className="flex items-center justify-between text-sm"><span className="text-muted-foreground">Paid</span><span className="font-mono tabular-nums text-success">{formatINR(f.paidAmount)}</span></div>
+   216→                <div className="flex items-center justify-between text-sm"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-semibold tabular-nums text-destructive">{formatINR(f.outstanding)}</span></div>
+   217→              </div>
+   218→            </div>
+   219→          </SectionCard>
+   220→        </div>
+   221→
+   222→        <div className="space-y-6">
+   223→          <SectionCard title="Payment Status" icon={CreditCard}>
+   224→            <div className="space-y-3">
+   225→              <div className="rounded-lg border border-border bg-muted/30 p-4 text-center">
+   226→                <p className="text-xs text-muted-foreground">Outstanding Amount</p>
+   227→                <p className="text-3xl font-bold text-primary">{formatINR(f.outstanding)}</p>
+   228→                <p className="text-[11px] text-muted-foreground">of {formatINR(f.total)} total</p>
+   229→              </div>
+   230→              {app.payment?.status === "SUCCESS" ? (
+   231→                <div className="rounded-lg border border-success/30 bg-success/5 p-3 text-center text-success">
+   232→                  <CheckCircle2 className="mx-auto size-6" />
+   233→                  <p className="mt-1 text-sm font-medium">Payment Successful</p>
+   234→                  <p className="text-[10px]">Receipt {app.payment.receiptNo}</p>
+   235→                </div>
+   236→              ) : (
+   237→                <Button className="w-full" size="lg" onClick={() => navigate("ltp-payment")}>
+   238→                  <CreditCard className="size-4" /> Pay Now <ArrowRight className="size-4" />
+   239→                </Button>
+   240→              )}
+   241→              <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+   242→                <Lock className="size-3" /> Secured by BillDesk (sandbox)
+   243→              </div>
+   244→            </div>
+   245→          </SectionCard>
+   246→
+   247→          <SectionCard title="Fee Structure" icon={FileCheck2}>
+   248→            <InfoGrid
+   249→              items={[
+   250→                { label: "Structure", value: f.feeStructureName },
+   251→                { label: "Application Type", value: app.project.type.replace(/_/g, " ") },
+   252→                { label: "Built-up Area", value: `${app.project.builtUpArea.toLocaleString("en-IN")} sq.m` },
+   253→                { label: "Effective From", value: formatDate("2025-04-01") },
+   254→              ]}
+   255→              columns={1}
+   256→            />
+   257→          </SectionCard>
+   258→        </div>
+   259→      </div>
+   260→    </div>
+   261→  );
+   262→}
+   263→
+   264→// ============================================================
+   265→// PAYMENT FLOW
+   266→// ============================================================
+   267→type PayStage = "pending" | "method" | "processing" | "success" | "failed";
+   268→
+   269→export function LtpPayment() {
+   270→  const { navigate, openApplication, initiatePayment: storeInitiatePayment, selectedApplicationId } = useAppStore();
+   271→  const visibleApps = useVisibleApplications();
+   272→  const processingAppIds = useAppStore((s) => s.processingAppIds);
+   273→  const { toast } = useToast();
+   274→
+   275→  // If a specific app is selected and it has a fee, show the payment flow for it
+   276→  const selectedApp = selectedApplicationId
+   277→    ? visibleApps.find((a) => a.id === selectedApplicationId)
+   278→    : null;
+   279→  const isPaymentFlow = selectedApp && selectedApp.fee;
+   280→
+   281→  // All apps with fees (for the payments listing)
+   282→  const appsWithFees = visibleApps.filter((a) => a.fee);
+   283→  const pendingPayments = appsWithFees.filter((a) =>
+   284→    a.payment?.status === "PENDING" || a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED"
+   285→  );
+   286→  const paidApps = appsWithFees.filter((a) => a.payment?.status === "SUCCESS");
+   287→  const totalOutstanding = pendingPayments.reduce((sum, a) => sum + (a.fee?.outstanding ?? 0), 0);
+   288→
+   289→  // ===== Payment flow view (for a specific app) =====
+   290→  if (isPaymentFlow && selectedApp) {
+   291→    return <PaymentFlow app={selectedApp} navigate={navigate} storeInitiatePayment={storeInitiatePayment} processingAppIds={processingAppIds} toast={toast} />;
+   292→  }
+   293→
+   294→  // ===== Payments listing view =====
+   295→  return (
+   296→    <div className="space-y-6">
+   297→      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+   298→      <PageHeader
+   299→        title="Payment"
+   300→        description="Manage application fees, outstanding amounts and payment receipts."
+   301→        icon={CreditCard}
+   302→        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]}
+   303→        badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode</Badge>}
+   304→      />
+   305→
+   306→      {/* Summary Cards */}
+   307→      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+   308→        <PaymentStatCard icon={Clock} value={pendingPayments.length} label="PENDING PAYMENTS" subtext="Applications awaiting payment" accent="bg-amber-500/10 text-amber-600" />
+   309→        <PaymentStatCard icon={IndianRupee} value={formatINR(totalOutstanding)} label="TOTAL OUTSTANDING" subtext="Across pending applications" accent="bg-destructive/10 text-destructive" />
+   310→        <PaymentStatCard icon={CheckCircle2} value={paidApps.length} label="PAID APPLICATIONS" subtext="Payment successfully completed" accent="bg-success/10 text-success" />
+   311→        <PaymentStatCard icon={CreditCard} value={paidApps.length} label="PAYMENT COMPLETED" subtext="Successful transactions" accent="bg-primary/10 text-primary" />
+   312→      </div>
+   313→
+   314→      {/* Pending Payments */}
+   315→      {pendingPayments.length > 0 && (
+   316→        <SectionCard title="Pending Payments" description="Applications requiring fee payment" icon={Clock}>
+   317→          <div className="space-y-3">
+   318→            {pendingPayments.map((app) => (
+   319→              <div key={app.id} className="rounded-xl border border-border bg-card p-4">
+   320→                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+   321→                  <div className="min-w-0 flex-1 space-y-1">
+   322→                    <div className="flex items-center gap-2 flex-wrap">
+   323→                      <p className="font-mono text-xs font-semibold text-primary">{app.applicationNo}</p>
+   324→                      <StatusBadge status={app.status} showIcon={false} />
+   325→                    </div>
+   326→                    <p className="text-sm font-medium">{app.project.name}</p>
+   327→                    <p className="text-[11px] text-muted-foreground">
+   328→                      {app.project.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())} · {app.applicant.name}
+   329→                    </p>
+   330→                  </div>
+   331→                  <div className="shrink-0 space-y-1 text-right">
+   332→                    <div className="flex items-center justify-between gap-4 text-xs">
+   333→                      <span className="text-muted-foreground">Fee Generated</span>
+   334→                      <span className="font-mono font-medium">{formatINR(app.fee!.total)}</span>
+   335→                    </div>
+   336→                    <div className="flex items-center justify-between gap-4 text-xs">
+   337→                      <span className="text-muted-foreground">Paid</span>
+   338→                      <span className="font-mono text-success">{formatINR(app.fee!.paidAmount)}</span>
+   339→                    </div>
+   340→                    <div className="flex items-center justify-between gap-4 text-xs">
+   341→                      <span className="text-muted-foreground">Outstanding</span>
+   342→                      <span className="font-mono font-semibold text-destructive">{formatINR(app.fee!.outstanding)}</span>
+   343→                    </div>
+   344→                  </div>
+   345→                </div>
+   346→                <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3">
+   347→                  <span className="text-[11px] text-muted-foreground">Generated: {formatDate(app.fee!.generatedAt)}</span>
+   348→                  <Button
+   349→                    size="sm"
+   350→                    onClick={() => openApplication(app.id, "ltp-payment")}
+   351→                  >
+   352→                    <CreditCard className="size-3.5" />
+   353→                    {app.fee!.paidAmount > 0 ? "Pay Remaining" : "Pay Now"}
+   354→                    <ArrowRight className="size-3.5" />
+   355→                  </Button>
+   356→                </div>
+   357→              </div>
+   358→            ))}
+   359→          </div>
+   360→        </SectionCard>
+   361→      )}
+   362→
+   363→      {/* Payment History / All Applications with Fees */}
+   364→      {appsWithFees.length > 0 && (
+   365→        <SectionCard title="Payment Applications" description="All applications with fee records" icon={ReceiptIndianRupee} noPadding>
+   366→          <div className="overflow-x-auto">
+   367→            <table className="w-full text-sm">
+   368→              <thead className="bg-muted/40">
+   369→                <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   370→                  <th className="px-4 py-2.5 font-medium">Application No.</th>
+   371→                  <th className="px-4 py-2.5 font-medium">Project</th>
+   372→                  <th className="px-4 py-2.5 font-medium">Applicant</th>
+   373→                  <th className="px-4 py-2.5 font-medium text-right">Total Fee</th>
+   374→                  <th className="px-4 py-2.5 font-medium text-right">Paid</th>
+   375→                  <th className="px-4 py-2.5 font-medium text-right">Outstanding</th>
+   376→                  <th className="px-4 py-2.5 font-medium">Status</th>
+   377→                  <th className="px-4 py-2.5 font-medium text-right">Action</th>
+   378→                </tr>
+   379→              </thead>
+   380→              <tbody className="divide-y divide-border">
+   381→                {appsWithFees.map((app) => {
+   382→                  const isPaid = app.payment?.status === "SUCCESS";
+   383→                  const isPending = app.payment?.status === "PENDING" || app.status === "PAYMENT_PENDING" || app.status === "FEE_GENERATED";
+   384→                  return (
+   385→                    <tr key={app.id} className="hover:bg-muted/30 h-14">
+   386→                      <td className="px-4 py-2">
+   387→                        <button onClick={() => openApplication(app.id, "ltp-application-details")} className="font-mono text-xs font-semibold text-primary hover:underline">
+   388→                          {app.applicationNo}
+   389→                        </button>
+   390→                      </td>
+   391→                      <td className="px-4 py-2 text-xs truncate max-w-[180px]">{app.project.name}</td>
+   392→                      <td className="px-4 py-2 text-xs truncate max-w-[140px]">{app.applicant.name}</td>
+   393→                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums">{formatINR(app.fee!.total)}</td>
+   394→                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums text-success">{formatINR(app.fee!.paidAmount)}</td>
+   395→                      <td className="px-4 py-2 text-right font-mono text-xs tabular-nums text-destructive">{formatINR(app.fee!.outstanding)}</td>
+   396→                      <td className="px-4 py-2">
+   397→                        {isPaid && <Badge className="bg-success/10 text-success">Success</Badge>}
+   398→                        {isPending && <Badge className="bg-amber-500/15 text-amber-600">Pending</Badge>}
+   399→                        {!isPaid && !isPending && <Badge variant="outline">{app.payment?.status ?? "—"}</Badge>}
+   400→                      </td>
+   401→                      <td className="px-4 py-2 text-right">
+   402→                        {isPending && (
+   403→                          <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => openApplication(app.id, "ltp-payment")}>
+   404→                            {app.fee!.paidAmount > 0 ? "Pay Remaining" : "Pay Now"}
+   405→                          </Button>
+   406→                        )}
+   407→                        {isPaid && (
+   408→                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openApplication(app.id, "ltp-receipt")}>
+   409→                            View Receipt
+   410→                          </Button>
+   411→                        )}
+   412→                      </td>
+   413→                    </tr>
+   414→                  );
+   415→                })}
+   416→              </tbody>
+   417→            </table>
+   418→          </div>
+   419→        </SectionCard>
+   420→      )}
+   421→
+   422→      {/* Empty state */}
+   423→      {appsWithFees.length === 0 && (
+   424→        <EmptyState icon={CreditCard} title="No payment records" description="Applications with generated fees will appear here." />
+   425→      )}
+   426→    </div>
+   427→  );
+   428→}
+   429→
+   430→// ============================================================
+   431→// PAYMENT FLOW — for a specific application
+   432→// ============================================================
+   433→function PaymentFlow({
+   434→  app,
+   435→  navigate,
+   436→  storeInitiatePayment,
+   437→  processingAppIds,
+   438→  toast,
+   439→}: {
+   440→  app: Application;
+   441→  navigate: (view: ViewKey) => void;
+   442→  storeInitiatePayment: (appId: string, method: Payment["method"]) => void;
+   443→  processingAppIds: string[];
+   444→  toast: (params: { title: string; description?: string; variant?: "default" | "destructive" }) => void;
+   445→}) {
+   446→  const [method, setMethod] = React.useState<Payment["method"]>("UPI");
+   447→  const isProcessing = processingAppIds.includes(app.id);
+   448→  const isAlreadyPaid = app.payment?.status === "SUCCESS";
+   449→  const [stage, setStage] = React.useState<"pending" | "method" | "processing" | "success">(isAlreadyPaid ? "success" : "pending");
+   450→
+   451→  React.useEffect(() => {
+   452→    if (app.payment?.status === "SUCCESS") setStage("success");
+   453→    else if (isProcessing) setStage("processing");
+   454→  }, [app.payment?.status, isProcessing]);
+   455→
+   456→  function initiatePayment() {
+   457→    setStage("processing");
+   458→    storeInitiatePayment(app.id, method);
+   459→    toast({ title: "Payment initiated", description: `Processing payment for ${app.applicationNo}…` });
+   460→  }
+   461→
+   462→  const PAYMENT_STEPS = [
+   463→    { key: "pending", label: "Fee Pending" },
+   464→    { key: "method", label: "Select Method" },
+   465→    { key: "processing", label: "Processing" },
+   466→    { key: "success", label: "Successful" },
+   467→  ];
+   468→
+   469→  return (
+   470→    <div className="space-y-6">
+   471→      <PageBackButton fallbackView="ltp-payment" fallbackLabel="Payments" />
+   472→      <PageHeader
+   473→        title="Payment"
+   474→        description={`MC/BP/2026/04/000${app.applicationNo.slice(-1)}`}
+   475→        icon={CreditCard}
+   476→        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Payment" }]}
+   477→        badge={<Badge className="bg-warning/15 text-warning-foreground">Demo mode — no real payment</Badge>}
+   478→      />
+   479→
+   480→      {/* Application Context Bar */}
+   481→      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-gov sm:flex-row sm:items-center sm:justify-between">
+   482→        <div className="flex items-start gap-3 min-w-0 flex-1">
+   483→          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+   484→            <Building2 className="size-5" />
+   485→          </div>
+   486→          <div className="min-w-0 flex-1 space-y-1">
+   487→            <div className="flex items-center gap-2 flex-wrap">
+   488→              <span className="font-mono text-sm font-semibold text-primary">{app.applicationNo}</span>
+   489→              <StatusBadge status={app.status} showIcon={false} />
+   490→            </div>
+   491→            <p className="text-sm font-medium truncate">{app.project.name}</p>
+   492→            <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
+   493→              <span>{app.project.type.replace(/_/g, " ").toLowerCase()}</span>
+   494→              <span>·</span>
+   495→              <span>Applicant: {app.applicant.name}</span>
+   496→            </div>
+   497→          </div>
+   498→        </div>
+   499→      </div>
+   500→
+   501→      {/* Payment progress stepper */}
+   502→      <div className="rounded-xl border border-border bg-card p-4 shadow-gov">
+   503→        <ol className="flex items-center justify-between">
+   504→          {PAYMENT_STEPS.map((s, idx) => {
+   505→            const currentIdx = PAYMENT_STEPS.findIndex((p) => p.key === stage);
+   506→            const isActive = idx === currentIdx;
+   507→            const isDone = idx < currentIdx;
+   508→            return (
+   509→              <li key={s.key} className="flex flex-1 items-center">
+   510→                <div className="flex items-center gap-2">
+   511→                  <div className={cn("flex size-8 items-center justify-center rounded-full border-2 text-xs font-semibold", isDone && "border-success bg-success text-success-foreground", isActive && "border-primary bg-primary text-primary-foreground ring-4 ring-primary/15", !isDone && !isActive && "border-border bg-background text-muted-foreground")}>
+   512→                    {isDone ? <Check className="size-4" /> : idx + 1}
+   513→                  </div>
+   514→                  <span className={cn("hidden text-xs font-medium sm:block", isActive ? "text-foreground" : "text-muted-foreground")}>{s.label}</span>
+   515→                </div>
+   516→                {idx < PAYMENT_STEPS.length - 1 && <div className={cn("mx-2 h-0.5 flex-1 rounded-full", isDone ? "bg-success" : "bg-border")} />}
+   517→              </li>
+   518→            );
+   519→          })}
+   520→        </ol>
+   521→      </div>
+   522→
+   523→      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   524→        <div className="lg:col-span-2 space-y-6">
+   525→          {stage === "pending" && (
+   526→            <SectionCard title="Payment Summary" description="Review the amount before proceeding" icon={ReceiptIndianRupee}>
+   527→              <div className="space-y-3">
+   528→                <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-4">
+   529→                  <div>
+   530→                    <p className="text-xs text-muted-foreground">Application</p>
+   531→                    <p className="font-mono text-sm font-medium text-primary">{app.applicationNo}</p>
+   532→                  </div>
+   533→                  <StatusBadge status={app.status} showIcon={false} />
+   534→                </div>
+   535→                {app.fee!.lineItems.map((li) => (
+   536→                  <div key={li.componentCode} className="flex items-center justify-between text-sm">
+   537→                    <span className="text-muted-foreground">{li.name}</span>
+   538→                    <span className="font-mono tabular-nums">₹{li.amount.toLocaleString("en-IN")}</span>
+   539→                  </div>
+   540→                ))}
+   541→                <Separator />
+   542→                <div className="flex items-center justify-between">
+   543→                  <span className="font-semibold">Total Payable</span>
+   544→                  <span className="font-mono text-xl font-bold text-primary">{formatINR(app.fee!.total)}</span>
+   545→                </div>
+   546→                <div className="flex items-center justify-between text-sm">
+   547→                  <span className="text-muted-foreground">Paid Amount</span>
+   548→                  <span className="font-mono text-success">{formatINR(app.fee!.paidAmount)}</span>
+   549→                </div>
+   550→                <div className="flex items-center justify-between text-sm">
+   551→                  <span className="text-muted-foreground">Outstanding</span>
+   552→                  <span className="font-mono font-semibold text-destructive">{formatINR(app.fee!.outstanding)}</span>
+   553→                </div>
+   554→                <Button className="w-full" size="lg" onClick={() => setStage("method")}>
+   555→                  Proceed to Payment <ArrowRight className="size-4" />
+   556→                </Button>
+   557→              </div>
+   558→            </SectionCard>
+   559→          )}
+   560→
+   561→          {stage === "method" && (
+   562→            <SectionCard title="Select Payment Method" icon={Wallet}>
+   563→              <RadioGroup value={method} onValueChange={(v) => setMethod(v as Payment["method"])} className="space-y-2">
+   564→                {[
+   565→                  { value: "UPI", label: "UPI", desc: "Google Pay, PhonePe, Paytm", icon: Smartphone },
+   566→                  { value: "NETBANKING", label: "Net Banking", desc: "All major banks", icon: Landmark },
+   567→                  { value: "CARD", label: "Debit / Credit Card", desc: "Visa, Mastercard, RuPay", icon: CreditCard },
+   568→                  { value: "DEMAND_DRAFT", label: "Demand Draft", desc: "Submit DD at office", icon: FileCheck2 },
+   569→                ].map((m) => (
+   570→                  <Label key={m.value} htmlFor={m.value} className={cn("flex cursor-pointer items-center gap-3 rounded-lg border-2 p-3 transition-all", method === m.value ? "border-primary bg-primary/5" : "border-border hover:border-primary/40")}>
+   571→                    <RadioGroupItem value={m.value} id={m.value} />
+   572→                    <m.icon className="size-5 text-primary" />
+   573→                    <div className="flex-1">
+   574→                      <p className="text-sm font-medium">{m.label}</p>
+   575→                      <p className="text-[11px] text-muted-foreground">{m.desc}</p>
+   576→                    </div>
+   577→                  </Label>
+   578→                ))}
+   579→              </RadioGroup>
+   580→              <div className="mt-4 flex gap-2">
+   581→                <Button variant="outline" onClick={() => setStage("pending")}>Back</Button>
+   582→                <Button className="flex-1" size="lg" onClick={initiatePayment}>
+   583→                  <Lock className="size-4" /> Pay {formatINR(app.fee!.outstanding)} Securely
+   584→                </Button>
+   585→              </div>
+   586→              <p className="mt-3 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+   587→                <ShieldCheck className="size-3" /> Demo mode: no real payment is processed.
+   588→              </p>
+   589→            </SectionCard>
+   590→          )}
+   591→
+   592→          {stage === "processing" && (
+   593→            <SectionCard title="Processing Payment" icon={Loader2}>
+   594→              <div className="flex flex-col items-center gap-4 py-10 text-center">
+   595→                <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+   596→                  <Loader2 className="size-8 animate-spin text-primary" />
+   597→                </div>
+   598→                <div className="space-y-1">
+   599→                  <p className="text-base font-semibold">Processing your payment…</p>
+   600→                  <p className="text-sm text-muted-foreground">Verifying transaction for {app.applicationNo}.</p>
+   601→                </div>
+   602→                <div className="w-full max-w-xs space-y-1.5 text-left text-xs">
+   603→                  <ProcessingStep label="Connecting to payment gateway" done />
+   604→                  <ProcessingStep label="Authenticating with bank" done />
+   605→                  <ProcessingStep label="Verifying transaction" active />
+   606→                  <ProcessingStep label="Generating receipt" />
+   607→                </div>
+   608→                <p className="text-[10px] text-muted-foreground">Demo gateway · no real money is debited</p>
+   609→              </div>
+   610→            </SectionCard>
+   611→          )}
+   612→
+   613→          {stage === "success" && (
+   614→            <SectionCard title="Payment Successful" icon={CheckCircle2}>
+   615→              <div className="flex flex-col items-center gap-4 py-6 text-center">
+   616→                <div className="flex size-16 items-center justify-center rounded-full bg-success/10 text-success">
+   617→                  <CheckCircle2 className="size-8" />
+   618→                </div>
+   619→                <div className="space-y-1">
+   620→                  <p className="text-lg font-semibold">Payment Verified</p>
+   621→                  <p className="text-sm text-muted-foreground">Your payment has been processed. The application has been forwarded for technical scrutiny.</p>
+   622→                </div>
+   623→                <div className="w-full max-w-sm space-y-2 rounded-lg border border-border bg-muted/30 p-4 text-left text-xs">
+   624→                  <div className="flex justify-between"><span className="text-muted-foreground">Application</span><span className="font-mono font-medium text-primary">{app.applicationNo}</span></div>
+   625→                  <div className="flex justify-between"><span className="text-muted-foreground">Transaction ID</span><span className="font-mono font-medium">{app.payment?.transactionId || "—"}</span></div>
+   626→                  <div className="flex justify-between"><span className="text-muted-foreground">Amount Paid</span><span className="font-mono font-medium text-success">{formatINR(app.fee!.total)}</span></div>
+   627→                  <div className="flex justify-between"><span className="text-muted-foreground">Receipt No.</span><span className="font-mono font-medium text-primary">{app.payment?.receiptNo || "—"}</span></div>
+   628→                  <Separator className="my-1" />
+   629→                  <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">₹0</span></div>
+   630→                </div>
+   631→                <div className="flex flex-wrap justify-center gap-2">
+   632→                  <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> View Receipt</Button>
+   633→                  <Button onClick={() => navigate("ltp-application-details")}>Track Application <ArrowRight className="size-4" /></Button>
+   634→                </div>
+   635→              </div>
+   636→            </SectionCard>
+   637→          )}
+   638→        </div>
+   639→
+   640→        <div className="space-y-6">
+   641→          <SectionCard title="Security & Trust" icon={ShieldCheck}>
+   642→            <ul className="space-y-2.5 text-xs">
+   643→              {[
+   644→                { icon: Lock, text: "256-bit SSL encrypted gateway" },
+   645→                { icon: ShieldCheck, text: "PCI-DSS compliant infrastructure" },
+   646→                { icon: FileCheck2, text: "Backend transaction verification" },
+   647→                { icon: CheckCircle2, text: "Auto-generated verified receipt" },
+   648→              ].map((s, i) => (
+   649→                <li key={i} className="flex items-center gap-2">
+   650→                  <s.icon className="size-3.5 text-success" /> <span>{s.text}</span>
+   651→                </li>
+   652→              ))}
+   653→            </ul>
+   654→            <div className="mt-3 rounded-md border border-warning/30 bg-warning/5 p-2 text-[10px] text-warning-foreground">
+   655→              <AlertCircle className="mr-1 inline size-3" />
+   656→              Demo mode: no real payment is processed.
+   657→            </div>
+   658→          </SectionCard>
+   659→        </div>
+   660→      </div>
+   661→    </div>
+   662→  );
+   663→}
+   664→
+   665→function ProcessingStep({ label, done, active }: { label: string; done?: boolean; active?: boolean }) {
+   666→  return (
+   667→    <div className="flex items-center gap-2">
+   668→      {done ? <CheckCircle2 className="size-3.5 text-success" /> : active ? <Loader2 className="size-3.5 animate-spin text-primary" /> : <Clock className="size-3.5 text-muted-foreground" />}
+   669→      <span className={cn(done || active ? "text-foreground" : "text-muted-foreground")}>{label}</span>
+   670→    </div>
+   671→  );
+   672→}
+   673→
+   674→// ============================================================
+   675→// RECEIPT
+   676→// ============================================================
+   677→export function LtpReceipt() {
+   678→  const { navigate } = useAppStore();
+   679→  const visibleApps = useVisibleApplications();
+   680→  const app = useAppOrDefault();
+   681→  if (!app || !app.payment || app.payment.status !== "SUCCESS") {
+   682→    return (
+   683→      <div className="space-y-6">
+   684→        <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+   685→        <PageHeader title="Payment Receipt" icon={ScrollText} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]} />
+   686→        <EmptyState icon={ScrollText} title="No receipt available" description="Receipts are generated after a successful payment." action={<Button size="sm" onClick={() => navigate("ltp-payment")}>Go to payment</Button>} />
+   687→      </div>
+   688→    );
+   689→  }
+   690→  const p = app.payment;
+   691→
+   692→  return (
+   693→    <div className="space-y-6">
+   694→      <PageBackButton fallbackView="ltp-payment" fallbackLabel="Payments" />
+   695→      <PageHeader
+   696→        title="Payment Receipt"
+   697→        description="Official receipt for your payment transaction."
+   698→        icon={ScrollText}
+   699→        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]}
+   700→        actions={
+   701→          <>
+   702→            <AppSelect apps={visibleApps} current={app} view="ltp-receipt" />
+   703→            <Button variant="outline" size="sm"><Printer className="size-4" /> Print</Button>
+   704→            <Button size="sm"><Download className="size-4" /> Download PDF</Button>
+   705→          </>
+   706→        }
+   707→      />
+   708→
+   709→      <div className="mx-auto max-w-3xl">
+   710→        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-gov-lg">
+   711→          {/* Receipt header */}
+   712→          <div className="flex flex-col gap-4 border-b border-border bg-sidebar p-6 text-sidebar-foreground sm:flex-row sm:items-center sm:justify-between">
+   713→            <div className="flex items-center gap-3">
+   714→              <div className="flex size-12 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+   715→                <Building2 className="size-6" />
+   716→              </div>
+   717→              <div>
+   718→                <p className="text-sm font-semibold">LTP Approval</p>
+   719→                <p className="text-[11px] text-sidebar-foreground/60">Building Permit Management System</p>
+   720→              </div>
+   721→            </div>
+   722→            <div className="text-right">
+   723→              <p className="text-[11px] text-sidebar-foreground/60">Receipt No.</p>
+   724→              <p className="font-mono text-sm font-semibold">{p.receiptNo}</p>
+   725→            </div>
+   726→          </div>
+   727→
+   728→          {/* Receipt body */}
+   729→          <div className="p-6 space-y-5">
+   730→            <div className="flex items-center justify-center">
+   731→              <div className="flex items-center gap-2 rounded-full border border-success/30 bg-success/5 px-4 py-1.5 text-success">
+   732→                <CheckCircle2 className="size-4" />
+   733→                <span className="text-sm font-medium">Payment Successful &amp; Verified</span>
+   734→              </div>
+   735→            </div>
+   736→
+   737→            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+   738→              <InfoGrid items={[
+   739→                { label: "Application No.", value: <span className="font-mono text-primary">{app.applicationNo}</span> },
+   740→                { label: "Applicant", value: app.applicant.name },
+   741→                { label: "Project", value: app.project.name },
+   742→              ]} columns={1} />
+   743→              <InfoGrid items={[
+   744→                { label: "Transaction ID", value: <span className="font-mono">{p.transactionId}</span> },
+   745→                { label: "Reference No.", value: <span className="font-mono">{p.referenceNo}</span> },
+   746→                { label: "Date", value: formatDateTime(p.completedAt ?? "") },
+   747→              ]} columns={1} />
+   748→            </div>
+   749→
+   750→            <Separator />
+   751→
+   752→            <div>
+   753→              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fee Breakup</p>
+   754→              <table className="w-full text-sm">
+   755→                <tbody className="divide-y divide-border">
+   756→                  {app.fee?.lineItems.map((li) => (
+   757→                    <tr key={li.componentCode}>
+   758→                      <td className="py-2">
+   759→                        <p className="text-xs font-medium">{li.name}</p>
+   760→                        <p className="text-[10px] text-muted-foreground">{li.description}</p>
+   761→                      </td>
+   762→                      <td className="py-2 text-right font-mono text-xs tabular-nums">₹{li.amount.toLocaleString("en-IN")}</td>
+   763→                    </tr>
+   764→                  ))}
+   765→                </tbody>
+   766→              </table>
+   767→              <div className="mt-3 flex justify-end">
+   768→                <div className="w-full max-w-xs space-y-1.5">
+   769→                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-mono tabular-nums">{formatINR(app.fee?.subtotal ?? 0)}</span></div>
+   770→                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="font-mono tabular-nums">{formatINR(app.fee?.gst ?? 0)}</span></div>
+   771→                  <Separator />
+   772→                  <div className="flex justify-between"><span className="font-semibold">Total Paid</span><span className="font-mono text-lg font-bold text-success">{formatINR(p.amount)}</span></div>
+   773→                </div>
+   774→              </div>
+   775→            </div>
+   776→
+   777→            <Separator />
+   778→
+   779→            <div className="grid grid-cols-2 gap-4 text-xs">
+   780→              <div>
+   781→                <p className="text-muted-foreground">Payment Method</p>
+   782→                <p className="font-medium">{p.method} · {p.gateway}</p>
+   783→              </div>
+   784→              <div>
+   785→                <p className="text-muted-foreground">Verified</p>
+   786→                <p className="font-medium text-success">{p.verified ? "Yes — backend verified" : "Pending"}</p>
+   787→              </div>
+   788→            </div>
+   789→          </div>
+   790→
+   791→          {/* Receipt footer */}
+   792→          <div className="border-t border-border bg-muted/30 p-4 text-center">
+   793→            <p className="text-[10px] text-muted-foreground">
+   794→              This is a computer-generated receipt and does not require a physical signature. Please retain for your records.
+   795→            </p>
+   796→            <p className="mt-1 text-[10px] text-muted-foreground">Generated on {formatDateTime(p.completedAt ?? "")}</p>
+   797→          </div>
+   798→        </div>
+   799→      </div>
+   800→    </div>
+   801→  );
+   802→}
+   803→
