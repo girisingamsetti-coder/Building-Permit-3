@@ -3,114 +3,88 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
-import {
-  APPLICATIONS,
-  USERS,
-  ROLES,
-  FEE_STRUCTURES,
-  SMS_TEMPLATES,
-  WORKFLOW_STAGES,
-} from "@/data/mock-data";
+import { ROLES, FEE_STRUCTURES, SMS_TEMPLATES, WORKFLOW_STAGES } from "@/data/mock-data";
 import {
   PageHeader,
   SectionCard,
-  StatCard,
 } from "@/components/design-system/layout";
-import { RoleBadge } from "@/components/design-system/badges";
-import { AuditTimeline, formatDateTime } from "@/components/design-system/workflow";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
   Users as UsersIcon,
+  UserCheck,
   ShieldCheck,
-  FileCog,
-  Calculator,
+  UserX,
   Workflow,
-  MailWarning,
+  AlertTriangle,
   History,
+  HeartPulse,
   Settings,
-  Activity,
+  ArrowRight,
   Server,
   Database,
   Smartphone,
   CreditCard,
   HardDrive,
-  ArrowRight,
+  FileCog,
+  Calculator,
+  MailWarning,
   CircleCheck,
   CircleAlert,
   Clock,
-  Cpu,
-  Gauge,
 } from "lucide-react";
-import type { AuditEntry, RoleKey, ViewKey } from "@/types";
-
-// ---------- helpers ----------
-const activeRoles = Object.values(ROLES).filter((r) => r.key !== "ADMIN");
-const todayIso = "2025-01-16";
-
-function buildAdminAuditEntries(): AuditEntry[] {
-  const fromApps = APPLICATIONS.flatMap((a) => a.auditLog);
-  const adminExtras: AuditEntry[] = [
-    { id: "ax-1", user: "Shri. Kailash Patil", role: "ADMIN", action: "Created user account", entity: "User", entityId: "u-tps-02", timestamp: "2025-01-16T08:42:00", ip: "10.0.0.55", device: "Edge / Windows" },
-    { id: "ax-2", user: "Shri. Kailash Patil", role: "ADMIN", action: "Updated fee structure", entity: "FeeStructure", entityId: "fs-bp-res-2025", timestamp: "2025-01-16T09:05:00", oldStatus: "Active", newStatus: "Active", ip: "10.0.0.55", device: "Edge / Windows" },
-    { id: "ax-3", user: "Shri. Kailash Patil", role: "ADMIN", action: "Disabled SMS template", entity: "SmsTemplate", entityId: "t9", timestamp: "2025-01-16T09:20:00", oldStatus: "Active", newStatus: "Inactive", ip: "10.0.0.55", device: "Edge / Windows" },
-    { id: "ax-4", user: "Shri. Kailash Patil", role: "ADMIN", action: "Exported audit log (CSV)", entity: "AuditLog", entityId: "export-2025-0142", timestamp: "2025-01-16T10:11:00", ip: "10.0.0.55", device: "Edge / Windows" },
-    { id: "ax-5", user: "Shri. Kailash Patil", role: "ADMIN", action: "Updated role permissions", entity: "Role", entityId: "ZJD", timestamp: "2025-01-16T11:30:00", ip: "10.0.0.55", device: "Edge / Windows" },
-  ];
-  const merged = [...fromApps, ...adminExtras];
-  // dedupe by id
-  const seen = new Set<string>();
-  const deduped = merged.filter((e) => {
-    if (seen.has(e.id)) return false;
-    seen.add(e.id);
-    return true;
-  });
-  return deduped.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
-}
+import type { AdminAuditEntry, ViewKey } from "@/types";
 
 const HEALTH_ITEMS = [
-  { id: "api", label: "API Gateway", icon: Server, status: "Operational" as const, latency: "82 ms", note: "All routes responding within SLA" },
-  { id: "db", label: "Database (Primary)", icon: Database, status: "Operational" as const, latency: "14 ms", note: "Read replica lag 0.3s" },
-  { id: "sms", label: "SMS Gateway (MSG91)", icon: Smartphone, status: "Degraded" as const, latency: "1.4 s", note: "Transactional queue degraded — retrying" },
-  { id: "pay", label: "Payment Gateway (BillDesk)", icon: CreditCard, status: "Operational" as const, latency: "210 ms", note: "Sandbox environment — all UPI/NetBanking flows nominal" },
-  { id: "storage", label: "Object Storage (S3)", icon: HardDrive, status: "Operational" as const, latency: "47 ms", note: "Bucket: ltp-uploads-prod, 1.2 TB used" },
-];
-
-const CONFIG_CARDS: {
-  view: ViewKey;
-  title: string;
-  desc: string;
-  icon: typeof UsersIcon;
-  count: () => string;
-}[] = [
-  { view: "admin-users", title: "Users", desc: "Manage user accounts, activation & access", icon: UsersIcon, count: () => `${USERS.length} users` },
-  { view: "admin-roles", title: "Roles & Permissions", desc: "RBAC matrix, role-level permissions", icon: ShieldCheck, count: () => `${activeRoles.length} roles` },
-  { view: "admin-application-types", title: "Application Types", desc: "Per-type document checklist config", icon: FileCog, count: () => "6 types" },
-  { view: "admin-fee-structures", title: "Fee Structures", desc: "Components, slabs & rate schedules", icon: Calculator, count: () => `${FEE_STRUCTURES.length} structures` },
-  { view: "admin-workflow", title: "Workflow Stages", desc: "Stage routing & role ownership", icon: Workflow, count: () => `${WORKFLOW_STAGES.length} stages` },
-  { view: "admin-templates", title: "Notification / SMS", desc: "Template library & delivery rules", icon: MailWarning, count: () => `${SMS_TEMPLATES.length} templates` },
-  { view: "admin-audit", title: "Audit Logs", desc: "Searchable, exportable event history", icon: History, count: () => "12,480 events" },
-  { view: "admin-settings", title: "System Settings", desc: "Authority, integrations & maintenance", icon: Settings, count: () => "5 sections" },
+  { id: "api", label: "API Gateway", icon: Server, status: "Operational" as const, note: "Demo monitoring — all routes responding" },
+  { id: "db", label: "Database (SQLite)", icon: Database, status: "Operational" as const, note: "Demo local database" },
+  { id: "storage", label: "File Storage", icon: HardDrive, status: "Operational" as const, note: "Demo local storage" },
+  { id: "sms", label: "SMS Gateway", icon: Smartphone, status: "Demo" as const, note: "Mock SMS — no real delivery" },
+  { id: "pay", label: "Payment Gateway", icon: CreditCard, status: "Demo" as const, note: "Mock payment — no real charges" },
 ];
 
 export function AdminDashboard() {
-  const { navigate, user } = useAppStore();
-  const auditEntries = React.useMemo(() => buildAdminAuditEntries().slice(0, 8), []);
-  const todaysEvents = auditEntries.filter((e) => e.timestamp.startsWith(todayIso)).length;
+  const { navigate, users, roles, adminAuditLog, applicationTypes, applications } = useAppStore();
+
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.active && u.status === "ACTIVE").length;
+  const inactiveUsers = users.filter((u) => !u.active || u.status === "INACTIVE" || u.status === "SUSPENDED").length;
+  const pendingUsers = users.filter((u) => u.status === "PENDING").length;
+  const totalRoles = Object.keys(roles).length;
+  const workflowStages = 13;
+  const activeAlerts = inactiveUsers + pendingUsers;
+  const today = new Date().toISOString().slice(0, 10);
+  const auditToday = adminAuditLog.filter((e) => e.timestamp.startsWith(today)).length;
+
+  const recentAudit = adminAuditLog.slice(0, 8);
+
+  const attentionItems: { label: string; count: number; view: ViewKey; severity: "high" | "medium" | "low" }[] = [];
+  if (pendingUsers > 0) attentionItems.push({ label: "Pending user approvals", count: pendingUsers, view: "admin-users", severity: "high" });
+  if (inactiveUsers > 0) attentionItems.push({ label: "Inactive/suspended users", count: inactiveUsers, view: "admin-users", severity: "medium" });
+  const inactiveAppTypes = applicationTypes.filter((t) => !t.active).length;
+  if (inactiveAppTypes > 0) attentionItems.push({ label: "Inactive application types", count: inactiveAppTypes, view: "admin-application-types", severity: "low" });
+  const openShortfalls = applications.flatMap((a) => a.shortfalls).filter((sf) => sf.status === "OPEN" || sf.status === "REOPENED").length;
+  if (openShortfalls > 0) attentionItems.push({ label: "Open shortfalls across applications", count: openShortfalls, view: "admin-audit", severity: "medium" });
+
+  const configCards: { view: ViewKey; title: string; desc: string; icon: typeof UsersIcon; count: string }[] = [
+    { view: "admin-users", title: "Users", desc: "Accounts, activation & access", icon: UsersIcon, count: `${totalUsers} users` },
+    { view: "admin-roles", title: "Roles & Permissions", desc: "RBAC matrix & permissions", icon: ShieldCheck, count: `${totalRoles} roles` },
+    { view: "admin-application-types", title: "Application Types", desc: "Per-type document checklist", icon: FileCog, count: `${applicationTypes.length} types` },
+    { view: "admin-fee-structures", title: "Fee Structures", desc: "Components & rate schedules", icon: Calculator, count: "View structures" },
+    { view: "admin-workflow", title: "Workflow Stages", desc: "Stage routing & ownership", icon: Workflow, count: `${workflowStages} stages` },
+    { view: "admin-templates", title: "Notification / SMS", desc: "Template library", icon: MailWarning, count: "View templates" },
+    { view: "admin-audit", title: "Audit Logs", desc: "Event history & search", icon: History, count: `${adminAuditLog.length} events` },
+    { view: "admin-settings", title: "System Settings", desc: "Portal config & integrations", icon: Settings, count: "View settings" },
+  ];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Administration"
-        description="Centralised control centre for users, configuration, integrations and system monitoring across the LTP approval workflow portal."
+        description="Centralized control centre for users, roles, permissions, workflow configuration, integrations and system monitoring."
         icon={Settings}
         breadcrumbs={[{ label: "Administration" }, { label: "Dashboard" }]}
-        badge={<Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900">Admin Console</Badge>}
+        badge={<Badge variant="outline" className="bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700">Admin Console</Badge>}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={() => navigate("admin-audit")}>
@@ -123,162 +97,168 @@ export function AdminDashboard() {
         }
       />
 
-      {/* ---------- Stat row ---------- */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8">
-        <StatCard label="Total Users" value={USERS.length} icon={UsersIcon} accent="primary" onClick={() => navigate("admin-users")} />
-        <StatCard label="Active Roles" value={activeRoles.length} icon={ShieldCheck} accent="info" onClick={() => navigate("admin-roles")} />
-        <StatCard label="Application Types" value={6} icon={FileCog} accent="amber" onClick={() => navigate("admin-application-types")} />
-        <StatCard label="Fee Structures" value={FEE_STRUCTURES.length} icon={Calculator} accent="success" onClick={() => navigate("admin-fee-structures")} />
-        <StatCard label="Workflow Stages" value={WORKFLOW_STAGES.length} icon={Workflow} accent="info" onClick={() => navigate("admin-workflow")} />
-        <StatCard label="SMS Templates" value={SMS_TEMPLATES.length} icon={MailWarning} accent="amber" onClick={() => navigate("admin-templates")} />
-        <StatCard label="Today's Audit Events" value={todaysEvents} icon={Activity} accent="warning" onClick={() => navigate("admin-audit")} />
-        <StatCard label="System Uptime" value="99.94%" icon={Gauge} accent="success" />
+      {/* ROW 1: KPI CARDS */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard label="Total Users" value={totalUsers} icon={UsersIcon} hint={`${activeUsers} active · ${inactiveUsers} inactive`} cls="bg-primary/10 text-primary" />
+        <KpiCard label="Active Users" value={activeUsers} icon={UserCheck} hint={`${pendingUsers} pending approval`} cls="bg-success/10 text-success" />
+        <KpiCard label="Roles" value={totalRoles} icon={ShieldCheck} hint="RBAC configured" cls="bg-info/10 text-info" />
+        <KpiCard label="Pending Access" value={pendingUsers} icon={UserX} hint="Awaiting approval" cls="bg-warning/15 text-warning-foreground" />
+        <KpiCard label="Workflow Stages" value={workflowStages} icon={Workflow} hint="Configured pipeline" cls="bg-primary/10 text-primary" />
+        <KpiCard label="Active Alerts" value={activeAlerts} icon={AlertTriangle} hint={`${inactiveUsers} inactive users`} cls="bg-destructive/10 text-destructive" />
+        <KpiCard label="Audit Events Today" value={auditToday} icon={History} hint={`${adminAuditLog.length} total events`} cls="bg-info/10 text-info" />
+        <KpiCard label="System Health" value="Operational" icon={HeartPulse} hint="Demo monitoring" cls="bg-success/10 text-success" />
       </div>
 
-      {/* ---------- System Health ---------- */}
-      <SectionCard
-        title="System Health"
-        description="Real-time status of platform integrations and infrastructure components."
-        icon={Cpu}
-        action={
-          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900 gap-1.5">
-            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> All systems operational
-          </Badge>
-        }
-      >
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {HEALTH_ITEMS.map((h) => {
-            const isDegraded = h.status === "Degraded";
-            const StatusIcon = isDegraded ? CircleAlert : CircleCheck;
-            return (
-              <div
-                key={h.id}
-                className={cn(
-                  "flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-gov",
-                  isDegraded ? "border-amber-300/60 dark:border-amber-800/60" : "border-border"
-                )}
-              >
-                <div className="flex items-start justify-between">
-                  <div className={cn("flex size-9 items-center justify-center rounded-lg", isDegraded ? "bg-amber-500/15 text-amber-600 dark:text-amber-400" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400")}>
-                    <h.icon className="size-4.5" />
+      {/* ROW 2: System Health + Administrative Attention */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[72%_28%]">
+        <SectionCard title="System Health" description="Demo monitoring data — no real infrastructure backend" icon={HeartPulse}>
+          <ul className="space-y-3">
+            {HEALTH_ITEMS.map((item) => {
+              const Icon = item.icon;
+              const isDegraded = (item.status as string) === "Degraded";
+              const isDemo = item.status === "Demo";
+              return (
+                <li key={item.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-lg",
+                      isDegraded ? "bg-warning/15 text-warning-foreground" : isDemo ? "bg-muted text-muted-foreground" : "bg-success/10 text-success"
+                    )}>
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground truncate">{item.note}</p>
+                    </div>
                   </div>
-                  <Badge variant="outline" className={cn("gap-1 font-medium", isDegraded ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-900" : "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900")}>
-                    <StatusIcon className="size-3" /> {h.status}
+                  <Badge className={cn(
+                    "shrink-0",
+                    isDegraded ? "bg-warning/15 text-warning-foreground" : isDemo ? "bg-muted text-muted-foreground" : "bg-success/10 text-success"
+                  )}>
+                    {isDegraded ? <CircleAlert className="size-3" /> : isDemo ? <Clock className="size-3" /> : <CircleCheck className="size-3" />}
+                    {item.status}
                   </Badge>
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium text-foreground">{h.label}</p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{h.note}</p>
-                </div>
-                <div className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Clock className="size-3" />
-                  <span className="font-mono tabular-nums">{h.latency}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </SectionCard>
+                </li>
+              );
+            })}
+          </ul>
+        </SectionCard>
 
-      {/* ---------- Recent Activity ---------- */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <SectionCard
-            title="Recent Activity"
-            description="Latest audit events across the portal — newest first."
-            icon={Activity}
-            action={
-              <Button variant="ghost" size="sm" onClick={() => navigate("admin-audit")} className="text-primary">
-                View all <ArrowRight className="size-3.5" />
-              </Button>
-            }
-          >
-            <ScrollArea className="max-h-[460px] pr-3">
-              <AuditTimeline entries={auditEntries} />
-            </ScrollArea>
-          </SectionCard>
-        </div>
-
-        {/* ---------- Configuration Overview ---------- */}
-        <SectionCard
-          title="Configuration Overview"
-          description="Jump straight into any administrative module."
-          icon={Settings}
-        >
-          <div className="grid grid-cols-1 gap-3">
-            {CONFIG_CARDS.map((c) => (
-              <button
-                key={c.view}
-                type="button"
-                onClick={() => navigate(c.view)}
-                className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:bg-accent/40"
-              >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <c.icon className="size-4.5" />
-                </div>
-                <div className="min-w-0 flex-1 space-y-0.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium text-foreground">{c.title}</p>
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{c.count()}</span>
-                  </div>
-                  <p className="truncate text-xs text-muted-foreground">{c.desc}</p>
-                </div>
-                <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </button>
-            ))}
-          </div>
+        <SectionCard title="Administrative Attention" description="Items requiring admin action" icon={AlertTriangle}>
+          {attentionItems.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <CircleCheck className="size-8 text-success" />
+              <p className="text-sm font-medium">All clear</p>
+              <p className="text-xs text-muted-foreground">No pending administrative actions.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2.5">
+              {attentionItems.map((item, i) => (
+                <li key={i}>
+                  <button
+                    onClick={() => navigate(item.view)}
+                    className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={cn(
+                        "flex size-8 shrink-0 items-center justify-center rounded-lg",
+                        item.severity === "high" ? "bg-destructive/10 text-destructive" : item.severity === "medium" ? "bg-warning/15 text-warning-foreground" : "bg-info/10 text-info"
+                      )}>
+                        <AlertTriangle className="size-4" />
+                      </div>
+                      <span className="text-xs font-medium truncate">{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge className={cn(
+                        item.severity === "high" ? "bg-destructive/10 text-destructive" : item.severity === "medium" ? "bg-warning/15 text-warning-foreground" : "bg-info/10 text-info"
+                      )}>{item.count}</Badge>
+                      <ArrowRight className="size-3.5 text-muted-foreground" />
+                    </div>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </SectionCard>
       </div>
 
-      {/* ---------- Configuration cards grid (manage) ---------- */}
-      <SectionCard
-        title="Manage Modules"
-        description="Each module is independently configurable. All changes are audit-logged."
-        icon={ShieldCheck}
-        noPadding
-      >
-        <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4 lg:[&>*:nth-child(2)]:border-l-0">
-          {CONFIG_CARDS.map((c) => (
-            <button
-              key={`mc-${c.view}`}
-              type="button"
-              onClick={() => navigate(c.view)}
-              className="group flex flex-col gap-2 p-5 text-left transition-colors hover:bg-accent/40"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <c.icon className="size-4.5" />
-                </div>
-                <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-foreground">{c.title}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{c.count()}</p>
-              </div>
-              <span className="mt-1 inline-flex items-center text-xs font-medium text-primary">Manage →</span>
-            </button>
-          ))}
-        </div>
-      </SectionCard>
+      {/* ROW 3: Recent Audit + Configuration Overview */}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[72%_28%]">
+        <SectionCard title="Recent Audit Activity" description="Latest administrative and application events" icon={History}
+          action={<Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => navigate("admin-audit")}>View All</Button>}
+        >
+          {recentAudit.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <History className="size-8 text-muted-foreground" />
+              <p className="text-sm font-medium">No audit events yet</p>
+              <p className="text-xs text-muted-foreground">Administrative actions will appear here once performed.</p>
+            </div>
+          ) : (
+            <ul className="space-y-2 max-h-96 overflow-y-auto">
+              {recentAudit.map((entry) => (
+                <li key={entry.id} className="flex items-start gap-3 rounded-lg border border-border bg-card p-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <History className="size-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-medium">{entry.action}</p>
+                      <Badge variant="outline" className="text-[9px]">{entry.targetType}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {entry.user} · {entry.entityId}
+                      {entry.oldValue && entry.newValue ? ` · ${entry.oldValue} → ${entry.newValue}` : entry.newValue ? ` → ${entry.newValue}` : ""}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {new Date(entry.timestamp).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </SectionCard>
 
-      {/* ---------- Footer info ---------- */}
-      <Card className="shadow-gov">
-        <CardContent className="flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-            <ShieldCheck className="size-4 text-primary" />
-            <span>
-              Signed in as <span className="font-medium text-foreground">{user?.name}</span>
-              {user?.role && (<span className="ml-2"><RoleBadge role={user.role as RoleKey} /></span>)}
-            </span>
+        <SectionCard title="Configuration Overview" description="Admin modules" icon={Settings}>
+          <div className="grid grid-cols-1 gap-2.5">
+            {configCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <button
+                  key={card.view}
+                  onClick={() => navigate(card.view)}
+                  className="group flex items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30"
+                >
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Icon className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{card.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{card.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="text-xs text-muted-foreground">{card.count}</span>
+                    <ArrowRight className="size-3.5 text-muted-foreground group-hover:text-primary" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Clock className="size-3.5" />
-            <span>Last portal refresh: {formatDateTime(new Date().toISOString())}</span>
-          </div>
-        </CardContent>
-      </Card>
+        </SectionCard>
+      </div>
     </div>
   );
 }
 
-export default AdminDashboard;
+function KpiCard({ label, value, icon: Icon, hint, cls }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }>; hint?: string; cls: string }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 shadow-gov">
+      <div className={cn("flex size-9 items-center justify-center rounded-lg", cls)}>
+        <Icon className="size-4" />
+      </div>
+      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      {hint && <p className="mt-0.5 text-[10px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}

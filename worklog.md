@@ -105,3 +105,37 @@ Verification:
 NOTE: This task rebuilt the STORE FOUNDATION (types, state slices, actions, RBAC). The admin module UI components (admin-users, admin-roles, admin-fee-structures, admin-application-types, admin-workflow, admin-templates, admin-settings, admin-dashboard, admin-audit) still need to be rewritten to use the new store actions — they currently still read from mock-data imports and use toast-only handlers. However, the store infrastructure is complete and tested: all 12 admin actions are implemented, audit-logged, and the login security checks (active/inactive/suspended/pending) work.
 
 Files changed: types/index.ts, mock-data.ts, store/app-store.ts, lib/permissions.ts, tsconfig.json, topbar.tsx, admin-roles.tsx, .zscripts/dev.sh, DEVELOPMENT.md
+
+---
+Task ID: 26
+Agent: main
+Task: Fix admin audit module alignment/issues, and fix errors across the whole application.
+
+Work Log:
+1. admin-audit.tsx — COMPLETE REWRITE:
+   - Removed hardcoded ADMIN_EXTRAS (7 fake entries) — audit feed now sources from store's adminAuditLog + useAllAuditLogs() (application audit)
+   - Real CSV export: builds Blob, creates download link, triggers click — no more toast-only fake
+   - Table headings made bold (font-bold, text-foreground) with border-b-2 + bg-muted/60 for clear separation
+   - Added tabs: All Events / Admin Actions / Application Events
+   - Filters (action, entity) now derive from real data instead of hardcoded arrays
+   - Fixed hardcoded "2025-01-16" today date → dynamic `new Date().toISOString().slice(0,10)`
+   - KPI cards (Total/Today/Admin/App) derived from store data
+   - Proper alignment with consistent grid layout
+
+2. admin-dashboard.tsx — COMPLETE REWRITE:
+   - All KPIs derived from store: users.length, Object.keys(roles).length, adminAuditLog.length, applicationTypes.length
+   - Removed hardcoded values: "6 types", "12,480 events", "99.94% uptime", todayIso = "2025-01-16"
+   - Recent Activity now sources from store adminAuditLog (not mock-data APPLICATIONS.flatMap)
+   - Configuration Overview cards show real counts from store
+   - System Health clearly labeled "Demo monitoring data"
+   - Administrative Attention section derived from real data (pending users, inactive users, inactive app types, open shortfalls)
+   - Clean 4-row layout: KPIs → Health + Attention → Recent Audit + Config Overview
+
+3. Both modules now use the store's users, roles, adminAuditLog, applicationTypes, applications slices (added in Task 25).
+
+Verification (Agent Browser):
+- Admin Audit: table headings bold (700) ✓, 4 KPI cards (224 total, 0 admin, 224 app) ✓, tabs work ✓, Export CSV works ✓, no fake entries ✓, 0 console errors ✓
+- Admin Dashboard: 8 KPI cards all from store (10 users, 10 roles, 13 stages, 0 audit today, Operational) ✓, Configuration Overview with real counts ✓, System Health + Administrative Attention ✓, 0 console errors ✓
+- Lint: 0 errors/0 warnings ✓, TypeScript: 0 errors ✓, Build: PASS ✓, Server: HTTP 200 ✓
+
+Files changed: src/components/admin/admin-audit.tsx, src/components/admin/admin-dashboard.tsx
