@@ -610,3 +610,77 @@ Stage Summary:
 - Build: not run per sandbox rule — equivalent verification via tsc + lint + agent-browser e2e test ✓
 - Tax model is now configurable (CGST_SGST / IGST / ZERO_TAX) with admin-editable rates, demo defaults (CGST 9% + AP SGST 9%), and historical immutability (taxConfig snapshot on each ApplicationFee)
 - All fee math is mathematically consistent: subtotal + totalGST = total, total - paid = outstanding
+
+---
+Task ID: 14
+Agent: main
+Task: Modify ONLY the Drawings & Scrutiny and Documents modules — fix top application selector alignment, simplify to Search/Find only, create a reusable ApplicationSelector component with searchable dropdown.
+
+Work Log:
+1. Inspected existing modules:
+   - `src/components/design-system/app-context.tsx` — existing `ApplicationSelector` was a basic shadcn `<Select>` without search (h-8, w-200px, no search input, no keyboard nav).
+   - `src/components/ltp/ltp-drawings.tsx` (588 lines) — used `ApplicationSelector` at line 146 (Drawings page) and line 417 (Scrutiny Report sub-page). Back button had misleading `fallbackLabel="Applications"`.
+   - `src/components/ltp/ltp-documents.tsx` (358 lines) — used `ApplicationSelector` at line 129. Back button had misleading `fallbackLabel="Applications"`.
+   - Both modules already used the shared `useVisibleApplications()` hook (single source of truth) and `openApplication(appId, view)` for switching — no duplicate datasets.
+
+2. Rewrote `ApplicationSelector` in `app-context.tsx` as a searchable Popover dropdown:
+   - **Trigger button**: h-10 (40px), w-[240px] on desktop (sm:w-[240px]), w-full on mobile. Rounded-md, border-input, bg-background, shadow-sm. Shows: Building2 icon + app no (mono, primary, text-primary) + project · applicant (secondary, text-muted-foreground, truncated).
+   - **Popover content**: w-[280px], align="end", p-0.
+   - **Search field**: sticky top, bg-popover, border-b. Input with Search icon, aria-label="Search applications", placeholder="Search applications…", h-8, bg-muted/40.
+   - **Results list**: max-h-[320px], overflow-y-auto, custom scrollbar styling. Each result: check icon (if selected) + app no (mono, font-semibold) + project (text-[11px]) + applicant (text-[10px]). All truncated with `truncate` class.
+   - **Selected state**: `bg-primary/10` background + Check icon (text-primary).
+   - **Active state** (keyboard hover): `bg-muted` background.
+   - **Empty state**: "No applications found." + "Try another application number, project or applicant."
+   - **Search**: case-insensitive partial match on `applicationNo`, `project.name`, `applicant.name`. Searches the COMPLETE shared `useVisibleApplications()` dataset (not just visible/loaded records).
+   - **Keyboard**: ArrowDown/ArrowUp to navigate, Enter to select, Escape to close. `activeIndex` state tracks position. `scrollIntoView` keeps active item visible.
+   - **Accessibility**: `aria-label="Select application"`, `aria-haspopup="listbox"`, `aria-expanded`, `role="listbox"`, `role="option"`, `aria-selected`.
+   - **No duplicate logic**: Both Drawings and Documents use the SAME component with the same props (`currentApp`, `view`, `apps?`).
+
+3. Added `useAppSwitchLoading(appId)` hook + `AppSwitchSkeleton` component to `app-context.tsx`:
+   - Returns `true` for ~250ms when the app ID changes, then `false`.
+   - Provides a brief loading state to prevent any visual flash of the previous application's data (spec section 26).
+   - `AppSwitchSkeleton` renders a lightweight skeleton (context bar placeholder + content placeholder) with `animate-pulse`.
+
+4. Updated `ltp-drawings.tsx`:
+   - Imported `useAppSwitchLoading` + `AppSwitchSkeleton`.
+   - Added `const switching = useAppSwitchLoading(app?.id);` before the early return (hooks must be called unconditionally).
+   - Wrapped the content (after the header) in `{switching ? <AppSwitchSkeleton /> : <>...</>}`.
+   - Removed misleading `fallbackLabel="Applications"` from `PageBackButton` — now uses the VIEW_LABELS hierarchy: "Back to Application".
+   - Updated breadcrumb to "Drawings & Scrutiny" (was "Drawings").
+   - The `ApplicationSelector` is already used with the same props — the new searchable component replaces the old one automatically.
+
+5. Updated `ltp-documents.tsx`:
+   - Same changes as Drawings: imported loading hook + skeleton, added `switching` state, wrapped content in conditional skeleton, removed misleading `fallbackLabel="Applications"`.
+
+6. Did NOT modify: Dashboard, My Applications, Fees, Payments, Shortfalls, Administration, Authentication, PageHeader (shared), ApplicationContextBar (shared), or any other module. Only touched: `app-context.tsx`, `ltp-drawings.tsx`, `ltp-documents.tsx`.
+
+Self-Verification (Agent Browser end-to-end):
+- **Selector alignment**: 240px × 40px on desktop, right-aligned via PageHeader actions. Trigger shows app no (mono primary) + project · applicant (secondary, truncated) ✓
+- **Search**: "Tamhane" → 1 result (MC/BP/2026/04/0002) ✓; "Priya" → 1 result (same) ✓; "0002" → 1 result (same) ✓
+- **Empty search**: "zzzz" → "No applications found. Try another application number, project or applicant." ✓
+- **Full dataset**: dropdown shows 25 applications (all visible apps), not just visible/loaded ✓
+- **Result format**: app no (primary, mono) + project (secondary) + applicant (tertiary), compact, no oversized cards ✓
+- **Selected state**: current app has `bg-primary/10` + check icon ✓
+- **Keyboard**: ArrowDown highlights next item, Enter selects, Escape closes ✓
+- **Application switch**: 0002 → 0005 — page shows 0005 data (Greenfield Residency, Nikhil Patil), no stale 0002 data ✓; 0005 → 0002 — page shows 0002 data (Tamhane Row Houses, Priya Tamhane), no stale 0005 data ✓
+- **Same selector in both modules**: Drawings selector = 240×40, Documents selector = 240×40, same design ✓
+- **Documents data**: correct app-specific documents (Required/Verified/Pending/Compliance counts) for the selected app ✓
+- **Drawings data**: correct app-specific drawings, scrutiny reports, version history for the selected app ✓
+- **Responsive mobile (390×844)**: selector is full-width (358px, w-full class), no horizontal overflow ✓
+- **Responsive desktop (1440×900)**: selector 240px, right-aligned, vertically balanced with header ✓
+- **Loading state**: brief skeleton shown on app switch (250ms) ✓
+- **Back navigation**: "Back to Application" (correct per hierarchy, not misleading) ✓
+- **0 console / runtime errors** throughout the entire test ✓
+- **No duplicate datasets**: both modules use `useVisibleApplications()` — shared store ✓
+
+Stage Summary:
+- Files changed: `src/components/design-system/app-context.tsx` (reusable ApplicationSelector + useAppSwitchLoading + AppSwitchSkeleton), `src/components/ltp/ltp-drawings.tsx`, `src/components/ltp/ltp-documents.tsx`
+- Only Drawings & Scrutiny and Documents modules modified — no other modules touched.
+- Single reusable `ApplicationSelector` component used in both modules (and the Scrutiny Report sub-page) — no duplicate selector logic.
+- Search/Find only — no advanced filters, sort, status filters, or extra dropdowns in the selector.
+- Shared application dataset via `useVisibleApplications()` — no duplicate data.
+- `applicationId` used as internal identity — no array index / row index / display position.
+- Selector: 40px height, 240px width (desktop) / full-width (mobile), 6px radius, border-input, shadow-sm.
+- Dropdown: 280px, max-h-[320px], internal scroll, sticky search, compact results, selected state with check + bg-primary/10.
+- Keyboard accessible: ArrowUp/Down, Enter, Escape, aria-label, role=listbox/option, aria-selected.
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.

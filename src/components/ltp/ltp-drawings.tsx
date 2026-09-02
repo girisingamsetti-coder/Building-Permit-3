@@ -10,7 +10,7 @@ import {
   InfoGrid,
 } from "@/components/design-system/layout";
 import { PageBackButton, PageBreadcrumb, type BreadcrumbItem } from "@/components/design-system/back-button";
-import { ApplicationContextBar, ApplicationSelector } from "@/components/design-system/app-context";
+import { ApplicationContextBar, ApplicationSelector, useAppSwitchLoading, AppSwitchSkeleton } from "@/components/design-system/app-context";
 import {
   StatusBadge,
   SeverityBadge,
@@ -80,12 +80,13 @@ export function LtpDrawings() {
   const [confirmUpload, setConfirmUpload] = React.useState<UploadedFile | null>(null);
 
   const isProcessing = app ? processingAppIds.includes(app.id) : false;
+  const switching = useAppSwitchLoading(app?.id);
 
   if (!app) {
     return (
       <div className="space-y-6">
-        <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
-        <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings" }]} />
+        <PageBackButton fallbackView="ltp-applications" />
+        <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings & Scrutiny" }]} />
         <EmptyState icon={FileWarning} title="No applications" description="Create an application first to upload drawings." action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Go to My Applications</Button>} />
       </div>
     );
@@ -137,76 +138,80 @@ export function LtpDrawings() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+      <PageBackButton fallbackView="ltp-applications" />
       <PageHeader
         title="Drawings & Scrutiny"
-        description="Upload, version and scrutinise your project drawings against Development Control Regulations."
+        description="Upload, manage and scrutinize project drawings against Development Control Regulations."
         icon={Upload}
         breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings & Scrutiny" }]}
         actions={<ApplicationSelector currentApp={app} view="ltp-drawings" apps={visibleApps} />}
       />
 
-      {/* Application Context Bar */}
-      <ApplicationContextBar app={app} />
+      {switching ? (
+        <AppSwitchSkeleton />
+      ) : (
+        <>
+          {/* Application Context Bar */}
+          <ApplicationContextBar app={app} />
 
-      {/* Status banner */}
-      <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} />
+          {/* Status banner */}
+          <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <SectionCard
-            title="Drawing Viewer"
-            description={app.drawings.length > 0 ? `Viewing ${app.drawings[app.drawings.length - 1]?.fileName}` : "No drawings yet"}
-            icon={Eye}
-          >
-            <DrawingViewer drawings={app.drawings.length ? app.drawings : [{ id: "empty", fileName: "No drawing", fileType: "PDF", fileSize: "0", version: 0, uploadedAt: "", uploadedBy: "", status: "PENDING_SCRUTINY" }]} />
-          </SectionCard>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="space-y-6 lg:col-span-2">
+              <SectionCard
+                title="Drawing Viewer"
+                description={app.drawings.length > 0 ? `Viewing ${app.drawings[app.drawings.length - 1]?.fileName}` : "No drawings yet"}
+                icon={Eye}
+              >
+                <DrawingViewer drawings={app.drawings.length ? app.drawings : [{ id: "empty", fileName: "No drawing", fileType: "PDF", fileSize: "0", version: 0, uploadedAt: "", uploadedBy: "", status: "PENDING_SCRUTINY" }]} />
+              </SectionCard>
 
-          {app.scrutinyReport && (
-            <SectionCard
-              title="Latest Scrutiny Report"
-              description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion} · ${app.applicationNo}`}
-              icon={ScrollText}
-              action={
-                <div className="flex items-center gap-2">
-                  {app.scrutinyReport.status === "PASSED" ? <Badge className="bg-success text-success-foreground">Passed</Badge> : <Badge className="bg-destructive text-white">Failed</Badge>}
-                  <Button variant="outline" size="sm" onClick={() => navigate("ltp-scrutiny")}>Full report <ArrowRight className="size-3" /></Button>
-                </div>
-              }
-            >
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg bg-muted p-3 text-center"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.totalChecks}</p><p className="text-[10px] uppercase text-muted-foreground">Total</p></div>
-                <div className="rounded-lg bg-success/10 p-3 text-center text-success"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.passed}</p><p className="text-[10px] uppercase">Passed</p></div>
-                <div className="rounded-lg bg-destructive/10 p-3 text-center text-destructive"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.failed + app.scrutinyReport.warnings}</p><p className="text-[10px] uppercase">Issues</p></div>
-              </div>
-            </SectionCard>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          <SectionCard title="Upload Drawing" description={`For: ${app.applicationNo}`} icon={Upload}>
-            <div className="mb-3 rounded-md border border-info/30 bg-info/5 px-3 py-2 text-[11px] text-info">
-              <p className="font-medium">You are uploading to:</p>
-              <p className="font-mono">{app.applicationNo}</p>
-              <p>{app.project.name}</p>
+              {app.scrutinyReport && (
+                <SectionCard
+                  title="Latest Scrutiny Report"
+                  description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion} · ${app.applicationNo}`}
+                  icon={ScrollText}
+                  action={
+                    <div className="flex items-center gap-2">
+                      {app.scrutinyReport.status === "PASSED" ? <Badge className="bg-success text-success-foreground">Passed</Badge> : <Badge className="bg-destructive text-white">Failed</Badge>}
+                      <Button variant="outline" size="sm" onClick={() => navigate("ltp-scrutiny")}>Full report <ArrowRight className="size-3" /></Button>
+                    </div>
+                  }
+                >
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="rounded-lg bg-muted p-3 text-center"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.totalChecks}</p><p className="text-[10px] uppercase text-muted-foreground">Total</p></div>
+                    <div className="rounded-lg bg-success/10 p-3 text-center text-success"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.passed}</p><p className="text-[10px] uppercase">Passed</p></div>
+                    <div className="rounded-lg bg-destructive/10 p-3 text-center text-destructive"><p className="text-xl font-semibold tabular-nums">{app.scrutinyReport.failed + app.scrutinyReport.warnings}</p><p className="text-[10px] uppercase">Issues</p></div>
+                  </div>
+                </SectionCard>
+              )}
             </div>
-            <FileUploader
-              label="Drop drawing here"
-              hint="Supported: DWG, DXF, PDF · max 50 MB"
-              accept=".dwg,.dxf,.pdf"
-              uploadedFiles={files}
-              onUpload={handleUpload}
-              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
-            />
-            {app.drawings.length > 0 && app.status !== "SCRUTINY_PASSED" && (
-              <Button className="mt-3 w-full" onClick={handleRunScrutiny} disabled={isProcessing}>
-                {isProcessing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
-              </Button>
-            )}
-          </SectionCard>
 
-          <SectionCard title="Version History" description={`Drawings for ${app.applicationNo}`} icon={History} noPadding>
-            <ul className="divide-y divide-border">
+            <div className="space-y-6">
+              <SectionCard title="Upload Drawing" description={`For: ${app.applicationNo}`} icon={Upload}>
+                <div className="mb-3 rounded-md border border-info/30 bg-info/5 px-3 py-2 text-[11px] text-info">
+                  <p className="font-medium">You are uploading to:</p>
+                  <p className="font-mono">{app.applicationNo}</p>
+                  <p>{app.project.name}</p>
+                </div>
+                <FileUploader
+                  label="Drop drawing here"
+                  hint="Supported: DWG, DXF, PDF · max 50 MB"
+                  accept=".dwg,.dxf,.pdf"
+                  uploadedFiles={files}
+                  onUpload={handleUpload}
+                  onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+                />
+                {app.drawings.length > 0 && app.status !== "SCRUTINY_PASSED" && (
+                  <Button className="mt-3 w-full" onClick={handleRunScrutiny} disabled={isProcessing}>
+                    {isProcessing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
+                  </Button>
+                )}
+              </SectionCard>
+
+              <SectionCard title="Version History" description={`Drawings for ${app.applicationNo}`} icon={History} noPadding>
+                <ul className="divide-y divide-border">
               {app.drawings.map((d) => (
                 <li key={d.id} className="p-3">
                   <div className="flex items-center gap-2.5">
@@ -270,6 +275,8 @@ export function LtpDrawings() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   );
 }
@@ -360,7 +367,7 @@ export function LtpScrutiny() {
   if (!app || !app.scrutinyReport) {
     return (
       <div className="space-y-6">
-        <PageBackButton fallbackView="ltp-drawings" fallbackLabel="Drawings" />
+        <PageBackButton fallbackView="ltp-drawings" />
         <PageHeader title="Scrutiny Report" icon={ScrollText} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Scrutiny" }]} />
         <EmptyState icon={ScrollText} title="No scrutiny report" description="Run scrutiny on a drawing to generate a report." />
       </div>
