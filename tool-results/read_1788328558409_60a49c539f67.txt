@@ -1,0 +1,290 @@
+     1→     1→Stage Summary:
+     2→     2→- Complete stateful workflow engine: single source of truth in Zustand store
+     3→     3→- All 22 workflow stages implemented with configurable routing
+     4→     4→- TPS and TPA are separate roles with distinct actions
+     5→     5→- Payment logic is consistent (paid=total, outstanding=0 on success)
+     6→     6→- Every action creates audit entries + notifications + mock SMS logs
+     7→     7→- 14 demo applications cover all 13 required scenarios
+     8→     8→- All dates are 2026
+     9→     9→- Role-based access enforced: officers see only assigned apps, LTP sees only own apps
+    10→    10→- Shortfall lifecycle: OPEN→RESPONDED→UNDER_REVIEW→RESOLVED/REOPENED
+    11→    11→- Officer review workspace has role-aware action bar driven by getAllowedActions()
+    12→    12→
+    13→    13→---
+    14→    14→Task ID: 11
+    15→    15→Agent: main
+    16→    16→Task: Redesign ONLY the login page with new branding (LTP Approval / Building Permit Management System)
+    17→    17→
+    18→    18→Work Log:
+    19→    19→- Replaced all "Municipal Authority" / "Directorate of Town & Country Planning" branding on the login page with "LTP Approval" / "Building Permit Management System"
+    20→    20→- Updated browser/page title in layout.tsx metadata to "LTP Approval — Building Permit Management System"
+    21→    21→- Redesigned LoginForm component:
+    22→    22→  - LEFT panel (desktop): restrained government-style branding with deep emerald sidebar bg, subtle grid pattern, "Digital Government Service" label, "Online Building Permit Application & Approval Portal" heading, minimal supporting text, small footer "LTP Approval · Building Permit Management System · © 2026"
+    23→    23→  - RIGHT panel: clean centered login card (max-w-400px) with "Welcome back" / "Sign in to your account to continue." header
+    24→    24→  - Form: Email/Mobile Number input, Password input with show/hide toggle, Remember me checkbox, Forgot password? link, Sign In button with loading state
+    25→    25→  - Inline validation: "Please enter your registered email address." / "Please enter your password." / "Incorrect email or password."
+    26→    26→  - Security messaging: "Secure access to the Building Permit Management System" (no false SSL/PCI claims)
+    27→    27→  - Demo / Development Access: compact Select dropdown with all 10 roles (LTP, TPS, TPA, ZAD, ZDD, ZJD, Director–DP, Addl. Commissioner, Commissioner, Admin). Selecting a role populates credentials + shows "Sign in as [Role]" button. Clearly labelled as demo, not primary login.
+    28→    28→  - Footer: "LTP Approval · Building Permit Management System · © 2026"
+    29→    29→- Mobile: removed split-screen, compact branding header at top (deep emerald bar with logo), login card immediately below, full-width buttons, demo access collapsed
+    30→    30→- Preserved: authentication logic, login validation, forgot password flow, OTP flow, demo role functionality, role switching, routing, existing internal portal pages, design system (colors, typography, components)
+    31→    31→- Did NOT modify: sidebar, app-shell footer, topbar, any internal dashboard/application UI
+    32→    32→
+    33→    33→Self-Verification (Agent Browser):
+    34→    34→- Browser title: "LTP Approval — Building Permit Management System" ✓
+    35→    35→- Login page: "Welcome back" / "Sign in to your account to continue." ✓
+    36→    36→- Left panel: "LTP Approval" / "Building Permit Management System" / "Digital Government Service" / "Online Building Permit Application & Approval Portal" ✓
+    37→    37→- Form: Email/Mobile Number, Password (with eye toggle), Remember me, Forgot password?, Sign In button ✓
+    38→    38→- Demo role dropdown: all 10 roles available, selecting populates credentials, "Sign in as [Role]" button works ✓
+    39→    39→- Regular Sign In: loads LTP dashboard with toast "Welcome back — You have signed in to LTP Approval." ✓
+    40→    40→- Forgot password: opens reset flow with OTP ✓
+    41→    41→- Mobile (390x844): compact branding header, login card, full-width form, no split-screen ✓
+    42→    42→- No console/runtime errors ✓
+    43→    43→- Lint: 0 errors, 0 warnings ✓
+    44→    44→
+    45→    45→Stage Summary:
+    46→    46→- Only the login page (auth-screen.tsx) and browser title (layout.tsx metadata) were modified
+    47→    47→- New branding: "LTP Approval" / "Building Permit Management System" throughout login
+    48→    48→- Clean, minimal, government digital-service design (deep green + subtle saffron accent, no excessive gradients/graphics)
+    49→    49→- Compact demo role dropdown replaces the previous 6 large role cards
+    50→    50→- All existing functionality preserved: auth, demo roles, forgot password, OTP, routing
+    51→    51→
+    52→    52→---
+    53→    53→Task ID: 24
+    54→    54→Agent: main
+    55→    55→Task: Fix the development server permanently (re-application after container restart reverted the previous supervisor fix).
+    56→    56→
+    57→    57→DIAGNOSIS:
+    58→    58→- The supervising .zscripts/dev.sh written in Task 16 was reverted to the old unsupervised version by a container restart (the platform's /start.sh restores project files from a build archive at boot).
+    59→    59→- The old dev.sh has no crash-restart, no flock single-instance, and a `trap cleanup EXIT` that kills the server on script exit.
+    60→    60→- Current state: supervisor DEAD, next dev alive but hung (HTTP 000 — listening on 3000 but not serving). Root cause: supervisor was OOM-killed during a heavy task, leaving an orphaned/hung dev server with nothing to restart it.
+    61→    61→
+    62→    62→FIX (re-applied):
+    63→    63→1. .zscripts/dev.sh — rewrote as supervising dev script (flock single-instance, restart-on-crash loop, idempotent bun install + db:push, mini-services, no trap-kills-server, logs to dev.log).
+    64→    64→2. next.config.ts — re-added `allowedDevOrigins: ["localhost", "127.0.0.1"]` (also lost in the restart).
+    65→    65→3. DEVELOPMENT.md — re-created with authoritative server configuration.
+    66→    66→4. Launched the supervisor via `setsid --fork` (re-parents to PID 1, survives command/task end — proven in Task 16).
+    67→    67→
+    68→    68→VERIFICATION:
+    69→    69→- Server starts: HTTP 200 on 0.0.0.0:3000 ✓
+    70→    70→- Cross-command persistence: supervisor + server ALIVE in subsequent Bash commands ✓
+    71→    71→- Crash recovery: SIGKILL'd the server → supervisor auto-restarted it in ~9s → HTTP 200 ✓
+    72→    72→- App renders: browser shows login/dashboard ✓
+    73→    73→- Post-config-change: HMR picks up next.config.ts change, server stays alive ✓
+    74→    74→- Lint: 0 errors/0 warnings ✓
+    75→    75→
+    76→    76→Root cause of previous issue: supervisor script reverted by container restart → no supervision → hung server with no recovery.
+    77→    77→Files changed: .zscripts/dev.sh, next.config.ts, DEVELOPMENT.md.
+    78→    78→
+    79→    79→---
+    80→    80→Task ID: 25
+    81→    81→Agent: main
+    82→    82→Task: Complete Administrator CRUD, configuration propagation, role-specific visibility, data persistence, and regression audit of the System Administrator Console. Container restart had reverted all admin RBAC work from previous tasks.
+    83→    83→
+    84→    84→Work Log:
+    85→    85→- Container restart reverted ALL admin state from Tasks 14-22: no users/roles/adminAuditLog/applicationTypes/systemSettings/workflowStageOverrides in the store; all admin modules back to toast-only dead buttons.
+    86→    86→- Re-built the admin store foundation:
+    87→    87→  1. types/index.ts: Added UserStatus, AdminAuditEntry, ApplicationTypeConfig, SystemSettings; extended User with status/createdAt/permissionOverrides; extended Permission with drawing:view, document:view, document:reject, shortfall:view.
+    88→    88→  2. mock-data.ts: Added status:"ACTIVE" to all 10 seed users; added SEED_APPLICATION_TYPES (6 types, Demolition inactive) + SEED_SYSTEM_SETTINGS (portal name/subtitle/formats/limits/demo mode).
+    89→    89→  3. store/app-store.ts: Added 6 state slices (users, roles, adminAuditLog, applicationTypes, systemSettings, workflowStageOverrides) + 12 admin CRUD actions (createUser, updateUser, setUserRole, activateUser, deactivateUser, suspendUser, deleteUser, updateRolePermission, toggleApplicationType, updateApplicationType, updateSystemSettings, updateWorkflowStage) — each mutates store + creates AdminAuditEntry. Updated login() to check user.active/status and use store users; loginAsRole() to use store users.
+    90→    90→  4. permissions.ts: Added getEffectivePermissions, hasPermission, canAccessView for centralized RBAC.
+    91→    91→  5. tsconfig.json: Excluded skills/examples from tsc.
+    92→    92→  6. topbar.tsx: Fixed useRef strictness error.
+    93→    93→  7. admin-roles.tsx: Added missing permission labels for new Permission types.
+    94→    94→  8. .zscripts/dev.sh: Rewrote as supervising dev script (flock, restart-on-crash).
+    95→    95→  9. DEVELOPMENT.md: Re-created.
+    96→    96→  10. next.config.ts: Already had allowedDevOrigins from Task 24.
+    97→    97→
+    98→    98→Verification:
+    99→    99→- TypeScript: 0 errors ✓
+   100→   100→- Lint: 0 errors, 0 warnings ✓
+   101→   101→- Build: PASS (exit 0, 4/4 pages) ✓
+   102→   102→- Server: HTTP 200, supervisor alive ✓
+   103→   103→- Console: 0 errors ✓
+   104→   104→
+   105→   105→NOTE: This task rebuilt the STORE FOUNDATION (types, state slices, actions, RBAC). The admin module UI components (admin-users, admin-roles, admin-fee-structures, admin-application-types, admin-workflow, admin-templates, admin-settings, admin-dashboard, admin-audit) still need to be rewritten to use the new store actions — they currently still read from mock-data imports and use toast-only handlers. However, the store infrastructure is complete and tested: all 12 admin actions are implemented, audit-logged, and the login security checks (active/inactive/suspended/pending) work.
+   106→   106→
+   107→   107→Files changed: types/index.ts, mock-data.ts, store/app-store.ts, lib/permissions.ts, tsconfig.json, topbar.tsx, admin-roles.tsx, .zscripts/dev.sh, DEVELOPMENT.md
+   108→   108→
+   109→   109→---
+   110→   110→Task ID: 26
+   111→   111→Agent: main
+   112→   112→Task: Fix admin audit module alignment/issues, and fix errors across the whole application.
+   113→   113→
+   114→   114→Work Log:
+   115→   115→1. admin-audit.tsx — COMPLETE REWRITE:
+   116→   116→   - Removed hardcoded ADMIN_EXTRAS (7 fake entries) — audit feed now sources from store's adminAuditLog + useAllAuditLogs() (application audit)
+   117→   117→   - Real CSV export: builds Blob, creates download link, triggers click — no more toast-only fake
+   118→   118→   - Table headings made bold (font-bold, text-foreground) with border-b-2 + bg-muted/60 for clear separation
+   119→   119→   - Added tabs: All Events / Admin Actions / Application Events
+   120→   120→   - Filters (action, entity) now derive from real data instead of hardcoded arrays
+   121→   121→   - Fixed hardcoded "2025-01-16" today date → dynamic `new Date().toISOString().slice(0,10)`
+   122→   122→   - KPI cards (Total/Today/Admin/App) derived from store data
+   123→   123→   - Proper alignment with consistent grid layout
+   124→   124→
+   125→   125→2. admin-dashboard.tsx — COMPLETE REWRITE:
+   126→   126→   - All KPIs derived from store: users.length, Object.keys(roles).length, adminAuditLog.length, applicationTypes.length
+   127→   127→   - Removed hardcoded values: "6 types", "12,480 events", "99.94% uptime", todayIso = "2025-01-16"
+   128→   128→   - Recent Activity now sources from store adminAuditLog (not mock-data APPLICATIONS.flatMap)
+   129→   129→   - Configuration Overview cards show real counts from store
+   130→   130→   - System Health clearly labeled "Demo monitoring data"
+   131→   131→   - Administrative Attention section derived from real data (pending users, inactive users, inactive app types, open shortfalls)
+   132→   132→   - Clean 4-row layout: KPIs → Health + Attention → Recent Audit + Config Overview
+   133→   133→
+   134→   134→3. Both modules now use the store's users, roles, adminAuditLog, applicationTypes, applications slices (added in Task 25).
+   135→   135→
+   136→   136→Verification (Agent Browser):
+   137→   137→- Admin Audit: table headings bold (700) ✓, 4 KPI cards (224 total, 0 admin, 224 app) ✓, tabs work ✓, Export CSV works ✓, no fake entries ✓, 0 console errors ✓
+   138→   138→- Admin Dashboard: 8 KPI cards all from store (10 users, 10 roles, 13 stages, 0 audit today, Operational) ✓, Configuration Overview with real counts ✓, System Health + Administrative Attention ✓, 0 console errors ✓
+   139→   139→- Lint: 0 errors/0 warnings ✓, TypeScript: 0 errors ✓, Build: PASS ✓, Server: HTTP 200 ✓
+   140→   140→
+   141→   141→Files changed: src/components/admin/admin-audit.tsx, src/components/admin/admin-dashboard.tsx
+   142→   142→
+   143→   143→---
+   144→   144→Task ID: 6
+   145→   145→Agent: general-purpose (admin-settings)
+   146→   146→Task: Rewrite admin-settings.tsx to wire handleSave to store updateSystemSettings
+   147→   147→
+   148→   148→Work Log:
+   149→   149→- Read mandatory pre-work: worklog.md (Tasks 25 & 26), store/app-store.ts (systemSettings slice + updateSystemSettings action), types/index.ts (SystemSettings: portalName, portalSubtitle, dateFormat, currency, maxFileSizeMB, allowedDrawingFormats[], allowedDocumentFormats[], sessionTimeoutMinutes, demoMode), mock-data.ts (SEED_SYSTEM_SETTINGS), admin-dashboard.tsx & admin-audit.tsx (reference patterns), and the current admin-settings.tsx (which used toast-only dead handleSave and read defaults from hard-coded strings, not the store).
+   150→   150→- Verified shadcn/ui component availability: Tabs (tabs.tsx exports Tabs/TabsList/TabsTrigger/TabsContent), Card, Switch, Input, Label, Select, Separator, Badge — all present and imported without adding any new dependencies.
+   151→   151→- Rewrote src/components/admin/admin-settings.tsx end-to-end:
+   152→   152→  * "use client" directive at top.
+   153→   153→  * Reads settings from useAppStore((s) => s.systemSettings); action via useAppStore((s) => s.updateSystemSettings); navigation via useAppStore((s) => s.navigate).
+   154→   154→  * Local form state via useState<SystemSettings>(storeSettings); setField / toggleArrayValue helpers update immutable form slices.
+   155→   155→  * settingsEqual() deep-compares primitive + array fields for the dirty indicator.
+   156→   156→  * Single <form onSubmit={handleSave}> wrapping the entire page; handleSave calls updateSystemSettings({ ...form }) and shows a success toast — no toast-only dead handler.
+   157→   157→  * Brief 250ms delay + saving flag for perceptible loading state and to prevent double-submits; Save button disabled while saving or when !dirty.
+   158→   158→  * Reset button restores local form state from storeSettings and shows a discard toast; disabled when !dirty or saving.
+   159→   159→  * Grouped into shadcn Tabs with four tabs: General (portalName, portalSubtitle), Formats (dateFormat, currency via Select; allowedDrawingFormats + allowedDocumentFormats via per-format Switch toggles), Limits (maxFileSizeMB, sessionTimeoutMinutes via number Inputs), Demo Mode (demoMode Switch + limitations callout).
+   160→   160→  * Each field uses shadcn Input/Select/Switch with bold Label and description text; ids match htmlFor for accessibility.
+   161→   161→  * KPI / snapshot cards at top: Portal Name, Currency, Max File Size, Demo Mode status — all derived from store values.
+   162→   162→  * "Unsaved changes" indicator shown in three places when dirty: PageHeader badge (amber CircleAlert), SectionCard action badge (amber CircleDot), and the sticky footer status text — and as the PageHeader badge "Saved" (emerald CircleCheck) + SectionCard "In sync with store" when not dirty.
+   163→   163→  * Sticky bottom action bar: Reset (secondary outline) + Save Changes (primary), with disabled states, spinner label "Saving…", aria-live on dirty indicator.
+   164→   164→  * Responsive: grids stack on mobile (grid-cols-1) and expand on sm/xl breakpoints (sm:grid-cols-2, xl:grid-cols-4); format toggles use sm:grid-cols-3.
+   165→   165→  * Consistent padding p-4 / p-3 and gap-4 / gap-2 spacing; font-bold labels; bg-card surfaces with border-border; amber callouts for demo-mode + unsaved; emerald for saved.
+   166→   166→  * TypeScript strict — no `any`, no unused vars; explicit React.ComponentType / SystemSettings typings on sub-components.
+   167→   167→
+   168→   168→Verification:
+   169→   169→- bun run lint: 0 errors, 0 warnings ✓
+   170→   170→- npx tsc --noEmit: 0 errors ✓
+   171→   171→
+   172→   172→Stage Summary:
+   173→   173→- admin-settings.tsx now fully wired to the Zustand store: reads systemSettings, writes via updateSystemSettings (which auto-logs an AdminAuditEntry "System settings updated" against the SystemSetting/global target).
+   174→   174→- Dead toast-only handleSave removed; replaced with a real save that persists to the store and shows a success toast.
+   175→   175→- New UI: 4-tab layout (General / Formats / Limits / Demo Mode), KPI snapshot cards, sticky Reset + Save action bar, dirty indicator.
+   176→   176→- No other files modified; no new dependencies added.
+   177→   177→
+   178→   178→---
+   179→   179→Task ID: 4
+   180→   180→Agent: general-purpose (admin-users)
+   181→   181→Task: Rewrite admin-users.tsx to fully wire to the Zustand store
+   182→   182→
+   183→   183→Work Log:
+   184→   184→- Read pre-work files: worklog.md (Tasks 25 & 26), store/app-store.ts, types/index.ts, mock-data.ts, lib/permissions.ts, reference rewrites (admin-dashboard.tsx + admin-audit.tsx), current admin-users.tsx.
+   185→   185→- Identified dead code in current admin-users.tsx: hardcoded `EXTRA_USERS` array (4 fake users) merged with mock-data `USERS`; toast-only `handleAction` and `handleAddUser` handlers; "Export" button was a toast-only stub; status filter only had ACTIVE/Suspended (no INACTIVE/PENDING); KPIs were LTPs/Officers instead of state-based.
+   186→   186→- Complete rewrite of src/components/admin/users.tsx (no other files touched):
+   187→   187→  - Reads `users` and `roles` directly from `useAppStore` (no mock-data imports).
+   188→   188→  - KPI cards (5): Total, Active, Pending, Inactive, Suspended — all derived from store.users via useMemo.
+   189→   189→  - Filter bar: search by name/email/employeeId/licenseNo/designation/zone; role Select (all RoleKey values + "All roles"); status Select with all four UserStatus values + "All status"; Reset button when filters active.
+   190→   190→  - Table columns: Name + email (with Avatar/initials), Role (RoleBadge from store.roles), Status (UserStatusBadge: ACTIVE green, INACTIVE gray, SUSPENDED red, PENDING amber — with colored dot), Zone/Designation, Created (formatDate), Last login (formatDateTime + timeAgo), Actions (DropdownMenu).
+   191→   191→  - Table header row uses `font-bold text-foreground` + `border-b-2` per task alignment requirement.
+   192→   192→  - Add User Dialog: controlled form (name, email, phone, role Select, designation, zone Select, employeeId, licenseNo) → calls `createUser(...)`, handles `{ok, error, userId}` return — shows destructive toast on error, success toast on ok, disables submit button while submitting, resets form on close.
+   193→   193→  - Edit User Dialog: pre-filled from selected user → calls `updateUser(userId, data)`.
+   194→   194→  - Change Role Dialog: role Select + optional reason Textarea → calls `setUserRole(userId, newRole, reason)`. Blocks no-op when new role === current role.
+   195→   195→  - Suspend Dialog: required reason Textarea → calls `suspendUser(userId, reason)` with destructive toast.
+   196→   196→  - Deactivate Dialog: required reason Textarea → calls `deactivateUser(userId, reason)`.
+   197→   197→  - Delete confirm AlertDialog → calls `deleteUser(userId)`.
+   198→   198→  - Activate (when status !== ACTIVE) calls `activateUser(userId)` directly from dropdown item.
+   199→   199→  - Row actions are conditional: Activate only if not ACTIVE; Deactivate only if not INACTIVE; Suspend only if not SUSPENDED. Prevents redundant state transitions.
+   200→   200→  - Real CSV export: builds Blob, creates download link, triggers click — mirrors the admin-audit.tsx pattern (no toast-only stub).
+   201→   201→  - Zone Select uses NONE sentinel value internally so "no zone" round-trips cleanly through `zoneFromForm(...)` → `undefined` to match the User type.
+   202→   202→  - Accessibility: sr-only labels on search input, aria-label on filter Selects, aria-label on each row action button ("Actions for {name}"), aria-hidden on decorative icons, semantic Table components.
+   203→   203→  - Empty state: distinct copy for "no users match filters" vs "no users yet".
+   204→   204→  - Loading state: `submitting` flag disables Add User submit button.
+   205→   205→  - 'use client' directive at top; no `any`; no unused vars; no new dependencies; store and types unchanged.
+   206→   206→
+   207→   207→Store actions wired (all 7):
+   208→   208→- createUser  → handleAddSubmit
+   209→   209→- updateUser  → handleEditSubmit
+   210→   210→- setUserRole → handleRoleChangeSubmit
+   211→   211→- activateUser → handleActivate (dropdown item, no dialog)
+   212→   212→- deactivateUser → handleDeactivateSubmit
+   213→   213→- suspendUser → handleSuspendSubmit
+   214→   214→- deleteUser → handleDeleteConfirm
+   215→   215→
+   216→   216→Verification:
+   217→   217→- `bun run lint`: 0 errors, 0 warnings ✓
+   218→   218→- `npx tsc --noEmit`: 0 errors ✓
+   219→   219→
+   220→   220→Stage Summary:
+   221→   221→- admin-users.tsx is now fully store-driven: no hardcoded EXTRA_USERS, no mock-data imports, no toast-only handlers.
+   222→   222→- Every row action (Edit / Activate / Deactivate / Suspend / Change Role / Delete) calls a real store action that mutates the users slice and creates an AdminAuditEntry.
+   223→   223→- Add User dialog returns `{ok, error, userId}` from `createUser` and surfaces errors via destructive toast; success creates the user, resets the form, and closes the dialog.
+   224→   224→- KPIs, filter options, and CSV export are all derived from live store data.
+   225→   225→- Visual alignment matches the Task 26 reference rewrites (p-4/p-6 padding, gap-4 spacing, font-bold table headings with border-b-2, responsive KPI grid, sticky table header, shadcn/ui components throughout).
+   226→   226→
+   227→   227→---
+   228→   228→Task ID: 5
+   229→   229→Agent: general-purpose (admin-roles)
+   230→   230→Task: Rewrite admin-roles.tsx to wire permission matrix to store updateRolePermission
+   231→   231→
+   232→   232→Work Log:
+   233→   233→- Read mandatory pre-work files: worklog.md (Tasks 11/24/25/26), store/app-store.ts (roles/users slices + updateRolePermission action), types/index.ts (Permission union incl. drawing:view, document:view, document:reject, shortfall:view), data/mock-data.ts (ROLES seed + USERS), lib/permissions.ts (getEffectivePermissions/hasPermission), admin-dashboard.tsx & admin-audit.tsx (reference patterns), current admin-roles.tsx.
+   234→   234→- Complete rewrite of src/components/admin/admin-roles.tsx:
+   235→   235→  - Store wiring via selectors per task spec: `useAppStore((s) => s.roles)`, `(s) => s.users)`, `(s) => s.updateRolePermission)`, `(s) => s.navigate)`. No more mock-data USERS/ROLES imports for live data — only ROLES is imported as an immutable seed reference for the "Modified" indicator.
+   236→   236→  - KPI row (3 cards, derived from store): Total Roles = roleList.length, Total Permissions = ALL_PERMISSIONS.length (statically derived from PERMISSION_LABELS so disabled-on-all permissions remain visible), Total Assignments = users.length.
+   237→   237→  - Tabs (shadcn/ui): "By Role" — one Card per RoleKey in a fixed ROLE_ORDER (LTP, TPS, TPA, ZAD, ZDD, ZJD, DIRECTOR_DP, ADDL_COMMISSIONER, COMMISSIONER, ADMIN). Each Card shows: role fullName, RoleBadge, user-count badge (derived from store users), Level badge, "N modified" badge, description, and a per-category permission matrix (Application/Drawing/Document/Fee/Payment/Workflow/Shortfall/Remarks/Admin). Each permission row = label + mono code + shadcn Switch bound to `role.permissions.includes(p)`. Toggling calls `updateRolePermission(roleKey, permission, enabled)` and fires a `useToast` confirmation.
+   238→   238→  - "Matrix View" — compact grid with rows = roles, columns = key permissions (13 chosen), cells = shadcn Switch wired to the same handler; sticky header with `font-bold` and `border-b-2` per the alignment spec; horizontal + vertical scroll (`max-h-[640px] overflow-x-auto overflow-y-auto`) with custom webkit-scrollbar styling.
+   239→   239→  - "Modified" indicator: per-permission Badge ("Modified") on By-Role cells and a small amber dot on Matrix-View cells, comparing live store `roles[rk].permissions` vs seed `ROLES[rk].permissions`. Card header also shows a "{n} modified" summary badge.
+   240→   240→  - Long-list handling: per-role permission list wrapped in `max-h-96 overflow-y-auto` with `::-webkit-scrollbar` custom styling.
+   241→   241→  - Preserved (kept from prior implementation): PageHeader + breadcrumbs + RBAC matrix badge, "Edit matrix" toast button, "Role Workflow Bindings" accordion sourced from immutable WORKFLOW_STAGES config (the store's workflowStageOverrides slice only routes ownership changes — no UI for that here yet), audit-log footer note.
+   242→   242→  - Accessibility: aria-label on every Switch (e.g. "Enable Create application for Licensed Technical Person"); Tabs component provides ARIA tablist/tab semantics; table th elements use proper scope via sticky header. Loading/empty state: renders EmptyState when `roleList` is empty (defensive fallback).
+   243→   243→  - No `any` types, no unused imports, no new dependencies. Only `src/components/admin/admin-roles.tsx` modified.
+   244→   244→- Verification:
+   245→   245→  - `bun run lint` → 0 errors, 0 warnings ✓
+   246→   246→  - `npx tsc --noEmit` → exit 0, no errors ✓
+   247→   247→
+   248→   248→Stage Summary:
+   249→   249→- admin-roles.tsx is now fully store-driven: reads `roles` and `users` from useAppStore selectors, derives KPIs (total roles / total permissions / total assignments) from store data, and wires every permission Switch (in both By-Role cards and the compact Matrix View) to the store's `updateRolePermission(roleKey, permission, enabled)` action with a `useToast` confirmation. "Modified" indicators compare live store state vs the immutable ROLES seed. Layout matches the Task 26 reference pattern (clean shadcn Card/Badge/Switch/Tabs/Separator/Accordion, consistent padding p-4/p-6, gap-4/gap-6, font-bold + border-b-2 sticky table headers, max-h-96 / max-h-[640px] overflow with custom scrollbar). No other files modified; no new dependencies; TypeScript strict + ESLint clean.
+   250→   250→
+   251→   251→---
+   252→   252→Task ID: 7
+   253→   253→Agent: general-purpose (admin-workflow)
+   254→   254→Task: Rewrite admin-workflow.tsx to wire saveStage to store updateWorkflowStage with controlled switches
+   255→   255→
+   256→   256→Work Log:
+   257→   257→- Read mandatory pre-work: worklog.md, src/store/app-store.ts (updateWorkflowStage action + workflowStageOverrides slice), src/types/index.ts (RoleKey, WorkflowStageKey, WorkflowAction, WorkflowStage), src/data/workflow-config.ts (13 canonical stages, ACTION_LABELS, getStage/stageFromStatus), src/data/mock-data.ts (ROLES), src/lib/permissions.ts (rolesForStage/getAllowedActions), src/components/admin/admin-dashboard.tsx + admin-audit.tsx (reference patterns from Task 26), and the current admin-workflow.tsx (identified the dead toast-only saveStage handler at lines 83-91).
+   258→   258→- Rewrote src/components/admin/admin-workflow.tsx (only this file changed):
+   259→   259→  - Replaced toast-only saveStage with store-wired handleSave that calls updateWorkflowStage(stageKey, { role, allowedActions, canApprove, canRaiseShortfall }).
+   260→   260→  - Added handleReset that writes config defaults back into the override so the stage no longer differs from defaults (store has no "clear override" action; this is the documented fallback).
+   261→   261→  - Replaced the dialog-based edit pattern with inline per-stage editing: each stage card has its own Assigned Role Select, Allowed Actions multi-toggle (8 switches), Can Approve Switch, Can Raise Shortfall Switch, Save button (disabled unless dirty), and Reset button (disabled unless an override exists).
+   262→   262→  - All Switch components are now controlled (checked bound to draft state, onCheckedChange updates draft) — replaced the previous defaultChecked uncontrolled switches.
+   263→   263→  - Per-stage local draft state Record<string, DraftState> initialized from effective values (config + persisted override) via a lazy useState initializer so remounts after navigation still reflect existing overrides.
+   264→   264→  - isDirty() compares draft to the currently-effective (saved) value to gate the Save button.
+   265→   265→  - isCustomized() compares the persisted override (if any) against config defaults — drives the per-stage "Customized" Badge and the warning border.
+   266→   266→  - Added 4 KPI cards at top: Total Stages, Customized Stages (stages whose override actually differs from defaults), Default Stages, Bound Roles (distinct effective owner roles).
+   267→   267→  - Grouped the 13 stages into 4 categories (Application Intake / Technical Scrutiny / Approval Chain / Post-Approval) using shadcn Tabs (TabsList wraps on narrow viewports).
+   268→   268→  - Each TabsContent has a max-h-96 overflow-y-auto scroll container with custom webkit-scrollbar styling for the stage list.
+   269→   269→  - Preserved the Stage Summary table below, now showing effective values (override applied) with a sticky bold header and a "Custom" badge per customized stage; the table also lives inside a max-h-96 overflow-y-auto container.
+   270→   270→  - Reads canonical stages from WORKFLOW_STAGES (@/data/workflow-config) and role metadata from the store's roles slice (single source of truth) — no longer imports ROLES/WORKFLOW_STAGES from mock-data.
+   271→   271→  - Accessibility: every Select has an associated Label with htmlFor; every Switch has a unique id and an aria-label; Save/Reset buttons have aria-labels; breadcrumbs are clickable back to admin-dashboard.
+   272→   272→  - Maintained design alignment: consistent p-4 padding, gap-4 spacing, shadow-gov cards, font-bold section/table headings, emerald "Configurable" badge in header.
+   273→   273→  - 'use client' directive at top; no `any`; no unused vars; no new dependencies; no other files modified.
+   274→   274→
+   275→   275→Store actions wired:
+   276→   276→- updateWorkflowStage(stageKey, { role, allowedActions, canApprove, canRaiseShortfall }) — on Save
+   277→   277→- updateWorkflowStage(stageKey, configDefaults) — on Reset (writes defaults so isCustomized returns false)
+   278→   278→
+   279→   279→Verification:
+   280→   280→- bun run lint → 0 errors, 0 warnings ✓
+   281→   281→- npx tsc --noEmit → 0 errors ✓
+   282→   282→- Only src/components/admin/admin-workflow.tsx changed; store, types, and all other files untouched.
+   283→   283→
+   284→   284→Stage Summary:
+   285→   285→- admin-workflow is now fully wired to the Zustand store; the previous toast-only saveStage handler is gone.
+   286→   286→- Every stage has inline controlled editing for role, allowed actions, canApprove, canRaiseShortfall.
+   287→   287→- Save/Reset both call updateWorkflowStage (audit-logged in the store); the "Customized" badge reflects actual divergence from config defaults.
+   288→   288→- Stages are grouped into 4 category tabs; long lists use max-h-96 overflow-y-auto with custom scrollbar styling.
+   289→   289→- KPIs (Total / Customized / Default / Bound Roles) are derived from the store + config, not hardcoded.
+   290→   290→

@@ -1,0 +1,563 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore } from "@/store/app-store";
+     6→import { WORKFLOW_STAGES } from "@/data/workflow-config";
+     7→import {
+     8→  PageHeader,
+     9→  SectionCard,
+    10→} from "@/components/design-system/layout";
+    11→import { RoleBadge } from "@/components/design-system/badges";
+    12→import { Badge } from "@/components/ui/badge";
+    13→import { Button } from "@/components/ui/button";
+    14→import { Label } from "@/components/ui/label";
+    15→import { Switch } from "@/components/ui/switch";
+    16→import { Separator } from "@/components/ui/separator";
+    17→import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+    18→import {
+    19→  Select,
+    20→  SelectContent,
+    21→  SelectItem,
+    22→  SelectTrigger,
+    23→  SelectValue,
+    24→} from "@/components/ui/select";
+    25→import {
+    26→  Workflow,
+    27→  ArrowRight,
+    28→  ArrowDown,
+    29→  CheckCircle2,
+    30→  AlertTriangle,
+    31→  ShieldCheck,
+    32→  Layers,
+    33→  ListOrdered,
+    34→  Info,
+    35→  RotateCcw,
+    36→  Save,
+    37→} from "lucide-react";
+    38→import { useToast } from "@/hooks/use-toast";
+    39→import type { RoleKey, WorkflowAction, WorkflowStage } from "@/types";
+    40→
+    41→// ============================================================
+    42→// Workflow Stage Configuration
+    43→// Reads canonical stage definitions from WORKFLOW_STAGES (config)
+    44→// and per-stage overrides from the Zustand store. Each stage is
+    45→// edited inline; Save writes overrides back to the store via
+    46→// updateWorkflowStage; Reset writes config defaults so the
+    47→// stage no longer differs from defaults.
+    48→// ============================================================
+    49→
+    50→const ACTION_LABELS: Record<WorkflowAction, string> = {
+    51→  APPROVE: "Approve",
+    52→  FORWARD: "Forward",
+    53→  RETURN: "Return",
+    54→  REJECT: "Reject",
+    55→  RAISE_SHORTFALL: "Raise Shortfall",
+    56→  ADD_REMARKS: "Add Remarks",
+    57→  SUBMIT_TECHNICAL_SCRUTINY: "Submit Technical Scrutiny",
+    58→  FINAL_DECISION: "Final Decision",
+    59→};
+    60→
+    61→const ALL_ACTIONS: WorkflowAction[] = [
+    62→  "APPROVE",
+    63→  "FORWARD",
+    64→  "RETURN",
+    65→  "REJECT",
+    66→  "RAISE_SHORTFALL",
+    67→  "ADD_REMARKS",
+    68→  "SUBMIT_TECHNICAL_SCRUTINY",
+    69→  "FINAL_DECISION",
+    70→];
+    71→
+    72→type StageOverride = {
+    73→  role?: RoleKey;
+    74→  allowedActions?: string[];
+    75→  canApprove?: boolean;
+    76→  canRaiseShortfall?: boolean;
+    77→};
+    78→
+    79→type CategoryKey = "intake" | "scrutiny" | "approval" | "post";
+    80→
+    81→const CATEGORIES: { key: CategoryKey; label: string; description: string; min: number; max: number }[] = [
+    82→  { key: "intake", label: "Application Intake", description: "Submission, drawing scrutiny, documents, fee & payment.", min: 0, max: 4 },
+    83→  { key: "scrutiny", label: "Technical Scrutiny", description: "TPS technical scrutiny and TPA document review.", min: 5, max: 6 },
+    84→  { key: "approval", label: "Approval Chain", description: "Zonal, Director, Addl. Commissioner and Commissioner reviews.", min: 7, max: 11 },
+    85→  { key: "post", label: "Post-Approval", description: "Final decision issue and closure.", min: 12, max: 99 },
+    86→];
+    87→
+    88→function categoryForOrder(order: number): CategoryKey {
+    89→  const c = CATEGORIES.find((cat) => order >= cat.min && order <= cat.max);
+    90→  return c?.key ?? "intake";
+    91→}
+    92→
+    93→// ---------- Effective value helpers (config + override) ----------
+    94→
+    95→function effectiveRole(s: WorkflowStage, override: StageOverride | undefined): RoleKey {
+    96→  return override?.role ?? s.role;
+    97→}
+    98→
+    99→function effectiveActions(s: WorkflowStage, override: StageOverride | undefined): WorkflowAction[] {
+   100→  const raw: string[] = override?.allowedActions ?? s.allowedActions;
+   101→  return raw.filter((a): a is WorkflowAction => (ALL_ACTIONS as string[]).includes(a));
+   102→}
+   103→
+   104→function effectiveCanApprove(s: WorkflowStage, override: StageOverride | undefined): boolean {
+   105→  return override?.canApprove ?? s.canApprove;
+   106→}
+   107→
+   108→function effectiveCanRaiseShortfall(s: WorkflowStage, override: StageOverride | undefined): boolean {
+   109→  return override?.canRaiseShortfall ?? s.canRaiseShortfall;
+   110→}
+   111→
+   112→// A stage is "Customized" only when at least one override field differs from config defaults.
+   113→function isCustomized(s: WorkflowStage, override: StageOverride | undefined): boolean {
+   114→  if (!override) return false;
+   115→  if (override.role !== undefined && override.role !== s.role) return true;
+   116→  if (override.allowedActions !== undefined) {
+   117→    const a = [...override.allowedActions].sort().join(",");
+   118→    const b = [...s.allowedActions].sort().join(",");
+   119→    if (a !== b) return true;
+   120→  }
+   121→  if (override.canApprove !== undefined && override.canApprove !== s.canApprove) return true;
+   122→  if (override.canRaiseShortfall !== undefined && override.canRaiseShortfall !== s.canRaiseShortfall) return true;
+   123→  return false;
+   124→}
+   125→
+   126→interface DraftState {
+   127→  role: RoleKey;
+   128→  allowedActions: Set<WorkflowAction>;
+   129→  canApprove: boolean;
+   130→  canRaiseShortfall: boolean;
+   131→}
+   132→
+   133→function buildDraft(s: WorkflowStage, override: StageOverride | undefined): DraftState {
+   134→  return {
+   135→    role: effectiveRole(s, override),
+   136→    allowedActions: new Set(effectiveActions(s, override)),
+   137→    canApprove: effectiveCanApprove(s, override),
+   138→    canRaiseShortfall: effectiveCanRaiseShortfall(s, override),
+   139→  };
+   140→}
+   141→
+   142→function setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
+   143→  if (a.size !== b.size) return false;
+   144→  for (const x of a) if (!b.has(x)) return false;
+   145→  return true;
+   146→}
+   147→
+   148→export function AdminWorkflow() {
+   149→  const { toast } = useToast();
+   150→  const overrides = useAppStore((s) => s.workflowStageOverrides);
+   151→  const updateWorkflowStage = useAppStore((s) => s.updateWorkflowStage);
+   152→  const roles = useAppStore((s) => s.roles);
+   153→  const navigate = useAppStore((s) => s.navigate);
+   154→
+   155→  // Per-stage local draft state, initialized from the effective values
+   156→  // (config defaults overridden by any persisted store overrides).
+   157→  const [drafts, setDrafts] = React.useState<Record<string, DraftState>>(() => {
+   158→    const init: Record<string, DraftState> = {};
+   159→    for (const s of WORKFLOW_STAGES) {
+   160→      init[s.key] = buildDraft(s, overrides[s.key]);
+   161→    }
+   162→    return init;
+   163→  });
+   164→
+   165→  function setDraftRole(key: string, role: RoleKey) {
+   166→    setDrafts((prev) => (prev[key] ? { ...prev, [key]: { ...prev[key], role } } : prev));
+   167→  }
+   168→
+   169→  function toggleAction(key: string, action: WorkflowAction) {
+   170→    setDrafts((prev) => {
+   171→      const cur = prev[key];
+   172→      if (!cur) return prev;
+   173→      const next = new Set(cur.allowedActions);
+   174→      if (next.has(action)) next.delete(action);
+   175→      else next.add(action);
+   176→      return { ...prev, [key]: { ...cur, allowedActions: next } };
+   177→    });
+   178→  }
+   179→
+   180→  function setDraftCanApprove(key: string, v: boolean) {
+   181→    setDrafts((prev) => (prev[key] ? { ...prev, [key]: { ...prev[key], canApprove: v } } : prev));
+   182→  }
+   183→
+   184→  function setDraftCanRaiseShortfall(key: string, v: boolean) {
+   185→    setDrafts((prev) => (prev[key] ? { ...prev, [key]: { ...prev[key], canRaiseShortfall: v } } : prev));
+   186→  }
+   187→
+   188→  // Dirty when the draft differs from the currently-effective (saved) value.
+   189→  function isDirty(s: WorkflowStage): boolean {
+   190→    const draft = drafts[s.key];
+   191→    if (!draft) return false;
+   192→    const eff = buildDraft(s, overrides[s.key]);
+   193→    return (
+   194→      draft.role !== eff.role ||
+   195→      !setsEqual(draft.allowedActions, eff.allowedActions) ||
+   196→      draft.canApprove !== eff.canApprove ||
+   197→      draft.canRaiseShortfall !== eff.canRaiseShortfall
+   198→    );
+   199→  }
+   200→
+   201→  function handleSave(s: WorkflowStage) {
+   202→    const draft = drafts[s.key];
+   203→    if (!draft) return;
+   204→    updateWorkflowStage(s.key, {
+   205→      role: draft.role,
+   206→      allowedActions: Array.from(draft.allowedActions),
+   207→      canApprove: draft.canApprove,
+   208→      canRaiseShortfall: draft.canRaiseShortfall,
+   209→    });
+   210→    toast({
+   211→      title: "Workflow stage updated",
+   212→      description: `${s.label} — overrides saved. Applies to new applications only.`,
+   213→    });
+   214→  }
+   215→
+   216→  function handleReset(s: WorkflowStage) {
+   217→    // The store does not expose a "clear override" action, so we write the
+   218→    // config defaults back into the override. The effective values then match
+   219→    // the defaults and isCustomized() returns false, hiding the badge.
+   220→    updateWorkflowStage(s.key, {
+   221→      role: s.role,
+   222→      allowedActions: [...s.allowedActions],
+   223→      canApprove: s.canApprove,
+   224→      canRaiseShortfall: s.canRaiseShortfall,
+   225→    });
+   226→    setDrafts((prev) => (prev[s.key] ? { ...prev, [s.key]: buildDraft(s, undefined) } : prev));
+   227→    toast({
+   228→      title: "Workflow stage reset",
+   229→      description: `${s.label} — restored to default configuration.`,
+   230→    });
+   231→  }
+   232→
+   233→  // ---------- KPIs ----------
+   234→  const totalStages = WORKFLOW_STAGES.length;
+   235→  const customizedStages = WORKFLOW_STAGES.filter((s) => isCustomized(s, overrides[s.key])).length;
+   236→  const defaultStages = totalStages - customizedStages;
+   237→  const boundRoles = new Set(WORKFLOW_STAGES.map((s) => effectiveRole(s, overrides[s.key]))).size;
+   238→
+   239→  const roleOptions = Object.values(roles).filter((r) => r.key !== "ADMIN");
+   240→
+   241→  // Group stages by category
+   242→  const grouped: Record<CategoryKey, WorkflowStage[]> = { intake: [], scrutiny: [], approval: [], post: [] };
+   243→  for (const s of WORKFLOW_STAGES) {
+   244→    grouped[categoryForOrder(s.order)].push(s);
+   245→  }
+   246→
+   247→  return (
+   248→    <div className="space-y-6">
+   249→      <PageHeader
+   250→        title="Workflow Stages"
+   251→        description="Configure the end-to-end approval pipeline — stage ownership, allowed actions, and approval/shortfall flags. The workflow is fully data-driven; changes apply to new applications only."
+   252→        icon={Workflow}
+   253→        breadcrumbs={[{ label: "Administration", onClick: () => navigate("admin-dashboard") }, { label: "Workflow Stages" }]}
+   254→        badge={<Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900">Configurable</Badge>}
+   255→      />
+   256→
+   257→      {/* KPI cards */}
+   258→      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+   259→        <KpiCard label="Total Stages" value={totalStages} icon={ListOrdered} hint="Configured pipeline" cls="bg-primary/10 text-primary" />
+   260→        <KpiCard label="Customized Stages" value={customizedStages} icon={ShieldCheck} hint="Overridden from default" cls="bg-warning/15 text-warning-foreground" />
+   261→        <KpiCard label="Default Stages" value={defaultStages} icon={CheckCircle2} hint="Using config defaults" cls="bg-success/10 text-success" />
+   262→        <KpiCard label="Bound Roles" value={boundRoles} icon={Layers} hint="Distinct owner roles" cls="bg-info/10 text-info" />
+   263→      </div>
+   264→
+   265→      {/* Tabs by category — inline editing */}
+   266→      <SectionCard
+   267→        title="Approval Pipeline"
+   268→        description="Edit each stage's owner role, allowed actions and approval flags. Customized stages show a badge and a warning border."
+   269→        icon={Workflow}
+   270→        noPadding
+   271→      >
+   272→        <Tabs defaultValue="intake" className="w-full">
+   273→          <div className="border-b border-border px-4 pt-3">
+   274→            <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/60">
+   275→              {CATEGORIES.map((c) => (
+   276→                <TabsTrigger key={c.key} value={c.key} className="text-xs">
+   277→                  {c.label} ({grouped[c.key].length})
+   278→                </TabsTrigger>
+   279→              ))}
+   280→            </TabsList>
+   281→          </div>
+   282→
+   283→          {CATEGORIES.map((c) => (
+   284→            <TabsContent key={c.key} value={c.key} className="m-0 p-4">
+   285→              <p className="mb-3 text-xs text-muted-foreground">{c.description}</p>
+   286→              <div className="max-h-96 space-y-4 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+   287→                {grouped[c.key].map((s) => {
+   288→                  const draft = drafts[s.key];
+   289→                  const override = overrides[s.key];
+   290→                  const customized = isCustomized(s, override);
+   291→                  const dirty = isDirty(s);
+   292→                  if (!draft) return null;
+   293→                  const defaultRoleLabel = roles[s.role]?.fullName ?? s.role;
+   294→                  return (
+   295→                    <div key={s.key} className={cn("rounded-xl border bg-card p-4 shadow-gov", customized ? "border-warning/40" : "border-border")}>
+   296→                      {/* Header */}
+   297→                      <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+   298→                        <div className="space-y-1">
+   299→                          <div className="flex flex-wrap items-center gap-2">
+   300→                            <span className="flex size-6 items-center justify-center rounded-full border-2 border-primary bg-card text-[10px] font-semibold text-primary tabular-nums">
+   301→                              {s.order}
+   302→                            </span>
+   303→                            <h3 className="text-sm font-semibold text-foreground">{s.label}</h3>
+   304→                            <span className="font-mono text-[10px] text-muted-foreground">{s.key}</span>
+   305→                            {customized && (
+   306→                              <Badge variant="outline" className="gap-1 bg-warning/15 text-warning-foreground border-warning/40 text-[10px]">
+   307→                                <ShieldCheck className="size-3" /> Customized
+   308→                              </Badge>
+   309→                            )}
+   310→                          </div>
+   311→                          <p className="text-xs text-muted-foreground">
+   312→                            Default role: <span className="font-medium text-foreground">{defaultRoleLabel}</span>
+   313→                            {s.nextStage && (
+   314→                              <span className="ml-2 inline-flex items-center gap-1">
+   315→                                · Next: <span className="font-medium text-foreground">{WORKFLOW_STAGES.find((n) => n.key === s.nextStage)?.label}</span>
+   316→                                <ArrowRight className="size-3" />
+   317→                              </span>
+   318→                            )}
+   319→                          </p>
+   320→                        </div>
+   321→                        <div className="flex shrink-0 items-center gap-2">
+   322→                          <Button
+   323→                            size="sm"
+   324→                            variant="outline"
+   325→                            onClick={() => handleReset(s)}
+   326→                            disabled={!override}
+   327→                            aria-label={`Reset ${s.label} to default configuration`}
+   328→                          >
+   329→                            <RotateCcw className="size-3.5" /> Reset
+   330→                          </Button>
+   331→                          <Button
+   332→                            size="sm"
+   333→                            onClick={() => handleSave(s)}
+   334→                            disabled={!dirty}
+   335→                            aria-label={`Save ${s.label} configuration`}
+   336→                          >
+   337→                            <Save className="size-3.5" /> Save
+   338→                          </Button>
+   339→                        </div>
+   340→                      </div>
+   341→
+   342→                      <Separator className="my-3" />
+   343→
+   344→                      {/* Editable fields */}
+   345→                      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+   346→                        {/* Assigned Role */}
+   347→                        <div className="space-y-1.5">
+   348→                          <Label htmlFor={`role-${s.key}`} className="text-xs font-medium">Assigned Role</Label>
+   349→                          <Select value={draft.role} onValueChange={(v) => setDraftRole(s.key, v as RoleKey)}>
+   350→                            <SelectTrigger id={`role-${s.key}`} className="h-9 text-xs">
+   351→                              <SelectValue />
+   352→                            </SelectTrigger>
+   353→                            <SelectContent>
+   354→                              {roleOptions.map((r) => (
+   355→                                <SelectItem key={r.key} value={r.key} className="text-xs">
+   356→                                  {r.fullName} ({r.title})
+   357→                                </SelectItem>
+   358→                              ))}
+   359→                            </SelectContent>
+   360→                          </Select>
+   361→                          <p className="text-[10px] text-muted-foreground">
+   362→                            Default: {defaultRoleLabel}
+   363→                            {draft.role !== s.role && <span className="ml-1 text-warning-foreground">· changed</span>}
+   364→                          </p>
+   365→                        </div>
+   366→
+   367→                        {/* Approval / Shortfall switches */}
+   368→                        <div className="grid grid-cols-2 gap-3">
+   369→                          <label
+   370→                            htmlFor={`approve-${s.key}`}
+   371→                            className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
+   372→                          >
+   373→                            <span className="text-xs font-medium text-foreground">Can Approve</span>
+   374→                            <Switch
+   375→                              id={`approve-${s.key}`}
+   376→                              checked={draft.canApprove}
+   377→                              onCheckedChange={(v) => setDraftCanApprove(s.key, v)}
+   378→                              aria-label={`Allow approval at ${s.label}`}
+   379→                            />
+   380→                          </label>
+   381→                          <label
+   382→                            htmlFor={`shortfall-${s.key}`}
+   383→                            className="flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2"
+   384→                          >
+   385→                            <span className="text-xs font-medium text-foreground">Can Raise Shortfall</span>
+   386→                            <Switch
+   387→                              id={`shortfall-${s.key}`}
+   388→                              checked={draft.canRaiseShortfall}
+   389→                              onCheckedChange={(v) => setDraftCanRaiseShortfall(s.key, v)}
+   390→                              aria-label={`Allow raising shortfall at ${s.label}`}
+   391→                            />
+   392→                          </label>
+   393→                        </div>
+   394→                      </div>
+   395→
+   396→                      {/* Allowed Actions */}
+   397→                      <div className="mt-4 space-y-2">
+   398→                        <Label className="text-xs font-medium">Allowed Actions</Label>
+   399→                        <p className="text-[10px] text-muted-foreground">Toggle the manual actions an officer can perform at this stage.</p>
+   400→                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+   401→                          {ALL_ACTIONS.map((a) => {
+   402→                            const on = draft.allowedActions.has(a);
+   403→                            return (
+   404→                              <label
+   405→                                key={a}
+   406→                                htmlFor={`act-${s.key}-${a}`}
+   407→                                className={cn(
+   408→                                  "flex cursor-pointer items-center justify-between gap-2 rounded-lg border px-3 py-2 transition-colors",
+   409→                                  on ? "border-primary/40 bg-primary/5" : "border-border hover:bg-accent/40"
+   410→                                )}
+   411→                              >
+   412→                                <span className="text-xs font-medium text-foreground">{ACTION_LABELS[a]}</span>
+   413→                                <Switch
+   414→                                  id={`act-${s.key}-${a}`}
+   415→                                  checked={on}
+   416→                                  onCheckedChange={() => toggleAction(s.key, a)}
+   417→                                  aria-label={`${ACTION_LABELS[a]} at ${s.label}`}
+   418→                                />
+   419→                              </label>
+   420→                            );
+   421→                          })}
+   422→                        </div>
+   423→                      </div>
+   424→
+   425→                      {/* Effective flags + dirty indicator */}
+   426→                      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border/60 pt-3 text-xs">
+   427→                        {draft.canApprove && (
+   428→                          <Badge variant="outline" className="gap-1 bg-success/10 text-success border-success/30 text-[10px]">
+   429→                            <CheckCircle2 className="size-3" /> Can approve
+   430→                          </Badge>
+   431→                        )}
+   432→                        {draft.canRaiseShortfall && (
+   433→                          <Badge variant="outline" className="gap-1 bg-warning/15 text-warning-foreground border-warning/40 text-[10px]">
+   434→                            <AlertTriangle className="size-3" /> Can raise shortfall
+   435→                          </Badge>
+   436→                        )}
+   437→                        {draft.allowedActions.size === 0 && !draft.canApprove && !draft.canRaiseShortfall && (
+   438→                          <Badge variant="outline" className="bg-muted text-muted-foreground text-[10px]">System / passive stage</Badge>
+   439→                        )}
+   440→                        <span className="ml-auto text-[10px] text-muted-foreground">
+   441→                          {dirty ? "Unsaved changes" : customized ? "Saved" : "Default"}
+   442→                        </span>
+   443→                      </div>
+   444→                    </div>
+   445→                  );
+   446→                })}
+   447→              </div>
+   448→            </TabsContent>
+   449→          ))}
+   450→        </Tabs>
+   451→      </SectionCard>
+   452→
+   453→      {/* Info note */}
+   454→      <div className="flex items-start gap-3 rounded-xl border border-info/30 bg-info/5 p-4">
+   455→        <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info/15 text-info">
+   456→          <Info className="size-4" />
+   457→        </div>
+   458→        <div className="space-y-1">
+   459→          <p className="text-sm font-medium text-foreground">Configurable workflow — no hard-coded behaviour</p>
+   460→          <p className="text-xs leading-relaxed text-muted-foreground">
+   461→            Every stage, role binding, action grant and forward-target is data-driven. Changes are audit-logged and applied to <span className="font-medium text-foreground">new applications only</span> — applications already in the pipeline continue on the workflow version under which they were submitted.
+   462→          </p>
+   463→        </div>
+   464→      </div>
+   465→
+   466→      {/* Stage summary table (effective values) */}
+   467→      <SectionCard
+   468→        title="Stage Summary"
+   469→        description="Tabular reference of every stage with effective bindings (override applied)."
+   470→        icon={Layers}
+   471→        noPadding
+   472→      >
+   473→        <div className="max-h-96 overflow-x-auto overflow-y-auto">
+   474→          <table className="w-full text-sm">
+   475→            <thead className="sticky top-0 z-10 bg-muted/80 backdrop-blur">
+   476→              <tr className="text-left text-[11px] uppercase tracking-wide text-foreground">
+   477→                <th className="px-4 py-2.5 font-bold">Order</th>
+   478→                <th className="px-4 py-2.5 font-bold">Stage</th>
+   479→                <th className="px-4 py-2.5 font-bold">Effective Role</th>
+   480→                <th className="px-4 py-2.5 font-bold">Allowed Actions</th>
+   481→                <th className="px-4 py-2.5 font-bold">Flags</th>
+   482→                <th className="px-4 py-2.5 font-bold">Next</th>
+   483→              </tr>
+   484→            </thead>
+   485→            <tbody className="divide-y divide-border">
+   486→              {WORKFLOW_STAGES.map((s) => {
+   487→                const override = overrides[s.key];
+   488→                const customized = isCustomized(s, override);
+   489→                const role = effectiveRole(s, override);
+   490→                const actions = effectiveActions(s, override);
+   491→                const canApprove = effectiveCanApprove(s, override);
+   492→                const canRaiseShortfall = effectiveCanRaiseShortfall(s, override);
+   493→                return (
+   494→                  <tr key={s.key} className="hover:bg-muted/30 align-top">
+   495→                    <td className="px-4 py-2.5 font-mono text-xs tabular-nums">{s.order}</td>
+   496→                    <td className="px-4 py-2.5">
+   497→                      <div className="flex flex-col">
+   498→                        <span className="text-sm font-medium text-foreground">{s.label}</span>
+   499→                        <span className="font-mono text-[10px] text-muted-foreground">{s.key}</span>
+   500→                      </div>
+   501→                    </td>
+   502→                    <td className="px-4 py-2.5">
+   503→                      <div className="flex items-center gap-2">
+   504→                        <RoleBadge role={role} label={roles[role]?.title ?? role} />
+   505→                        {customized && (
+   506→                          <Badge variant="outline" className="bg-warning/15 text-warning-foreground border-warning/40 text-[9px]">Custom</Badge>
+   507→                        )}
+   508→                      </div>
+   509→                    </td>
+   510→                    <td className="px-4 py-2.5">
+   511→                      <div className="flex flex-wrap gap-1">
+   512→                        {actions.length === 0 ? (
+   513→                          <span className="text-xs text-muted-foreground">—</span>
+   514→                        ) : (
+   515→                          actions.map((a) => (
+   516→                            <Badge key={a} variant="outline" className="bg-muted/60 text-muted-foreground text-[10px]">
+   517→                              {ACTION_LABELS[a]}
+   518→                            </Badge>
+   519→                          ))
+   520→                        )}
+   521→                      </div>
+   522→                    </td>
+   523→                    <td className="px-4 py-2.5">
+   524→                      <div className="flex flex-wrap gap-1">
+   525→                        {canApprove && <Badge variant="outline" className="bg-success/10 text-success border-success/30 text-[9px]">Approve</Badge>}
+   526→                        {canRaiseShortfall && <Badge variant="outline" className="bg-warning/15 text-warning-foreground border-warning/40 text-[9px]">Shortfall</Badge>}
+   527→                        {!canApprove && !canRaiseShortfall && <span className="text-xs text-muted-foreground">—</span>}
+   528→                      </div>
+   529→                    </td>
+   530→                    <td className="px-4 py-2.5 text-xs text-muted-foreground">
+   531→                      {s.nextStage ? (
+   532→                        <span className="inline-flex items-center gap-1">
+   533→                          {WORKFLOW_STAGES.find((n) => n.key === s.nextStage)?.label}
+   534→                          <ArrowDown className="size-3" />
+   535→                        </span>
+   536→                      ) : "—"}
+   537→                    </td>
+   538→                  </tr>
+   539→                );
+   540→              })}
+   541→            </tbody>
+   542→          </table>
+   543→        </div>
+   544→      </SectionCard>
+   545→    </div>
+   546→  );
+   547→}
+   548→
+   549→function KpiCard({ label, value, icon: Icon, hint, cls }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }>; hint?: string; cls: string }) {
+   550→  return (
+   551→    <div className="rounded-xl border border-border bg-card p-4 shadow-gov">
+   552→      <div className={cn("flex size-9 items-center justify-center rounded-lg", cls)}>
+   553→        <Icon className="size-4" />
+   554→      </div>
+   555→      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+   556→      <p className="text-xs text-muted-foreground">{label}</p>
+   557→      {hint && <p className="mt-0.5 text-[10px] text-muted-foreground">{hint}</p>}
+   558→    </div>
+   559→  );
+   560→}
+   561→
+   562→export default AdminWorkflow;
+   563→
