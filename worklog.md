@@ -469,3 +469,66 @@ Stage Summary:
 - Every admin action mutates the Zustand store, appends an AdminAuditEntry, and the UI reflects the change immediately.
 - Where the store has no action (Add application type, fee structure CRUD, SMS template activation), the UI is honestly labelled (disabled + tooltip or "Demo only — not persisted") — NO toast-only fakes remain.
 - Production-quality verified: lint clean, tsc clean, browser end-to-end test passes, sticky footer + responsive layout inherited from app-shell, all modules render with no console errors.
+
+---
+Task ID: 12
+Agent: main
+Task: Inspect existing LTP "My Applications" module, then implement search, status filter, sorting, List/Grid view, pagination, New Application, application navigation, back navigation, and responsive layout. Verify all via agent-browser, then run lint + tsc.
+
+Work Log:
+1. Inspected existing `src/components/ltp/ltp-applications.tsx` (247 lines). Found:
+   - Search (by app no, project, applicant) ✓ already present
+   - Status filter Select ✓ already present (11 options)
+   - List/Grid view toggle ✓ already present
+   - New Application button + modal ✓ already present
+   - Application navigation (openApplication) ✓ already present
+   - Breadcrumb back to ltp-dashboard ✓ already present
+   - Responsive grid ✓ already present
+   - MISSING: Sorting (no sort control, no sortable columns)
+   - MISSING: Pagination (all apps shown at once)
+   - MISSING: Sortable column headers with indicators
+   - MISSING: Page-size selector
+   - MISSING: Result-count summary + clear-filters chip bar
+   - Table headers were not bold (only font-medium) — needed font-bold + border-b-2 per UI rules
+   - Status filter list was incomplete (missing several statuses like DRAWING_UPLOADED, SCRUTINY_IN_PROGRESS, FEE_GENERATED, DIRECTOR_DP_REVIEW, ADDL_COMMISSIONER_REVIEW, COMMISSIONER_REVIEW, REJECTED, RETURNED)
+2. Also inspected: store `useVisibleApplications()` (filters by LTP role), `page.tsx` router (ltp-applications → LtpApplications), `back-button.tsx` hierarchy (ltp-application-details → ltp-applications), `ltp-dashboard.tsx` reference pagination pattern, `new-application-modal.tsx` (5-step wizard), `ltp-application-details.tsx` (has Back to Applications + breadcrumb), shadcn `pagination.tsx` + available UI components.
+3. Rewrote `src/components/ltp/ltp-applications.tsx` (full rewrite, 660+ lines):
+   - **Search**: enhanced to also match ward + zone (in addition to app no, project, applicant). Added inline clear-search (X) button.
+   - **Status filter**: expanded from 11 → 20 status options (now covers every ApplicationStatus value).
+   - **Sorting**: added a Sort Select dropdown with 12 sort options (lastUpdated / submissionDate / applicationNo / projectName / status / priority × asc/desc). ALSO made 7 of 9 table column headers clickable sortable with sort-direction indicators (ChevronUp / ChevronDown when active, ChevronsUpDown dimmed when inactive) and proper `aria-sort` on the `<th>`. Clicking a header toggles direction if same key, else sets the key with a sensible default direction. Header sort + dropdown sort stay in sync (both write to the same sortKey/sortDir state).
+   - **List/Grid view toggle**: preserved; both views now use the SAME paginated + sorted + filtered dataset.
+   - **Pagination**: implemented full pagination — page-size selector (10 / 25 / 50), "Showing X–Y of Z" summary, prev/next buttons with disabled state, numbered page buttons with active highlight + `aria-current="page"`, ellipsis logic for >7 pages, auto-reset to page 1 when query / status / sort / pageSize changes, guard against out-of-range page.
+   - **New Application**: preserved button + modal wiring (NewApplicationModal).
+   - **Application navigation**: preserved — clicking the app-no link, the row (any non-interactive cell), or the "Open" button all call `openApplication(a.id)` → lands on ltp-application-details. Added `e.stopPropagation()` on the Status / Priority / Action cells so clicking their controls doesn't double-navigate.
+   - **Back navigation**: preserved breadcrumb (LTP Portal → Applications) via PageHeader; the details page has its own "Back to Applications" button which returns to ltp-applications.
+   - **Responsive layout**: mobile-first — toolbar stacks vertically (`flex-col sm:flex-row`), KPI grid is 2 cols on mobile / 4 on sm+, grid view is 1 col on mobile / 2 on sm / 3 on xl, table wraps in `overflow-x-auto`, page nav buttons hide their text labels on mobile (only icons).
+   - **UI alignment**: table headers now `font-bold` + `border-b-2` + sticky `bg-muted/60 backdrop-blur`; consistent `p-4`/`p-6` padding and `gap-3`/`gap-4` spacing; active-filter chip bar shows result count + "Clear filters" button + current sort label.
+   - **Accessibility**: `aria-label` on search / status / sort / view-toggle / page-size / pagination controls; `aria-sort` on sortable `<th>`; `aria-current="page"` on active page; `aria-pressed` on view-toggle buttons; `sr-only` label for page-size select.
+4. Fixed lint warning: moved `aria-sort` from inner `<button>` (unsupported on role=button) to the parent `<th>` element; added descriptive `aria-label` on the sort button instead.
+5. Verified: lint 0 errors / 0 warnings ✓, tsc 0 errors ✓, server HTTP 200 ✓, dev.log 0 runtime errors ✓.
+
+Self-Verification (Agent Browser end-to-end):
+- Logged in as LTP (Ar. Vikram Deshpande) → navigated to My Applications ✓
+- KPI cards: 25 Total, 24 Active, 15 Action Required, 1 Approved (store-derived) ✓
+- Search "riverstone" → 1 match, result text "1 application match your filters" ✓
+- Status filter "Payment Pending" → 12 matches, all visible rows show Payment Pending ✓
+- Sort by Application No. column header → ascending (MC/BP/2026/04/0004 first), aria-sort="ascending", dropdown syncs to "Application No. (A → Z)" ✓; click again → descending (MC/BP/2026/04/0027 first), aria-sort="descending" ✓
+- Clear filters button → restores all 25 applications ✓
+- List/Grid toggle → grid view shows 10 application cards with app no, project, ward/zone, status, stage ✓
+- Pagination: "Showing 1–10 of 25", 3 page buttons, click Page 2 → "Showing 11–20 of 25" aria-current="page"=2, first app differs ✓; Next → "Showing 21–25 of 25" page 3 ✓
+- Page size 10 → 25 → "Showing 1–25 of 25", single page, no pagination nav ✓
+- Switch back to list view → 25 rows visible (page size 25) ✓
+- New Application button → opens 5-step wizard modal (Details / Project / Drawing / Documents / Review) ✓; close returns to My Applications ✓
+- Application navigation: click "Open" on a row → lands on Application Details showing MC/BP/2026/04/0027 ✓
+- Back navigation: click "Back to Applications" on details page → returns to My Applications ✓
+- Responsive mobile (390×844): heading visible, KPI grid 2-col, toolbar stacks vertically, table horizontally scrollable ✓ (screenshot /tmp/mobile-myapps.png)
+- Responsive desktop (1440×900): full toolbar inline, view toggle present, pagination present ✓ (screenshot /tmp/desktop-myapps.png)
+- 0 console / runtime errors throughout the entire test ✓
+- 0 HMR / Fast Refresh errors ✓
+
+Stage Summary:
+- Single file changed: `src/components/ltp/ltp-applications.tsx` (full rewrite, ~660 lines).
+- All 9 user-requested features implemented + verified end-to-end: search ✓, status filter ✓ (20 options), sorting ✓ (dropdown + sortable headers with aria-sort), List/Grid view ✓, pagination ✓ (size selector + nav + ellipsis + reset-on-filter), New Application ✓ (5-step wizard), application navigation ✓, back navigation ✓, responsive ✓ (mobile 390×844 + desktop 1440×900).
+- Store-driven (no UI-only state): reads from `useVisibleApplications()`; navigation via `openApplication`/`navigate`; New Application via `createApplication` in the modal — all persistence stays in the Zustand store, consistent with the admin-CRUD rigor from the pasted spec ("no UI-only configuration", "single source of truth").
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
+- Build not run per sandbox rule ("never use `bun run build`"); equivalent verification done via tsc + lint + agent-browser end-to-end test.

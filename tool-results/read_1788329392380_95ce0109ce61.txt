@@ -1,0 +1,1912 @@
+     1→PERFORM A COMPLETE ADMINISTRATOR CRUD, CONFIGURATION PROPAGATION,
+     2→ROLE-SPECIFIC VISIBILITY, DATA PERSISTENCE, AND REGRESSION AUDIT
+     3→OF THE SYSTEM ADMINISTRATOR CONSOLE.
+     4→
+     5→IMPORTANT:
+     6→
+     7→This task is primarily for the SYSTEM ADMINISTRATOR / ADMIN CONSOLE.
+     8→
+     9→The main problem is:
+    10→
+    11→1. Edit buttons exist but are not actually working.
+    12→2. Changes made through Edit are not reflected in the relevant user logins/modules.
+    13→3. Add/create functionality is inconsistent.
+    14→4. Delete actions are not working.
+    15→5. Some configuration screens appear to change visually but do not change
+    16→   the actual application behavior.
+    17→6. Data is likely duplicated between admin modules and operational modules.
+    18→
+    19→Do NOT merely change button styling.
+    20→
+    21→Find and fix the ROOT CAUSE.
+    22→
+    23→==================================================
+    24→1. COMPLETE ADMIN CRUD AUDIT
+    25→==================================================
+    26→
+    27→Audit every System Administrator module that contains:
+    28→
+    29→Add
+    30→Create
+    31→Edit
+    32→Update
+    33→Delete
+    34→Activate
+    35→Deactivate
+    36→Enable
+    37→Disable
+    38→Save
+    39→Reset
+    40→Assign
+    41→Remove
+    42→Configure
+    43→
+    44→Inspect:
+    45→
+    46→Users
+    47→Roles & Permissions
+    48→Application Types
+    49→Fee Structures
+    50→Workflow Stages
+    51→Notification / SMS
+    52→System Settings
+    53→Audit Logs where applicable
+    54→Any additional configurable admin module
+    55→
+    56→For EACH module verify:
+    57→
+    58→Create
+    59→Read
+    60→Update
+    61→Delete
+    62→Activate/Deactivate
+    63→Persistence
+    64→Validation
+    65→Authorization
+    66→Audit logging
+    67→Cross-module propagation
+    68→
+    69→==================================================
+    70→2. NO UI-ONLY EDITS
+    71→==================================================
+    72→
+    73→When the administrator clicks:
+    74→
+    75→Edit
+    76→
+    77→the actual data record must become editable.
+    78→
+    79→When:
+    80→
+    81→Save Changes
+    82→
+    83→is clicked:
+    84→
+    85→the underlying shared data must be updated.
+    86→
+    87→Do NOT simply update local component state.
+    88→
+    89→Do NOT make the modal close while the old data remains unchanged.
+    90→
+    91→==================================================
+    92→3. SINGLE SOURCE OF TRUTH
+    93→==================================================
+    94→
+    95→Create/use one authoritative data source for each entity.
+    96→
+    97→Entities:
+    98→
+    99→User
+   100→Role
+   101→Permission
+   102→Application Type
+   103→Fee Structure
+   104→Workflow Stage
+   105→Notification Template
+   106→SMS Template
+   107→System Setting
+   108→
+   109→Do NOT maintain separate copies such as:
+   110→
+   111→adminUsers
+   112→dashboardUsers
+   113→loginUsers
+   114→
+   115→adminRoles
+   116→loginRoles
+   117→
+   118→adminFeeStructures
+   119→feeStructures
+   120→
+   121→adminWorkflow
+   122→applicationWorkflow
+   123→
+   124→etc.
+   125→
+   126→The admin console and operational modules must reference the same
+   127→configuration source.
+   128→
+   129→==================================================
+   130→4. USER EDIT FUNCTIONALITY
+   131→==================================================
+   132→
+   133→Admin:
+   134→
+   135→Users
+   136→→ Select User
+   137→→ Edit
+   138→
+   139→The Edit form should allow appropriate fields such as:
+   140→
+   141→Name
+   142→Email
+   143→Mobile
+   144→Role
+   145→Status
+   146→
+   147→depending on current architecture.
+   148→
+   149→Click:
+   150→
+   151→Save Changes
+   152→
+   153→Expected:
+   154→
+   155→1. User record updates.
+   156→2. User list updates.
+   157→3. Audit log created.
+   158→4. Shared user store updates.
+   159→5. Login/session behavior reflects the change.
+   160→6. Role permissions recalculate if role changed.
+   161→
+   162→==================================================
+   163→5. USER ROLE CHANGE
+   164→==================================================
+   165→
+   166→Example:
+   167→
+   168→User:
+   169→Test User
+   170→
+   171→Current role:
+   172→LTP
+   173→
+   174→Admin changes:
+   175→
+   176→LTP
+   177→→ TPS
+   178→
+   179→Save.
+   180→
+   181→Expected:
+   182→
+   183→The next login/session for that user behaves as TPS.
+   184→
+   185→It must NOT still behave as LTP.
+   186→
+   187→Update:
+   188→
+   189→role
+   190→effective permissions
+   191→navigation
+   192→route access
+   193→available actions
+   194→dashboard
+   195→workflow permissions
+   196→
+   197→==================================================
+   198→6. USER STATUS CHANGE
+   199→==================================================
+   200→
+   201→Admin changes:
+   202→
+   203→ACTIVE
+   204→→ INACTIVE
+   205→
+   206→Save.
+   207→
+   208→Expected:
+   209→
+   210→User cannot log in.
+   211→
+   212→Admin changes:
+   213→
+   214→INACTIVE
+   215→→ ACTIVE
+   216→
+   217→Save.
+   218→
+   219→Expected:
+   220→
+   221→user can log in again.
+   222→
+   223→Do not implement this only visually.
+   224→
+   225→Actual login authorization must check current user status.
+   226→
+   227→==================================================
+   228→7. DELETE USER
+   229→==================================================
+   230→
+   231→If user deletion is supported:
+   232→
+   233→Click:
+   234→
+   235→Delete
+   236→
+   237→Show confirmation:
+   238→
+   239→Delete this user?
+   240→
+   241→This action cannot be undone.
+   242→
+   243→[Cancel] [Delete]
+   244→
+   245→After confirmation:
+   246→
+   247→remove/deactivate according to the project's data model.
+   248→
+   249→IMPORTANT:
+   250→
+   251→Do not physically destroy historical audit/workflow records associated with
+   252→the user.
+   253→
+   254→If the user has historical activity, prefer soft-delete/deactivate unless
+   255→the system specifically requires permanent deletion.
+   256→
+   257→After deletion/deactivation:
+   258→
+   259→User list updates.
+   260→
+   261→Login access updates.
+   262→
+   263→Permissions update.
+   264→
+   265→Audit event is created.
+   266→
+   267→==================================================
+   268→8. ADD USER
+   269→==================================================
+   270→
+   271→Admin:
+   272→
+   273→Users
+   274→→ Add User
+   275→
+   276→Create new user.
+   277→
+   278→After Save:
+   279→
+   280→The user must appear in Users.
+   281→
+   282→If ACTIVE:
+   283→
+   284→the user should be able to log in using the existing demo authentication
+   285→mechanism.
+   286→
+   287→The assigned role must immediately determine:
+   288→
+   289→sidebar
+   290→dashboard
+   291→permissions
+   292→module access
+   293→actions
+   294→
+   295→==================================================
+   296→9. ROLES & PERMISSIONS — EDIT
+   297→==================================================
+   298→
+   299→Admin:
+   300→
+   301→Roles & Permissions
+   302→→ Select Role
+   303→→ Edit
+   304→
+   305→Changing permission must update the central role-permission mapping.
+   306→
+   307→Example:
+   308→
+   309→TPS
+   310→
+   311→Permission:
+   312→
+   313→drawings.scrutinize
+   314→
+   315→Change:
+   316→
+   317→Enabled
+   318→→ Disabled
+   319→
+   320→Save.
+   321→
+   322→Expected:
+   323→
+   324→TPS user can no longer perform scrutiny.
+   325→
+   326→The change must affect:
+   327→
+   328→sidebar visibility where appropriate
+   329→route guards
+   330→button visibility
+   331→action authorization
+   332→underlying service/action validation
+   333→
+   334→==================================================
+   335→10. PERMISSION PROPAGATION
+   336→==================================================
+   337→
+   338→Do NOT require manually editing every TPS user.
+   339→
+   340→Role permission changes must automatically affect users assigned to that role.
+   341→
+   342→Example:
+   343→
+   344→Role:
+   345→TPS
+   346→
+   347→Permission:
+   348→documents.verify
+   349→
+   350→ON
+   351→
+   352→All TPS users inherit this permission.
+   353→
+   354→Change:
+   355→
+   356→OFF
+   357→
+   358→All TPS users lose the permission.
+   359→
+   360→Use:
+   361→
+   362→Role Permissions
+   363→+
+   364→User Overrides if supported
+   365→
+   366→to calculate effective permissions centrally.
+   367→
+   368→==================================================
+   369→11. USER-SPECIFIC PERMISSION OVERRIDE
+   370→==================================================
+   371→
+   372→If the existing architecture supports individual user overrides:
+   373→
+   374→calculate:
+   375→
+   376→Effective Permissions =
+   377→Role Permissions
+   378→+
+   379→Allowed Overrides
+   380→-
+   381→Denied Overrides
+   382→
+   383→Make this calculation central.
+   384→
+   385→Do not implement separate permission calculations in individual pages.
+   386→
+   387→==================================================
+   388→12. DIRECT URL SECURITY
+   389→==================================================
+   390→
+   391→Disabling a permission must not merely hide a button.
+   392→
+   393→Test direct route access.
+   394→
+   395→Example:
+   396→
+   397→TPS permission:
+   398→
+   399→drawings.scrutinize = OFF
+   400→
+   401→Try directly accessing the relevant route/action.
+   402→
+   403→Expected:
+   404→
+   405→Access denied
+   406→
+   407→or
+   408→
+   409→action unavailable
+   410→
+   411→Do not allow permission bypass through URL.
+   412→
+   413→==================================================
+   414→13. APPLICATION TYPES — EDIT
+   415→==================================================
+   416→
+   417→Admin:
+   418→
+   419→Application Types
+   420→→ Edit
+   421→
+   422→Fields may include:
+   423→
+   424→Name
+   425→Description
+   426→Category
+   427→Active/Inactive
+   428→
+   429→When saved:
+   430→
+   431→the Application Type list updates.
+   432→
+   433→If an Application Type is active:
+   434→
+   435→it appears in New Application.
+   436→
+   437→If deactivated:
+   438→
+   439→it must no longer appear for NEW applications.
+   440→
+   441→IMPORTANT:
+   442→
+   443→Do not alter historical applications that already use the deactivated
+   444→application type.
+   445→
+   446→Historical records must remain intact.
+   447→
+   448→==================================================
+   449→14. APPLICATION TYPES — ADD
+   450→==================================================
+   451→
+   452→Admin can create a new application type.
+   453→
+   454→Example:
+   455→
+   456→Building Regularization
+   457→
+   458→After Save:
+   459→
+   460→New Application wizard should immediately show it for eligible new
+   461→applications.
+   462→
+   463→No hardcoded list should override the configuration.
+   464→
+   465→==================================================
+   466→15. APPLICATION TYPES — DELETE
+   467→==================================================
+   468→
+   469→Before deleting:
+   470→
+   471→check whether existing applications use the type.
+   472→
+   473→If historical records depend on it:
+   474→
+   475→prefer:
+   476→
+   477→Deactivate
+   478→
+   479→instead of physical deletion.
+   480→
+   481→Show:
+   482→
+   483→This application type is used by existing applications and cannot be
+   484→permanently deleted. Deactivate it instead?
+   485→
+   486→==================================================
+   487→16. FEE STRUCTURES — EDIT
+   488→==================================================
+   489→
+   490→Admin:
+   491→
+   492→Fee Structures
+   493→→ Edit
+   494→
+   495→Changes must modify the central active configuration.
+   496→
+   497→Fee structure may contain:
+   498→
+   499→Name
+   500→Application Type
+   501→Property Type
+   502→Effective From
+   503→Effective To
+   504→Components
+   505→Rates
+   506→Basis
+   507→Status
+   508→
+   509→Save must persist the actual configuration.
+   510→
+   511→==================================================
+   512→17. FEE STRUCTURE PROPAGATION
+   513→==================================================
+   514→
+   515→When a fee structure is changed:
+   516→
+   517→NEW fee generation must use the updated configuration.
+   518→
+   519→Example:
+   520→
+   521→Old:
+   522→
+   523→Application Fee = ₹2,500
+   524→
+   525→Admin changes:
+   526→
+   527→Application Fee = ₹3,000
+   528→
+   529→A NEW application reaching fee generation must use:
+   530→
+   531→₹3,000
+   532→
+   533→Do not modify an already generated historical fee unless explicitly
+   534→requested.
+   535→
+   536→==================================================
+   537→18. FEE STRUCTURE VERSIONING
+   538→==================================================
+   539→
+   540→Do not silently rewrite historical fee calculations.
+   541→
+   542→Use:
+   543→
+   544→Fee Structure Version
+   545→
+   546→Example:
+   547→
+   548→Building Permission Residential
+   549→v1
+   550→
+   551→Building Permission Residential
+   552→v2
+   553→
+   554→Existing fee generated under v1 remains linked to v1.
+   555→
+   556→New applications use active v2.
+   557→
+   558→==================================================
+   559→19. FEE STRUCTURE DELETE
+   560→==================================================
+   561→
+   562→Do not permanently delete a fee structure that is referenced by existing
+   563→fees.
+   564→
+   565→Instead:
+   566→
+   567→Deactivate
+   568→
+   569→Preserve historical records.
+   570→
+   571→==================================================
+   572→20. WORKFLOW STAGES — EDIT
+   573→==================================================
+   574→
+   575→Admin:
+   576→
+   577→Workflow Stages
+   578→→ Edit
+   579→
+   580→Editable configuration may include:
+   581→
+   582→Stage Name
+   583→Role
+   584→Sequence
+   585→SLA
+   586→Active/Inactive
+   587→Allowed Actions
+   588→Shortfall Allowed
+   589→Fee Shortfall Allowed
+   590→
+   591→Save must update the central workflow configuration.
+   592→
+   593→==================================================
+   594→21. WORKFLOW PROPAGATION
+   595→==================================================
+   596→
+   597→NEW applications must use the currently active workflow configuration.
+   598→
+   599→Existing in-progress applications should NOT be corrupted.
+   600→
+   601→Use workflow versioning if required.
+   602→
+   603→Example:
+   604→
+   605→Workflow v1:
+   606→LTP
+   607→→ TPS
+   608→→ TPA
+   609→→ ZAD/ZDD
+   610→→ ZJD
+   611→→ Director
+   612→→ Additional Commissioner
+   613→→ Commissioner
+   614→
+   615→Admin creates Workflow v2.
+   616→
+   617→New applications:
+   618→v2
+   619→
+   620→Existing applications:
+   621→remain on v1 where appropriate.
+   622→
+   623→==================================================
+   624→22. WORKFLOW VALIDATION
+   625→==================================================
+   626→
+   627→Prevent saving invalid configuration.
+   628→
+   629→Examples:
+   630→
+   631→duplicate sequence
+   632→missing role
+   633→missing first stage
+   634→missing final stage
+   635→inactive required stage
+   636→circular workflow
+   637→
+   638→Show clear validation.
+   639→
+   640→==================================================
+   641→23. WORKFLOW STAGE DELETE
+   642→==================================================
+   643→
+   644→Do not delete a workflow stage that existing applications depend on.
+   645→
+   646→Instead:
+   647→
+   648→Deactivate
+   649→
+   650→or:
+   651→
+   652→Create a new workflow version without that stage.
+   653→
+   654→Historical workflow history must remain intact.
+   655→
+   656→==================================================
+   657→24. NOTIFICATION TEMPLATE — EDIT
+   658→==================================================
+   659→
+   660→Admin:
+   661→
+   662→Notification / SMS
+   663→→ Edit Template
+   664→
+   665→Update:
+   666→
+   667→Subject
+   668→Message
+   669→Active/Inactive
+   670→Channel
+   671→Event
+   672→
+   673→Save must persist.
+   674→
+   675→==================================================
+   676→25. NOTIFICATION PROPAGATION
+   677→==================================================
+   678→
+   679→When the event occurs:
+   680→
+   681→the latest active template should be used for NEW events.
+   682→
+   683→Example:
+   684→
+   685→Event:
+   686→
+   687→Payment Successful
+   688→
+   689→Admin changes template.
+   690→
+   691→Next successful payment should use the updated template.
+   692→
+   693→Existing historical notifications do not need to change.
+   694→
+   695→==================================================
+   696→26. TEMPLATE VARIABLES
+   697→==================================================
+   698→
+   699→Support:
+   700→
+   701→{{applicationNumber}}
+   702→{{projectName}}
+   703→{{applicantName}}
+   704→{{currentStage}}
+   705→{{status}}
+   706→{{amount}}
+   707→
+   708→Validate variables.
+   709→
+   710→Do not allow broken/unrecognized variables to be saved without warning.
+   711→
+   712→==================================================
+   713→27. SYSTEM SETTINGS — EDIT
+   714→==================================================
+   715→
+   716→Admin:
+   717→
+   718→System Settings
+   719→→ Edit
+   720→
+   721→Changes must update the central settings.
+   722→
+   723→Examples:
+   724→
+   725→Portal Name
+   726→Portal Subtitle
+   727→File Size Limit
+   728→Allowed File Formats
+   729→Date Format
+   730→Currency
+   731→Demo Mode
+   732→Session Timeout
+   733→Notification Preferences
+   734→
+   735→Do not hardcode the same setting in components.
+   736→
+   737→==================================================
+   738→28. SETTINGS PROPAGATION
+   739→==================================================
+   740→
+   741→Example:
+   742→
+   743→Admin changes:
+   744→
+   745→Portal Name
+   746→
+   747→from:
+   748→
+   749→LTP Approval
+   750→
+   751→to:
+   752→
+   753→LTP Approval Portal
+   754→
+   755→Expected:
+   756→
+   757→all applicable portal branding updates.
+   758→
+   759→Do not modify unrelated branding unless setting is intended to be global.
+   760→
+   761→==================================================
+   762→29. FILE SIZE CONFIGURATION
+   763→==================================================
+   764→
+   765→If Admin changes:
+   766→
+   767→Maximum Document Size:
+   768→10 MB → 20 MB
+   769→
+   770→Document upload validation must reflect 20 MB for NEW uploads.
+   771→
+   772→Same principle for drawing file limits.
+   773→
+   774→==================================================
+   775→30. ALLOWED FILE TYPES
+   776→==================================================
+   777→
+   778→If Admin configures:
+   779→
+   780→Documents:
+   781→PDF, JPG, PNG
+   782→
+   783→the Documents module must use the same configuration.
+   784→
+   785→Do not hardcode another list in the upload component.
+   786→
+   787→==================================================
+   788→31. DELETE / DEACTIVATE RULE
+   789→==================================================
+   790→
+   791→Before ANY destructive operation:
+   792→
+   793→determine whether the record has historical dependencies.
+   794→
+   795→If yes:
+   796→
+   797→prefer soft-delete/deactivate.
+   798→
+   799→If no:
+   800→
+   801→allow deletion where appropriate.
+   802→
+   803→Always confirm destructive actions.
+   804→
+   805→==================================================
+   806→32. DELETE CONFIRMATION
+   807→==================================================
+   808→
+   809→Use a consistent confirmation modal.
+   810→
+   811→Example:
+   812→
+   813→Delete Application Type?
+   814→
+   815→Are you sure you want to delete "Demolition Permit"?
+   816→
+   817→[Cancel]
+   818→[Delete]
+   819→
+   820→Use warning styling.
+   821→
+   822→Do NOT delete immediately after clicking the icon.
+   823→
+   824→==================================================
+   825→33. DELETE ERROR HANDLING
+   826→==================================================
+   827→
+   828→If delete is prevented because of dependencies:
+   829→
+   830→show:
+   831→
+   832→Cannot delete this configuration because it is being used by existing
+   833→records.
+   834→
+   835→Use:
+   836→
+   837→Deactivate
+   838→
+   839→where appropriate.
+   840→
+   841→==================================================
+   842→34. SAVE VALIDATION
+   843→==================================================
+   844→
+   845→Every Edit/Create form must validate:
+   846→
+   847→required fields
+   848→duplicate values
+   849→invalid formats
+   850→invalid numbers
+   851→invalid sequences
+   852→missing relationships
+   853→
+   854→Do not allow invalid configuration to be saved.
+   855→
+   856→==================================================
+   857→35. SAVE STATE
+   858→==================================================
+   859→
+   860→When saving:
+   861→
+   862→button:
+   863→
+   864→Saving...
+   865→
+   866→Disable duplicate clicks.
+   867→
+   868→After success:
+   869→
+   870→Changes saved successfully.
+   871→
+   872→After failure:
+   873→
+   874→Unable to save changes.
+   875→
+   876→The form should remain open so the user can correct the issue.
+   877→
+   878→==================================================
+   879→36. CANCEL
+   880→==================================================
+   881→
+   882→Cancel must discard unsaved changes.
+   883→
+   884→Do not accidentally persist edits before Save.
+   885→
+   886→==================================================
+   887→37. UNSAVED CHANGES
+   888→==================================================
+   889→
+   890→If a form has changed and the administrator clicks Close:
+   891→
+   892→show:
+   893→
+   894→Discard unsaved changes?
+   895→
+   896→[Continue Editing]
+   897→[Discard]
+   898→
+   899→Use this only where useful.
+   900→
+   901→==================================================
+   902→38. EDIT MODALS
+   903→==================================================
+   904→
+   905→All Admin edit/create modals must have:
+   906→
+   907→consistent width
+   908→consistent padding
+   909→proper labels
+   910→aligned fields
+   911→scrollable content
+   912→fixed footer
+   913→Save / Cancel aligned
+   914→no overflow
+   915→no clipped fields
+   916→
+   917→==================================================
+   918→39. ADMIN TABLE ACTIONS
+   919→==================================================
+   920→
+   921→Every table action must work.
+   922→
+   923→For example:
+   924→
+   925→View
+   926→Edit
+   927→Delete
+   928→Activate
+   929→Deactivate
+   930→Assign
+   931→
+   932→must each perform the intended action.
+   933→
+   934→Do NOT leave icons as decorative elements.
+   935→
+   936→==================================================
+   937→40. ACTION FEEDBACK
+   938→==================================================
+   939→
+   940→After:
+   941→
+   942→Edit
+   943→Delete
+   944→Add
+   945→Activate
+   946→Deactivate
+   947→Assign
+   948→
+   949→show a clear toast/banner.
+   950→
+   951→Examples:
+   952→
+   953→User updated successfully.
+   954→
+   955→Role permissions updated successfully.
+   956→
+   957→Application type deactivated.
+   958→
+   959→Fee structure updated.
+   960→
+   961→Workflow stage saved.
+   962→
+   963→==================================================
+   964→41. AUDIT LOGGING
+   965→==================================================
+   966→
+   967→Every admin mutation MUST create an audit event.
+   968→
+   969→Events:
+   970→
+   971→USER_CREATED
+   972→USER_UPDATED
+   973→USER_DEACTIVATED
+   974→USER_REACTIVATED
+   975→ROLE_UPDATED
+   976→PERMISSION_CHANGED
+   977→APPLICATION_TYPE_CREATED
+   978→APPLICATION_TYPE_UPDATED
+   979→APPLICATION_TYPE_DEACTIVATED
+   980→FEE_STRUCTURE_CREATED
+   981→FEE_STRUCTURE_UPDATED
+   982→FEE_STRUCTURE_DEACTIVATED
+   983→WORKFLOW_UPDATED
+   984→NOTIFICATION_TEMPLATE_UPDATED
+   985→SYSTEM_SETTING_UPDATED
+   986→
+   987→==================================================
+   988→42. AUDIT DETAILS
+   989→==================================================
+   990→
+   991→Store:
+   992→
+   993→auditId
+   994→actorUserId
+   995→actorRole
+   996→action
+   997→targetType
+   998→targetId
+   999→oldValue
+  1000→newValue
+  1001→timestamp
+  1002→
+  1003→Use safe structured values where possible.
+  1004→
+  1005→Do not store passwords/secrets.
+  1006→
+  1007→==================================================
+  1008→43. DATA PROPAGATION MATRIX
+  1009→==================================================
+  1010→
+  1011→For each admin configuration verify:
+  1012→
+  1013→ADMIN CHANGE
+  1014→↓
+  1015→CENTRAL DATA
+  1016→↓
+  1017→AFFECTED MODULE
+  1018→↓
+  1019→AFFECTED USER ROLE
+  1020→↓
+  1021→VISIBLE RESULT
+  1022→
+  1023→Examples:
+  1024→
+  1025→Permission change
+  1026→→ RBAC store
+  1027→→ TPS
+  1028→→ TPS user
+  1029→→ button/action changes
+  1030→
+  1031→Application Type change
+  1032→→ configuration store
+  1033→→ New Application
+  1034→→ LTP
+  1035→→ option changes
+  1036→
+  1037→Fee Structure change
+  1038→→ fee config
+  1039→→ Fee Generation
+  1040→→ LTP
+  1041→→ calculated amount changes
+  1042→
+  1043→Workflow change
+  1044→→ workflow config
+  1045→→ newly created applications
+  1046→→ role queues
+  1047→→ sequence changes
+  1048→
+  1049→Notification change
+  1050→→ notification config
+  1051→→ event
+  1052→→ relevant users
+  1053→→ message changes
+  1054→
+  1055→System Setting
+  1056→→ settings store
+  1057→→ configured modules
+  1058→→ all applicable roles
+  1059→→ setting reflected
+  1060→
+  1061→==================================================
+  1062→44. CROSS-MODULE REFRESH
+  1063→==================================================
+  1064→
+  1065→After an admin change:
+  1066→
+  1067→do not require a full page refresh if shared state can update immediately.
+  1068→
+  1069→All relevant consumers should react to the change.
+  1070→
+  1071→If persistence requires reload:
+  1072→
+  1073→verify that after reload the new configuration still exists.
+  1074→
+  1075→==================================================
+  1076→45. PERSISTENCE
+  1077→==================================================
+  1078→
+  1079→Audit whether Admin changes currently live only in:
+  1080→
+  1081→component state
+  1082→modal state
+  1083→temporary arrays
+  1084→
+  1085→Move them to the existing authoritative persistence mechanism.
+  1086→
+  1087→For demo mode, use the project's existing persistent store/local storage
+  1088→approach where appropriate.
+  1089→
+  1090→For production architecture, use the backend/database.
+  1091→
+  1092→Do NOT create a second database.
+  1093→
+  1094→==================================================
+  1095→46. ADMIN USER DATA TEST
+  1096→==================================================
+  1097→
+  1098→Create:
+  1099→
+  1100→Test TPS User
+  1101→
+  1102→Role:
+  1103→TPS
+  1104→
+  1105→Then edit:
+  1106→
+  1107→Name
+  1108→Role
+  1109→Status
+  1110→
+  1111→Verify changes appear everywhere.
+  1112→
+  1113→==================================================
+  1114→47. ADMIN PERMISSION TEST
+  1115→==================================================
+  1116→
+  1117→Disable:
+  1118→
+  1119→TPS technical scrutiny
+  1120→
+  1121→Verify TPS cannot perform it.
+  1122→
+  1123→Re-enable.
+  1124→
+  1125→Verify TPS can perform it.
+  1126→
+  1127→==================================================
+  1128→48. APPLICATION TYPE TEST
+  1129→==================================================
+  1130→
+  1131→Create:
+  1132→
+  1133→Building Regularization
+  1134→
+  1135→Verify it appears in New Application.
+  1136→
+  1137→Deactivate it.
+  1138→
+  1139→Verify it disappears from NEW Application.
+  1140→
+  1141→Historical applications remain intact.
+  1142→
+  1143→==================================================
+  1144→49. FEE STRUCTURE TEST
+  1145→==================================================
+  1146→
+  1147→Edit a fee component.
+  1148→
+  1149→Generate a NEW fee.
+  1150→
+  1151→Verify new value is used.
+  1152→
+  1153→Open an OLD fee.
+  1154→
+  1155→Verify historical value remains correct.
+  1156→
+  1157→==================================================
+  1158→50. WORKFLOW TEST
+  1159→==================================================
+  1160→
+  1161→Change workflow configuration for NEW applications.
+  1162→
+  1163→Create new application.
+  1164→
+  1165→Verify it follows the configured workflow.
+  1166→
+  1167→Check an existing in-progress application.
+  1168→
+  1169→Verify it is not corrupted.
+  1170→
+  1171→==================================================
+  1172→51. NOTIFICATION TEST
+  1173→==================================================
+  1174→
+  1175→Edit:
+  1176→
+  1177→Payment Successful
+  1178→
+  1179→template.
+  1180→
+  1181→Trigger demo payment success.
+  1182→
+  1183→Verify the new template is used.
+  1184→
+  1185→==================================================
+  1186→52. SYSTEM SETTINGS TEST
+  1187→==================================================
+  1188→
+  1189→Edit a setting.
+  1190→
+  1191→Navigate to affected module.
+  1192→
+  1193→Verify change is reflected.
+  1194→
+  1195→Refresh browser.
+  1196→
+  1197→Verify change persists.
+  1198→
+  1199→==================================================
+  1200→53. DELETE TEST
+  1201→==================================================
+  1202→
+  1203→Create a disposable demo record.
+  1204→
+  1205→Delete it.
+  1206→
+  1207→Verify:
+  1208→
+  1209→record disappears
+  1210→search no longer finds it
+  1211→related list updates
+  1212→audit event created
+  1213→
+  1214→Then test a record with dependencies.
+  1215→
+  1216→Expected:
+  1217→
+  1218→delete blocked
+  1219→
+  1220→or:
+  1221→
+  1222→deactivate offered.
+  1223→
+  1224→==================================================
+  1225→54. ACTIVATION TEST
+  1226→==================================================
+  1227→
+  1228→Deactivate:
+  1229→
+  1230→Application Type
+  1231→Fee Structure
+  1232→User
+  1233→
+  1234→Verify each affected system behavior.
+  1235→
+  1236→Reactivate.
+  1237→
+  1238→Verify behavior returns.
+  1239→
+  1240→==================================================
+  1241→55. SEARCH AFTER EDIT
+  1242→==================================================
+  1243→
+  1244→Edit a record.
+  1245→
+  1246→Search for it immediately.
+  1247→
+  1248→Expected:
+  1249→
+  1250→updated record returned.
+  1251→
+  1252→==================================================
+  1253→56. FILTER AFTER EDIT
+  1254→==================================================
+  1255→
+  1256→Change status/role/category.
+  1257→
+  1258→Apply filter.
+  1259→
+  1260→Expected:
+  1261→
+  1262→record appears under new filter.
+  1263→
+  1264→==================================================
+  1265→57. SORT AFTER EDIT
+  1266→==================================================
+  1267→
+  1268→Change:
+  1269→
+  1270→UpdatedAt
+  1271→
+  1272→Expected:
+  1273→
+  1274→sorting reflects the new updated date.
+  1275→
+  1276→==================================================
+  1277→58. NO STALE UI
+  1278→==================================================
+  1279→
+  1280→After Save, there must be no stale cards/tables.
+  1281→
+  1282→All visible admin lists must immediately reflect the saved data.
+  1283→
+  1284→==================================================
+  1285→59. NO DUPLICATE RECORDS
+  1286→==================================================
+  1287→
+  1288→A double click on Save must NOT create duplicate records.
+  1289→
+  1290→Disable button while saving.
+  1291→
+  1292→==================================================
+  1293→60. NO ID COLLISIONS
+  1294→==================================================
+  1295→
+  1296→Every new record must have unique:
+  1297→
+  1298→id
+  1299→
+  1300→Do not generate duplicate IDs.
+  1301→
+  1302→==================================================
+  1303→61. NO ARRAY-INDEX IDENTITY
+  1304→==================================================
+  1305→
+  1306→Do not identify records by table row index.
+  1307→
+  1308→Use:
+  1309→
+  1310→userId
+  1311→roleId
+  1312→permissionId
+  1313→applicationTypeId
+  1314→feeStructureId
+  1315→workflowStageId
+  1316→templateId
+  1317→settingId
+  1318→
+  1319→==================================================
+  1320→62. ROLE EFFECTIVE PERMISSION TEST
+  1321→==================================================
+  1322→
+  1323→For every role:
+  1324→
+  1325→LTP
+  1326→TPS
+  1327→TPA
+  1328→ZAD
+  1329→ZDD
+  1330→ZJD
+  1331→Director
+  1332→Additional Commissioner
+  1333→Commissioner
+  1334→
+  1335→verify:
+  1336→
+  1337→effective permissions
+  1338→
+  1339→after an Admin change.
+  1340→
+  1341→==================================================
+  1342→63. ADMIN CANNOT BREAK LIVE WORKFLOW
+  1343→==================================================
+  1344→
+  1345→Configuration changes must be validated before activation.
+  1346→
+  1347→Do not allow an invalid configuration to make the whole application
+  1348→workflow unusable.
+  1349→
+  1350→==================================================
+  1351→64. ERROR RECOVERY
+  1352→==================================================
+  1353→
+  1354→If a configuration save fails:
+  1355→
+  1356→old valid configuration remains active.
+  1357→
+  1358→Do NOT partially apply changes.
+  1359→
+  1360→==================================================
+  1361→65. VERSIONING
+  1362→==================================================
+  1363→
+  1364→Where configuration affects historical business records:
+  1365→
+  1366→use versioning.
+  1367→
+  1368→Important entities:
+  1369→
+  1370→Fee Structure
+  1371→Workflow
+  1372→
+  1373→Do not rewrite historical results.
+  1374→
+  1375→==================================================
+  1376→66. CONFIGURATION EFFECTIVE DATE
+  1377→==================================================
+  1378→
+  1379→For Fee Structures where applicable:
+  1380→
+  1381→support:
+  1382→
+  1383→Effective From
+  1384→
+  1385→New records use active structure based on effective date.
+  1386→
+  1387→Existing generated fees remain unchanged.
+  1388→
+  1389→==================================================
+  1390→67. ROLE ASSIGNMENT EFFECTIVE DATE
+  1391→==================================================
+  1392→
+  1393→User role changes should affect that user's future login/session.
+  1394→
+  1395→Historical audit events should preserve the previous role.
+  1396→
+  1397→==================================================
+  1398→68. ADMIN DASHBOARD
+  1399→==================================================
+  1400→
+  1401→Update Admin Dashboard counters from the actual data.
+  1402→
+  1403→For example:
+  1404→
+  1405→Total Users
+  1406→Active Users
+  1407→Roles
+  1408→Application Types
+  1409→Fee Structures
+  1410→Workflow Stages
+  1411→Pending Access
+  1412→Audit Events Today
+  1413→
+  1414→No hardcoded counts.
+  1415→
+  1416→==================================================
+  1417→69. CONFIGURATION OVERVIEW
+  1418→==================================================
+  1419→
+  1420→Admin dashboard cards such as:
+  1421→
+  1422→Users
+  1423→Roles & Permissions
+  1424→Application Types
+  1425→Fee Structures
+  1426→Workflow Stages
+  1427→Notification/SMS
+  1428→Audit Logs
+  1429→System Settings
+  1430→
+  1431→must show actual counts.
+  1432→
+  1433→Clicking each card opens the correct module.
+  1434→
+  1435→==================================================
+  1436→70. CARD ALIGNMENT
+  1437→==================================================
+  1438→
+  1439→Ensure all Admin configuration cards:
+  1440→
+  1441→same width
+  1442→same height where appropriate
+  1443→same padding
+  1444→same gap
+  1445→no overlap
+  1446→no clipping
+  1447→
+  1448→Use CSS Grid.
+  1449→
+  1450→Do NOT use absolute positioning.
+  1451→
+  1452→==================================================
+  1453→71. ADMIN TABLE ALIGNMENT
+  1454→==================================================
+  1455→
+  1456→All Admin tables:
+  1457→
+  1458→consistent row height
+  1459→consistent cell padding
+  1460→correct column width
+  1461→aligned action buttons
+  1462→proper badge alignment
+  1463→no clipped values
+  1464→
+  1465→==================================================
+  1466→72. ADMIN FORM ALIGNMENT
+  1467→==================================================
+  1468→
+  1469→All Admin forms:
+  1470→
+  1471→2-column layout where appropriate
+  1472→
+  1473→full-width fields inside columns
+  1474→
+  1475→labels aligned
+  1476→
+  1477→inputs equal height
+  1478→
+  1479→errors directly beneath fields
+  1480→
+  1481→buttons aligned in footer
+  1482→
+  1483→==================================================
+  1484→73. RESPONSIVE ADMIN UI
+  1485→==================================================
+  1486→
+  1487→Test:
+  1488→
+  1489→1920
+  1490→1600
+  1491→1440
+  1492→1366
+  1493→1280
+  1494→1024
+  1495→768
+  1496→480
+  1497→390
+  1498→
+  1499→Ensure:
+  1500→
+  1501→no horizontal overflow
+  1502→no card overlap
+  1503→no modal clipping
+  1504→no table breakage
+  1505→no hidden buttons
+  1506→no unusable dropdowns
+  1507→
+  1508→==================================================
+  1509→74. SECURITY
+  1510→==================================================
+  1511→
+  1512→Only authorized administrators can:
+  1513→
+  1514→create users
+  1515→edit users
+  1516→delete/deactivate users
+  1517→edit roles
+  1518→edit permissions
+  1519→edit fee structures
+  1520→edit workflow
+  1521→edit settings
+  1522→
+  1523→Do not rely only on hiding controls.
+  1524→
+  1525→Protect actual actions/routes.
+  1526→
+  1527→==================================================
+  1528→75. FINAL CRUD MATRIX
+  1529→==================================================
+  1530→
+  1531→Test each module:
+  1532→
+  1533→USERS
+  1534→Create ✅
+  1535→Read ✅
+  1536→Update ✅
+  1537→Deactivate ✅
+  1538→Reactivate ✅
+  1539→Delete/Soft Delete ✅
+  1540→
+  1541→ROLES & PERMISSIONS
+  1542→Read ✅
+  1543→Update ✅
+  1544→Grant ✅
+  1545→Revoke ✅
+  1546→Propagate ✅
+  1547→
+  1548→APPLICATION TYPES
+  1549→Create ✅
+  1550→Read ✅
+  1551→Update ✅
+  1552→Activate ✅
+  1553→Deactivate ✅
+  1554→Delete/Soft Delete ✅
+  1555→
+  1556→FEE STRUCTURES
+  1557→Create ✅
+  1558→Read ✅
+  1559→Update ✅
+  1560→Activate ✅
+  1561→Deactivate ✅
+  1562→Versioning ✅
+  1563→
+  1564→WORKFLOW STAGES
+  1565→Create/Configure ✅
+  1566→Read ✅
+  1567→Update ✅
+  1568→Activate ✅
+  1569→Deactivate ✅
+  1570→Validation ✅
+  1571→Versioning ✅
+  1572→
+  1573→NOTIFICATION/SMS
+  1574→Create/Edit ✅
+  1575→Read ✅
+  1576→Activate/Deactivate ✅
+  1577→Test ✅
+  1578→
+  1579→SYSTEM SETTINGS
+  1580→Read ✅
+  1581→Update ✅
+  1582→Persist ✅
+  1583→Propagate ✅
+  1584→
+  1585→AUDIT
+  1586→Create automatically ✅
+  1587→Read ✅
+  1588→Filter ✅
+  1589→Search ✅
+  1590→
+  1591→==================================================
+  1592→76. FINAL CROSS-LOGIN TEST
+  1593→==================================================
+  1594→
+  1595→TEST USER 1:
+  1596→
+  1597→Admin changes TPS permission.
+  1598→
+  1599→Login as TPS.
+  1600→
+  1601→Verify behavior.
+  1602→
+  1603→TEST USER 2:
+  1604→
+  1605→Admin changes LTP application type availability.
+  1606→
+  1607→Login as LTP.
+  1608→
+  1609→Open New Application.
+  1610→
+  1611→Verify updated application type list.
+  1612→
+  1613→TEST USER 3:
+  1614→
+  1615→Admin changes fee structure.
+  1616→
+  1617→Login as LTP.
+  1618→
+  1619→Complete an application until fee generation.
+  1620→
+  1621→Verify new fee structure is used.
+  1622→
+  1623→TEST USER 4:
+  1624→
+  1625→Admin changes workflow.
+  1626→
+  1627→Create a NEW application.
+  1628→
+  1629→Verify new workflow.
+  1630→
+  1631→TEST USER 5:
+  1632→
+  1633→Admin deactivates user.
+  1634→
+  1635→Attempt login.
+  1636→
+  1637→Verify access denied.
+  1638→
+  1639→==================================================
+  1640→77. FINAL DELETE TEST
+  1641→==================================================
+  1642→
+  1643→For every admin module with Delete:
+  1644→
+  1645→1. Create demo record.
+  1646→2. Edit it.
+  1647→3. Verify edit.
+  1648→4. Delete it.
+  1649→5. Verify removal.
+  1650→6. Verify audit log.
+  1651→7. Verify affected modules.
+  1652→8. Verify search no longer returns record.
+  1653→
+  1654→For records with historical dependencies:
+  1655→
+  1656→verify deletion is safely blocked or replaced by deactivation.
+  1657→
+  1658→==================================================
+  1659→78. FINAL EDIT TEST
+  1660→==================================================
+  1661→
+  1662→For EVERY module containing Edit:
+  1663→
+  1664→1. Open Edit.
+  1665→2. Change one field.
+  1666→3. Save.
+  1667→4. Close.
+  1668→5. Reopen.
+  1669→6. Verify change persisted.
+  1670→7. Refresh browser.
+  1671→8. Verify change still exists.
+  1672→9. Open affected user/module.
+  1673→10. Verify propagation.
+  1674→
+  1675→==================================================
+  1676→79. FINAL ADD TEST
+  1677→==================================================
+  1678→
+  1679→For EVERY module supporting Add/Create:
+  1680→
+  1681→Create record.
+  1682→
+  1683→Verify:
+  1684→
+  1685→list
+  1686→search
+  1687→filter
+  1688→related module
+  1689→affected role
+  1690→audit
+  1691→
+  1692→==================================================
+  1693→80. FINAL CONFIGURATION TEST
+  1694→==================================================
+  1695→
+  1696→Make one controlled change to each configurable area:
+  1697→
+  1698→User
+  1699→Role
+  1700→Permission
+  1701→Application Type
+  1702→Fee Structure
+  1703→Workflow Stage
+  1704→Notification Template
+  1705→System Setting
+  1706→
+  1707→Verify each change reaches the intended consumer.
+  1708→
+  1709→==================================================
+  1710→81. FINAL CODE AUDIT
+  1711→==================================================
+  1712→
+  1713→Search the codebase for:
+  1714→
+  1715→hardcoded users
+  1716→hardcoded roles
+  1717→hardcoded permissions
+  1718→hardcoded application types
+  1719→hardcoded fee structures
+  1720→hardcoded workflow stages
+  1721→hardcoded notification templates
+  1722→hardcoded system settings
+  1723→
+  1724→Replace only the configuration that should be dynamically managed.
+  1725→
+  1726→Do NOT unnecessarily remove demo seed data.
+  1727→
+  1728→==================================================
+  1729→82. FINAL ARCHITECTURE RULE
+  1730→==================================================
+  1731→
+  1732→The system should follow:
+  1733→
+  1734→ADMIN CONFIGURATION
+  1735→        ↓
+  1736→CENTRAL DATA / CONFIG STORE
+  1737→        ↓
+  1738→EFFECTIVE CONFIGURATION
+  1739→        ↓
+  1740→ROLE / MODULE CONSUMERS
+  1741→        ↓
+  1742→USER INTERFACE + ACTION AUTHORIZATION
+  1743→
+  1744→NOT:
+  1745→
+  1746→ADMIN PAGE
+  1747→        ↓
+  1748→LOCAL STATE ONLY
+  1749→
+  1750→==================================================
+  1751→83. FINAL REGRESSION
+  1752→==================================================
+  1753→
+  1754→After all changes verify:
+  1755→
+  1756→Admin dashboard
+  1757→Users
+  1758→Roles
+  1759→Permissions
+  1760→Application Types
+  1761→Fee Structures
+  1762→Workflow
+  1763→Notification/SMS
+  1764→System Settings
+  1765→Audit Logs
+  1766→
+  1767→Then verify affected operational modules:
+  1768→
+  1769→LTP
+  1770→TPS
+  1771→TPA
+  1772→ZAD
+  1773→ZDD
+  1774→ZJD
+  1775→Director
+  1776→Additional Commissioner
+  1777→Commissioner
+  1778→
+  1779→==================================================
+  1780→84. FINAL BUILD
+  1781→==================================================
+  1782→
+  1783→Run:
+  1784→
+  1785→type check
+  1786→lint
+  1787→build
+  1788→
+  1789→Check:
+  1790→
+  1791→browser console
+  1792→server console
+  1793→runtime errors
+  1794→broken routes
+  1795→
+  1796→Expected:
+  1797→
+  1798→0 critical errors.
+  1799→
+  1800→==================================================
+  1801→85. FINAL REPORT
+  1802→==================================================
+  1803→
+  1804→Return a concise report:
+  1805→
+  1806→Modules audited:
+  1807→<number>
+  1808→
+  1809→Edit actions found:
+  1810→<number>
+  1811→
+  1812→Edit actions fixed:
+  1813→<number>
+  1814→
+  1815→Create actions tested:
+  1816→<number>
+  1817→
+  1818→Delete actions tested:
+  1819→<number>
+  1820→
+  1821→Delete/deactivation issues fixed:
+  1822→<number>
+  1823→
+  1824→Permission propagation issues fixed:
+  1825→<number>
+  1826→
+  1827→Cross-login propagation tests:
+  1828→<number passed>
+  1829→
+  1830→Workflow configuration tests:
+  1831→<number passed>
+  1832→
+  1833→Fee structure propagation tests:
+  1834→<number passed>
+  1835→
+  1836→Application type propagation tests:
+  1837→<number passed>
+  1838→
+  1839→Notification propagation tests:
+  1840→<number passed>
+  1841→
+  1842→System settings propagation tests:
+  1843→<number passed>
+  1844→
+  1845→Audit events verified:
+  1846→<number>
+  1847→
+  1848→Console errors:
+  1849→<number>
+  1850→
+  1851→Type Check:
+  1852→PASS / FAIL
+  1853→
+  1854→Lint:
+  1855→PASS / FAIL
+  1856→
+  1857→Build:
+  1858→PASS / FAIL
+  1859→
+  1860→==================================================
+  1861→FINAL ACCEPTANCE CRITERIA
+  1862→==================================================
+  1863→
+  1864→The Admin Console is NOT complete unless:
+  1865→
+  1866→1. Every Edit option that is supposed to work actually works.
+  1867→2. Every Save operation persists the change.
+  1868→3. Every Add/Create option works.
+  1869→4. Every Delete option either safely deletes or correctly blocks/deactivates.
+  1870→5. Permission changes affect real user behavior.
+  1871→6. Role changes affect real user behavior.
+  1872→7. Application Type changes affect NEW Application creation.
+  1873→8. Fee Structure changes affect NEW fee generation.
+  1874→9. Workflow changes affect NEW workflow instances.
+  1875→10. Notification changes affect NEW events.
+  1876→11. System Setting changes affect intended consumers.
+  1877→12. Existing historical records remain consistent.
+  1878→13. Deleted/deactivated records do not unexpectedly break history.
+  1879→14. Every admin mutation is audited.
+  1880→15. No configuration is controlled only by local component state.
+  1881→16. No duplicate configuration datasets exist.
+  1882→17. No UI-only permissions exist.
+  1883→18. Direct route/action authorization works.
+  1884→19. Cross-login testing passes.
+  1885→20. No stale UI after changes.
+  1886→21. No duplicate records on repeated Save.
+  1887→22. Cards and tables remain properly aligned.
+  1888→23. No excessive layout overflow is introduced.
+  1889→24. Lint passes.
+  1890→25. Build passes.
+  1891→26. No critical console/runtime errors exist.
+  1892→
+  1893→FINAL OBJECTIVE:
+  1894→
+  1895→Make the System Administrator Console a REAL configuration and management
+  1896→layer for the LTP Approval / Building Permit Management System.
+  1897→
+  1898→When an Administrator edits something, the change must actually exist.
+  1899→
+  1900→When an Administrator deletes/deactivates something, the system must
+  1901→actually respond.
+  1902→
+  1903→When an Administrator changes configuration, the appropriate user login
+  1904→and module must reflect the change.
+  1905→
+  1906→Do not implement fake CRUD.
+  1907→
+  1908→Do not implement UI-only configuration.
+  1909→
+  1910→Do not create duplicate datasets.
+  1911→
+  1912→Fix the underlying data flow and propagation architecture.
