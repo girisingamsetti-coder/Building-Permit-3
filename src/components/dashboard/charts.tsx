@@ -28,29 +28,17 @@ export function DonutChart({
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
-  // Precompute cumulative offsets for each segment (avoids mutating a
-  // variable inside .map() which triggers react-hooks/immutability).
-  const segments = data.map((d, i) => {
-    const dash = (d.value / total) * circumference;
-    return { dash, color: d.color ?? getDefaultColor(i), key: i };
-  });
-  let cumulative = 0;
-  const segmentEls = segments.map((seg) => {
-    const el = (
-      <circle
-        key={seg.key}
-        cx={size / 2} cy={size / 2} r={radius}
-        fill="none"
-        stroke={seg.color}
-        strokeWidth={thickness}
-        strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
-        strokeDashoffset={-cumulative}
-        className="transition-all duration-300"
-      />
-    );
-    cumulative += seg.dash;
-    return el;
-  });
+  // Precompute cumulative offsets for each segment using a pure reduce.
+  // Avoids mutating a variable inside .map() (react-hooks/immutability).
+  const segmentData = data.reduce<Array<{ dash: number; color: string; key: number; offset: number }>>(
+    (acc, d, i) => {
+      const dash = (d.value / total) * circumference;
+      const offset = acc.length > 0 ? acc[acc.length - 1].offset + acc[acc.length - 1].dash : 0;
+      acc.push({ dash, color: d.color ?? getDefaultColor(i), key: i, offset });
+      return acc;
+    },
+    []
+  );
 
   if (total === 0 || data.length === 0) {
     return (
@@ -69,7 +57,18 @@ export function DonutChart({
             fill="none" stroke="currentColor" strokeWidth={thickness}
             className="text-muted/30"
           />
-          {segmentEls}
+          {segmentData.map((seg) => (
+            <circle
+              key={seg.key}
+              cx={size / 2} cy={size / 2} r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={thickness}
+              strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
+              strokeDashoffset={-seg.offset}
+              className="transition-all duration-300"
+            />
+          ))}
         </svg>
         {(centerValue !== undefined || centerLabel) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center">
