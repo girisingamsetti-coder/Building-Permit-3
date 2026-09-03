@@ -40,6 +40,8 @@ export interface UploadedFile {
   size: string;
   progress: number;
   status: "uploading" | "done" | "error";
+  file?: File;       // the actual File object — kept so callers can store the real binary
+  error?: string;    // validation error message (when status === "error")
 }
 
 export function FileUploader({
@@ -72,6 +74,7 @@ export function FileUploader({
       size: formatBytes(f.size),
       progress: 0,
       status: "uploading",
+      file: f,  // keep the real File object
     }));
     onUpload?.(files);
     // simulate upload progress

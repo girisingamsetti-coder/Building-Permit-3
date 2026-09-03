@@ -28,15 +28,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { DocumentStatusBadge } from "@/components/design-system/badges";
 import { formatDateTime } from "@/components/design-system/workflow";
+import { downloadStoredFile, getStoredFileObjectURL } from "@/lib/file-store";
 import { useToast } from "@/hooks/use-toast";
 import {
   CheckCircle2,
   XCircle,
   AlertTriangle,
   Download,
-  Eye,
   FileText,
-  ImageIcon,
   FileWarning,
   Building2,
   User,
@@ -93,6 +92,8 @@ export function DocumentViewerModal({
       setShortfallRemarks("");
     }
   }, [open]);
+
+  const reuploadInputRef = React.useRef<HTMLInputElement>(null);
 
   if (!doc) return null;
 
@@ -160,15 +161,27 @@ export function DocumentViewerModal({
 
   function handleReupload() {
     if (!doc) return;
-    // Generate a mock file for re-upload (demo mode)
-    const newFileName = `${doc.code}_v${(doc.version ?? 1) + 1}_corrected.pdf`;
-    const newSize = `${(0.5 + Math.random() * 2).toFixed(1)} MB`;
-    uploadDocument(app.id, doc.code, newFileName, newSize);
-    toast({
-      title: "Document re-uploaded",
-      description: `${newFileName} → ${app.applicationNo}. v${doc.version} kept in history. New version pending verification.`,
-    });
-    onOpenChange(false);
+    // Trigger a real file input — the actual File is passed to uploadDocument.
+    reuploadInputRef.current?.click();
+  }
+
+  async function handleReuploadFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!doc) return;
+    const f = e.target.files?.[0];
+    if (!f) return;
+    e.target.value = "";
+    setActing(true);
+    const res = await uploadDocument(app.id, doc.code, f);
+    setActing(false);
+    if (res.ok) {
+      toast({
+        title: "Document re-uploaded",
+        description: `${f.name} → ${app.applicationNo}. v${doc.version} kept in history. New version pending verification.`,
+      });
+      onOpenChange(false);
+    } else {
+      toast({ title: "Re-upload failed", description: res.error ?? "Please try again.", variant: "destructive" });
+    }
   }
 
   function handleDownload() {
@@ -177,19 +190,18 @@ export function DocumentViewerModal({
   }
 
   function downloadDocument(d: DocumentRecord | DocumentVersion) {
-    // Demo mode: generate a placeholder blob with the correct filename
-    const fileName = "fileName" in d && d.fileName ? d.fileName : `${("code" in d ? d.code : "doc")}_v${d.version}.pdf`;
-    const content = `LTP Approval — Building Permit Management System\n\nDocument: ${fileName}\nApplication: ${app.applicationNo}\nProject: ${app.project.name}\nApplicant: ${app.applicant.name}\nVersion: v${d.version}\n\n(Demo file — no real upload backend.)`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({ title: "Download started", description: fileName });
+    // Download the ACTUAL stored file content from the file store.
+    const fileReference = "fileReference" in d ? d.fileReference : undefined;
+    if (fileReference && downloadStoredFile(fileReference)) {
+      toast({ title: "Download started", description: d.fileName ?? `${d.version}` });
+      return;
+    }
+    // No real file in the store (seed/demo data) — honest error, no fake PDF.
+    toast({
+      title: "Download unavailable",
+      description: "This document's file content is not available. It may be a seed/demo record that was never actually uploaded in this session.",
+      variant: "destructive",
+    });
   }
 
   return (
@@ -428,8 +440,15 @@ export function DocumentViewerModal({
               <p className="text-xs text-info/90">
                 This document was {doc.status === "REJECTED" ? "rejected" : "raised as a shortfall"}. Upload a corrected version to continue.
               </p>
-              <Button size="sm" onClick={handleReupload}>
-                <Upload className="size-4" /> Upload New Version (v{(doc.version ?? 1) + 1})
+              <input
+                ref={reuploadInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.dwg,.dxf,.doc,.docx,.xls,.xlsx"
+                className="hidden"
+                onChange={handleReuploadFilePicked}
+              />
+              <Button size="sm" onClick={handleReupload} disabled={acting}>
+                {acting ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} Upload New Version (v{(doc.version ?? 1) + 1})
               </Button>
             </div>
           )}
@@ -449,10 +468,31 @@ export function DocumentViewerModal({
 
 // ============================================================
 // DOCUMENT PREVIEW
-// Shows PDF/image preview, or "preview unavailable" for unsupported types.
+// Shows the ACTUAL stored file: PDF via object URL iframe, image via
+// object URL img, or "preview unavailable" for unsupported types / seed data.
 // ============================================================
 function DocumentPreview({ doc }: { doc: DocumentRecord }) {
   const ext = doc.fileType?.toLowerCase() ?? doc.fileName?.split(".").pop()?.toLowerCase() ?? "";
+  const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
+  const [unavailable, setUnavailable] = React.useState(false);
+
+  // Fetch the real binary from the file store and create an object URL.
+  React.useEffect(() => {
+    let url: string | null = null;
+    if (doc.fileReference) {
+      url = getStoredFileObjectURL(doc.fileReference);
+      if (url) {
+        setObjectUrl(url);
+      } else {
+        setUnavailable(true);
+      }
+    } else {
+      setUnavailable(true);
+    }
+    return () => {
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [doc.fileReference]);
 
   if (!doc.fileName) {
     return (
@@ -464,42 +504,57 @@ function DocumentPreview({ doc }: { doc: DocumentRecord }) {
     );
   }
 
-  // PDF preview (using browser native)
+  // Seed/demo file with no real binary in the store
+  if (unavailable) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/20 py-12 text-center">
+        <FileWarning className="size-10 text-muted-foreground" />
+        <p className="text-sm font-medium">Preview unavailable</p>
+        <p className="text-xs text-muted-foreground">
+          This is a seed/demo document whose file content was not actually uploaded in this session.
+        </p>
+      </div>
+    );
+  }
+
+  // Unsupported type (DWG, DXF, DOC, DOCX, XLS, XLSX, etc.)
+  if (!["pdf", "jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/20 py-12 text-center">
+        <FileWarning className="size-10 text-muted-foreground" />
+        <p className="text-sm font-medium">Preview unavailable for this file type</p>
+        <p className="text-xs text-muted-foreground">.{ext || "dwg"} files cannot be previewed in the browser.</p>
+      </div>
+    );
+  }
+
+  // Loading state
+  if (!objectUrl) {
+    return (
+      <div className="flex items-center justify-center gap-2 rounded-md border border-border bg-muted/20 py-12">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Loading preview…</p>
+      </div>
+    );
+  }
+
+  // PDF preview — real PDF via object URL
   if (ext === "pdf") {
     return (
       <div className="rounded-md border border-border bg-muted/20 p-2">
         <iframe
           title="PDF preview"
-          srcDoc={`<!DOCTYPE html><html><body style="margin:0;padding:24px;font-family:system-ui;background:#f9fafb;color:#374151"><div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:32px"><div style="text-align:center;border-bottom:2px solid #047857;padding-bottom:16px;margin-bottom:16px"><h2 style="color:#047857;margin:0">LTP Approval</h2><p style="color:#6b7280;font-size:12px;margin:4px 0 0">Building Permit Management System</p></div><h3 style="color:#1f2937">PDF Document Preview</h3><p style="font-size:13px;color:#6b7280"><strong>File:</strong> ${doc.fileName}<br/><strong>Size:</strong> ${doc.fileSize}<br/><strong>Version:</strong> v${doc.version}</p><div style="margin-top:16px;padding:16px;background:#f3f4f6;border-radius:4px;font-size:12px;color:#6b7280;text-align:center">Demo preview — PDF content would render here in production.</div></div></body></html>`}
-          className="h-[300px] w-full rounded border-0"
+          src={objectUrl}
+          className="h-[400px] w-full rounded border-0"
         />
       </div>
     );
   }
 
-  // Image preview (jpg, png, jpeg, gif)
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-border bg-muted/20 py-12">
-        <ImageIcon className="size-12 text-muted-foreground" />
-        <p className="text-sm font-medium">{doc.fileName}</p>
-        <p className="text-xs text-muted-foreground">Image preview would render here.</p>
-        <Button size="sm" variant="outline" className="mt-2">
-          <Eye className="size-4" /> Open Image
-        </Button>
-      </div>
-    );
-  }
-
-  // Unsupported type (DWG, DXF, etc.)
+  // Image preview — real image via object URL
   return (
-    <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border bg-muted/20 py-12 text-center">
-      <FileWarning className="size-10 text-muted-foreground" />
-      <p className="text-sm font-medium">Preview unavailable for this file type</p>
-      <p className="text-xs text-muted-foreground">.{ext || "dwg"} files cannot be previewed in the browser.</p>
-      <Button size="sm" variant="outline" className="mt-2">
-        <Download className="size-4" /> Download to view
-      </Button>
+    <div className="flex items-center justify-center rounded-md border border-border bg-muted/20 p-4">
+      <img src={objectUrl} alt={doc.fileName} className="max-h-[400px] max-w-full rounded border border-border" />
     </div>
   );
 }

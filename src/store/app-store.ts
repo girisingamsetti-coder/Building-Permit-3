@@ -54,6 +54,7 @@ import {
 import { feeService } from "@/services/fee-service";
 import { paymentService } from "@/services/payment-service";
 import { NotificationFactory, createNotification } from "@/services/notification-service";
+import { fileStore, readFileAsArrayBuffer, validateFile, genFileReference, extensionToMime } from "@/lib/file-store";
 
 // Re-export for views
 export { DEMO_CREDENTIALS, ROLES };
@@ -144,7 +145,9 @@ interface AppState {
   runScrutiny: (appId: string) => void;
   reuploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
 
-  uploadDocument: (appId: string, docCode: string, fileName: string, fileSize: string) => void;
+  // uploadDocument now accepts the real File object so its actual binary
+  // content is stored in the file store. Returns {ok, error, fileReference}.
+  uploadDocument: (appId: string, docCode: string, file: File) => Promise<{ ok: boolean; error?: string; fileReference?: string }>;
 
   generateFee: (appId: string) => void;
 
@@ -542,17 +545,46 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
-  uploadDocument: (appId, docCode, fileName, fileSize) => {
+  uploadDocument: async (appId, docCode, file) => {
     const user = get().user!;
+
+    // ===== VALIDATE the real file (extension + MIME + size) =====
+    const validation = validateFile(file);
+    if (!validation.ok) {
+      return { ok: false, error: validation.error };
+    }
+    const ext = validation.extension ?? "";
+    const mimeType = validation.mimeType ?? extensionToMime(ext);
+
+    // ===== READ the actual file bytes into an ArrayBuffer =====
+    let data: ArrayBuffer;
+    try {
+      data = await readFileAsArrayBuffer(file);
+    } catch {
+      return { ok: false, error: "Failed to read the selected file. Please try again." };
+    }
+
+    // ===== STORE the actual binary in the file store =====
+    const fileReference = genFileReference(appId, docCode, (get().applications.find((a) => a.id === appId)?.documents.find((d) => d.code === docCode)?.version ?? 0) + 1);
+    fileStore.store({
+      data,
+      fileName: file.name,
+      mimeType,
+      applicationId: appId,
+      documentCode: docCode,
+      version: (get().applications.find((a) => a.id === appId)?.documents.find((d) => d.code === docCode)?.version ?? 0) + 1,
+      uploadedBy: user.name,
+    });
+
+    // ===== UPDATE the application's document record =====
+    const fileName = file.name;
+    const fileSize = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         const existing = app.documents.find((d) => d.code === docCode);
         const newVersion = (existing?.version ?? 0) + 1;
         const now = nowISO();
-        // Determine file type from extension
-        const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
         const fileType = ext;
-        const fileReference = `demo://${docCode}_v${newVersion}`;
 
         let updated: Application = { ...app, documents: app.documents.map((d) => {
           if (d.code !== docCode) return d;
@@ -630,6 +662,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       const { notification } = NotificationFactory.documentUploaded(app, doc.name ?? docCode, doc.version ?? 1);
       set((s) => ({ notifications: [notification, ...s.notifications] }));
     }
+    return { ok: true, fileReference };
   },
 
   generateFee: (appId) => {

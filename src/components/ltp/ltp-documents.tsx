@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DocumentViewerModal } from "@/components/ltp/document-viewer-modal";
+import { downloadStoredFile } from "@/lib/file-store";
 import {
   FolderClosed,
   Upload,
@@ -52,6 +53,7 @@ import {
   Search,
   Clock,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Application, DocumentRecord } from "@/types";
@@ -71,7 +73,8 @@ export function LtpDocuments() {
   const [statusFilter, setStatusFilter] = React.useState("ALL");
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
   const [selectedDocCode, setSelectedDocCode] = React.useState<string>("");
-  const [confirmDoc, setConfirmDoc] = React.useState<DocumentRecord | null>(null);
+  const [confirmDoc, setConfirmDoc] = React.useState<{ doc: DocumentRecord; file: File } | null>(null);
+  const [uploading, setUploading] = React.useState(false);
   const [viewerDoc, setViewerDoc] = React.useState<DocumentRecord | null>(null);
   const switching = useAppSwitchLoading(app?.id);
 
@@ -87,20 +90,29 @@ export function LtpDocuments() {
     );
   }
 
-  function handleUploadDocument(doc: DocumentRecord) {
-    setConfirmDoc(doc);
+  function handleUploadDocument(doc: DocumentRecord, file: File) {
+    setConfirmDoc({ doc, file });
   }
 
-  function confirmDocumentUpload() {
+  async function confirmDocumentUpload() {
     if (!app || !confirmDoc) return;
-    const fakeName = `${confirmDoc.code}_v${(confirmDoc.version ?? 0) + 1}_${Date.now().toString().slice(-4)}.pdf`;
-    const fakeSize = `${(0.5 + Math.random() * 2).toFixed(1)} MB`;
-    uploadDocument(app.id, confirmDoc.code, fakeName, fakeSize);
-    toast({
-      title: "Document uploaded successfully",
-      description: `${confirmDoc.name} → ${app.applicationNo}. Status: Pending Verification.`,
-    });
+    setUploading(true);
+    const res = await uploadDocument(app.id, confirmDoc.doc.code, confirmDoc.file);
+    setUploading(false);
+    if (res.ok) {
+      toast({
+        title: "Document uploaded successfully",
+        description: `${confirmDoc.doc.name} → ${app.applicationNo}. Status: Pending Verification.`,
+      });
+    } else {
+      toast({
+        title: "Upload failed",
+        description: res.error ?? "Please try again.",
+        variant: "destructive",
+      });
+    }
     setConfirmDoc(null);
+    setFiles([]);
   }
 
   // ===== Counters — derived from the selected application's documents =====
@@ -221,9 +233,9 @@ export function LtpDocuments() {
                           <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">{(d.reviewedAt ?? d.verifiedAt) ? formatDate(d.reviewedAt ?? d.verifiedAt ?? "") : "—"}</td>
                           <td className="px-4 py-2 text-right">
                             <div className="flex justify-end gap-1">
-                              {/* REQUIRED: Upload (if LTP) */}
+                              {/* REQUIRED: Upload (if LTP) — triggers a real file input */}
                               {d.status === "REQUIRED" && canUpload && (
-                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUploadDocument(d)}><Upload className="size-3" /> Upload</Button>
+                                <RowUploadButton doc={d} onPick={(file) => handleUploadDocument(d, file)} label="Upload" />
                               )}
                               {/* PENDING_VERIFICATION: View + Download */}
                               {(d.status === "PENDING_VERIFICATION" || d.status === "VERIFIED") && (
@@ -237,7 +249,7 @@ export function LtpDocuments() {
                                 <>
                                   <Button size="icon" variant="ghost" className="size-7" onClick={() => setViewerDoc(d)} aria-label={`View ${d.name}`}><Eye className="size-3.5" /></Button>
                                   <Button size="icon" variant="ghost" className="size-7" onClick={() => downloadDoc(d)} aria-label={`Download ${d.name}`}><Download className="size-3.5" /></Button>
-                                  {canUpload && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUploadDocument(d)}><Upload className="size-3" /> Re-upload</Button>}
+                                  {canUpload && <RowUploadButton doc={d} onPick={(file) => handleUploadDocument(d, file)} label="Re-upload" />}
                                 </>
                               )}
                               {/* SHORTFALL: View + Download + Resolve */}
@@ -245,7 +257,7 @@ export function LtpDocuments() {
                                 <>
                                   <Button size="icon" variant="ghost" className="size-7" onClick={() => setViewerDoc(d)} aria-label={`View ${d.name}`}><Eye className="size-3.5" /></Button>
                                   <Button size="icon" variant="ghost" className="size-7" onClick={() => downloadDoc(d)} aria-label={`Download ${d.name}`}><Download className="size-3.5" /></Button>
-                                  {canUpload && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleUploadDocument(d)}><Upload className="size-3" /> Resolve</Button>}
+                                  {canUpload && <RowUploadButton doc={d} onPick={(file) => handleUploadDocument(d, file)} label="Resolve" />}
                                 </>
                               )}
                               {/* SUPERSEDED: View + Download */}
@@ -298,10 +310,14 @@ export function LtpDocuments() {
                         newFiles.forEach((f) => map.set(f.id, f));
                         return Array.from(map.values());
                       });
+                      // When a file finishes uploading (status === "done") and a
+                      // document type is selected, open the confirmation dialog
+                      // with the REAL File object.
                       if (selectedDocCode) {
                         const doc = app.documents.find((d) => d.code === selectedDocCode);
-                        if (doc) {
-                          handleUploadDocument(doc);
+                        const doneFile = newFiles.find((f) => f.status === "done" && f.file);
+                        if (doc && doneFile?.file) {
+                          handleUploadDocument(doc, doneFile.file);
                         }
                       }
                     }}
@@ -345,7 +361,7 @@ export function LtpDocuments() {
           </div>
 
           {/* Document Upload Confirmation Dialog */}
-          <Dialog open={!!confirmDoc} onOpenChange={(o) => !o && setConfirmDoc(null)}>
+          <Dialog open={!!confirmDoc} onOpenChange={(o) => !o && !uploading && setConfirmDoc(null)}>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Upload Document</DialogTitle>
@@ -362,21 +378,29 @@ export function LtpDocuments() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Document:</span>
-                  <span className="font-medium">{confirmDoc?.name}</span>
+                  <span className="font-medium">{confirmDoc?.doc.name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Type:</span>
-                  <span className="font-medium">{confirmDoc?.required ? "Required" : "Optional"}</span>
+                  <span className="font-medium">{confirmDoc?.doc.required ? "Required" : "Optional"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">File:</span>
+                  <span className="font-medium truncate max-w-[200px]">{confirmDoc?.file.name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">File Size:</span>
+                  <span className="font-medium">{confirmDoc ? `${(confirmDoc.file.size / 1024 / 1024).toFixed(2)} MB` : "—"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">New Version:</span>
-                  <span className="font-medium">v{(confirmDoc?.version ?? 0) + 1}</span>
+                  <span className="font-medium">v{(confirmDoc?.doc.version ?? 0) + 1}</span>
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setConfirmDoc(null)}>Cancel</Button>
-                <Button onClick={confirmDocumentUpload}>
-                  <Upload className="size-4" /> Upload Document
+                <Button variant="outline" onClick={() => setConfirmDoc(null)} disabled={uploading}>Cancel</Button>
+                <Button onClick={confirmDocumentUpload} disabled={uploading}>
+                  {uploading ? <><Loader2 className="size-4 animate-spin" /> Uploading…</> : <><Upload className="size-4" /> Upload Document</>}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -390,19 +414,45 @@ export function LtpDocuments() {
   );
 
   function downloadDoc(d: DocumentRecord) {
-    const fileName = d.fileName ?? `${d.code}_v${d.version ?? 1}.pdf`;
-    const content = `LTP Approval — Building Permit Management System\n\nDocument: ${fileName}\nApplication: ${app!.applicationNo}\nProject: ${app!.project.name}\nApplicant: ${app!.applicant.name}\nVersion: v${d.version ?? 1}\n\n(Demo file — no real upload backend.)`;
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({ title: "Download started", description: fileName });
+    // Download the ACTUAL stored file content from the file store.
+    if (d.fileReference && downloadStoredFile(d.fileReference)) {
+      toast({ title: "Download started", description: d.fileName ?? `${d.code}_v${d.version ?? 1}` });
+      return;
+    }
+    // No real file in the store (e.g. seed data after a full reload) — show an
+    // honest error instead of downloading a fake/invalid file.
+    toast({
+      title: "Download unavailable",
+      description: "This document's file content is not available. It may be a seed/demo record that was never actually uploaded in this session.",
+      variant: "destructive",
+    });
   }
+}
+
+// ============================================================
+// ROW UPLOAD BUTTON — renders a button + hidden file input
+// ============================================================
+function RowUploadButton({ doc, onPick, label }: { doc: DocumentRecord; onPick: (file: File) => void; label: string }) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.dwg,.dxf,.doc,.docx,.xls,.xlsx"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onPick(f);
+          // reset so the same file can be re-selected later
+          e.target.value = "";
+        }}
+      />
+      <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => inputRef.current?.click()}>
+        <Upload className="size-3" /> {label}
+      </Button>
+    </>
+  );
 }
 
 function ComplianceCard({ label, value, icon: Icon, cls }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }>; cls: string }) {
