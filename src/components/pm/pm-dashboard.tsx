@@ -4,15 +4,12 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import {
-  useAllApplications,
-  useAllUsers,
   computeSLA,
   computeOfficerWorkloads,
   identifyBottleneck,
   computePendingActions,
   computeRecentActivity,
   timeAgoBrief,
-  formatDuration,
 } from "@/components/pm/pm-helpers";
 import { PageHeader } from "@/components/design-system/layout";
 import {
@@ -35,6 +32,19 @@ import {
   usePmPagination,
 } from "@/components/pm/pm-shared";
 import {
+  useDashboardScope,
+  computeScopedKpis,
+  applicationsByStatus,
+  applicationsByStage,
+  slaSummary as slaSummaryChartData,
+  paymentStatusData,
+} from "@/components/dashboard/dashboard-scope";
+import {
+  DonutChart,
+  BarChart,
+  ChartCard,
+} from "@/components/dashboard/charts";
+import {
   BarChart3,
   FileStack,
   Clock,
@@ -48,8 +58,10 @@ import {
   History,
   Ban,
   TrendingDown,
+  PieChart,
+  CreditCard,
 } from "lucide-react";
-import type { Application, RoleKey } from "@/types";
+import type { Application, RoleKey, User } from "@/types";
 
 // ============================================================
 // PROJECT MANAGER DASHBOARD
@@ -140,22 +152,17 @@ const ACTIVITY_TYPES = [
 export function PmDashboard() {
   const navigate = useAppStore((s) => s.navigate);
   const openApplication = useAppStore((s) => s.openApplication);
-  const apps = useAllApplications();
-  const users = useAllUsers();
+  const scope = useDashboardScope();
+  const apps = scope.applications;
+  const users = scope.users;
 
-  // ---- KPI counts (derived, not hardcoded) ----
-  const kpis = React.useMemo(() => {
-    const total = apps.length;
-    const inProgress = apps.filter((a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status)).length;
-    const approved = apps.filter((a) => a.status === "APPROVED").length;
-    const delayedAtRisk = apps.filter((a) => {
-      const sla = computeSLA(a);
-      return ["DELAYED", "CRITICAL", "AT_RISK", "BLOCKED"].includes(sla.status);
-    }).length;
-    return { total, inProgress, approved, delayedAtRisk };
-  }, [apps]);
+  // ---- KPI counts (derived from the dashboard-scope engine) ----
+  const kpis = React.useMemo(() => computeScopedKpis(apps), [apps]);
+  // "Delayed / At Risk" = DELAYED + CRITICAL + AT_RISK (per scoped KPI fields).
+  // BLOCKED apps surface separately in the SLA Summary chart + card.
+  const delayedAtRisk = kpis.delayed + kpis.atRisk;
 
-  // ---- SLA summary counts ----
+  // ---- SLA summary counts (for the clickable SLA Summary card) ----
   const slaSummary = React.useMemo(() => {
     const counts = { ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, CRITICAL: 0, BLOCKED: 0, COMPLETED: 0 };
     apps.forEach((a) => {
@@ -182,8 +189,11 @@ export function PmDashboard() {
         <CompactKpiCard icon={FileStack} value={kpis.total} label="Total Applications" accent="bg-primary/10 text-primary" onClick={() => navigate("pm-applications")} />
         <CompactKpiCard icon={Clock} value={kpis.inProgress} label="In Progress" accent="bg-info/10 text-info" onClick={() => navigate("pm-applications")} />
         <CompactKpiCard icon={CheckCircle2} value={kpis.approved} label="Approved" accent="bg-success/10 text-success" onClick={() => navigate("pm-applications")} />
-        <CompactKpiCard icon={AlertTriangle} value={kpis.delayedAtRisk} label="Delayed / At Risk" accent="bg-destructive/10 text-destructive" onClick={() => navigate("pm-sla")} />
+        <CompactKpiCard icon={AlertTriangle} value={delayedAtRisk} label="Delayed / At Risk" accent="bg-destructive/10 text-destructive" onClick={() => navigate("pm-sla")} />
       </div>
+
+      {/* ===== CHARTS SECTION (2-col grid on desktop, 1-col on mobile; aligned tops + consistent height) ===== */}
+      <ChartsSection apps={apps} />
 
       {/* ===== Application Progress Overview (full width, searchable/filterable/paginated) ===== */}
       <ApplicationProgressSection apps={apps} onViewAll={() => navigate("pm-applications")} onOpen={(id) => openApplication(id, "pm-application-details")} />
@@ -238,6 +248,70 @@ function CompactKpiCard({
         <p className="mt-1 text-xs font-medium text-muted-foreground">{label}</p>
       </div>
     </button>
+  );
+}
+
+// ============================================================
+// CHARTS SECTION
+// 2-col grid on desktop, 1-col on mobile.
+// Four chart cards: Applications by Status (donut), Applications by
+// Stage (bar), SLA Summary (donut), Payment Status (donut).
+// All cards share a consistent body height (h-[280px]) so the grid
+// rows line up with aligned tops. Each chart shows a "No data
+// available" fallback when the scoped dataset is empty.
+// ============================================================
+function ChartsSection({ apps }: { apps: Application[] }) {
+  const statusData = React.useMemo(() => applicationsByStatus(apps), [apps]);
+  const stageData = React.useMemo(() => applicationsByStage(apps), [apps]);
+  const slaData = React.useMemo(() => slaSummaryChartData(apps), [apps]);
+  const paymentData = React.useMemo(() => paymentStatusData(apps), [apps]);
+
+  return (
+    <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2">
+      <ChartCard
+        icon={PieChart}
+        title="Applications by Status"
+        subtitle="Distribution across workflow statuses"
+        className="h-full"
+      >
+        <div className="flex h-[280px] items-center">
+          <DonutChart data={statusData} centerLabel="Total" centerValue={apps.length} />
+        </div>
+      </ChartCard>
+
+      <ChartCard
+        icon={BarChart3}
+        title="Applications by Stage"
+        subtitle="Current stage distribution"
+        className="h-full"
+      >
+        <div className="h-[280px] overflow-y-auto pr-1">
+          <BarChart data={stageData} height={260} barHeight={22} />
+        </div>
+      </ChartCard>
+
+      <ChartCard
+        icon={Gauge}
+        title="SLA Summary"
+        subtitle="On-track vs at-risk vs delayed vs blocked"
+        className="h-full"
+      >
+        <div className="flex h-[280px] items-center">
+          <DonutChart data={slaData} centerLabel="Total" centerValue={apps.length} />
+        </div>
+      </ChartCard>
+
+      <ChartCard
+        icon={CreditCard}
+        title="Payment Status"
+        subtitle="Paid vs pending vs no fee yet"
+        className="h-full"
+      >
+        <div className="flex h-[280px] items-center">
+          <DonutChart data={paymentData} centerLabel="Total" centerValue={apps.length} />
+        </div>
+      </ChartCard>
+    </div>
   );
 }
 
@@ -602,7 +676,7 @@ function OfficerWorkloadSection({
   onOpenOfficer,
 }: {
   apps: Application[];
-  users: ReturnType<typeof useAllUsers>;
+  users: User[];
   onViewAll: () => void;
   onOpenOfficer: (id: string) => void;
 }) {

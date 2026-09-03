@@ -1,0 +1,2291 @@
+REDESIGN AND FIX THE ENTIRE PROJECT MANAGER DASHBOARD.
+
+IMPORTANT:
+This task applies ONLY to the PROJECT MANAGER DASHBOARD.
+
+Do NOT redesign:
+- LTP Dashboard
+- My Applications
+- Drawings & Scrutiny
+- Documents
+- Fees
+- Payments
+- Shortfalls
+- Administration
+- Authentication
+- Other role dashboards
+
+Do not change the core business workflow.
+
+The current Project Manager Dashboard has too much information displayed
+inside large cards. Some cards are difficult to read, some have excessive
+vertical space, some data is missing, and long lists/tables are difficult
+to navigate.
+
+I want the dashboard to become:
+
+CLEAN
+COMPACT
+EASY TO READ
+PROPERLY ALIGNED
+DATA-COMPLETE
+SEARCHABLE
+PAGINATED
+RESPONSIVE
+
+The Project Manager should be able to understand the entire approval
+operation quickly without reading huge cards.
+
+==================================================
+1. MAIN PROBLEM TO FIX
+==================================================
+
+The dashboard currently has:
+
+- very large cards
+- excessive vertical space
+- too many records shown at once
+- difficult-to-read tables
+- long lists without navigation
+- some missing/zero data
+- repeated information
+- inconsistent card heights
+- poor visual hierarchy
+- some activity content getting clipped
+- long content requiring excessive scrolling
+
+Fix the structure, not just the colors.
+
+==================================================
+2. DASHBOARD INFORMATION HIERARCHY
+==================================================
+
+The dashboard should follow:
+
+Header
+↓
+KPI Summary
+↓
+Application Progress
+↓
+Workflow / SLA
+↓
+Officer Workload
+↓
+Bottleneck / Pending Actions
+↓
+Recent Activity
+
+Do not show every record in full.
+
+Use:
+
+SUMMARY
++
+SEARCH
++
+FILTER
++
+PAGINATION
++
+DRILL-DOWN
+
+==================================================
+3. HEADER
+==================================================
+
+Keep:
+
+Project Manager Dashboard
+
+Subtitle:
+
+Central operational view of the building permit approval workflow.
+
+Do not put excessive actions in the header.
+
+==================================================
+4. KPI CARDS
+==================================================
+
+Keep ONLY the most useful Project Manager KPIs:
+
+1. Total Applications
+2. In Progress
+3. Approved
+4. Delayed / At Risk
+
+Do not create excessive KPI cards.
+
+Desktop:
+
+4 equal cards in one row.
+
+Tablet:
+
+2 × 2
+
+Mobile:
+
+1 column
+
+==================================================
+5. KPI CARD DESIGN
+==================================================
+
+Each KPI card:
+
+Height:
+90–110px
+
+Padding:
+16–20px
+
+Use:
+
+Icon
+Number
+Short label
+
+Example:
+
+25
+Total Applications
+
+23
+In Progress
+
+1
+Approved
+
+24
+Delayed / At Risk
+
+Do not put paragraphs inside KPI cards.
+
+==================================================
+6. KPI DATA
+==================================================
+
+All KPI numbers MUST be dynamically calculated from the shared application
+dataset.
+
+Do NOT hardcode:
+
+25
+23
+1
+24
+
+The screenshot/demo data can produce these values, but the implementation
+must calculate them.
+
+==================================================
+7. KPI CORRECTNESS
+==================================================
+
+Make sure the numbers are logically consistent.
+
+For example:
+
+Total Applications = all visible Project Manager applications
+
+In Progress = active applications that are not completed
+
+Approved = applications with final approved state
+
+Delayed / At Risk = applications whose SLA state is At Risk/Delayed/Critical
+
+Do not count the same application incorrectly in multiple mutually exclusive
+categories.
+
+==================================================
+8. APPLICATION PROGRESS OVERVIEW
+==================================================
+
+This should be the MAIN section of the dashboard.
+
+Title:
+
+Application Progress Overview
+
+Subtitle:
+
+Latest applications across the approval workflow.
+
+Right:
+
+[ View All → ]
+
+==================================================
+9. APPLICATION PROGRESS TABLE
+==================================================
+
+Use a compact table.
+
+Columns:
+
+Application No.
+Project
+Applicant
+Current Stage
+Assigned Role
+Assigned Officer
+Status
+Progress
+SLA
+Last Updated
+Action
+
+Keep row heights compact:
+
+52–64px
+
+Do not create extremely tall rows.
+
+==================================================
+10. APPLICATION PROGRESS SEARCH
+==================================================
+
+Add search directly inside the Application Progress card.
+
+Search by:
+
+Application Number
+Project
+Applicant
+Officer
+Current Stage
+Status
+
+Example:
+
+[ 🔍 Search applications... ]
+
+Search must operate on the complete Project Manager application dataset.
+
+==================================================
+11. APPLICATION PROGRESS FILTERS
+==================================================
+
+Add compact filters:
+
+[ All Statuses ▼ ]
+[ All Stages ▼ ]
+[ All Roles ▼ ]
+[ SLA ▼ ]
+
+Do not overload the toolbar.
+
+Desktop:
+
+Search on left.
+
+Filters on right.
+
+==================================================
+12. APPLICATION PROGRESS PAGINATION
+==================================================
+
+If there are more applications than can fit comfortably, use pagination.
+
+Recommended:
+
+10 applications per page.
+
+Example:
+
+Showing 1–10 of 25 applications
+
+[‹] [1] [2] [3] [›]
+
+When Page 2:
+
+Showing 11–20 of 25 applications
+
+Do NOT display 25+ rows in one huge card.
+
+==================================================
+13. SEARCH + PAGINATION ORDER
+==================================================
+
+Use:
+
+Role Visibility
+↓
+Search
+↓
+Filters
+↓
+Sort
+↓
+Pagination
+
+Do NOT paginate first.
+
+==================================================
+14. RESET PAGINATION
+==================================================
+
+When search/filter changes:
+
+reset to Page 1.
+
+Do not show an empty page.
+
+==================================================
+15. APPLICATION PROGRESS ACTION
+==================================================
+
+Clicking an application:
+
+opens the exact application.
+
+Use:
+
+applicationId
+
+Never use table row index.
+
+==================================================
+16. LIVE WORKFLOW MONITOR
+==================================================
+
+Create a compact:
+
+Live Workflow Monitor
+
+Do not display too many full-size cards.
+
+Each record should show:
+
+Application No.
+Project
+Current Stage
+Assigned Role
+Assigned Officer
+Progress
+SLA Status
+
+Example:
+
+MC/BP/2026/04/0005
+Greenfield Residency
+
+TPS Technical Scrutiny
+TPS
+Smt. Meena Kulkarni
+42%
+At Risk
+
+==================================================
+17. LIVE WORKFLOW SEARCH
+==================================================
+
+Add:
+
+[ 🔍 Search application / project / officer ]
+
+Search must work.
+
+==================================================
+18. LIVE WORKFLOW FILTERS
+==================================================
+
+Add compact filters:
+
+Stage
+Role
+SLA
+
+Example:
+
+[ All Stages ▼ ]
+[ All Roles ▼ ]
+[ All SLA ▼ ]
+
+==================================================
+19. LIVE WORKFLOW PAGINATION
+==================================================
+
+If more than 5–10 applications exist:
+
+paginate.
+
+Recommended:
+
+5 records per page for the compact dashboard monitor.
+
+Example:
+
+Showing 1–5 of 25
+
+[‹] [1] [2] [3] ... [5] [›]
+
+Do not put 25 large workflow rows into a single card.
+
+==================================================
+20. WORKFLOW DETAIL
+==================================================
+
+Clicking a workflow record should open:
+
+Application Details
+
+or:
+
+Workflow Monitor detail
+
+Use the existing routing/data model.
+
+==================================================
+21. SLA SUMMARY
+==================================================
+
+Current SLA Summary should be compact.
+
+Categories:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+Blocked
+
+Each should show:
+
+count
+
+and optional small progress bar.
+
+==================================================
+22. SLA DATA MUST NOT BE EMPTY WITHOUT REASON
+==================================================
+
+The current dashboard shows several SLA categories as 0.
+
+Check whether:
+
+- the calculation is wrong
+- SLA timestamps are missing
+- demo applications have no SLA data
+- status mapping is wrong
+
+Do NOT simply replace zeroes with fake numbers.
+
+Trace the actual SLA calculation.
+
+==================================================
+23. SLA CALCULATION
+==================================================
+
+Calculate from:
+
+stage enteredAt
++
+configured SLA duration
++
+current time
+
+For completed applications:
+
+stop timing at completedAt.
+
+Do not continue counting completed applications.
+
+==================================================
+24. SLA SUMMARY SEARCH
+==================================================
+
+The Project Manager should be able to inspect applications inside each SLA
+category.
+
+Click:
+
+Critical Delay
+
+should open the filtered applications.
+
+Click:
+
+At Risk
+
+should show At Risk applications.
+
+Click:
+
+Blocked
+
+should show blocked applications.
+
+==================================================
+25. SLA CATEGORY PAGINATION
+==================================================
+
+If a category contains many applications:
+
+paginate.
+
+Example:
+
+Critical Delay
+22 applications
+
+Page 1:
+1–10
+
+Page 2:
+11–20
+
+Page 3:
+21–22
+
+Do NOT create one huge list.
+
+==================================================
+26. OFFICER WORKLOAD
+==================================================
+
+Current Officer Workload section is useful, but too much information can
+make it difficult to scan.
+
+Show compact officer cards.
+
+Each:
+
+Officer Name
+Role
+Assigned
+Pending
+At Risk
+Delayed
+Workload %
+
+Example:
+
+Smt. Meena Kulkarni
+TPS
+
+1 Assigned
+0 Pending
+0 At Risk
+1 Delayed
+
+==================================================
+27. OFFICER WORKLOAD SEARCH
+==================================================
+
+Add:
+
+[ 🔍 Search officer... ]
+
+Search by:
+
+Officer Name
+Role
+
+==================================================
+28. OFFICER WORKLOAD FILTER
+==================================================
+
+Add:
+
+[ All Roles ▼ ]
+
+Options:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+==================================================
+29. OFFICER WORKLOAD PAGINATION
+==================================================
+
+If there are more officers than can fit comfortably:
+
+paginate.
+
+Recommended:
+
+6 officers per page.
+
+Example:
+
+Showing 1–6 of 18 officers
+
+[‹] [1] [2] [3] [›]
+
+Do not display 20–50 officer cards in one huge section.
+
+==================================================
+30. OFFICER WORKLOAD SORT
+==================================================
+
+Optional sort:
+
+Highest Workload
+Most Pending
+Most Delayed
+Officer Name
+
+Keep sort compact.
+
+==================================================
+31. OFFICER DETAIL
+==================================================
+
+Clicking an officer should open their detailed progress.
+
+Show:
+
+Officer
+Role
+Assigned Applications
+Completed
+Pending
+Delayed
+SLA Compliance
+Recent Actions
+
+Do not expose unnecessary personal data.
+
+==================================================
+32. CURRENT BOTTLENECK
+==================================================
+
+Keep:
+
+Current Bottleneck
+
+but make it more useful and compact.
+
+Display:
+
+Stage:
+Payment
+
+Pending Applications:
+12
+
+Average Pending Duration:
+X
+
+SLA Status:
+Critical
+
+Action:
+
+[ Inspect SLA → ]
+
+Do not create multiple redundant boxes.
+
+==================================================
+33. BOTTLENECK SEARCH
+==================================================
+
+If multiple bottlenecks/stages exist, allow:
+
+Search stage
+
+and/or:
+
+[ All Workflow Stages ▼ ]
+
+==================================================
+34. BOTTLENECK PAGINATION
+==================================================
+
+If showing multiple bottlenecks:
+
+paginate or show top 5.
+
+Do NOT create a massive list.
+
+==================================================
+35. PENDING ACTIONS
+==================================================
+
+This should be a compact, searchable table.
+
+Columns:
+
+Application
+Project
+Stage
+Responsible Role
+Responsible Officer
+Pending Since
+SLA
+Priority
+
+==================================================
+36. PENDING ACTIONS SEARCH
+==================================================
+
+Add:
+
+[ 🔍 Search pending actions... ]
+
+Search:
+
+Application
+Project
+Officer
+Role
+Stage
+
+==================================================
+37. PENDING ACTIONS FILTERS
+==================================================
+
+Add:
+
+[ All Roles ▼ ]
+[ All Stages ▼ ]
+[ All Priority ▼ ]
+[ All SLA ▼ ]
+
+==================================================
+38. PENDING ACTIONS PAGINATION
+==================================================
+
+10 records per page.
+
+Example:
+
+Showing 1–10 of 32 pending actions
+
+[‹] [1] [2] [3] [4] [›]
+
+==================================================
+39. PENDING ACTION DETAIL
+==================================================
+
+Clicking the row must open the relevant application.
+
+Do not give Project Manager unauthorized workflow approval actions.
+
+==================================================
+40. RECENT ACTIVITY
+==================================================
+
+The current Recent Activity section has a very large vertical area and
+activity entries can become difficult to read.
+
+Redesign it as a compact activity feed.
+
+Each item:
+
+Action
+Actor
+Role
+Application
+Timestamp
+
+Example:
+
+Payment Verified
+Mock Payment Gateway · TPA
+MC/BP/2026/04/0019
+17 Aug 2026, 06:00 PM
+
+==================================================
+41. RECENT ACTIVITY SEARCH
+==================================================
+
+Add:
+
+[ 🔍 Search activity... ]
+
+Search:
+
+Action
+Actor
+Application
+Project
+Role
+
+==================================================
+42. RECENT ACTIVITY FILTER
+==================================================
+
+Add:
+
+[ All Activities ▼ ]
+
+Possible types:
+
+Application Created
+Drawing Uploaded
+Scrutiny Passed
+Scrutiny Failed
+Document Uploaded
+Documents Verified
+Shortfall Raised
+Fee Generated
+Payment Initiated
+Payment Verified
+Application Forwarded
+Application Approved
+Application Rejected
+
+==================================================
+43. RECENT ACTIVITY PAGINATION
+==================================================
+
+Show:
+
+10 activity items per page.
+
+Example:
+
+Showing 1–10 of 48 activities
+
+[‹] [1] [2] [3] ... [5] [›]
+
+Do NOT create an internally scrolling giant card if pagination is more
+readable.
+
+==================================================
+44. RECENT ACTIVITY CARD HEIGHT
+==================================================
+
+Remove the very tall activity container.
+
+Use:
+
+10 records per page
+
+and allow the card to have natural content height.
+
+Do not force a fixed massive height.
+
+==================================================
+45. RECENT ACTIVITY DATA
+==================================================
+
+Activity must come from actual audit/workflow/application events.
+
+Do NOT create unrelated fake activity.
+
+Use:
+
+applicationId
+actorId
+role
+action
+timestamp
+
+==================================================
+46. DASHBOARD SEARCH
+==================================================
+
+The top global search already exists.
+
+Do NOT duplicate a giant global search.
+
+Each data-heavy card should have its OWN contextual search.
+
+Use:
+
+Application Progress → application search
+
+Workflow Monitor → workflow search
+
+Officer Workload → officer search
+
+Pending Actions → action search
+
+Recent Activity → activity search
+
+SLA categories → category-filtered application search
+
+==================================================
+47. CARD SEARCH DESIGN
+==================================================
+
+Search boxes should be small and compact.
+
+Height:
+
+36–40px
+
+Do not make giant search fields inside every card.
+
+==================================================
+48. SEARCH ALIGNMENT
+==================================================
+
+Within each card:
+
+Title/subtitle on left.
+
+Search/filter controls on right.
+
+Example:
+
+Application Progress Overview                    [Search] [Filters]
+
+This keeps cards compact.
+
+==================================================
+49. CARD HEADER ALIGNMENT
+==================================================
+
+Every card header should follow:
+
+LEFT:
+Icon + Title + Subtitle
+
+RIGHT:
+Search / Filter / View All
+
+All header controls must vertically align.
+
+==================================================
+50. VIEW ALL
+==================================================
+
+Use:
+
+View All →
+
+only where the full module is useful.
+
+Examples:
+
+Application Progress
+Officer Workload
+Pending Actions
+Recent Activity
+
+Do not add View All to every small KPI card.
+
+==================================================
+51. CARD HEIGHT
+==================================================
+
+Do NOT make all cards the same fixed height.
+
+Use:
+
+KPI:
+compact fixed height
+
+Tables:
+content-driven
+
+Officer cards:
+compact fixed height
+
+SLA:
+content-driven
+
+Activity:
+content-driven
+
+This avoids large empty areas.
+
+==================================================
+52. CARD WIDTH
+==================================================
+
+Use available dashboard width efficiently.
+
+No excessive left/right margins.
+
+Use:
+
+width:
+100%
+
+max-width:
+1600–1700px
+
+margin:
+0 auto
+
+padding:
+24–32px
+
+==================================================
+53. MAIN CARD GRID
+==================================================
+
+Use a clear layout.
+
+Recommended:
+
+Application Progress:
+full width
+
+Workflow Monitor:
+full width or 2-column where appropriate
+
+SLA Summary:
+half-width
+
+Officer Workload:
+half/full width
+
+Bottleneck:
+half-width
+
+Pending Actions:
+full width
+
+Recent Activity:
+full width
+
+Avoid placing narrow cards containing huge tables.
+
+==================================================
+54. NO OVERLAPPING
+==================================================
+
+Audit the entire Project Manager Dashboard for:
+
+- overlapping cards
+- clipped activity rows
+- text hidden behind scroll
+- controls overlapping
+- buttons outside card
+- broken tables
+- inconsistent widths
+
+Fix with:
+
+CSS Grid
+Flexbox
+normal document flow
+
+Do NOT use excessive absolute positioning.
+
+==================================================
+55. COLUMN ALIGNMENT
+==================================================
+
+Tables must have:
+
+consistent column widths
+aligned headers
+aligned data
+consistent row height
+consistent padding
+
+Status:
+center/left according to design
+
+Progress:
+aligned
+
+SLA:
+aligned
+
+Dates:
+aligned consistently
+
+==================================================
+56. APPLICATION PROGRESS COLUMN WIDTH
+==================================================
+
+Use sensible responsive widths.
+
+Do not let:
+
+Project
+Applicant
+Assigned Officer
+
+consume too much space and squeeze:
+
+Status
+Progress
+SLA
+
+Allow truncation with tooltip for long values.
+
+==================================================
+57. TEXT OVERFLOW
+==================================================
+
+Long:
+
+Project Names
+Applicant Names
+Officer Names
+Stage Names
+
+should use:
+
+text-overflow: ellipsis
+
+with tooltip/full value on hover.
+
+Do NOT let long text break card alignment.
+
+==================================================
+58. PAGINATION COMPONENT
+==================================================
+
+Create/reuse ONE reusable pagination component for the Project Manager module.
+
+Example:
+
+Showing 1–10 of 39
+
+[‹] [1] [2] [3] [4] [›]
+
+Use it consistently.
+
+Do NOT create separate pagination implementations for every card.
+
+==================================================
+59. PAGINATION RULE
+==================================================
+
+Pagination should happen AFTER:
+
+role visibility
+search
+filters
+sorting
+
+Always.
+
+==================================================
+60. PAGE STATE
+==================================================
+
+Changing:
+
+search
+filter
+sort
+
+must reset the respective section to Page 1.
+
+Changing one section must NOT unexpectedly reset another section.
+
+Example:
+
+Officer Workload page can change independently from Recent Activity page.
+
+==================================================
+61. DATA SOURCE
+==================================================
+
+All cards and tables MUST use the existing shared project/application data.
+
+Do NOT create:
+
+projectManagerApplications
+projectManagerActivities
+projectManagerOfficers
+
+as independent fake datasets if the shared architecture already has the
+required data.
+
+Use derived selectors.
+
+==================================================
+62. NO HARDCODED COUNTS
+==================================================
+
+Remove hardcoded:
+
+25
+23
+1
+24
+22
+12
+etc.
+
+where they represent calculated dashboard metrics.
+
+Counts must come from shared data.
+
+==================================================
+63. NO FAKE SLA
+==================================================
+
+Do NOT change SLA numbers simply to make the dashboard look populated.
+
+Fix missing SLA data at the calculation/data layer.
+
+==================================================
+64. MISSING DATA AUDIT
+==================================================
+
+Audit every Project Manager dashboard metric.
+
+For every displayed value ask:
+
+Where does this value come from?
+
+If missing:
+
+identify the source problem.
+
+Fix the data relationship/calculation.
+
+Do not hide missing data by replacing it with random demo values.
+
+==================================================
+65. DATA FALLBACK
+==================================================
+
+If a metric genuinely has no data:
+
+show:
+
+0
+
+or:
+
+No data available
+
+depending on context.
+
+Do not display blank areas.
+
+==================================================
+66. WORKFLOW PROGRESS
+==================================================
+
+Application progress must be derived from the application's actual workflow
+stage.
+
+Example:
+
+Application Created
+→ Drawing Scrutiny
+→ Documents
+→ Fee
+→ Payment
+→ TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director
+→ Additional Commissioner
+→ Commissioner
+
+Calculate percentage consistently.
+
+Do not show every application as the same percentage unless their actual
+stage is the same.
+
+==================================================
+67. APPLICATION-SPECIFIC PROGRESS
+==================================================
+
+Example:
+
+Application A:
+Payment
+→ progress according to Payment stage.
+
+Application B:
+TPS
+→ higher progress than Application A.
+
+Application C:
+Commissioner
+→ near completion.
+
+Do not hardcode 33% for all applications.
+
+==================================================
+68. SLA STATUS
+==================================================
+
+Each application should calculate:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+Blocked
+Completed
+
+using actual workflow/SLA state.
+
+==================================================
+69. OFFICER WORKLOAD
+==================================================
+
+Calculate:
+
+Assigned
+=
+currently active assigned applications
+
+Pending
+=
+applications awaiting action
+
+Delayed
+=
+applications exceeding SLA
+
+At Risk
+=
+applications approaching SLA breach
+
+Do NOT count completed applications as active workload.
+
+==================================================
+70. OFFICER PERFORMANCE
+==================================================
+
+For Officer Progress, calculate:
+
+Completed
+Pending
+Delayed
+Average Processing Time
+SLA Compliance
+
+from actual workflow timestamps.
+
+==================================================
+71. RECENT ACTIVITY ORDER
+==================================================
+
+Sort:
+
+Newest first
+
+Use actual event timestamps.
+
+Do not use hardcoded chronological order.
+
+==================================================
+72. RECENT ACTIVITY PAGINATION
+==================================================
+
+When new activity appears:
+
+Page 1 should show the newest event.
+
+Older events move to later pages.
+
+==================================================
+73. FILTERED COUNTS
+==================================================
+
+For data-heavy cards:
+
+show:
+
+Showing 1–10 of 39
+
+based on the current filtered result.
+
+Do not show the global count after filtering.
+
+==================================================
+74. DRILL-DOWN
+==================================================
+
+Every meaningful count/card should be clickable where useful.
+
+Examples:
+
+Delayed / At Risk
+→ filtered delayed applications
+
+Critical Delay
+→ critical applications
+
+Officer
+→ officer detail
+
+Workflow Stage
+→ stage applications
+
+Do not make decorative items clickable.
+
+==================================================
+75. APPLICATION NAVIGATION
+==================================================
+
+When opening an application:
+
+use applicationId.
+
+Never use list position.
+
+==================================================
+76. RETURN NAVIGATION
+==================================================
+
+When returning from application detail:
+
+preferably preserve:
+
+search
+filters
+page
+
+for the section from which the user came.
+
+==================================================
+77. DASHBOARD SCROLLING
+==================================================
+
+The dashboard may be vertically scrollable.
+
+However, DO NOT create multiple nested scroll containers.
+
+Avoid:
+
+page scroll
++
+card scroll
++
+table scroll
++
+activity scroll
+
+unless necessary.
+
+Prefer pagination.
+
+==================================================
+78. NESTED SCROLL REMOVAL
+==================================================
+
+The current Recent Activity design appears to use internal scrolling.
+
+Replace large internal scrolling lists with pagination where practical.
+
+==================================================
+79. PAGE LENGTH
+==================================================
+
+Reduce overall dashboard height.
+
+A user should not need to scroll excessively just to understand:
+
+applications
+workflow
+SLA
+officer workload
+pending actions
+
+Use pagination and compact summaries.
+
+==================================================
+80. RESPONSIVE DESKTOP
+==================================================
+
+At 1920px:
+
+Use available width effectively.
+
+At 1600px:
+
+4 KPI cards
+
+At 1440px:
+
+4 KPI cards
+
+At 1280px:
+
+4 KPI cards if space permits
+
+At 1024px:
+
+2 × 2 KPI cards
+
+At 768px:
+
+2 columns or single column depending on content
+
+At mobile:
+
+single-column sections
+
+==================================================
+81. RESPONSIVE TABLES
+==================================================
+
+Desktop:
+
+full table
+
+Tablet:
+
+responsive table
+
+Mobile:
+
+use the most appropriate existing pattern.
+
+Possible:
+
+compact application cards
+
+or
+
+controlled horizontal table scroll
+
+Do not make the entire dashboard horizontally scroll.
+
+==================================================
+82. MOBILE SEARCH
+==================================================
+
+Search/filter controls should stack cleanly.
+
+Example:
+
+[ Search................. ]
+
+[ Status ▼ ] [ Stage ▼ ]
+
+Do not shrink inputs to unreadable widths.
+
+==================================================
+83. MOBILE PAGINATION
+==================================================
+
+Example:
+
+Showing 1–5 of 22
+
+[‹] [1] [2] [3] [›]
+
+Do not show 20 page-number buttons.
+
+==================================================
+84. VISUAL DESIGN
+==================================================
+
+Keep current LTP Approval style:
+
+- white cards
+- subtle borders
+- dark green primary
+- teal/blue information
+- amber warnings
+- red critical
+- compact icons
+- moderate radius
+- restrained shadows
+
+Do NOT introduce:
+
+gradients
+glassmorphism
+large animations
+excessive colors
+
+==================================================
+85. CARD SPACING
+==================================================
+
+Use:
+
+16–24px between sections
+
+16–20px card padding
+
+8–12px control gaps
+
+Avoid huge blank gaps.
+
+==================================================
+86. CARD HEADER SPACING
+==================================================
+
+Title and subtitle:
+
+8px spacing
+
+Header controls:
+
+aligned to top/middle
+
+Do not create large blank header areas.
+
+==================================================
+87. SECTION WIDTH CONSISTENCY
+==================================================
+
+All major cards must align to the same page container.
+
+No card should randomly be narrower unless it is intentionally placed in
+a grid.
+
+==================================================
+88. TABLE WIDTH CONSISTENCY
+==================================================
+
+Table should use the full card width.
+
+Do not leave large unused spaces.
+
+==================================================
+89. KPI ALIGNMENT
+==================================================
+
+All KPI cards:
+
+same width
+same height
+
+Icon position identical.
+
+Number baseline aligned.
+
+Label baseline aligned.
+
+==================================================
+90. OFFICER CARD ALIGNMENT
+==================================================
+
+All officer cards:
+
+same width in a grid
+same height
+same internal padding
+
+Progress bars aligned.
+
+Assigned badge aligned.
+
+Pending/At Risk/Delayed metrics aligned.
+
+==================================================
+91. SLA CARD ALIGNMENT
+==================================================
+
+Each SLA row:
+
+icon
+label
+count
+action
+
+must be horizontally aligned.
+
+No random spacing.
+
+==================================================
+92. ACTIVITY ALIGNMENT
+==================================================
+
+Activity feed:
+
+left:
+timeline/icon
+
+center:
+action + metadata
+
+right:
+timestamp
+
+Keep these columns aligned.
+
+==================================================
+93. DATA COMPLETENESS
+==================================================
+
+Audit these dashboard sections:
+
+Application Progress
+Live Workflow Monitor
+SLA Summary
+Officer Workload
+Current Bottleneck
+Pending Actions
+Recent Activity
+
+For each:
+
+verify all expected fields are present.
+
+No missing:
+
+Application
+Project
+Officer
+Role
+Stage
+Status
+Progress
+SLA
+Timestamp
+
+where required by the section.
+
+==================================================
+94. PROJECT MANAGER APPLICATION COUNT
+==================================================
+
+The Project Manager should see ALL applications within their permitted
+scope, not just the first few demo records.
+
+Dashboard sections may show a limited page, but counts must represent the
+complete dataset.
+
+==================================================
+95. DEMO DATA
+==================================================
+
+Use diverse demo data.
+
+Applications should have different:
+
+projects
+applicants
+roles
+officers
+stages
+statuses
+SLA states
+progress percentages
+
+Do not make every application:
+
+Payment Pending
+33%
+Critical Delay
+
+unless that is genuinely the dataset state.
+
+==================================================
+96. DATA DISTRIBUTION
+==================================================
+
+Ensure demo data covers:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+Blocked
+Completed
+
+and multiple workflow stages.
+
+This allows the Project Manager dashboard to demonstrate all features.
+
+==================================================
+97. OFFICER DISTRIBUTION
+==================================================
+
+Use multiple officers across:
+
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+Do not assign every application to the same person unless actual data says
+so.
+
+==================================================
+98. FINAL QA — APPLICATION PROGRESS
+==================================================
+
+Test:
+
+25+ applications.
+
+Verify pagination.
+
+Search:
+
+Kulkarni
+
+Verify matching applications.
+
+Filter:
+
+Payment Pending
+
+Verify only matching applications.
+
+Sort:
+
+Updated newest
+
+Verify correct ordering.
+
+==================================================
+99. FINAL QA — WORKFLOW
+==================================================
+
+Test:
+
+Application A
+→ TPS
+
+Application B
+→ TPA
+
+Application C
+→ ZJD
+
+Verify each appears with the correct stage and progress.
+
+==================================================
+100. FINAL QA — SLA
+==================================================
+
+Test:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+Blocked
+
+Verify counts.
+
+Click each.
+
+Verify correct applications appear.
+
+==================================================
+101. FINAL QA — OFFICERS
+==================================================
+
+Search:
+
+Meena
+
+Verify correct officer.
+
+Filter:
+
+TPS
+
+Verify only TPS officers.
+
+Open officer.
+
+Verify workload data.
+
+==================================================
+102. FINAL QA — PENDING ACTIONS
+==================================================
+
+Search:
+
+Payment
+
+Verify payment-related pending actions.
+
+Filter:
+
+Urgent
+
+Verify only urgent applications.
+
+Pagination works.
+
+==================================================
+103. FINAL QA — ACTIVITY
+==================================================
+
+Search:
+
+Payment Verified
+
+Verify correct activities.
+
+Sort newest first.
+
+Pagination works.
+
+==================================================
+104. DATA REFRESH
+==================================================
+
+Perform an application state change from another role.
+
+Example:
+
+TPS completes scrutiny.
+
+Then Project Manager dashboard should update:
+
+Current Stage
+Progress
+SLA
+Pending Actions
+Recent Activity
+Officer Workload
+
+without requiring a manual hard refresh where the existing architecture
+supports reactive shared state.
+
+==================================================
+105. CROSS-ROLE REFLECTION
+==================================================
+
+Test:
+
+LTP creates application.
+
+Project Manager sees it.
+
+LTP uploads drawing.
+
+Project Manager sees Drawing Uploaded.
+
+Scrutiny passes.
+
+Project Manager sees updated stage.
+
+Documents verified.
+
+Project Manager sees document progress.
+
+Fee generated.
+
+Project Manager sees fee state.
+
+Payment successful.
+
+Project Manager sees Payment Successful.
+
+Application forwarded.
+
+Project Manager sees next officer/stage.
+
+==================================================
+106. NO STALE DATA
+==================================================
+
+After state changes:
+
+do not show old stage in one card and new stage in another.
+
+All dashboard sections must use consistent shared state.
+
+==================================================
+107. NO DUPLICATE DATASETS
+==================================================
+
+Do NOT create separate dashboard-only versions of:
+
+applications
+officers
+workflow
+activities
+SLA
+
+Use centralized selectors/derived data.
+
+==================================================
+108. NO HARD-CODED UI VALUES
+==================================================
+
+Do not hardcode:
+
+counts
+progress
+SLA status
+officer assignments
+timestamps
+
+where these values should come from the shared data model.
+
+Demo seed data is allowed, but the dashboard must calculate from it.
+
+==================================================
+109. COMPONENT REUSE
+==================================================
+
+Create/reuse common components for:
+
+SearchBar
+FilterDropdown
+Pagination
+StatusBadge
+ProgressBar
+DataTable
+OfficerCard
+
+Do not build five different pagination components.
+
+==================================================
+110. ERROR HANDLING
+==================================================
+
+If a dashboard data section fails:
+
+show:
+
+Unable to load data.
+
+[ Retry ]
+
+Do not leave an empty white card.
+
+==================================================
+111. LOADING STATES
+==================================================
+
+Use compact skeleton loading.
+
+Do not display misleading zeros while data is loading.
+
+==================================================
+112. EMPTY STATES
+==================================================
+
+If no results after search/filter:
+
+No matching applications found.
+
+[ Clear Filters ]
+
+Same pattern for:
+
+Officers
+Activities
+Pending Actions
+
+==================================================
+113. ACCESS CONTROL
+==================================================
+
+Project Manager remains read/monitor-only unless explicitly permitted.
+
+Do NOT add:
+
+Approve
+Reject
+Verify
+Edit
+Delete
+Configure
+
+to dashboard rows.
+
+==================================================
+114. FINAL PAGE STRUCTURE
+==================================================
+
+Final Project Manager Dashboard:
+
+Project Manager Dashboard
+Central operational view...
+
+┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+│ Total        │ │ In Progress  │ │ Approved     │ │ Delayed/Risk │
+│ 25           │ │ 18           │ │ 4            │ │ 3            │
+└──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ Application Progress Overview             [Search] [Filters]  │
+├────────────────────────────────────────────────────────────────┤
+│ Application | Project | Officer | Stage | Status | SLA       │
+│ ...                                                            │
+│ ...                                                            │
+└────────────────────────────────────────────────────────────────┘
+Showing 1–10 of 25
+
+┌────────────────────────────────────────────────────────────────┐
+│ Live Workflow Monitor                    [Search] [Filters]    │
+│ Application → Stage → Officer → Progress → SLA                │
+│ ...                                                            │
+└────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────┐ ┌──────────────────────────────┐
+│ SLA Summary                  │ │ Current Bottleneck            │
+│ On Track       10            │ │ Payment                       │
+│ At Risk         4            │ │ 12 pending                    │
+│ Delayed         3            │ │ Critical                      │
+│ Critical        2            │ │ [Inspect SLA →]               │
+│ Blocked         1            │ │                               │
+└──────────────────────────────┘ └──────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────┐
+│ Officer Workload                    [Search] [Role] [View All] │
+│ Officer | Role | Assigned | Pending | Delayed | Workload       │
+└────────────────────────────────────────────────────────────────┘
+Showing 1–6 of 18 officers
+
+┌────────────────────────────────────────────────────────────────┐
+│ Pending Actions                       [Search] [Filters]        │
+│ Application | Stage | Officer | Pending Since | SLA | Priority│
+└────────────────────────────────────────────────────────────────┘
+Showing 1–10 of 32
+
+┌────────────────────────────────────────────────────────────────┐
+│ Recent Activity                       [Search] [Type]           │
+│ Action | Actor | Role | Application | Timestamp                 │
+│ ...                                                            │
+└────────────────────────────────────────────────────────────────┘
+Showing 1–10 of 48
+
+==================================================
+115. FINAL DESIGN OBJECTIVE
+==================================================
+
+The Project Manager should understand the operational status within seconds.
+
+The dashboard should answer:
+
+How many applications are there?
+
+How many are in progress?
+
+How many are approved?
+
+How many are delayed?
+
+Which applications are currently pending?
+
+Which workflow stage has the bottleneck?
+
+Which officers have the highest workload?
+
+Which applications are at risk?
+
+What actions happened recently?
+
+The user should NOT need to scroll through hundreds of records.
+
+Use:
+
+SUMMARY
++
+SEARCH
++
+FILTER
++
+PAGINATION
++
+DRILL-DOWN
+
+instead of:
+
+SUMMARY
++
+HUGE LISTS
++
+HUGE CARDS
++
+NESTED SCROLLING
+
+==================================================
+116. FINAL ACCEPTANCE CRITERIA
+==================================================
+
+The Project Manager Dashboard is complete only when:
+
+UI:
+
+- cards are easy to read
+- no overlapping
+- no clipping
+- no excessive whitespace
+- consistent alignment
+- consistent widths
+- consistent heights where appropriate
+- clear hierarchy
+- compact spacing
+
+DATA:
+
+- no missing critical fields
+- no inconsistent values between sections
+- no hardcoded KPI counts
+- no hardcoded progress
+- no fake SLA values
+- correct officer assignments
+- correct workflow stages
+- correct timestamps
+
+FUNCTIONALITY:
+
+- search works in Application Progress
+- filters work
+- pagination works
+- search works in Workflow Monitor
+- workflow pagination works
+- SLA categories open correct applications
+- officer search works
+- officer filtering works
+- officer pagination works
+- pending action search works
+- pending action filtering works
+- pending action pagination works
+- recent activity search works
+- recent activity filtering works
+- recent activity pagination works
+
+DATA FLOW:
+
+- LTP changes appear
+- TPS changes appear
+- TPA changes appear
+- ZAD/ZDD changes appear
+- ZJD changes appear
+- Director changes appear
+- Additional Commissioner changes appear
+- Commissioner changes appear
+
+RESPONSIVE:
+
+- 1920
+- 1600
+- 1440
+- 1366
+- 1280
+- 1024
+- 768
+- 480
+- 390
+
+No horizontal page overflow.
+
+QUALITY:
+
+- no React errors
+- no TypeScript errors
+- no runtime errors
+- no broken imports
+- no broken navigation
+- lint passes
+- build passes
+
+FINAL RULE:
+
+Do not simply make the existing cards smaller.
+
+Reorganize the dashboard so that each section displays the RIGHT AMOUNT OF
+INFORMATION and provides Search / Filter / Pagination where the data set
+can become large.
+
+Use compact summary cards for metrics.
+
+Use searchable, paginated tables/lists for large datasets.
+
+Use drill-down pages for detailed information.
+
+Make the Project Manager Dashboard efficient for daily operational
+monitoring.

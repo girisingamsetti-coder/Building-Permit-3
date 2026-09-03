@@ -32,8 +32,31 @@ import {
   CircleCheck,
   CircleAlert,
   Clock,
+  PieChart,
+  BarChart3,
+  Activity,
+  TrendingUp,
+  FileStack,
+  CheckCircle2,
+  CircleDollarSign,
+  FileWarning,
 } from "lucide-react";
 import type { AdminAuditEntry, ViewKey } from "@/types";
+import {
+  useDashboardScope,
+  computeScopedKpis,
+  applicationsByStatus,
+  applicationsByStage,
+  slaSummary,
+  paymentStatusData,
+  applicationVolumeOverTime,
+} from "@/components/dashboard/dashboard-scope";
+import {
+  DonutChart,
+  BarChart,
+  LineChart,
+  ChartCard,
+} from "@/components/dashboard/charts";
 
 const HEALTH_ITEMS = [
   { id: "api", label: "API Gateway", icon: Server, status: "Operational" as const, note: "Demo monitoring — all routes responding" },
@@ -44,7 +67,15 @@ const HEALTH_ITEMS = [
 ];
 
 export function AdminDashboard() {
-  const { navigate, users, roles, adminAuditLog, applicationTypes, applications } = useAppStore();
+  const { navigate, users, roles, adminAuditLog, applicationTypes } = useAppStore();
+  // Org-wide dashboard scope (ADMIN sees ALL applications)
+  const scope = useDashboardScope();
+  const appKpis = computeScopedKpis(scope.applications);
+  const statusData = applicationsByStatus(scope.applications);
+  const stageData = applicationsByStage(scope.applications);
+  const slaData = slaSummary(scope.applications);
+  const paymentData = paymentStatusData(scope.applications);
+  const volumeData = applicationVolumeOverTime(scope.applications);
 
   const totalUsers = users.length;
   const activeUsers = users.filter((u) => u.active && u.status === "ACTIVE").length;
@@ -63,8 +94,7 @@ export function AdminDashboard() {
   if (inactiveUsers > 0) attentionItems.push({ label: "Inactive/suspended users", count: inactiveUsers, view: "admin-users", severity: "medium" });
   const inactiveAppTypes = applicationTypes.filter((t) => !t.active).length;
   if (inactiveAppTypes > 0) attentionItems.push({ label: "Inactive application types", count: inactiveAppTypes, view: "admin-application-types", severity: "low" });
-  const openShortfalls = applications.flatMap((a) => a.shortfalls).filter((sf) => sf.status === "OPEN" || sf.status === "REOPENED").length;
-  if (openShortfalls > 0) attentionItems.push({ label: "Open shortfalls across applications", count: openShortfalls, view: "admin-audit", severity: "medium" });
+  if (appKpis.openShortfalls > 0) attentionItems.push({ label: "Open shortfalls across applications", count: appKpis.openShortfalls, view: "admin-audit", severity: "medium" });
 
   const configCards: { view: ViewKey; title: string; desc: string; icon: typeof UsersIcon; count: string }[] = [
     { view: "admin-users", title: "Users", desc: "Accounts, activation & access", icon: UsersIcon, count: `${totalUsers} users` },
@@ -97,7 +127,28 @@ export function AdminDashboard() {
         }
       />
 
-      {/* ROW 1: KPI CARDS */}
+      {/* ROW 1: Organization-wide Application KPIs (derived from computeScopedKpis) */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <FileStack className="size-4" />
+          </div>
+          <h2 className="text-sm font-semibold text-foreground">Organization-wide Application KPIs</h2>
+          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px]">Live data</Badge>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard label="Total Applications" value={appKpis.total} icon={FileStack} hint={`${appKpis.drafts} drafts`} cls="bg-primary/10 text-primary" />
+          <KpiCard label="In Progress" value={appKpis.inProgress} icon={Activity} hint={`${appKpis.atRisk} at risk`} cls="bg-info/10 text-info" />
+          <KpiCard label="Approved" value={appKpis.approved} icon={CheckCircle2} hint={`${appKpis.rejected} rejected`} cls="bg-success/10 text-success" />
+          <KpiCard label="Pending Payments" value={appKpis.pendingPayments} icon={CircleDollarSign} hint="Awaiting fee payment" cls="bg-warning/15 text-warning-foreground" />
+          <KpiCard label="Delayed / Critical" value={appKpis.delayed} icon={Clock} hint="Past SLA threshold" cls="bg-destructive/10 text-destructive" />
+          <KpiCard label="Open Shortfalls" value={appKpis.openShortfalls} icon={FileWarning} hint="Needs officer action" cls="bg-warning/15 text-warning-foreground" />
+          <KpiCard label="Pending Documents" value={appKpis.pendingDocuments} icon={FileCog} hint="Awaiting verification" cls="bg-info/10 text-info" />
+          <KpiCard label="Drafts" value={appKpis.drafts} icon={FileStack} hint="Not yet submitted" cls="bg-muted text-muted-foreground" />
+        </div>
+      </div>
+
+      {/* ROW 2: Admin KPI cards (users, roles, audit) — kept from existing */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Total Users" value={totalUsers} icon={UsersIcon} hint={`${activeUsers} active · ${inactiveUsers} inactive`} cls="bg-primary/10 text-primary" />
         <KpiCard label="Active Users" value={activeUsers} icon={UserCheck} hint={`${pendingUsers} pending approval`} cls="bg-success/10 text-success" />
@@ -109,7 +160,35 @@ export function AdminDashboard() {
         <KpiCard label="System Health" value="Operational" icon={HeartPulse} hint="Demo monitoring" cls="bg-success/10 text-success" />
       </div>
 
-      {/* ROW 2: System Health + Administrative Attention */}
+      {/* ROW 3: Charts Section (2-col grid + full-width line chart) */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <PieChart className="size-4" />
+          </div>
+          <h2 className="text-sm font-semibold text-foreground">Application Analytics</h2>
+          <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px]">Org-wide</Badge>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <ChartCard icon={PieChart} title="Applications by Status" subtitle="Distribution across all statuses">
+            <DonutChart data={statusData} centerLabel="Total" centerValue={appKpis.total} />
+          </ChartCard>
+          <ChartCard icon={BarChart3} title="Applications by Stage" subtitle="Pipeline distribution">
+            <BarChart data={stageData} />
+          </ChartCard>
+          <ChartCard icon={Activity} title="SLA Performance" subtitle="On track · at risk · delayed · blocked">
+            <DonutChart data={slaData} centerLabel="Total" centerValue={appKpis.total} />
+          </ChartCard>
+          <ChartCard icon={CircleDollarSign} title="Payment Status" subtitle="Paid · pending · no fee yet">
+            <DonutChart data={paymentData} centerLabel="Total" centerValue={appKpis.total} />
+          </ChartCard>
+        </div>
+        <ChartCard icon={TrendingUp} title="Application Volume Over Time" subtitle="Submissions over the last 6 months">
+          <LineChart data={volumeData} />
+        </ChartCard>
+      </div>
+
+      {/* ROW 4: System Health + Administrative Attention */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[72%_28%]">
         <SectionCard title="System Health" description="Demo monitoring data — no real infrastructure backend" icon={HeartPulse}>
           <ul className="space-y-3">
@@ -182,7 +261,7 @@ export function AdminDashboard() {
         </SectionCard>
       </div>
 
-      {/* ROW 3: Recent Audit + Configuration Overview */}
+      {/* ROW 5: Recent Audit + Configuration Overview */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[72%_28%]">
         <SectionCard title="Recent Audit Activity" description="Latest administrative and application events" icon={History}
           action={<Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => navigate("admin-audit")}>View All</Button>}

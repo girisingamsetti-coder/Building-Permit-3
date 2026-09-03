@@ -1196,3 +1196,145 @@ Stage Summary:
 - No hardcoded counts — all derived from shared store data.
 - Responsive: mobile stacks, desktop side-by-side, no horizontal overflow.
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
+
+---
+Task ID: 6+7
+Agent: general-purpose (Admin + LTP Dashboard Charts)
+Task: Add charts to Admin + LTP Dashboards using dashboard-scope engine
+
+Work Log:
+- Read mandatory context files: worklog.md, dashboard-scope.ts, charts.tsx, current admin-dashboard.tsx (264 lines), current ltp-dashboard.tsx (491 lines), layout.tsx, badges.tsx, app-store.ts, types/index.ts.
+- Confirmed eslint config: `@typescript-eslint/no-unused-vars` and `no-unused-vars` are OFF, so unused imports do not error.
+
+Admin Dashboard (admin-dashboard.tsx) — added:
+1. Imported `useDashboardScope`, `computeScopedKpis`, `applicationsByStatus`, `applicationsByStage`, `slaSummary`, `paymentStatusData`, `applicationVolumeOverTime` from `@/components/dashboard/dashboard-scope`.
+2. Imported `DonutChart`, `BarChart`, `LineChart`, `ChartCard` from `@/components/dashboard/charts`.
+3. Imported new lucide icons: PieChart, BarChart3, Activity, TrendingUp, FileStack, CheckCircle2, CircleDollarSign, FileWarning.
+4. Resolved scope via `useDashboardScope()` (ADMIN → org-wide, `scope.isGlobal === true`, `scope.applications` = ALL apps).
+5. Derived KPIs from `computeScopedKpis(scope.applications)` → appKpis (total, inProgress, approved, rejected, drafts, delayed, atRisk, pendingPayments, openShortfalls, pendingDocuments).
+6. Added ROW 1: "Organization-wide Application KPIs" header + 8 KPI cards (Total Apps, In Progress, Approved, Pending Payments, Delayed/Critical, Open Shortfalls, Pending Documents, Drafts) — all from appKpis, NO hardcoded values.
+7. Kept ROW 2: existing 8 admin KPI cards (users, roles, audit) unchanged.
+8. Added ROW 3 "Application Analytics" charts section:
+   - 2-col grid (grid-cols-1 lg:grid-cols-2): Applications by Status (DonutChart), Applications by Stage (BarChart), SLA Performance (DonutChart), Payment Status (DonutChart).
+   - Full-width LineChart: Application Volume Over Time (6 months).
+9. Replaced the inline `openShortfalls` calculation in attentionItems with `appKpis.openShortfalls` (still real data, just sourced from computeScopedKpis).
+10. Kept ROW 4 (System Health + Administrative Attention) and ROW 5 (Recent Audit + Configuration Overview) unchanged.
+
+LTP Dashboard (ltp-dashboard.tsx) — added:
+1. Imported `useDashboardScope`, `computeScopedKpis`, `applicationsByStatus`, `applicationsByStage`, `paymentStatusData`, `documentCompletionData` from `@/components/dashboard/dashboard-scope`.
+2. Imported `DonutChart`, `BarChart`, `ChartCard` from `@/components/dashboard/charts`.
+3. Imported new lucide icons: PieChart, BarChart3, Activity.
+4. Removed `useVisibleApplications` import (replaced with `useDashboardScope().applications` — for LTP this returns apps where `ltpId === user.id`).
+5. Removed `ACTION_STATUSES` (unused after refactor) and `Building2` import (unused).
+6. Resolved scope via `useDashboardScope()` → `apps = scope.applications` (LTP's own apps only).
+7. Derived KPIs from `computeScopedKpis(apps)` → kpis.
+8. Replaced manual `stats` object with kpis-based values.
+9. Updated 4 KPI cards to derive from computeScopedKpis (no manual counting):
+   - TOTAL APPLICATIONS → kpis.total
+   - IN PROGRESS → kpis.inProgress (replaced "SCRUTINY PENDING" since computeScopedKpis has no direct scrutiny-pending metric)
+   - PENDING PAYMENTS → kpis.pendingPayments
+   - OPEN SHORTFALLS → kpis.openShortfalls (renamed from "SHORTFALL RAISED")
+10. Added a NEW Charts Section between KPI cards and My Applications:
+    - Header row with PieChart icon + "My Application Analytics" label.
+    - 2-col grid (grid-cols-1 lg:grid-cols-2): My Applications by Status (DonutChart), My Applications by Stage (BarChart), Document Completion (DonutChart), Payment Status (DonutChart).
+11. Kept My Applications grid + pagination (unchanged, but `apps` now = scope.applications).
+12. Kept Live Workflow Tracker (unchanged).
+
+Constraints honoured:
+- `useDashboardScope()` used in BOTH files; ADMIN scope is global, LTP scope is own apps only.
+- All chart data sourced from dashboard-scope functions — NO hardcoded values, NO manual counting of apps.
+- All KPI cards derived from `computeScopedKpis(scope.applications)`.
+- Charts show "No data available" via the chart components' built-in empty state (charts.tsx handles this).
+- Existing functionality preserved (admin config overview, admin system health, admin attention, admin audit; LTP applications grid + pagination + workflow tracker).
+- ONLY admin-dashboard.tsx and ltp-dashboard.tsx modified (verified via `git diff --stat`).
+- "use client" directive at top of both files.
+- TypeScript strict — no `any`, no unused vars that lint would flag.
+- Charts section: 2-col grid on desktop (`grid-cols-1 lg:grid-cols-2`), 1-col mobile; LineChart full-width on Admin.
+- Chart cards use shared `ChartCard` wrapper (consistent width, header, padding) — visually aligned.
+- KPIs responsive: 1-col mobile → 2-col tablet (sm:grid-cols-2) → 4-col desktop (xl:grid-cols-4).
+
+Lint & Type Check:
+- `bun run lint` → 1 pre-existing error in `src/components/dashboard/charts.tsx` line 64 (`offset += dash` — `react-hooks/immutability` rule). This file is NOT in scope for this task ("DO NOT modify any other files"), and the error was present BEFORE my changes (verified: I never touched charts.tsx). My two modified files lint cleanly: `npx eslint src/components/admin/admin-dashboard.tsx src/components/ltp/ltp-dashboard.tsx` → 0 errors, 0 warnings.
+- `npx tsc --noEmit` → 0 errors across the entire project (full project type check).
+
+Stage Summary:
+- Files changed: ONLY `src/components/admin/admin-dashboard.tsx` and `src/components/ltp/ltp-dashboard.tsx`. Confirmed by `git diff --stat`: 2 files, +151 / −37 lines.
+- Admin Dashboard: added 8 new app-KPI cards from computeScopedKpis + 5 charts (4 donut/bar + 1 full-width line chart). Kept all existing admin KPIs, System Health, Admin Attention, Recent Audit, Configuration Overview.
+- LTP Dashboard: refactored KPI cards to derive from computeScopedKpis (replaced manual stats calculation, replaced SCRUTINY PENDING with IN PROGRESS since computeScopedKpis has no direct scrutiny-pending metric), added 4 charts in 2-col grid (Status donut, Stage bar, Document Completion donut, Payment Status donut). Kept welcome bar, My Applications grid + pagination, Live Workflow Tracker.
+- All charts sourced from the dashboard-scope engine — no manual counts anywhere.
+- tsc: 0 errors. Lint: 0 errors in my files (1 pre-existing error in charts.tsx outside my scope).
+
+---
+Task ID: 5
+Agent: general-purpose (Officer Dashboard)
+Task: Redesign Officer Dashboard with role-specific KPIs + charts
+
+Work Log:
+- Read all mandatory pre-work files: worklog.md (full), dashboard-scope.ts, charts.tsx, current officer-dashboard.tsx (592 lines), layout.tsx, badges.tsx, app-store.ts (useAssignedApplications selector), permissions.ts (rolesForStage map), types/index.ts (RoleKey, WorkflowStageKey, Application), workflow-config.ts (stage → role map), mock-data.ts (ROLES titles/fullNames), and inspected ltp-dashboard.tsx for chart usage patterns.
+- Rewrote `src/components/officer/officer-dashboard.tsx` (from 592 → 608 lines, expanded for per-role KPI definitions) with the new role-aware data-scope engine:
+  1. **PageHeader** — role-aware title: `${roleTitle} Dashboard` (e.g., "TPS Dashboard", "TPA Dashboard", "ZAD Dashboard", "Commissioner Dashboard"). Uses `ROLES[role].title` + `ROLES[role].fullName`. Badge = RoleBadge with role title. Actions: "Assigned Queue" (outline) + "Open Review" (primary).
+  2. **KPI Cards** (4-col grid: `grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`) — ROLE-SPECIFIC via switch on `scope.role`. All values derived from `scope.applications` + `computeScopedKpis(scope.applications)`:
+     - TPS: Assigned Applications (= scope length) | Pending Scrutiny (atStage TPS_TECHNICAL_SCRUTINY) | Completed Scrutiny (myCompletedActions) | SLA At Risk (baseKpis.atRisk)
+     - TPA: Pending Reviews (atStage TPA_REVIEW) | Completed Reviews (myCompletedActions) | Open Shortfalls (baseKpis.openShortfalls) | SLA At Risk
+     - ZAD/ZDD: Pending Approvals (atStage ZAD_ZDD_REVIEW) | Open Shortfalls | SLA At Risk | Completed Reviews (myCompletedActions)
+     - ZJD: Pending Decisions (atStage ZJD_REVIEW) | Open Shortfalls | SLA At Risk | Completed Decisions (myCompletedActions)
+     - DIRECTOR_DP: Pending Decisions (atStage DIRECTOR_DP_REVIEW) | Open Shortfalls | SLA At Risk | Approved (baseKpis.approved)
+     - ADDL_COMMISSIONER: Pending Reviews (atStage ADDITIONAL_COMMISSIONER_REVIEW) | Approved | Rejected (baseKpis.rejected) | SLA At Risk
+     - COMMISSIONER: Pending Final Decisions (atStage COMMISSIONER_REVIEW + FINAL_DECISION) | Approved | Rejected | Delayed (baseKpis.delayed)
+     - Helpers: `atStage(stage)` counts apps currently at a given workflow stage (excluding APPROVED/REJECTED). `myCompletedActions` counts COMPLETED workflow-history entries where `actor.name === user.name && actor.role === user.role` (user-level match — counts this specific officer's own completed actions across scoped apps).
+     - Icons: ClipboardCheck (assigned), Clock (pending), CheckCircle2 (completed/approved), FileWarning (open shortfalls), AlertTriangle (SLA at risk), XCircle (rejected), CalendarClock (delayed). StatCard accent colors: primary/info/success/warning/amber/destructive.
+     - Clickable KPIs (with onClick → navigate("officer-applications")): Assigned Applications, SLA At Risk, Delayed. Others are display-only.
+  3. **Charts** (2-col grid: `grid-cols-1 lg:grid-cols-2`) using `DonutChart`, `BarChart`, `ChartCard` from `@/components/dashboard/charts`:
+     - Applications by Status (DonutChart, PieChart icon, centerValue=totalApps) — from `applicationsByStatus(scope.applications)`
+     - Applications by Stage (BarChart, BarChart3 icon) — from `applicationsByStage(scope.applications)`
+     - Scrutiny Results (DonutChart, CheckCircle2 icon, centerValue=totalScrutiny) — TPS-only, from `scrutinyResultsData(scope.applications)`
+     - SLA Summary (DonutChart, Gauge icon, centerValue=totalSla) — always, from `slaSummary(scope.applications)`
+     - All charts show "No data available" automatically when empty (handled by chart components).
+  4. **Assigned Applications** (Priority Queue) — kept the existing list/table style with the "Open Review" action button. Switched from `useAssignedApplications()` to `scope.applications` (the scoped dataset). Sorted by priority (URGENT→HIGH→NORMAL) then by SLA proximity. Filtered to `OFFICER_REVIEW_STAGES` (8 workflow stages from TPS_TECHNICAL_SCRUTINY through FINAL_DECISION, excluding APPROVED/REJECTED). Shows up to 8 apps; each row has app no (clickable), StatusBadge, PriorityBadge, project name, property/ward/LTP info, SLA days-remaining tone, stage label, and an "Open review" button → `openApplication(a.id, "officer-review")`. Empty state with "Browse all applications" fallback.
+- READ-ONLY: no approve / reject / verify / pay buttons. Only navigation actions: row click → openApplication(officer-review), "Open Review" button in header → navigate(officer-review), "Assigned Queue" button → navigate(officer-applications), "View all" link → navigate(officer-applications), clickable KPIs → navigate(officer-applications).
+- Removed the dropped sections from the old dashboard: Quick Filters, Recent Decisions timeline, Notifications, Officer Profile, My Workload mini-chart, SLA Performance (mocked 87% / 4.2d / 13% — hardcoded numbers that violated the spec), Applications Near SLA. The redesigned dashboard strictly follows the 4-section spec (PageHeader, KPIs, Charts, Assigned Applications).
+- Removed unused imports: useAssignedApplications, useToast, Badge, Progress, Separator, ScrollArea, WorkflowTimeline, formatDate, formatDateTime, timeAgo, InfoRow, Activity, Zap, Filter, TrendingUp, Undo2, History, ShieldCheck, getStage, ApplicationStatus, WorkflowHistoryEntry, Application. Added: PieChart, BarChart3, Gauge, XCircle, useDashboardScope, computeScopedKpis, applicationsByStatus, applicationsByStage, slaSummary, scrutinyResultsData, DonutChart, BarChart, ChartCard, WorkflowStageKey.
+- TypeScript strict — no `any`, no unused vars/imports. The `role` is typed as `RoleKey` (from `DashboardScope.role`). `atStage` param is `WorkflowStageKey`. `KpiDef` interface uses `typeof ClipboardCheck` for icon (matches the LucideIcon type expected by StatCard). `KpiAccent` is a strict union matching StatCard's accent prop.
+- Responsive: KPIs 1-col mobile → 2-col tablet → 4-col desktop. Charts 1-col mobile → 2-col desktop. Assigned Applications rows stack on mobile (flex-col) and go horizontal on sm+ (flex-row).
+
+Verification:
+- `bun run lint` → 1 error in `src/components/dashboard/charts.tsx` line 64 (`offset += dash` — react-hooks/immutability rule). This is a PRE-EXISTING error in the shared charts file (untracked, newly created by another agent); the task spec explicitly forbids modifying any file other than `officer-dashboard.tsx`, so this error is out of scope. The officer-dashboard.tsx file itself passes lint cleanly (verified with `npx eslint src/components/officer/officer-dashboard.tsx` → 0 errors).
+- `npx tsc --noEmit` → 0 errors anywhere (no officer-dashboard.tsx errors, no charts.tsx errors, no dashboard-scope.ts errors).
+
+Stage Summary:
+- Files changed: only `src/components/officer/officer-dashboard.tsx` (592 → 608 lines, full rewrite).
+- Officer Dashboard is now role-specific: TPS, TPA, ZAD, ZDD, ZJD, DIRECTOR_DP, ADDL_COMMISSIONER, and COMMISSIONER each see their own set of 4 role-specific KPIs (no two roles share the same KPI set) + a role-aware page title + role-specific chart set (TPS gets an extra Scrutiny Results donut).
+- All KPI values derive from `useDashboardScope()` + `computeScopedKpis()` + scoped-app filters — NO hardcoded numbers.
+- Charts use the shared chart components (DonutChart, BarChart, ChartCard) from `@/components/dashboard/charts`.
+- Assigned Applications section uses `scope.applications` (not the old `useAssignedApplications()`) — richer scope-aware view that includes both currently-assigned apps + apps where this officer acted in workflow history.
+- READ-ONLY: zero unauthorized action buttons — only navigation actions. Workflow actions happen on the Review page.
+- Lint: officer-dashboard.tsx 0 errors ✓ (1 pre-existing error in shared charts.tsx — out of scope).
+- tsc: 0 errors ✓.
+
+---
+Task ID: 4
+Agent: general-purpose (PM Dashboard Charts)
+Task: Add charts to PM Dashboard using dashboard-scope engine
+
+Work Log:
+- Read worklog.md, dashboard-scope.ts, charts.tsx, pm-dashboard.tsx, pm-shared.tsx, and pm-helpers.ts for full context.
+- Replaced data sources in PmDashboard: swapped `useAllApplications()` + `useAllUsers()` for `useDashboardScope()`, deriving `apps = scope.applications` and `users = scope.users` so the PM sees the same organization-wide dataset but routed through the new scope engine.
+- Reworked KPI computation: replaced the manual `kpis` useMemo with `computeScopedKpis(apps)` from `@/components/dashboard/dashboard-scope`; the four CompactKpiCards now render `kpis.total`, `kpis.inProgress`, `kpis.approved`, and `delayedAtRisk = kpis.delayed + kpis.atRisk` (BLOCKED apps remain visible via the new SLA Summary chart and the existing SLA Summary card section).
+- Added a new `ChartsSection` component (between KPIs and Application Progress) that renders four ChartCards in a `grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2`:
+    1. Applications by Status — DonutChart from `applicationsByStatus(apps)`
+    2. Applications by Stage — BarChart from `applicationsByStage(apps)`
+    3. SLA Summary — DonutChart from `slaSummaryChartData(apps)` (imported as alias to avoid clashing with the existing local `slaSummary` memo)
+    4. Payment Status — DonutChart from `paymentStatusData(apps)`
+  Each chart body uses `h-[280px]` for consistent height + aligned tops; the BarChart wrapper uses `overflow-y-auto` to gracefully handle many stages. Each chart component already renders "No data available" when the scoped dataset is empty (per the provided chart components).
+- Kept all existing sections unchanged: KPIs, Application Progress table, Live Workflow Monitor, Recent Activity, SLA Summary card, Bottleneck, Officer Workload table, Pending Actions table.
+- Cleaned imports: removed `useAllApplications`, `useAllUsers`, and unused `formatDuration` from the pm-helpers import block; added the dashboard-scope + charts imports; added `PieChart` and `CreditCard` to the lucide-react import; added `User` to the `@/types` import.
+- Updated `OfficerWorkloadSection` prop type from `users: ReturnType<typeof useAllUsers>` to `users: User[]` so it no longer depends on the now-removed `useAllUsers` import.
+- Lint: `npx eslint src/components/pm/pm-dashboard.tsx` → clean (no errors/warnings). `bun run lint` reports one pre-existing error in `src/components/dashboard/charts.tsx` (`react-hooks/immutability` on `offset += dash` inside DonutChart's `.map()`) — outside this task's file scope; not touched.
+- TypeScript: `npx tsc --noEmit` → no errors anywhere in the codebase (specifically no `pm-dashboard` errors).
+
+Stage Summary:
+- PM Dashboard now consumes the centralized `useDashboardScope()` engine + `computeScopedKpis()` for its KPIs and dataset, instead of raw `useAllApplications()`/`useAllUsers()` selectors.
+- A new Charts section sits between the KPI row and the Application Progress table, rendering four ChartCards (Status donut, Stage bar, SLA donut, Payment donut) in a 2-col desktop / 1-col mobile grid with consistent 280px bodies and aligned tops.
+- All pre-existing sections (Application Progress, Live Workflow, Recent Activity, SLA Summary card, Bottleneck, Officer Workload, Pending Actions) are preserved verbatim — only the data sources and the new chart block were added.
+- Only `src/components/pm/pm-dashboard.tsx` was modified; no other files touched.
+- Lint clean for pm-dashboard.tsx; tsc clean project-wide; the lone `bun run lint` error is a pre-existing issue in the shared `charts.tsx` file (not in scope for this task).

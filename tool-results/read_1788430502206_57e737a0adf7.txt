@@ -1,0 +1,593 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore, useAssignedApplications } from "@/store/app-store";
+     6→import { ROLES } from "@/data/mock-data";
+     7→import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
+     8→import {
+     9→  PageHeader,
+    10→  StatCard,
+    11→  SectionCard,
+    12→  EmptyState,
+    13→  InfoRow,
+    14→} from "@/components/design-system/layout";
+    15→import {
+    16→  StatusBadge,
+    17→  PriorityBadge,
+    18→  RoleBadge,
+    19→} from "@/components/design-system/badges";
+    20→import {
+    21→  WorkflowTimeline,
+    22→  formatDate,
+    23→  formatDateTime,
+    24→  timeAgo,
+    25→} from "@/components/design-system/workflow";
+    26→import { Button } from "@/components/ui/button";
+    27→import { Badge } from "@/components/ui/badge";
+    28→import { Progress } from "@/components/ui/progress";
+    29→import { Separator } from "@/components/ui/separator";
+    30→import { ScrollArea } from "@/components/ui/scroll-area";
+    31→import {
+    32→  ClipboardCheck,
+    33→  Clock,
+    34→  AlertTriangle,
+    35→  CheckCircle2,
+    36→  FileWarning,
+    37→  Activity,
+    38→  ArrowRight,
+    39→  ChevronRight,
+    40→  CalendarClock,
+    41→  ShieldCheck,
+    42→  LayoutDashboard,
+    43→  Zap,
+    44→  Filter,
+    45→  TrendingUp,
+    46→  Gauge,
+    47→  ListChecks,
+    48→  Inbox,
+    49→  Undo2,
+    50→  FileSearch,
+    51→  History,
+    52→} from "lucide-react";
+    53→import { useToast } from "@/hooks/use-toast";
+    54→import type { Application, ApplicationStatus, RoleKey, WorkflowHistoryEntry } from "@/types";
+    55→
+    56→// ---------- Helpers ----------
+    57→function daysRemaining(iso?: string): number | null {
+    58→  if (!iso) return null;
+    59→  const diff = new Date(iso).getTime() - Date.now();
+    60→  return Math.ceil(diff / 86400000);
+    61→}
+    62→
+    63→function slaTone(days: number | null): { cls: string; label: string; tone: "ok" | "near" | "critical" | "overdue" | "na" } {
+    64→  if (days === null) return { cls: "text-muted-foreground", label: "—", tone: "na" };
+    65→  if (days < 0) return { cls: "text-destructive font-semibold", label: `Overdue ${Math.abs(days)}d`, tone: "overdue" };
+    66→  if (days <= 3) return { cls: "text-destructive font-semibold", label: `${days}d left`, tone: "critical" };
+    67→  if (days <= 7) return { cls: "text-amber-600 dark:text-amber-400 font-semibold", label: `${days}d left`, tone: "near" };
+    68→  return { cls: "text-success font-medium", label: `${days}d left`, tone: "ok" };
+    69→}
+    70→
+    71→// Statuses that count as "pending review" for an officer (in-stage, awaiting action)
+    72→const PENDING_REVIEW_STATUSES: ApplicationStatus[] = [
+    73→  "TPS_TECHNICAL_SCRUTINY",
+    74→  "TPA_REVIEW",
+    75→  "ZAD_ZDD_REVIEW",
+    76→  "ZJD_REVIEW",
+    77→  "DIRECTOR_DP_REVIEW",
+    78→  "ADDITIONAL_COMMISSIONER_REVIEW",
+    79→  "COMMISSIONER_REVIEW",
+    80→  "SHORTFALL_RAISED",
+    81→  "DOCUMENT_VERIFICATION",
+    82→];
+    83→
+    84→const STAGE_REVIEW_STATUSES: ApplicationStatus[] = [
+    85→  "TPS_TECHNICAL_SCRUTINY",
+    86→  "TPA_REVIEW",
+    87→  "ZAD_ZDD_REVIEW",
+    88→  "ZJD_REVIEW",
+    89→  "DIRECTOR_DP_REVIEW",
+    90→  "ADDITIONAL_COMMISSIONER_REVIEW",
+    91→  "COMMISSIONER_REVIEW",
+    92→];
+    93→
+    94→// ---------- Quick Filters config ----------
+    95→const QUICK_FILTERS: { label: string; value: string; icon: typeof Filter }[] = [
+    96→  { label: "Urgent Priority", value: "URGENT", icon: Zap },
+    97→  { label: "Near SLA (≤7d)", value: "NEAR_SLA", icon: CalendarClock },
+    98→  { label: "Shortfall Open", value: "SHORTFALL", icon: FileWarning },
+    99→  { label: "In Review Stage", value: "IN_REVIEW", icon: Clock },
+   100→];
+   101→
+   102→export function OfficerDashboard() {
+   103→  const { user, navigate, openApplication, notifications, applications } = useAppStore();
+   104→  const { toast } = useToast();
+   105→  const assigned = useAssignedApplications();
+   106→
+   107→  const role: RoleKey | undefined = user?.role;
+   108→
+   109→  // Derived stats
+   110→  const stats = React.useMemo(() => {
+   111→    const totalAssigned = assigned.length;
+   112→    const pending = assigned.filter((a) => PENDING_REVIEW_STATUSES.includes(a.status)).length;
+   113→    const activeShortfalls = assigned.reduce(
+   114→      (s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length,
+   115→      0
+   116→    );
+   117→    const nearSLA = assigned.filter((a) => {
+   118→      const d = daysRemaining(a.expectedSLA);
+   119→      return d !== null && d >= 0 && d <= 7;
+   120→    }).length;
+   121→    const recentlyProcessed = role ? getRecentDecisions(role, applications).length : 0;
+   122→    const approved = applications.filter((a) => a.status === "APPROVED").length;
+   123→    const returned = applications.filter((a) => a.status === "RETURNED").length;
+   124→    return { totalAssigned, pending, activeShortfalls, nearSLA, recentlyProcessed, approved, returned };
+   125→  }, [assigned, role, applications]);
+   126→
+   127→  // Priority Queue (sorted: urgent first, then by SLA)
+   128→  const priorityQueue = React.useMemo(() => {
+   129→    return [...assigned].sort((a, b) => {
+   130→      const pa = a.priority === "URGENT" ? 0 : a.priority === "HIGH" ? 1 : 2;
+   131→      const pb = b.priority === "URGENT" ? 0 : b.priority === "HIGH" ? 1 : 2;
+   132→      if (pa !== pb) return pa - pb;
+   133→      const sa = daysRemaining(a.expectedSLA) ?? 9999;
+   134→      const sb = daysRemaining(b.expectedSLA) ?? 9999;
+   135→      return sa - sb;
+   136→    });
+   137→  }, [assigned]);
+   138→
+   139→  // Near SLA apps
+   140→  const nearSLAApps = React.useMemo(
+   141→    () =>
+   142→      assigned
+   143→        .filter((a) => {
+   144→          const d = daysRemaining(a.expectedSLA);
+   145→          return d !== null && d >= 0 && d <= 7;
+   146→        })
+   147→        .sort((a, b) => (daysRemaining(a.expectedSLA) ?? 0) - (daysRemaining(b.expectedSLA) ?? 0)),
+   148→    [assigned]
+   149→  );
+   150→
+   151→  // Recent decisions timeline (from workflow history across all apps)
+   152→  const recentDecisions = React.useMemo(() => {
+   153→    if (!role) return [];
+   154→    return getRecentDecisions(role, applications).slice(0, 6);
+   155→  }, [role, applications]);
+   156→
+   157→  // Workload by status (mini bar chart)
+   158→  const workload = React.useMemo(() => {
+   159→    const buckets: Record<string, number> = {
+   160→      "In Review Stage": 0,
+   161→      "Shortfall": 0,
+   162→      "Documents Pending": 0,
+   163→      "Other": 0,
+   164→    };
+   165→    assigned.forEach((a) => {
+   166→      if (STAGE_REVIEW_STATUSES.includes(a.status)) buckets["In Review Stage"]++;
+   167→      else if (a.status === "SHORTFALL_RAISED") buckets["Shortfall"]++;
+   168→      else if (a.status === "DOCUMENT_UPLOAD_PENDING") buckets["Documents Pending"]++;
+   169→      else buckets["Other"]++;
+   170→    });
+   171→    const max = Math.max(1, ...Object.values(buckets));
+   172→    return { buckets, max };
+   173→  }, [assigned]);
+   174→
+   175→  // SLA performance (mocked but realistic: ~87% on-time)
+   176→  const slaPerformance = React.useMemo(() => {
+   177→    const onTime = 87;
+   178→    const avgDays = 4.2;
+   179→    const breachRate = 13;
+   180→    return { onTime, avgDays, breachRate };
+   181→  }, []);
+   182→
+   183→  const recentNotifs = notifications.slice(0, 5);
+   184→
+   185→  function handleQuickFilter(value: string) {
+   186→    toast({
+   187→      title: "Filter applied",
+   188→      description: `Showing applications matching: ${value.replace("_", " ").toLowerCase()}`,
+   189→    });
+   190→    navigate("officer-applications");
+   191→  }
+   192→
+   193→  if (!role) return null;
+   194→
+   195→  const officerTitle = ROLES[role].title;
+   196→  const officerFullName = ROLES[role].fullName;
+   197→
+   198→  return (
+   199→    <div className="space-y-6">
+   200→      <PageHeader
+   201→        title={`Officer Workspace`}
+   202→        description={`Welcome, ${user?.name}. Here is your review pipeline at a glance — ${officerFullName}.`}
+   203→        icon={LayoutDashboard}
+   204→        breadcrumbs={[
+   205→          { label: "Officer Workspace", onClick: () => navigate("officer-dashboard") },
+   206→          { label: "Dashboard" },
+   207→        ]}
+   208→        badge={<RoleBadge role={role} label={officerTitle} />}
+   209→        actions={
+   210→          <>
+   211→            <Button variant="outline" size="sm" onClick={() => navigate("officer-applications")}>
+   212→              <ClipboardCheck className="size-4" /> Assigned Queue
+   213→            </Button>
+   214→            <Button size="sm" onClick={() => navigate("officer-review")}>
+   215→              <FileSearch className="size-4" /> Open Review
+   216→            </Button>
+   217→          </>
+   218→        }
+   219→      />
+   220→
+   221→      {/* Stat cards */}
+   222→      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+   223→        <StatCard label="Assigned Applications" value={stats.totalAssigned} icon={ClipboardCheck} accent="primary" onClick={() => navigate("officer-applications")} />
+   224→        <StatCard label="Pending Review" value={stats.pending} icon={Clock} accent="info" />
+   225→        <StatCard label="Active Shortfalls" value={stats.activeShortfalls} icon={FileWarning} accent="warning" />
+   226→        <StatCard label="Near SLA (≤7d)" value={stats.nearSLA} icon={AlertTriangle} accent="amber" onClick={() => navigate("officer-applications")} />
+   227→        <StatCard label="Recently Processed" value={stats.recentlyProcessed} icon={Activity} accent="info" />
+   228→        <StatCard label="Approved" value={stats.approved} icon={CheckCircle2} accent="success" />
+   229→        <StatCard label="Returned" value={stats.returned} icon={Undo2} accent="destructive" />
+   230→      </div>
+   231→
+   232→      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   233→        {/* LEFT — 2/3 */}
+   234→        <div className="space-y-6 lg:col-span-2">
+   235→          {/* Priority Queue */}
+   236→          <SectionCard
+   237→            title="Priority Queue"
+   238→            description="Applications assigned to your stage — sorted by priority and SLA urgency"
+   239→            icon={ListChecks}
+   240→            action={
+   241→              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("officer-applications")}>
+   242→                View all <ChevronRight className="size-3.5" />
+   243→              </Button>
+   244→            }
+   245→            noPadding
+   246→          >
+   247→            {priorityQueue.length === 0 ? (
+   248→              <div className="p-6">
+   249→                <EmptyState
+   250→                  icon={Inbox}
+   251→                  title="No applications pending at your stage"
+   252→                  description="When an application reaches your review stage in the approval workflow, it will appear here automatically."
+   253→                  action={<Button size="sm" variant="outline" onClick={() => navigate("officer-applications")}>Browse all applications</Button>}
+   254→                />
+   255→              </div>
+   256→            ) : (
+   257→              <ul className="divide-y divide-border">
+   258→                {priorityQueue.slice(0, 6).map((a) => {
+   259→                  const days = daysRemaining(a.expectedSLA);
+   260→                  const sla = slaTone(days);
+   261→                  const stage = WORKFLOW_STAGES.find((s) => s.key === a.currentStage);
+   262→                  return (
+   263→                    <li key={a.id}>
+   264→                      <div className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between">
+   265→                        <div className="flex min-w-0 flex-1 items-start gap-3">
+   266→                          <div
+   267→                            className={cn(
+   268→                              "flex size-10 shrink-0 items-center justify-center rounded-lg",
+   269→                              a.priority === "URGENT"
+   270→                                ? "bg-destructive/10 text-destructive"
+   271→                                : a.priority === "HIGH"
+   272→                                ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+   273→                                : "bg-primary/10 text-primary"
+   274→                            )}
+   275→                          >
+   276→                            <ClipboardCheck className="size-5" />
+   277→                          </div>
+   278→                          <div className="min-w-0 flex-1 space-y-1">
+   279→                            <div className="flex flex-wrap items-center gap-2">
+   280→                              <button
+   281→                                onClick={() => openApplication(a.id, "officer-review")}
+   282→                                className="font-mono text-xs font-semibold text-primary hover:underline"
+   283→                              >
+   284→                                {a.applicationNo}
+   285→                              </button>
+   286→                              <StatusBadge status={a.status} showIcon={false} />
+   287→                              <PriorityBadge priority={a.priority} />
+   288→                            </div>
+   289→                            <p className="truncate text-sm font-medium">{a.project.name}</p>
+   290→                            <p className="text-[11px] text-muted-foreground">
+   291→                              {a.project.propertyType.replace("_", " ").toLowerCase()} · {a.project.ward} · via {a.ltpName}
+   292→                            </p>
+   293→                          </div>
+   294→                        </div>
+   295→                        <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:gap-1.5">
+   296→                          <div className="flex items-center gap-1.5">
+   297→                            <CalendarClock className={cn("size-3.5", sla.cls)} />
+   298→                            <span className={cn("text-xs tabular-nums", sla.cls)}>{sla.label}</span>
+   299→                          </div>
+   300→                          <div className="flex items-center gap-2">
+   301→                            <span className="hidden text-[10px] text-muted-foreground sm:inline">
+   302→                              {stage?.label ?? a.currentStageLabel}
+   303→                            </span>
+   304→                            <Button
+   305→                              size="sm"
+   306→                              className="h-7 text-xs"
+   307→                              onClick={() => openApplication(a.id, "officer-review")}
+   308→                            >
+   309→                              Open review <ArrowRight className="size-3" />
+   310→                            </Button>
+   311→                          </div>
+   312→                        </div>
+   313→                      </div>
+   314→                    </li>
+   315→                  );
+   316→                })}
+   317→              </ul>
+   318→            )}
+   319→          </SectionCard>
+   320→
+   321→          {/* Applications Near SLA */}
+   322→          <SectionCard
+   323→            title="Applications Near SLA"
+   324→            description="Time-critical applications within 7 days of their expected SLA"
+   325→            icon={AlertTriangle}
+   326→            action={
+   327→              nearSLAApps.length > 0 ? (
+   328→                <Badge className="bg-warning/15 text-warning-foreground border border-warning/40">
+   329→                  {nearSLAApps.length} near SLA
+   330→                </Badge>
+   331→              ) : undefined
+   332→            }
+   333→            noPadding
+   334→          >
+   335→            {nearSLAApps.length === 0 ? (
+   336→              <div className="p-6">
+   337→                <EmptyState
+   338→                  icon={CheckCircle2}
+   339→                  title="No SLA risks"
+   340→                  description="None of your assigned applications are within 7 days of their expected SLA."
+   341→                />
+   342→              </div>
+   343→            ) : (
+   344→              <ul className="divide-y divide-border">
+   345→                {nearSLAApps.map((a) => {
+   346→                  const days = daysRemaining(a.expectedSLA) ?? 0;
+   347→                  const sla = slaTone(days);
+   348→                  const pct = Math.min(100, Math.max(0, 100 - (days / 30) * 100));
+   349→                  return (
+   350→                    <li key={a.id} className="p-4 transition-colors hover:bg-warning/[0.04]">
+   351→                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+   352→                        <div className="min-w-0 flex-1 space-y-1">
+   353→                          <div className="flex flex-wrap items-center gap-2">
+   354→                            <button
+   355→                              onClick={() => openApplication(a.id, "officer-review")}
+   356→                              className="font-mono text-xs font-semibold text-primary hover:underline"
+   357→                            >
+   358→                              {a.applicationNo}
+   359→                            </button>
+   360→                            <PriorityBadge priority={a.priority} />
+   361→                            <span className="text-xs text-muted-foreground">{a.project.name}</span>
+   362→                          </div>
+   363→                          <div className="flex items-center gap-2">
+   364→                            <Progress value={pct} className="h-1.5 flex-1" />
+   365→                            <span className={cn("text-xs font-semibold tabular-nums", sla.cls)}>{sla.label}</span>
+   366→                          </div>
+   367→                          <p className="text-[10px] text-muted-foreground">
+   368→                            Expected SLA: {formatDate(a.expectedSLA ?? "")} · Stage: {a.currentStageLabel}
+   369→                          </p>
+   370→                        </div>
+   371→                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => openApplication(a.id, "officer-review")}>
+   372→                          Review <ArrowRight className="size-3" />
+   373→                        </Button>
+   374→                      </div>
+   375→                    </li>
+   376→                  );
+   377→                })}
+   378→              </ul>
+   379→            )}
+   380→          </SectionCard>
+   381→
+   382→          {/* Recent Decisions timeline */}
+   383→          <SectionCard
+   384→            title="Recent Decisions"
+   385→            description="Chronological record of your recent actions across the approval pipeline"
+   386→            icon={Activity}
+   387→          >
+   388→            {recentDecisions.length === 0 ? (
+   389→              <EmptyState
+   390→                icon={History}
+   391→                title="No recent decisions recorded"
+   392→                description="Your past workflow actions will appear here as you approve, forward or return applications."
+   393→              />
+   394→            ) : (
+   395→              <WorkflowTimeline
+   396→                entries={recentDecisions.map((d) => ({
+   397→                  id: `rd-${d.app.id}-${d.entry.id}`,
+   398→                  stage: d.entry.stage,
+   399→                  stageLabel: d.entry.stageLabel,
+   400→                  actor: d.entry.actor,
+   401→                  action: `${d.entry.action} — ${d.app.applicationNo}`,
+   402→                  remarks: d.entry.remarks,
+   403→                  timestamp: d.entry.timestamp,
+   404→                  status: "COMPLETED",
+   405→                  duration: d.entry.duration,
+   406→                }))}
+   407→              />
+   408→            )}
+   409→          </SectionCard>
+   410→        </div>
+   411→
+   412→        {/* RIGHT — 1/3 */}
+   413→        <div className="space-y-6">
+   414→          {/* My Workload mini-chart */}
+   415→          <SectionCard title="My Workload" description="Distribution of assigned applications by status" icon={Gauge}>
+   416→            <div className="space-y-3">
+   417→              {Object.entries(workload.buckets).map(([label, count]) => {
+   418→                const pct = Math.round((count / workload.max) * 100);
+   419→                const tone =
+   420→                  label === "In Review Stage"
+   421→                    ? "bg-info"
+   422→                    : label === "Shortfall"
+   423→                    ? "bg-warning"
+   424→                    : label === "Documents Pending"
+   425→                    ? "bg-amber-500"
+   426→                    : "bg-muted-foreground/60";
+   427→                return (
+   428→                  <div key={label} className="space-y-1">
+   429→                    <div className="flex items-center justify-between text-xs">
+   430→                      <span className="text-muted-foreground">{label}</span>
+   431→                      <span className="font-semibold tabular-nums">{count}</span>
+   432→                    </div>
+   433→                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+   434→                      <div
+   435→                        className={cn("h-full rounded-full transition-all", tone)}
+   436→                        style={{ width: `${Math.max(pct, count > 0 ? 8 : 0)}%` }}
+   437→                      />
+   438→                    </div>
+   439→                  </div>
+   440→                );
+   441→              })}
+   442→              <Separator />
+   443→              <div className="flex items-center justify-between">
+   444→                <span className="text-xs text-muted-foreground">Total in queue</span>
+   445→                <span className="text-lg font-semibold tabular-nums">{assigned.length}</span>
+   446→              </div>
+   447→            </div>
+   448→          </SectionCard>
+   449→
+   450→          {/* SLA Performance */}
+   451→          <SectionCard title="SLA Performance" description="On-time decision rate · last 30 days" icon={TrendingUp}>
+   452→            <div className="space-y-4">
+   453→              <div className="flex items-end justify-between">
+   454→                <div>
+   455→                  <p className="text-3xl font-semibold tabular-nums text-success">{slaPerformance.onTime}%</p>
+   456→                  <p className="text-xs text-muted-foreground">On-time decisions</p>
+   457→                </div>
+   458→                <div className="flex size-12 items-center justify-center rounded-full bg-success/10 text-success">
+   459→                  <CheckCircle2 className="size-6" />
+   460→                </div>
+   461→              </div>
+   462→              <div className="grid grid-cols-2 gap-3">
+   463→                <div className="rounded-lg border border-border bg-muted/30 p-3">
+   464→                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg. days / decision</p>
+   465→                  <p className="text-lg font-semibold tabular-nums">{slaPerformance.avgDays}d</p>
+   466→                </div>
+   467→                <div className="rounded-lg border border-border bg-muted/30 p-3">
+   468→                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">SLA breach rate</p>
+   469→                  <p className="text-lg font-semibold tabular-nums text-amber-600 dark:text-amber-400">{slaPerformance.breachRate}%</p>
+   470→                </div>
+   471→              </div>
+   472→              <div className="space-y-2 rounded-lg border border-border bg-muted/20 p-3">
+   473→                <InfoRow label="Target on-time" value={<span className="font-medium">≥ 90%</span>} />
+   474→                <InfoRow label="Service level" value={<Badge className="bg-success/10 text-success">Tier A</Badge>} />
+   475→                <InfoRow label="Reviewed this month" value={<span className="font-medium">{stats.recentlyProcessed + 14}</span>} />
+   476→              </div>
+   477→            </div>
+   478→          </SectionCard>
+   479→
+   480→          {/* Quick Filters */}
+   481→          <SectionCard title="Quick Filters" description="Jump straight to a filtered queue view" icon={Filter} noPadding>
+   482→            <div className="grid grid-cols-2 gap-2 p-3">
+   483→              {QUICK_FILTERS.map((f) => (
+   484→                <button
+   485→                  key={f.value}
+   486→                  onClick={() => handleQuickFilter(f.value)}
+   487→                  className="group flex flex-col items-start gap-2 rounded-lg border border-border bg-card p-3 text-left transition-all hover:border-primary/40 hover:shadow-gov"
+   488→                >
+   489→                  <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+   490→                    <f.icon className="size-4" />
+   491→                  </div>
+   492→                  <span className="text-xs font-medium leading-tight">{f.label}</span>
+   493→                </button>
+   494→              ))}
+   495→            </div>
+   496→          </SectionCard>
+   497→
+   498→          {/* Recent Notifications */}
+   499→          <SectionCard
+   500→            title="Notifications"
+   501→            icon={Activity}
+   502→            action={
+   503→              <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigate("ltp-notifications")}>
+   504→                All <ChevronRight className="size-3.5" />
+   505→              </Button>
+   506→            }
+   507→            noPadding
+   508→          >
+   509→            <ScrollArea className="h-[260px]">
+   510→              <ul className="divide-y divide-border">
+   511→                {recentNotifs.map((n) => (
+   512→                  <li key={n.id} className={cn("p-3 transition-colors hover:bg-muted/40", !n.read && "bg-primary/[0.03]")}>
+   513→                    <div className="flex items-start gap-2.5">
+   514→                      <span className={cn("mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full", n.read ? "bg-muted text-muted-foreground" : "bg-primary/10 text-primary")}>
+   515→                        <Activity className="size-3.5" />
+   516→                      </span>
+   517→                      <div className="min-w-0 flex-1 space-y-0.5">
+   518→                        <p className={cn("text-xs leading-tight", !n.read && "font-semibold")}>{n.title}</p>
+   519→                        <p className="text-[11px] text-muted-foreground line-clamp-2">{n.message}</p>
+   520→                        <p className="text-[10px] text-muted-foreground">{timeAgo(n.timestamp)}</p>
+   521→                      </div>
+   522→                    </div>
+   523→                  </li>
+   524→                ))}
+   525→              </ul>
+   526→            </ScrollArea>
+   527→          </SectionCard>
+   528→
+   529→          {/* Officer Profile */}
+   530→          <SectionCard title="Your Office" icon={ShieldCheck}>
+   531→            <div className="space-y-3">
+   532→              <div className="flex items-center gap-3">
+   533→                <div className="flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+   534→                  {(user?.name ?? "O").split(" ").map((p) => p[0]).slice(0, 2).join("")}
+   535→                </div>
+   536→                <div className="min-w-0 flex-1">
+   537→                  <p className="text-sm font-medium truncate">{user?.name}</p>
+   538→                  <p className="text-xs text-muted-foreground">{user?.designation}</p>
+   539→                </div>
+   540→                {role && <RoleBadge role={role} label={officerTitle} />}
+   541→              </div>
+   542→              <Separator />
+   543→              <div className="grid grid-cols-2 gap-3 text-xs">
+   544→                <div>
+   545→                  <p className="text-muted-foreground">Employee ID</p>
+   546→                  <p className="font-mono font-medium">{user?.employeeId ?? "—"}</p>
+   547→                </div>
+   548→                <div>
+   549→                  <p className="text-muted-foreground">Zone</p>
+   550→                  <p className="font-medium">{user?.zone ?? "—"}</p>
+   551→                </div>
+   552→                <div className="col-span-2">
+   553→                  <p className="text-muted-foreground">Department</p>
+   554→                  <p className="font-medium">{user?.department ?? "—"}</p>
+   555→                </div>
+   556→                <div className="col-span-2">
+   557→                  <p className="text-muted-foreground">Last login</p>
+   558→                  <p className="font-medium">{user?.lastLogin ? formatDateTime(user.lastLogin) : "—"}</p>
+   559→                </div>
+   560→              </div>
+   561→            </div>
+   562→          </SectionCard>
+   563→        </div>
+   564→      </div>
+   565→    </div>
+   566→  );
+   567→}
+   568→
+   569→// ---------- Helper: extract recent decisions for a role from store applications ----------
+   570→function getRecentDecisions(
+   571→  role: RoleKey,
+   572→  apps: Application[]
+   573→): { app: Application; entry: WorkflowHistoryEntry }[] {
+   574→  const out: { app: Application; entry: WorkflowHistoryEntry }[] = [];
+   575→  for (const app of apps) {
+   576→    for (const entry of app.workflowHistory) {
+   577→      if (entry.status !== "COMPLETED") continue;
+   578→      const stage = getStage(entry.stage);
+   579→      if (!stage) continue;
+   580→      const stageRole = stage.role;
+   581→      const isMatch =
+   582→        role === stageRole ||
+   583→        entry.actor.role === role ||
+   584→        ((role === "TPS" || role === "TPA") && (stageRole === "TPS" || stageRole === "TPA")) ||
+   585→        ((role === "ZAD" || role === "ZDD") && (stageRole === "ZAD" || stageRole === "ZDD"));
+   586→      if (isMatch && entry.timestamp) {
+   587→        out.push({ app, entry });
+   588→      }
+   589→    }
+   590→  }
+   591→  return out.sort((a, b) => b.entry.timestamp.localeCompare(a.entry.timestamp));
+   592→}
+   593→

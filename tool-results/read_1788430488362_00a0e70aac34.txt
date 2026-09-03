@@ -1,0 +1,949 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore } from "@/store/app-store";
+     6→import {
+     7→  useAllApplications,
+     8→  useAllUsers,
+     9→  computeSLA,
+    10→  computeOfficerWorkloads,
+    11→  identifyBottleneck,
+    12→  computePendingActions,
+    13→  computeRecentActivity,
+    14→  timeAgoBrief,
+    15→  formatDuration,
+    16→} from "@/components/pm/pm-helpers";
+    17→import { PageHeader } from "@/components/design-system/layout";
+    18→import {
+    19→  StatusBadge,
+    20→  RoleBadge,
+    21→  PriorityBadge,
+    22→} from "@/components/design-system/badges";
+    23→import { formatDate, formatDateTime } from "@/components/design-system/workflow";
+    24→import { Button } from "@/components/ui/button";
+    25→import { Badge } from "@/components/ui/badge";
+    26→import { Progress } from "@/components/ui/progress";
+    27→import { WORKFLOW_STAGES } from "@/data/workflow-config";
+    28→import { rolesForStage } from "@/lib/permissions";
+    29→import {
+    30→  PmSearchInput,
+    31→  PmFilterSelect,
+    32→  PmPagination,
+    33→  PmCardHeader,
+    34→  PmEmptyState,
+    35→  usePmPagination,
+    36→} from "@/components/pm/pm-shared";
+    37→import {
+    38→  BarChart3,
+    39→  FileStack,
+    40→  Clock,
+    41→  CheckCircle2,
+    42→  AlertTriangle,
+    43→  Activity,
+    44→  Users,
+    45→  Gauge,
+    46→  ArrowRight,
+    47→  ListChecks,
+    48→  History,
+    49→  Ban,
+    50→  TrendingDown,
+    51→} from "lucide-react";
+    52→import type { Application, RoleKey } from "@/types";
+    53→
+    54→// ============================================================
+    55→// PROJECT MANAGER DASHBOARD
+    56→// Central operational view — READ-ONLY monitoring.
+    57→// Every data-heavy section has its OWN search + filters + pagination.
+    58→// No nested scrolling — pagination instead.
+    59→// No hardcoded counts — everything derived from shared store data.
+    60→// ============================================================
+    61→
+    62→// ---- Shared option lists ----
+    63→const STATUS_OPTIONS = [
+    64→  { value: "ALL", label: "All Statuses" },
+    65→  { value: "DRAFT", label: "Draft" },
+    66→  { value: "DRAWING_UPLOADED", label: "Drawing Uploaded" },
+    67→  { value: "SCRUTINY_IN_PROGRESS", label: "Scrutiny In Progress" },
+    68→  { value: "SCRUTINY_FAILED", label: "Scrutiny Failed" },
+    69→  { value: "DRAWING_REUPLOAD_REQUIRED", label: "Drawing Reupload Required" },
+    70→  { value: "DOCUMENT_UPLOAD_PENDING", label: "Documents Pending" },
+    71→  { value: "DOCUMENT_VERIFICATION", label: "Document Verification" },
+    72→  { value: "SHORTFALL_RAISED", label: "Shortfall Raised" },
+    73→  { value: "FEE_GENERATED", label: "Fee Generated" },
+    74→  { value: "PAYMENT_PENDING", label: "Payment Pending" },
+    75→  { value: "PAYMENT_PROCESSING", label: "Payment Processing" },
+    76→  { value: "TPS_TECHNICAL_SCRUTINY", label: "TPS Technical Scrutiny" },
+    77→  { value: "TPA_REVIEW", label: "TPA Review" },
+    78→  { value: "ZAD_ZDD_REVIEW", label: "ZAD/ZDD Review" },
+    79→  { value: "ZJD_REVIEW", label: "ZJD Review" },
+    80→  { value: "DIRECTOR_DP_REVIEW", label: "Director Review" },
+    81→  { value: "ADDITIONAL_COMMISSIONER_REVIEW", label: "Addl. Commissioner Review" },
+    82→  { value: "COMMISSIONER_REVIEW", label: "Commissioner Review" },
+    83→  { value: "APPROVED", label: "Approved" },
+    84→  { value: "REJECTED", label: "Rejected" },
+    85→  { value: "RETURNED", label: "Returned" },
+    86→];
+    87→
+    88→const STAGE_OPTIONS = [
+    89→  { value: "ALL", label: "All Stages" },
+    90→  ...WORKFLOW_STAGES.map((s) => ({ value: s.key, label: s.label })),
+    91→];
+    92→
+    93→const ROLE_OPTIONS: { value: string; label: string }[] = [
+    94→  { value: "ALL", label: "All Roles" },
+    95→  { value: "LTP", label: "LTP" },
+    96→  { value: "TPS", label: "TPS" },
+    97→  { value: "TPA", label: "TPA" },
+    98→  { value: "ZAD", label: "ZAD" },
+    99→  { value: "ZDD", label: "ZDD" },
+   100→  { value: "ZJD", label: "ZJD" },
+   101→  { value: "DIRECTOR_DP", label: "Director" },
+   102→  { value: "ADDL_COMMISSIONER", label: "Addl. Commissioner" },
+   103→  { value: "COMMISSIONER", label: "Commissioner" },
+   104→];
+   105→
+   106→const SLA_OPTIONS = [
+   107→  { value: "ALL", label: "All SLA" },
+   108→  { value: "ON_TRACK", label: "On Track" },
+   109→  { value: "AT_RISK", label: "At Risk" },
+   110→  { value: "DELAYED", label: "Delayed" },
+   111→  { value: "CRITICAL", label: "Critical Delay" },
+   112→  { value: "BLOCKED", label: "Blocked" },
+   113→  { value: "COMPLETED", label: "Completed" },
+   114→];
+   115→
+   116→const PRIORITY_OPTIONS = [
+   117→  { value: "ALL", label: "All Priority" },
+   118→  { value: "URGENT", label: "Urgent" },
+   119→  { value: "HIGH", label: "High" },
+   120→  { value: "NORMAL", label: "Normal" },
+   121→];
+   122→
+   123→const ACTIVITY_TYPES = [
+   124→  { value: "ALL", label: "All Activities" },
+   125→  { value: "Application", label: "Application" },
+   126→  { value: "Drawing", label: "Drawing" },
+   127→  { value: "Scrutiny", label: "Scrutiny" },
+   128→  { value: "Document", label: "Document" },
+   129→  { value: "Shortfall", label: "Shortfall" },
+   130→  { value: "Fee", label: "Fee" },
+   131→  { value: "Payment", label: "Payment" },
+   132→  { value: "Forwarded", label: "Forwarded" },
+   133→  { value: "Approved", label: "Approved" },
+   134→  { value: "Rejected", label: "Rejected" },
+   135→];
+   136→
+   137→// ============================================================
+   138→// MAIN DASHBOARD
+   139→// ============================================================
+   140→export function PmDashboard() {
+   141→  const navigate = useAppStore((s) => s.navigate);
+   142→  const openApplication = useAppStore((s) => s.openApplication);
+   143→  const apps = useAllApplications();
+   144→  const users = useAllUsers();
+   145→
+   146→  // ---- KPI counts (derived, not hardcoded) ----
+   147→  const kpis = React.useMemo(() => {
+   148→    const total = apps.length;
+   149→    const inProgress = apps.filter((a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status)).length;
+   150→    const approved = apps.filter((a) => a.status === "APPROVED").length;
+   151→    const delayedAtRisk = apps.filter((a) => {
+   152→      const sla = computeSLA(a);
+   153→      return ["DELAYED", "CRITICAL", "AT_RISK", "BLOCKED"].includes(sla.status);
+   154→    }).length;
+   155→    return { total, inProgress, approved, delayedAtRisk };
+   156→  }, [apps]);
+   157→
+   158→  // ---- SLA summary counts ----
+   159→  const slaSummary = React.useMemo(() => {
+   160→    const counts = { ON_TRACK: 0, AT_RISK: 0, DELAYED: 0, CRITICAL: 0, BLOCKED: 0, COMPLETED: 0 };
+   161→    apps.forEach((a) => {
+   162→      const sla = computeSLA(a);
+   163→      if (sla.status in counts) counts[sla.status as keyof typeof counts]++;
+   164→    });
+   165→    return counts;
+   166→  }, [apps]);
+   167→
+   168→  // ---- Bottleneck ----
+   169→  const bottleneck = React.useMemo(() => identifyBottleneck(apps), [apps]);
+   170→
+   171→  return (
+   172→    <div className="space-y-5">
+   173→      <PageHeader
+   174→        title="Project Manager Dashboard"
+   175→        description="Central operational view of the building permit approval workflow."
+   176→        icon={BarChart3}
+   177→        breadcrumbs={[{ label: "Project Manager" }, { label: "Dashboard" }]}
+   178→      />
+   179→
+   180→      {/* ===== KPI CARDS (4-col, compact 90-110px height) ===== */}
+   181→      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+   182→        <CompactKpiCard icon={FileStack} value={kpis.total} label="Total Applications" accent="bg-primary/10 text-primary" onClick={() => navigate("pm-applications")} />
+   183→        <CompactKpiCard icon={Clock} value={kpis.inProgress} label="In Progress" accent="bg-info/10 text-info" onClick={() => navigate("pm-applications")} />
+   184→        <CompactKpiCard icon={CheckCircle2} value={kpis.approved} label="Approved" accent="bg-success/10 text-success" onClick={() => navigate("pm-applications")} />
+   185→        <CompactKpiCard icon={AlertTriangle} value={kpis.delayedAtRisk} label="Delayed / At Risk" accent="bg-destructive/10 text-destructive" onClick={() => navigate("pm-sla")} />
+   186→      </div>
+   187→
+   188→      {/* ===== Application Progress Overview (full width, searchable/filterable/paginated) ===== */}
+   189→      <ApplicationProgressSection apps={apps} onViewAll={() => navigate("pm-applications")} onOpen={(id) => openApplication(id, "pm-application-details")} />
+   190→
+   191→      {/* ===== Live Workflow Monitor + Recent Activity (SIDE-BY-SIDE on desktop) ===== */}
+   192→      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+   193→        <LiveWorkflowSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-workflow")} />
+   194→        <RecentActivitySection apps={apps} onViewAll={() => navigate("pm-reports")} />
+   195→      </div>
+   196→
+   197→      {/* ===== SLA Summary + Current Bottleneck (2-col) ===== */}
+   198→      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+   199→        <SlaSummarySection slaSummary={slaSummary} onCategoryClick={(status) => navigate("pm-sla")} />
+   200→        <BottleneckSection bottleneck={bottleneck} onInspect={() => navigate("pm-sla")} />
+   201→      </div>
+   202→
+   203→      {/* ===== Officer Workload (full width, compact TABLE) ===== */}
+   204→      <OfficerWorkloadSection apps={apps} users={users} onViewAll={() => navigate("pm-officers")} onOpenOfficer={(id) => openApplication(id, "pm-officer-details")} />
+   205→
+   206→      {/* ===== Pending Actions (full width, searchable/filterable/paginated) ===== */}
+   207→      <PendingActionsSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-applications")} />
+   208→    </div>
+   209→  );
+   210→}
+   211→
+   212→// ============================================================
+   213→// COMPACT KPI CARD (90-110px height)
+   214→// ============================================================
+   215→function CompactKpiCard({
+   216→  icon: Icon,
+   217→  value,
+   218→  label,
+   219→  accent,
+   220→  onClick,
+   221→}: {
+   222→  icon: React.ComponentType<{ className?: string }>;
+   223→  value: number;
+   224→  label: string;
+   225→  accent: string;
+   226→  onClick?: () => void;
+   227→}) {
+   228→  return (
+   229→    <button
+   230→      onClick={onClick}
+   231→      className="flex items-center gap-3.5 rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/30 hover:shadow-md"
+   232→    >
+   233→      <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-lg", accent)}>
+   234→        <Icon className="size-5" />
+   235→      </div>
+   236→      <div className="min-w-0">
+   237→        <p className="text-2xl font-bold tabular-nums leading-none">{value}</p>
+   238→        <p className="mt-1 text-xs font-medium text-muted-foreground">{label}</p>
+   239→      </div>
+   240→    </button>
+   241→  );
+   242→}
+   243→
+   244→// ============================================================
+   245→// SECTION WRAPPER
+   246→// ============================================================
+   247→function PmSection({ children, className }: { children: React.ReactNode; className?: string }) {
+   248→  return (
+   249→    <div className={cn("overflow-hidden rounded-xl border border-border bg-card shadow-sm", className)}>
+   250→      {children}
+   251→    </div>
+   252→  );
+   253→}
+   254→
+   255→// ============================================================
+   256→// APPLICATION PROGRESS SECTION
+   257→// ============================================================
+   258→function ApplicationProgressSection({
+   259→  apps,
+   260→  onViewAll,
+   261→  onOpen,
+   262→}: {
+   263→  apps: Application[];
+   264→  onViewAll: () => void;
+   265→  onOpen: (id: string) => void;
+   266→}) {
+   267→  const [query, setQuery] = React.useState("");
+   268→  const [statusFilter, setStatusFilter] = React.useState("ALL");
+   269→  const [stageFilter, setStageFilter] = React.useState("ALL");
+   270→  const [roleFilter, setRoleFilter] = React.useState("ALL");
+   271→  const [slaFilter, setSlaFilter] = React.useState("ALL");
+   272→  const { page, setPage, reset } = usePmPagination();
+   273→  const pageSize = 10;
+   274→
+   275→  const filtered = React.useMemo(() => {
+   276→    let list = [...apps].sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
+   277→    if (query.trim()) {
+   278→      const q = query.toLowerCase();
+   279→      list = list.filter((a) =>
+   280→        a.applicationNo.toLowerCase().includes(q) ||
+   281→        a.project.name.toLowerCase().includes(q) ||
+   282→        a.applicant.name.toLowerCase().includes(q) ||
+   283→        (a.assignedOfficer?.name ?? "").toLowerCase().includes(q) ||
+   284→        a.currentStageLabel.toLowerCase().includes(q) ||
+   285→        a.status.toLowerCase().includes(q)
+   286→      );
+   287→    }
+   288→    if (statusFilter !== "ALL") list = list.filter((a) => a.status === statusFilter);
+   289→    if (stageFilter !== "ALL") list = list.filter((a) => a.currentStage === stageFilter);
+   290→    if (roleFilter !== "ALL") {
+   291→      list = list.filter((a) => {
+   292→        const roles = rolesForStage(a.currentStage);
+   293→        return roles.includes(roleFilter as RoleKey) || a.assignedOfficer?.role === roleFilter;
+   294→      });
+   295→    }
+   296→    if (slaFilter !== "ALL") list = list.filter((a) => computeSLA(a).status === slaFilter);
+   297→    return list;
+   298→  }, [apps, query, statusFilter, stageFilter, roleFilter, slaFilter]);
+   299→
+   300→  // Reset to page 1 when filters change
+   301→  React.useEffect(() => { reset(); }, [query, statusFilter, stageFilter, roleFilter, slaFilter, reset]);
+   302→
+   303→  const pageApps = filtered.slice((page - 1) * pageSize, page * pageSize);
+   304→
+   305→  return (
+   306→    <PmSection>
+   307→      <PmCardHeader
+   308→        icon={Activity}
+   309→        title="Application Progress Overview"
+   310→        subtitle="Latest applications across the approval workflow"
+   311→        controls={
+   312→          <div className="flex items-center gap-2 flex-wrap">
+   313→            <PmSearchInput value={query} onChange={setQuery} placeholder="Search applications…" className="w-full sm:w-48" />
+   314→            <PmFilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} ariaLabel="Filter by status" className="w-full sm:w-36" />
+   315→            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
+   316→            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
+   317→            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-32" />
+   318→          </div>
+   319→        }
+   320→      />
+   321→      {pageApps.length === 0 ? (
+   322→        <PmEmptyState
+   323→          message="No applications match your filters."
+   324→          onClear={() => { setQuery(""); setStatusFilter("ALL"); setStageFilter("ALL"); setRoleFilter("ALL"); setSlaFilter("ALL"); }}
+   325→        />
+   326→      ) : (
+   327→        <div className="overflow-x-auto">
+   328→          <table className="w-full text-sm">
+   329→            <thead className="bg-muted/40">
+   330→              <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
+   331→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Application No.</th>
+   332→                <th scope="col" className="px-4 py-2.5 font-bold w-[16%]">Project</th>
+   333→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Applicant</th>
+   334→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Current Stage</th>
+   335→                <th scope="col" className="px-4 py-2.5 font-bold w-[8%]">Role</th>
+   336→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Officer</th>
+   337→                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Status</th>
+   338→                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[8%]">Progress</th>
+   339→                <th scope="col" className="px-4 py-2.5 font-bold w-[5%]">SLA</th>
+   340→                <th scope="col" className="px-4 py-2.5 font-bold w-[5%]">Updated</th>
+   341→              </tr>
+   342→            </thead>
+   343→            <tbody className="divide-y divide-border">
+   344→              {pageApps.map((a) => {
+   345→                const sla = computeSLA(a);
+   346→                return (
+   347→                  <tr
+   348→                    key={a.id}
+   349→                    onClick={() => onOpen(a.id)}
+   350→                    className="cursor-pointer transition-colors hover:bg-muted/30"
+   351→                    style={{ height: "52px" }}
+   352→                  >
+   353→                    <td className="px-4 py-2">
+   354→                      <button
+   355→                        onClick={(e) => { e.stopPropagation(); onOpen(a.id); }}
+   356→                        className="font-mono text-xs font-medium text-primary hover:underline"
+   357→                        title={a.applicationNo}
+   358→                      >
+   359→                        {a.applicationNo}
+   360→                      </button>
+   361→                    </td>
+   362→                    <td className="px-4 py-2 max-w-[180px]">
+   363→                      <p className="truncate text-xs font-medium" title={a.project.name}>{a.project.name}</p>
+   364→                    </td>
+   365→                    <td className="px-4 py-2 max-w-[140px]">
+   366→                      <p className="truncate text-xs" title={a.applicant.name}>{a.applicant.name}</p>
+   367→                    </td>
+   368→                    <td className="px-4 py-2">
+   369→                      <span className="text-xs truncate" title={a.currentStageLabel}>{a.currentStageLabel}</span>
+   370→                    </td>
+   371→                    <td className="px-4 py-2">
+   372→                      <span className="text-xs text-muted-foreground">
+   373→                        {a.assignedOfficer ? a.assignedOfficer.role.replace("_", " ") : "—"}
+   374→                      </span>
+   375→                    </td>
+   376→                    <td className="px-4 py-2 max-w-[140px]">
+   377→                      <p className="truncate text-xs" title={a.assignedOfficer?.name}>
+   378→                        {a.assignedOfficer?.name ?? "—"}
+   379→                      </p>
+   380→                    </td>
+   381→                    <td className="px-4 py-2"><StatusBadge status={a.status} showIcon={false} /></td>
+   382→                    <td className="px-4 py-2">
+   383→                      <div className="flex items-center gap-2 justify-end">
+   384→                        <Progress value={a.progress} className="h-1.5 w-12" />
+   385→                        <span className="text-xs tabular-nums w-8 text-right">{a.progress}%</span>
+   386→                      </div>
+   387→                    </td>
+   388→                    <td className="px-4 py-2">
+   389→                      <Badge variant="outline" className={cn("text-[9px] whitespace-nowrap", sla.cls)}>{sla.label}</Badge>
+   390→                    </td>
+   391→                    <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">{timeAgoBrief(a.lastUpdated)}</td>
+   392→                  </tr>
+   393→                );
+   394→              })}
+   395→            </tbody>
+   396→          </table>
+   397→        </div>
+   398→      )}
+   399→      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+   400→        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+   401→          View All <ArrowRight className="size-3" />
+   402→        </Button>
+   403→      </div>
+   404→      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+   405→    </PmSection>
+   406→  );
+   407→}
+   408→
+   409→// ============================================================
+   410→// LIVE WORKFLOW MONITOR SECTION (5 per page)
+   411→// ============================================================
+   412→function LiveWorkflowSection({
+   413→  apps,
+   414→  onOpen,
+   415→  onViewAll,
+   416→}: {
+   417→  apps: Application[];
+   418→  onOpen: (id: string) => void;
+   419→  onViewAll: () => void;
+   420→}) {
+   421→  const [query, setQuery] = React.useState("");
+   422→  const [stageFilter, setStageFilter] = React.useState("ALL");
+   423→  const [roleFilter, setRoleFilter] = React.useState("ALL");
+   424→  const [slaFilter, setSlaFilter] = React.useState("ALL");
+   425→  const { page, setPage, reset } = usePmPagination();
+   426→  const pageSize = 5;
+   427→
+   428→  const filtered = React.useMemo(() => {
+   429→    let list = apps
+   430→      .filter((a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status))
+   431→      .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
+   432→    if (query.trim()) {
+   433→      const q = query.toLowerCase();
+   434→      list = list.filter((a) =>
+   435→        a.applicationNo.toLowerCase().includes(q) ||
+   436→        a.project.name.toLowerCase().includes(q) ||
+   437→        (a.assignedOfficer?.name ?? "").toLowerCase().includes(q) ||
+   438→        (a.assignedOfficer?.role ?? "").toLowerCase().includes(q) ||
+   439→        a.currentStageLabel.toLowerCase().includes(q)
+   440→      );
+   441→    }
+   442→    if (stageFilter !== "ALL") list = list.filter((a) => a.currentStage === stageFilter);
+   443→    if (roleFilter !== "ALL") {
+   444→      list = list.filter((a) => {
+   445→        const roles = rolesForStage(a.currentStage);
+   446→        return roles.includes(roleFilter as RoleKey) || a.assignedOfficer?.role === roleFilter;
+   447→      });
+   448→    }
+   449→    if (slaFilter !== "ALL") list = list.filter((a) => computeSLA(a).status === slaFilter);
+   450→    return list;
+   451→  }, [apps, query, stageFilter, roleFilter, slaFilter]);
+   452→
+   453→  React.useEffect(() => { reset(); }, [query, stageFilter, roleFilter, slaFilter, reset]);
+   454→
+   455→  const pageApps = filtered.slice((page - 1) * pageSize, page * pageSize);
+   456→
+   457→  return (
+   458→    <PmSection>
+   459→      <PmCardHeader
+   460→        icon={Activity}
+   461→        title="Live Workflow Monitor"
+   462→        subtitle="Applications currently moving through the approval pipeline"
+   463→        controls={
+   464→          <div className="flex items-center gap-2 flex-wrap">
+   465→            <PmSearchInput value={query} onChange={setQuery} placeholder="Search app / project / officer…" className="w-full sm:w-52" />
+   466→            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
+   467→            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
+   468→            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-32" />
+   469→          </div>
+   470→        }
+   471→      />
+   472→      {pageApps.length === 0 ? (
+   473→        <PmEmptyState
+   474→          message="No applications match your filters."
+   475→          onClear={() => { setQuery(""); setStageFilter("ALL"); setRoleFilter("ALL"); setSlaFilter("ALL"); }}
+   476→        />
+   477→      ) : (
+   478→        <div className="divide-y divide-border">
+   479→          {pageApps.map((a) => {
+   480→            const sla = computeSLA(a);
+   481→            return (
+   482→              <div
+   483→                key={a.id}
+   484→                onClick={() => onOpen(a.id)}
+   485→                className="flex cursor-pointer items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30"
+   486→              >
+   487→                <div className="min-w-0 flex-1">
+   488→                  <div className="flex items-center gap-2">
+   489→                    <span className="font-mono text-xs font-semibold text-primary">{a.applicationNo}</span>
+   490→                    <Badge variant="outline" className={cn("text-[9px]", sla.cls)}>{sla.label}</Badge>
+   491→                  </div>
+   492→                  <p className="mt-0.5 truncate text-xs font-medium" title={a.project.name}>{a.project.name}</p>
+   493→                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+   494→                    {a.currentStageLabel} · {a.assignedOfficer?.name ?? "Unassigned"} · {a.assignedOfficer ? a.assignedOfficer.role.replace("_", " ") : "—"}
+   495→                  </p>
+   496→                </div>
+   497→                <div className="shrink-0 w-20 text-right">
+   498→                  <Progress value={a.progress} className="h-1.5" />
+   499→                  <p className="mt-1 text-xs font-semibold tabular-nums">{a.progress}%</p>
+   500→                </div>
+   501→              </div>
+   502→            );
+   503→          })}
+   504→        </div>
+   505→      )}
+   506→      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+   507→        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+   508→          View All <ArrowRight className="size-3" />
+   509→        </Button>
+   510→      </div>
+   511→      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+   512→    </PmSection>
+   513→  );
+   514→}
+   515→
+   516→// ============================================================
+   517→// SLA SUMMARY SECTION (clickable categories)
+   518→// ============================================================
+   519→function SlaSummarySection({
+   520→  slaSummary,
+   521→  onCategoryClick,
+   522→}: {
+   523→  slaSummary: Record<string, number>;
+   524→  onCategoryClick: (status: string) => void;
+   525→}) {
+   526→  const categories = [
+   527→    { status: "ON_TRACK", label: "On Track", cls: "bg-success/10 text-success", icon: CheckCircle2 },
+   528→    { status: "AT_RISK", label: "At Risk", cls: "bg-amber-500/15 text-amber-600", icon: AlertTriangle },
+   529→    { status: "DELAYED", label: "Delayed", cls: "bg-orange-500/15 text-orange-600", icon: Clock },
+   530→    { status: "CRITICAL", label: "Critical Delay", cls: "bg-destructive/10 text-destructive", icon: AlertTriangle },
+   531→    { status: "BLOCKED", label: "Blocked", cls: "bg-destructive/15 text-destructive", icon: Ban },
+   532→    { status: "COMPLETED", label: "Completed", cls: "bg-success/10 text-success", icon: CheckCircle2 },
+   533→  ];
+   534→  return (
+   535→    <PmSection>
+   536→      <PmCardHeader icon={Gauge} title="SLA Summary" subtitle="Click a category to inspect applications" />
+   537→      <div className="grid grid-cols-2 gap-px bg-border">
+   538→        {categories.map((cat) => (
+   539→          <button
+   540→            key={cat.status}
+   541→            onClick={() => onCategoryClick(cat.status)}
+   542→            className="flex items-center gap-3 bg-card p-3 text-left transition-colors hover:bg-muted/40"
+   543→          >
+   544→            <div className={cn("flex size-8 shrink-0 items-center justify-center rounded-lg", cat.cls)}>
+   545→              <cat.icon className="size-4" />
+   546→            </div>
+   547→            <div className="min-w-0">
+   548→              <p className="text-lg font-bold tabular-nums leading-none">{slaSummary[cat.status] ?? 0}</p>
+   549→              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{cat.label}</p>
+   550→            </div>
+   551→          </button>
+   552→        ))}
+   553→      </div>
+   554→    </PmSection>
+   555→  );
+   556→}
+   557→
+   558→// ============================================================
+   559→// BOTTLENECK SECTION (compact)
+   560→// ============================================================
+   561→function BottleneckSection({
+   562→  bottleneck,
+   563→  onInspect,
+   564→}: {
+   565→  bottleneck: { stageLabel: string; pendingCount: number; reason: string } | null;
+   566→  onInspect: () => void;
+   567→}) {
+   568→  return (
+   569→    <PmSection>
+   570→      <PmCardHeader icon={TrendingDown} title="Current Bottleneck" subtitle="Stage with the most pending applications" />
+   571→      {bottleneck ? (
+   572→        <div className="space-y-3 p-4">
+   573→          <div className="flex items-start justify-between gap-3">
+   574→            <div>
+   575→              <p className="text-sm font-semibold text-foreground">{bottleneck.stageLabel}</p>
+   576→              <p className="mt-1 text-xs text-muted-foreground">{bottleneck.reason}</p>
+   577→            </div>
+   578→            <Badge className="bg-destructive/10 text-destructive shrink-0">{bottleneck.pendingCount} pending</Badge>
+   579→          </div>
+   580→          <Button variant="outline" size="sm" className="w-full" onClick={onInspect}>
+   581→            <Gauge className="size-4" /> Inspect SLA <ArrowRight className="size-3" />
+   582→          </Button>
+   583→        </div>
+   584→      ) : (
+   585→        <div className="flex flex-col items-center gap-2 p-6 text-center">
+   586→          <CheckCircle2 className="size-8 text-success" />
+   587→          <p className="text-sm font-medium text-success">No bottleneck detected</p>
+   588→          <p className="text-xs text-muted-foreground">All stages are processing within SLA.</p>
+   589→        </div>
+   590→      )}
+   591→    </PmSection>
+   592→  );
+   593→}
+   594→
+   595→// ============================================================
+   596→// OFFICER WORKLOAD SECTION (6 per page)
+   597→// ============================================================
+   598→function OfficerWorkloadSection({
+   599→  apps,
+   600→  users,
+   601→  onViewAll,
+   602→  onOpenOfficer,
+   603→}: {
+   604→  apps: Application[];
+   605→  users: ReturnType<typeof useAllUsers>;
+   606→  onViewAll: () => void;
+   607→  onOpenOfficer: (id: string) => void;
+   608→}) {
+   609→  const [query, setQuery] = React.useState("");
+   610→  const [roleFilter, setRoleFilter] = React.useState("ALL");
+   611→  const [sortBy, setSortBy] = React.useState("WORKLOAD");
+   612→  const { page, setPage, reset } = usePmPagination();
+   613→  const pageSize = 6;
+   614→
+   615→  const workloads = React.useMemo(() => computeOfficerWorkloads(apps, users), [apps, users]);
+   616→
+   617→  const filtered = React.useMemo(() => {
+   618→    let list = workloads;
+   619→    if (query.trim()) {
+   620→      const q = query.toLowerCase();
+   621→      list = list.filter((w) => w.user.name.toLowerCase().includes(q) || w.user.role.toLowerCase().includes(q));
+   622→    }
+   623→    if (roleFilter !== "ALL") list = list.filter((w) => w.user.role === roleFilter);
+   624→    list = [...list];
+   625→    if (sortBy === "WORKLOAD") list.sort((a, b) => b.assigned - a.assigned);
+   626→    else if (sortBy === "PENDING") list.sort((a, b) => b.pending - a.pending);
+   627→    else if (sortBy === "DELAYED") list.sort((a, b) => b.delayed - a.delayed);
+   628→    else if (sortBy === "NAME") list.sort((a, b) => a.user.name.localeCompare(b.user.name));
+   629→    return list;
+   630→  }, [workloads, query, roleFilter, sortBy]);
+   631→
+   632→  React.useEffect(() => { reset(); }, [query, roleFilter, sortBy, reset]);
+   633→
+   634→  const pageOfficers = filtered.slice((page - 1) * pageSize, page * pageSize);
+   635→
+   636→  const sortOptions = [
+   637→    { value: "WORKLOAD", label: "Highest Workload" },
+   638→    { value: "PENDING", label: "Most Pending" },
+   639→    { value: "DELAYED", label: "Most Delayed" },
+   640→    { value: "NAME", label: "Officer Name" },
+   641→  ];
+   642→
+   643→  return (
+   644→    <PmSection>
+   645→      <PmCardHeader
+   646→        icon={Users}
+   647→        title="Officer Workload"
+   648→        subtitle="Current active assignments across all officers"
+   649→        controls={
+   650→          <div className="flex items-center gap-2 flex-wrap">
+   651→            <PmSearchInput value={query} onChange={setQuery} placeholder="Search officer…" className="w-full sm:w-40" />
+   652→            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
+   653→            <PmFilterSelect value={sortBy} onChange={setSortBy} options={sortOptions} ariaLabel="Sort by" className="w-full sm:w-36" />
+   654→          </div>
+   655→        }
+   656→      />
+   657→      {pageOfficers.length === 0 ? (
+   658→        <PmEmptyState
+   659→          message="No officers match your filters."
+   660→          onClear={() => { setQuery(""); setRoleFilter("ALL"); }}
+   661→        />
+   662→      ) : (
+   663→        <div className="overflow-x-auto">
+   664→          <table className="w-full text-sm">
+   665→            <thead className="bg-muted/40">
+   666→              <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
+   667→                <th scope="col" className="px-4 py-2.5 font-bold w-[22%]">Officer</th>
+   668→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Role</th>
+   669→                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Assigned</th>
+   670→                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Pending</th>
+   671→                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">At Risk</th>
+   672→                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Delayed</th>
+   673→                <th scope="col" className="px-4 py-2.5 font-bold w-[26%]">Workload</th>
+   674→              </tr>
+   675→            </thead>
+   676→            <tbody className="divide-y divide-border">
+   677→              {pageOfficers.map((w) => {
+   678→                // Workload % = assigned / (assigned + 5) capped at 100, where 5 represents a full load
+   679→                const workloadPct = Math.min(100, Math.round((w.assigned / Math.max(w.assigned, 5)) * 100));
+   680→                return (
+   681→                  <tr
+   682→                    key={w.user.id}
+   683→                    onClick={() => onOpenOfficer(w.user.id)}
+   684→                    className="cursor-pointer transition-colors hover:bg-muted/30"
+   685→                    style={{ height: "48px" }}
+   686→                  >
+   687→                    <td className="px-4 py-2">
+   688→                      <div className="flex items-center gap-2">
+   689→                        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+   690→                          {w.user.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+   691→                        </div>
+   692→                        <p className="truncate text-xs font-medium" title={w.user.name}>{w.user.name}</p>
+   693→                      </div>
+   694→                    </td>
+   695→                    <td className="px-4 py-2"><RoleBadge role={w.user.role} /></td>
+   696→                    <td className="px-4 py-2 text-right text-xs font-semibold tabular-nums">{w.assigned}</td>
+   697→                    <td className="px-4 py-2 text-right text-xs font-semibold tabular-nums">{w.pending}</td>
+   698→                    <td className="px-4 py-2 text-right">
+   699→                      <span className={cn("text-xs font-semibold tabular-nums", w.atRisk > 0 ? "text-amber-600" : "text-muted-foreground")}>{w.atRisk}</span>
+   700→                    </td>
+   701→                    <td className="px-4 py-2 text-right">
+   702→                      <span className={cn("text-xs font-semibold tabular-nums", w.delayed > 0 ? "text-destructive" : "text-muted-foreground")}>{w.delayed}</span>
+   703→                    </td>
+   704→                    <td className="px-4 py-2">
+   705→                      <div className="flex items-center gap-2">
+   706→                        <Progress value={workloadPct} className="h-1.5 flex-1" />
+   707→                        <span className="text-xs font-semibold tabular-nums w-8 text-right">{workloadPct}%</span>
+   708→                      </div>
+   709→                    </td>
+   710→                  </tr>
+   711→                );
+   712→              })}
+   713→            </tbody>
+   714→          </table>
+   715→        </div>
+   716→      )}
+   717→      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+   718→        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+   719→          View All <ArrowRight className="size-3" />
+   720→        </Button>
+   721→      </div>
+   722→      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+   723→    </PmSection>
+   724→  );
+   725→}
+   726→
+   727→// ============================================================
+   728→// PENDING ACTIONS SECTION (10 per page)
+   729→// ============================================================
+   730→function PendingActionsSection({
+   731→  apps,
+   732→  onOpen,
+   733→  onViewAll,
+   734→}: {
+   735→  apps: Application[];
+   736→  onOpen: (id: string) => void;
+   737→  onViewAll: () => void;
+   738→}) {
+   739→  const [query, setQuery] = React.useState("");
+   740→  const [roleFilter, setRoleFilter] = React.useState("ALL");
+   741→  const [stageFilter, setStageFilter] = React.useState("ALL");
+   742→  const [priorityFilter, setPriorityFilter] = React.useState("ALL");
+   743→  const [slaFilter, setSlaFilter] = React.useState("ALL");
+   744→  const { page, setPage, reset } = usePmPagination();
+   745→  const pageSize = 10;
+   746→
+   747→  const allPending = React.useMemo(() => computePendingActions(apps), [apps]);
+   748→
+   749→  const filtered = React.useMemo(() => {
+   750→    let list = allPending;
+   751→    if (query.trim()) {
+   752→      const q = query.toLowerCase();
+   753→      list = list.filter((pa) =>
+   754→        pa.app.applicationNo.toLowerCase().includes(q) ||
+   755→        pa.app.project.name.toLowerCase().includes(q) ||
+   756→        pa.responsibleOfficer.toLowerCase().includes(q) ||
+   757→        pa.responsibleRole.toLowerCase().includes(q) ||
+   758→        pa.stageLabel.toLowerCase().includes(q)
+   759→      );
+   760→    }
+   761→    if (roleFilter !== "ALL") {
+   762→      list = list.filter((pa) => {
+   763→        const roles = rolesForStage(pa.app.currentStage);
+   764→        return roles.includes(roleFilter as RoleKey) || pa.app.assignedOfficer?.role === roleFilter;
+   765→      });
+   766→    }
+   767→    if (stageFilter !== "ALL") list = list.filter((pa) => pa.app.currentStage === stageFilter);
+   768→    if (priorityFilter !== "ALL") list = list.filter((pa) => pa.priority === priorityFilter);
+   769→    if (slaFilter !== "ALL") list = list.filter((pa) => computeSLA(pa.app).status === slaFilter);
+   770→    return list;
+   771→  }, [allPending, query, roleFilter, stageFilter, priorityFilter, slaFilter]);
+   772→
+   773→  React.useEffect(() => { reset(); }, [query, roleFilter, stageFilter, priorityFilter, slaFilter, reset]);
+   774→
+   775→  const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
+   776→
+   777→  return (
+   778→    <PmSection>
+   779→      <PmCardHeader
+   780→        icon={ListChecks}
+   781→        title="Pending Actions"
+   782→        subtitle="Applications awaiting action across all stages"
+   783→        controls={
+   784→          <div className="flex items-center gap-2 flex-wrap">
+   785→            <PmSearchInput value={query} onChange={setQuery} placeholder="Search pending actions…" className="w-full sm:w-44" />
+   786→            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-28" />
+   787→            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-32" />
+   788→            <PmFilterSelect value={priorityFilter} onChange={setPriorityFilter} options={PRIORITY_OPTIONS} ariaLabel="Filter by priority" className="w-full sm:w-28" />
+   789→            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-28" />
+   790→          </div>
+   791→        }
+   792→      />
+   793→      {pageItems.length === 0 ? (
+   794→        <PmEmptyState
+   795→          message="No pending actions match your filters."
+   796→          onClear={() => { setQuery(""); setRoleFilter("ALL"); setStageFilter("ALL"); setPriorityFilter("ALL"); setSlaFilter("ALL"); }}
+   797→        />
+   798→      ) : (
+   799→        <div className="overflow-x-auto">
+   800→          <table className="w-full text-sm">
+   801→            <thead className="bg-muted/40">
+   802→              <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
+   803→                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Application</th>
+   804→                <th scope="col" className="px-4 py-2.5 font-bold w-[16%]">Project</th>
+   805→                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Stage</th>
+   806→                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Role</th>
+   807→                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Officer</th>
+   808→                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Pending Since</th>
+   809→                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">SLA</th>
+   810→                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Priority</th>
+   811→              </tr>
+   812→            </thead>
+   813→            <tbody className="divide-y divide-border">
+   814→              {pageItems.map((pa) => (
+   815→                <tr
+   816→                  key={pa.app.id}
+   817→                  onClick={() => onOpen(pa.app.id)}
+   818→                  className="cursor-pointer transition-colors hover:bg-muted/30"
+   819→                  style={{ height: "48px" }}
+   820→                >
+   821→                  <td className="px-4 py-2">
+   822→                    <button
+   823→                      onClick={(e) => { e.stopPropagation(); onOpen(pa.app.id); }}
+   824→                      className="font-mono text-xs font-medium text-primary hover:underline"
+   825→                      title={pa.app.applicationNo}
+   826→                    >
+   827→                      {pa.app.applicationNo}
+   828→                    </button>
+   829→                  </td>
+   830→                  <td className="px-4 py-2 max-w-[160px]">
+   831→                    <p className="truncate text-xs" title={pa.app.project.name}>{pa.app.project.name}</p>
+   832→                  </td>
+   833→                  <td className="px-4 py-2">
+   834→                    <span className="text-xs truncate" title={pa.stageLabel}>{pa.stageLabel}</span>
+   835→                  </td>
+   836→                  <td className="px-4 py-2">
+   837→                    <span className="text-xs text-muted-foreground">{pa.responsibleRole}</span>
+   838→                  </td>
+   839→                  <td className="px-4 py-2 max-w-[140px]">
+   840→                    <p className="truncate text-xs" title={pa.responsibleOfficer}>{pa.responsibleOfficer}</p>
+   841→                  </td>
+   842→                  <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap">{timeAgoBrief(pa.pendingSince)}</td>
+   843→                  <td className="px-4 py-2">
+   844→                    <Badge variant="outline" className={cn("text-[9px] whitespace-nowrap", pa.slaCls)}>{pa.slaLabel}</Badge>
+   845→                  </td>
+   846→                  <td className="px-4 py-2">
+   847→                    <PriorityBadge priority={pa.priority === "URGENT" ? "HIGH" : pa.priority === "HIGH" ? "HIGH" : "NORMAL"} />
+   848→                  </td>
+   849→                </tr>
+   850→              ))}
+   851→            </tbody>
+   852→          </table>
+   853→        </div>
+   854→      )}
+   855→      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+   856→        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+   857→          View All <ArrowRight className="size-3" />
+   858→        </Button>
+   859→      </div>
+   860→      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+   861→    </PmSection>
+   862→  );
+   863→}
+   864→
+   865→// ============================================================
+   866→// RECENT ACTIVITY SECTION (10 per page, NO nested scroll)
+   867→// ============================================================
+   868→function RecentActivitySection({
+   869→  apps,
+   870→  onViewAll,
+   871→}: {
+   872→  apps: Application[];
+   873→  onViewAll: () => void;
+   874→}) {
+   875→  const [query, setQuery] = React.useState("");
+   876→  const [typeFilter, setTypeFilter] = React.useState("ALL");
+   877→  const { page, setPage, reset } = usePmPagination();
+   878→  const pageSize = 10;
+   879→
+   880→  const allActivity = React.useMemo(() => computeRecentActivity(apps, 9999), [apps]);
+   881→
+   882→  const filtered = React.useMemo(() => {
+   883→    let list = allActivity;
+   884→    if (query.trim()) {
+   885→      const q = query.toLowerCase();
+   886→      list = list.filter((ev) =>
+   887→        ev.action.toLowerCase().includes(q) ||
+   888→        ev.actor.toLowerCase().includes(q) ||
+   889→        ev.applicationNo.toLowerCase().includes(q) ||
+   890→        ev.projectName.toLowerCase().includes(q) ||
+   891→        ev.role.toLowerCase().includes(q)
+   892→      );
+   893→    }
+   894→    if (typeFilter !== "ALL") {
+   895→      list = list.filter((ev) => ev.action.toLowerCase().includes(typeFilter.toLowerCase()));
+   896→    }
+   897→    return list;
+   898→  }, [allActivity, query, typeFilter]);
+   899→
+   900→  React.useEffect(() => { reset(); }, [query, typeFilter, reset]);
+   901→
+   902→  const pageEvents = filtered.slice((page - 1) * pageSize, page * pageSize);
+   903→
+   904→  return (
+   905→    <PmSection>
+   906→      <PmCardHeader
+   907→        icon={History}
+   908→        title="Recent Activity"
+   909→        subtitle="Latest workflow events across all applications"
+   910→        controls={
+   911→          <div className="flex items-center gap-2 flex-wrap">
+   912→            <PmSearchInput value={query} onChange={setQuery} placeholder="Search activity…" className="w-full sm:w-44" />
+   913→            <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} ariaLabel="Filter by activity type" className="w-full sm:w-36" />
+   914→          </div>
+   915→        }
+   916→      />
+   917→      {pageEvents.length === 0 ? (
+   918→        <PmEmptyState
+   919→          message="No activity matches your filters."
+   920→          onClear={() => { setQuery(""); setTypeFilter("ALL"); }}
+   921→        />
+   922→      ) : (
+   923→        <div className="divide-y divide-border">
+   924→          {pageEvents.map((ev, idx) => (
+   925→            <div key={idx} className="flex items-start gap-3 px-4 py-2.5">
+   926→              <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+   927→                <Activity className="size-3.5" />
+   928→              </div>
+   929→              <div className="min-w-0 flex-1">
+   930→                <p className="text-xs font-medium text-foreground">{ev.action}</p>
+   931→                <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
+   932→                  {ev.actor} · {ev.role} · <span className="font-mono text-primary">{ev.applicationNo}</span>
+   933→                </p>
+   934→              </div>
+   935→              <span className="shrink-0 text-[11px] text-muted-foreground whitespace-nowrap">{formatDateTime(ev.timestamp)}</span>
+   936→            </div>
+   937→          ))}
+   938→        </div>
+   939→      )}
+   940→      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+   941→        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+   942→          View All <ArrowRight className="size-3" />
+   943→        </Button>
+   944→      </div>
+   945→      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
+   946→    </PmSection>
+   947→  );
+   948→}
+   949→

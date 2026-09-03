@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, useVisibleApplications } from "@/store/app-store";
+import { useAppStore } from "@/store/app-store";
 import { SectionCard, EmptyState } from "@/components/design-system/layout";
 import { NewApplicationModal } from "@/components/ltp/new-application/new-application-modal";
 import {
@@ -42,19 +42,31 @@ import {
   CircleDollarSign,
   Upload,
   FileText,
+  PieChart,
+  BarChart3,
+  Activity,
 } from "lucide-react";
 import type { Application, ApplicationStatus, ViewKey } from "@/types";
+import {
+  useDashboardScope,
+  computeScopedKpis,
+  applicationsByStatus,
+  applicationsByStage,
+  paymentStatusData,
+  documentCompletionData,
+} from "@/components/dashboard/dashboard-scope";
+import {
+  DonutChart,
+  BarChart,
+  ChartCard,
+} from "@/components/dashboard/charts";
 
 // ============================================================
-// KPI DATA — derived from shared application state
+// KPI DATA — derived from shared application state via dashboard scope
 // ============================================================
 const REVIEW_STATUSES: string[] = [
   "TPS_TECHNICAL_SCRUTINY", "TPA_REVIEW", "ZAD_ZDD_REVIEW", "ZJD_REVIEW",
   "DIRECTOR_DP_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW",
-];
-const ACTION_STATUSES: string[] = [
-  "SCRUTINY_FAILED", "SHORTFALL_RAISED", "PAYMENT_PENDING",
-  "DOCUMENT_UPLOAD_PENDING", "DRAWING_REUPLOAD_REQUIRED",
 ];
 
 // ============================================================
@@ -92,20 +104,19 @@ function getApplicationAction(status: ApplicationStatus): AppAction {
 // ============================================================
 export function LtpDashboard() {
   const { user, navigate, openApplication } = useAppStore();
-  const apps = useVisibleApplications();
+  // LTP scope: applications where ltpId === user.id (scoped to this LTP only)
+  const scope = useDashboardScope();
+  const apps = scope.applications;
+  const kpis = computeScopedKpis(apps);
+
+  // Chart data — all derived from the scoped dataset
+  const statusData = applicationsByStatus(apps);
+  const stageData = applicationsByStage(apps);
+  const docData = documentCompletionData(apps);
+  const paymentData = paymentStatusData(apps);
+
   const [newAppOpen, setNewAppOpen] = React.useState(false);
   const [trackerAppId, setTrackerAppId] = React.useState<string>("");
-
-  // Derive KPI stats from shared dataset
-  const stats = {
-    total: apps.length,
-    pendingPayments: apps.filter((a) => a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED").length,
-    scrutinyPending: apps.filter((a) =>
-      a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED" ||
-      a.status === "SCRUTINY_IN_PROGRESS" || a.status === "DRAWING_UPLOADED"
-    ).length,
-    shortfallRaised: apps.reduce((s, a) => s + a.shortfalls.filter((sf) => sf.status !== "RESOLVED").length, 0),
-  };
 
   // All applications sorted by lastUpdated (most recent first)
   const sortedApps = React.useMemo(
@@ -166,40 +177,64 @@ export function LtpDashboard() {
         </div>
       </div>
 
-      {/* ===== KPI Cards (4 cards) ===== */}
+      {/* ===== KPI Cards (4 cards) — derived from computeScopedKpis ===== */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiStatCard
           icon={FileStack}
-          value={stats.total}
+          value={kpis.total}
           label="TOTAL APPLICATIONS"
           subtext="Submitted by you"
           accent="bg-primary/10 text-primary"
           onClick={() => navigate("ltp-applications")}
         />
         <KpiStatCard
+          icon={Activity}
+          value={kpis.inProgress}
+          label="IN PROGRESS"
+          subtext="Under review or processing"
+          accent="bg-info/10 text-info"
+          onClick={() => navigate("ltp-applications")}
+        />
+        <KpiStatCard
           icon={CreditCard}
-          value={stats.pendingPayments}
+          value={kpis.pendingPayments}
           label="PENDING PAYMENTS"
           subtext="Awaiting fee payment"
           accent="bg-orange-500/10 text-orange-600"
           onClick={() => navigate("ltp-payment")}
         />
         <KpiStatCard
-          icon={Clock}
-          value={stats.scrutinyPending}
-          label="SCRUTINY PENDING"
-          subtext="Under drawing scrutiny"
-          accent="bg-amber-500/10 text-amber-600"
-          onClick={() => navigate("ltp-drawings")}
-        />
-        <KpiStatCard
           icon={AlertTriangle}
-          value={stats.shortfallRaised}
-          label="SHORTFALL RAISED"
+          value={kpis.openShortfalls}
+          label="OPEN SHORTFALLS"
           subtext="Needs your action"
           accent="bg-destructive/10 text-destructive"
           onClick={() => navigate("ltp-shortfalls")}
         />
+      </div>
+
+      {/* ===== Charts Section (2-col grid) ===== */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <PieChart className="size-4" />
+          </div>
+          <h2 className="text-sm font-semibold text-foreground">My Application Analytics</h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <ChartCard icon={PieChart} title="My Applications by Status" subtitle="Distribution across all statuses">
+            <DonutChart data={statusData} centerLabel="Total" centerValue={kpis.total} />
+          </ChartCard>
+          <ChartCard icon={BarChart3} title="My Applications by Stage" subtitle="Pipeline distribution">
+            <BarChart data={stageData} />
+          </ChartCard>
+          <ChartCard icon={FileText} title="Document Completion" subtitle="Verified · pending · required">
+            <DonutChart data={docData} centerLabel="Docs" centerValue={kpis.pendingDocuments} />
+          </ChartCard>
+          <ChartCard icon={CircleDollarSign} title="Payment Status" subtitle="Paid · pending · no fee yet">
+            <DonutChart data={paymentData} centerLabel="Apps" centerValue={kpis.total} />
+          </ChartCard>
+        </div>
       </div>
 
       {/* ===== My Applications ===== */}

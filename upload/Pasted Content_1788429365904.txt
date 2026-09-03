@@ -1,0 +1,2484 @@
+REVIEW AND REDESIGN THE DASHBOARD ARCHITECTURE FOR EVERY USER ROLE IN THE
+LTP APPROVAL / BUILDING PERMIT MANAGEMENT SYSTEM.
+
+IMPORTANT:
+This is NOT only a UI redesign.
+
+Implement BOTH:
+
+1. ROLE-BASED DATA VISIBILITY
+2. CLEAN, CONSISTENT, WELL-ALIGNED DASHBOARD UI
+
+The dashboard must show only the data that is relevant and authorized for
+the currently logged-in user.
+
+Do not expose unrelated project, application, officer, financial, workflow,
+RFI, worklog, or other operational data across roles.
+
+==================================================
+1. CORE PRINCIPLE
+==================================================
+
+The system must follow:
+
+LOGIN
+↓
+USER
+↓
+ROLE
+↓
+PERMISSIONS
+↓
+PROJECT / APPLICATION SCOPE
+↓
+DASHBOARD DATA
+↓
+KPI / CHART / TABLE / CARD
+
+Every dashboard component must respect this scope.
+
+Do NOT build one global dashboard and simply hide a few cards.
+
+Each role must receive the correct data set first, and the UI must render
+from that scoped data.
+
+==================================================
+2. ROLE-BASED DASHBOARD RULE
+==================================================
+
+Implement role-aware dashboards for at least:
+
+System Administrator
+Project Manager
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+
+Use the existing RBAC architecture.
+
+Do not create a separate fake permission system.
+
+==================================================
+3. SYSTEM ADMINISTRATOR
+==================================================
+
+SYSTEM ADMINISTRATOR has organization-wide visibility.
+
+The Administrator dashboard can display:
+
+ALL PROJECTS
+ALL APPLICATIONS
+ALL USERS
+ALL ROLES
+ALL WORKFLOW STAGES
+ALL DOCUMENTS
+ALL DRAWINGS
+ALL SCRUTINY
+ALL FEES
+ALL PAYMENTS
+ALL SHORTFALLS
+ALL NOTIFICATIONS
+ALL AUDIT DATA
+
+However, even the Administrator dashboard should only display information
+that is useful for administration.
+
+Remove unnecessary operational detail from the Admin landing dashboard.
+
+Recommended Admin KPIs:
+
+Total Projects
+Total Applications
+Active Applications
+Approved Applications
+Pending Applications
+Users
+Active Users
+Open Shortfalls
+Pending Payments
+System Health
+
+==================================================
+4. ADMIN DASHBOARD CHARTS
+==================================================
+
+Useful Admin charts:
+
+Applications by Status
+Applications by Stage
+Applications by Project
+Workflow Performance
+User/Role Distribution
+SLA Performance
+Fees & Collections
+Payment Status
+Shortfalls
+System Activity
+
+Do NOT show project-specific operational metrics as though they are
+specific to the Administrator.
+
+All values must be calculated from ALL authorized data.
+
+==================================================
+5. PROJECT MANAGER
+==================================================
+
+PROJECT MANAGER MUST SEE ONLY PROJECTS ASSIGNED TO THAT PROJECT MANAGER.
+
+Do NOT show projects assigned to another Project Manager.
+
+Example:
+
+Project Manager A
+
+Assigned Projects:
+Project 1
+Project 4
+Project 7
+
+Dashboard data must only come from:
+
+Project 1
+Project 4
+Project 7
+
+==================================================
+6. PROJECT MANAGER KPIs
+==================================================
+
+Recommended:
+
+Assigned Projects
+Total Applications
+In Progress
+Approved
+Delayed / At Risk
+Open Shortfalls
+Pending Documents
+Pending Payments
+
+All values must be calculated ONLY from assigned projects.
+
+==================================================
+7. PROJECT MANAGER CHARTS
+==================================================
+
+Useful charts:
+
+Applications by Status
+Applications by Stage
+Project-wise Progress
+SLA / Delay Summary
+Officer Workload
+Open Shortfalls
+Fee / Payment Summary
+Application Volume Over Time
+
+Every chart must use only the Project Manager's assigned projects.
+
+==================================================
+8. PROJECT MANAGER PROJECT FILTER
+==================================================
+
+Provide:
+
+[ All Assigned Projects ▼ ]
+
+Options should contain only projects assigned to the logged-in Project Manager.
+
+Do NOT display unauthorized projects.
+
+==================================================
+9. PROJECT MANAGER APPLICATION TABLE
+==================================================
+
+Show:
+
+Application No.
+Project
+Applicant
+Current Stage
+Assigned Officer
+Status
+Progress
+SLA
+Updated
+
+All rows must belong to assigned projects.
+
+==================================================
+10. LTP DASHBOARD
+==================================================
+
+LTP should see ONLY:
+
+Applications created/submitted by that LTP
+Documents related to those applications
+Drawings related to those applications
+Scrutiny related to those applications
+Fees related to those applications
+Payments related to those applications
+Shortfalls related to those applications
+Notifications related to those applications
+
+Do NOT show another LTP's applications.
+
+==================================================
+11. LTP KPIs
+==================================================
+
+Recommended:
+
+My Applications
+Drafts
+Under Review
+Action Required
+Approved
+Shortfalls
+Pending Payments
+
+==================================================
+12. LTP CHARTS
+==================================================
+
+Useful:
+
+My Applications by Status
+My Applications by Stage
+Scrutiny Results
+Document Completion
+Payment Status
+Shortfalls
+
+Do NOT show organization-wide totals.
+
+==================================================
+13. TPS DASHBOARD
+==================================================
+
+TPS should see only applications currently assigned to that TPS user or
+within the configured TPS work scope.
+
+Useful KPIs:
+
+Assigned Applications
+Pending Scrutiny
+Completed Scrutiny
+Failed Scrutiny
+Re-upload Required
+SLA At Risk
+
+Useful charts:
+
+Scrutiny Status
+Applications by Priority
+Pending Scrutiny by Age
+Stage Distribution
+Scrutiny Result Trends
+
+Do NOT show:
+
+LTP financial dashboard
+Administrator configuration
+Other officers' unrelated workloads
+
+unless explicitly permitted.
+
+==================================================
+14. TPA DASHBOARD
+==================================================
+
+TPA should see only applications assigned to that TPA user / configured
+TPA scope.
+
+Useful:
+
+Pending Reviews
+Completed Reviews
+Shortfalls
+Fee Shortfalls
+SLA At Risk
+Applications by Stage
+Review Outcomes
+
+Do not show unrelated TPS/ZAD/ZJD work unless required for workflow
+visibility.
+
+==================================================
+15. ZAD / ZDD
+==================================================
+
+For ZAD and ZDD:
+
+show applications routed to their jurisdiction/work queue.
+
+Useful:
+
+Pending Approvals
+Shortfalls
+Fee Shortfalls
+Applications by Status
+SLA
+Recent Workflow Actions
+
+Use only the relevant jurisdiction/work scope.
+
+==================================================
+16. ZJD
+==================================================
+
+ZJD should see:
+
+Assigned Applications
+Pending Decisions
+Shortfalls
+Fee Shortfalls
+Applications Awaiting Decision
+SLA Status
+Workflow Progress
+
+Only relevant applications.
+
+==================================================
+17. DIRECTOR – DP
+==================================================
+
+Show:
+
+Applications Awaiting Director Review
+Pending Decisions
+Shortfalls
+Applications by Project
+Applications by Stage
+SLA Performance
+Decision Status
+
+Only the applications within Director's authorized scope.
+
+==================================================
+18. ADDITIONAL COMMISSIONER
+==================================================
+
+Show:
+
+Applications Awaiting Review
+Pending Decisions
+Approved
+Rejected
+Shortfalls
+Stage Summary
+SLA Summary
+Project Summary
+
+Only authorized applications.
+
+==================================================
+19. COMMISSIONER
+==================================================
+
+Show executive-level operational information:
+
+Total Applications in Scope
+Applications Awaiting Final Decision
+Approved
+Rejected
+Pending
+Delayed
+Shortfalls
+Project Summary
+Workflow Summary
+SLA Summary
+
+Do not overload this dashboard with technical operational details.
+
+==================================================
+20. SHARED DATA-SCOPE ENGINE
+==================================================
+
+Implement one centralized data-scope mechanism.
+
+Conceptually:
+
+getDashboardScope(currentUser)
+
+returns:
+
+role
+userId
+projectIds
+applicationIds
+authorizedModules
+permissions
+
+Then dashboard data is derived from the scoped dataset.
+
+Example:
+
+const scopedApplications =
+  getApplicationsForUser(currentUser)
+
+All dashboard KPIs and charts must derive from this scoped collection.
+
+==================================================
+21. DO NOT FILTER ONLY IN UI
+==================================================
+
+CRITICAL:
+
+Do NOT fetch/display ALL records and merely hide them in the UI.
+
+The authorization/data scope must exist at the data-access/selector/service
+level.
+
+A user must not be able to expose another project's data by:
+
+URL
+query parameter
+browser state manipulation
+changing a dropdown
+changing local storage
+editing client state
+
+==================================================
+22. ROLE + PROJECT SCOPE
+==================================================
+
+Effective visibility should be:
+
+User Role
++
+User Identity
++
+Assigned Projects
++
+Workflow Assignment
++
+Permissions
+
+Example:
+
+Project Manager:
+
+role = PROJECT_MANAGER
+
+projectScope = [P1, P4, P7]
+
+Only:
+
+applications.projectId IN [P1, P4, P7]
+
+==================================================
+23. APPLICATION SCOPE
+==================================================
+
+Where a role is specifically assigned an application:
+
+applicationId must also be respected.
+
+Example:
+
+TPS user:
+only applications assigned to that TPS user.
+
+==================================================
+24. WORKFLOW SCOPE
+==================================================
+
+For approval roles:
+
+Only show active applications that are:
+
+assigned to the user
+OR
+within the configured authorized queue.
+
+Do not show unrelated completed workflow records unless historical visibility
+is explicitly permitted.
+
+==================================================
+25. PROJECT-LEVEL DASHBOARD
+==================================================
+
+Project Manager should be able to select:
+
+Project A
+Project B
+Project C
+
+from assigned projects.
+
+When Project A is selected:
+
+ALL dashboard content updates to Project A.
+
+KPIs
+Charts
+Tables
+Workflow
+SLA
+Officer workload
+Shortfalls
+Payments
+
+must all reflect Project A only.
+
+==================================================
+26. CHART DATA CONSISTENCY
+==================================================
+
+Every chart must use the SAME scoped dataset as the KPI cards and tables.
+
+Example:
+
+If KPI says:
+
+Applications = 25
+
+the Applications by Status chart should sum to 25.
+
+If Project Manager has 3 projects selected:
+
+all charts must reflect those 3 projects.
+
+Do not mix global data into one chart.
+
+==================================================
+27. KPI CONSISTENCY
+==================================================
+
+Ensure:
+
+Total Applications
+=
+sum of applications represented in the relevant application chart/table.
+
+Similarly:
+
+Pending
+Approved
+Rejected
+In Progress
+Delayed
+
+must be derived consistently.
+
+==================================================
+28. CHART RULE
+==================================================
+
+Do NOT create charts merely because space exists.
+
+Every chart must answer a useful management question.
+
+Preferred charts:
+
+Status
+Stage
+Progress
+SLA
+Workload
+Financial Summary
+Shortfalls
+Trends
+
+Remove decorative charts.
+
+==================================================
+29. CHART ALIGNMENT
+==================================================
+
+ALL charts must have:
+
+same card width in a row
+consistent height
+consistent padding
+same header structure
+same title alignment
+same chart area height
+same footer alignment
+
+No chart should be taller or shorter for no functional reason.
+
+==================================================
+30. TWO-COLUMN CHART LAYOUT
+==================================================
+
+Desktop:
+
+Use a clean 2-column grid.
+
+Example:
+
+┌─────────────────────────────┐
+│ Applications by Status      │
+│                             │
+│        Chart                │
+│                             │
+└─────────────────────────────┘
+
+┌─────────────────────────────┐
+│ Applications by Stage       │
+│                             │
+│        Chart                │
+│                             │
+└─────────────────────────────┘
+
+Both cards:
+
+same width
+same height
+aligned top/bottom.
+
+==================================================
+31. FULL-WIDTH CHARTS
+==================================================
+
+Use full width only for charts that need it.
+
+Examples:
+
+Volume Over Time
+Workflow Trend
+Application Trend
+
+Do not stretch small charts across the entire page.
+
+==================================================
+32. CHART CARD DIMENSIONS
+==================================================
+
+Use consistent chart card design.
+
+Header:
+56–64px
+
+Content:
+220–300px depending on chart
+
+Footer:
+optional
+
+Do not create oversized empty chart cards.
+
+==================================================
+33. CHART INTERNAL ALIGNMENT
+==================================================
+
+Ensure:
+
+chart title
+legend
+axis labels
+bars
+lines
+labels
+
+remain inside the card.
+
+No:
+
+text clipping
+legend overflow
+cropped x-axis labels
+overlapping data labels
+
+==================================================
+34. DONUT / PIE CHARTS
+==================================================
+
+Donut chart:
+
+centered
+
+Legend:
+
+aligned consistently
+
+Values:
+
+right aligned
+
+Example:
+
+Draft                 7     14%
+Preparing            12     24%
+Awaiting Payment      8     16%
+Department Review    13     25%
+Shortfall              3      6%
+
+Do not allow legend to collide with chart.
+
+==================================================
+35. BAR CHARTS
+==================================================
+
+Use:
+
+consistent bar width
+consistent spacing
+clear axis
+readable labels
+
+Do not make bars so thin that values cannot be interpreted.
+
+If there are many stages:
+
+use horizontal bars or a scrollable chart area rather than overlapping
+labels.
+
+==================================================
+36. LINE CHARTS
+==================================================
+
+Volume Over Time should:
+
+use actual date-based values
+have readable x-axis labels
+use a consistent y-axis scale
+show a useful legend
+not compress all activity into one tiny area
+
+If the data range is sparse, do not create misleading visual trends.
+
+==================================================
+37. FINANCIAL CHARTS
+==================================================
+
+For authorized roles only, show:
+
+Fees Generated
+Fees Collected
+Outstanding
+Payment Success
+
+Use Indian currency formatting:
+
+₹16.90 L
+
+or:
+
+₹16,90,442
+
+depending on the dashboard's existing convention.
+
+Ensure:
+
+collected + outstanding
+=
+applicable demand amount
+
+where the metric definition supports this.
+
+==================================================
+38. SLA CHARTS
+==================================================
+
+Use:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+Blocked
+
+Counts must come from actual SLA state.
+
+Do not hardcode values.
+
+==================================================
+39. OFFICER WORKLOAD CHART
+==================================================
+
+Only show officers within the user's authorized scope.
+
+Example:
+
+Project Manager:
+
+officers working on assigned projects.
+
+Administrator:
+
+all authorized officers.
+
+LTP:
+
+do not display organization-wide officer workload unless useful/authorized.
+
+==================================================
+40. RFI / WORKLOG / PROJECT DATA
+==================================================
+
+Where project-management data exists in the application:
+
+show only data relevant to the current user's scope.
+
+For Project Manager:
+
+Assigned project RFIs
+Assigned project worklogs
+Assigned project delays
+Assigned project hindrances
+Assigned project safety issues
+Assigned project progress
+
+For Administrator:
+
+organization-wide view.
+
+For other roles:
+
+only data relevant to their responsibility.
+
+==================================================
+41. PROJECT FOCUS
+==================================================
+
+The dashboard should answer:
+
+Which project?
+What is the current progress?
+What is delayed?
+Who is responsible?
+What is pending?
+What needs attention?
+
+Do not overload dashboards with unrelated metrics.
+
+==================================================
+42. PROJECT SELECTOR
+==================================================
+
+For Project Manager:
+
+[ All Assigned Projects ▼ ]
+
+Only assigned projects.
+
+For Administrator:
+
+[ All Projects ▼ ]
+
+For role dashboards where project selection is not meaningful:
+
+do not display an unnecessary project selector.
+
+==================================================
+43. SEARCH
+==================================================
+
+Global search should also respect the current user's data scope.
+
+Project Manager searching:
+
+"Greenfield"
+
+must only return matching records within assigned projects.
+
+LTP searching:
+
+must only return that LTP's applications.
+
+Administrator:
+
+can search all authorized records.
+
+==================================================
+44. FILTERS
+==================================================
+
+Every dashboard filter must be scope-aware.
+
+Never allow:
+
+Project Manager
+→ Project dropdown
+→ unauthorized project appears.
+
+The filter options themselves must be filtered by permission/scope.
+
+==================================================
+45. ROLE SWITCH / DEMO ROLE
+==================================================
+
+The existing Demo Role switch must actually change dashboard scope.
+
+Example:
+
+Switch:
+
+Administrator
+→ Project Manager
+
+Expected:
+
+global data disappears.
+
+Only Project Manager assigned projects appear.
+
+Switch:
+
+Project Manager
+→ LTP
+
+Expected:
+
+only LTP-owned applications appear.
+
+Switch:
+
+LTP
+→ TPS
+
+Expected:
+
+TPS dashboard and authorized application scope appear.
+
+Do NOT simply change the title/name.
+
+The underlying data scope must change.
+
+==================================================
+46. DASHBOARD RELOAD TEST
+==================================================
+
+Refresh the browser after role switching.
+
+Correct role and correct scoped data must remain.
+
+Do not depend only on temporary component state.
+
+==================================================
+47. URL SECURITY
+==================================================
+
+Try changing application/project IDs in URL.
+
+Expected:
+
+Unauthorized data must not open.
+
+==================================================
+48. CARD VISIBILITY
+==================================================
+
+A card itself should be role-specific.
+
+Examples:
+
+System Administrator:
+System Health
+Users
+Audit
+Configuration
+
+Project Manager:
+Project Progress
+Workflow
+Officer Workload
+SLA
+
+LTP:
+My Applications
+Documents
+Payments
+Shortfalls
+
+TPS:
+Scrutiny
+Pending Reviews
+Scrutiny Results
+
+Do not show irrelevant cards just because the component exists globally.
+
+==================================================
+49. CARD ORDER
+==================================================
+
+Put the most useful cards at the top.
+
+Example Project Manager:
+
+1. Applications
+2. Progress
+3. Delays
+4. SLA
+5. Workflow
+6. Officer Workload
+7. Shortfalls
+8. Financial Summary where permitted
+9. Activity
+
+==================================================
+50. CLEAN GOVERNMENT-STYLE UI
+==================================================
+
+Use a restrained professional interface.
+
+Use:
+
+white cards
+subtle borders
+moderate radius
+clear typography
+consistent spacing
+deep green primary color
+blue information
+amber warning
+red critical
+green success
+
+Do NOT use:
+
+excessive gradients
+neon colors
+glassmorphism
+large decorative illustrations
+unnecessary animations
+
+==================================================
+51. CARD ALIGNMENT
+==================================================
+
+All cards in the same row must align.
+
+Use CSS Grid.
+
+Example:
+
+grid-template-columns:
+repeat(4, minmax(0, 1fr))
+
+For 2-column sections:
+
+repeat(2, minmax(0, 1fr))
+
+No fixed pixel positioning.
+
+==================================================
+52. CARD HEIGHT
+==================================================
+
+KPI cards:
+
+90–110px
+
+Chart cards:
+
+280–360px depending on chart.
+
+Tables:
+
+content-driven.
+
+Do not create large empty cards just to match height.
+
+==================================================
+53. CARD GAP
+==================================================
+
+Use:
+
+16–24px
+
+consistently.
+
+==================================================
+54. PAGE CONTAINER
+==================================================
+
+Use:
+
+width: 100%
+max-width: 1600–1700px
+margin: 0 auto
+padding: 24–32px
+
+Do not leave excessive left/right whitespace.
+
+==================================================
+55. SECTION SPACING
+==================================================
+
+Use:
+
+20–24px
+
+between dashboard sections.
+
+Avoid large empty vertical gaps.
+
+==================================================
+56. CARD PADDING
+==================================================
+
+Use:
+
+16–20px
+
+inside cards.
+
+Avoid oversized internal whitespace.
+
+==================================================
+57. CHART HEADER
+==================================================
+
+Each chart header:
+
+LEFT:
+Icon
+Title
+Subtitle if necessary
+
+RIGHT:
+View All / Filter / Period selector where useful
+
+All vertically aligned.
+
+==================================================
+58. CHART LEGENDS
+==================================================
+
+Keep legends:
+
+inside card
+
+properly aligned
+
+readable
+
+Do not allow the legend to expand the card unexpectedly.
+
+==================================================
+59. LONG LABELS
+==================================================
+
+For long:
+
+project names
+stage names
+officer names
+
+use:
+
+ellipsis + tooltip
+
+Do not allow text to distort card dimensions.
+
+==================================================
+60. NO OVERLAP
+==================================================
+
+Audit every dashboard at:
+
+1920
+1600
+1440
+1366
+1280
+1024
+768
+480
+390
+
+Check:
+
+cards
+charts
+legends
+labels
+filters
+buttons
+tables
+
+No overlap.
+
+==================================================
+61. RESPONSIVE DESKTOP
+==================================================
+
+1920–1280:
+
+4 KPI cards
+
+2-column charts where suitable.
+
+1024:
+
+2 KPI columns.
+
+768:
+
+2 or 1 depending on content.
+
+480/390:
+
+single-column dashboard.
+
+==================================================
+62. TABLES
+==================================================
+
+For data-heavy dashboard sections:
+
+use pagination.
+
+Recommended:
+
+10 rows per page.
+
+Show:
+
+Showing 1–10 of 51
+
+[‹] [1] [2] [3] [›]
+
+Search and filters must happen before pagination.
+
+==================================================
+63. SEARCHABLE TABLES
+==================================================
+
+Application tables:
+
+search application/project/applicant/officer.
+
+Officer tables:
+
+search officer/role.
+
+Activity:
+
+search action/application/actor.
+
+Shortfalls:
+
+search application/shortfall/officer.
+
+==================================================
+64. PROJECT MANAGER CHART FILTERING
+==================================================
+
+When Project Manager selects:
+
+Project A
+
+ALL charts update.
+
+Example:
+
+Applications by Status
+Applications by Stage
+SLA
+Shortfalls
+Fees
+Officer Workload
+
+must only use Project A data.
+
+==================================================
+65. ADMIN CHART FILTERING
+==================================================
+
+Administrator can select:
+
+All Projects
+or
+specific project.
+
+When specific project is selected:
+
+charts become project-specific.
+
+When All Projects:
+
+all authorized data.
+
+==================================================
+66. ROLE DASHBOARD DATA REFRESH
+==================================================
+
+When data changes in another role:
+
+dashboard should update when the existing architecture supports reactive
+state.
+
+Example:
+
+TPS completes scrutiny.
+
+Project Manager:
+
+Applications by Stage
+Workflow Monitor
+SLA
+Recent Activity
+
+should reflect the change.
+
+==================================================
+67. NO STALE CHARTS
+==================================================
+
+Do not allow:
+
+KPI = new data
+
+but chart = old data.
+
+Every dashboard component must derive from the same current scoped data.
+
+==================================================
+68. NO FAKE ZERO
+==================================================
+
+If:
+
+Approved = 0
+
+because there are genuinely no approved applications:
+
+show 0.
+
+Do not inject fake values only to make charts look complete.
+
+==================================================
+69. NO FAKE DATA DISTRIBUTION
+==================================================
+
+Demo data can be used.
+
+However, chart values must be calculated from demo records.
+
+Do not manually set:
+
+51 total
+44 progress
+0 approved
+
+inside chart components.
+
+==================================================
+70. MISSING DATA
+==================================================
+
+If a dashboard metric cannot be calculated because source data is missing:
+
+fix the underlying data mapping.
+
+Do NOT silently substitute random numbers.
+
+==================================================
+71. EMPTY CHART
+==================================================
+
+If no data exists:
+
+No data available
+
+instead of:
+
+blank chart
+broken chart
+random values
+
+==================================================
+72. CHART TOOLTIP
+==================================================
+
+Use clean tooltips showing:
+
+label
+value
+percentage where relevant
+
+Example:
+
+Payment Pending
+12 applications
+24%
+
+==================================================
+73. CHART CLICK
+==================================================
+
+Where meaningful:
+
+click chart segment/bar
+
+→ open filtered application list.
+
+Example:
+
+Applications by Status
+→ click Payment Pending
+→ show Payment Pending applications.
+
+Do not make charts clickable if no meaningful drill-down exists.
+
+==================================================
+74. DRILL-DOWN
+==================================================
+
+Chart → filtered table.
+
+KPI → relevant filtered list.
+
+Officer → officer detail.
+
+Project → project dashboard.
+
+Stage → stage applications.
+
+SLA → affected applications.
+
+==================================================
+75. PROJECT DASHBOARD
+==================================================
+
+For Project Manager, clicking a project can open:
+
+Project Overview
+
+with:
+
+Project Information
+Application Summary
+Progress
+Workflow
+SLA
+Delays
+RFIs
+Worklogs
+Documents
+Drawings
+Shortfalls
+Fees
+Payments
+Recent Activity
+
+Only for that project.
+
+==================================================
+76. PROJECT PROGRESS
+==================================================
+
+Where project-related progress data exists:
+
+show:
+
+Overall Progress
+Planned
+Actual
+Variance
+Delayed Items
+Completed Items
+Pending Items
+
+Do not invent values if the underlying project data does not exist.
+
+==================================================
+77. RFI / WORKLOG INTEGRATION
+==================================================
+
+If these modules/data exist in the project:
+
+Project Manager should see:
+
+Total RFIs
+Open RFIs
+Overdue RFIs
+Resolved RFIs
+
+Worklogs:
+
+Submitted
+Approved
+Pending Approval
+Rejected
+
+Hindrance:
+
+Open
+Resolved
+Pending
+
+Safety:
+
+Open observations
+Resolved observations
+
+Only where these data sources already exist.
+
+==================================================
+78. PROJECT MANAGER DATA BOUNDARY
+==================================================
+
+For every query used on Project Manager dashboard:
+
+apply project scope.
+
+Do not perform:
+
+getAllApplications()
+
+and then filter only in render.
+
+Prefer:
+
+getApplicationsForProjects(projectIds)
+
+or equivalent scoped selector.
+
+==================================================
+79. ROLE DATA BOUNDARY
+==================================================
+
+Similarly:
+
+LTP:
+getApplicationsForLtp(userId)
+
+TPS:
+getApplicationsForReviewer(userId, TPS)
+
+Project Manager:
+getApplicationsForProjects(projectIds)
+
+Administrator:
+getAllAuthorizedApplications()
+
+Use the project's existing architecture.
+
+==================================================
+80. DATA LEAK TEST
+==================================================
+
+Create:
+
+Project A → Manager A
+Project B → Manager B
+
+Login Manager A.
+
+Verify:
+
+Project A visible.
+
+Project B invisible.
+
+Search Project B.
+
+Expected:
+
+No result.
+
+Try direct URL to Project B.
+
+Expected:
+
+Access denied.
+
+==================================================
+81. CROSS-ROLE TEST
+==================================================
+
+Login Administrator:
+
+see A + B.
+
+Login Manager A:
+
+see A only.
+
+Login Manager B:
+
+see B only.
+
+Login LTP A:
+
+see own applications only.
+
+Login TPS:
+
+see assigned scrutiny applications.
+
+==================================================
+82. CHART CROSS-ROLE TEST
+==================================================
+
+Use same projects.
+
+Administrator chart:
+
+all projects.
+
+Manager A chart:
+
+Project A only.
+
+Manager B chart:
+
+Project B only.
+
+Verify chart totals differ appropriately.
+
+==================================================
+83. CARD CROSS-ROLE TEST
+==================================================
+
+Verify each role receives only appropriate cards.
+
+No role should see:
+
+irrelevant admin cards
+irrelevant financial cards
+irrelevant workflow actions
+irrelevant operational metrics
+
+unless permissions explicitly allow them.
+
+==================================================
+84. SEARCH CROSS-ROLE TEST
+==================================================
+
+Global search and card-level search must respect scope.
+
+No data leakage through search.
+
+==================================================
+85. FILTER CROSS-ROLE TEST
+==================================================
+
+Dropdown options must also respect scope.
+
+Project Manager should NOT see unauthorized project names in filters.
+
+==================================================
+86. EXPORT CROSS-ROLE TEST
+==================================================
+
+If export exists:
+
+exported data must respect the same scope.
+
+Project Manager export:
+assigned projects only.
+
+LTP export:
+own applications only.
+
+Administrator:
+all authorized data.
+
+==================================================
+87. PERFORMANCE
+==================================================
+
+Do not load unnecessary global data into restricted role dashboards.
+
+Use scoped data retrieval/selectors.
+
+Avoid rendering hundreds of unnecessary chart points.
+
+==================================================
+88. DASHBOARD COMPONENT ARCHITECTURE
+==================================================
+
+Create reusable components:
+
+KpiCard
+ChartCard
+DataTable
+SearchBar
+FilterBar
+Pagination
+StatusBadge
+ProgressBar
+DashboardSection
+
+But data scope must be injected from the correct role-specific selector.
+
+==================================================
+89. ROLE DASHBOARD CONFIGURATION
+==================================================
+
+Use a role dashboard configuration model where appropriate.
+
+Concept:
+
+PROJECT_MANAGER:
+[
+  applicationsOverview,
+  projectProgress,
+  workflowMonitor,
+  sla,
+  officerWorkload,
+  shortfalls,
+  activity
+]
+
+LTP:
+[
+  myApplications,
+  documents,
+  payments,
+  shortfalls
+]
+
+TPS:
+[
+  scrutiny,
+  pendingReviews,
+  workload,
+  sla
+]
+
+ADMIN:
+[
+  systemOverview,
+  applications,
+  users,
+  workflow,
+  fees,
+  payments,
+  audit
+]
+
+Do not force every role to render every section.
+
+==================================================
+90. DASHBOARD SECTION VISIBILITY
+==================================================
+
+Section visibility should be permission-aware.
+
+Example:
+
+canViewFinance
+
+canViewOfficerWorkload
+
+canViewAudit
+
+canViewProjectProgress
+
+Do not duplicate permission logic inside individual chart components.
+
+==================================================
+91. PROJECT MANAGER OFFICER WORKLOAD
+==================================================
+
+Show only officers who have assignments in Project Manager's assigned projects.
+
+Do not show unrelated officers.
+
+==================================================
+92. PROJECT MANAGER RECENT ACTIVITY
+==================================================
+
+Show only activities belonging to:
+
+assigned projects.
+
+Do not show unrelated organization-wide audit activity.
+
+==================================================
+93. ADMIN RECENT ACTIVITY
+==================================================
+
+Administrator can see organization-wide activity.
+
+==================================================
+94. ROLE-SPECIFIC NOTIFICATIONS
+==================================================
+
+Dashboard notifications should follow same scope.
+
+LTP:
+own applications
+
+Project Manager:
+assigned projects
+
+Administrator:
+system-wide authorized events
+
+Workflow officers:
+assigned applications/work queue
+
+==================================================
+95. AUDIT DATA
+==================================================
+
+Administrator:
+
+full audit access.
+
+Project Manager:
+
+operational activity relevant to assigned projects.
+
+Other roles:
+
+only authorized activity.
+
+==================================================
+96. FINANCIAL VISIBILITY
+==================================================
+
+Fees and payments should only appear where role permissions permit.
+
+Project Manager:
+
+assigned projects only.
+
+LTP:
+
+own applications.
+
+Administrator:
+
+organization-wide.
+
+Workflow officers:
+
+show only what is needed for their workflow.
+
+==================================================
+97. SENSITIVE INFORMATION
+==================================================
+
+Do not expose unnecessary user/account information simply because a role
+can see operational data.
+
+==================================================
+98. VISUAL CONSISTENCY
+==================================================
+
+All role dashboards should feel like the same system.
+
+Same:
+
+header
+sidebar
+typography
+cards
+badges
+charts
+spacing
+buttons
+
+But content must be role-specific.
+
+==================================================
+99. DO NOT COPY DASHBOARDS
+==================================================
+
+Do not clone the Project Manager Dashboard for every role and merely rename
+the title.
+
+Build shared components with different role-specific data/configuration.
+
+==================================================
+100. FINAL DASHBOARD QA
+==================================================
+
+Test EVERY role individually:
+
+Administrator
+Project Manager
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director
+Additional Commissioner
+Commissioner
+
+For each role verify:
+
+login
+dashboard
+KPI
+charts
+tables
+search
+filters
+pagination
+drill-down
+permissions
+data scope
+project scope
+application scope
+
+==================================================
+101. VISUAL QA
+==================================================
+
+For every dashboard inspect:
+
+horizontal spacing
+vertical spacing
+card width
+card height
+chart width
+chart height
+chart labels
+legend alignment
+table alignment
+filter alignment
+button alignment
+pagination alignment
+
+Correct:
+
+overlap
+clipping
+excess whitespace
+unequal card sizes
+misaligned chart content
+
+==================================================
+102. CHART HEIGHT
+==================================================
+
+Charts in the same row must have matching outer card height.
+
+Do not allow:
+
+Chart A = 300px
+
+Chart B = 500px
+
+without a clear content requirement.
+
+==================================================
+103. CHART WIDTH
+==================================================
+
+Charts should fill their card properly.
+
+Do not leave large blank margins around the chart.
+
+==================================================
+104. CHART LEGEND
+==================================================
+
+If the legend causes layout problems:
+
+move it to:
+
+bottom
+or
+right
+
+rather than allowing overlap.
+
+==================================================
+105. RESPONSIVE CHARTS
+==================================================
+
+Desktop:
+
+2-column charts.
+
+Tablet:
+
+1–2 columns according to content.
+
+Mobile:
+
+1 column.
+
+Charts must resize without:
+
+cropping
+overflowing
+overlapping labels.
+
+==================================================
+106. CHART AXIS
+==================================================
+
+Ensure:
+
+axis labels readable
+units displayed
+currency formatted
+percentage formatted
+
+Do not show unnecessarily dense grid lines.
+
+==================================================
+107. SECTION HEADERS
+==================================================
+
+Use consistent section labels such as:
+
+CASELOAD
+ATTENTION & SLA
+REVENUE & FINANCE
+WORKFLOW
+OPERATIONS
+ANALYTICS & TRENDS
+
+Only show sections relevant to that role.
+
+==================================================
+108. SECTION ORDER BY ROLE
+==================================================
+
+Administrator:
+
+CASELOAD
+SYSTEM HEALTH
+WORKFLOW
+REVENUE & FINANCE
+AUDIT / OPERATIONS
+ANALYTICS
+
+Project Manager:
+
+PROJECT CASELOAD
+ATTENTION & SLA
+PROJECT PROGRESS
+WORKFLOW
+OFFICER WORKLOAD
+RFIs / WORKLOGS
+SHORTFALLS
+FINANCE where permitted
+
+LTP:
+
+MY APPLICATIONS
+ACTION REQUIRED
+DRAWINGS
+DOCUMENTS
+FEES & PAYMENTS
+SHORTFALLS
+NOTIFICATIONS
+
+TPS:
+
+SCRUTINY CASELOAD
+PENDING REVIEWS
+SCRUTINY RESULTS
+SLA
+APPLICATIONS
+RECENT ACTIVITY
+
+Other approval roles:
+
+PENDING CASES
+SLA
+WORKLOAD
+SHORTFALLS
+DECISIONS
+RECENT ACTIVITY
+
+==================================================
+109. IMPORTANT
+==================================================
+
+Use only relevant dashboard sections.
+
+Do NOT show:
+
+Revenue & Finance
+
+to a role where financial information is not relevant or authorized.
+
+Do NOT show:
+
+Officer Workload
+
+to LTP unless needed.
+
+Do NOT show:
+
+System Health
+
+to regular operational users unless useful/authorized.
+
+==================================================
+110. DATA DEFINITIONS
+==================================================
+
+Document the definition of each KPI/chart internally.
+
+For example:
+
+Total Applications:
+number of applications within current scope.
+
+In Progress:
+applications not in terminal state.
+
+Approved:
+final approved applications.
+
+Delayed:
+applications with SLA breach.
+
+At Risk:
+applications approaching configured SLA threshold.
+
+Do not count a completed application as delayed simply because its historical
+processing time exceeded an SLA unless the metric explicitly means
+"completed late".
+
+==================================================
+111. DATE FILTER
+==================================================
+
+Where trend charts support date ranges:
+
+Today
+7 Days
+30 Days
+90 Days
+Custom
+
+The date filter must affect only the relevant metrics.
+
+Do not apply date filtering blindly to lifetime totals.
+
+==================================================
+112. PROJECT FILTER + DATE FILTER
+==================================================
+
+Project Manager:
+
+Project
++
+Date Range
+
+must combine correctly.
+
+Example:
+
+Project A
++
+Last 30 Days
+
+returns only Project A records within that period.
+
+==================================================
+113. NO MIXED SCOPE
+==================================================
+
+Do not create a dashboard where:
+
+KPI = Project Manager scope
+
+but:
+
+chart = global scope
+
+or:
+
+table = different scope.
+
+Everything must use one effective dashboard scope.
+
+==================================================
+114. SINGLE SCOPED DATA MODEL
+==================================================
+
+Conceptually:
+
+dashboardScope = resolveScope(user)
+
+scopedApplications
+scopedProjects
+scopedUsers
+scopedActivities
+scopedPayments
+scopedDocuments
+scopedShortfalls
+scopedWorkflow
+
+All components derive from these scoped datasets.
+
+==================================================
+115. FINAL ACCEPTANCE TEST — ADMIN
+==================================================
+
+Administrator sees:
+
+all authorized projects
+all authorized applications
+all operational statistics
+
+Charts and tables match.
+
+==================================================
+116. FINAL ACCEPTANCE TEST — PROJECT MANAGER
+==================================================
+
+Project Manager assigned:
+
+Project A
+Project B
+
+Dashboard contains only A + B.
+
+No Project C data.
+
+Charts, KPIs, tables, search, filters and exports all remain scoped.
+
+==================================================
+117. FINAL ACCEPTANCE TEST — LTP
+==================================================
+
+LTP sees own applications only.
+
+Create a new application.
+
+Verify it appears.
+
+Another LTP must NOT see it.
+
+==================================================
+118. FINAL ACCEPTANCE TEST — WORKFLOW USERS
+==================================================
+
+TPS:
+
+only relevant scrutiny workload.
+
+TPA:
+
+only relevant review workload.
+
+ZAD/ZDD:
+
+only relevant routed workload.
+
+ZJD:
+
+only relevant decision workload.
+
+Director:
+
+only relevant director-level workload.
+
+Additional Commissioner:
+
+only relevant workload.
+
+Commissioner:
+
+final authorized workload.
+
+==================================================
+119. FINAL CROSS-ROLE REFLECTION
+==================================================
+
+Create one application.
+
+Move it through:
+
+LTP
+→ TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director
+→ Additional Commissioner
+→ Commissioner
+
+After each transition:
+
+Project Manager dashboard must reflect:
+
+current stage
+assigned role
+assigned officer
+progress
+SLA
+recent activity
+
+The relevant operational role dashboard must also update.
+
+==================================================
+120. FINAL UI QUALITY RULE
+==================================================
+
+Every dashboard must look:
+
+clean
+modern
+professional
+government-enterprise appropriate
+project-focused
+easy to scan
+
+Use alignment as the primary design principle.
+
+Everything should share:
+
+one page grid
+one spacing system
+one card system
+one typography system
+one chart system
+
+==================================================
+121. NO EXCESSIVE EMPTY SPACE
+==================================================
+
+Remove unnecessary:
+
+top/bottom gaps
+card padding
+chart margins
+section gaps
+table whitespace
+
+But do not make the interface cramped.
+
+Use balanced whitespace.
+
+==================================================
+122. FINAL BUILD / TEST
+==================================================
+
+Run:
+
+type check
+lint
+build
+
+Then test every role.
+
+Check:
+
+browser console
+React warnings
+runtime errors
+broken routes
+incorrect permissions
+incorrect data scope
+chart rendering
+responsive layout
+
+==================================================
+123. FINAL REPORT
+==================================================
+
+Return:
+
+Roles audited
+Dashboards audited
+Components audited
+Charts audited
+KPI calculations audited
+Data-scope issues found
+Permission issues found
+Cross-role data leaks found
+UI alignment issues found
+Search issues
+Filter issues
+Pagination issues
+Drill-down issues
+
+Then:
+
+Issues fixed
+Tests passed
+Tests failed
+
+Type Check:
+PASS / FAIL
+
+Lint:
+PASS / FAIL
+
+Build:
+PASS / FAIL
+
+Console Errors:
+0 / number
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+The system must behave like this:
+
+SYSTEM ADMINISTRATOR
+→ ALL AUTHORIZED PROJECT DATA
+
+PROJECT MANAGER
+→ ONLY ASSIGNED PROJECT DATA
+
+LTP
+→ ONLY THEIR APPLICATION DATA
+
+TPS
+→ ONLY THEIR SCRUTINY WORKLOAD
+
+TPA
+→ ONLY THEIR REVIEW WORKLOAD
+
+ZAD/ZDD
+→ ONLY THEIR AUTHORIZED WORKLOAD
+
+ZJD
+→ ONLY THEIR AUTHORIZED WORKLOAD
+
+DIRECTOR
+→ ONLY THEIR AUTHORIZED WORKLOAD
+
+ADDITIONAL COMMISSIONER
+→ ONLY THEIR AUTHORIZED WORKLOAD
+
+COMMISSIONER
+→ ONLY THEIR AUTHORIZED FINAL-DECISION WORKLOAD
+
+And for every role:
+
+LOGIN
+↓
+CORRECT SCOPE
+↓
+CORRECT KPIs
+↓
+CORRECT CHARTS
+↓
+CORRECT TABLES
+↓
+CORRECT SEARCH/FILTERS
+↓
+CORRECT PAGINATION
+↓
+CORRECT DRILL-DOWN
+↓
+CORRECT PERMISSIONS
+
+The dashboard must never show unrelated data.
+
+Every chart must be based on the logged-in user's authorized scope.
+
+Every card must have a clear purpose.
+
+Every chart/card/table must be correctly aligned with consistent width,
+height, spacing, labels, legends and typography.
+
+Do not fake values merely to populate charts.
+
+Do not hide unauthorized data only through CSS/UI.
+
+Fix the underlying scope, permission, selector, calculation and data flow.
