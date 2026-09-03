@@ -454,7 +454,7 @@ export function OfficerDashboard() {
       </div>
 
       {/* ===== Charts — 1-col mobile → 2-col desktop ===== */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
         <ChartCard
           icon={PieChart}
           title="Applications by Status"

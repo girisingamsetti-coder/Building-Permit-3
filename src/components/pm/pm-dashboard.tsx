@@ -267,49 +267,37 @@ function ChartsSection({ apps }: { apps: Application[] }) {
   const paymentData = React.useMemo(() => paymentStatusData(apps), [apps]);
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
       <ChartCard
         icon={PieChart}
         title="Applications by Status"
         subtitle="Distribution across workflow statuses"
-        className="h-full"
       >
-        <div className="flex h-[280px] items-center">
-          <DonutChart data={statusData} centerLabel="Total" centerValue={apps.length} />
-        </div>
+        <DonutChart data={statusData} centerLabel="Total" centerValue={apps.length} />
       </ChartCard>
 
       <ChartCard
         icon={BarChart3}
         title="Applications by Stage"
         subtitle="Current stage distribution"
-        className="h-full"
       >
-        <div className="h-[280px] overflow-y-auto pr-1">
-          <BarChart data={stageData} height={260} barHeight={22} />
-        </div>
+        <BarChart data={stageData} />
       </ChartCard>
 
       <ChartCard
         icon={Gauge}
         title="SLA Summary"
         subtitle="On-track vs at-risk vs delayed vs blocked"
-        className="h-full"
       >
-        <div className="flex h-[280px] items-center">
-          <DonutChart data={slaData} centerLabel="Total" centerValue={apps.length} />
-        </div>
+        <DonutChart data={slaData} centerLabel="Total" centerValue={apps.length} />
       </ChartCard>
 
       <ChartCard
         icon={CreditCard}
         title="Payment Status"
         subtitle="Paid vs pending vs no fee yet"
-        className="h-full"
       >
-        <div className="flex h-[280px] items-center">
-          <DonutChart data={paymentData} centerLabel="Total" centerValue={apps.length} />
-        </div>
+        <DonutChart data={paymentData} centerLabel="Total" centerValue={apps.length} />
       </ChartCard>
     </div>
   );

@@ -169,7 +169,7 @@ export function AdminDashboard() {
           <h2 className="text-sm font-semibold text-foreground">Application Analytics</h2>
           <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-[10px]">Org-wide</Badge>
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
           <ChartCard icon={PieChart} title="Applications by Status" subtitle="Distribution across all statuses">
             <DonutChart data={statusData} centerLabel="Total" centerValue={appKpis.total} />
           </ChartCard>

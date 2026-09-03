@@ -221,7 +221,7 @@ export function LtpDashboard() {
           </div>
           <h2 className="text-sm font-semibold text-foreground">My Application Analytics</h2>
         </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
           <ChartCard icon={PieChart} title="My Applications by Status" subtitle="Distribution across all statuses">
             <DonutChart data={statusData} centerLabel="Total" centerValue={kpis.total} />
           </ChartCard>

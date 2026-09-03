@@ -7,15 +7,22 @@ import type { ChartDatum } from "@/components/dashboard/dashboard-scope";
 // ============================================================
 // REUSABLE CHART COMPONENTS
 // Used across ALL dashboards (LTP, Officer, Admin, PM).
-// Consistent dimensions, alignment, legends, colors.
+// Compact, well-aligned, consistent dimensions.
+//
+// Design principles:
+//   - Donut: 42% chart / 58% legend grid, vertically centered
+//   - Legend: 3-col grid (label / count / %), 26px rows, 8px dots
+//   - Bar: label-left + count-right on same line, bar below, 32px rows
+//   - Card: 56px header, 220px content, 16px padding, no excess
 // ============================================================
 
 // ---------- Donut Chart ----------
-// Centered SVG donut with legend on the right.
+// 42/58 grid split: donut left, legend right. Vertically centered.
+// Compact 26px legend rows with 3-col grid (label/count/%).
 export function DonutChart({
   data,
-  size = 160,
-  thickness = 28,
+  size = 140,
+  thickness = 24,
   centerLabel,
   centerValue,
 }: {
@@ -28,8 +35,8 @@ export function DonutChart({
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
-  // Precompute cumulative offsets for each segment using a pure reduce.
-  // Avoids mutating a variable inside .map() (react-hooks/immutability).
+
+  // Precompute cumulative offsets using pure reduce (no mutation in .map()).
   const segmentData = data.reduce<Array<{ dash: number; color: string; key: number; offset: number }>>(
     (acc, d, i) => {
       const dash = (d.value / total) * circumference;
@@ -42,48 +49,61 @@ export function DonutChart({
 
   if (total === 0 || data.length === 0) {
     return (
-      <div className="flex items-center justify-center" style={{ height: size + 40 }}>
+      <div className="flex h-full min-h-[180px] items-center justify-center">
         <p className="text-sm text-muted-foreground">No data available</p>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-4 flex-wrap">
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="transform -rotate-90">
-          <circle
-            cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="currentColor" strokeWidth={thickness}
-            className="text-muted/30"
-          />
-          {segmentData.map((seg) => (
+    <div className="grid grid-cols-[42%_58%] items-center gap-3">
+      {/* Donut — centered in its column */}
+      <div className="flex items-center justify-center">
+        <div className="relative shrink-0" style={{ width: size, height: size }}>
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
             <circle
-              key={seg.key}
               cx={size / 2} cy={size / 2} r={radius}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={thickness}
-              strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
-              strokeDashoffset={-seg.offset}
-              className="transition-all duration-300"
+              fill="none" stroke="currentColor" strokeWidth={thickness}
+              className="text-muted/20"
             />
-          ))}
-        </svg>
-        {(centerValue !== undefined || centerLabel) && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            {centerValue !== undefined && <span className="text-xl font-bold tabular-nums">{centerValue}</span>}
-            {centerLabel && <span className="text-[10px] text-muted-foreground">{centerLabel}</span>}
-          </div>
-        )}
+            {segmentData.map((seg) => (
+              <circle
+                key={seg.key}
+                cx={size / 2} cy={size / 2} r={radius}
+                fill="none"
+                stroke={seg.color}
+                strokeWidth={thickness}
+                strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
+                strokeDashoffset={-seg.offset}
+                className="transition-all duration-300"
+              />
+            ))}
+          </svg>
+          {(centerValue !== undefined || centerLabel) && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              {centerValue !== undefined && <span className="text-lg font-bold tabular-nums leading-none">{centerValue}</span>}
+              {centerLabel && <span className="mt-0.5 text-[10px] text-muted-foreground">{centerLabel}</span>}
+            </div>
+          )}
+        </div>
       </div>
-      <div className="flex-1 min-w-0 space-y-1.5">
+
+      {/* Legend — 3-col grid: label / count / %, compact 26px rows */}
+      <div className="min-w-0 space-y-0.5">
         {data.map((d, i) => (
-          <div key={i} className="flex items-center gap-2 text-xs">
-            <span className="size-2.5 shrink-0 rounded-full" style={{ background: d.color ?? getDefaultColor(i) }} />
-            <span className="flex-1 truncate text-muted-foreground" title={d.label}>{d.label}</span>
-            <span className="font-semibold tabular-nums">{d.value}</span>
-            <span className="text-muted-foreground tabular-nums w-10 text-right">
+          <div
+            key={i}
+            className="grid grid-cols-[1fr_auto_auto] items-center gap-2 text-xs leading-[26px]"
+          >
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span
+                className="size-2 shrink-0 rounded-full"
+                style={{ background: d.color ?? getDefaultColor(i) }}
+              />
+              <span className="truncate text-muted-foreground" title={d.label}>{d.label}</span>
+            </span>
+            <span className="text-right font-semibold tabular-nums text-foreground">{d.value}</span>
+            <span className="w-9 text-right tabular-nums text-muted-foreground">
               {total > 0 ? Math.round((d.value / total) * 100) : 0}%
             </span>
           </div>
@@ -94,11 +114,10 @@ export function DonutChart({
 }
 
 // ---------- Horizontal Bar Chart ----------
-// Clean horizontal bars with labels + values.
+// Compact: label left + count right on same line, bar below.
+// 32px row height. All bars share the same background width.
 export function BarChart({
   data,
-  height = 220,
-  barHeight = 28,
   showValues = true,
 }: {
   data: ChartDatum[];
@@ -108,23 +127,22 @@ export function BarChart({
 }) {
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center" style={{ height }}>
+      <div className="flex h-full min-h-[180px] items-center justify-center">
         <p className="text-sm text-muted-foreground">No data available</p>
       </div>
     );
   }
   const maxVal = Math.max(...data.map((d) => d.value), 1);
-  const totalH = Math.max(height, data.length * (barHeight + 8) + 16);
 
   return (
-    <div className="space-y-2" style={{ minHeight: totalH }}>
+    <div className="space-y-1.5">
       {data.map((d, i) => (
-        <div key={i} className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
+        <div key={i} className="space-y-0.5">
+          <div className="flex items-center justify-between text-xs leading-[20px]">
             <span className="truncate font-medium" title={d.label}>{d.label}</span>
             {showValues && <span className="font-semibold tabular-nums">{d.value}</span>}
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted/40">
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/40">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
@@ -157,7 +175,6 @@ export function LineChart({
       </div>
     );
   }
-  const width = 100; // percentage-based
   const maxVal = Math.max(...data.map((d) => d.value), 1);
   const padding = 8;
   const chartH = height - padding * 2;
@@ -196,7 +213,7 @@ export function LineChart({
 }
 
 // ---------- Chart Card ----------
-// Consistent wrapper: header (icon + title + subtitle) + chart body.
+// Compact: 56px header, 16px content padding, consistent across all charts.
 export function ChartCard({
   icon: Icon,
   title,
@@ -211,19 +228,21 @@ export function ChartCard({
   className?: string;
 }) {
   return (
-    <div className={cn("overflow-hidden rounded-xl border border-border bg-card shadow-sm", className)}>
-      <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
+    <div className={cn("flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm", className)}>
+      {/* Header — 56px, compact */}
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-border px-4">
         {Icon && (
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Icon className="size-4" />
           </div>
         )}
-        <div className="min-w-0 space-y-0.5">
-          <h3 className="truncate text-sm font-semibold text-foreground">{title}</h3>
-          {subtitle && <p className="truncate text-xs text-muted-foreground">{subtitle}</p>}
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-semibold leading-tight text-foreground">{title}</h3>
+          {subtitle && <p className="truncate text-xs leading-tight text-muted-foreground">{subtitle}</p>}
         </div>
       </div>
-      <div className="p-4">{children}</div>
+      {/* Content — 16px padding, vertically centers chart within stretched card */}
+      <div className="flex flex-1 items-center p-4">{children}</div>
     </div>
   );
 }

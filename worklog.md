@@ -1391,3 +1391,51 @@ Type Check: PASS ✓
 Lint: PASS ✓
 Build: PASS (verified via tsc + lint + agent-browser e2e) ✓
 Console Errors: 0 ✓
+
+---
+Task ID: 12
+Agent: main
+Task: Fix chart layout and spacing in dashboards — remove excessive whitespace, improve chart sizing, donut-to-legend spacing, alignment, card content proportions, consistent chart layout, responsive behavior.
+
+Work Log:
+1. Inspected `charts.tsx` (DonutChart, BarChart, ChartCard) and all 4 dashboard chart sections to identify whitespace root causes:
+   - DonutChart: `size=160` with `flex-wrap` and `gap-4` created excess spacing; legend used loose `flex` items with `gap-2` and no grid alignment.
+   - BarChart: `barHeight=28` with `space-y-2` between items created excess vertical spacing; `minHeight` calculation could produce oversized containers.
+   - ChartCard: `p-4` padding was reasonable but content had no vertical centering.
+   - PM Dashboard: chart sections used `h-[280px]` fixed heights creating excess empty space below charts.
+   - Chart grids: missing `items-stretch` so cards in same row didn't match height.
+
+2. Rewrote `charts.tsx`:
+   - **DonutChart**: Changed to `grid grid-cols-[42%_58%] items-center gap-3` (42% donut / 58% legend). Donut size reduced to 140px (efficient for card). Legend uses 3-col grid `grid-cols-[1fr_auto_auto]` with 26px row height and 8px (size-2) color dots. Legend columns: label (truncate with tooltip) / count (right-aligned, font-semibold) / percentage (right-aligned, w-9, muted). Center of donut shows value (text-lg font-bold) + label (text-[10px]).
+   - **BarChart**: Compact rows — label left + count right on same line (leading-[20px]), bar below (h-1.5, rounded-full). `space-y-1.5` between items. Removed `height` and `barHeight` props (content-driven). All bars share the same background width (`w-full`).
+   - **ChartCard**: Compact 56px header (`h-14`, `items-center`, `px-4`). Content area uses `flex flex-1 items-center p-4` so chart is vertically centered within the stretched card height. Removed all fixed/oversized heights.
+   - **Empty state**: Uses `min-h-[180px]` (not oversized) for "No data available" message.
+
+3. Fixed chart sections in all 4 dashboards:
+   - **PM Dashboard** (`pm-dashboard.tsx`): Removed `h-[280px]` fixed heights and `overflow-y-auto` wrappers. Removed `items-stretch` → added `items-stretch` on grid. Changed `gap-5` to `gap-4`. Removed `className="h-full"` from ChartCards. Removed `height={260}` and `barHeight={22}` from BarChart.
+   - **LTP Dashboard** (`ltp-dashboard.tsx`): Added `items-stretch` to chart grid.
+   - **Admin Dashboard** (`admin-dashboard.tsx`): Added `items-stretch` to chart grid.
+   - **Officer Dashboard** (`officer-dashboard.tsx`): Added `items-stretch` to chart grid, changed `gap-6` to `gap-4`.
+
+4. Did NOT change: data, calculations, permissions, filters, navigation, business logic, chart data values, tooltips, or click actions.
+
+Self-Verification (Agent Browser — LTP Dashboard):
+- **Chart card heights**: Row 1 = 492px (both cards matched ✓), Row 2 = 230px (both cards matched ✓). Content-driven height — row 1 has more data items (15+ statuses/stages) so it's taller. This is correct per spec.
+- **Chart card widths**: All 464px (equal ✓).
+- **Donut SVG**: 140x140 (properly sized, not too small, not too large ✓).
+- **Legend**: 3-col grid confirmed (label/count/%) ✓.
+- **Desktop (1440px)**: 2-column layout (left=296, right=856) ✓, no overflow ✓.
+- **Mobile (390px)**: 1-column layout (all left=16) ✓, no overflow ✓.
+- **Console errors**: 0 ✓.
+- **Lint**: 0 errors ✓.
+- **tsc**: 0 errors ✓.
+- **Server**: HTTP 200 ✓.
+
+Stage Summary:
+- Files changed: `src/components/dashboard/charts.tsx` (full rewrite — compact DonutChart, BarChart, ChartCard), `src/components/pm/pm-dashboard.tsx` (removed h-[280px] + fixed grid), `src/components/ltp/ltp-dashboard.tsx` (added items-stretch), `src/components/admin/admin-dashboard.tsx` (added items-stretch), `src/components/officer/officer-dashboard.tsx` (added items-stretch, fixed gap).
+- Root cause fixed: chart content was not using the available card space efficiently — donut was too small (160px in a 280px+ card), legend had loose flex spacing, and fixed heights created excess empty space below charts.
+- Donut charts now use a 42/58 grid split with compact 3-col legends (26px rows, 8px dots, right-aligned counts/percentages).
+- Bar charts now use compact rows (label+count on same line, bar below, 1.5px height).
+- Chart cards use 56px headers and vertically-centered content (no excess whitespace below charts).
+- Chart grids use `items-stretch` so cards in the same row match height.
+- No data, calculations, or business logic changed.
