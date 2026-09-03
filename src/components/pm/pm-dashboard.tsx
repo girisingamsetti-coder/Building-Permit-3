@@ -188,8 +188,11 @@ export function PmDashboard() {
       {/* ===== Application Progress Overview (full width, searchable/filterable/paginated) ===== */}
       <ApplicationProgressSection apps={apps} onViewAll={() => navigate("pm-applications")} onOpen={(id) => openApplication(id, "pm-application-details")} />
 
-      {/* ===== Live Workflow Monitor (full width, searchable/filterable/paginated) ===== */}
-      <LiveWorkflowSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-workflow")} />
+      {/* ===== Live Workflow Monitor + Recent Activity (SIDE-BY-SIDE on desktop) ===== */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <LiveWorkflowSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-workflow")} />
+        <RecentActivitySection apps={apps} onViewAll={() => navigate("pm-reports")} />
+      </div>
 
       {/* ===== SLA Summary + Current Bottleneck (2-col) ===== */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
@@ -197,14 +200,11 @@ export function PmDashboard() {
         <BottleneckSection bottleneck={bottleneck} onInspect={() => navigate("pm-sla")} />
       </div>
 
-      {/* ===== Officer Workload (full width, searchable/filterable/paginated) ===== */}
+      {/* ===== Officer Workload (full width, compact TABLE) ===== */}
       <OfficerWorkloadSection apps={apps} users={users} onViewAll={() => navigate("pm-officers")} onOpenOfficer={(id) => openApplication(id, "pm-officer-details")} />
 
       {/* ===== Pending Actions (full width, searchable/filterable/paginated) ===== */}
       <PendingActionsSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-applications")} />
-
-      {/* ===== Recent Activity (full width, searchable/filterable/paginated, NO nested scroll) ===== */}
-      <RecentActivitySection apps={apps} onViewAll={() => navigate("pm-reports")} />
     </div>
   );
 }
@@ -434,7 +434,9 @@ function LiveWorkflowSection({
       list = list.filter((a) =>
         a.applicationNo.toLowerCase().includes(q) ||
         a.project.name.toLowerCase().includes(q) ||
-        (a.assignedOfficer?.name ?? "").toLowerCase().includes(q)
+        (a.assignedOfficer?.name ?? "").toLowerCase().includes(q) ||
+        (a.assignedOfficer?.role ?? "").toLowerCase().includes(q) ||
+        a.currentStageLabel.toLowerCase().includes(q)
       );
     }
     if (stageFilter !== "ALL") list = list.filter((a) => a.currentStage === stageFilter);
@@ -658,42 +660,58 @@ function OfficerWorkloadSection({
           onClear={() => { setQuery(""); setRoleFilter("ALL"); }}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pageOfficers.map((w) => (
-            <button
-              key={w.user.id}
-              onClick={() => onOpenOfficer(w.user.id)}
-              className="flex flex-col gap-2 rounded-lg border border-border p-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/30"
-            >
-              <div className="flex items-center gap-2">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
-                  {w.user.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold" title={w.user.name}>{w.user.name}</p>
-                  <RoleBadge role={w.user.role} />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center justify-between rounded border border-border px-2 py-1">
-                  <span className="text-muted-foreground">Assigned</span>
-                  <span className="font-semibold tabular-nums">{w.assigned}</span>
-                </div>
-                <div className="flex items-center justify-between rounded border border-border px-2 py-1">
-                  <span className="text-muted-foreground">Pending</span>
-                  <span className="font-semibold tabular-nums">{w.pending}</span>
-                </div>
-                <div className="flex items-center justify-between rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1">
-                  <span className="text-amber-600">At Risk</span>
-                  <span className="font-semibold tabular-nums text-amber-600">{w.atRisk}</span>
-                </div>
-                <div className="flex items-center justify-between rounded border border-destructive/30 bg-destructive/5 px-2 py-1">
-                  <span className="text-destructive">Delayed</span>
-                  <span className="font-semibold tabular-nums text-destructive">{w.delayed}</span>
-                </div>
-              </div>
-            </button>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-muted/40">
+              <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
+                <th scope="col" className="px-4 py-2.5 font-bold w-[22%]">Officer</th>
+                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Role</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Assigned</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Pending</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">At Risk</th>
+                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Delayed</th>
+                <th scope="col" className="px-4 py-2.5 font-bold w-[26%]">Workload</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {pageOfficers.map((w) => {
+                // Workload % = assigned / (assigned + 5) capped at 100, where 5 represents a full load
+                const workloadPct = Math.min(100, Math.round((w.assigned / Math.max(w.assigned, 5)) * 100));
+                return (
+                  <tr
+                    key={w.user.id}
+                    onClick={() => onOpenOfficer(w.user.id)}
+                    className="cursor-pointer transition-colors hover:bg-muted/30"
+                    style={{ height: "48px" }}
+                  >
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+                          {w.user.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+                        </div>
+                        <p className="truncate text-xs font-medium" title={w.user.name}>{w.user.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2"><RoleBadge role={w.user.role} /></td>
+                    <td className="px-4 py-2 text-right text-xs font-semibold tabular-nums">{w.assigned}</td>
+                    <td className="px-4 py-2 text-right text-xs font-semibold tabular-nums">{w.pending}</td>
+                    <td className="px-4 py-2 text-right">
+                      <span className={cn("text-xs font-semibold tabular-nums", w.atRisk > 0 ? "text-amber-600" : "text-muted-foreground")}>{w.atRisk}</span>
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <span className={cn("text-xs font-semibold tabular-nums", w.delayed > 0 ? "text-destructive" : "text-muted-foreground")}>{w.delayed}</span>
+                    </td>
+                    <td className="px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <Progress value={workloadPct} className="h-1.5 flex-1" />
+                        <span className="text-xs font-semibold tabular-nums w-8 text-right">{workloadPct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
       <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
@@ -869,6 +887,7 @@ function RecentActivitySection({
         ev.action.toLowerCase().includes(q) ||
         ev.actor.toLowerCase().includes(q) ||
         ev.applicationNo.toLowerCase().includes(q) ||
+        ev.projectName.toLowerCase().includes(q) ||
         ev.role.toLowerCase().includes(q)
       );
     }

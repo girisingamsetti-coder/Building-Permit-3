@@ -1142,3 +1142,57 @@ Stage Summary:
 - Text truncation with tooltips for long values.
 - Responsive: 1-col mobile → 2-col tablet → 4-col desktop KPIs, no horizontal overflow.
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
+
+---
+Task ID: 10
+Agent: main
+Task: Redesign and fix the Project Manager Dashboard LAYOUT — place Live Workflow Monitor + Recent Activity side-by-side, redesign Officer Workload as a compact table, remove excessive whitespace, improve alignment.
+
+Work Log:
+1. Inspected current `pm-dashboard.tsx`: the layout had Live Workflow Monitor as a full-width section, then SLA+Bottleneck (2-col), then Officer Workload as a 3-col card grid, then Pending Actions (full-width), then Recent Activity (full-width). This created excessive vertical space and inefficient horizontal use.
+2. Reorganized the main layout in `PmDashboard()`:
+   - KPI Cards (4-col)
+   - Application Progress Overview (full-width)
+   - **Live Workflow Monitor + Recent Activity (SIDE-BY-SIDE 2-col)** using `grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]`
+   - SLA Summary + Current Bottleneck (2-col)
+   - **Officer Workload (full-width compact TABLE)**
+   - Pending Actions (full-width)
+   - Removed the old full-width Recent Activity that was at the bottom.
+3. Redesigned `OfficerWorkloadSection` from a 3-col card grid to a compact TABLE:
+   - Columns: Officer (22%), Role (12%), Assigned (10%), Pending (10%), At Risk (10%), Delayed (10%), Workload (26%).
+   - 48px row height (compact).
+   - Officer cell: avatar initials + name (truncated with tooltip).
+   - Role cell: RoleBadge.
+   - Assigned/Pending: right-aligned tabular-nums.
+   - At Risk: amber color when > 0, muted otherwise.
+   - Delayed: destructive color when > 0, muted otherwise.
+   - Workload: Progress bar + percentage (workloadPct = assigned / max(assigned, 5) * 100, capped at 100).
+   - Row click → openApplication(officer.id, "pm-officer-details").
+   - 6 officers per page + pagination + View All button.
+4. Fixed Live Workflow Monitor search to include stage + role (spec section 6: search by Application Number, Project, Officer, Role, Current Stage). Added `a.assignedOfficer?.role` and `a.currentStageLabel` to the search filter.
+5. Enriched `ActivityEvent` in `pm-helpers.ts` with a new `projectName` field (from `a.project.name`) so Recent Activity search can include project name (spec section 11: search by Action, Actor, Application, Project, Role). Updated `computeRecentActivity()` to populate `projectName`. Updated Recent Activity search in pm-dashboard.tsx to include `ev.projectName`.
+6. Both side-by-side cards (Live Workflow + Recent Activity) use content-driven height — no forced equal heights, no excessive blank space.
+
+Self-Verification (Agent Browser end-to-end):
+- **Desktop (1440×900)**: Live Workflow Monitor + Recent Activity side-by-side (sameTop=true, sideBySide=true) ✓; no horizontal overflow ✓
+- **Mobile (390×844)**: Live Workflow + Recent Activity stack vertically (stacked=true) ✓; no horizontal overflow ✓
+- **Officer Workload**: compact TABLE with 7 columns (Officer, Role, Assigned, Pending, At Risk, Delayed, Workload), 6 rows per page, progress bar for workload ✓
+- **Live Workflow search "Payment"**: 12 results (Showing 1-5 of 12) ✓ (searches app no, project, officer, role, stage)
+- **Recent Activity search "Payment Verified"**: 22 results (Showing 1-10 of 22) ✓ (searches action, actor, application, project, role)
+- **Officer search "Meena"**: 1 result (Smt. Meena Kulkarni, Showing 1-1 of 1) ✓
+- **All 7 sections present**: Application Progress Overview, Live Workflow Monitor, Recent Activity, SLA Summary, Current Bottleneck, Officer Workload, Pending Actions ✓
+- **Console errors**: 0 ✓
+- **Lint**: 0 errors, 0 warnings ✓
+- **tsc**: 0 errors ✓
+
+Stage Summary:
+- Files changed: `src/components/pm/pm-dashboard.tsx` (layout reorganization + Officer Workload table redesign + search fixes), `src/components/pm/pm-helpers.ts` (ActivityEvent.projectName enrichment).
+- Only the PM Dashboard was modified — no other modules touched.
+- Live Workflow Monitor + Recent Activity are now side-by-side on desktop (2-col), stacked on mobile.
+- Officer Workload is now a compact table instead of a card grid — more efficient, easier to scan.
+- SLA Summary + Current Bottleneck remain side-by-side (2-col).
+- Application Progress + Pending Actions remain full-width.
+- No nested scrolling — pagination in every data-heavy section.
+- No hardcoded counts — all derived from shared store data.
+- Responsive: mobile stacks, desktop side-by-side, no horizontal overflow.
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.

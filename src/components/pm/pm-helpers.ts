@@ -314,6 +314,7 @@ export function computePendingActions(apps: Application[]): PendingAction[] {
 export interface ActivityEvent {
   applicationNo: string;
   applicationId: string;
+  projectName: string;
   timestamp: string;
   actor: string;
   role: string;
@@ -328,6 +329,7 @@ export function computeRecentActivity(apps: Application[], limit = 20): Activity
       events.push({
         applicationNo: a.applicationNo,
         applicationId: a.id,
+        projectName: a.project.name,
         timestamp: log.timestamp,
         actor: log.user,
         role: log.role,
