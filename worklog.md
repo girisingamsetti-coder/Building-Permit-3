@@ -1081,3 +1081,64 @@ Stage Summary:
 - Demo user: Shri. Rajesh Kumar, projectmanager@demo.gov.in, password demo1234 — appears in Demo Role dropdown automatically.
 - Files changed: types/index.ts, data/mock-data.ts, lib/permissions.ts, store/app-store.ts, components/layout/nav-config.ts, components/layout/sidebar.tsx, components/design-system/back-button.tsx, components/design-system/badges.tsx, components/admin/admin-roles.tsx, app/page.tsx, + 11 new files in components/pm/.
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
+
+---
+Task ID: 9
+Agent: main
+Task: Redesign and fix the entire Project Manager Dashboard — compact cards, per-section search/filter/pagination, no nested scrolling, no hardcoded counts, SLA correctness, responsive.
+
+Work Log:
+1. Inspected current `pm-dashboard.tsx` (827 lines): issues found were — Application Progress showed 10 rows with NO search/filter/pagination, Live Workflow Monitor showed 5 rows with NO search/filter/pagination, Officer Workload showed 6 cards with NO search/filter/pagination, Pending Actions showed 5 rows with NO search/filter/pagination, Recent Activity showed 15 events with NO search/filter/pagination, large cards with excessive vertical space.
+2. Created `src/components/pm/pm-shared.tsx` — reusable PM dashboard components:
+   - `PmSearchInput` — compact search input (h-9, 36px) with Search icon + clear (X) button, aria-label.
+   - `PmFilterSelect` — compact filter dropdown (h-9, 36px) using shadcn Select.
+   - `PmPagination` — reusable pagination: "Showing X–Y of Z" + prev/next + numbered page buttons with ellipsis logic, aria-current="page". Used by ALL sections — ONE pagination implementation.
+   - `usePmPagination` hook — manages page state, provides reset() for filter changes.
+   - `PmCardHeader` — consistent card header: LEFT = icon + title + subtitle, RIGHT = controls. All header controls vertically aligned.
+   - `PmEmptyState` — compact empty state with "Clear Filters" button.
+3. Rewrote `src/components/pm/pm-dashboard.tsx` (~700 lines) — complete redesign:
+   - **CompactKpiCard**: 4 KPI cards (Total Applications, In Progress, Approved, Delayed/At Risk) — 90-110px height, icon + number + short label only. No paragraphs. All counts derived from `useAllApplications()` — NO hardcoded values.
+   - **Application Progress Overview** (full width): compact table (52px row height), 10 per page pagination. Search by app no, project, applicant, officer, stage, status. Filters: status, stage, role, SLA. "View All" link. Row click → openApplication(a.id, "pm-application-details").
+   - **Live Workflow Monitor** (full width): compact card-style rows, 5 per page pagination. Search by app/project/officer. Filters: stage, role, SLA. "View All" link. Click → openApplication.
+   - **SLA Summary** (half width): 6 clickable categories (On Track, At Risk, Delayed, Critical Delay, Blocked, Completed) — each shows count from `computeSLA()`. Click → navigate("pm-sla").
+   - **Current Bottleneck** (half width): compact — stage label + pending count + "Inspect SLA" button. If no bottleneck, success state.
+   - **Officer Workload** (full width): compact officer cards (6 per page). Search by name/role. Filter by role. Sort by workload/pending/delayed/name. "View All" link. Click officer → openApplication(officer.id, "pm-officer-details").
+   - **Pending Actions** (full width): compact table (48px row height), 10 per page pagination. Search by app/project/officer/role/stage. Filters: role, stage, priority, SLA. "View All" link. Row click → openApplication.
+   - **Recent Activity** (full width): compact vertical feed, 10 per page pagination (NO nested scrolling). Search by action/actor/application/role. Filter by activity type. "View All" link.
+4. Each section has its OWN independent search + filter + pagination state — changing one section's filters does NOT reset another section.
+5. Pagination happens AFTER search/filter/sort (spec section 13/59). Changing search/filter resets to page 1 (spec section 14/60).
+6. Text overflow: long project/applicant/officer names use `truncate` with `title` tooltip (spec section 57).
+7. SLA calculation: verified `computeSLA()` in pm-helpers.ts is correct — derives from real `lastUpdated` timestamps + configured SLA days per stage. No fake SLA values. Categories show real counts (On Track, At Risk, Delayed, Critical, Blocked, Completed) from actual data.
+8. All KPI counts dynamically calculated from `useAllApplications()` — Total = apps.length, In Progress = not completed, Approved = APPROVED, Delayed/At Risk = SLA status in DELAYED/CRITICAL/AT_RISK/BLOCKED. No hardcoded 25/23/1/24.
+9. READ-ONLY: no edit/approve/reject/verify/pay/upload/delete/configure buttons anywhere. Only View/Track/Inspect/navigation actions (spec section 113).
+10. Responsive: KPI cards 1-col mobile → 2-col tablet → 4-col desktop. Tables use overflow-x-auto. Filters stack on mobile. No horizontal page overflow (spec section 80-83).
+11. No nested scrolling — pagination instead of internal scroll containers (spec section 77-79).
+
+Self-Verification (Agent Browser end-to-end):
+- Logged in as Project Manager → PM Dashboard loads ✓
+- KPI cards: 25 Total, 23 In Progress, 1 Approved, 24 Delayed/At Risk (all store-derived) ✓
+- Application Progress: search "Kulkarni" → 3 results ("Showing 1-3 of 3"), clear search → 25 results ("Showing 1-10 of 25"), page 2 → "Showing 11-20 of 25" with different apps ✓
+- All 5 paginated sections show correct counts:
+  - App Progress: Showing 1-10 of 25 ✓
+  - Live Workflow: Showing 1-5 of 23 ✓
+  - Officer Workload: Showing 1-6 of 8 ✓
+  - Pending Actions: Showing 1-10 of 23 ✓
+  - Recent Activity: Showing 1-10 of 224 ✓
+- SLA Summary click-through: clicking "On Track" → navigates to SLA & Delay Monitoring page ✓
+- Read-only: no Approve/Reject/Verify/Pay/Upload/Delete buttons found (only KPI label "1 Approved" which is a display, not an action) ✓
+- Mobile (390×844): no horizontal overflow, KPI cards present ✓
+- Desktop (1440×900): all 7 sections present (Application Progress Overview, Live Workflow Monitor, SLA Summary, Current Bottleneck, Officer Workload, Pending Actions, Recent Activity) ✓
+- 0 console/runtime errors throughout ✓
+
+Stage Summary:
+- Files changed: `src/components/pm/pm-dashboard.tsx` (full rewrite), `src/components/pm/pm-shared.tsx` (NEW — reusable components).
+- Only the PM Dashboard was modified — no other modules touched.
+- ONE reusable pagination implementation (PmPagination) used by all 5 data-heavy sections.
+- ONE reusable search input (PmSearchInput) + filter select (PmFilterSelect) used consistently.
+- Every section has independent search + filter + pagination state.
+- No nested scrolling — pagination instead.
+- No hardcoded counts — everything derived from shared store data via computeSLA, computeOfficerWorkloads, computePendingActions, computeRecentActivity.
+- Compact card heights: KPI 90-110px, tables 48-52px rows, officer cards compact.
+- Text truncation with tooltips for long values.
+- Responsive: 1-col mobile → 2-col tablet → 4-col desktop KPIs, no horizontal overflow.
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.

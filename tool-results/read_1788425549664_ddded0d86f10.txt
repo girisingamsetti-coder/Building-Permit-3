@@ -1,0 +1,827 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore } from "@/store/app-store";
+     6→import {
+     7→  useAllApplications,
+     8→  useAllUsers,
+     9→  computeSLA,
+    10→  computeOfficerWorkloads,
+    11→  identifyBottleneck,
+    12→  computePendingActions,
+    13→  computeRecentActivity,
+    14→  timeAgoBrief,
+    15→} from "@/components/pm/pm-helpers";
+    16→import {
+    17→  PageHeader,
+    18→  SectionCard,
+    19→  EmptyState,
+    20→  StatCard,
+    21→} from "@/components/design-system/layout";
+    22→import {
+    23→  StatusBadge,
+    24→  RoleBadge,
+    25→  PriorityBadge,
+    26→} from "@/components/design-system/badges";
+    27→import { formatDateTime } from "@/components/design-system/workflow";
+    28→import { Button } from "@/components/ui/button";
+    29→import { Badge } from "@/components/ui/badge";
+    30→import { Progress } from "@/components/ui/progress";
+    31→import {
+    32→  BarChart3,
+    33→  FileStack,
+    34→  Clock,
+    35→  CheckCircle2,
+    36→  AlertTriangle,
+    37→  Activity,
+    38→  Users,
+    39→  Timer,
+    40→  Gauge,
+    41→  ArrowRight,
+    42→  ChevronRight,
+    43→  Ban,
+    44→  ListChecks,
+    45→  History,
+    46→  CircleDot,
+    47→} from "lucide-react";
+    48→
+    49→// ============================================================
+    50→// PROJECT MANAGER DASHBOARD
+    51→// Central operational view — READ-ONLY monitoring.
+    52→// No edit/approve/reject/verify/pay buttons anywhere.
+    53→// ============================================================
+    54→
+    55→export function PmDashboard() {
+    56→  const navigate = useAppStore((s) => s.navigate);
+    57→  const openApplication = useAppStore((s) => s.openApplication);
+    58→
+    59→  const apps = useAllApplications();
+    60→  const users = useAllUsers();
+    61→
+    62→  // ---- KPI counts derived from the shared applications dataset ----
+    63→  const kpis = React.useMemo(() => {
+    64→    const total = apps.length;
+    65→    const inProgress = apps.filter(
+    66→      (a) =>
+    67→        !["APPROVED", "REJECTED", "DRAFT"].includes(a.status)
+    68→    ).length;
+    69→    const approved = apps.filter((a) => a.status === "APPROVED").length;
+    70→    const delayedAtRisk = apps.filter((a) => {
+    71→      const sla = computeSLA(a);
+    72→      return (
+    73→        sla.status === "DELAYED" ||
+    74→        sla.status === "CRITICAL" ||
+    75→        sla.status === "AT_RISK" ||
+    76→        sla.status === "BLOCKED"
+    77→      );
+    78→    }).length;
+    79→    return { total, inProgress, approved, delayedAtRisk };
+    80→  }, [apps]);
+    81→
+    82→  // ---- Application Progress Overview (max 10 rows) ----
+    83→  const overviewApps = React.useMemo(
+    84→    () =>
+    85→      [...apps]
+    86→        .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))
+    87→        .slice(0, 10),
+    88→    [apps]
+    89→  );
+    90→
+    91→  // ---- Live Workflow Monitor: 5 most-recently-updated non-completed apps ----
+    92→  const liveApps = React.useMemo(
+    93→    () =>
+    94→      apps
+    95→        .filter((a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status))
+    96→        .sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated))
+    97→        .slice(0, 5),
+    98→    [apps]
+    99→  );
+   100→
+   101→  // ---- SLA Summary counts (across all apps) ----
+   102→  const slaSummary = React.useMemo(() => {
+   103→    const counts: Record<
+   104→      "ON_TRACK" | "AT_RISK" | "DELAYED" | "CRITICAL" | "BLOCKED",
+   105→      number
+   106→    > = {
+   107→      ON_TRACK: 0,
+   108→      AT_RISK: 0,
+   109→      DELAYED: 0,
+   110→      CRITICAL: 0,
+   111→      BLOCKED: 0,
+   112→    };
+   113→    apps.forEach((a) => {
+   114→      const sla = computeSLA(a);
+   115→      if (sla.status === "COMPLETED") return;
+   116→      if (sla.status in counts) counts[sla.status as keyof typeof counts]++;
+   117→    });
+   118→    return counts;
+   119→  }, [apps]);
+   120→
+   121→  // ---- Officer workload ----
+   122→  const officerWorkloads = React.useMemo(
+   123→    () => computeOfficerWorkloads(apps, users).slice(0, 6),
+   124→    [apps, users]
+   125→  );
+   126→
+   127→  // ---- Bottleneck ----
+   128→  const bottleneck = React.useMemo(() => identifyBottleneck(apps), [apps]);
+   129→
+   130→  // ---- Pending Actions (top 5) ----
+   131→  const pendingActions = React.useMemo(
+   132→    () => computePendingActions(apps).slice(0, 5),
+   133→    [apps]
+   134→  );
+   135→
+   136→  // ---- Recent Activity (15 events) ----
+   137→  const recentActivity = React.useMemo(
+   138→    () => computeRecentActivity(apps, 15),
+   139→    [apps]
+   140→  );
+   141→
+   142→  return (
+   143→    <div className="space-y-6">
+   144→      <PageHeader
+   145→        title="Project Manager Dashboard"
+   146→        description="Central operational view of the building permit approval workflow."
+   147→        icon={BarChart3}
+   148→        breadcrumbs={[
+   149→          { label: "Project Manager" },
+   150→          { label: "Dashboard" },
+   151→        ]}
+   152→      />
+   153→
+   154→      {/* ===== KPI CARDS (4-col grid) ===== */}
+   155→      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+   156→        <StatCard
+   157→          label="Total Applications"
+   158→          value={kpis.total}
+   159→          icon={FileStack}
+   160→          accent="primary"
+   161→          onClick={() => navigate("pm-applications")}
+   162→        />
+   163→        <StatCard
+   164→          label="In Progress"
+   165→          value={kpis.inProgress}
+   166→          icon={Clock}
+   167→          accent="info"
+   168→          onClick={() => navigate("pm-applications")}
+   169→        />
+   170→        <StatCard
+   171→          label="Approved"
+   172→          value={kpis.approved}
+   173→          icon={CheckCircle2}
+   174→          accent="success"
+   175→          onClick={() => navigate("pm-applications")}
+   176→        />
+   177→        <StatCard
+   178→          label="Delayed / At Risk"
+   179→          value={kpis.delayedAtRisk}
+   180→          icon={AlertTriangle}
+   181→          accent="destructive"
+   182→          onClick={() => navigate("pm-sla")}
+   183→        />
+   184→      </div>
+   185→
+   186→      {/* ===== Application Progress Overview (full-width table) ===== */}
+   187→      <SectionCard
+   188→        title="Application Progress Overview"
+   189→        description="Latest applications across the workflow"
+   190→        icon={Activity}
+   191→        noPadding
+   192→        action={
+   193→          <Button
+   194→            variant="outline"
+   195→            size="sm"
+   196→            className="h-8 text-xs"
+   197→            onClick={() => navigate("pm-applications")}
+   198→          >
+   199→            View all <ArrowRight className="size-3" />
+   200→          </Button>
+   201→        }
+   202→      >
+   203→        {overviewApps.length === 0 ? (
+   204→          <div className="p-6">
+   205→            <EmptyState
+   206→              icon={FileStack}
+   207→              title="No applications found"
+   208→              description="Applications will appear here once they are created."
+   209→            />
+   210→          </div>
+   211→        ) : (
+   212→          <div className="overflow-x-auto">
+   213→            <table className="w-full text-sm">
+   214→              <caption className="sr-only">
+   215→                Application progress overview
+   216→              </caption>
+   217→              <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
+   218→                <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
+   219→                  <th scope="col" className="px-4 py-3 font-bold">
+   220→                    Application No.
+   221→                  </th>
+   222→                  <th scope="col" className="px-4 py-3 font-bold">
+   223→                    Project
+   224→                  </th>
+   225→                  <th scope="col" className="px-4 py-3 font-bold">
+   226→                    Applicant
+   227→                  </th>
+   228→                  <th scope="col" className="px-4 py-3 font-bold">
+   229→                    Current Stage
+   230→                  </th>
+   231→                  <th scope="col" className="px-4 py-3 font-bold">
+   232→                    Assigned Role
+   233→                  </th>
+   234→                  <th scope="col" className="px-4 py-3 font-bold">
+   235→                    Assigned Officer
+   236→                  </th>
+   237→                  <th scope="col" className="px-4 py-3 font-bold">
+   238→                    Status
+   239→                  </th>
+   240→                  <th scope="col" className="px-4 py-3 text-right font-bold">
+   241→                    Progress
+   242→                  </th>
+   243→                  <th scope="col" className="px-4 py-3 font-bold">
+   244→                    SLA
+   245→                  </th>
+   246→                  <th scope="col" className="px-4 py-3 font-bold">
+   247→                    Last Updated
+   248→                  </th>
+   249→                </tr>
+   250→              </thead>
+   251→              <tbody className="divide-y divide-border">
+   252→                {overviewApps.map((a) => {
+   253→                  const sla = computeSLA(a);
+   254→                  return (
+   255→                    <tr
+   256→                      key={a.id}
+   257→                      className="group cursor-pointer transition-colors hover:bg-muted/30"
+   258→                      onClick={() =>
+   259→                        openApplication(a.id, "pm-application-details")
+   260→                      }
+   261→                    >
+   262→                      <td className="px-4 py-3">
+   263→                        <button
+   264→                          onClick={(e) => {
+   265→                            e.stopPropagation();
+   266→                            openApplication(a.id, "pm-application-details");
+   267→                          }}
+   268→                          className="font-mono text-xs font-medium text-primary hover:underline"
+   269→                        >
+   270→                          {a.applicationNo}
+   271→                        </button>
+   272→                      </td>
+   273→                      <td className="px-4 py-3 max-w-[200px]">
+   274→                        <p className="truncate text-xs font-medium">
+   275→                          {a.project.name}
+   276→                        </p>
+   277→                      </td>
+   278→                      <td className="px-4 py-3 max-w-[160px]">
+   279→                        <p className="truncate text-xs">{a.applicant.name}</p>
+   280→                      </td>
+   281→                      <td className="px-4 py-3">
+   282→                        <span className="text-xs">{a.currentStageLabel}</span>
+   283→                      </td>
+   284→                      <td className="px-4 py-3">
+   285→                        {a.assignedOfficer ? (
+   286→                          <RoleBadge role={a.assignedOfficer.role} />
+   287→                        ) : (
+   288→                          <span className="text-xs text-muted-foreground">—</span>
+   289→                        )}
+   290→                      </td>
+   291→                      <td className="px-4 py-3">
+   292→                        <span className="text-xs">
+   293→                          {a.assignedOfficer?.name ?? "Unassigned"}
+   294→                        </span>
+   295→                      </td>
+   296→                      <td className="px-4 py-3">
+   297→                        <StatusBadge status={a.status} showIcon={false} />
+   298→                      </td>
+   299→                      <td className="px-4 py-3 text-right">
+   300→                        <div className="flex items-center gap-2 justify-end">
+   301→                          <Progress
+   302→                            value={a.progress}
+   303→                            className="h-1.5 w-16"
+   304→                          />
+   305→                          <span className="text-[11px] tabular-nums text-muted-foreground">
+   306→                            {a.progress}%
+   307→                          </span>
+   308→                        </div>
+   309→                      </td>
+   310→                      <td className="px-4 py-3">
+   311→                        <SlaBadge label={sla.label} cls={sla.cls} />
+   312→                      </td>
+   313→                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+   314→                        {timeAgoBrief(a.lastUpdated)}
+   315→                      </td>
+   316→                    </tr>
+   317→                  );
+   318→                })}
+   319→              </tbody>
+   320→            </table>
+   321→          </div>
+   322→        )}
+   323→      </SectionCard>
+   324→
+   325→      {/* ===== ROW: Live Workflow Monitor (LEFT, span-2) + SLA Summary (RIGHT) ===== */}
+   326→      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+   327→        <SectionCard
+   328→          title="Live Workflow Monitor"
+   329→          description="Most recently updated active applications"
+   330→          icon={Activity}
+   331→          className="xl:col-span-2"
+   332→        >
+   333→          {liveApps.length === 0 ? (
+   334→            <EmptyState
+   335→              icon={CircleDot}
+   336→              title="No active applications"
+   337→              description="All applications are currently completed or in draft."
+   338→            />
+   339→          ) : (
+   340→            <ul className="space-y-2.5">
+   341→              {liveApps.map((a) => {
+   342→                const sla = computeSLA(a);
+   343→                return (
+   344→                  <li key={a.id}>
+   345→                    <button
+   346→                      onClick={() =>
+   347→                        openApplication(a.id, "pm-application-details")
+   348→                      }
+   349→                      className="flex w-full items-center gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30"
+   350→                    >
+   351→                      <div className="min-w-0 flex-1 space-y-1">
+   352→                        <div className="flex items-center gap-2 flex-wrap">
+   353→                          <span className="font-mono text-xs font-medium text-primary">
+   354→                            {a.applicationNo}
+   355→                          </span>
+   356→                          <span className="truncate text-xs font-medium">
+   357→                            {a.project.name}
+   358→                          </span>
+   359→                        </div>
+   360→                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+   361→                          <span>{a.currentStageLabel}</span>
+   362→                          <span aria-hidden>·</span>
+   363→                          <span>
+   364→                            {a.assignedOfficer?.name ?? "Unassigned"}
+   365→                          </span>
+   366→                          {a.assignedOfficer && (
+   367→                            <RoleBadge role={a.assignedOfficer.role} />
+   368→                          )}
+   369→                          <span aria-hidden>·</span>
+   370→                          <span>
+   371→                            Pending since {timeAgoBrief(a.lastUpdated)}
+   372→                          </span>
+   373→                        </div>
+   374→                      </div>
+   375→                      <div className="flex flex-col items-end gap-1.5 shrink-0">
+   376→                        <div className="flex items-center gap-2">
+   377→                          <Progress
+   378→                            value={a.progress}
+   379→                            className="h-1.5 w-20"
+   380→                          />
+   381→                          <span className="text-[11px] tabular-nums text-muted-foreground">
+   382→                            {a.progress}%
+   383→                          </span>
+   384→                        </div>
+   385→                        <SlaBadge
+   386→                          label={sla.label}
+   387→                          cls={sla.cls}
+   388→                        />
+   389→                      </div>
+   390→                    </button>
+   391→                  </li>
+   392→                );
+   393→              })}
+   394→            </ul>
+   395→          )}
+   396→        </SectionCard>
+   397→
+   398→        <SectionCard
+   399→          title="SLA Summary"
+   400→          description="Distribution of SLA statuses across all applications"
+   401→          icon={Gauge}
+   402→        >
+   403→          <ul className="space-y-2">
+   404→            {SLA_SUMMARY_ITEMS.map((item) => (
+   405→              <li key={item.key}>
+   406→                <button
+   407→                  onClick={() => navigate("pm-sla")}
+   408→                  className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-muted/30"
+   409→                  aria-label={`${item.label}: ${slaSummary[item.key]} applications. View SLA details.`}
+   410→                >
+   411→                  <div className="flex items-center gap-2 min-w-0">
+   412→                    <span
+   413→                      className={cn(
+   414→                        "flex size-8 shrink-0 items-center justify-center rounded-lg",
+   415→                        item.cls
+   416→                      )}
+   417→                    >
+   418→                      <item.icon className="size-4" />
+   419→                    </span>
+   420→                    <span className="text-xs font-medium">{item.label}</span>
+   421→                  </div>
+   422→                  <div className="flex items-center gap-2 shrink-0">
+   423→                    <Badge
+   424→                      variant="outline"
+   425→                      className="tabular-nums"
+   426→                    >
+   427→                      {slaSummary[item.key]}
+   428→                    </Badge>
+   429→                    <ChevronRight className="size-3.5 text-muted-foreground" />
+   430→                  </div>
+   431→                </button>
+   432→              </li>
+   433→            ))}
+   434→          </ul>
+   435→        </SectionCard>
+   436→      </div>
+   437→
+   438→      {/* ===== ROW: Officer Workload (LEFT) + Current Bottleneck (RIGHT) ===== */}
+   439→      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_320px]">
+   440→        <SectionCard
+   441→          title="Officer Workload"
+   442→          description="Active applications assigned per officer"
+   443→          icon={Users}
+   444→          className="xl:col-span-2"
+   445→          action={
+   446→            <Button
+   447→              variant="outline"
+   448→              size="sm"
+   449→              className="h-8 text-xs"
+   450→              onClick={() => navigate("pm-officers")}
+   451→            >
+   452→              View all <ArrowRight className="size-3" />
+   453→            </Button>
+   454→          }
+   455→        >
+   456→          {officerWorkloads.length === 0 ? (
+   457→            <EmptyState
+   458→              icon={Users}
+   459→              title="No officers found"
+   460→              description="There are no active officers in the system yet."
+   461→            />
+   462→          ) : (
+   463→            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+   464→              {officerWorkloads.map((w) => {
+   465→                const maxAssigned = Math.max(
+   466→                  1,
+   467→                  ...officerWorkloads.map((o) => o.assigned)
+   468→                );
+   469→                const pct =
+   470→                  maxAssigned === 0 ? 0 : (w.assigned / maxAssigned) * 100;
+   471→                return (
+   472→                  <button
+   473→                    key={w.user.id}
+   474→                    onClick={() => navigate("pm-officers")}
+   475→                    className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-primary/40 hover:bg-muted/30"
+   476→                  >
+   477→                    <div className="flex items-start justify-between gap-2">
+   478→                      <div className="min-w-0">
+   479→                        <p className="truncate text-sm font-medium">
+   480→                          {w.user.name}
+   481→                        </p>
+   482→                        <div className="mt-1">
+   483→                          <RoleBadge role={w.user.role} />
+   484→                        </div>
+   485→                      </div>
+   486→                      <Badge
+   487→                        variant="outline"
+   488→                        className="tabular-nums shrink-0"
+   489→                      >
+   490→                        {w.assigned} assigned
+   491→                      </Badge>
+   492→                    </div>
+   493→                    <Progress value={pct} className="h-1.5" />
+   494→                    <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+   495→                      <span>
+   496→                        Pending:{" "}
+   497→                        <span className="font-medium text-foreground tabular-nums">
+   498→                          {w.pending}
+   499→                        </span>
+   500→                      </span>
+   501→                      <span>
+   502→                        At risk:{" "}
+   503→                        <span className="font-medium text-amber-600 tabular-nums">
+   504→                          {w.atRisk}
+   505→                        </span>
+   506→                      </span>
+   507→                      <span>
+   508→                        Delayed:{" "}
+   509→                        <span className="font-medium text-destructive tabular-nums">
+   510→                          {w.delayed}
+   511→                        </span>
+   512→                      </span>
+   513→                    </div>
+   514→                  </button>
+   515→                );
+   516→              })}
+   517→            </div>
+   518→          )}
+   519→        </SectionCard>
+   520→
+   521→        <SectionCard
+   522→          title="Current Bottleneck"
+   523→          description="Stage with the most pending applications"
+   524→          icon={Timer}
+   525→        >
+   526→          {bottleneck ? (
+   527→            <div className="space-y-3">
+   528→              <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+   529→                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+   530→                  <AlertTriangle className="size-4" />
+   531→                </div>
+   532→                <div className="min-w-0 space-y-1">
+   533→                  <p className="text-sm font-medium">
+   534→                    {bottleneck.stageLabel}
+   535→                  </p>
+   536→                  <p className="text-xs text-muted-foreground">
+   537→                    {bottleneck.reason}
+   538→                  </p>
+   539→                </div>
+   540→              </div>
+   541→              <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3">
+   542→                <span className="text-xs text-muted-foreground">
+   543→                  Pending at this stage
+   544→                </span>
+   545→                <Badge className="bg-destructive/10 text-destructive tabular-nums">
+   546→                  {bottleneck.pendingCount}
+   547→                </Badge>
+   548→              </div>
+   549→              <Button
+   550→                variant="outline"
+   551→                size="sm"
+   552→                className="w-full text-xs"
+   553→                onClick={() => navigate("pm-sla")}
+   554→              >
+   555→                Inspect SLA <ArrowRight className="size-3" />
+   556→              </Button>
+   557→            </div>
+   558→          ) : (
+   559→            <div className="flex flex-col items-center gap-2 py-8 text-center">
+   560→              <div className="flex size-12 items-center justify-center rounded-full bg-success/10 text-success">
+   561→                <CheckCircle2 className="size-6" />
+   562→              </div>
+   563→              <p className="text-sm font-medium">No bottleneck detected</p>
+   564→              <p className="text-xs text-muted-foreground">
+   565→                All stages are flowing smoothly.
+   566→              </p>
+   567→            </div>
+   568→          )}
+   569→        </SectionCard>
+   570→      </div>
+   571→
+   572→      {/* ===== Pending Actions ===== */}
+   573→      <SectionCard
+   574→        title="Pending Actions"
+   575→        description="Applications awaiting action, prioritised by urgency"
+   576→        icon={ListChecks}
+   577→        noPadding
+   578→        action={
+   579→          <Button
+   580→            variant="outline"
+   581→            size="sm"
+   582→            className="h-8 text-xs"
+   583→            onClick={() => navigate("pm-applications")}
+   584→          >
+   585→            View all <ArrowRight className="size-3" />
+   586→          </Button>
+   587→        }
+   588→      >
+   589→        {pendingActions.length === 0 ? (
+   590→          <div className="p-6">
+   591→            <EmptyState
+   592→              icon={CheckCircle2}
+   593→              title="No pending actions"
+   594→              description="All active applications are on track."
+   595→            />
+   596→          </div>
+   597→        ) : (
+   598→          <div className="overflow-x-auto">
+   599→            <table className="w-full text-sm">
+   600→              <caption className="sr-only">
+   601→                Pending actions across applications
+   602→              </caption>
+   603→              <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
+   604→                <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
+   605→                  <th scope="col" className="px-4 py-3 font-bold">
+   606→                    Application
+   607→                  </th>
+   608→                  <th scope="col" className="px-4 py-3 font-bold">
+   609→                    Stage
+   610→                  </th>
+   611→                  <th scope="col" className="px-4 py-3 font-bold">
+   612→                    Responsible Role
+   613→                  </th>
+   614→                  <th scope="col" className="px-4 py-3 font-bold">
+   615→                    Responsible Officer
+   616→                  </th>
+   617→                  <th scope="col" className="px-4 py-3 font-bold">
+   618→                    Pending Since
+   619→                  </th>
+   620→                  <th scope="col" className="px-4 py-3 font-bold">
+   621→                    SLA
+   622→                  </th>
+   623→                  <th scope="col" className="px-4 py-3 font-bold">
+   624→                    Priority
+   625→                  </th>
+   626→                </tr>
+   627→              </thead>
+   628→              <tbody className="divide-y divide-border">
+   629→                {pendingActions.map((p) => (
+   630→                  <tr
+   631→                    key={p.app.id}
+   632→                    className="group cursor-pointer transition-colors hover:bg-muted/30"
+   633→                    onClick={() =>
+   634→                      openApplication(p.app.id, "pm-application-details")
+   635→                    }
+   636→                  >
+   637→                    <td className="px-4 py-3">
+   638→                      <button
+   639→                        onClick={(e) => {
+   640→                          e.stopPropagation();
+   641→                          openApplication(
+   642→                            p.app.id,
+   643→                            "pm-application-details"
+   644→                          );
+   645→                        }}
+   646→                        className="font-mono text-xs font-medium text-primary hover:underline"
+   647→                      >
+   648→                        {p.app.applicationNo}
+   649→                      </button>
+   650→                      <div className="truncate text-[10px] text-muted-foreground max-w-[180px]">
+   651→                        {p.app.project.name}
+   652→                      </div>
+   653→                    </td>
+   654→                    <td className="px-4 py-3">
+   655→                      <span className="text-xs">{p.stageLabel}</span>
+   656→                    </td>
+   657→                    <td className="px-4 py-3">
+   658→                      <span className="text-xs">{p.responsibleRole}</span>
+   659→                    </td>
+   660→                    <td className="px-4 py-3">
+   661→                      <span className="text-xs">
+   662→                        {p.responsibleOfficer}
+   663→                      </span>
+   664→                    </td>
+   665→                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+   666→                      {timeAgoBrief(p.pendingSince)}
+   667→                    </td>
+   668→                    <td className="px-4 py-3">
+   669→                      <SlaBadge
+   670→                        label={p.slaLabel}
+   671→                        cls={p.slaCls}
+   672→                      />
+   673→                    </td>
+   674→                    <td className="px-4 py-3">
+   675→                      <PriorityBadge priority={p.priority} />
+   676→                    </td>
+   677→                  </tr>
+   678→                ))}
+   679→              </tbody>
+   680→            </table>
+   681→          </div>
+   682→        )}
+   683→      </SectionCard>
+   684→
+   685→      {/* ===== Recent Activity ===== */}
+   686→      <SectionCard
+   687→        title="Recent Activity"
+   688→        description="Latest application and workflow events across the system"
+   689→        icon={History}
+   690→        action={
+   691→          <Button
+   692→            variant="outline"
+   693→            size="sm"
+   694→            className="h-8 text-xs"
+   695→            onClick={() => navigate("pm-reports")}
+   696→          >
+   697→            View all <ArrowRight className="size-3" />
+   698→          </Button>
+   699→        }
+   700→      >
+   701→        {recentActivity.length === 0 ? (
+   702→          <EmptyState
+   703→            icon={History}
+   704→            title="No recent activity"
+   705→            description="Activity events will appear here once actions are performed."
+   706→          />
+   707→        ) : (
+   708→          <ol className="relative space-y-0 max-h-[420px] overflow-y-auto pr-1">
+   709→            {recentActivity.map((e, idx) => (
+   710→              <li
+   711→                key={`${e.applicationId}-${e.timestamp}-${idx}`}
+   712→                className="relative flex gap-3 pb-4"
+   713→              >
+   714→                {idx < recentActivity.length - 1 && (
+   715→                  <div
+   716→                    className="absolute left-[7px] top-5 h-[calc(100%-0.5rem)] w-px bg-border"
+   717→                    aria-hidden
+   718→                  />
+   719→                )}
+   720→                <div className="relative z-10 mt-1.5 size-3.5 shrink-0 rounded-full border-2 border-primary/60 bg-background">
+   721→                  <div className="absolute inset-0.5 rounded-full bg-primary/60" />
+   722→                </div>
+   723→                <div className="min-w-0 flex-1 space-y-0.5">
+   724→                  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+   725→                    <p className="text-sm font-medium">{e.action}</p>
+   726→                    <span className="text-[11px] text-muted-foreground tabular-nums whitespace-nowrap">
+   727→                      {formatDateTime(e.timestamp)}
+   728→                    </span>
+   729→                  </div>
+   730→                  <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+   731→                    <span className="font-medium text-foreground/80">
+   732→                      {e.actor}
+   733→                    </span>
+   734→                    <Badge
+   735→                      variant="outline"
+   736→                      className="text-[10px] font-medium"
+   737→                    >
+   738→                      {e.role}
+   739→                    </Badge>
+   740→                    <span aria-hidden>·</span>
+   741→                    <button
+   742→                      onClick={() =>
+   743→                        openApplication(
+   744→                          e.applicationId,
+   745→                          "pm-application-details"
+   746→                        )
+   747→                      }
+   748→                      className="font-mono text-[11px] text-primary hover:underline"
+   749→                    >
+   750→                      {e.applicationNo}
+   751→                    </button>
+   752→                  </div>
+   753→                  {e.remarks && (
+   754→                    <p className="text-xs text-muted-foreground italic">
+   755→                      {e.remarks}
+   756→                    </p>
+   757→                  )}
+   758→                </div>
+   759→              </li>
+   760→            ))}
+   761→          </ol>
+   762→        )}
+   763→      </SectionCard>
+   764→    </div>
+   765→  );
+   766→}
+   767→
+   768→// ============================================================
+   769→// SLA SUMMARY ITEMS (labels + classes — no hardcoded counts)
+   770→// ============================================================
+   771→
+   772→const SLA_SUMMARY_ITEMS: {
+   773→  key: keyof {
+   774→    ON_TRACK: number;
+   775→    AT_RISK: number;
+   776→    DELAYED: number;
+   777→    CRITICAL: number;
+   778→    BLOCKED: number;
+   779→  };
+   780→  label: string;
+   781→  cls: string;
+   782→  icon: React.ComponentType<{ className?: string }>;
+   783→}[] = [
+   784→  {
+   785→    key: "ON_TRACK",
+   786→    label: "On Track",
+   787→    cls: "bg-success/10 text-success",
+   788→    icon: CheckCircle2,
+   789→  },
+   790→  {
+   791→    key: "AT_RISK",
+   792→    label: "At Risk",
+   793→    cls: "bg-amber-500/15 text-amber-600 dark:text-amber-400",
+   794→    icon: AlertTriangle,
+   795→  },
+   796→  {
+   797→    key: "DELAYED",
+   798→    label: "Delayed",
+   799→    cls: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+   800→    icon: Clock,
+   801→  },
+   802→  {
+   803→    key: "CRITICAL",
+   804→    label: "Critical Delay",
+   805→    cls: "bg-destructive/10 text-destructive",
+   806→    icon: Timer,
+   807→  },
+   808→  {
+   809→    key: "BLOCKED",
+   810→    label: "Blocked",
+   811→    cls: "bg-destructive/10 text-destructive",
+   812→    icon: Ban,
+   813→  },
+   814→];
+   815→
+   816→// ============================================================
+   817→// SLA BADGE (uses pre-computed classes from computeSLA)
+   818→// ============================================================
+   819→
+   820→function SlaBadge({ label, cls }: { label: string; cls: string }) {
+   821→  return (
+   822→    <Badge variant="outline" className={cn("text-[11px] font-medium", cls)}>
+   823→      {label}
+   824→    </Badge>
+   825→  );
+   826→}
+   827→
