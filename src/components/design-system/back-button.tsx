@@ -34,6 +34,7 @@ const VIEW_LABELS: Record<ViewKey, string> = {
   "officer-dashboard": "Dashboard",
   "officer-review": "Application Review",
   "officer-applications": "Assigned Queue",
+  "officer-documents": "Document Review",
   "admin-dashboard": "Dashboard",
   "admin-users": "Users",
   "admin-roles": "Roles & Permissions",

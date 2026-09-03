@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
+  FileText,
   FileWarning,
   XCircle,
   CircleDot,
@@ -91,12 +92,12 @@ export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
 
 // ---------- Document Status Badge ----------
 const DOC_MAP: Record<DocumentStatus, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {
-  REQUIRED: { label: "Required", cls: "bg-muted text-muted-foreground border-border", icon: CircleDot },
-  UPLOADED: { label: "Uploaded", cls: "bg-info/10 text-info border-info/30", icon: Info },
-  UNDER_REVIEW: { label: "Under Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  REQUIRED: { label: "Required", cls: "bg-muted text-muted-foreground border-border", icon: FileText },
+  PENDING_VERIFICATION: { label: "Pending Verification", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   VERIFIED: { label: "Verified", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
   REJECTED: { label: "Rejected", cls: "bg-destructive/10 text-destructive border-destructive/30", icon: XCircle },
   SHORTFALL: { label: "Shortfall", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: FileWarning },
+  SUPERSEDED: { label: "Superseded", cls: "bg-muted text-muted-foreground border-border", icon: FileText },
 };
 
 export function DocumentStatusBadge({ status }: { status: DocumentStatus }) {

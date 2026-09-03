@@ -46,6 +46,7 @@ import {
   canViewApplication,
   getAllowedActions,
   getAssignedOfficerForStage,
+  hasPermission,
   portalForRole,
   computeProgress,
   rolesForStage,
@@ -151,6 +152,11 @@ interface AppState {
 
   respondToShortfall: (appId: string, shortfallId: string, responseText: string, supportingDoc?: string) => void;
 
+  // Document review actions (reviewer-only — permission-checked)
+  verifyDocument: (appId: string, docId: string, remarks?: string) => { ok: boolean; error?: string };
+  rejectDocument: (appId: string, docId: string, reason: string) => { ok: boolean; error?: string };
+  raiseDocumentShortfall: (appId: string, docId: string, data: { reason: string; requiredAction: string; remarks?: string }) => { ok: boolean; error?: string };
+
   // ---- officer workflow actions ----
   forwardApplication: (appId: string, remarks: string) => void;
   approveApplication: (appId: string, remarks: string) => void;
@@ -163,9 +169,7 @@ interface AppState {
   resolveShortfall: (appId: string, shortfallId: string, resolution: string) => void;
   reopenShortfall: (appId: string, shortfallId: string, reason: string) => void;
 
-  // officer document actions
-  verifyDocument: (appId: string, docId: string) => void;
-  rejectDocument: (appId: string, docId: string, reason: string) => void;
+  // officer document actions — declared above with permission-checked signatures
 
   addRemark: (appId: string, text: string, type: Remark["type"]) => void;
 
@@ -360,8 +364,8 @@ export const useAppStore = create<AppState>((set, get) => ({
     const uploadedCodes = data.uploadedDocCodes ?? [];
     const documents = baseDocs.map((d) => ({
       ...d,
-      status: (uploadedCodes.includes(d.code) ? "UPLOADED" : "REQUIRED") as DocumentStatus,
-      ...(uploadedCodes.includes(d.code) ? { uploadedAt: now, version: 1, fileSize: "1.2 MB" } : {}),
+      status: (uploadedCodes.includes(d.code) ? "PENDING_VERIFICATION" : "REQUIRED") as DocumentStatus,
+      ...(uploadedCodes.includes(d.code) ? { uploadedAt: now, uploadedBy: user.name, version: 1, fileSize: "1.2 MB", fileType: "pdf", fileReference: `demo://${d.code}_v1`, fileName: `${d.code}_v1.pdf` } : {}),
     }));
 
     // Determine initial status: if drawing uploaded → DRAWING_UPLOADED, else DRAFT
@@ -542,24 +546,103 @@ export const useAppStore = create<AppState>((set, get) => ({
     const user = get().user!;
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
-        let updated: Application = { ...app, documents: app.documents.map((d) => d.code === docCode ? { ...d, status: "UPLOADED" as const, uploadedAt: nowISO(), version: (d.version ?? 0) + 1, fileSize } : d) };
-        // If all required docs uploaded, move to DOCUMENT_VERIFICATION
-        const allUploaded = updated.documents.filter((d) => d.required).every((d) => d.status === "UPLOADED" || d.status === "VERIFIED");
+        const existing = app.documents.find((d) => d.code === docCode);
+        const newVersion = (existing?.version ?? 0) + 1;
+        const now = nowISO();
+        // Determine file type from extension
+        const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
+        const fileType = ext;
+        const fileReference = `demo://${docCode}_v${newVersion}`;
+
+        let updated: Application = { ...app, documents: app.documents.map((d) => {
+          if (d.code !== docCode) return d;
+          // If there's an existing uploaded version (REJECTED / SHORTFALL), push it to history as SUPERSEDED
+          if (existing && (d.status === "REJECTED" || d.status === "SHORTFALL" || d.status === "PENDING_VERIFICATION" || d.status === "VERIFIED")) {
+            const historyEntry = {
+              version: d.version ?? 1,
+              fileName: d.fileName ?? `${d.code}_v${d.version ?? 1}.pdf`,
+              fileSize: d.fileSize ?? "0 MB",
+              fileType: d.fileType,
+              fileReference: d.fileReference,
+              uploadedBy: d.uploadedBy ?? "Unknown",
+              uploadedAt: d.uploadedAt ?? now,
+              status: d.status as DocumentStatus,
+              reviewedBy: d.reviewedBy,
+              reviewedAt: d.reviewedAt,
+              rejectionReason: d.rejectionReason,
+              shortfallReason: d.shortfallReason,
+              reviewRemarks: d.reviewRemarks,
+            };
+            return {
+              ...d,
+              status: "PENDING_VERIFICATION" as const,
+              uploadedBy: user.name,
+              uploadedAt: now,
+              version: newVersion,
+              fileName,
+              fileSize,
+              fileType,
+              fileReference,
+              reviewedBy: undefined,
+              reviewedAt: undefined,
+              reviewRemarks: undefined,
+              rejectionReason: undefined,
+              shortfallReason: undefined,
+              shortfallId: undefined,
+              verifiedBy: undefined,
+              verifiedAt: undefined,
+              remarks: undefined,
+              history: [...(d.history ?? []), historyEntry],
+            };
+          }
+          // First upload (status was REQUIRED)
+          return {
+            ...d,
+            status: "PENDING_VERIFICATION" as const,
+            uploadedBy: user.name,
+            uploadedAt: now,
+            version: newVersion,
+            fileName,
+            fileSize,
+            fileType,
+            fileReference,
+            history: d.history ?? [],
+          };
+        }) };
+        // If all required docs uploaded (PENDING_VERIFICATION or VERIFIED), move to DOCUMENT_VERIFICATION
+        const allUploaded = updated.documents.filter((d) => d.required).every((d) => d.status === "PENDING_VERIFICATION" || d.status === "VERIFIED");
         if (allUploaded && app.status === "DOCUMENT_UPLOAD_PENDING") {
           updated = addAudit(updated, { user: user.name, role: user.role, action: "All required documents uploaded", oldStatus: app.status, newStatus: "DOCUMENT_VERIFICATION" });
           updated = setAppStatus(updated, "DOCUMENT_VERIFICATION", "DOCUMENTS");
           // Assign to TPA for verification
           const tpa = USERS.find((u) => u.role === "TPA")!;
-          updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: nowISO() };
+          updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: now };
         } else {
-          updated = addAudit(updated, { user: user.name, role: user.role, action: `Document uploaded: ${docCode}` });
+          updated = addAudit(updated, { user: user.name, role: user.role, action: `Document uploaded: ${docCode} v${newVersion}` });
         }
         return updated;
       }),
     }));
+    // Notification to LTP: document uploaded and pending verification
+    const app = get().applications.find((a) => a.id === appId)!;
+    const doc = app.documents.find((d) => d.code === docCode);
+    if (doc) {
+      const { notification } = NotificationFactory.documentUploaded(app, doc.name ?? docCode, doc.version ?? 1);
+      set((s) => ({ notifications: [notification, ...s.notifications] }));
+    }
   },
 
   generateFee: (appId) => {
+    // GUARD: fee generation is blocked until all required documents are VERIFIED.
+    const appBefore = get().applications.find((a) => a.id === appId);
+    if (appBefore) {
+      const requiredDocs = appBefore.documents.filter((d) => d.required);
+      const allVerified = requiredDocs.length > 0 && requiredDocs.every((d) => d.status === "VERIFIED");
+      if (!allVerified) {
+        // Block — do not generate fee
+        return;
+      }
+    }
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         const docCount = app.documents.filter((d) => d.required).length;
@@ -880,15 +963,34 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
-  verifyDocument: (appId, docId) => {
+  verifyDocument: (appId, docId, remarks) => {
     const user = get().user!;
+    const roles = get().roles;
+    // PERMISSION CHECK: only roles with document:verify can verify
+    if (!hasPermission(user, "document:verify", roles)) {
+      return { ok: false, error: "You do not have permission to verify documents." };
+    }
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
-        let updated: Application = { ...app, documents: app.documents.map((d) => d.id === docId ? { ...d, status: "VERIFIED" as const, verifiedBy: user.name, verifiedAt: nowISO() } : d) };
-        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document verified: ${updated.documents.find((d) => d.id === docId)?.name}` });
-        // Check if all required docs verified → generate fee
+        const now = nowISO();
+        let updated: Application = { ...app, documents: app.documents.map((d) => d.id === docId ? {
+          ...d,
+          status: "VERIFIED" as const,
+          reviewedBy: user.name,
+          reviewedAt: now,
+          reviewRemarks: remarks,
+          verifiedBy: user.name,    // legacy compat
+          verifiedAt: now,          // legacy compat
+          remarks: remarks,         // legacy compat
+        } : d) };
+        const docName = updated.documents.find((d) => d.id === docId)?.name ?? "Document";
+        const docVersion = updated.documents.find((d) => d.id === docId)?.version ?? 1;
+        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document verified: ${docName} v${docVersion}`, remarks });
+        // Check if all required docs verified → generate fee (auto-advance)
         const allVerified = updated.documents.filter((d) => d.required).every((d) => d.status === "VERIFIED");
-        if (allVerified && updated.status === "DOCUMENT_VERIFICATION") {
+        if (allVerified && (updated.status === "DOCUMENT_VERIFICATION" || updated.status === "DOCUMENT_UPLOAD_PENDING")) {
+          updated = addWorkflowHistory(updated, "DOCUMENTS", { name: user.name, role: user.role }, "All required documents verified", undefined, "COMPLETED");
+          // Auto-generate fee now that all required docs are verified
           const docCount = updated.documents.filter((d) => d.required).length;
           const result = feeService.calculate({
             applicationType: updated.project.type,
@@ -902,29 +1004,124 @@ export const useAppStore = create<AppState>((set, get) => ({
             updated = { ...updated, fee };
             updated = addAudit(updated, { user: "System (Fee Engine)", role: "TPA", action: "All documents verified — fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
             updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
-            updated = addWorkflowHistory(updated, "DOCUMENTS", { name: user.name, role: user.role }, "Documents verified", undefined, "COMPLETED");
           }
         }
         return updated;
       }),
     }));
-    // Notification if fee generated
-    const app = get().applications.find((a) => a.id === appId)!;
-    if (app.status === "FEE_GENERATED" && app.fee) {
-      const { notification, smsLog } = NotificationFactory.feeGenerated(app);
+    // Notification to LTP: document verified
+    const appAfter = get().applications.find((a) => a.id === appId)!;
+    const docAfter = appAfter.documents.find((d) => d.id === docId);
+    if (docAfter) {
+      const { notification } = NotificationFactory.documentVerified(appAfter, docAfter.name, docAfter.version ?? 1);
+      set((s) => ({ notifications: [notification, ...s.notifications] }));
+    }
+    // If fee was auto-generated, notify LTP
+    if (appAfter.status === "FEE_GENERATED" && appAfter.fee) {
+      const { notification, smsLog } = NotificationFactory.feeGenerated(appAfter);
       set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
     }
+    return { ok: true };
   },
 
   rejectDocument: (appId, docId, reason) => {
     const user = get().user!;
+    const roles = get().roles;
+    // PERMISSION CHECK: only roles with document:reject can reject
+    if (!hasPermission(user, "document:reject", roles)) {
+      return { ok: false, error: "You do not have permission to reject documents." };
+    }
+    if (!reason.trim()) {
+      return { ok: false, error: "Rejection reason is required." };
+    }
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
-        let updated: Application = { ...app, documents: app.documents.map((d) => d.id === docId ? { ...d, status: "REJECTED" as const, verifiedBy: user.name, verifiedAt: nowISO(), remarks: reason } : d) };
-        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document rejected: ${updated.documents.find((d) => d.id === docId)?.name}`, remarks: reason });
+        const now = nowISO();
+        let updated: Application = { ...app, documents: app.documents.map((d) => d.id === docId ? {
+          ...d,
+          status: "REJECTED" as const,
+          reviewedBy: user.name,
+          reviewedAt: now,
+          rejectionReason: reason,
+          verifiedBy: user.name,   // legacy compat
+          verifiedAt: now,         // legacy compat
+          remarks: reason,         // legacy compat
+        } : d) };
+        const docName = updated.documents.find((d) => d.id === docId)?.name ?? "Document";
+        const docVersion = updated.documents.find((d) => d.id === docId)?.version ?? 1;
+        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document rejected: ${docName} v${docVersion}`, remarks: reason });
         return updated;
       }),
     }));
+    // Notification to LTP: document rejected
+    const appAfter = get().applications.find((a) => a.id === appId)!;
+    const docAfter = appAfter.documents.find((d) => d.id === docId);
+    if (docAfter) {
+      const { notification } = NotificationFactory.documentRejected(appAfter, docAfter.name, docAfter.version ?? 1, reason);
+      set((s) => ({ notifications: [notification, ...s.notifications] }));
+    }
+    return { ok: true };
+  },
+
+  raiseDocumentShortfall: (appId, docId, data) => {
+    const user = get().user!;
+    const roles = get().roles;
+    // PERMISSION CHECK: only roles with shortfall:raise can raise shortfall
+    if (!hasPermission(user, "shortfall:raise", roles)) {
+      return { ok: false, error: "You do not have permission to raise shortfalls." };
+    }
+    if (!data.reason.trim() || !data.requiredAction.trim()) {
+      return { ok: false, error: "Shortfall reason and required action are required." };
+    }
+    const shortfallId = genId("sf");
+    const shortfallSeq = `SF/2026/${String(Math.floor(Math.random() * 9000) + 1000)}`;
+    set((s) => ({
+      applications: updateApp(s.applications, appId, (app) => {
+        const now = nowISO();
+        // Update document status to SHORTFALL + link shortfall record
+        let updated: Application = { ...app, documents: app.documents.map((d) => d.id === docId ? {
+          ...d,
+          status: "SHORTFALL" as const,
+          reviewedBy: user.name,
+          reviewedAt: now,
+          shortfallReason: data.reason,
+          remarks: data.reason,    // legacy compat
+          shortfallId,
+        } : d) };
+        const docName = updated.documents.find((d) => d.id === docId)?.name ?? "Document";
+        const docVersion = updated.documents.find((d) => d.id === docId)?.version ?? 1;
+        // Create a Shortfall record linked to the document
+        const shortfall: Shortfall = {
+          id: shortfallId,
+          shortfallId: shortfallSeq,
+          type: "DOCUMENT",
+          title: `Shortfall: ${docName} v${docVersion}`,
+          description: `${data.reason}${data.remarks ? ` — ${data.remarks}` : ""}`,
+          raisedBy: { name: user.name, role: user.role },
+          raisedAt: now,
+          dueDate: new Date(Date.now() + 7 * 86400000).toISOString(),
+          status: "OPEN",
+          applicationId: app.id,
+          applicationNo: app.applicationNo,
+          stageRaisedAt: "DOCUMENTS",
+        };
+        updated = { ...updated, shortfalls: [...updated.shortfalls, shortfall] };
+        updated = addAudit(updated, { user: user.name, role: user.role, action: `Document shortfall raised: ${docName} v${docVersion}`, remarks: data.reason });
+        // Set application status to SHORTFALL_RAISED if currently in document verification
+        if (updated.status === "DOCUMENT_VERIFICATION" || updated.status === "DOCUMENT_UPLOAD_PENDING") {
+          updated = setAppStatus(updated, "SHORTFALL_RAISED");
+        }
+        return updated;
+      }),
+    }));
+    // Notification to LTP: document shortfall raised
+    const appAfter = get().applications.find((a) => a.id === appId)!;
+    const docAfter = appAfter.documents.find((d) => d.id === docId);
+    if (docAfter) {
+      const { notification, smsLog } = NotificationFactory.shortfallRaised(appAfter, `${docAfter.name} v${docAfter.version ?? 1}`);
+      set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+    }
+    return { ok: true };
   },
 
   addRemark: (appId, text, type) => {
@@ -1150,6 +1347,31 @@ export function useAssignedApplications() {
       if (["APPROVED", "REJECTED"].includes(a.status)) return false;
       return rolesForStage(a.currentStage).includes(user.role);
     });
+  }, [applications, user]);
+}
+
+// Returns ALL applications for officer document reviewers — every application
+// with at least one uploaded document (PENDING_VERIFICATION / VERIFIED / REJECTED /
+// SHORTFALL). This is broader than useVisibleApplications so the reviewer can see
+// every document awaiting review across the whole system.
+export function useAllReviewableApplications() {
+  const applications = useAppStore((s) => s.applications);
+  const user = useAppStore((s) => s.user);
+  return useMemo(() => {
+    if (!user) return [];
+    if (user.role === "ADMIN") return applications;
+    if (user.role === "LTP") return applications.filter((a) => a.ltpId === user.id);
+    // Officers with document:verify or document:reject see ALL applications that
+    // have at least one uploaded document (so they can review documents even
+    // when the application isn't at the DOCUMENTS stage yet, e.g. a re-upload).
+    return applications.filter((a) =>
+      a.documents.some((d) =>
+        d.status === "PENDING_VERIFICATION" ||
+        d.status === "REJECTED" ||
+        d.status === "SHORTFALL" ||
+        d.status === "VERIFIED"
+      )
+    );
   }, [applications, user]);
 }
 

@@ -21,6 +21,7 @@ import { LtpProfile, LtpHelp } from "@/components/ltp/ltp-profile";
 import { OfficerDashboard } from "@/components/officer/officer-dashboard";
 import { OfficerApplications } from "@/components/officer/officer-applications";
 import { OfficerReview } from "@/components/officer/officer-review";
+import { OfficerDocuments } from "@/components/officer/officer-documents";
 
 // Admin views
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
@@ -59,6 +60,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "officer-dashboard": OfficerDashboard,
   "officer-review": OfficerReview,
   "officer-applications": OfficerApplications,
+  "officer-documents": OfficerDocuments,
   // admin
   "admin-dashboard": AdminDashboard,
   "admin-users": AdminUsers,

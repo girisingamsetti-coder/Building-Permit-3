@@ -684,3 +684,75 @@ Stage Summary:
 - Dropdown: 280px, max-h-[320px], internal scroll, sticky search, compact results, selected state with check + bg-primary/10.
 - Keyboard accessible: ArrowUp/Down, Enter, Escape, aria-label, role=listbox/option, aria-selected.
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
+
+---
+Task ID: 15
+Agent: main
+Task: Fix the Required Documents module completely — document workflow (Required → Pending Verification → Verified/Rejected/Shortfall), View/Download buttons, reviewer queue, permissions, versioning, fee-generation guard, notifications, audit.
+
+Work Log:
+1. Inspected existing implementation: `ltp-documents.tsx` (358 lines), `ltp-drawings.tsx`, store `uploadDocument`/`verifyDocument`/`rejectDocument`/`generateFee` actions, types (`DocumentStatus` had UPLOADED/UNDER_REVIEW instead of PENDING_VERIFICATION), `DocumentRecord` lacked review/version fields, permissions (`document:verify` only on TPA, no `document:reject`), notification service (no document workflow factories).
+
+2. Types (`src/types/index.ts`):
+   - Replaced `UPLOADED`/`UNDER_REVIEW` with `PENDING_VERIFICATION` in `DocumentStatus`. Added `SUPERSEDED`. New lifecycle: REQUIRED → PENDING_VERIFICATION → VERIFIED | REJECTED | SHORTFALL; on re-upload old → SUPERSEDED, new → PENDING_VERIFICATION.
+   - Extended `DocumentRecord` with: `uploadedBy`, `fileName`, `fileType`, `fileReference`, `reviewedBy`, `reviewedAt`, `reviewRemarks`, `rejectionReason`, `shortfallReason`, `shortfallId`, `history: DocumentVersion[]`.
+   - Added `DocumentVersion` interface for historical versions.
+   - Added `officer-documents` to `ViewKey`.
+   - Added `DOCUMENT_UPLOADED`, `DOCUMENT_REJECTED`, `DOCUMENT_SHORTFALL` to `NotificationType`.
+
+3. Seed data (`src/data/mock-data.ts`):
+   - `makeDocuments`: updated all statuses from UPLOADED → PENDING_VERIFICATION. Added `uploadedBy`, `fileName`, `fileType`, `fileReference` fields to every seed document.
+   - Added `document:reject` + `document:view` permissions to TPA role (authorized reviewer).
+   - Added `document:upload` to LTP (already present, confirmed).
+
+4. Store (`src/store/app-store.ts`):
+   - `uploadDocument`: REWROTE — now creates a versioned record. On re-upload (existing REJECTED/SHORTFALL/PENDING_VERIFICATION/VERIFIED), pushes old version to `history` array with status snapshot, creates new version with PENDING_VERIFICATION. First upload (REQUIRED) → PENDING_VERIFICATION. Stores `uploadedBy`, `fileName`, `fileType`, `fileReference`, `version`. Auto-advances to DOCUMENT_VERIFICATION when all required docs are uploaded. Sends `documentUploaded` notification.
+   - `verifyDocument`: REWROTE with permission check (`document:verify`). Sets `reviewedBy`, `reviewedAt`, `reviewRemarks`. On all-required-verified, auto-generates fee (with the `generateFee` guard now satisfied). Sends `documentVerified` notification. Returns `{ok, error}`.
+   - `rejectDocument`: REWROTE with permission check (`document:reject`). Requires reason. Sets `rejectionReason`, `reviewedBy`, `reviewedAt`. Sends `documentRejected` notification. Returns `{ok, error}`.
+   - `raiseDocumentShortfall` (NEW): permission check (`shortfall:raise`). Requires reason + requiredAction. Sets doc status to SHORTFALL, creates a linked `Shortfall` record (type DOCUMENT), sets app status to SHORTFALL_RAISED. Sends `shortfallRaised` notification. Returns `{ok, error}`.
+   - `generateFee`: Added GUARD — blocks fee generation unless ALL required documents are VERIFIED. Upload ≠ verification.
+   - `createApplication`: updated document status from UPLOADED → PENDING_VERIFICATION.
+   - Added `useAllReviewableApplications` hook — returns ALL applications with at least one uploaded document (broader than `useVisibleApplications` for officers, so reviewers see every document pending verification across the whole system, not just apps at the DOCUMENTS stage).
+
+5. Notification service (`src/services/notification-service.ts`):
+   - Added 4 factories: `documentUploaded`, `documentVerified`, `documentRejected`, `documentShortfall` — each includes applicationNumber, documentName, version, status.
+   - Updated SMS template code map with new notification types.
+
+6. UI:
+   - `src/components/ltp/document-viewer-modal.tsx` (NEW — 340 lines): Reusable modal for both LTP and reviewer. Shows: application context (app no, project, applicant, doc type), document metadata (file name, version, size, uploaded by, date, status, rejection/shortfall reason), document preview (PDF via iframe, image placeholder, "preview unavailable" for DWG/DXF), version history (current + older versions with status + reviewer + reason), role-aware review actions (Verify/Reject/Raise Shortfall for reviewers with permission checks, re-upload for LTP), download button (generates real blob with correct filename like `7_12_Land_Extract_v2.pdf`).
+   - `src/components/ltp/ltp-documents.tsx` (REWRITE — 365 lines): Uses `DocumentViewerModal`. Status-aware action buttons: REQUIRED → Upload; PENDING_VERIFICATION/VERIFIED → View + Download; REJECTED → View + Download + Re-upload; SHORTFALL → View + Download + Resolve; SUPERSEDED → View + Download. Counters: Required, Verified, Pending Verification, Compliance % (verified/required, NOT uploaded/required). Status filter updated to new statuses. Document search now matches name, code, AND fileName.
+   - `src/components/officer/officer-documents.tsx` (NEW — 180 lines): Reviewer queue. KPIs: Pending Verification, Verified, Rejected, Shortfall. Searchable table (by app no, project, applicant, document). Uses `useAllReviewableApplications` so reviewer sees ALL uploaded docs across the system. Each row has a "Review" button that opens `DocumentViewerModal` (with Verify/Reject/Shortfall actions for authorized reviewers).
+   - `src/components/design-system/badges.tsx`: Updated `DOC_MAP` for new DocumentStatus values (REQUIRED, PENDING_VERIFICATION, VERIFIED, REJECTED, SHORTFALL, SUPERSEDED).
+   - `src/components/layout/nav-config.ts`: Added "Document Review" nav item to OFFICER portal (icon: FileCheck2).
+   - `src/components/layout/topbar.tsx` + `src/components/ltp/ltp-notifications.tsx`: Added notification icons for DOCUMENT_UPLOADED, DOCUMENT_REJECTED, DOCUMENT_SHORTFALL.
+   - `src/components/design-system/back-button.tsx`: Added "officer-documents" → "Document Review" label.
+   - `src/app/page.tsx`: Registered `officer-documents` → `OfficerDocuments` in VIEW_REGISTRY.
+   - `src/components/officer/officer-review.tsx`: Updated document verification conditions from `UPLOADED` → `PENDING_VERIFICATION`.
+
+Self-Verification (Agent Browser end-to-end):
+- **Upload**: LTP uploads 7/12 Land Extract on app-2 → status changes from "Required" to "Pending Verification", version v2, View + Download buttons appear ✓
+- **Counters after upload**: Required=7, Verified=0, Pending Verification=1, Compliance=0% (uploading does NOT increase compliance — only VERIFIED counts) ✓
+- **View button**: opens DocumentViewerModal with application context (MC/BP/2026/04/0002, Tamhane Row Houses, Smt. Priya Tamhane), document metadata (file name, version v2, size, uploaded by, date, status), PDF preview iframe ✓
+- **LTP permissions enforced**: LTP sees NO Verify/Reject/Shortfall buttons (permission-checked) ✓
+- **Download**: generates real blob with correct filename (DOC_712_v2_...pdf), toast "Download started" ✓
+- **Reviewer queue (TPA)**: TPA sees 24 pending verification documents across ALL applications. Search "0002" → finds the uploaded doc with "Review" button ✓
+- **Verify**: TPA clicks Review → Verify → confirm. Toast "Document verified 7/12 Land Extract v2 has been verified". Pending count drops 24→23 ✓
+- **Reject**: TPA clicks Review → Reject → fills reason "Document is not legible..." → confirm. Toast "Document rejected 7/12 Land Extract v2 has been rejected". Pending count drops, Rejected count = 1 ✓
+- **Raise Shortfall**: TPA clicks Review → Raise Shortfall → fills reason + requiredAction → confirm. Toast "Shortfall raised on 7/12 Land Extract v2. LTP notified". Shortfall count goes 1→2 ✓
+- **LTP sees shortfall**: LTP opens app-3 → 7/12 doc shows "Shortfall" status with "Resolve" button + shortfall reason visible in table ✓
+- **Re-upload (versioning)**: LTP clicks Resolve → confirm. Doc becomes v3, "Pending Verification". Version history in modal shows: Current v3 (Pending Verification) + v2 (Shortfall, "Missing authorized signature...", Reviewed by Shri. Rajesh Patil + date) ✓
+- **Download correct version**: modal footer Download button + per-version Download buttons in history ✓
+- **Fee generation blocked**: generateFee guard blocks unless all required docs VERIFIED (tested via code — upload alone does not generate fee) ✓
+- **0 console / runtime errors** throughout ✓
+
+Stage Summary:
+- Files changed: `src/types/index.ts`, `src/data/mock-data.ts`, `src/store/app-store.ts`, `src/services/notification-service.ts`, `src/components/ltp/ltp-documents.tsx`, `src/components/ltp/document-viewer-modal.tsx` (NEW), `src/components/officer/officer-documents.tsx` (NEW), `src/components/design-system/badges.tsx`, `src/components/design-system/back-button.tsx`, `src/components/layout/nav-config.ts`, `src/components/layout/topbar.tsx`, `src/components/ltp/ltp-notifications.tsx`, `src/components/officer/officer-review.tsx`, `src/app/page.tsx`
+- Document lifecycle: REQUIRED → PENDING_VERIFICATION → VERIFIED | REJECTED | SHORTFALL; re-upload creates new version (old kept in history with status snapshot).
+- View/Download work: modal shows real preview (PDF iframe, image placeholder, "unavailable" for DWG), download generates real blob with correct filename + version.
+- Reviewer queue: `officer-documents` view shows ALL uploaded docs across the system; TPA sees Verify/Reject/Raise Shortfall (permission-checked).
+- Permissions enforced: LTP cannot Verify/Reject/Shortfall (buttons hidden + store action returns `{ok:false, error}`). TPA can do all three (now has `document:verify`, `document:reject`, `shortfall:raise`).
+- Fee generation: blocked by `generateFee` guard until ALL required docs VERIFIED.
+- Notifications: documentUploaded, documentVerified, documentRejected, documentShortfall — each with applicationNumber + documentName + version.
+- Version history: kept in `DocumentRecord.history[]`, displayed in modal with per-version download.
+- Counters/compliance: derived from real document status; compliance = verified/required (NOT uploaded/required).
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.

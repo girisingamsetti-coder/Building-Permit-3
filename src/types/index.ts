@@ -209,26 +209,61 @@ export interface ScrutinyReport {
 }
 
 // ---------- Documents ----------
+// Document lifecycle:
+//   REQUIRED → PENDING_VERIFICATION → VERIFIED | REJECTED | SHORTFALL
+//   On re-upload after REJECTED/SHORTFALL: old version → SUPERSEDED, new version → PENDING_VERIFICATION
 export type DocumentStatus =
   | "REQUIRED"
-  | "UPLOADED"
-  | "UNDER_REVIEW"
+  | "PENDING_VERIFICATION"
   | "VERIFIED"
   | "REJECTED"
-  | "SHORTFALL";
+  | "SHORTFALL"
+  | "SUPERSEDED";
 
 export interface DocumentRecord {
   id: string;
   name: string;
-  code: string;
+  code: string;             // documentTypeId (e.g. DOC_712)
   required: boolean;
   status: DocumentStatus;
+  // Upload metadata
+  uploadedBy?: string;
   uploadedAt?: string;
-  version?: number;
+  version?: number;         // current version number (1, 2, 3…)
+  fileName?: string;        // actual uploaded file name
   fileSize?: string;
+  fileType?: string;        // MIME/extension: pdf, jpg, png, dwg…
+  fileReference?: string;   // storage/blob reference (demo: data URL or filename)
+  // Review metadata
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewRemarks?: string;   // optional verify remarks
+  rejectionReason?: string;
+  shortfallReason?: string;
+  shortfallId?: string;     // link to Shortfall record when status === SHORTFALL
+  // Version history — older versions of this document type
+  history?: DocumentVersion[];
+  // Legacy compat
   verifiedBy?: string;
   verifiedAt?: string;
   remarks?: string;
+}
+
+// Historical version of a document (kept when a new version is uploaded)
+export interface DocumentVersion {
+  version: number;
+  fileName: string;
+  fileSize: string;
+  fileType?: string;
+  fileReference?: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  status: DocumentStatus;   // REJECTED | SHORTFALL | SUPERSEDED
+  reviewedBy?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+  shortfallReason?: string;
+  reviewRemarks?: string;
 }
 
 // ---------- Fees ----------
@@ -418,7 +453,10 @@ export type NotificationType =
   | "SCRUTINY_FAILED"
   | "SCRUTINY_PASSED"
   | "DOCUMENTS_REQUIRED"
+  | "DOCUMENT_UPLOADED"
   | "DOCUMENT_VERIFIED"
+  | "DOCUMENT_REJECTED"
+  | "DOCUMENT_SHORTFALL"
   | "FEE_GENERATED"
   | "PAYMENT_SUCCESSFUL"
   | "SHORTFALL_RAISED"
@@ -537,6 +575,7 @@ export type ViewKey =
   | "officer-dashboard"
   | "officer-review"
   | "officer-applications"
+  | "officer-documents"
   | "admin-dashboard"
   | "admin-users"
   | "admin-roles"

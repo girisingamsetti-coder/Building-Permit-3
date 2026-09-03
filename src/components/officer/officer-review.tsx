@@ -871,8 +871,8 @@ function DocumentsTab({ app, user }: { app: Application; user: AppUser }) {
           </thead>
           <tbody className="divide-y divide-border">
             {app.documents.map((d) => {
-              const canVerify = isTPA && (d.status === "UPLOADED" || d.status === "REQUIRED");
-              const canReject = isTPA && d.status !== "VERIFIED" && d.status !== "REQUIRED";
+              const canVerify = isTPA && d.status === "PENDING_VERIFICATION";
+              const canReject = isTPA && (d.status === "PENDING_VERIFICATION" || d.status === "SHORTFALL");
               return (
                 <tr key={d.id} className="hover:bg-muted/30">
                   <td className="px-3 py-2.5">

@@ -20,6 +20,7 @@ import {
   Workflow,
   MailWarning,
   History,
+  FileCheck2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -80,6 +81,7 @@ export const NAV: Record<Portal, NavGroup[]> = {
       items: [
         { view: "officer-applications", label: "Assigned Queue", icon: ClipboardCheck },
         { view: "officer-review", label: "Application Review", icon: FileSearch },
+        { view: "officer-documents", label: "Document Review", icon: FileCheck2 },
       ],
     },
     {

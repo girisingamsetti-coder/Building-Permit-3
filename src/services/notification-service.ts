@@ -77,7 +77,10 @@ function getTemplateCode(type: NotificationType): string {
     SCRUTINY_FAILED: "SMS_SCRUTINY_FAIL",
     SCRUTINY_PASSED: "SMS_SCRUTINY_PASS",
     DOCUMENTS_REQUIRED: "SMS_DOC_REQ",
+    DOCUMENT_UPLOADED: "SMS_DOC_UPLOADED",
     DOCUMENT_VERIFIED: "SMS_DOC_VERIFIED",
+    DOCUMENT_REJECTED: "SMS_DOC_REJECTED",
+    DOCUMENT_SHORTFALL: "SMS_DOC_SHORTFALL",
     FEE_GENERATED: "SMS_FEE_GEN",
     PAYMENT_SUCCESSFUL: "SMS_PAY_OK",
     SHORTFALL_RAISED: "SMS_SHORTFALL",
@@ -220,6 +223,47 @@ export const NotificationFactory = {
       type: "APPLICATION_RETURNED",
       title: "Application Returned",
       message: `${app.applicationNo} has been returned to ${stageLabel} for correction.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  // ---- Document workflow notifications ----
+  documentUploaded(app: Application, documentName: string, version: number) {
+    return createNotification({
+      type: "DOCUMENT_UPLOADED",
+      title: "Document Uploaded",
+      message: `${documentName} v${version} uploaded for ${app.applicationNo} and is pending verification.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  documentVerified(app: Application, documentName: string, version: number) {
+    return createNotification({
+      type: "DOCUMENT_VERIFIED",
+      title: "Document Verified",
+      message: `${documentName} v${version} for ${app.applicationNo} has been verified successfully.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  documentRejected(app: Application, documentName: string, version: number, reason: string) {
+    return createNotification({
+      type: "DOCUMENT_REJECTED",
+      title: "Document Rejected",
+      message: `${documentName} v${version} for ${app.applicationNo} has been rejected. Reason: ${reason}. Please upload a corrected version.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  documentShortfall(app: Application, documentName: string, version: number, reason: string) {
+    return createNotification({
+      type: "DOCUMENT_SHORTFALL",
+      title: "Document Shortfall Raised",
+      message: `A shortfall has been raised on ${documentName} v${version} for ${app.applicationNo}. Action required: ${reason}`,
       applicationId: app.id,
       applicationNo: app.applicationNo,
       recipientRole: "LTP",
