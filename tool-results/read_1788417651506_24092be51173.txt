@@ -1,0 +1,812 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore, useSelectedApplication, ROLES } from "@/store/app-store";
+     6→import {
+     7→  PageHeader,
+     8→  SectionCard,
+     9→  InfoGrid,
+    10→  InfoRow,
+    11→  EmptyState,
+    12→} from "@/components/design-system/layout";
+    13→import {
+    14→  StatusBadge,
+    15→  PriorityBadge,
+    16→  RoleBadge,
+    17→  SeverityBadge,
+    18→  DocumentStatusBadge,
+    19→  PaymentStatusBadge,
+    20→} from "@/components/design-system/badges";
+    21→import {
+    22→  WorkflowStepper,
+    23→  WorkflowTimeline,
+    24→  AuditTimeline,
+    25→  StageStatusPill,
+    26→  formatDateTime,
+    27→  formatDate,
+    28→  formatINR,
+    29→  timeAgo,
+    30→} from "@/components/design-system/workflow";
+    31→import {
+    32→  DrawingViewer,
+    33→  FileUploader,
+    34→  DocumentFileRow,
+    35→  type UploadedFile,
+    36→} from "@/components/design-system/files";
+    37→import { Button } from "@/components/ui/button";
+    38→import { Badge } from "@/components/ui/badge";
+    39→import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    40→import { Separator } from "@/components/ui/separator";
+    41→import { Progress } from "@/components/ui/progress";
+    42→import {
+    43→  FileText,
+    44→  Workflow,
+    45→  Upload,
+    46→  FolderClosed,
+    47→  ReceiptIndianRupee,
+    48→  AlertTriangle,
+    49→  MessageSquare,
+    50→  History,
+    51→  Building2,
+    52→  MapPin,
+    53→  User,
+    54→  Calendar,
+    55→  Clock,
+    56→  CheckCircle2,
+    57→  XCircle,
+    58→  AlertCircle,
+    59→  ArrowRight,
+    60→  Download,
+    61→  Eye,
+    62→  FileWarning,
+    63→  ScrollText,
+    64→  ShieldCheck,
+    65→  Info,
+    66→  Copy,
+    67→  Printer,
+    68→  Share2,
+    69→  ChevronRight,
+    70→  Flag,
+    71→} from "lucide-react";
+    72→import { useToast } from "@/hooks/use-toast";
+    73→import { PageBackButton } from "@/components/design-system/back-button";
+    74→import type { Application } from "@/types";
+    75→
+    76→export function LtpApplicationDetails() {
+    77→  const app = useSelectedApplication();
+    78→  const { navigate, openApplication } = useAppStore();
+    79→
+    80→  if (!app) {
+    81→    return (
+    82→      <div className="space-y-6">
+    83→        <PageBackButton fallbackView="ltp-applications" />
+    84→        <PageHeader
+    85→          title="Application Details"
+    86→          icon={FileText}
+    87→          breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Applications", onClick: () => navigate("ltp-applications") }, { label: "Details" }]}
+    88→        />
+    89→        <EmptyState
+    90→          icon={FileWarning}
+    91→          title="No application selected"
+    92→          description="Select an application from the list to view its details."
+    93→          action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Browse applications</Button>}
+    94→        />
+    95→      </div>
+    96→    );
+    97→  }
+    98→
+    99→  return (
+   100→    <div className="space-y-6">
+   101→      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
+   102→      <PageHeader
+   103→        title={app.applicationNo}
+   104→        description={app.project.name}
+   105→        icon={FileText}
+   106→        breadcrumbs={[
+   107→          { label: "LTP Portal", onClick: () => navigate("ltp-dashboard") },
+   108→          { label: "Applications", onClick: () => navigate("ltp-applications") },
+   109→          { label: app.applicationNo },
+   110→        ]}
+   111→        badge={<StatusBadge status={app.status} />}
+   112→        actions={
+   113→          <>
+   114→            <Button variant="outline" size="sm"><Printer className="size-4" /> Print</Button>
+   115→            <Button variant="outline" size="sm"><Share2 className="size-4" /> Share</Button>
+   116→          </>
+   117→        }
+   118→      />
+   119→
+   120→      {/* Status banner */}
+   121→      <StatusBanner app={app} />
+   122→
+   123→      {/* Workflow stepper */}
+   124→      <SectionCard title="Approval Workflow" description="Multi-level approval pipeline" icon={Workflow}>
+   125→        <div className="space-y-4">
+   126→          <WorkflowStepper currentStage={app.currentStage} status={app.status === "APPROVED" ? "COMPLETED" : app.status === "SCRUTINY_FAILED" ? "FAILED" : app.status === "SHORTFALL_RAISED" ? "SHORTFALL" : "CURRENT"} />
+   127→          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-xs">
+   128→            <div className="flex items-center gap-2">
+   129→              <Clock className="size-3.5 text-muted-foreground" />
+   130→              <span className="text-muted-foreground">Submitted:</span>
+   131→              <span className="font-medium">{formatDate(app.submissionDate)}</span>
+   132→            </div>
+   133→            <div className="flex items-center gap-2">
+   134→              <Calendar className="size-3.5 text-muted-foreground" />
+   135→              <span className="text-muted-foreground">Expected SLA:</span>
+   136→              <span className="font-medium">{formatDate(app.expectedSLA ?? "")}</span>
+   137→            </div>
+   138→            {app.assignedOfficer && (
+   139→              <div className="flex items-center gap-2">
+   140→                <ShieldCheck className="size-3.5 text-muted-foreground" />
+   141→                <span className="text-muted-foreground">Assigned:</span>
+   142→                <span className="font-medium">{app.assignedOfficer.name}</span>
+   143→                <RoleBadge role={app.assignedOfficer.role} />
+   144→              </div>
+   145→            )}
+   146→          </div>
+   147→        </div>
+   148→      </SectionCard>
+   149→
+   150→      {/* Tabs */}
+   151→      <Tabs defaultValue="overview" className="space-y-4">
+   152→        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
+   153→          <TabsTrigger value="overview" className="gap-1.5"><Info className="size-3.5" /> Overview</TabsTrigger>
+   154→          <TabsTrigger value="workflow" className="gap-1.5"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
+   155→          <TabsTrigger value="drawings" className="gap-1.5"><Upload className="size-3.5" /> Drawings &amp; Scrutiny</TabsTrigger>
+   156→          <TabsTrigger value="documents" className="gap-1.5"><FolderClosed className="size-3.5" /> Documents</TabsTrigger>
+   157→          <TabsTrigger value="fees" className="gap-1.5"><ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payment</TabsTrigger>
+   158→          <TabsTrigger value="shortfalls" className="gap-1.5"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
+   159→          <TabsTrigger value="remarks" className="gap-1.5"><MessageSquare className="size-3.5" /> Remarks {app.remarks.length > 0 && <Badge className="ml-1 bg-muted text-muted-foreground text-[9px]">{app.remarks.length}</Badge>}</TabsTrigger>
+   160→          <TabsTrigger value="audit" className="gap-1.5"><History className="size-3.5" /> Audit Log</TabsTrigger>
+   161→        </TabsList>
+   162→
+   163→        <TabsContent value="overview" className="space-y-6">
+   164→          <OverviewTab app={app} />
+   165→        </TabsContent>
+   166→        <TabsContent value="workflow" className="space-y-6">
+   167→          <WorkflowTab app={app} />
+   168→        </TabsContent>
+   169→        <TabsContent value="drawings" className="space-y-6">
+   170→          <DrawingsTab app={app} />
+   171→        </TabsContent>
+   172→        <TabsContent value="documents" className="space-y-6">
+   173→          <DocumentsTab app={app} />
+   174→        </TabsContent>
+   175→        <TabsContent value="fees" className="space-y-6">
+   176→          <FeesTab app={app} />
+   177→        </TabsContent>
+   178→        <TabsContent value="shortfalls" className="space-y-6">
+   179→          <ShortfallsTab app={app} />
+   180→        </TabsContent>
+   181→        <TabsContent value="remarks" className="space-y-6">
+   182→          <RemarksTab app={app} />
+   183→        </TabsContent>
+   184→        <TabsContent value="audit" className="space-y-6">
+   185→          <AuditTab app={app} />
+   186→        </TabsContent>
+   187→      </Tabs>
+   188→    </div>
+   189→  );
+   190→}
+   191→
+   192→// ---------- Status Banner ----------
+   193→function StatusBanner({ app }: { app: Application }) {
+   194→  const { openApplication, navigate } = useAppStore();
+   195→  const { toast } = useToast();
+   196→
+   197→  const config = {
+   198→    SCRUTINY_FAILED: {
+   199→      icon: XCircle,
+   200→      cls: "border-destructive/30 bg-destructive/5 text-destructive",
+   201→      iconCls: "bg-destructive/10 text-destructive",
+   202→      title: "Drawing scrutiny failed",
+   203→      desc: `${app.scrutinyReport?.failed ?? 1} critical issue(s) found. Please re-upload corrected drawings.`,
+   204→      action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
+   205→    },
+   206→    DRAWING_REUPLOAD_REQUIRED: {
+   207→      icon: XCircle,
+   208→      cls: "border-destructive/30 bg-destructive/5 text-destructive",
+   209→      iconCls: "bg-destructive/10 text-destructive",
+   210→      title: "Drawing re-upload required",
+   211→      desc: "Scrutiny identified critical non-compliances. Please re-upload a corrected drawing.",
+   212→      action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
+   213→    },
+   214→    SHORTFALL_RAISED: {
+   215→      icon: AlertTriangle,
+   216→      cls: "border-warning/30 bg-warning/5 text-warning-foreground",
+   217→      iconCls: "bg-warning/15 text-warning-foreground",
+   218→      title: `${app.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) raised`,
+   219→      desc: "Action required from you. Respond to the shortfalls to resume processing.",
+   220→      action: { label: "View shortfalls", view: "ltp-shortfalls" as const },
+   221→    },
+   222→    PAYMENT_PENDING: {
+   223→      icon: AlertCircle,
+   224→      cls: "border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400",
+   225→      iconCls: "bg-amber-500/15 text-amber-600",
+   226→      title: "Payment pending",
+   227→      desc: `Outstanding amount ${formatINR(app.fee?.outstanding ?? 0)}. Complete payment to initiate the approval workflow.`,
+   228→      action: { label: "Pay now", view: "ltp-payment" as const },
+   229→    },
+   230→    DOCUMENT_UPLOAD_PENDING: {
+   231→      icon: AlertCircle,
+   232→      cls: "border-info/30 bg-info/5 text-info",
+   233→      iconCls: "bg-info/10 text-info",
+   234→      title: "Documents pending",
+   235→      desc: "Some required documents are yet to be uploaded or verified.",
+   236→      action: { label: "Upload documents", view: "ltp-documents" as const },
+   237→    },
+   238→    PAYMENT_SUCCESS: {
+   239→      icon: CheckCircle2,
+   240→      cls: "border-success/30 bg-success/5 text-success",
+   241→      iconCls: "bg-success/10 text-success",
+   242→      title: "Payment successful",
+   243→      desc: "Your payment has been verified. The application is now in the approval pipeline.",
+   244→      action: { label: "Track application", view: "ltp-application-details" as const },
+   245→    },
+   246→    APPROVED: {
+   247→      icon: CheckCircle2,
+   248→      cls: "border-success/30 bg-success/5 text-success",
+   249→      iconCls: "bg-success/10 text-success",
+   250→      title: "Application approved",
+   251→      desc: "Your application has been approved. Download the permit below.",
+   252→      action: { label: "Download permit", view: "ltp-receipt" as const },
+   253→    },
+   254→    REJECTED: {
+   255→      icon: XCircle,
+   256→      cls: "border-destructive/30 bg-destructive/5 text-destructive",
+   257→      iconCls: "bg-destructive/10 text-destructive",
+   258→      title: "Application rejected",
+   259→      desc: "Your application has been rejected. Contact the reviewing officer for details.",
+   260→      action: { label: "View remarks", view: "ltp-application-details" as const },
+   261→    },
+   262→    RETURNED: {
+   263→      icon: AlertCircle,
+   264→      cls: "border-warning/30 bg-warning/5 text-warning-foreground",
+   265→      iconCls: "bg-warning/15 text-warning-foreground",
+   266→      title: "Application returned",
+   267→      desc: "The application has been returned for correction. Please review the remarks and resubmit.",
+   268→      action: { label: "View remarks", view: "ltp-application-details" as const },
+   269→    },
+   270→  } as const;
+   271→
+   272→  const c = config[app.status as keyof typeof config];
+   273→  if (!c) return null;
+   274→  const Icon = c.icon;
+   275→
+   276→  return (
+   277→    <div className={cn("flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between", c.cls)}>
+   278→      <div className="flex items-start gap-3">
+   279→        <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-lg", c.iconCls)}>
+   280→          <Icon className="size-5" />
+   281→        </div>
+   282→        <div className="space-y-0.5">
+   283→          <p className="text-sm font-semibold">{c.title}</p>
+   284→          <p className="text-xs opacity-90">{c.desc}</p>
+   285→        </div>
+   286→      </div>
+   287→      <Button
+   288→        size="sm"
+   289→        variant="outline"
+   290→        className={cn("shrink-0 border-current/30 bg-background/50", c.cls)}
+   291→        onClick={() => {
+   292→          openApplication(app.id, c.action.view);
+   293→          toast({ title: c.action.label });
+   294→        }}
+   295→      >
+   296→        {c.action.label} <ArrowRight className="size-4" />
+   297→      </Button>
+   298→    </div>
+   299→  );
+   300→}
+   301→
+   302→// ---------- Overview Tab ----------
+   303→function OverviewTab({ app }: { app: Application }) {
+   304→  const docsVerified = app.documents.filter((d) => d.status === "VERIFIED").length;
+   305→  const docsTotal = app.documents.filter((d) => d.required).length;
+   306→  return (
+   307→    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   308→      <div className="space-y-6 lg:col-span-2">
+   309→        <SectionCard title="Applicant Information" icon={User}>
+   310→          <InfoGrid
+   311→            items={[
+   312→              { label: "Applicant Name", value: app.applicant.name },
+   313→              { label: "Contact", value: app.applicant.contact, mono: true },
+   314→              { label: "Email", value: app.applicant.email },
+   315→              { label: "Address", value: app.applicant.address },
+   316→              { label: "Submitted on behalf of", value: app.ltpName },
+   317→              { label: "LTP License No.", value: "LTP-MC-2019-0457", mono: true },
+   318→            ]}
+   319→            columns={2}
+   320→          />
+   321→        </SectionCard>
+   322→
+   323→        <SectionCard title="Project Information" icon={Building2}>
+   324→          <InfoGrid
+   325→            items={[
+   326→              { label: "Project Name", value: app.project.name },
+   327→              { label: "Application Type", value: app.project.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) },
+   328→              { label: "Property Type", value: app.project.propertyType.replace("_", " ").toLowerCase() },
+   329→              { label: "Land Use", value: app.project.landUse },
+   330→              { label: "Plot Area", value: `${app.project.plotArea.toLocaleString("en-IN")} sq.m` },
+   331→              { label: "Built-up Area", value: `${app.project.builtUpArea.toLocaleString("en-IN")} sq.m` },
+   332→              { label: "FAR Utilisation", value: `${(app.project.builtUpArea / app.project.plotArea).toFixed(2)} (permissible 1.50)` },
+   333→              { label: "Priority", value: <PriorityBadge priority={app.priority} /> },
+   334→            ]}
+   335→            columns={2}
+   336→          />
+   337→        </SectionCard>
+   338→
+   339→        <SectionCard title="Property Location" icon={MapPin}>
+   340→          <InfoGrid
+   341→            items={[
+   342→              { label: "Ward", value: app.project.ward },
+   343→              { label: "Zone", value: app.project.zone },
+   344→              { label: "Survey No.", value: app.project.surveyNo, mono: true },
+   345→              { label: "Site Address", value: app.project.address },
+   346→            ]}
+   347→            columns={2}
+   348→          />
+   349→        </SectionCard>
+   350→      </div>
+   351→
+   352→      <div className="space-y-6">
+   353→        <SectionCard title="Application Summary" icon={FileText}>
+   354→          <div className="space-y-3">
+   355→            <div className="flex items-center justify-between">
+   356→              <span className="text-xs text-muted-foreground">Application No.</span>
+   357→              <span className="font-mono text-xs font-medium">{app.applicationNo}</span>
+   358→            </div>
+   359→            <div className="flex items-center justify-between">
+   360→              <span className="text-xs text-muted-foreground">Status</span>
+   361→              <StatusBadge status={app.status} showIcon={false} />
+   362→            </div>
+   363→            <div className="flex items-center justify-between">
+   364→              <span className="text-xs text-muted-foreground">Current Stage</span>
+   365→              <span className="text-xs font-medium">{app.currentStageLabel}</span>
+   366→            </div>
+   367→            <Separator />
+   368→            <div className="space-y-1.5">
+   369→              <div className="flex items-center justify-between text-xs">
+   370→                <span className="text-muted-foreground">Progress</span>
+   371→                <span className="font-medium tabular-nums">{app.progress}%</span>
+   372→              </div>
+   373→              <Progress value={app.progress} className="h-1.5" />
+   374→            </div>
+   375→            <Separator />
+   376→            <InfoRow label="Submission Date" value={formatDate(app.submissionDate)} />
+   377→            <InfoRow label="Last Updated" value={timeAgo(app.lastUpdated)} />
+   378→            <InfoRow label="Expected SLA" value={formatDate(app.expectedSLA ?? "")} />
+   379→          </div>
+   380→        </SectionCard>
+   381→
+   382→        <SectionCard title="Quick Stats" icon={Info}>
+   383→          <div className="grid grid-cols-2 gap-3">
+   384→            <Stat label="Drawings" value={`${app.drawings.length}`} sub={`${app.drawings[0]?.version ?? 0} versions`} />
+   385→            <Stat label="Documents" value={`${docsVerified}/${docsTotal}`} sub="verified" />
+   386→            <Stat label="Shortfalls" value={`${app.shortfalls.length}`} sub={app.shortfalls.length ? "open" : "none"} />
+   387→            <Stat label="Fee Paid" value={app.payment?.status === "SUCCESS" ? "Yes" : "No"} sub={app.payment ? formatINR(app.payment.amount) : "—"} />
+   388→          </div>
+   389→        </SectionCard>
+   390→      </div>
+   391→    </div>
+   392→  );
+   393→}
+   394→
+   395→function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+   396→  return (
+   397→    <div className="rounded-lg border border-border bg-muted/30 p-3">
+   398→      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
+   399→      <p className="text-lg font-semibold tabular-nums">{value}</p>
+   400→      {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+   401→    </div>
+   402→  );
+   403→}
+   404→
+   405→// ---------- Workflow Tab ----------
+   406→function WorkflowTab({ app }: { app: Application }) {
+   407→  return (
+   408→    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   409→      <div className="lg:col-span-2">
+   410→        <SectionCard title="Workflow Timeline" description="Chronological record of all stage transitions" icon={Workflow}>
+   411→          <WorkflowTimeline entries={app.workflowHistory} />
+   412→        </SectionCard>
+   413→      </div>
+   414→      <div className="space-y-6">
+   415→        <SectionCard title="Stage Status" icon={Flag}>
+   416→          <ul className="space-y-2">
+   417→            {app.workflowHistory.map((e) => (
+   418→              <li key={e.id} className="flex items-center justify-between gap-2">
+   419→                <span className="text-xs text-foreground/80">{e.stageLabel}</span>
+   420→                <StageStatusPill status={e.status} />
+   421→              </li>
+   422→            ))}
+   423→          </ul>
+   424→        </SectionCard>
+   425→        <SectionCard title="Assigned Officers" icon={ShieldCheck}>
+   426→          <ul className="space-y-3">
+   427→            {Array.from(new Set(app.workflowHistory.filter((w) => w.timestamp).map((w) => w.actor.name))).map((name) => {
+   428→              const entry = app.workflowHistory.find((w) => w.actor.name === name)!;
+   429→              return (
+   430→                <li key={name} className="flex items-center gap-2.5">
+   431→                  <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
+   432→                    {name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+   433→                  </div>
+   434→                  <div className="min-w-0 flex-1">
+   435→                    <p className="truncate text-xs font-medium">{name}</p>
+   436→                    <p className="text-[10px] text-muted-foreground">{ROLES[entry.actor.role].fullName}</p>
+   437→                  </div>
+   438→                  <RoleBadge role={entry.actor.role} />
+   439→                </li>
+   440→              );
+   441→            })}
+   442→          </ul>
+   443→        </SectionCard>
+   444→      </div>
+   445→    </div>
+   446→  );
+   447→}
+   448→
+   449→// ---------- Drawings & Scrutiny Tab ----------
+   450→function DrawingsTab({ app }: { app: Application }) {
+   451→  const [files, setFiles] = React.useState<UploadedFile[]>([]);
+   452→  return (
+   453→    <div className="space-y-6">
+   454→      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   455→        <div className="lg:col-span-2 space-y-6">
+   456→          <SectionCard title="Drawing Viewer" description="View, zoom, rotate and switch versions" icon={Eye}>
+   457→            {app.drawings.length > 0 ? (
+   458→              <DrawingViewer drawings={app.drawings} />
+   459→            ) : (
+   460→              <EmptyState icon={Upload} title="No drawings uploaded" description="Upload your first drawing to begin scrutiny." />
+   461→            )}
+   462→          </SectionCard>
+   463→
+   464→          {app.scrutinyReport && (
+   465→            <SectionCard
+   466→              title="Scrutiny Report"
+   467→              description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion}`}
+   468→              icon={ScrollText}
+   469→              action={app.scrutinyReport.status === "PASSED" ? <Badge className="bg-success text-success-foreground">Passed</Badge> : <Badge className="bg-destructive text-white">Failed</Badge>}
+   470→            >
+   471→              <div className="space-y-4">
+   472→                <div className={cn("rounded-lg border p-3 text-sm", app.scrutinyReport.status === "PASSED" ? "border-success/30 bg-success/5 text-success" : "border-destructive/30 bg-destructive/5 text-destructive")}>
+   473→                  <p className="font-medium">{app.scrutinyReport.summary}</p>
+   474→                </div>
+   475→                <div className="grid grid-cols-3 gap-3">
+   476→                  <ScrutinyStat label="Total Checks" value={app.scrutinyReport.totalChecks} cls="bg-muted text-muted-foreground" />
+   477→                  <ScrutinyStat label="Passed" value={app.scrutinyReport.passed} cls="bg-success/10 text-success" />
+   478→                  <ScrutinyStat label="Failed / Warnings" value={`${app.scrutinyReport.failed} / ${app.scrutinyReport.warnings}`} cls="bg-warning/15 text-warning-foreground" />
+   479→                </div>
+   480→                <div className="overflow-hidden rounded-lg border border-border">
+   481→                  <table className="w-full text-sm">
+   482→                    <thead className="bg-muted/40">
+   483→                      <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   484→                        <th className="px-3 py-2 font-medium">Rule</th>
+   485→                        <th className="px-3 py-2 font-medium">Category</th>
+   486→                        <th className="px-3 py-2 font-medium">Severity</th>
+   487→                        <th className="px-3 py-2 font-medium">Result</th>
+   488→                      </tr>
+   489→                    </thead>
+   490→                    <tbody className="divide-y divide-border">
+   491→                      {app.scrutinyReport.checks.map((c) => (
+   492→                        <tr key={c.id} className="hover:bg-muted/30">
+   493→                          <td className="px-3 py-2">
+   494→                            <p className="text-xs font-medium">{c.rule}</p>
+   495→                            <p className="text-[10px] text-muted-foreground">{c.message}</p>
+   496→                          </td>
+   497→                          <td className="px-3 py-2 text-xs text-muted-foreground">{c.category}</td>
+   498→                          <td className="px-3 py-2"><SeverityBadge severity={c.severity} /></td>
+   499→                          <td className="px-3 py-2">
+   500→                            {c.status === "PASS" && <Badge className="bg-success/15 text-success">Pass</Badge>}
+   501→                            {c.status === "FAIL" && <Badge className="bg-destructive text-white">Fail</Badge>}
+   502→                            {c.status === "WARNING" && <Badge className="bg-warning text-warning-foreground">Warning</Badge>}
+   503→                          </td>
+   504→                        </tr>
+   505→                      ))}
+   506→                    </tbody>
+   507→                  </table>
+   508→                </div>
+   509→              </div>
+   510→            </SectionCard>
+   511→          )}
+   512→        </div>
+   513→
+   514→        <div className="space-y-6">
+   515→          <SectionCard title="Upload New Drawing" description="Re-upload corrected drawings after a failed scrutiny" icon={Upload}>
+   516→            <FileUploader
+   517→              label="Drop drawing here"
+   518→              hint="DWG, DXF or PDF · max 50 MB"
+   519→              accept=".dwg,.dxf,.pdf"
+   520→              uploadedFiles={files}
+   521→              onUpload={(newFiles) => {
+   522→                setFiles((prev) => {
+   523→                  const map = new Map(prev.map((f) => [f.id, f]));
+   524→                  newFiles.forEach((f) => map.set(f.id, f));
+   525→                  return Array.from(map.values());
+   526→                });
+   527→              }}
+   528→              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+   529→            />
+   530→          </SectionCard>
+   531→
+   532→          <SectionCard title="Version History" icon={History} noPadding>
+   533→            <ul className="divide-y divide-border">
+   534→              {app.drawings.map((d) => (
+   535→                <li key={d.id} className="p-3">
+   536→                  <div className="flex items-center gap-2.5">
+   537→                    <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+   538→                      <FileText className="size-4" />
+   539→                    </div>
+   540→                    <div className="min-w-0 flex-1">
+   541→                      <p className="truncate text-xs font-medium">{d.fileName}</p>
+   542→                      <p className="text-[10px] text-muted-foreground">{d.fileSize} · v{d.version} · {formatDateTime(d.uploadedAt)}</p>
+   543→                    </div>
+   544→                    {d.status === "SCRUTINY_PASSED" && <Badge className="bg-success/10 text-success text-[9px]">Passed</Badge>}
+   545→                    {d.status === "SCRUTINY_FAILED" && <Badge className="bg-destructive/10 text-destructive text-[9px]">Failed</Badge>}
+   546→                    {d.status === "SUPERSEDED" && <Badge className="bg-muted text-muted-foreground text-[9px]">Superseded</Badge>}
+   547→                    {d.status === "PENDING_SCRUTINY" && <Badge className="bg-info/10 text-info text-[9px]">Pending</Badge>}
+   548→                  </div>
+   549→                  {d.notes && <p className="mt-1.5 text-[10px] text-muted-foreground italic">{d.notes}</p>}
+   550→                </li>
+   551→              ))}
+   552→            </ul>
+   553→          </SectionCard>
+   554→        </div>
+   555→      </div>
+   556→    </div>
+   557→  );
+   558→}
+   559→
+   560→function ScrutinyStat({ label, value, cls }: { label: string; value: string | number; cls: string }) {
+   561→  return (
+   562→    <div className={cn("rounded-lg p-3 text-center", cls)}>
+   563→      <p className="text-xl font-semibold tabular-nums">{value}</p>
+   564→      <p className="text-[10px] uppercase tracking-wide opacity-80">{label}</p>
+   565→    </div>
+   566→  );
+   567→}
+   568→
+   569→// ---------- Documents Tab ----------
+   570→function DocumentsTab({ app }: { app: Application }) {
+   571→  const verified = app.documents.filter((d) => d.status === "VERIFIED").length;
+   572→  const required = app.documents.filter((d) => d.required).length;
+   573→  const pct = Math.round((verified / required) * 100);
+   574→  return (
+   575→    <div className="space-y-6">
+   576→      <SectionCard title="Document Compliance" icon={FolderClosed}>
+   577→        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+   578→          <div className="space-y-1">
+   579→            <p className="text-sm font-medium">{verified} of {required} required documents verified</p>
+   580→            <p className="text-xs text-muted-foreground">{app.documents.filter((d) => d.status === "SHORTFALL").length} shortfalls · {app.documents.filter((d) => d.status === "REQUIRED").length} pending upload</p>
+   581→          </div>
+   582→          <div className="flex items-center gap-3">
+   583→            <Progress value={pct} className="h-2 w-32" />
+   584→            <span className="text-sm font-semibold tabular-nums">{pct}%</span>
+   585→          </div>
+   586→        </div>
+   587→      </SectionCard>
+   588→
+   589→      <SectionCard title="Required Documents" description="Upload, preview and track verification status" icon={FileText} noPadding>
+   590→        <div className="overflow-x-auto">
+   591→          <table className="w-full text-sm">
+   592→            <thead className="bg-muted/40">
+   593→              <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
+   594→                <th className="px-4 py-2.5 font-medium">Document</th>
+   595→                <th className="px-4 py-2.5 font-medium">Required</th>
+   596→                <th className="px-4 py-2.5 font-medium">Status</th>
+   597→                <th className="px-4 py-2.5 font-medium">Version</th>
+   598→                <th className="px-4 py-2.5 font-medium">Verified By</th>
+   599→                <th className="px-4 py-2.5 font-medium">Date</th>
+   600→                <th className="px-4 py-2.5 font-medium text-right">Actions</th>
+   601→              </tr>
+   602→            </thead>
+   603→            <tbody className="divide-y divide-border">
+   604→              {app.documents.map((d) => (
+   605→                <tr key={d.id} className="hover:bg-muted/30">
+   606→                  <td className="px-4 py-3">
+   607→                    <p className="text-xs font-medium">{d.name}</p>
+   608→                    <p className="font-mono text-[10px] text-muted-foreground">{d.code}</p>
+   609→                    {d.remarks && <p className="mt-0.5 text-[10px] text-destructive">{d.remarks}</p>}
+   610→                  </td>
+   611→                  <td className="px-4 py-3">
+   612→                    {d.required ? <Badge className="bg-destructive/10 text-destructive text-[9px]">Required</Badge> : <Badge variant="outline" className="text-[9px]">Optional</Badge>}
+   613→                  </td>
+   614→                  <td className="px-4 py-3"><DocumentStatusBadge status={d.status} /></td>
+   615→                  <td className="px-4 py-3 text-xs">{d.version ? `v${d.version}` : "—"}</td>
+   616→                  <td className="px-4 py-3 text-xs">{d.verifiedBy ?? "—"}</td>
+   617→                  <td className="px-4 py-3 text-xs text-muted-foreground">{d.verifiedAt ? formatDate(d.verifiedAt) : "—"}</td>
+   618→                  <td className="px-4 py-3 text-right">
+   619→                    <div className="flex justify-end gap-1">
+   620→                      {d.status === "REQUIRED" || d.status === "SHORTFALL" ? (
+   621→                        <Button size="sm" variant="outline" className="h-7 text-xs"><Upload className="size-3" /> Upload</Button>
+   622→                      ) : (
+   623→                        <>
+   624→                          <Button size="icon" variant="ghost" className="size-7"><Eye className="size-3.5" /></Button>
+   625→                          <Button size="icon" variant="ghost" className="size-7"><Download className="size-3.5" /></Button>
+   626→                        </>
+   627→                      )}
+   628→                    </div>
+   629→                  </td>
+   630→                </tr>
+   631→              ))}
+   632→            </tbody>
+   633→          </table>
+   634→        </div>
+   635→      </SectionCard>
+   636→    </div>
+   637→  );
+   638→}
+   639→
+   640→// ---------- Fees Tab ----------
+   641→function FeesTab({ app }: { app: Application }) {
+   642→  if (!app.fee) {
+   643→    return <EmptyState icon={ReceiptIndianRupee} title="Fees not generated" description="Fees will be generated automatically once documents are verified." />;
+   644→  }
+   645→  const f = app.fee;
+   646→  return (
+   647→    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   648→      <div className="lg:col-span-2">
+   649→        <SectionCard title="Fee Breakdown" description={`${f.feeStructureName} · generated ${formatDate(f.generatedAt)}`} icon={ReceiptIndianRupee}>
+   650→          <div className="space-y-1">
+   651→            <div className="flex items-center justify-between border-b border-border pb-2 text-xs uppercase tracking-wide text-muted-foreground">
+   652→              <span>Component</span>
+   653→              <span>Amount (₹)</span>
+   654→            </div>
+   655→            {f.lineItems.map((li) => (
+   656→              <div key={li.componentCode} className="flex items-center justify-between py-2.5 border-b border-dashed border-border/60 last:border-0">
+   657→                <div className="min-w-0">
+   658→                  <p className="text-sm font-medium">{li.name}</p>
+   659→                  <p className="text-[11px] text-muted-foreground">{li.description}</p>
+   660→                  <p className="text-[10px] text-muted-foreground">{li.basis} · ₹{li.rate.toLocaleString("en-IN")} × {li.quantity.toLocaleString("en-IN")}</p>
+   661→                </div>
+   662→                <span className="font-mono text-sm font-medium tabular-nums">{li.amount.toLocaleString("en-IN")}</span>
+   663→              </div>
+   664→            ))}
+   665→            <div className="flex items-center justify-between pt-3 text-sm">
+   666→              <span className="text-muted-foreground">Subtotal</span>
+   667→              <span className="font-mono tabular-nums">{formatINR(f.subtotal)}</span>
+   668→            </div>
+   669→            <div className="flex items-center justify-between text-sm">
+   670→              <span className="text-muted-foreground">GST</span>
+   671→              <span className="font-mono tabular-nums">{formatINR(f.gst)}</span>
+   672→            </div>
+   673→            <Separator className="my-2" />
+   674→            <div className="flex items-center justify-between">
+   675→              <span className="text-base font-semibold">Total Payable</span>
+   676→              <span className="font-mono text-lg font-bold text-primary">{formatINR(f.total)}</span>
+   677→            </div>
+   678→          </div>
+   679→        </SectionCard>
+   680→      </div>
+   681→      <div className="space-y-6">
+   682→        <SectionCard title="Payment Status" icon={CheckCircle2}>
+   683→          <div className="space-y-3">
+   684→            <div className="flex items-center justify-between">
+   685→              <span className="text-xs text-muted-foreground">Total Fee</span>
+   686→              <span className="font-mono text-sm font-medium">{formatINR(f.total)}</span>
+   687→            </div>
+   688→            <div className="flex items-center justify-between">
+   689→              <span className="text-xs text-muted-foreground">Paid</span>
+   690→              <span className="font-mono text-sm text-success">{formatINR(f.paidAmount)}</span>
+   691→            </div>
+   692→            <div className="flex items-center justify-between">
+   693→              <span className="text-xs text-muted-foreground">Outstanding</span>
+   694→              <span className="font-mono text-sm font-semibold text-destructive">{formatINR(f.outstanding)}</span>
+   695→            </div>
+   696→            <Separator />
+   697→            {app.payment ? (
+   698→              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+   699→                <div className="flex items-center justify-between">
+   700→                  <span className="text-xs text-muted-foreground">Transaction</span>
+   701→                  <PaymentStatusBadge status={app.payment.status} />
+   702→                </div>
+   703→                <p className="font-mono text-[11px]">{app.payment.transactionId || "—"}</p>
+   704→                <p className="text-[10px] text-muted-foreground">{app.payment.gateway} · {app.payment.method}</p>
+   705→                {app.payment.receiptNo && (
+   706→                  <Button size="sm" variant="outline" className="w-full"><Download className="size-3.5" /> Receipt {app.payment.receiptNo}</Button>
+   707→                )}
+   708→              </div>
+   709→            ) : (
+   710→              <Button className="w-full"><ReceiptIndianRupee className="size-4" /> Pay Now</Button>
+   711→            )}
+   712→          </div>
+   713→        </SectionCard>
+   714→      </div>
+   715→    </div>
+   716→  );
+   717→}
+   718→
+   719→// ---------- Shortfalls Tab ----------
+   720→function ShortfallsTab({ app }: { app: Application }) {
+   721→  const { navigate } = useAppStore();
+   722→  if (app.shortfalls.length === 0) {
+   723→    return <EmptyState icon={CheckCircle2} title="No shortfalls" description="There are no active shortfalls on this application." />;
+   724→  }
+   725→  return (
+   726→    <div className="space-y-4">
+   727→      {app.shortfalls.map((s) => (
+   728→        <SectionCard key={s.id} title={s.title} icon={AlertTriangle}
+   729→          action={<Badge className="bg-warning text-warning-foreground">{s.shortfallId}</Badge>}>
+   730→          <div className="space-y-3">
+   731→            <p className="text-sm text-foreground/90">{s.description}</p>
+   732→            <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
+   733→              <div><p className="text-muted-foreground">Type</p><p className="font-medium">{s.type}</p></div>
+   734→              <div><p className="text-muted-foreground">Raised By</p><p className="font-medium">{s.raisedBy.name}</p></div>
+   735→              <div><p className="text-muted-foreground">Raised On</p><p className="font-medium">{formatDate(s.raisedAt)}</p></div>
+   736→              <div><p className="text-muted-foreground">Due Date</p><p className="font-medium text-destructive">{formatDate(s.dueDate)}</p></div>
+   737→            </div>
+   738→            <Button size="sm" onClick={() => navigate("ltp-shortfalls")}><MessageSquare className="size-4" /> Respond to shortfall</Button>
+   739→          </div>
+   740→        </SectionCard>
+   741→      ))}
+   742→    </div>
+   743→  );
+   744→}
+   745→
+   746→// ---------- Remarks Tab ----------
+   747→function RemarksTab({ app }: { app: Application }) {
+   748→  if (app.remarks.length === 0) {
+   749→    return <EmptyState icon={MessageSquare} title="No remarks yet" description="Remarks from reviewing officers will appear here." />;
+   750→  }
+   751→  return (
+   752→    <SectionCard title="Officer Remarks" description="Comments and observations from the review chain" icon={MessageSquare}>
+   753→      <ol className="relative space-y-0">
+   754→        {app.remarks.map((r, idx) => {
+   755→          const isLast = idx === app.remarks.length - 1;
+   756→          const typeCls = {
+   757→            INFO: "bg-info/10 text-info",
+   758→            OBSERVATION: "bg-muted text-muted-foreground",
+   759→            INSTRUCTION: "bg-warning/15 text-warning-foreground",
+   760→            DECISION: "bg-success/10 text-success",
+   761→          }[r.type];
+   762→          return (
+   763→            <li key={r.id} className="relative flex gap-3 pb-5">
+   764→              {!isLast && <div className="absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border" />}
+   765→              <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+   766→                {r.author.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+   767→              </div>
+   768→              <div className="flex-1 space-y-1">
+   769→                <div className="flex flex-wrap items-center justify-between gap-x-2">
+   770→                  <div className="flex items-center gap-2">
+   771→                    <span className="text-sm font-medium">{r.author.name}</span>
+   772→                    <RoleBadge role={r.author.role} />
+   773→                    <Badge className={cn("text-[9px]", typeCls)}>{r.type}</Badge>
+   774→                  </div>
+   775→                  <span className="text-xs text-muted-foreground">{formatDateTime(r.timestamp)}</span>
+   776→                </div>
+   777→                <p className="text-sm text-foreground/90 rounded-md bg-muted/40 px-3 py-2">{r.text}</p>
+   778→              </div>
+   779→            </li>
+   780→          );
+   781→        })}
+   782→      </ol>
+   783→    </SectionCard>
+   784→  );
+   785→}
+   786→
+   787→// ---------- Audit Tab ----------
+   788→function AuditTab({ app }: { app: Application }) {
+   789→  return (
+   790→    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+   791→      <div className="lg:col-span-2">
+   792→        <SectionCard title="Audit Trail" description="Complete chronological record of all actions" icon={History}>
+   793→          <AuditTimeline entries={app.auditLog} />
+   794→        </SectionCard>
+   795→      </div>
+   796→      <div className="space-y-6">
+   797→        <SectionCard title="Compliance Metadata" icon={ShieldCheck}>
+   798→          <div className="space-y-2">
+   799→            <InfoRow label="Total Events" value={app.auditLog.length} />
+   800→            <InfoRow label="First Event" value={formatDateTime(app.auditLog[0]?.timestamp ?? "")} />
+   801→            <InfoRow label="Last Event" value={formatDateTime(app.auditLog[app.auditLog.length - 1]?.timestamp ?? "")} />
+   802→            <Separator />
+   803→            <InfoRow label="Data Retention" value="7 years" />
+   804→            <InfoRow label="Audit Standard" value="NIC eGov" />
+   805→            <InfoRow label="Integrity" value={<Badge className="bg-success/10 text-success">Verified</Badge>} />
+   806→          </div>
+   807→        </SectionCard>
+   808→      </div>
+   809→    </div>
+   810→  );
+   811→}
+   812→

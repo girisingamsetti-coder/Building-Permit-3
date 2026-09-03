@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useAppStore } from "@/store/app-store";
+import { canAccessView } from "@/lib/permissions";
 import { AuthScreen } from "@/components/auth/auth-screen";
 import { AppShell } from "@/components/layout/app-shell";
 
@@ -33,6 +34,18 @@ import { AdminWorkflow } from "@/components/admin/admin-workflow";
 import { AdminTemplates } from "@/components/admin/admin-templates";
 import { AdminAudit } from "@/components/admin/admin-audit";
 import { AdminSettings } from "@/components/admin/admin-settings";
+
+// Project Manager views
+import { PmDashboard } from "@/components/pm/pm-dashboard";
+import { PmApplications } from "@/components/pm/pm-applications";
+import { PmApplicationDetails } from "@/components/pm/pm-application-details";
+import { PmWorkflow } from "@/components/pm/pm-workflow";
+import { PmOfficers } from "@/components/pm/pm-officers";
+import { PmOfficerDetails } from "@/components/pm/pm-officer-details";
+import { PmSla } from "@/components/pm/pm-sla";
+import { PmReports } from "@/components/pm/pm-reports";
+import { PmShortfalls } from "@/components/pm/pm-shortfalls";
+import { PmHelp } from "@/components/pm/pm-help";
 
 import type { ViewKey } from "@/types";
 
@@ -71,10 +84,21 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "admin-templates": AdminTemplates,
   "admin-audit": AdminAudit,
   "admin-settings": AdminSettings,
+  // project manager (read-only monitoring)
+  "pm-dashboard": PmDashboard,
+  "pm-applications": PmApplications,
+  "pm-application-details": PmApplicationDetails,
+  "pm-workflow": PmWorkflow,
+  "pm-officers": PmOfficers,
+  "pm-officer-details": PmOfficerDetails,
+  "pm-sla": PmSla,
+  "pm-reports": PmReports,
+  "pm-shortfalls": PmShortfalls,
+  "pm-help": PmHelp,
 };
 
 export default function Home() {
-  const { isAuthenticated, view } = useAppStore();
+  const { isAuthenticated, view, user, roles, navigate } = useAppStore();
 
   // Scroll to top on view change
   React.useEffect(() => {
@@ -84,6 +108,17 @@ export default function Home() {
       else window.scrollTo({ top: 0 });
     }
   }, [view]);
+
+  // Route guard — redirect unauthorized users to their default view
+  React.useEffect(() => {
+    if (isAuthenticated && user && !canAccessView(user, view, roles)) {
+      const portal = user.role === "ADMIN" ? "admin-dashboard"
+        : user.role === "LTP" ? "ltp-dashboard"
+        : user.role === "PROJECT_MANAGER" ? "pm-dashboard"
+        : "officer-dashboard";
+      navigate(portal);
+    }
+  }, [isAuthenticated, user, view, roles, navigate]);
 
   if (!isAuthenticated) {
     return <AuthScreen />;

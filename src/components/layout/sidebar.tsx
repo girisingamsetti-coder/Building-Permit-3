@@ -49,7 +49,7 @@ export function Sidebar() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-3.5 text-sidebar-primary" />
             <span className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-              {portal === "LTP" ? "LTP Portal" : portal === "OFFICER" ? "Officer Workspace" : "Administration"}
+              {portal === "LTP" ? "LTP Portal" : portal === "OFFICER" ? "Officer Workspace" : portal === "PROJECT_MANAGER" ? "Project Manager" : "Administration"}
             </span>
           </div>
         </div>

@@ -21,6 +21,10 @@ import {
   MailWarning,
   History,
   FileCheck2,
+  Activity,
+  Gauge,
+  BarChart3,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
@@ -123,6 +127,40 @@ export const NAV: Record<Portal, NavGroup[]> = {
       items: [
         { view: "admin-audit", label: "Audit Logs", icon: History },
         { view: "ltp-notifications", label: "Notifications", icon: Bell },
+      ],
+    },
+  ],
+  PROJECT_MANAGER: [
+    {
+      label: "Overview",
+      items: [{ view: "pm-dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    },
+    {
+      label: "Monitoring",
+      items: [
+        { view: "pm-applications", label: "Applications", icon: FileStack },
+        { view: "pm-workflow", label: "Workflow Monitor", icon: Activity },
+        { view: "pm-officers", label: "Officer Progress", icon: Users },
+        { view: "pm-sla", label: "SLA & Delays", icon: Gauge },
+      ],
+    },
+    {
+      label: "Reports",
+      items: [
+        { view: "pm-reports", label: "Progress Reports", icon: BarChart3 },
+        { view: "pm-shortfalls", label: "Shortfalls", icon: AlertTriangle },
+      ],
+    },
+    {
+      label: "Communication",
+      items: [
+        { view: "ltp-notifications", label: "Notifications", icon: Bell },
+      ],
+    },
+    {
+      label: "Help",
+      items: [
+        { view: "pm-help", label: "Help & Support", icon: CircleHelp },
       ],
     },
   ],

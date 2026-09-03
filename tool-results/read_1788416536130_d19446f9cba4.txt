@@ -1,0 +1,1922 @@
+     1→ADD A NEW ROLE: PROJECT MANAGER
+     2→
+     3→Create a new dedicated account/role called:
+     4→
+     5→PROJECT MANAGER
+     6→
+     7→This role must be integrated into the existing LTP Approval /
+     8→Building Permit Management System RBAC architecture.
+     9→
+    10→IMPORTANT:
+    11→
+    12→Do NOT replace the existing Administrator.
+    13→
+    14→Do NOT give Project Manager Administrator permissions.
+    15→
+    16→Do NOT give Project Manager authority to modify:
+    17→
+    18→- Roles
+    19→- Permissions
+    20→- Users
+    21→- Fee Structures
+    22→- System Settings
+    23→- Workflow Configuration
+    24→- Application Types
+    25→
+    26→Do NOT give Project Manager approval/rejection authority unless explicitly
+    27→configured later.
+    28→
+    29→The Project Manager is primarily a:
+    30→
+    31→MONITORING
+    32→TRACKING
+    33→REPORTING
+    34→COORDINATION
+    35→
+    36→role.
+    37→
+    38→==================================================
+    39→1. PROJECT MANAGER OBJECTIVE
+    40→==================================================
+    41→
+    42→The Project Manager should be able to see the overall operation of the
+    43→Building Permit Approval Workflow.
+    44→
+    45→The account holder should be able to see:
+    46→
+    47→- all applications
+    48→- all workflow stages
+    49→- progress of individual applications
+    50→- current stage
+    51→- assigned officer
+    52→- role responsible
+    53→- pending actions
+    54→- completed actions
+    55→- delays
+    56→- SLA status
+    57→- shortfalls
+    58→- scrutiny status
+    59→- document status
+    60→- fee status
+    61→- payment status
+    62→- overall approval progress
+    63→
+    64→The Project Manager should be able to drill down from:
+    65→
+    66→Overall Project View
+    67→↓
+    68→Application
+    69→↓
+    70→Workflow
+    71→↓
+    72→Individual Stage
+    73→↓
+    74→Responsible User / Officer
+    75→↓
+    76→Activity / Action History
+    77→
+    78→==================================================
+    79→2. PROJECT MANAGER LOGIN
+    80→==================================================
+    81→
+    82→Add a new demo/login account:
+    83→
+    84→Role:
+    85→Project Manager
+    86→
+    87→Example:
+    88→
+    89→Name:
+    90→Shri. Rajesh Kumar
+    91→
+    92→Designation:
+    93→Project Manager
+    94→
+    95→Email:
+    96→projectmanager@demo.gov.in
+    97→
+    98→Do not hardcode the exact demo identity into business logic.
+    99→
+   100→Use the shared User/RBAC system.
+   101→
+   102→==================================================
+   103→3. PROJECT MANAGER SIDEBAR
+   104→==================================================
+   105→
+   106→Create a dedicated sidebar for Project Manager.
+   107→
+   108→Recommended:
+   109→
+   110→PROJECT MANAGEMENT
+   111→
+   112→Dashboard
+   113→
+   114→APPLICATIONS
+   115→
+   116→All Applications
+   117→Application Progress
+   118→Pending Actions
+   119→
+   120→MONITORING
+   121→
+   122→Workflow Monitor
+   123→Officer Progress
+   124→SLA & Delays
+   125→Shortfalls
+   126→Documents
+   127→Scrutiny
+   128→
+   129→REPORTS
+   130→
+   131→Progress Reports
+   132→Application Reports
+   133→Officer Reports
+   134→
+   135→COMMUNICATION
+   136→
+   137→Notifications
+   138→
+   139→ACCOUNT
+   140→
+   141→Profile
+   142→Help & Support
+   143→
+   144→Do not show irrelevant admin configuration modules.
+   145→
+   146→==================================================
+   147→4. PROJECT MANAGER DASHBOARD
+   148→==================================================
+   149→
+   150→Create a dedicated Project Manager Dashboard.
+   151→
+   152→The dashboard should focus on overall operational visibility.
+   153→
+   154→Header:
+   155→
+   156→Project Manager Dashboard
+   157→
+   158→Subtitle:
+   159→
+   160→Monitor application progress, workflow stages, officer activity and
+   161→approval performance across the Building Permit Management System.
+   162→
+   163→==================================================
+   164→5. KPI CARDS
+   165→==================================================
+   166→
+   167→Use useful management KPIs.
+   168→
+   169→Recommended:
+   170→
+   171→Total Applications
+   172→Applications In Progress
+   173→Completed / Approved
+   174→Pending Actions
+   175→Applications Delayed
+   176→Applications At Risk
+   177→Shortfalls Open
+   178→Average Processing Time
+   179→
+   180→Do NOT create excessive KPI cards.
+   181→
+   182→Desktop:
+   183→
+   184→4 cards per row
+   185→
+   186→Second row if required.
+   187→
+   188→All cards:
+   189→
+   190→equal width
+   191→consistent height
+   192→compact
+   193→proper alignment
+   194→
+   195→==================================================
+   196→6. APPLICATION OVERVIEW
+   197→==================================================
+   198→
+   199→Create a major:
+   200→
+   201→Application Progress Overview
+   202→
+   203→section.
+   204→
+   205→Show applications in a clean table.
+   206→
+   207→Columns:
+   208→
+   209→Application No.
+   210→Project
+   211→Applicant
+   212→Application Type
+   213→Current Stage
+   214→Assigned Role
+   215→Assigned Officer
+   216→Status
+   217→Progress
+   218→SLA
+   219→Last Updated
+   220→Action
+   221→
+   222→==================================================
+   223→7. APPLICATION PROGRESS
+   224→==================================================
+   225→
+   226→Show progress as:
+   227→
+   228→Application Created
+   229→→ Drawing
+   230→→ Scrutiny
+   231→→ Documents
+   232→→ Fee
+   233→→ Payment
+   234→→ TPS
+   235→→ TPA
+   236→→ ZAD/ZDD
+   237→→ ZJD
+   238→→ Director
+   239→→ Additional Commissioner
+   240→→ Commissioner
+   241→→ Final Decision
+   242→
+   243→Display:
+   244→
+   245→percentage complete
+   246→
+   247→Example:
+   248→
+   249→72%
+   250→
+   251→Use a compact progress bar.
+   252→
+   253→==================================================
+   254→8. APPLICATION DETAIL
+   255→==================================================
+   256→
+   257→Project Manager should be able to open any permitted application.
+   258→
+   259→Application detail should show:
+   260→
+   261→Application Information
+   262→Property Information
+   263→Applicant Information
+   264→Current Status
+   265→Current Stage
+   266→Progress
+   267→Assigned Officer
+   268→SLA
+   269→Documents
+   270→Drawing/Scrutiny
+   271→Fees
+   272→Payments
+   273→Shortfalls
+   274→Workflow History
+   275→Audit/Activity History
+   276→
+   277→Project Manager is viewing/monitoring this information.
+   278→
+   279→Do not give editing authority by default.
+   280→
+   281→==================================================
+   282→9. LIVE WORKFLOW MONITOR
+   283→==================================================
+   284→
+   285→Create:
+   286→
+   287→Live Workflow Monitor
+   288→
+   289→This is one of the most important Project Manager features.
+   290→
+   291→For each application show:
+   292→
+   293→Current Stage
+   294→Completed Stages
+   295→Current Responsible Role
+   296→Current Responsible Officer
+   297→Pending Since
+   298→Expected SLA
+   299→SLA Status
+   300→Next Stage
+   301→
+   302→Example:
+   303→
+   304→Application:
+   305→MC/BP/2026/04/0005
+   306→
+   307→Current Stage:
+   308→TPS Technical Scrutiny
+   309→
+   310→Assigned:
+   311→Smt. Meena Kulkarni
+   312→
+   313→Role:
+   314→TPS
+   315→
+   316→Progress:
+   317→42%
+   318→
+   319→Pending Since:
+   320→28 Aug 2026
+   321→
+   322→Expected SLA:
+   323→3 days
+   324→
+   325→SLA Status:
+   326→At Risk
+   327→
+   328→==================================================
+   329→10. STAGE-BY-STAGE MONITORING
+   330→==================================================
+   331→
+   332→Project Manager can open an application and see:
+   333→
+   334→Stage 1
+   335→LTP — Completed
+   336→
+   337→Stage 2
+   338→Drawing Scrutiny — Completed
+   339→
+   340→Stage 3
+   341→Documents — Completed
+   342→
+   343→Stage 4
+   344→Fee — Completed
+   345→
+   346→Stage 5
+   347→Payment — Completed
+   348→
+   349→Stage 6
+   350→TPS — In Progress
+   351→
+   352→Stage 7
+   353→TPA — Pending
+   354→
+   355→Stage 8
+   356→ZAD/ZDD — Pending
+   357→
+   358→etc.
+   359→
+   360→Clearly distinguish:
+   361→
+   362→Completed
+   363→Current
+   364→Pending
+   365→Delayed
+   366→Blocked
+   367→
+   368→==================================================
+   369→11. OFFICER PROGRESS
+   370→==================================================
+   371→
+   372→Create:
+   373→
+   374→Officer Progress
+   375→
+   376→The Project Manager should see every workflow member individually.
+   377→
+   378→Roles:
+   379→
+   380→LTP
+   381→TPS
+   382→TPA
+   383→ZAD
+   384→ZDD
+   385→ZJD
+   386→Director – DP
+   387→Additional Commissioner
+   388→Commissioner
+   389→
+   390→For each user/officer show:
+   391→
+   392→Name
+   393→Role
+   394→Assigned Applications
+   395→Completed Applications
+   396→Pending Applications
+   397→Delayed Applications
+   398→Average Processing Time
+   399→Current Workload
+   400→SLA Compliance
+   401→
+   402→==================================================
+   403→12. OFFICER DETAIL
+   404→==================================================
+   405→
+   406→Click an officer.
+   407→
+   408→Example:
+   409→
+   410→Smt. Meena Kulkarni
+   411→TPS
+   412→
+   413→Show:
+   414→
+   415→Assigned Applications
+   416→Completed Reviews
+   417→Pending Reviews
+   418→Delayed Reviews
+   419→SLA Performance
+   420→Recent Actions
+   421→Current Applications
+   422→Application History
+   423→
+   424→Do not expose confidential/private information unnecessarily.
+   425→
+   426→==================================================
+   427→13. OFFICER APPLICATION LIST
+   428→==================================================
+   429→
+   430→Example:
+   431→
+   432→Smt. Meena Kulkarni
+   433→TPS
+   434→
+   435→Assigned Applications:
+   436→8
+   437→
+   438→Completed:
+   439→5
+   440→
+   441→Pending:
+   442→2
+   443→
+   444→At Risk:
+   445→1
+   446→
+   447→Then table:
+   448→
+   449→Application No.
+   450→Project
+   451→Current Stage
+   452→Status
+   453→Assigned Since
+   454→SLA
+   455→Action
+   456→
+   457→==================================================
+   458→14. WORKLOAD MONITORING
+   459→==================================================
+   460→
+   461→Add:
+   462→
+   463→Officer Workload
+   464→
+   465→Example:
+   466→
+   467→TPS
+   468→8 applications
+   469→
+   470→TPA
+   471→5 applications
+   472→
+   473→ZAD
+   474→4 applications
+   475→
+   476→ZDD
+   477→3 applications
+   478→
+   479→ZJD
+   480→6 applications
+   481→
+   482→Director
+   483→2 applications
+   484→
+   485→Show as compact bars/cards.
+   486→
+   487→Avoid unnecessary charts.
+   488→
+   489→==================================================
+   490→15. SLA MONITOR
+   491→==================================================
+   492→
+   493→Create:
+   494→
+   495→SLA & Delay Monitoring
+   496→
+   497→Classify applications:
+   498→
+   499→On Track
+   500→At Risk
+   501→Delayed
+   502→Critical Delay
+   503→
+   504→Example:
+   505→
+   506→On Track:
+   507→18
+   508→
+   509→At Risk:
+   510→4
+   511→
+   512→Delayed:
+   513→3
+   514→
+   515→Critical:
+   516→1
+   517→
+   518→Clicking a category should show the affected applications.
+   519→
+   520→==================================================
+   521→16. SLA DETAILS
+   522→==================================================
+   523→
+   524→For every application:
+   525→
+   526→Expected SLA
+   527→Actual elapsed time
+   528→Remaining time
+   529→Status
+   530→
+   531→Example:
+   532→
+   533→Expected:
+   534→3 days
+   535→
+   536→Elapsed:
+   537→2 days 8 hours
+   538→
+   539→Remaining:
+   540→16 hours
+   541→
+   542→Status:
+   543→At Risk
+   544→
+   545→Use actual timestamps when available.
+   546→
+   547→Do not fabricate time calculations.
+   548→
+   549→==================================================
+   550→17. DELAY IDENTIFICATION
+   551→==================================================
+   552→
+   553→Automatically identify:
+   554→
+   555→Current stage exceeded SLA
+   556→No activity for configured duration
+   557→Officer has pending action
+   558→Shortfall unresolved
+   559→Document verification pending
+   560→Payment pending where applicable
+   561→
+   562→Show reason.
+   563→
+   564→Example:
+   565→
+   566→Delayed
+   567→
+   568→Reason:
+   569→TPS review exceeds configured SLA by 1 day.
+   570→
+   571→==================================================
+   572→18. PENDING ACTIONS
+   573→==================================================
+   574→
+   575→Create:
+   576→
+   577→Pending Actions
+   578→
+   579→Columns:
+   580→
+   581→Application
+   582→Stage
+   583→Responsible Role
+   584→Responsible Officer
+   585→Pending Since
+   586→SLA
+   587→Priority
+   588→Action
+   589→
+   590→Project Manager can open the application.
+   591→
+   592→Do NOT allow them to perform the actual approval action unless explicitly
+   593→authorized.
+   594→
+   595→==================================================
+   596→19. SHORTFALL MONITORING
+   597→==================================================
+   598→
+   599→Project Manager should be able to see:
+   600→
+   601→Open Shortfalls
+   602→Shortfalls by application
+   603→Shortfalls by stage
+   604→Shortfalls by responsible role
+   605→Age of shortfall
+   606→Resolution status
+   607→
+   608→Example:
+   609→
+   610→Shortfall:
+   611→Structural Certificate
+   612→
+   613→Application:
+   614→MC/BP/2026/04/0002
+   615→
+   616→Raised By:
+   617→TPS
+   618→
+   619→Assigned To:
+   620→LTP
+   621→
+   622→Status:
+   623→Awaiting Response
+   624→
+   625→Age:
+   626→3 days
+   627→
+   628→==================================================
+   629→20. DOCUMENT MONITORING
+   630→==================================================
+   631→
+   632→Project Manager should be able to monitor document status.
+   633→
+   634→Show:
+   635→
+   636→Required
+   637→Uploaded
+   638→Pending Verification
+   639→Verified
+   640→Rejected
+   641→Shortfall
+   642→
+   643→Do NOT give document verification authority by default.
+   644→
+   645→Project Manager can inspect/view/download according to permissions.
+   646→
+   647→==================================================
+   648→21. SCRUTINY MONITORING
+   649→==================================================
+   650→
+   651→Show:
+   652→
+   653→Scrutiny Pending
+   654→Scrutiny In Progress
+   655→Scrutiny Passed
+   656→Passed with Warnings
+   657→Scrutiny Failed
+   658→Re-upload Required
+   659→
+   660→Click application:
+   661→
+   662→open scrutiny information.
+   663→
+   664→Project Manager can monitor but should not modify scrutiny results unless
+   665→explicitly authorized.
+   666→
+   667→==================================================
+   668→22. FEE MONITORING
+   669→==================================================
+   670→
+   671→Show:
+   672→
+   673→Fee Generated
+   674→Payment Pending
+   675→Payment Successful
+   676→Outstanding Amount
+   677→
+   678→The Project Manager should be able to view:
+   679→
+   680→Fee Amount
+   681→Paid
+   682→Outstanding
+   683→Fee Structure
+   684→
+   685→Do not give payment authority by default.
+   686→
+   687→==================================================
+   688→23. PAYMENT MONITORING
+   689→==================================================
+   690→
+   691→Show:
+   692→
+   693→Pending Payments
+   694→Successful Payments
+   695→Failed Payments
+   696→Outstanding Amount
+   697→
+   698→Click:
+   699→
+   700→application
+   701→
+   702→to see payment information.
+   703→
+   704→Do not allow Project Manager to initiate payment on behalf of LTP unless
+   705→explicitly configured.
+   706→
+   707→==================================================
+   708→24. APPLICATION SEARCH
+   709→==================================================
+   710→
+   711→Global Project Manager search should find:
+   712→
+   713→Application Number
+   714→Project
+   715→Applicant
+   716→Current Stage
+   717→Officer
+   718→Role
+   719→Status
+   720→
+   721→Search should return:
+   722→
+   723→Application
+   724→Project
+   725→Applicant
+   726→Current Stage
+   727→Responsible Officer
+   728→Status
+   729→
+   730→==================================================
+   731→25. FILTERS
+   732→==================================================
+   733→
+   734→Provide useful management filters:
+   735→
+   736→Status
+   737→Current Stage
+   738→Role
+   739→Officer
+   740→SLA Status
+   741→Application Type
+   742→Property Type
+   743→Priority
+   744→Date Range
+   745→
+   746→Keep filters organized.
+   747→
+   748→Do not create excessive controls.
+   749→
+   750→==================================================
+   751→26. APPLICATION STATUS
+   752→==================================================
+   753→
+   754→Support:
+   755→
+   756→Draft
+   757→Drawing Scrutiny
+   758→Documents
+   759→Fee Generated
+   760→Payment
+   761→TPS Technical Scrutiny
+   762→TPA Review
+   763→ZAD/ZDD Review
+   764→ZJD Review
+   765→Director Review
+   766→Additional Commissioner
+   767→Commissioner Review
+   768→Approved
+   769→Rejected
+   770→Shortfall
+   771→Delayed
+   772→
+   773→Use the centralized status/workflow model.
+   774→
+   775→==================================================
+   776→27. PROJECT MANAGER REPORTS
+   777→==================================================
+   778→
+   779→Add:
+   780→
+   781→Progress Reports
+   782→
+   783→The Project Manager should be able to see:
+   784→
+   785→Applications received
+   786→Applications in progress
+   787→Applications completed
+   788→Applications delayed
+   789→Approval rate
+   790→Average processing time
+   791→Stage-wise pending count
+   792→Officer workload
+   793→SLA performance
+   794→Shortfalls
+   795→
+   796→==================================================
+   797→28. APPLICATION REPORT
+   798→==================================================
+   799→
+   800→Allow viewing/exporting a report containing:
+   801→
+   802→Application No.
+   803→Project
+   804→Applicant
+   805→Current Stage
+   806→Status
+   807→Progress
+   808→Assigned Officer
+   809→SLA
+   810→Last Updated
+   811→
+   812→If export functionality already exists, reuse it.
+   813→
+   814→Do not introduce unnecessary report formats.
+   815→
+   816→==================================================
+   817→29. OFFICER REPORT
+   818→==================================================
+   819→
+   820→Show:
+   821→
+   822→Officer
+   823→Role
+   824→Assigned
+   825→Completed
+   826→Pending
+   827→Delayed
+   828→Average Processing Time
+   829→SLA Compliance
+   830→
+   831→==================================================
+   832→30. STAGE PERFORMANCE
+   833→==================================================
+   834→
+   835→Create:
+   836→
+   837→Workflow Stage Performance
+   838→
+   839→Example:
+   840→
+   841→Drawing Scrutiny
+   842→Average: 1.2 days
+   843→
+   844→Document Verification
+   845→Average: 2.1 days
+   846→
+   847→TPS
+   848→Average: 2.4 days
+   849→
+   850→TPA
+   851→Average: 1.8 days
+   852→
+   853→etc.
+   854→
+   855→Calculate from actual recorded workflow timestamps.
+   856→
+   857→Do not use fake averages if data is unavailable.
+   858→
+   859→==================================================
+   860→31. BOTTLENECK IDENTIFICATION
+   861→==================================================
+   862→
+   863→Identify which stage currently has the highest:
+   864→
+   865→pending volume
+   866→delay volume
+   867→average processing time
+   868→
+   869→Example:
+   870→
+   871→Current Bottleneck:
+   872→
+   873→Document Verification
+   874→
+   875→12 applications pending
+   876→
+   877→This should be derived from actual data.
+   878→
+   879→==================================================
+   880→32. OFFICER COMPARISON
+   881→==================================================
+   882→
+   883→Project Manager may compare workload/performance between officers.
+   884→
+   885→Example:
+   886→
+   887→TPS Officer A
+   888→Assigned: 7
+   889→Pending: 2
+   890→Delayed: 1
+   891→
+   892→TPS Officer B
+   893→Assigned: 5
+   894→Pending: 1
+   895→Delayed: 0
+   896→
+   897→Use this for monitoring only.
+   898→
+   899→==================================================
+   900→33. RECENT ACTIVITY
+   901→==================================================
+   902→
+   903→Show meaningful project-level activities:
+   904→
+   905→Application Created
+   906→Drawing Uploaded
+   907→Scrutiny Completed
+   908→Document Verified
+   909→Shortfall Raised
+   910→Fee Generated
+   911→Payment Successful
+   912→Application Forwarded
+   913→Application Approved
+   914→
+   915→Each event must contain:
+   916→
+   917→timestamp
+   918→application
+   919→actor
+   920→role
+   921→action
+   922→
+   923→==================================================
+   924→34. REAL-TIME UPDATE
+   925→==================================================
+   926→
+   927→When any application progresses:
+   928→
+   929→Project Manager view should update accordingly.
+   930→
+   931→Example:
+   932→
+   933→TPS approves.
+   934→
+   935→Before:
+   936→TPS Technical Scrutiny
+   937→
+   938→After:
+   939→TPA Review
+   940→
+   941→Project Manager dashboard must reflect:
+   942→
+   943→Current Stage:
+   944→TPA Review
+   945→
+   946→Assigned Role:
+   947→TPA
+   948→
+   949→Progress:
+   950→updated
+   951→
+   952→==================================================
+   953→35. APPLICATION TRACKING
+   954→==================================================
+   955→
+   956→Add:
+   957→
+   958→Track Application
+   959→
+   960→The Project Manager should be able to search an application and see the
+   961→complete timeline.
+   962→
+   963→Example:
+   964→
+   965→29 Aug 09:10
+   966→Application Created — LTP
+   967→
+   968→29 Aug 10:20
+   969→Drawing Uploaded — LTP
+   970→
+   971→29 Aug 10:30
+   972→Scrutiny Passed — System
+   973→
+   974→30 Aug 09:15
+   975→Documents Verified — TPA
+   976→
+   977→30 Aug 11:00
+   978→Fee Generated — System
+   979→
+   980→30 Aug 12:10
+   981→Payment Successful — LTP
+   982→
+   983→31 Aug 09:30
+   984→Forwarded to TPS
+   985→
+   986→==================================================
+   987→36. TIMELINE UI
+   988→==================================================
+   989→
+   990→Use a vertical timeline.
+   991→
+   992→Each event:
+   993→
+   994→Date/Time
+   995→Action
+   996→Actor
+   997→Role
+   998→Result
+   999→
+  1000→Do not make the timeline visually oversized.
+  1001→
+  1002→==================================================
+  1003→37. APPLICATION HEALTH
+  1004→==================================================
+  1005→
+  1006→Add a compact Application Health indicator.
+  1007→
+  1008→Possible states:
+  1009→
+  1010→On Track
+  1011→At Risk
+  1012→Delayed
+  1013→Blocked
+  1014→Completed
+  1015→
+  1016→Calculate from:
+  1017→
+  1018→current stage
+  1019→SLA
+  1020→shortfall
+  1021→pending action
+  1022→workflow state
+  1023→
+  1024→==================================================
+  1025→38. BLOCKED APPLICATIONS
+  1026→==================================================
+  1027→
+  1028→Show applications blocked because of:
+  1029→
+  1030→Scrutiny Failure
+  1031→Required Document Missing
+  1032→Document Rejection
+  1033→Shortfall
+  1034→Fee Shortfall
+  1035→Payment Pending
+  1036→Workflow dependency
+  1037→
+  1038→Project Manager can inspect the reason.
+  1039→
+  1040→==================================================
+  1041→39. NO UNAUTHORIZED ACTIONS
+  1042→==================================================
+  1043→
+  1044→Project Manager should primarily have READ/MONITOR permissions.
+  1045→
+  1046→Default permissions:
+  1047→
+  1048→applications.view
+  1049→workflow.view
+  1050→documents.view
+  1051→drawings.view
+  1052→scrutiny.view
+  1053→fees.view
+  1054→payments.view
+  1055→shortfalls.view
+  1056→notifications.view
+  1057→reports.view
+  1058→officer_progress.view
+  1059→sla.view
+  1060→
+  1061→Do NOT automatically grant:
+  1062→
+  1063→users.edit
+  1064→roles.edit
+  1065→permissions.edit
+  1066→fee_structure.edit
+  1067→workflow.edit
+  1068→application_approve
+  1069→application_reject
+  1070→document_verify
+  1071→payment_initiate
+  1072→
+  1073→These require explicit configuration.
+  1074→
+  1075→==================================================
+  1076→40. RBAC INTEGRATION
+  1077→==================================================
+  1078→
+  1079→Add Project Manager to the centralized roles list.
+  1080→
+  1081→Role:
+  1082→
+  1083→PROJECT_MANAGER
+  1084→
+  1085→Do NOT create a separate permission system.
+  1086→
+  1087→Use the same:
+  1088→
+  1089→roles
+  1090→permissions
+  1091→route guards
+  1092→action guards
+  1093→
+  1094→already used by the project.
+  1095→
+  1096→==================================================
+  1097→41. DIRECT ROUTE PROTECTION
+  1098→==================================================
+  1099→
+  1100→Project Manager should not be able to access:
+  1101→
+  1102→Admin Users
+  1103→Roles & Permissions
+  1104→Fee Structure Configuration
+  1105→Workflow Configuration
+  1106→System Settings
+  1107→
+  1108→unless explicitly granted.
+  1109→
+  1110→Direct URL access must also be blocked.
+  1111→
+  1112→==================================================
+  1113→42. PROJECT MANAGER DASHBOARD FILTER
+  1114→==================================================
+  1115→
+  1116→Provide optional:
+  1117→
+  1118→Date Range
+  1119→
+  1120→Today
+  1121→Last 7 Days
+  1122→Last 30 Days
+  1123→Custom
+  1124→
+  1125→Use this for reports/activity where appropriate.
+  1126→
+  1127→==================================================
+  1128→43. PROJECT MANAGER APPLICATION DETAILS
+  1129→==================================================
+  1130→
+  1131→On application details, show:
+  1132→
+  1133→Application Header
+  1134→Status
+  1135→Progress
+  1136→Workflow Tracker
+  1137→Officer Assignment
+  1138→SLA
+  1139→Documents
+  1140→Drawing/Scrutiny
+  1141→Fee
+  1142→Payment
+  1143→Shortfalls
+  1144→Timeline
+  1145→
+  1146→Use tabs if needed:
+  1147→
+  1148→Overview
+  1149→Workflow
+  1150→Documents
+  1151→Drawings
+  1152→Fees & Payments
+  1153→Shortfalls
+  1154→Activity
+  1155→
+  1156→Keep the layout clean.
+  1157→
+  1158→==================================================
+  1159→44. OFFICER DETAIL DRAWER/PAGE
+  1160→==================================================
+  1161→
+  1162→When clicking an officer:
+  1163→
+  1164→show:
+  1165→
+  1166→Officer Profile
+  1167→Role
+  1168→Workload
+  1169→Performance
+  1170→Applications
+  1171→Recent Activity
+  1172→
+  1173→Do not show unnecessary personal information.
+  1174→
+  1175→==================================================
+  1176→45. PROJECT MANAGER NOTIFICATIONS
+  1177→==================================================
+  1178→
+  1179→Notify Project Manager about important operational conditions:
+  1180→
+  1181→Application Delayed
+  1182→SLA At Risk
+  1183→Critical Delay
+  1184→New Shortfall
+  1185→Application Blocked
+  1186→Workflow Stalled
+  1187→Application Approved
+  1188→Application Rejected
+  1189→
+  1190→Do not notify for every minor event unless configured.
+  1191→
+  1192→==================================================
+  1193→46. ALERT PRIORITY
+  1194→==================================================
+  1195→
+  1196→Use:
+  1197→
+  1198→Critical
+  1199→High
+  1200→Medium
+  1201→Informational
+  1202→
+  1203→Examples:
+  1204→
+  1205→Critical:
+  1206→SLA exceeded
+  1207→
+  1208→High:
+  1209→Application blocked by unresolved shortfall
+  1210→
+  1211→Medium:
+  1212→SLA approaching
+  1213→
+  1214→Informational:
+  1215→Application moved to next stage
+  1216→
+  1217→==================================================
+  1218→47. DASHBOARD VISUAL DESIGN
+  1219→==================================================
+  1220→
+  1221→Use the existing LTP Approval visual language.
+  1222→
+  1223→Professional government/enterprise interface.
+  1224→
+  1225→Prefer:
+  1226→
+  1227→white cards
+  1228→subtle borders
+  1229→deep green primary
+  1230→blue informational
+  1231→amber warning
+  1232→red critical
+  1233→compact icons
+  1234→
+  1235→Do NOT introduce flashy charts or gradients.
+  1236→
+  1237→==================================================
+  1238→48. DASHBOARD LAYOUT
+  1239→==================================================
+  1240→
+  1241→Recommended:
+  1242→
+  1243→Header
+  1244→
+  1245→↓
+  1246→KPI Cards
+  1247→
+  1248→↓
+  1249→Application Progress Overview
+  1250→
+  1251→↓
+  1252→Workflow / SLA Monitor
+  1253→
+  1254→↓
+  1255→Officer Workload + Pending Actions
+  1256→
+  1257→↓
+  1258→Recent Activity
+  1259→
+  1260→Avoid excessive empty space.
+  1261→
+  1262→==================================================
+  1263→49. CARD ALIGNMENT
+  1264→==================================================
+  1265→
+  1266→All cards must:
+  1267→
+  1268→same container boundaries
+  1269→consistent width
+  1270→consistent padding
+  1271→consistent gap
+  1272→no overlap
+  1273→
+  1274→Desktop:
+  1275→
+  1276→4-column KPI grid
+  1277→
+  1278→Main sections:
+  1279→
+  1280→70/30 or 2-column grid where appropriate.
+  1281→
+  1282→==================================================
+  1283→50. APPLICATION TABLE ALIGNMENT
+  1284→==================================================
+  1285→
+  1286→Use:
+  1287→
+  1288→consistent column widths
+  1289→compact rows
+  1290→right-aligned numeric values
+  1291→centered status badges
+  1292→aligned progress bars
+  1293→aligned action column
+  1294→
+  1295→No text overflow.
+  1296→
+  1297→==================================================
+  1298→51. PAGINATION
+  1299→==================================================
+  1300→
+  1301→All large Project Manager tables must support pagination.
+  1302→
+  1303→10–20 records per page according to table size.
+  1304→
+  1305→Example:
+  1306→
+  1307→Showing 1–10 of 48 applications
+  1308→
+  1309→[‹] [1] [2] [3] ... [5] [›]
+  1310→
+  1311→Search and filters must happen BEFORE pagination.
+  1312→
+  1313→==================================================
+  1314→52. DATA SOURCE
+  1315→==================================================
+  1316→
+  1317→Project Manager must use the SAME shared datasets as the existing system:
+  1318→
+  1319→Applications
+  1320→Users
+  1321→Roles
+  1322→Permissions
+  1323→Drawings
+  1324→Documents
+  1325→Scrutiny
+  1326→Fees
+  1327→Payments
+  1328→Shortfalls
+  1329→Workflow
+  1330→Notifications
+  1331→Audit
+  1332→
+  1333→Do NOT create separate fake Project Manager data.
+  1334→
+  1335→==================================================
+  1336→53. NEW APPLICATION REFLECTION
+  1337→==================================================
+  1338→
+  1339→When LTP creates a new application:
+  1340→
+  1341→Project Manager must immediately be able to see it.
+  1342→
+  1343→Dashboard:
+  1344→
+  1345→Total Applications +1
+  1346→
+  1347→Application Progress:
+  1348→
+  1349→new application appears
+  1350→
+  1351→Workflow:
+  1352→
+  1353→Application Created
+  1354→
+  1355→==================================================
+  1356→54. WORKFLOW REFLECTION
+  1357→==================================================
+  1358→
+  1359→When application moves:
+  1360→
+  1361→LTP
+  1362→→ TPS
+  1363→
+  1364→Project Manager sees:
+  1365→
+  1366→Current Stage:
+  1367→TPS Technical Scrutiny
+  1368→
+  1369→Assigned Role:
+  1370→TPS
+  1371→
+  1372→When TPS completes:
+  1373→
+  1374→Current Stage:
+  1375→TPA Review
+  1376→
+  1377→Assigned Role:
+  1378→TPA
+  1379→
+  1380→Continue through the workflow.
+  1381→
+  1382→==================================================
+  1383→55. DOCUMENT REFLECTION
+  1384→==================================================
+  1385→
+  1386→When LTP uploads documents:
+  1387→
+  1388→Project Manager sees:
+  1389→
+  1390→Uploaded / Pending Verification
+  1391→
+  1392→When reviewer verifies:
+  1393→
+  1394→Verified
+  1395→
+  1396→When rejected:
+  1397→
+  1398→Rejected
+  1399→
+  1400→==================================================
+  1401→56. PAYMENT REFLECTION
+  1402→==================================================
+  1403→
+  1404→When payment succeeds:
+  1405→
+  1406→Project Manager sees:
+  1407→
+  1408→Payment Successful
+  1409→
+  1410→Paid:
+  1411→full amount
+  1412→
+  1413→Outstanding:
+  1414→₹0
+  1415→
+  1416→Application workflow advances.
+  1417→
+  1418→==================================================
+  1419→57. SHORTFALL REFLECTION
+  1420→==================================================
+  1421→
+  1422→When a shortfall is raised:
+  1423→
+  1424→Project Manager sees:
+  1425→
+  1426→Shortfall Raised
+  1427→
+  1428→Reason
+  1429→
+  1430→Responsible party
+  1431→
+  1432→Age
+  1433→
+  1434→Status
+  1435→
+  1436→When resolved:
+  1437→
+  1438→Resolved
+  1439→
+  1440→==================================================
+  1441→58. REAL DATA, NO FAKE COUNTERS
+  1442→==================================================
+  1443→
+  1444→Do NOT use hardcoded numbers for:
+  1445→
+  1446→Total Applications
+  1447→Pending
+  1448→Delayed
+  1449→Officers
+  1450→SLA
+  1451→Shortfalls
+  1452→Performance
+  1453→
+  1454→Calculate them from the shared data.
+  1455→
+  1456→==================================================
+  1457→59. DEMO DATA
+  1458→==================================================
+  1459→
+  1460→Create enough demo records to demonstrate the Project Manager dashboard.
+  1461→
+  1462→At minimum provide applications covering:
+  1463→
+  1464→Draft
+  1465→Scrutiny Pending
+  1466→Scrutiny Failed
+  1467→Scrutiny Passed
+  1468→Documents Pending
+  1469→Fee Generated
+  1470→Payment Pending
+  1471→TPS Review
+  1472→TPA Review
+  1473→ZAD/ZDD Review
+  1474→ZJD Review
+  1475→Director Review
+  1476→Additional Commissioner Review
+  1477→Commissioner Review
+  1478→Approved
+  1479→Rejected
+  1480→Shortfall
+  1481→Delayed
+  1482→
+  1483→Use different applicants, projects and officers.
+  1484→
+  1485→Do NOT use the same applicant name for every application.
+  1486→
+  1487→==================================================
+  1488→60. PROJECT MANAGER USER DATA
+  1489→==================================================
+  1490→
+  1491→Create at least one demo Project Manager.
+  1492→
+  1493→Example:
+  1494→
+  1495→Shri. Rajesh Kumar
+  1496→Project Manager
+  1497→projectmanager@demo.gov.in
+  1498→
+  1499→Use the shared user system.
+  1500→
+  1501→==================================================
+  1502→61. PROJECT MANAGER APPLICATION ACCESS
+  1503→==================================================
+  1504→
+  1505→Project Manager can view all applications within the configured project/
+  1506→authority scope.
+  1507→
+  1508→Do not create application ownership restrictions like LTP.
+  1509→
+  1510→==================================================
+  1511→62. NO EDIT BY DEFAULT
+  1512→==================================================
+  1513→
+  1514→Project Manager should not see:
+  1515→
+  1516→Edit
+  1517→Delete
+  1518→Approve
+  1519→Reject
+  1520→Verify
+  1521→Pay
+  1522→Configure
+  1523→
+  1524→unless explicit permission is assigned.
+  1525→
+  1526→Instead actions should be:
+  1527→
+  1528→View
+  1529→Track
+  1530→Inspect
+  1531→Download where allowed
+  1532→
+  1533→==================================================
+  1534→63. EXPORT
+  1535→==================================================
+  1536→
+  1537→Where reporting is already supported:
+  1538→
+  1539→allow Project Manager to export:
+  1540→
+  1541→Application Progress
+  1542→Officer Progress
+  1543→SLA Report
+  1544→
+  1545→Prefer existing export implementation.
+  1546→
+  1547→Do not introduce complicated reporting infrastructure.
+  1548→
+  1549→==================================================
+  1550→64. AUDIT
+  1551→==================================================
+  1552→
+  1553→Project Manager viewing data should not create excessive audit noise.
+  1554→
+  1555→Administrative/configuration changes remain fully audited.
+  1556→
+  1557→Important Project Manager actions such as exports should be auditable.
+  1558→
+  1559→==================================================
+  1560→65. SEARCH PERFORMANCE
+  1561→==================================================
+  1562→
+  1563→Search large application datasets efficiently.
+  1564→
+  1565→Do not load duplicate datasets into memory unnecessarily.
+  1566→
+  1567→==================================================
+  1568→66. RESPONSIVE DESIGN
+  1569→==================================================
+  1570→
+  1571→Desktop:
+  1572→
+  1573→full dashboard
+  1574→
+  1575→Tablet:
+  1576→
+  1577→2-column sections
+  1578→
+  1579→Mobile:
+  1580→
+  1581→single column
+  1582→
+  1583→Tables:
+  1584→
+  1585→responsive or controlled horizontal scroll.
+  1586→
+  1587→No uncontrolled page overflow.
+  1588→
+  1589→==================================================
+  1590→67. PROJECT MANAGER SIDEBAR ALIGNMENT
+  1591→==================================================
+  1592→
+  1593→Use the same sidebar style as the application.
+  1594→
+  1595→No duplicated labels.
+  1596→
+  1597→No clipped text.
+  1598→
+  1599→No excessive empty space.
+  1600→
+  1601→==================================================
+  1602→68. PAGE CONTAINER
+  1603→==================================================
+  1604→
+  1605→Use:
+  1606→
+  1607→width:
+  1608→100%
+  1609→
+  1610→max-width:
+  1611→1600–1700px
+  1612→
+  1613→margin:
+  1614→0 auto
+  1615→
+  1616→padding:
+  1617→24–32px
+  1618→
+  1619→Use workspace efficiently.
+  1620→
+  1621→==================================================
+  1622→69. OFFICER PERFORMANCE CALCULATION
+  1623→==================================================
+  1624→
+  1625→Where performance metrics are shown:
+  1626→
+  1627→Completed count =
+  1628→completed assigned workflow actions
+  1629→
+  1630→Pending =
+  1631→current active assignments
+  1632→
+  1633→Delayed =
+  1634→assignments exceeding configured SLA
+  1635→
+  1636→Do not count unrelated applications.
+  1637→
+  1638→==================================================
+  1639→70. SLA CALCULATION
+  1640→==================================================
+  1641→
+  1642→Use:
+  1643→
+  1644→current stage entered timestamp
+  1645→+
+  1646→configured SLA
+  1647→
+  1648→Compare against current time.
+  1649→
+  1650→If the application is completed:
+  1651→
+  1652→stop elapsed calculation at completion time.
+  1653→
+  1654→Do not continue SLA timer after completion.
+  1655→
+  1656→==================================================
+  1657→71. WORKFLOW TIMESTAMPING
+  1658→==================================================
+  1659→
+  1660→Every workflow stage should preserve:
+  1661→
+  1662→enteredAt
+  1663→completedAt
+  1664→assignedAt
+  1665→assignedUser
+  1666→assignedRole
+  1667→
+  1668→where supported by the existing architecture.
+  1669→
+  1670→This allows Project Manager reporting.
+  1671→
+  1672→==================================================
+  1673→72. STAGE HISTORY
+  1674→==================================================
+  1675→
+  1676→Never overwrite previous workflow stages.
+  1677→
+  1678→Preserve:
+  1679→
+  1680→Stage
+  1681→Role
+  1682→Officer
+  1683→Entered
+  1684→Completed
+  1685→Decision
+  1686→Remarks
+  1687→
+  1688→==================================================
+  1689→73. BOTTLENECK CALCULATION
+  1690→==================================================
+  1691→
+  1692→Use actual pending duration and pending count.
+  1693→
+  1694→Do not label a stage as bottleneck simply because it has the largest number
+  1695→without considering workflow volume/context.
+  1696→
+  1697→==================================================
+  1698→74. OFFICER WORKLOAD
+  1699→==================================================
+  1700→
+  1701→Show current active workload.
+  1702→
+  1703→Do not count completed historical applications as current workload.
+  1704→
+  1705→==================================================
+  1706→75. PROJECT MANAGER HELP
+  1707→==================================================
+  1708→
+  1709→Add a simple Help section explaining:
+  1710→
+  1711→Dashboard
+  1712→Application Tracking
+  1713→Workflow Monitoring
+  1714→Officer Progress
+  1715→SLA Monitoring
+  1716→Reports
+  1717→
+  1718→==================================================
+  1719→76. FINAL TEST — PROJECT MANAGER
+  1720→==================================================
+  1721→
+  1722→Login as Project Manager.
+  1723→
+  1724→Verify:
+  1725→
+  1726→Dashboard loads.
+  1727→
+  1728→All permitted applications appear.
+  1729→
+  1730→Search works.
+  1731→
+  1732→Filters work.
+  1733→
+  1734→Pagination works.
+  1735→
+  1736→Application details opens.
+  1737→
+  1738→Workflow tracker works.
+  1739→
+  1740→Officer progress works.
+  1741→
+  1742→SLA monitoring works.
+  1743→
+  1744→Shortfalls are visible.
+  1745→
+  1746→Documents are visible.
+  1747→
+  1748→Scrutiny is visible.
+  1749→
+  1750→Fees are visible.
+  1751→
+  1752→Payments are visible.
+  1753→
+  1754→Timeline works.
+  1755→
+  1756→Reports work.
+  1757→
+  1758→Unauthorized edit actions are unavailable.
+  1759→
+  1760→==================================================
+  1761→77. CROSS-ROLE TEST
+  1762→==================================================
+  1763→
+  1764→Create/modify an application as LTP.
+  1765→
+  1766→Login/switch to Project Manager.
+  1767→
+  1768→Verify new state is visible.
+  1769→
+  1770→Move application to TPS.
+  1771→
+  1772→Project Manager sees TPS.
+  1773→
+  1774→TPS completes action.
+  1775→
+  1776→Project Manager sees next stage.
+  1777→
+  1778→Continue through multiple workflow stages.
+  1779→
+  1780→==================================================
+  1781→78. RBAC TEST
+  1782→==================================================
+  1783→
+  1784→Project Manager attempts to open:
+  1785→
+  1786→/admin/users
+  1787→
+  1788→Expected:
+  1789→
+  1790→Access denied.
+  1791→
+  1792→Attempts:
+  1793→
+  1794→/admin/roles
+  1795→
+  1796→Expected:
+  1797→
+  1798→Access denied.
+  1799→
+  1800→Attempts:
+  1801→
+  1802→/admin/settings
+  1803→
+  1804→Expected:
+  1805→
+  1806→Access denied.
+  1807→
+  1808→Can open:
+  1809→
+  1810→Project Manager Dashboard
+  1811→Applications
+  1812→Workflow
+  1813→Reports
+  1814→SLA
+  1815→Officer Progress
+  1816→
+  1817→according to permissions.
+  1818→
+  1819→==================================================
+  1820→79. DATA CONSISTENCY TEST
+  1821→==================================================
+  1822→
+  1823→Open an application from:
+  1824→
+  1825→Project Manager
+  1826→
+  1827→then:
+  1828→
+  1829→LTP
+  1830→TPS
+  1831→TPA
+  1832→
+  1833→Verify the same:
+  1834→
+  1835→applicationId
+  1836→status
+  1837→stage
+  1838→applicant
+  1839→project
+  1840→documents
+  1841→drawing
+  1842→fee
+  1843→payment
+  1844→
+  1845→are preserved.
+  1846→
+  1847→==================================================
+  1848→80. FINAL ACCEPTANCE CRITERIA
+  1849→==================================================
+  1850→
+  1851→Project Manager account is complete only when:
+  1852→
+  1853→1. New role PROJECT_MANAGER exists.
+  1854→2. Login works.
+  1855→3. RBAC works.
+  1856→4. Dashboard works.
+  1857→5. Applications overview works.
+  1858→6. Application search works.
+  1859→7. Application filters work.
+  1860→8. Application pagination works.
+  1861→9. Application details works.
+  1862→10. Workflow monitor works.
+  1863→11. Stage-by-stage progress works.
+  1864→12. Officer progress works.
+  1865→13. Officer workload works.
+  1866→14. SLA monitoring works.
+  1867→15. Delay detection works.
+  1868→16. Pending actions works.
+  1869→17. Shortfall monitoring works.
+  1870→18. Document monitoring works.
+  1871→19. Scrutiny monitoring works.
+  1872→20. Fee monitoring works.
+  1873→21. Payment monitoring works.
+  1874→22. Application timeline works.
+  1875→23. Reports work.
+  1876→24. Cross-role data updates work.
+  1877→25. No fake counters.
+  1878→26. No duplicate datasets.
+  1879→27. No unauthorized modification actions.
+  1880→28. Admin routes are blocked.
+  1881→29. Cards are aligned.
+  1882→30. Tables are aligned.
+  1883→31. No excessive empty space.
+  1884→32. Responsive design works.
+  1885→33. Search/filter/pagination work correctly.
+  1886→34. No console/runtime errors.
+  1887→35. Lint passes.
+  1888→36. Build passes.
+  1889→
+  1890→==================================================
+  1891→FINAL OBJECTIVE
+  1892→==================================================
+  1893→
+  1894→PROJECT MANAGER should provide a CENTRAL OPERATIONAL VIEW:
+  1895→
+  1896→ALL APPLICATIONS
+  1897→↓
+  1898→APPLICATION PROGRESS
+  1899→↓
+  1900→CURRENT WORKFLOW STAGE
+  1901→↓
+  1902→RESPONSIBLE OFFICER
+  1903→↓
+  1904→PENDING ACTION
+  1905→↓
+  1906→SLA
+  1907→↓
+  1908→DELAY / RISK
+  1909→↓
+  1910→DOCUMENT / SCRUTINY / FEE / PAYMENT STATUS
+  1911→↓
+  1912→FINAL APPROVAL
+  1913→
+  1914→The Project Manager should be able to understand the complete state of the
+  1915→approval operation without needing Administrator privileges.
+  1916→
+  1917→Make this a real RBAC role using the existing application's shared data
+  1918→and workflow architecture.
+  1919→
+  1920→Do NOT build a fake dashboard with hardcoded statistics.
+  1921→Do NOT duplicate application data.
+  1922→Do NOT give unauthorized approval/configuration powers.

@@ -838,3 +838,246 @@ Stage Summary:
 - Versioning: each version has its own `fileReference` → its own real binary. Old versions remain downloadable.
 - Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.
 - The downloaded PDF opens successfully in Adobe Acrobat (verified via byte-identical MD5 + valid PDF signature + `file` command confirming "PDF document, version 1.4, 1 page(s)").
+
+---
+Task ID: 4
+Agent: general-purpose (PM Dashboard + Applications)
+Task: Build pm-dashboard.tsx + pm-applications.tsx
+
+Work Log:
+- Read pre-work files in order: worklog.md (Tasks 1–16), src/components/pm/pm-helpers.ts (computeSLA, computeAppHealth, computeOfficerWorkloads, computeStagePerformance, identifyBottleneck, computePendingActions, computeRecentActivity, formatDuration, timeAgoBrief, useAllApplications, useAllUsers + types SLAInfo/OfficerWorkload/StagePerf/PendingAction/ActivityEvent/AppHealth), src/store/app-store.ts (navigate, openApplication, user), src/components/design-system/layout.tsx (PageHeader, SectionCard, EmptyState, InfoGrid, InfoRow, StatCard), src/components/design-system/badges.tsx (StatusBadge, PriorityBadge, RoleBadge), src/components/design-system/workflow.tsx (WorkflowStepper, formatDate, formatDateTime, timeAgo), src/components/ltp/ltp-applications.tsx (search/filter/pagination pattern + KPI + StatusBadge usage), src/components/admin/admin-dashboard.tsx (KPI + store-derived metrics pattern), src/types/index.ts (Application, ApplicationStatus, User, RoleKey, ViewKey), src/data/workflow-config.ts (WORKFLOW_STAGES, getStage), src/lib/permissions.ts (rolesForStage, hasPermission).
+- Created src/components/pm/pm-dashboard.tsx (no other files touched, no new dependencies):
+  - "use client" directive at top.
+  - Imports: useAppStore for navigate + openApplication; useAllApplications/useAllUsers/computeSLA/computeOfficerWorkloads/identifyBottleneck/computePendingActions/computeRecentActivity/timeAgoBrief from @/components/pm/pm-helpers; PageHeader/SectionCard/EmptyState/StatCard from layout; StatusBadge/RoleBadge/PriorityBadge from badges; formatDateTime from workflow; Button/Badge/Progress from ui; 15 lucide icons.
+  - PageHeader: title "Project Manager Dashboard", description "Central operational view of the building permit approval workflow.", icon BarChart3, breadcrumb "Project Manager → Dashboard".
+  - KPI Cards (4-col grid, all derived from useAllApplications): Total Applications (FileStack, primary), In Progress (Clock, info, excludes APPROVED/REJECTED/DRAFT), Approved (CheckCircle2, success), Delayed/At Risk (AlertTriangle, destructive, where computeSLA status ∈ DELAYED|CRITICAL|AT_RISK|BLOCKED). Each KPI StatCard navigates to pm-applications or pm-sla on click.
+  - Application Progress Overview (SectionCard, noPadding, icon=Activity, "View all" → navigate("pm-applications")): full-width table of 10 most-recently-updated apps. Columns: Application No. (mono primary link), Project (truncate), Applicant (truncate), Current Stage, Assigned Role (RoleBadge), Assigned Officer, Status (StatusBadge no icon), Progress (compact Progress bar + %, right-aligned), SLA (SlaBadge from computeSLA), Last Updated (timeAgoBrief). Clicking a row → openApplication(a.id, "pm-application-details"). Semantic <th scope="col"> headers, bold + border-b-2, sticky thead.
+  - 2-col grid (xl:grid-cols-[1fr_320px] with LEFT col-span-2):
+    - LEFT — Live Workflow Monitor (SectionCard, icon=Activity): vertical list of 5 most-recently-updated non-completed apps. Each row is a button → openApplication(a.id, "pm-application-details"). Shows application no, project, current stage, assigned officer, role badge, "Pending since <timeAgoBrief>", Progress bar + %, SLA badge. EmptyState fallback.
+    - RIGHT — SLA Summary (SectionCard, icon=Gauge): 5 clickable rows (On Track / At Risk / Delayed / Critical Delay / Blocked) each with icon, label, count badge, chevron. Clicking → navigate("pm-sla"). Counts computed from slaSummary memo (loops computeSLA across all apps). No hardcoded counters.
+  - 2-col grid (same layout):
+    - LEFT — Officer Workload (SectionCard, icon=Users, "View all" → navigate("pm-officers")): 2-col inner grid of officer cards. Each card shows officer name, RoleBadge, "X assigned" badge, Progress bar (relative to max assigned), and Pending/At risk/Delayed counts from computeOfficerWorkloads. Clicking navigates to pm-officers. EmptyState fallback.
+    - RIGHT — Current Bottleneck (SectionCard, icon=Timer): if identifyBottleneck returns a result, shows stage label + reason + pending count + "Inspect SLA" button → navigate("pm-sla"); else shows "No bottleneck detected" success state.
+  - Pending Actions (SectionCard, noPadding, icon=ListChecks, "View all" → navigate("pm-applications")): table of top 5 from computePendingActions. Columns: Application (mono link + project name), Stage, Responsible Role, Responsible Officer, Pending Since (timeAgoBrief), SLA (SlaBadge using pre-computed slaLabel/slaCls), Priority (PriorityBadge). Row click → openApplication(a.id, "pm-application-details"). EmptyState fallback.
+  - Recent Activity (SectionCard, icon=History, "View all" → navigate("pm-reports")): vertical timeline of 15 most-recent events from computeRecentActivity. Each event shows timestamp (formatDateTime), actor + role badge, action text, application no (mono primary link → openApplication). Max-height 420px scrollable. EmptyState fallback.
+  - Local helper SlaBadge (label + cls) — minimal wrapper using the pre-computed SLA classes from computeSLA (no recompute, no `any`).
+  - Local const SLA_SUMMARY_ITEMS — labels + icon + cls only (counts come from slaSummary memo).
+  - Responsive: KPI grid is 1→2→4 cols; main grids collapse to 1 col on mobile, 70/30 split on desktop. Tables overflow-x-auto.
+  - Accessibility: aria-label on the SLA summary buttons (incl. count + "View SLA details"); aria-label on recent-activity applicationNo buttons; aria-hidden on decorative separators; semantic <th scope="col"> + <caption> on every table.
+  - READ-ONLY: no edit/approve/reject/verify/pay buttons anywhere — only View/Inspect actions that call openApplication/navigate.
+- Created src/components/pm/pm-applications.tsx (no other files touched):
+  - "use client" directive at top.
+  - Imports: useAppStore (navigate, openApplication); useAllApplications/computeSLA/SLAStatus from pm-helpers; PageHeader/SectionCard/EmptyState/StatCard from layout; StatusBadge/RoleBadge from badges; timeAgo from workflow; Button/Input/Badge/Progress from ui; Select family from ui/select; WORKFLOW_STAGES from workflow-config; 12 lucide icons; ApplicationStatus type.
+  - PageHeader: title "Applications", description "All building permit applications across the workflow.", icon FileStack, breadcrumb "Project Manager → Applications".
+  - KPI Cards (4-col): Total (FileStack/primary), In Progress (Clock/info, excludes APPROVED/REJECTED/DRAFT), Approved (CheckCircle2/success), Delayed / At Risk (AlertTriangle/destructive, where computeSLA status ∈ DELAYED|CRITICAL|AT_RISK|BLOCKED). All counts derived via useMemo from the shared apps + slaMap.
+  - Filter toolbar: search input (by app no, project, applicant, assigned officer), status Select (all 23 ApplicationStatus values + "All statuses"), stage Select (all 13 WORKFLOW_STAGES + "All stages"), SLA Select (All/On Track/At Risk/Delayed/Critical/Blocked). Each control has aria-label. Pattern matches ltp-applications.tsx.
+  - Active filter chips + result count row: shows "{N} applications match your filters" + "Clear filters" button when any filter is active.
+  - Application table (paginated, default 15 per page): columns Application No. (mono link), Project, Applicant, App Type (mapped via APP_TYPE_LABELS), Current Stage, Assigned Role (RoleBadge), Assigned Officer, Status (StatusBadge), Progress (right-aligned, compact Progress + %), SLA (badge from slaMap), Last Updated (timeAgo), Action (right-aligned "View" ghost button → openApplication(a.id, "pm-application-details")). Row click also opens application. Bold headers (font-bold + border-b-2), sticky thead, semantic <th scope="col"> + <caption>.
+  - Pagination footer: "Showing X–Y of Z" with tabular-nums, page-size Select (10/25/50), Prev/Next buttons + numbered page buttons (with ellipsis for >7 pages via buildPageList). aria-label on every pagination control; aria-current on the active page. Reset to page 1 whenever filters or pageSize change.
+  - Empty state with "Clear filters" action when filtered results are empty.
+  - Footer note: "Project Manager view is read-only · Back to Dashboard" (link navigates to pm-dashboard).
+  - Memoised slaMap (id → {status,label,cls}) so we compute SLA once per app instead of on each render.
+  - TypeScript strict: no `any`, no unused vars (removed unused `Application` import).
+- Verified lint and tsc:
+  - `bun run lint` → exit 0, 0 warnings, 0 errors.
+  - `npx eslint src/components/pm/pm-dashboard.tsx src/components/pm/pm-applications.tsx --max-warnings=0` → exit 0.
+  - `npx tsc --noEmit | grep -E "^src/components/pm/(pm-dashboard|pm-applications)\\.tsx"` → 0 hits (no errors in our files).
+  - Pre-existing errors in src/app/page.tsx (missing PM views in the registry), src/components/pm/pm-help.tsx, src/components/pm/pm-workflow.tsx, and one priority-widening issue inside pm-helpers.ts itself are NOT in our files — they belong to other tasks (Task 5 will register the views) and to pm-helpers itself which we are forbidden to modify.
+
+Stage Summary:
+- Files created: src/components/pm/pm-dashboard.tsx (~827 lines), src/components/pm/pm-applications.tsx (~654 lines). No other files modified, no new dependencies added.
+- All PM helper functions wired: computeSLA, computeOfficerWorkloads, identifyBottleneck, computePendingActions, computeRecentActivity, timeAgoBrief, useAllApplications, useAllUsers. (computeAppHealth, computeStagePerformance, formatDuration also exist in pm-helpers but are not required by this task's spec — left for downstream PM views like pm-sla/pm-officers/pm-reports.)
+- READ-ONLY: every interactive element is a View / Inspect / navigation action (openApplication → "pm-application-details", navigate → pm-applications / pm-sla / pm-officers / pm-reports). No edit/approve/reject/verify/pay buttons.
+- Single source of truth: all data derived from useAllApplications() + useAllUsers(); zero hardcoded counters.
+- Responsive: mobile single column → tablet 2-col → desktop 4-col KPIs + 70/30 grids (xl:grid-cols-[1fr_320px] with col-span-2 for the wide column).
+- Accessibility: aria-labels on search, status/stage/SLA filters, pagination buttons, SLA summary category buttons; semantic <th scope="col"> + <caption> on every table; aria-current on active pagination page; aria-hidden on decorative icons/separators.
+- Lint: 0 errors / 0 warnings for both files. tsc: 0 errors in our two files (pre-existing errors elsewhere are not our responsibility and we are forbidden from modifying other files).
+
+---
+Task ID: 6
+Agent: general-purpose (PM Officers + Reports + Shortfalls + Help)
+Task: Build pm-officers.tsx + pm-officer-details.tsx + pm-reports.tsx + pm-shortfalls.tsx + pm-help.tsx
+
+Work Log:
+- Read mandatory pre-work files in order: worklog.md (full prior history), src/components/pm/pm-helpers.ts (computeSLA, computeAppHealth, computeOfficerWorkloads, computeStagePerformance, identifyBottleneck, computePendingActions, computeRecentActivity, formatDuration, timeAgoBrief, useAllApplications, useAllUsers; types OfficerWorkload, StagePerf, SLAInfo), src/store/app-store.ts (useAppStore, navigate, openApplication, selectedApplicationId, useAllShortfalls, useAllAuditLogs), src/components/design-system/layout.tsx (PageHeader, SectionCard, EmptyState, InfoGrid, InfoRow, StatCard), src/components/design-system/badges.tsx (StatusBadge, PriorityBadge, RoleBadge, ShortfallStatusBadge, ShortfallTypeBadge), src/components/design-system/workflow.tsx (formatDate, formatDateTime, timeAgo), src/components/design-system/back-button.tsx (PageBackButton), src/types/index.ts (Application, User, RoleKey, ViewKey, Shortfall), src/data/workflow-config.ts (WORKFLOW_STAGES, getStage), src/lib/permissions.ts (rolesForStage), src/components/admin/admin-audit.tsx (CSV export pattern).
+- Wrote src/components/pm/pm-officers.tsx (Officer Progress page):
+  * "use client" directive; PageBackButton fallbackView="pm-dashboard"; PageHeader title="Officer Progress" with Users icon.
+  * 4-col KPI cards (StatCard): Total Officers, Total Assigned, Total Delayed/At Risk, Avg SLA Compliance % — all derived from computeOfficerWorkloads(apps, users) + per-app computeSLA.
+  * Officer Workload table (noPadding SectionCard) with columns: Officer (avatar+name+email), Role (RoleBadge), Assigned, Completed, Pending, Delayed, At Risk, Avg Days, Action (View button). Row click + View button both call openApplication(officerId, "pm-officer-details") — reusing selectedApplicationId as the officer-ID carrier (no store change needed).
+  * Officer Comparison SectionCard — responsive grid (1/2/3/4 cols) of compact cards per officer showing avatar, name, designation, RoleBadge, 3-up Assigned/Pending/Delayed mini-stats, avg processing days + completed count footer. Each card is keyboard-activated (Enter/Space) and clickable.
+  * Quick nav footer linking to pm-reports.
+- Wrote src/components/pm/pm-officer-details.tsx (Officer Detail page):
+  * "use client"; reads officer ID via useAppStore(s => s.selectedApplicationId); finds the officer in useAllUsers().
+  * PageBackButton fallbackView="pm-officers"; PageHeader title=officer.name, description=designation+zone, icon=User, badge=RoleBadge.
+  * Officer Profile SectionCard via InfoGrid (3-col): Name, Role (RoleBadge), Designation, Zone, Department, Employee ID.
+  * 4-col KPI cards: Assigned, Completed, Pending, Delayed (from computeOfficerWorkloads filtered to this officer).
+  * Assigned Applications table — apps.filter(a => a.assignedOfficer?.role === officer.role); columns: Application No. (mono, link to pm-application-details), Project (name+applicant), Current Stage, Status (StatusBadge), Assigned Since (formatDate + timeAgo), SLA (computeSLA badge), Action (View → openApplication). Paginated 10 per page with Prev/Next controls and page state reset on officer change.
+  * Recent Actions table — flatten apps[].auditLog where log.role === officer.role, sort by timestamp desc, slice top 15. Columns: Timestamp (formatDateTime+timeAgo), Action, Application No. (link), Remarks.
+  * EmptyState fallback "No officer selected" with a CTA button navigating to pm-officers — fired when selectedApplicationId is null or not a user.
+- Wrote src/components/pm/pm-reports.tsx (Progress Reports page):
+  * "use client"; PageBackButton fallbackView="pm-dashboard"; PageHeader title="Progress Reports" with BarChart3 icon.
+  * 4-col KPI cards: Applications Received, In Progress, Completed (Approved), Delayed (derived from app.status + computeSLA).
+  * Approval Rate SectionCard with Progress bar — approved/decisioned*100; shows numerator/denominator + "Live" badge.
+  * Stage-wise Pending Count table (noPadding) from computeStagePerformance(apps): Stage, Pending, Avg Days (formatted with "d" suffix).
+  * Officer Report table (noPadding) from computeOfficerWorkloads(apps, users): Officer (name+email), Role (RoleBadge), Assigned, Completed, Pending, Delayed, Avg Days, SLA % (color-coded chip: green ≥80, amber ≥50, red <50). SectionCard action prop holds an Export CSV button that mirrors the admin-audit.tsx Blob+download pattern — generates `officer-report-YYYY-MM-DD.csv` with 10 columns and fires a useToast confirmation.
+  * Bottleneck Identification SectionCard from identifyBottleneck(apps): shows the worst stage + reason; EmptyState fallback when no bottleneck.
+  * Recent Activity Feed SectionCard (noPadding) from computeRecentActivity(apps, 30): vertical list with timestamp + timeAgo, actor + RoleBadge (role string cast to RoleKey), action, application-no link to pm-application-details, optional remarks.
+- Wrote src/components/pm/pm-shortfalls.tsx (Shortfall Monitoring page):
+  * "use client"; PageBackButton fallbackView="pm-dashboard"; PageHeader title="Shortfall Monitoring" with AlertTriangle icon.
+  * 4-col KPI cards: Open Shortfalls, Responded/Under Review, Resolved, Overdue/Reopened — derived from useAllShortfalls() status counts.
+  * Shortfalls table (noPadding) from useAllShortfalls(): Shortfall ID (mono), Application No. (link to pm-application-details), Title (with project name), Type (ShortfallTypeBadge), Raised By (name + RoleBadge), Raised At (formatDate), Age (days, color-coded when overdue), Status (ShortfallStatusBadge), Due Date. Row click opens parent application. Paginated 15 per page with Prev/Next + page reset on filter change.
+  * Status filter (shadcn Select) on the SectionCard action: All / Open / Responded / Under Review / Resolved / Reopened / Overdue (matches ShortfallStatus union).
+  * Shortfalls by Stage SectionCard (noPadding): groups shortfalls by stageRaisedAt using WORKFLOW_STAGES labels, shows count chips color-coded by severity (red >3, amber >1, info 1). EmptyState fallback when no shortfalls.
+- Wrote src/components/pm/pm-help.tsx (Help & Support page):
+  * "use client"; PageBackButton fallbackView="pm-dashboard"; PageHeader title="Help & Support" with CircleHelp icon.
+  * Help sections rendered as a 1/2-col responsive grid of SectionCards: Dashboard, Application Tracking, Workflow Monitoring, Officer Progress, SLA Monitoring, Progress Reports — each with an icon (LucideIcon type imported for strict typing), description, bullet list of usage notes, and an "Open …" button calling navigate(viewKey).
+  * Read-Only Role SectionCard reminding the PM portal is monitoring-only (no approve/reject/return/verify/pay/shortfall actions).
+  * "Need more help?" SectionCard with a CTA back to the dashboard.
+- Fixed initial TS error in pm-help.tsx: changed `icon: React.ComponentType<{ className?: string }>` to `icon: LucideIcon` (imported from lucide-react) so it matches the PageHeader/SectionCard icon prop type.
+- Verified clean: `bun run lint` → 0 errors, 0 warnings. `npx tsc --noEmit` → 0 errors in any of the 5 new files (remaining errors are in pre-existing files pm-helpers.ts line 292 priority narrowing, pm-sla.tsx line 119 wrong `action` vs `actions` prop, pm-workflow.tsx line 49 missing formatDate import, and src/app/page.tsx VIEW_REGISTRY not yet registering PM views — none of which are in scope for this task per the "DO NOT modify any other file" constraint).
+- Did NOT modify any file outside src/components/pm/; did NOT modify pm-helpers.ts; did NOT add new dependencies.
+
+PM helper functions wired across the 5 files:
+- computeOfficerWorkloads(apps, users) → pm-officers (KPIs + table + comparison cards), pm-officer-details (workload summary KPIs), pm-reports (officer report table + CSV export).
+- computeSLA(app) → pm-officers (avg compliance %), pm-officer-details (per-app SLA badge in assigned-applications table), pm-reports (delayed count + recent activity).
+- computeStagePerformance(apps) → pm-reports (Stage-wise Pending Count table).
+- identifyBottleneck(apps) → pm-reports (Bottleneck Identification card).
+- computeRecentActivity(apps, 30) → pm-reports (Recent Activity Feed).
+- useAllApplications() → all 4 monitoring pages.
+- useAllUsers() → pm-officers, pm-officer-details, pm-reports.
+- (useAllShortfalls from store, not pm-helpers) → pm-shortfalls.
+
+Stage Summary:
+- 5 read-only PM monitoring pages created: pm-officers, pm-officer-details, pm-reports, pm-shortfalls, pm-help.
+- All metrics computed live from the shared applications/users dataset via pm-helpers.ts — zero hardcoded counters.
+- Cross-page navigation: pm-officers → pm-officer-details (via openApplication(officerId, "pm-officer-details") reusing selectedApplicationId); pm-officer-details → pm-application-details; pm-shortfalls → pm-application-details; pm-reports → pm-application-details (from recent activity feed); pm-help → all 6 monitoring views.
+- Real CSV export on pm-reports Officer Report (Blob + download anchor, mirrors admin-audit.tsx pattern).
+- Responsive 1→2→4 column layouts throughout; sticky bold table headers with border-b-2; tabular-nums for figures; color-coded severity chips (success/info/amber/destructive).
+- Accessibility: aria-label on row action buttons, role="button" + tabIndex + keyboard handler on clickable cards, sr-only labels where needed.
+- Lint clean (0/0). TypeScript clean for all 5 new files; pre-existing TS errors in other files (pm-helpers.ts, pm-sla.tsx, pm-workflow.tsx, src/app/page.tsx) remain untouched per the task scope.
+
+---
+Task ID: 5
+Agent: general-purpose (PM App Details + Workflow + SLA)
+Task: Build pm-application-details.tsx + pm-workflow.tsx + pm-sla.tsx
+
+Work Log:
+- Read mandatory pre-work: worklog.md (Tasks 11-26 history), pm-helpers.ts (shared helpers: computeSLA, computeAppHealth, computeStagePerformance, identifyBottleneck, computePendingActions, computeRecentActivity, formatDuration, timeAgoBrief, useAllApplications, useAllUsers; types: SLAInfo, StagePerf, PendingAction, ActivityEvent), store/app-store.ts (useSelectedApplication, openApplication, navigate, useAllReviewableApplications, useAllShortfalls, useAllAuditLogs), design-system/layout.tsx (PageHeader, SectionCard, EmptyState, InfoGrid, InfoRow, StatCard), design-system/badges.tsx (StatusBadge, PriorityBadge, RoleBadge, SeverityBadge, DocumentStatusBadge, PaymentStatusBadge, ShortfallStatusBadge, ShortfallTypeBadge), design-system/workflow.tsx (WorkflowStepper, WorkflowTimeline, AuditTimeline, formatDate, formatDateTime, formatINR, timeAgo, StageStatusPill), design-system/back-button.tsx (PageBackButton with PARENT_VIEW map — pm-application-details → pm-applications already wired), ltp-application-details.tsx (reference pattern for tabbed application detail layout), types/index.ts (Application, ApplicationStatus, User, ViewKey, WorkflowStageKey, WorkflowHistoryEntry, AuditEntry, DocumentRecord, Drawing, ScrutinyReport, Shortfall), data/workflow-config.ts (WORKFLOW_STAGES with order + role + nextStage, getStage, stageFromStatus), lib/permissions.ts (rolesForStage mapping per WorkflowStageKey).
+- Confirmed no prior PM components existed (only pm-helpers.ts in /src/components/pm/). Confirmed PM views are not yet registered in src/app/page.tsx VIEW_REGISTRY — that registration is out of scope for this task ("DO NOT modify any other file" constraint). The 3 new components are ready to be registered by a subsequent integration task.
+
+- Created src/components/pm/pm-application-details.tsx (Project Manager Application Details — read-only, comprehensive single-application view):
+  * "use client" at top; uses useSelectedApplication() and useAppStore({ navigate, openApplication }); falls back to EmptyState + "Go to Applications" button when no app is selected.
+  * PageBackButton (fallbackView="pm-applications"); PageHeader title = app.applicationNo, description = app.project.name, icon = FileText, breadcrumbs PM → Applications → Application, badge = StatusBadge.
+  * ApplicationContextCard (compact 4-col responsive grid): Application No., Project, Applicant, Type, Property Type, Current Stage, Status badge, Progress %, plus priority/SLA/last-updated footer.
+  * Tabs (shadcn Tabs): Overview, Workflow, Documents, Drawings, Fees & Payments, Shortfalls (with count badge), Activity.
+  * Overview tab: Application Information InfoGrid (app no, submission date, last updated, expected SLA, application type, LTP), Property Information InfoGrid (plot area, built-up area, land use, ward, zone, survey no, site address, property type), Applicant Information InfoGrid (name, contact, email, address), Current Status card (StatusBadge + PriorityBadge + Progress), Assigned Officer card (avatar + name + RoleBadge + assignedAt), SLA card (Badge using slaCls + slaLabel + Expected SLA + Last Updated).
+  * Workflow tab: WorkflowStepper (current stage with status mapped from app.status: APPROVED→COMPLETED, SCRUTINY_FAILED/DRAWING_REUPLOAD_REQUIRED→FAILED, SHORTFALL_RAISED→SHORTFALL, RETURNED→RETURNED, else CURRENT), Stage-by-Stage Table (all WORKFLOW_STAGES with index/label/responsible RoleBadge/StageStatusPill computed by comparing stage.order vs currentStageOrder, accounting for completed apps), WorkflowTimeline (from app.workflowHistory).
+  * Documents tab: read-only Table — Document (name+code), Required (Required/Optional badge), Status (DocumentStatusBadge), Version (vN), Uploaded By, Uploaded Date (formatDate), Reviewed By (reviewedBy ?? verifiedBy). NO upload/verify/reject buttons.
+  * Drawings tab: read-only Table — File Name (with file type + size), Version (vN), Uploaded (formatDateTime), Status (custom DrawingStatusBadge); plus Scrutiny Report summary card (report no, status badge, summary, Total/Passed/Failed stats, generated date) when app.scrutinyReport is present.
+  * Fees & Payments tab: read-only — Fee Breakdown line-items table (component, basis, amount), Subtotal/GST/Total summary; Payment Summary card (Total/Subtotal/GST/Paid/Outstanding via InfoRow + formatINR); Payment Record card (PaymentStatusBadge, method, gateway, transactionId, referenceNo, receiptNo, initiated/completed timestamps, amount). NO pay buttons.
+  * Shortfalls tab: per-shortfall SectionCard with title + ShortfallTypeBadge + shortfallId mono badge, description, 4-col grid (Status/ShortfallStatusBadge, Raised By/RoleBadge, Raised On, Due Date), response block (info tint), resolution block (success tint) when present.
+  * Activity tab: AuditTimeline (from app.auditLog) + Compliance Metadata side card (Total Events, First/Last Event, Data Retention, Integrity badge).
+  * All counts derived — NO hardcoded counters. TypeScript strict: no `any`, no unused vars/imports (initially imported SeverityBadge, Building2, XCircle but removed them after self-audit).
+
+- Created src/components/pm/pm-workflow.tsx (Live Workflow Monitor — read-only):
+  * "use client" at top; uses useAllApplications() (from pm-helpers) + useAppStore({ navigate, openApplication }).
+  * PageBackButton (fallbackView="pm-dashboard"); PageHeader title "Live Workflow Monitor", description "Track every application through the approval workflow in real time.", icon = Activity, breadcrumbs PM → Live Workflow Monitor.
+  * KPI Cards (4-col): Total In Progress (apps not APPROVED/REJECTED), Completed Stages (sum of COMPLETED workflowHistory entries across in-progress apps), Pending Actions (computePendingActions(apps).length), Current Bottleneck (identifyBottleneck(apps)?.stageLabel ?? "—" with sub count).
+  * Stage Performance SectionCard (from computeStagePerformance(apps)) — sticky-bold-header Table: Stage, Responsible Role (RoleBadge for each rolesForStage(stageKey)), Pending Count, Avg Processing Days. Row for the stage with the most pending is highlighted (bg-destructive/5) and gets a "Bottleneck" badge.
+  * Live Workflow Table (paginated 15/page) — ALL non-completed apps, sorted by SLA urgency (CRITICAL > DELAYED > BLOCKED > AT_RISK > ON_TRACK). Columns: Application No., Project (+ applicant), Current Stage (+ PriorityBadge), Assigned Role (RoleBadge per rolesForStage), Assigned Officer, Pending Since (timeAgoBrief(sla.pendingSince)), Expected SLA (sla.expectedDays), SLA Status (Badge with sla.cls), Next Stage (getStage(nextStage)?.shortLabel + ArrowRight, or "Final"). Row click → openApplication(a.id, "pm-application-details"). Includes Prev/Next pagination bar with "Showing X–Y of N" counter.
+  * Stage-by-Stage View — shadcn Accordion (single-collapsible, defaultOpen = first stage that has apps). Each AccordionItem: trigger shows stage label + StageRoles pill + count badge; content shows a compact Table of apps at that stage (Application No., Project, Applicant, Priority, Status, Pending Since) — rows clickable to open application details. Empty stages render a "No applications currently at this stage" hint instead of the table.
+  * All metrics derived from pm-helpers — no hardcoded counters.
+
+- Created src/components/pm/pm-sla.tsx (SLA & Delay Monitoring — read-only):
+  * "use client" at top; uses useAllApplications() + useAppStore({ navigate, openApplication }).
+  * PageBackButton (fallbackView="pm-dashboard"); PageHeader title "SLA & Delay Monitoring", description "Track SLA compliance and identify delayed applications.", icon = Gauge, breadcrumbs PM → SLA & Delay Monitoring; "Clear filter" button rendered in actions slot when a filter is active.
+  * SLA Summary Cards (5-col responsive grid) — counts from computeSLA across all apps: On Track (success), At Risk (amber), Delayed (orange), Critical (destructive), Blocked (destructive). Each card is a clickable button that toggles the table filter (clicking again clears); active card gets a primary ring + "Filtered" badge.
+  * SLA Details Table (paginated 15/page) — ALL applications (including completed), sorted by SLA severity (BLOCKED > CRITICAL > DELAYED > AT_RISK > ON_TRACK > COMPLETED) then by remainingDays asc. Columns: Application No., Project (+ applicant), Current Stage (stageInfo.label + PriorityBadge), Expected SLA (sla.expectedDays), Elapsed (sla.elapsedDays), Remaining (color-coded: red for negative, amber for 0, with "X d over" / "Due today" / "X d" labels), Status (Badge with sla.cls), Reason (sla.reason when present). Row click → openApplication(a.id, "pm-application-details"). Filter state ("ALL" | SLAStatus) controls which subset is shown; paginated with Prev/Next.
+  * Blocked Applications SectionCard (noPadding) — filters apps where computeSLA.status === "BLOCKED", shows table of Application No., Project, Current Stage, Blocking Reason (with AlertTriangle icon + sla.reason), Action ("Open →" hint). Row click → openApplication. EmptyState (CheckCircle2) shown when no blocked apps.
+  * Delay Identification SectionCard — groups by sla.reason across BLOCKED + DELAYED + CRITICAL apps, sorted by count desc. Each reason rendered as a list item with AlertTriangle icon + reason text + count badge + percentage bar (width based on reason/total). EmptyState shown when no delays recorded.
+
+- Common constraints honored across all 3 files:
+  * "use client" directive at top of each file.
+  * Uses existing shadcn/ui components (Button, Badge, Tabs/TabsList/TabsTrigger/TabsContent, Table family, Separator, Progress, Accordion family) — no new dependencies.
+  * Uses useAppStore for navigate + openApplication; useSelectedApplication for the detail view; useAllApplications (from pm-helpers) for the workflow + SLA monitoring views.
+  * Uses pm-helpers computeSLA, computeStagePerformance, identifyBottleneck, computePendingActions, timeAgoBrief — NO hardcoded counters.
+  * READ-ONLY throughout — no edit/approve/reject/verify/pay buttons. Only navigation actions (row click → openApplication, "Go to Applications" / "Clear filter" buttons).
+  * Responsive: mobile single column, desktop multi-column (grid-cols-2 → sm:grid-cols-3 → lg:grid-cols-4/5; sidebar/main layouts use lg:grid-cols-3 with col-span-2 for primary content).
+  * TypeScript strict — no `any` (used explicit unions and WorkflowStageKey casts where needed), no unused vars/imports (cleaned SeverityBadge/Building2/XCircle from pm-application-details; verified every import is used).
+  * Did NOT modify any other file (only created the 3 new files in /src/components/pm/).
+
+Verification:
+- `bun run lint` → exit 0, 0 errors / 0 warnings ✓
+- `npx tsc --noEmit` → 0 errors in pm-application-details.tsx, pm-workflow.tsx, pm-sla.tsx ✓ (only remaining tsc error is in src/app/page.tsx — pre-existing, VIEW_REGISTRY missing the PM view keys; that registration is out of scope for this task and will be done by an integration task)
+
+PM helper functions wired (all real, no hardcoded counters):
+- pm-application-details.tsx: computeSLA
+- pm-workflow.tsx: useAllApplications, computeSLA, computeStagePerformance, computePendingActions, identifyBottleneck, timeAgoBrief
+- pm-sla.tsx: useAllApplications, computeSLA (with type import for SLAStatus)
+
+Issues hit & resolved:
+- Initial draft imported formatDate from "@/components/pm/pm-helpers" — pm-helpers does not export formatDate. Fixed by importing formatDate from "@/components/design-system/workflow" (where it actually lives) in pm-workflow.tsx.
+- Initial pm-sla.tsx used `action={...}` prop on PageHeader — PageHeader's prop is `actions` (plural). Fixed.
+- Initial pm-application-details.tsx stepperStatus was typed as WorkflowHistoryEntry["status"] (which includes PENDING) — WorkflowStepper expects only 5 values (no PENDING). Tightened the type to "COMPLETED" | "CURRENT" | "FAILED" | "RETURNED" | "SHORTFALL".
+- Verified both OctagonAlert and AlertOctagon are valid lucide-react exports (AlertOctagon is an alias for OctagonAlert) — kept OctagonAlert in pm-sla.tsx (Critical card) and AlertOctagon in pm-workflow.tsx (bottleneck KPI card).
+
+Stage Summary:
+- 3 new files created in /src/components/pm/: pm-application-details.tsx, pm-workflow.tsx, pm-sla.tsx. Total ~1,300 LOC.
+- All 3 are read-only Project Manager monitoring views per spec (sections 8-17, 30-31, 35-38, 43, 55-57, 70-73).
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors in the 3 PM files ✓ (1 pre-existing error in src/app/page.tsx awaiting PM view registration by another agent).
+- Every counter is derived from the shared store via pm-helpers (no hardcoded numbers).
+- Every row in every monitoring table is clickable to drill into pm-application-details via openApplication(a.id, "pm-application-details").
+- Responsive: all 3 layouts collapse to single-column on mobile and expand to multi-column grids on sm/lg breakpoints.
+
+---
+Task ID: 7+8
+Agent: main
+Task: Register PM components in page.tsx, add route guard, run final lint + tsc + browser test, append worklog + final report.
+
+Work Log:
+1. Registered all 10 PM components in `src/app/page.tsx` VIEW_REGISTRY:
+   - pm-dashboard → PmDashboard
+   - pm-applications → PmApplications
+   - pm-application-details → PmApplicationDetails
+   - pm-workflow → PmWorkflow
+   - pm-officers → PmOfficers
+   - pm-officer-details → PmOfficerDetails
+   - pm-sla → PmSla
+   - pm-reports → PmReports
+   - pm-shortfalls → PmShortfalls
+   - pm-help → PmHelp
+2. Added route guard to page.tsx Home component: uses `canAccessView(user, view, roles)` to check if the current user can access the current view. If not, redirects to the user's default portal view (pm-dashboard for PROJECT_MANAGER, admin-dashboard for ADMIN, ltp-dashboard for LTP, officer-dashboard for officers). This blocks PM from accessing admin/LTP/officer operational routes via direct URL navigation.
+3. Fixed `priority` type widening issue in `pm-helpers.ts` (line 304) — cast the ternary expression to `"HIGH" | "NORMAL" | "URGENT"` union type.
+4. Final lint: 0 errors, 0 warnings ✓
+5. Final tsc: 0 errors ✓
+
+Self-Verification (Agent Browser end-to-end):
+- Logged in as Project Manager via Demo Role dropdown → "Sign in as Project Manager" → landed on "Project Manager Dashboard" ✓
+- Sidebar portal label: "Project Manager" ✓
+- Sidebar nav items: Dashboard, Applications, Workflow Monitor, Officer Progress, SLA & Delays, Progress Reports, Shortfalls, Notifications, Help & Support ✓ (all 9 items, no admin links)
+- KPI cards: 25 Total Applications, 23 In Progress, 1 Approved, 24 Delayed/At Risk (all derived from real store data, not hardcoded) ✓
+- All 7 PM views load correctly with 0 console errors:
+  - Applications ✓
+  - Live Workflow Monitor ✓
+  - Officer Progress ✓
+  - SLA & Delay Monitoring ✓
+  - Progress Reports ✓
+  - Shortfall Monitoring ✓
+  - Help & Support ✓
+- PM Application Details: opens with all 7 tabs (Overview, Workflow, Documents, Drawings, Fees & Payments, Shortfalls, Activity) ✓
+- PM Application Details is READ-ONLY: 0 Approve/Reject/Verify/Pay/Upload/Re-upload/Resolve buttons found ✓
+- Mobile responsive (390×844): PM Dashboard loads, no horizontal overflow, KPI grids stack ✓
+- Desktop responsive (1440×900): PM Dashboard loads, 4-col KPI grid ✓
+- Route guard: PM cannot access admin/LTP/officer operational routes (redirected to pm-dashboard) ✓
+- 0 console/runtime errors throughout the entire test ✓
+
+Stage Summary:
+- New role PROJECT_MANAGER added to the RBAC architecture with read-only monitoring permissions.
+- 10 new PM components built + 1 shared helpers file (pm-helpers.ts).
+- All PM views use the shared application/user dataset (useAllApplications, useAllUsers) — NO duplicate datasets, NO hardcoded counters.
+- Route guard in page.tsx blocks PM from accessing admin routes (admin-users, admin-roles, admin-settings, etc.) and LTP/officer operational routes (ltp-create-application, officer-review, etc.).
+- PM sidebar shows only PM nav items (no admin links).
+- PM Application Details is fully read-only (no edit/approve/reject/verify/pay buttons).
+- Demo user: Shri. Rajesh Kumar, projectmanager@demo.gov.in, password demo1234 — appears in Demo Role dropdown automatically.
+- Files changed: types/index.ts, data/mock-data.ts, lib/permissions.ts, store/app-store.ts, components/layout/nav-config.ts, components/layout/sidebar.tsx, components/design-system/back-button.tsx, components/design-system/badges.tsx, components/admin/admin-roles.tsx, app/page.tsx, + 11 new files in components/pm/.
+- Lint: 0 errors / 0 warnings ✓; tsc: 0 errors ✓; server HTTP 200 ✓; 0 runtime errors ✓.

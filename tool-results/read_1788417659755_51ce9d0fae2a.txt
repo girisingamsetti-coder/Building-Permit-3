@@ -1,0 +1,701 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import { cn } from "@/lib/utils";
+     5→import { useAppStore, useVisibleApplications } from "@/store/app-store";
+     6→import {
+     7→  PageHeader,
+     8→  StatCard,
+     9→  SectionCard,
+    10→  EmptyState,
+    11→} from "@/components/design-system/layout";
+    12→import { StatusBadge, PriorityBadge } from "@/components/design-system/badges";
+    13→import { timeAgo } from "@/components/design-system/workflow";
+    14→import { Button } from "@/components/ui/button";
+    15→import { Input } from "@/components/ui/input";
+    16→import {
+    17→  Select,
+    18→  SelectContent,
+    19→  SelectItem,
+    20→  SelectTrigger,
+    21→  SelectValue,
+    22→} from "@/components/ui/select";
+    23→import {
+    24→  FileStack,
+    25→  FilePlus2,
+    26→  Search,
+    27→  Filter,
+    28→  ArrowRight,
+    29→  LayoutGrid,
+    30→  List,
+    31→  FileText,
+    32→  Clock,
+    33→  CheckCircle2,
+    34→  AlertTriangle,
+    35→  MapPin,
+    36→  X,
+    37→  ChevronLeft,
+    38→  ChevronRight,
+    39→  ChevronsUpDown,
+    40→  ChevronUp,
+    41→  ChevronDown,
+    42→  Calendar,
+    43→  Hash,
+    44→  Building2,
+    45→  AlertCircle,
+    46→} from "lucide-react";
+    47→import type { Application, ApplicationStatus } from "@/types";
+    48→import { NewApplicationModal } from "@/components/ltp/new-application/new-application-modal";
+    49→
+    50→// ============================================================
+    51→// CONSTANTS
+    52→// ============================================================
+    53→
+    54→const STATUS_FILTERS: { value: string; label: string }[] = [
+    55→  { value: "ALL", label: "All statuses" },
+    56→  { value: "DRAFT", label: "Draft" },
+    57→  { value: "DRAWING_UPLOADED", label: "Drawing Uploaded" },
+    58→  { value: "SCRUTINY_IN_PROGRESS", label: "Scrutiny In Progress" },
+    59→  { value: "SCRUTINY_FAILED", label: "Scrutiny Failed" },
+    60→  { value: "DRAWING_REUPLOAD_REQUIRED", label: "Drawing Reupload Required" },
+    61→  { value: "DOCUMENT_UPLOAD_PENDING", label: "Documents Pending" },
+    62→  { value: "SHORTFALL_RAISED", label: "Shortfall Raised" },
+    63→  { value: "FEE_GENERATED", label: "Fee Generated" },
+    64→  { value: "PAYMENT_PENDING", label: "Payment Pending" },
+    65→  { value: "TPS_TECHNICAL_SCRUTINY", label: "TPS Technical Scrutiny" },
+    66→  { value: "TPA_REVIEW", label: "TPA Review" },
+    67→  { value: "ZAD_ZDD_REVIEW", label: "ZAD/ZDD Review" },
+    68→  { value: "ZJD_REVIEW", label: "ZJD Review" },
+    69→  { value: "DIRECTOR_DP_REVIEW", label: "Director DP Review" },
+    70→  { value: "ADDITIONAL_COMMISSIONER_REVIEW", label: "Addl. Commissioner Review" },
+    71→  { value: "COMMISSIONER_REVIEW", label: "Commissioner Review" },
+    72→  { value: "APPROVED", label: "Approved" },
+    73→  { value: "REJECTED", label: "Rejected" },
+    74→  { value: "RETURNED", label: "Returned" },
+    75→];
+    76→
+    77→type SortKey =
+    78→  | "lastUpdated"
+    79→  | "submissionDate"
+    80→  | "applicationNo"
+    81→  | "projectName"
+    82→  | "status"
+    83→  | "priority";
+    84→
+    85→type SortDir = "asc" | "desc";
+    86→
+    87→const SORT_OPTIONS: { value: string; label: string; key: SortKey; dir: SortDir }[] = [
+    88→  { value: "lastUpdated-desc", label: "Last Updated (newest first)", key: "lastUpdated", dir: "desc" },
+    89→  { value: "lastUpdated-asc", label: "Last Updated (oldest first)", key: "lastUpdated", dir: "asc" },
+    90→  { value: "submissionDate-desc", label: "Submission Date (newest first)", key: "submissionDate", dir: "desc" },
+    91→  { value: "submissionDate-asc", label: "Submission Date (oldest first)", key: "submissionDate", dir: "asc" },
+    92→  { value: "applicationNo-asc", label: "Application No. (A → Z)", key: "applicationNo", dir: "asc" },
+    93→  { value: "applicationNo-desc", label: "Application No. (Z → A)", key: "applicationNo", dir: "desc" },
+    94→  { value: "projectName-asc", label: "Project Name (A → Z)", key: "projectName", dir: "asc" },
+    95→  { value: "projectName-desc", label: "Project Name (Z → A)", key: "projectName", dir: "desc" },
+    96→  { value: "status-asc", label: "Status (A → Z)", key: "status", dir: "asc" },
+    97→  { value: "status-desc", label: "Status (Z → A)", key: "status", dir: "desc" },
+    98→  { value: "priority-desc", label: "Priority (high → low)", key: "priority", dir: "desc" },
+    99→  { value: "priority-asc", label: "Priority (low → high)", key: "priority", dir: "asc" },
+   100→];
+   101→
+   102→const PAGE_SIZE_OPTIONS = [10, 25, 50];
+   103→
+   104→const PRIORITY_RANK: Record<Application["priority"], number> = {
+   105→  URGENT: 3,
+   106→  HIGH: 2,
+   107→  NORMAL: 1,
+   108→};
+   109→
+   110→// ============================================================
+   111→// MAIN COMPONENT
+   112→// ============================================================
+   113→
+   114→export function LtpApplications() {
+   115→  const { user, openApplication, navigate } = useAppStore();
+   116→  const visibleApps = useVisibleApplications();
+   117→
+   118→  // ---- Filter / sort / pagination state ----
+   119→  const [query, setQuery] = React.useState("");
+   120→  const [status, setStatus] = React.useState("ALL");
+   121→  const [view, setView] = React.useState<"table" | "grid">("table");
+   122→  const [sortKey, setSortKey] = React.useState<SortKey>("lastUpdated");
+   123→  const [sortDir, setSortDir] = React.useState<SortDir>("desc");
+   124→  const [page, setPage] = React.useState(1);
+   125→  const [pageSize, setPageSize] = React.useState(10);
+   126→  const [newAppOpen, setNewAppOpen] = React.useState(false);
+   127→
+   128→  // ---- Derived: filtered + sorted list ----
+   129→  const filteredApps = React.useMemo(() => {
+   130→    let list = visibleApps;
+   131→    if (query.trim()) {
+   132→      const q = query.toLowerCase();
+   133→      list = list.filter(
+   134→        (a) =>
+   135→          a.applicationNo.toLowerCase().includes(q) ||
+   136→          a.project.name.toLowerCase().includes(q) ||
+   137→          a.applicant.name.toLowerCase().includes(q) ||
+   138→          a.project.ward.toLowerCase().includes(q) ||
+   139→          a.project.zone.toLowerCase().includes(q)
+   140→      );
+   141→    }
+   142→    if (status !== "ALL") list = list.filter((a) => a.status === status);
+   143→
+   144→    // Sort
+   145→    const sorted = [...list].sort((a, b) => {
+   146→      let cmp = 0;
+   147→      switch (sortKey) {
+   148→        case "lastUpdated":
+   149→          cmp = a.lastUpdated.localeCompare(b.lastUpdated);
+   150→          break;
+   151→        case "submissionDate":
+   152→          cmp = a.submissionDate.localeCompare(b.submissionDate);
+   153→          break;
+   154→        case "applicationNo":
+   155→          cmp = a.applicationNo.localeCompare(b.applicationNo);
+   156→          break;
+   157→        case "projectName":
+   158→          cmp = a.project.name.localeCompare(b.project.name);
+   159→          break;
+   160→        case "status":
+   161→          cmp = a.status.localeCompare(b.status);
+   162→          break;
+   163→        case "priority":
+   164→          cmp = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
+   165→          break;
+   166→        default:
+   167→          cmp = 0;
+   168→      }
+   169→      return sortDir === "asc" ? cmp : -cmp;
+   170→    });
+   171→    return sorted;
+   172→  }, [visibleApps, query, status, sortKey, sortDir]);
+   173→
+   174→  // ---- Pagination math ----
+   175→  const totalApps = filteredApps.length;
+   176→  const totalPages = Math.max(1, Math.ceil(totalApps / pageSize));
+   177→  const startIndex = (page - 1) * pageSize;
+   178→  const endIndex = Math.min(startIndex + pageSize, totalApps);
+   179→  const pageApps = filteredApps.slice(startIndex, endIndex);
+   180→
+   181→  // Reset to page 1 when filters/sort/pageSize change (guard against out-of-range)
+   182→  React.useEffect(() => {
+   183→    if (page > totalPages) setPage(1);
+   184→  }, [page, totalPages]);
+   185→
+   186→  // Reset page to 1 whenever the filter/sort inputs change
+   187→  React.useEffect(() => {
+   188→    setPage(1);
+   189→  }, [query, status, sortKey, sortDir, pageSize]);
+   190→
+   191→  // ---- KPI counts (computed from the unfiltered visible set) ----
+   192→  const ACTION_STATUSES = [
+   193→    "SCRUTINY_FAILED",
+   194→    "SHORTFALL_RAISED",
+   195→    "PAYMENT_PENDING",
+   196→    "DOCUMENT_UPLOAD_PENDING",
+   197→    "DRAWING_REUPLOAD_REQUIRED",
+   198→  ];
+   199→  const counts = {
+   200→    total: visibleApps.length,
+   201→    active: visibleApps.filter((a) => !["APPROVED", "REJECTED"].includes(a.status)).length,
+   202→    approved: visibleApps.filter((a) => a.status === "APPROVED").length,
+   203→    action: visibleApps.filter((a) => ACTION_STATUSES.includes(a.status)).length,
+   204→  };
+   205→
+   206→  const hasActiveFilters = query.trim() !== "" || status !== "ALL";
+   207→
+   208→  function handleClearFilters() {
+   209→    setQuery("");
+   210→    setStatus("ALL");
+   211→  }
+   212→
+   213→  function handleSortChange(value: string) {
+   214→    const opt = SORT_OPTIONS.find((o) => o.value === value);
+   215→    if (opt) {
+   216→      setSortKey(opt.key);
+   217→      setSortDir(opt.dir);
+   218→    }
+   219→  }
+   220→
+   221→  // Toggle sort by clicking a column header
+   222→  function toggleColumnSort(key: SortKey) {
+   223→    if (sortKey === key) {
+   224→      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+   225→    } else {
+   226→      // Default direction per column
+   227→      const defaultDir: SortDir = key === "lastUpdated" || key === "submissionDate" || key === "priority" ? "desc" : "asc";
+   228→      setSortKey(key);
+   229→      setSortDir(defaultDir);
+   230→    }
+   231→  }
+   232→
+   233→  return (
+   234→    <div className="space-y-6">
+   235→      <PageHeader
+   236→        title="My Applications"
+   237→        description="All building and project approval applications you have submitted."
+   238→        icon={FileStack}
+   239→        breadcrumbs={[
+   240→          { label: "LTP Portal", onClick: () => navigate("ltp-dashboard") },
+   241→          { label: "Applications" },
+   242→        ]}
+   243→        actions={
+   244→          <Button size="sm" onClick={() => setNewAppOpen(true)}>
+   245→            <FilePlus2 className="size-4" /> New Application
+   246→          </Button>
+   247→        }
+   248→      />
+   249→
+   250→      {/* ===== KPI cards ===== */}
+   251→      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+   252→        <StatCard label="Total" value={counts.total} icon={FileStack} accent="primary" />
+   253→        <StatCard label="Active" value={counts.active} icon={Clock} accent="info" />
+   254→        <StatCard label="Action Required" value={counts.action} icon={AlertTriangle} accent="warning" />
+   255→        <StatCard label="Approved" value={counts.approved} icon={CheckCircle2} accent="success" />
+   256→      </div>
+   257→
+   258→      <SectionCard noPadding>
+   259→        {/* ===== Filter / sort / view toolbar ===== */}
+   260→        <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center">
+   261→          {/* Search */}
+   262→          <div className="relative flex-1">
+   263→            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+   264→            <Input
+   265→              value={query}
+   266→              onChange={(e) => setQuery(e.target.value)}
+   267→              placeholder="Search by application no, project, applicant, ward, zone…"
+   268→              className="h-9 pl-9"
+   269→              aria-label="Search applications"
+   270→            />
+   271→            {query && (
+   272→              <button
+   273→                onClick={() => setQuery("")}
+   274→                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+   275→                aria-label="Clear search"
+   276→              >
+   277→                <X className="size-3.5" />
+   278→              </button>
+   279→            )}
+   280→          </div>
+   281→
+   282→          {/* Status filter */}
+   283→          <Select value={status} onValueChange={setStatus}>
+   284→            <SelectTrigger className="h-9 w-full sm:w-[180px]" aria-label="Filter by status">
+   285→              <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
+   286→              <SelectValue />
+   287→            </SelectTrigger>
+   288→            <SelectContent>
+   289→              {STATUS_FILTERS.map((f) => (
+   290→                <SelectItem key={f.value} value={f.value}>
+   291→                  {f.label}
+   292→                </SelectItem>
+   293→              ))}
+   294→            </SelectContent>
+   295→          </Select>
+   296→
+   297→          {/* Sort */}
+   298→          <Select
+   299→            value={`${sortKey}-${sortDir}`}
+   300→            onValueChange={handleSortChange}
+   301→          >
+   302→            <SelectTrigger className="h-9 w-full sm:w-[230px]" aria-label="Sort applications">
+   303→              <ChevronsUpDown className="mr-1.5 size-3.5 text-muted-foreground" />
+   304→              <SelectValue />
+   305→            </SelectTrigger>
+   306→            <SelectContent>
+   307→              {SORT_OPTIONS.map((o) => (
+   308→                <SelectItem key={o.value} value={o.value}>
+   309→                  {o.label}
+   310→                </SelectItem>
+   311→              ))}
+   312→            </SelectContent>
+   313→          </Select>
+   314→
+   315→          {/* View toggle */}
+   316→          <div className="flex items-center rounded-md border border-border" role="group" aria-label="View toggle">
+   317→            <Button
+   318→              variant={view === "table" ? "secondary" : "ghost"}
+   319→              size="icon"
+   320→              className="h-9 w-9 rounded-r-none"
+   321→              onClick={() => setView("table")}
+   322→              aria-label="List view"
+   323→              aria-pressed={view === "table"}
+   324→            >
+   325→              <List className="size-4" />
+   326→            </Button>
+   327→            <Button
+   328→              variant={view === "grid" ? "secondary" : "ghost"}
+   329→              size="icon"
+   330→              className="h-9 w-9 rounded-l-none"
+   331→              onClick={() => setView("grid")}
+   332→              aria-label="Grid view"
+   333→              aria-pressed={view === "grid"}
+   334→            >
+   335→              <LayoutGrid className="size-4" />
+   336→            </Button>
+   337→          </div>
+   338→        </div>
+   339→
+   340→        {/* ===== Active filter chips + result count ===== */}
+   341→        <div className="flex flex-col gap-2 border-b border-border bg-muted/30 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+   342→          <div className="flex flex-wrap items-center gap-2">
+   343→            <span className="text-xs font-medium text-muted-foreground">
+   344→              {totalApps} {totalApps === 1 ? "application" : "applications"}
+   345→              {hasActiveFilters && " match your filters"}
+   346→            </span>
+   347→            {hasActiveFilters && (
+   348→              <Button
+   349→                variant="ghost"
+   350→                size="sm"
+   351→                className="h-6 px-2 text-xs"
+   352→                onClick={handleClearFilters}
+   353→              >
+   354→                <X className="size-3" /> Clear filters
+   355→              </Button>
+   356→            )}
+   357→          </div>
+   358→          <span className="text-[11px] text-muted-foreground">
+   359→            Sorted by {SORT_OPTIONS.find((o) => o.key === sortKey && o.dir === sortDir)?.label ?? "Last Updated"}
+   360→          </span>
+   361→        </div>
+   362→
+   363→        {/* ===== List / Grid body ===== */}
+   364→        {pageApps.length === 0 ? (
+   365→          <div className="p-6">
+   366→            <EmptyState
+   367→              icon={FileText}
+   368→              title={hasActiveFilters ? "No applications match your filters" : "No applications found"}
+   369→              description={
+   370→                hasActiveFilters
+   371→                  ? "Try adjusting your search or filters, or clear them to see all applications."
+   372→                  : "Create a new application to get started."
+   373→              }
+   374→              action={
+   375→                hasActiveFilters ? (
+   376→                  <Button size="sm" variant="outline" onClick={handleClearFilters}>
+   377→                    <X className="size-4" /> Clear filters
+   378→                  </Button>
+   379→                ) : (
+   380→                  <Button size="sm" onClick={() => setNewAppOpen(true)}>
+   381→                    <FilePlus2 className="size-4" /> New Application
+   382→                  </Button>
+   383→                )
+   384→              }
+   385→            />
+   386→          </div>
+   387→        ) : view === "table" ? (
+   388→          <div className="overflow-x-auto">
+   389→            <table className="w-full text-sm">
+   390→              <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
+   391→                <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
+   392→                  <SortableTh
+   393→                    label="Application No."
+   394→                    active={sortKey === "applicationNo"}
+   395→                    dir={sortDir}
+   396→                    onClick={() => toggleColumnSort("applicationNo")}
+   397→                    icon={Hash}
+   398→                  />
+   399→                  <SortableTh
+   400→                    label="Project"
+   401→                    active={sortKey === "projectName"}
+   402→                    dir={sortDir}
+   403→                    onClick={() => toggleColumnSort("projectName")}
+   404→                    icon={Building2}
+   405→                  />
+   406→                  <th className="px-4 py-3 font-bold">Applicant</th>
+   407→                  <SortableTh
+   408→                    label="Status"
+   409→                    active={sortKey === "status"}
+   410→                    dir={sortDir}
+   411→                    onClick={() => toggleColumnSort("status")}
+   412→                  />
+   413→                  <th className="px-4 py-3 font-bold">Current Stage</th>
+   414→                  <SortableTh
+   415→                    label="Priority"
+   416→                    active={sortKey === "priority"}
+   417→                    dir={sortDir}
+   418→                    onClick={() => toggleColumnSort("priority")}
+   419→                  />
+   420→                  <SortableTh
+   421→                    label="Submitted"
+   422→                    active={sortKey === "submissionDate"}
+   423→                    dir={sortDir}
+   424→                    onClick={() => toggleColumnSort("submissionDate")}
+   425→                    icon={Calendar}
+   426→                  />
+   427→                  <SortableTh
+   428→                    label="Updated"
+   429→                    active={sortKey === "lastUpdated"}
+   430→                    dir={sortDir}
+   431→                    onClick={() => toggleColumnSort("lastUpdated")}
+   432→                    icon={Clock}
+   433→                  />
+   434→                  <th className="px-4 py-3 text-right font-bold">Action</th>
+   435→                </tr>
+   436→              </thead>
+   437→              <tbody className="divide-y divide-border">
+   438→                {pageApps.map((a) => (
+   439→                  <tr
+   440→                    key={a.id}
+   441→                    className="group cursor-pointer transition-colors hover:bg-muted/30"
+   442→                    onClick={() => openApplication(a.id)}
+   443→                  >
+   444→                    <td className="px-4 py-3">
+   445→                      <button
+   446→                        onClick={(e) => {
+   447→                          e.stopPropagation();
+   448→                          openApplication(a.id);
+   449→                        }}
+   450→                        className="font-mono text-xs font-medium text-primary hover:underline"
+   451→                      >
+   452→                        {a.applicationNo}
+   453→                      </button>
+   454→                      <div className="text-[10px] text-muted-foreground">{formatDate(a.submissionDate)}</div>
+   455→                    </td>
+   456→                    <td className="px-4 py-3 max-w-[220px]">
+   457→                      <p className="truncate text-xs font-medium">{a.project.name}</p>
+   458→                      <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
+   459→                        <MapPin className="size-2.5" /> {a.project.ward} · {a.project.zone}
+   460→                      </p>
+   461→                    </td>
+   462→                    <td className="px-4 py-3 max-w-[160px]">
+   463→                      <p className="truncate text-xs">{a.applicant.name}</p>
+   464→                      <p className="text-[10px] text-muted-foreground capitalize">
+   465→                        {a.project.propertyType.replace("_", " ").toLowerCase()}
+   466→                      </p>
+   467→                    </td>
+   468→                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+   469→                      <StatusBadge status={a.status} showIcon={false} />
+   470→                    </td>
+   471→                    <td className="px-4 py-3">
+   472→                      <span className="text-xs">{a.currentStageLabel}</span>
+   473→                    </td>
+   474→                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+   475→                      <PriorityBadge priority={a.priority} />
+   476→                    </td>
+   477→                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+   478→                      {formatDate(a.submissionDate)}
+   479→                    </td>
+   480→                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+   481→                      {timeAgo(a.lastUpdated)}
+   482→                    </td>
+   483→                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+   484→                      <Button
+   485→                        variant="ghost"
+   486→                        size="sm"
+   487→                        className="h-7 text-xs"
+   488→                        onClick={() => openApplication(a.id)}
+   489→                      >
+   490→                        Open <ArrowRight className="size-3" />
+   491→                      </Button>
+   492→                    </td>
+   493→                  </tr>
+   494→                ))}
+   495→              </tbody>
+   496→            </table>
+   497→          </div>
+   498→        ) : (
+   499→          <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+   500→            {pageApps.map((a) => (
+   501→              <ApplicationCard key={a.id} app={a} onOpen={() => openApplication(a.id)} />
+   502→            ))}
+   503→          </div>
+   504→        )}
+   505→
+   506→        {/* ===== Pagination footer ===== */}
+   507→        {totalApps > 0 && (
+   508→          <div className="flex flex-col gap-3 border-t border-border px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+   509→            <div className="flex items-center gap-3">
+   510→              <p className="text-xs text-muted-foreground">
+   511→                Showing <span className="font-medium text-foreground">{startIndex + 1}–{endIndex}</span> of{" "}
+   512→                <span className="font-medium text-foreground">{totalApps}</span>
+   513→              </p>
+   514→              <div className="flex items-center gap-1.5">
+   515→                <label htmlFor="page-size" className="text-xs text-muted-foreground sr-only sm:not-sr-only sm:ml-1">
+   516→                  Rows
+   517→                </label>
+   518→                <Select
+   519→                  value={String(pageSize)}
+   520→                  onValueChange={(v) => setPageSize(Number(v))}
+   521→                >
+   522→                  <SelectTrigger
+   523→                    id="page-size"
+   524→                    className="h-8 w-[72px] text-xs"
+   525→                    aria-label="Rows per page"
+   526→                  >
+   527→                    <SelectValue />
+   528→                  </SelectTrigger>
+   529→                  <SelectContent>
+   530→                    {PAGE_SIZE_OPTIONS.map((s) => (
+   531→                      <SelectItem key={s} value={String(s)}>
+   532→                        {s}
+   533→                      </SelectItem>
+   534→                    ))}
+   535→                  </SelectContent>
+   536→                </Select>
+   537→              </div>
+   538→            </div>
+   539→
+   540→            {totalPages > 1 && (
+   541→              <div className="flex items-center gap-1" role="navigation" aria-label="Pagination">
+   542→                <button
+   543→                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+   544→                  disabled={page === 1}
+   545→                  className="flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+   546→                  aria-label="Previous page"
+   547→                >
+   548→                  <ChevronLeft className="size-4" />
+   549→                  <span className="hidden sm:inline">Prev</span>
+   550→                </button>
+   551→                {buildPageList(page, totalPages).map((p, idx) =>
+   552→                  p === "…" ? (
+   553→                    <span
+   554→                      key={`ellipsis-${idx}`}
+   555→                      className="flex h-8 w-8 items-center justify-center text-xs text-muted-foreground"
+   556→                      aria-hidden
+   557→                    >
+   558→                      …
+   559→                    </span>
+   560→                  ) : (
+   561→                    <button
+   562→                      key={p}
+   563→                      onClick={() => setPage(p)}
+   564→                      className={cn(
+   565→                        "flex h-8 w-8 items-center justify-center rounded-md border text-xs font-medium transition-colors",
+   566→                        p === page
+   567→                          ? "border-primary bg-primary text-primary-foreground"
+   568→                          : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+   569→                      )}
+   570→                      aria-label={`Page ${p}`}
+   571→                      aria-current={p === page ? "page" : undefined}
+   572→                    >
+   573→                      {p}
+   574→                    </button>
+   575→                  )
+   576→                )}
+   577→                <button
+   578→                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+   579→                  disabled={page === totalPages}
+   580→                  className="flex h-8 items-center gap-1 rounded-md border border-border px-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+   581→                  aria-label="Next page"
+   582→                >
+   583→                  <span className="hidden sm:inline">Next</span>
+   584→                  <ChevronRight className="size-4" />
+   585→                </button>
+   586→              </div>
+   587→            )}
+   588→          </div>
+   589→        )}
+   590→      </SectionCard>
+   591→
+   592→      {/* ===== New Application Modal ===== */}
+   593→      <NewApplicationModal open={newAppOpen} onOpenChange={setNewAppOpen} />
+   594→    </div>
+   595→  );
+   596→}
+   597→
+   598→// ============================================================
+   599→// SORTABLE TABLE HEADER
+   600→// ============================================================
+   601→
+   602→function SortableTh({
+   603→  label,
+   604→  active,
+   605→  dir,
+   606→  onClick,
+   607→  icon: Icon,
+   608→}: {
+   609→  label: string;
+   610→  active: boolean;
+   611→  dir: SortDir;
+   612→  onClick: () => void;
+   613→  icon?: React.ComponentType<{ className?: string }>;
+   614→}) {
+   615→  return (
+   616→    <th
+   617→      className="px-4 py-3 font-bold"
+   618→      aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
+   619→    >
+   620→      <button
+   621→        onClick={onClick}
+   622→        className={cn(
+   623→          "inline-flex items-center gap-1 rounded-md px-0.5 py-0.5 text-[11px] font-bold uppercase tracking-wide transition-colors hover:text-primary",
+   624→          active && "text-primary"
+   625→        )}
+   626→        aria-label={`Sort by ${label}, currently ${active ? (dir === "asc" ? "ascending" : "descending") : "unsorted"}`}
+   627→      >
+   628→        {Icon && <Icon className="size-3" />}
+   629→        {label}
+   630→        {active ? (
+   631→          dir === "asc" ? (
+   632→            <ChevronUp className="size-3" />
+   633→          ) : (
+   634→            <ChevronDown className="size-3" />
+   635→          )
+   636→        ) : (
+   637→          <ChevronsUpDown className="size-3 opacity-40" />
+   638→        )}
+   639→      </button>
+   640→    </th>
+   641→  );
+   642→}
+   643→
+   644→// ============================================================
+   645→// PAGE LIST BUILDER (with ellipsis)
+   646→// ============================================================
+   647→
+   648→function buildPageList(current: number, total: number): (number | "…")[] {
+   649→  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+   650→  const pages: (number | "…")[] = [1];
+   651→  const start = Math.max(2, current - 1);
+   652→  const end = Math.min(total - 1, current + 1);
+   653→  if (start > 2) pages.push("…");
+   654→  for (let i = start; i <= end; i++) pages.push(i);
+   655→  if (end < total - 1) pages.push("…");
+   656→  pages.push(total);
+   657→  return pages;
+   658→}
+   659→
+   660→// ============================================================
+   661→// APPLICATION CARD (grid view)
+   662→// ============================================================
+   663→
+   664→function ApplicationCard({ app, onOpen }: { app: Application; onOpen: () => void }) {
+   665→  return (
+   666→    <button
+   667→      onClick={onOpen}
+   668→      className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 text-left shadow-gov transition-all hover:border-primary/40 hover:shadow-gov-lg"
+   669→    >
+   670→      <div className="flex items-start justify-between gap-2">
+   671→        <div className="min-w-0">
+   672→          <p className="font-mono text-xs font-medium text-primary">{app.applicationNo}</p>
+   673→          <p className="truncate text-sm font-medium">{app.project.name}</p>
+   674→        </div>
+   675→        <PriorityBadge priority={app.priority} />
+   676→      </div>
+   677→      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+   678→        <MapPin className="size-3" /> {app.project.ward} · {app.project.zone}
+   679→      </div>
+   680→      <div className="flex items-center justify-between">
+   681→        <StatusBadge status={app.status} showIcon={false} />
+   682→        <span className="text-[11px] text-muted-foreground">{timeAgo(app.lastUpdated)}</span>
+   683→      </div>
+   684→      <div className="flex items-center justify-between border-t border-border pt-2">
+   685→        <span className="text-[11px] text-muted-foreground">
+   686→          Stage: <span className="font-medium text-foreground">{app.currentStageLabel}</span>
+   687→        </span>
+   688→        <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+   689→      </div>
+   690→    </button>
+   691→  );
+   692→}
+   693→
+   694→// ============================================================
+   695→// HELPERS
+   696→// ============================================================
+   697→
+   698→function formatDate(iso: string) {
+   699→  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+   700→}
+   701→

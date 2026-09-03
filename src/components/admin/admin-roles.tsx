@@ -77,6 +77,9 @@ const PERMISSION_LABELS: Record<Permission, string> = {
   "config:manage": "Manage configuration",
   "audit:view": "View audit logs",
   "notifications:manage": "Manage notifications",
+  "reports:view": "View reports",
+  "officer_progress:view": "View officer progress",
+  "sla:view": "View SLA status",
 };
 
 const ALL_PERMISSIONS = Object.keys(PERMISSION_LABELS) as Permission[];
@@ -92,6 +95,7 @@ const ROLE_ORDER: RoleKey[] = [
   "ADDL_COMMISSIONER",
   "COMMISSIONER",
   "ADMIN",
+  "PROJECT_MANAGER",
 ];
 
 const PERMISSION_CATEGORIES: { name: string; permissions: Permission[] }[] = [
@@ -104,6 +108,7 @@ const PERMISSION_CATEGORIES: { name: string; permissions: Permission[] }[] = [
   { name: "Shortfall", permissions: ["shortfall:raise", "shortfall:view", "shortfall:resolve"] },
   { name: "Remarks", permissions: ["remarks:add"] },
   { name: "Admin", permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage"] },
+  { name: "Monitoring", permissions: ["reports:view", "officer_progress:view", "sla:view"] },
 ];
 
 // "Key" permissions surfaced in the compact Matrix View (kept narrow enough

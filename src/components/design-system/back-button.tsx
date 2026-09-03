@@ -44,6 +44,17 @@ const VIEW_LABELS: Record<ViewKey, string> = {
   "admin-templates": "Notification / SMS",
   "admin-audit": "Audit Logs",
   "admin-settings": "System Settings",
+  // Project Manager views
+  "pm-dashboard": "Dashboard",
+  "pm-applications": "Applications",
+  "pm-application-details": "Application",
+  "pm-workflow": "Workflow Monitor",
+  "pm-officers": "Officer Progress",
+  "pm-officer-details": "Officer",
+  "pm-sla": "SLA & Delays",
+  "pm-reports": "Progress Reports",
+  "pm-shortfalls": "Shortfalls",
+  "pm-help": "Help & Support",
 };
 
 // Explicit parent hierarchy — NOT browser history
@@ -73,6 +84,10 @@ const PARENT_VIEW: Partial<Record<ViewKey, ViewKey>> = {
 
   // Officer review → Assigned Queue
   "officer-review": "officer-applications",
+
+  // Project Manager hierarchy
+  "pm-application-details": "pm-applications",   // PM Application Details → PM Applications
+  "pm-officer-details": "pm-officers",           // PM Officer Details → PM Officers
 };
 
 // ============================================================

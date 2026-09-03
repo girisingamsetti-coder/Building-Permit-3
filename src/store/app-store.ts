@@ -61,6 +61,7 @@ export { DEMO_CREDENTIALS, ROLES };
 export function defaultViewForPortal(portal: Portal): ViewKey {
   if (portal === "LTP") return "ltp-dashboard";
   if (portal === "OFFICER") return "officer-dashboard";
+  if (portal === "PROJECT_MANAGER") return "pm-dashboard";
   return "admin-dashboard";
 }
 

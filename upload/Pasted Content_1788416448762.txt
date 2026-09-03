@@ -1,0 +1,1922 @@
+ADD A NEW ROLE: PROJECT MANAGER
+
+Create a new dedicated account/role called:
+
+PROJECT MANAGER
+
+This role must be integrated into the existing LTP Approval /
+Building Permit Management System RBAC architecture.
+
+IMPORTANT:
+
+Do NOT replace the existing Administrator.
+
+Do NOT give Project Manager Administrator permissions.
+
+Do NOT give Project Manager authority to modify:
+
+- Roles
+- Permissions
+- Users
+- Fee Structures
+- System Settings
+- Workflow Configuration
+- Application Types
+
+Do NOT give Project Manager approval/rejection authority unless explicitly
+configured later.
+
+The Project Manager is primarily a:
+
+MONITORING
+TRACKING
+REPORTING
+COORDINATION
+
+role.
+
+==================================================
+1. PROJECT MANAGER OBJECTIVE
+==================================================
+
+The Project Manager should be able to see the overall operation of the
+Building Permit Approval Workflow.
+
+The account holder should be able to see:
+
+- all applications
+- all workflow stages
+- progress of individual applications
+- current stage
+- assigned officer
+- role responsible
+- pending actions
+- completed actions
+- delays
+- SLA status
+- shortfalls
+- scrutiny status
+- document status
+- fee status
+- payment status
+- overall approval progress
+
+The Project Manager should be able to drill down from:
+
+Overall Project View
+↓
+Application
+↓
+Workflow
+↓
+Individual Stage
+↓
+Responsible User / Officer
+↓
+Activity / Action History
+
+==================================================
+2. PROJECT MANAGER LOGIN
+==================================================
+
+Add a new demo/login account:
+
+Role:
+Project Manager
+
+Example:
+
+Name:
+Shri. Rajesh Kumar
+
+Designation:
+Project Manager
+
+Email:
+projectmanager@demo.gov.in
+
+Do not hardcode the exact demo identity into business logic.
+
+Use the shared User/RBAC system.
+
+==================================================
+3. PROJECT MANAGER SIDEBAR
+==================================================
+
+Create a dedicated sidebar for Project Manager.
+
+Recommended:
+
+PROJECT MANAGEMENT
+
+Dashboard
+
+APPLICATIONS
+
+All Applications
+Application Progress
+Pending Actions
+
+MONITORING
+
+Workflow Monitor
+Officer Progress
+SLA & Delays
+Shortfalls
+Documents
+Scrutiny
+
+REPORTS
+
+Progress Reports
+Application Reports
+Officer Reports
+
+COMMUNICATION
+
+Notifications
+
+ACCOUNT
+
+Profile
+Help & Support
+
+Do not show irrelevant admin configuration modules.
+
+==================================================
+4. PROJECT MANAGER DASHBOARD
+==================================================
+
+Create a dedicated Project Manager Dashboard.
+
+The dashboard should focus on overall operational visibility.
+
+Header:
+
+Project Manager Dashboard
+
+Subtitle:
+
+Monitor application progress, workflow stages, officer activity and
+approval performance across the Building Permit Management System.
+
+==================================================
+5. KPI CARDS
+==================================================
+
+Use useful management KPIs.
+
+Recommended:
+
+Total Applications
+Applications In Progress
+Completed / Approved
+Pending Actions
+Applications Delayed
+Applications At Risk
+Shortfalls Open
+Average Processing Time
+
+Do NOT create excessive KPI cards.
+
+Desktop:
+
+4 cards per row
+
+Second row if required.
+
+All cards:
+
+equal width
+consistent height
+compact
+proper alignment
+
+==================================================
+6. APPLICATION OVERVIEW
+==================================================
+
+Create a major:
+
+Application Progress Overview
+
+section.
+
+Show applications in a clean table.
+
+Columns:
+
+Application No.
+Project
+Applicant
+Application Type
+Current Stage
+Assigned Role
+Assigned Officer
+Status
+Progress
+SLA
+Last Updated
+Action
+
+==================================================
+7. APPLICATION PROGRESS
+==================================================
+
+Show progress as:
+
+Application Created
+→ Drawing
+→ Scrutiny
+→ Documents
+→ Fee
+→ Payment
+→ TPS
+→ TPA
+→ ZAD/ZDD
+→ ZJD
+→ Director
+→ Additional Commissioner
+→ Commissioner
+→ Final Decision
+
+Display:
+
+percentage complete
+
+Example:
+
+72%
+
+Use a compact progress bar.
+
+==================================================
+8. APPLICATION DETAIL
+==================================================
+
+Project Manager should be able to open any permitted application.
+
+Application detail should show:
+
+Application Information
+Property Information
+Applicant Information
+Current Status
+Current Stage
+Progress
+Assigned Officer
+SLA
+Documents
+Drawing/Scrutiny
+Fees
+Payments
+Shortfalls
+Workflow History
+Audit/Activity History
+
+Project Manager is viewing/monitoring this information.
+
+Do not give editing authority by default.
+
+==================================================
+9. LIVE WORKFLOW MONITOR
+==================================================
+
+Create:
+
+Live Workflow Monitor
+
+This is one of the most important Project Manager features.
+
+For each application show:
+
+Current Stage
+Completed Stages
+Current Responsible Role
+Current Responsible Officer
+Pending Since
+Expected SLA
+SLA Status
+Next Stage
+
+Example:
+
+Application:
+MC/BP/2026/04/0005
+
+Current Stage:
+TPS Technical Scrutiny
+
+Assigned:
+Smt. Meena Kulkarni
+
+Role:
+TPS
+
+Progress:
+42%
+
+Pending Since:
+28 Aug 2026
+
+Expected SLA:
+3 days
+
+SLA Status:
+At Risk
+
+==================================================
+10. STAGE-BY-STAGE MONITORING
+==================================================
+
+Project Manager can open an application and see:
+
+Stage 1
+LTP — Completed
+
+Stage 2
+Drawing Scrutiny — Completed
+
+Stage 3
+Documents — Completed
+
+Stage 4
+Fee — Completed
+
+Stage 5
+Payment — Completed
+
+Stage 6
+TPS — In Progress
+
+Stage 7
+TPA — Pending
+
+Stage 8
+ZAD/ZDD — Pending
+
+etc.
+
+Clearly distinguish:
+
+Completed
+Current
+Pending
+Delayed
+Blocked
+
+==================================================
+11. OFFICER PROGRESS
+==================================================
+
+Create:
+
+Officer Progress
+
+The Project Manager should see every workflow member individually.
+
+Roles:
+
+LTP
+TPS
+TPA
+ZAD
+ZDD
+ZJD
+Director – DP
+Additional Commissioner
+Commissioner
+
+For each user/officer show:
+
+Name
+Role
+Assigned Applications
+Completed Applications
+Pending Applications
+Delayed Applications
+Average Processing Time
+Current Workload
+SLA Compliance
+
+==================================================
+12. OFFICER DETAIL
+==================================================
+
+Click an officer.
+
+Example:
+
+Smt. Meena Kulkarni
+TPS
+
+Show:
+
+Assigned Applications
+Completed Reviews
+Pending Reviews
+Delayed Reviews
+SLA Performance
+Recent Actions
+Current Applications
+Application History
+
+Do not expose confidential/private information unnecessarily.
+
+==================================================
+13. OFFICER APPLICATION LIST
+==================================================
+
+Example:
+
+Smt. Meena Kulkarni
+TPS
+
+Assigned Applications:
+8
+
+Completed:
+5
+
+Pending:
+2
+
+At Risk:
+1
+
+Then table:
+
+Application No.
+Project
+Current Stage
+Status
+Assigned Since
+SLA
+Action
+
+==================================================
+14. WORKLOAD MONITORING
+==================================================
+
+Add:
+
+Officer Workload
+
+Example:
+
+TPS
+8 applications
+
+TPA
+5 applications
+
+ZAD
+4 applications
+
+ZDD
+3 applications
+
+ZJD
+6 applications
+
+Director
+2 applications
+
+Show as compact bars/cards.
+
+Avoid unnecessary charts.
+
+==================================================
+15. SLA MONITOR
+==================================================
+
+Create:
+
+SLA & Delay Monitoring
+
+Classify applications:
+
+On Track
+At Risk
+Delayed
+Critical Delay
+
+Example:
+
+On Track:
+18
+
+At Risk:
+4
+
+Delayed:
+3
+
+Critical:
+1
+
+Clicking a category should show the affected applications.
+
+==================================================
+16. SLA DETAILS
+==================================================
+
+For every application:
+
+Expected SLA
+Actual elapsed time
+Remaining time
+Status
+
+Example:
+
+Expected:
+3 days
+
+Elapsed:
+2 days 8 hours
+
+Remaining:
+16 hours
+
+Status:
+At Risk
+
+Use actual timestamps when available.
+
+Do not fabricate time calculations.
+
+==================================================
+17. DELAY IDENTIFICATION
+==================================================
+
+Automatically identify:
+
+Current stage exceeded SLA
+No activity for configured duration
+Officer has pending action
+Shortfall unresolved
+Document verification pending
+Payment pending where applicable
+
+Show reason.
+
+Example:
+
+Delayed
+
+Reason:
+TPS review exceeds configured SLA by 1 day.
+
+==================================================
+18. PENDING ACTIONS
+==================================================
+
+Create:
+
+Pending Actions
+
+Columns:
+
+Application
+Stage
+Responsible Role
+Responsible Officer
+Pending Since
+SLA
+Priority
+Action
+
+Project Manager can open the application.
+
+Do NOT allow them to perform the actual approval action unless explicitly
+authorized.
+
+==================================================
+19. SHORTFALL MONITORING
+==================================================
+
+Project Manager should be able to see:
+
+Open Shortfalls
+Shortfalls by application
+Shortfalls by stage
+Shortfalls by responsible role
+Age of shortfall
+Resolution status
+
+Example:
+
+Shortfall:
+Structural Certificate
+
+Application:
+MC/BP/2026/04/0002
+
+Raised By:
+TPS
+
+Assigned To:
+LTP
+
+Status:
+Awaiting Response
+
+Age:
+3 days
+
+==================================================
+20. DOCUMENT MONITORING
+==================================================
+
+Project Manager should be able to monitor document status.
+
+Show:
+
+Required
+Uploaded
+Pending Verification
+Verified
+Rejected
+Shortfall
+
+Do NOT give document verification authority by default.
+
+Project Manager can inspect/view/download according to permissions.
+
+==================================================
+21. SCRUTINY MONITORING
+==================================================
+
+Show:
+
+Scrutiny Pending
+Scrutiny In Progress
+Scrutiny Passed
+Passed with Warnings
+Scrutiny Failed
+Re-upload Required
+
+Click application:
+
+open scrutiny information.
+
+Project Manager can monitor but should not modify scrutiny results unless
+explicitly authorized.
+
+==================================================
+22. FEE MONITORING
+==================================================
+
+Show:
+
+Fee Generated
+Payment Pending
+Payment Successful
+Outstanding Amount
+
+The Project Manager should be able to view:
+
+Fee Amount
+Paid
+Outstanding
+Fee Structure
+
+Do not give payment authority by default.
+
+==================================================
+23. PAYMENT MONITORING
+==================================================
+
+Show:
+
+Pending Payments
+Successful Payments
+Failed Payments
+Outstanding Amount
+
+Click:
+
+application
+
+to see payment information.
+
+Do not allow Project Manager to initiate payment on behalf of LTP unless
+explicitly configured.
+
+==================================================
+24. APPLICATION SEARCH
+==================================================
+
+Global Project Manager search should find:
+
+Application Number
+Project
+Applicant
+Current Stage
+Officer
+Role
+Status
+
+Search should return:
+
+Application
+Project
+Applicant
+Current Stage
+Responsible Officer
+Status
+
+==================================================
+25. FILTERS
+==================================================
+
+Provide useful management filters:
+
+Status
+Current Stage
+Role
+Officer
+SLA Status
+Application Type
+Property Type
+Priority
+Date Range
+
+Keep filters organized.
+
+Do not create excessive controls.
+
+==================================================
+26. APPLICATION STATUS
+==================================================
+
+Support:
+
+Draft
+Drawing Scrutiny
+Documents
+Fee Generated
+Payment
+TPS Technical Scrutiny
+TPA Review
+ZAD/ZDD Review
+ZJD Review
+Director Review
+Additional Commissioner
+Commissioner Review
+Approved
+Rejected
+Shortfall
+Delayed
+
+Use the centralized status/workflow model.
+
+==================================================
+27. PROJECT MANAGER REPORTS
+==================================================
+
+Add:
+
+Progress Reports
+
+The Project Manager should be able to see:
+
+Applications received
+Applications in progress
+Applications completed
+Applications delayed
+Approval rate
+Average processing time
+Stage-wise pending count
+Officer workload
+SLA performance
+Shortfalls
+
+==================================================
+28. APPLICATION REPORT
+==================================================
+
+Allow viewing/exporting a report containing:
+
+Application No.
+Project
+Applicant
+Current Stage
+Status
+Progress
+Assigned Officer
+SLA
+Last Updated
+
+If export functionality already exists, reuse it.
+
+Do not introduce unnecessary report formats.
+
+==================================================
+29. OFFICER REPORT
+==================================================
+
+Show:
+
+Officer
+Role
+Assigned
+Completed
+Pending
+Delayed
+Average Processing Time
+SLA Compliance
+
+==================================================
+30. STAGE PERFORMANCE
+==================================================
+
+Create:
+
+Workflow Stage Performance
+
+Example:
+
+Drawing Scrutiny
+Average: 1.2 days
+
+Document Verification
+Average: 2.1 days
+
+TPS
+Average: 2.4 days
+
+TPA
+Average: 1.8 days
+
+etc.
+
+Calculate from actual recorded workflow timestamps.
+
+Do not use fake averages if data is unavailable.
+
+==================================================
+31. BOTTLENECK IDENTIFICATION
+==================================================
+
+Identify which stage currently has the highest:
+
+pending volume
+delay volume
+average processing time
+
+Example:
+
+Current Bottleneck:
+
+Document Verification
+
+12 applications pending
+
+This should be derived from actual data.
+
+==================================================
+32. OFFICER COMPARISON
+==================================================
+
+Project Manager may compare workload/performance between officers.
+
+Example:
+
+TPS Officer A
+Assigned: 7
+Pending: 2
+Delayed: 1
+
+TPS Officer B
+Assigned: 5
+Pending: 1
+Delayed: 0
+
+Use this for monitoring only.
+
+==================================================
+33. RECENT ACTIVITY
+==================================================
+
+Show meaningful project-level activities:
+
+Application Created
+Drawing Uploaded
+Scrutiny Completed
+Document Verified
+Shortfall Raised
+Fee Generated
+Payment Successful
+Application Forwarded
+Application Approved
+
+Each event must contain:
+
+timestamp
+application
+actor
+role
+action
+
+==================================================
+34. REAL-TIME UPDATE
+==================================================
+
+When any application progresses:
+
+Project Manager view should update accordingly.
+
+Example:
+
+TPS approves.
+
+Before:
+TPS Technical Scrutiny
+
+After:
+TPA Review
+
+Project Manager dashboard must reflect:
+
+Current Stage:
+TPA Review
+
+Assigned Role:
+TPA
+
+Progress:
+updated
+
+==================================================
+35. APPLICATION TRACKING
+==================================================
+
+Add:
+
+Track Application
+
+The Project Manager should be able to search an application and see the
+complete timeline.
+
+Example:
+
+29 Aug 09:10
+Application Created — LTP
+
+29 Aug 10:20
+Drawing Uploaded — LTP
+
+29 Aug 10:30
+Scrutiny Passed — System
+
+30 Aug 09:15
+Documents Verified — TPA
+
+30 Aug 11:00
+Fee Generated — System
+
+30 Aug 12:10
+Payment Successful — LTP
+
+31 Aug 09:30
+Forwarded to TPS
+
+==================================================
+36. TIMELINE UI
+==================================================
+
+Use a vertical timeline.
+
+Each event:
+
+Date/Time
+Action
+Actor
+Role
+Result
+
+Do not make the timeline visually oversized.
+
+==================================================
+37. APPLICATION HEALTH
+==================================================
+
+Add a compact Application Health indicator.
+
+Possible states:
+
+On Track
+At Risk
+Delayed
+Blocked
+Completed
+
+Calculate from:
+
+current stage
+SLA
+shortfall
+pending action
+workflow state
+
+==================================================
+38. BLOCKED APPLICATIONS
+==================================================
+
+Show applications blocked because of:
+
+Scrutiny Failure
+Required Document Missing
+Document Rejection
+Shortfall
+Fee Shortfall
+Payment Pending
+Workflow dependency
+
+Project Manager can inspect the reason.
+
+==================================================
+39. NO UNAUTHORIZED ACTIONS
+==================================================
+
+Project Manager should primarily have READ/MONITOR permissions.
+
+Default permissions:
+
+applications.view
+workflow.view
+documents.view
+drawings.view
+scrutiny.view
+fees.view
+payments.view
+shortfalls.view
+notifications.view
+reports.view
+officer_progress.view
+sla.view
+
+Do NOT automatically grant:
+
+users.edit
+roles.edit
+permissions.edit
+fee_structure.edit
+workflow.edit
+application_approve
+application_reject
+document_verify
+payment_initiate
+
+These require explicit configuration.
+
+==================================================
+40. RBAC INTEGRATION
+==================================================
+
+Add Project Manager to the centralized roles list.
+
+Role:
+
+PROJECT_MANAGER
+
+Do NOT create a separate permission system.
+
+Use the same:
+
+roles
+permissions
+route guards
+action guards
+
+already used by the project.
+
+==================================================
+41. DIRECT ROUTE PROTECTION
+==================================================
+
+Project Manager should not be able to access:
+
+Admin Users
+Roles & Permissions
+Fee Structure Configuration
+Workflow Configuration
+System Settings
+
+unless explicitly granted.
+
+Direct URL access must also be blocked.
+
+==================================================
+42. PROJECT MANAGER DASHBOARD FILTER
+==================================================
+
+Provide optional:
+
+Date Range
+
+Today
+Last 7 Days
+Last 30 Days
+Custom
+
+Use this for reports/activity where appropriate.
+
+==================================================
+43. PROJECT MANAGER APPLICATION DETAILS
+==================================================
+
+On application details, show:
+
+Application Header
+Status
+Progress
+Workflow Tracker
+Officer Assignment
+SLA
+Documents
+Drawing/Scrutiny
+Fee
+Payment
+Shortfalls
+Timeline
+
+Use tabs if needed:
+
+Overview
+Workflow
+Documents
+Drawings
+Fees & Payments
+Shortfalls
+Activity
+
+Keep the layout clean.
+
+==================================================
+44. OFFICER DETAIL DRAWER/PAGE
+==================================================
+
+When clicking an officer:
+
+show:
+
+Officer Profile
+Role
+Workload
+Performance
+Applications
+Recent Activity
+
+Do not show unnecessary personal information.
+
+==================================================
+45. PROJECT MANAGER NOTIFICATIONS
+==================================================
+
+Notify Project Manager about important operational conditions:
+
+Application Delayed
+SLA At Risk
+Critical Delay
+New Shortfall
+Application Blocked
+Workflow Stalled
+Application Approved
+Application Rejected
+
+Do not notify for every minor event unless configured.
+
+==================================================
+46. ALERT PRIORITY
+==================================================
+
+Use:
+
+Critical
+High
+Medium
+Informational
+
+Examples:
+
+Critical:
+SLA exceeded
+
+High:
+Application blocked by unresolved shortfall
+
+Medium:
+SLA approaching
+
+Informational:
+Application moved to next stage
+
+==================================================
+47. DASHBOARD VISUAL DESIGN
+==================================================
+
+Use the existing LTP Approval visual language.
+
+Professional government/enterprise interface.
+
+Prefer:
+
+white cards
+subtle borders
+deep green primary
+blue informational
+amber warning
+red critical
+compact icons
+
+Do NOT introduce flashy charts or gradients.
+
+==================================================
+48. DASHBOARD LAYOUT
+==================================================
+
+Recommended:
+
+Header
+
+↓
+KPI Cards
+
+↓
+Application Progress Overview
+
+↓
+Workflow / SLA Monitor
+
+↓
+Officer Workload + Pending Actions
+
+↓
+Recent Activity
+
+Avoid excessive empty space.
+
+==================================================
+49. CARD ALIGNMENT
+==================================================
+
+All cards must:
+
+same container boundaries
+consistent width
+consistent padding
+consistent gap
+no overlap
+
+Desktop:
+
+4-column KPI grid
+
+Main sections:
+
+70/30 or 2-column grid where appropriate.
+
+==================================================
+50. APPLICATION TABLE ALIGNMENT
+==================================================
+
+Use:
+
+consistent column widths
+compact rows
+right-aligned numeric values
+centered status badges
+aligned progress bars
+aligned action column
+
+No text overflow.
+
+==================================================
+51. PAGINATION
+==================================================
+
+All large Project Manager tables must support pagination.
+
+10–20 records per page according to table size.
+
+Example:
+
+Showing 1–10 of 48 applications
+
+[‹] [1] [2] [3] ... [5] [›]
+
+Search and filters must happen BEFORE pagination.
+
+==================================================
+52. DATA SOURCE
+==================================================
+
+Project Manager must use the SAME shared datasets as the existing system:
+
+Applications
+Users
+Roles
+Permissions
+Drawings
+Documents
+Scrutiny
+Fees
+Payments
+Shortfalls
+Workflow
+Notifications
+Audit
+
+Do NOT create separate fake Project Manager data.
+
+==================================================
+53. NEW APPLICATION REFLECTION
+==================================================
+
+When LTP creates a new application:
+
+Project Manager must immediately be able to see it.
+
+Dashboard:
+
+Total Applications +1
+
+Application Progress:
+
+new application appears
+
+Workflow:
+
+Application Created
+
+==================================================
+54. WORKFLOW REFLECTION
+==================================================
+
+When application moves:
+
+LTP
+→ TPS
+
+Project Manager sees:
+
+Current Stage:
+TPS Technical Scrutiny
+
+Assigned Role:
+TPS
+
+When TPS completes:
+
+Current Stage:
+TPA Review
+
+Assigned Role:
+TPA
+
+Continue through the workflow.
+
+==================================================
+55. DOCUMENT REFLECTION
+==================================================
+
+When LTP uploads documents:
+
+Project Manager sees:
+
+Uploaded / Pending Verification
+
+When reviewer verifies:
+
+Verified
+
+When rejected:
+
+Rejected
+
+==================================================
+56. PAYMENT REFLECTION
+==================================================
+
+When payment succeeds:
+
+Project Manager sees:
+
+Payment Successful
+
+Paid:
+full amount
+
+Outstanding:
+₹0
+
+Application workflow advances.
+
+==================================================
+57. SHORTFALL REFLECTION
+==================================================
+
+When a shortfall is raised:
+
+Project Manager sees:
+
+Shortfall Raised
+
+Reason
+
+Responsible party
+
+Age
+
+Status
+
+When resolved:
+
+Resolved
+
+==================================================
+58. REAL DATA, NO FAKE COUNTERS
+==================================================
+
+Do NOT use hardcoded numbers for:
+
+Total Applications
+Pending
+Delayed
+Officers
+SLA
+Shortfalls
+Performance
+
+Calculate them from the shared data.
+
+==================================================
+59. DEMO DATA
+==================================================
+
+Create enough demo records to demonstrate the Project Manager dashboard.
+
+At minimum provide applications covering:
+
+Draft
+Scrutiny Pending
+Scrutiny Failed
+Scrutiny Passed
+Documents Pending
+Fee Generated
+Payment Pending
+TPS Review
+TPA Review
+ZAD/ZDD Review
+ZJD Review
+Director Review
+Additional Commissioner Review
+Commissioner Review
+Approved
+Rejected
+Shortfall
+Delayed
+
+Use different applicants, projects and officers.
+
+Do NOT use the same applicant name for every application.
+
+==================================================
+60. PROJECT MANAGER USER DATA
+==================================================
+
+Create at least one demo Project Manager.
+
+Example:
+
+Shri. Rajesh Kumar
+Project Manager
+projectmanager@demo.gov.in
+
+Use the shared user system.
+
+==================================================
+61. PROJECT MANAGER APPLICATION ACCESS
+==================================================
+
+Project Manager can view all applications within the configured project/
+authority scope.
+
+Do not create application ownership restrictions like LTP.
+
+==================================================
+62. NO EDIT BY DEFAULT
+==================================================
+
+Project Manager should not see:
+
+Edit
+Delete
+Approve
+Reject
+Verify
+Pay
+Configure
+
+unless explicit permission is assigned.
+
+Instead actions should be:
+
+View
+Track
+Inspect
+Download where allowed
+
+==================================================
+63. EXPORT
+==================================================
+
+Where reporting is already supported:
+
+allow Project Manager to export:
+
+Application Progress
+Officer Progress
+SLA Report
+
+Prefer existing export implementation.
+
+Do not introduce complicated reporting infrastructure.
+
+==================================================
+64. AUDIT
+==================================================
+
+Project Manager viewing data should not create excessive audit noise.
+
+Administrative/configuration changes remain fully audited.
+
+Important Project Manager actions such as exports should be auditable.
+
+==================================================
+65. SEARCH PERFORMANCE
+==================================================
+
+Search large application datasets efficiently.
+
+Do not load duplicate datasets into memory unnecessarily.
+
+==================================================
+66. RESPONSIVE DESIGN
+==================================================
+
+Desktop:
+
+full dashboard
+
+Tablet:
+
+2-column sections
+
+Mobile:
+
+single column
+
+Tables:
+
+responsive or controlled horizontal scroll.
+
+No uncontrolled page overflow.
+
+==================================================
+67. PROJECT MANAGER SIDEBAR ALIGNMENT
+==================================================
+
+Use the same sidebar style as the application.
+
+No duplicated labels.
+
+No clipped text.
+
+No excessive empty space.
+
+==================================================
+68. PAGE CONTAINER
+==================================================
+
+Use:
+
+width:
+100%
+
+max-width:
+1600–1700px
+
+margin:
+0 auto
+
+padding:
+24–32px
+
+Use workspace efficiently.
+
+==================================================
+69. OFFICER PERFORMANCE CALCULATION
+==================================================
+
+Where performance metrics are shown:
+
+Completed count =
+completed assigned workflow actions
+
+Pending =
+current active assignments
+
+Delayed =
+assignments exceeding configured SLA
+
+Do not count unrelated applications.
+
+==================================================
+70. SLA CALCULATION
+==================================================
+
+Use:
+
+current stage entered timestamp
++
+configured SLA
+
+Compare against current time.
+
+If the application is completed:
+
+stop elapsed calculation at completion time.
+
+Do not continue SLA timer after completion.
+
+==================================================
+71. WORKFLOW TIMESTAMPING
+==================================================
+
+Every workflow stage should preserve:
+
+enteredAt
+completedAt
+assignedAt
+assignedUser
+assignedRole
+
+where supported by the existing architecture.
+
+This allows Project Manager reporting.
+
+==================================================
+72. STAGE HISTORY
+==================================================
+
+Never overwrite previous workflow stages.
+
+Preserve:
+
+Stage
+Role
+Officer
+Entered
+Completed
+Decision
+Remarks
+
+==================================================
+73. BOTTLENECK CALCULATION
+==================================================
+
+Use actual pending duration and pending count.
+
+Do not label a stage as bottleneck simply because it has the largest number
+without considering workflow volume/context.
+
+==================================================
+74. OFFICER WORKLOAD
+==================================================
+
+Show current active workload.
+
+Do not count completed historical applications as current workload.
+
+==================================================
+75. PROJECT MANAGER HELP
+==================================================
+
+Add a simple Help section explaining:
+
+Dashboard
+Application Tracking
+Workflow Monitoring
+Officer Progress
+SLA Monitoring
+Reports
+
+==================================================
+76. FINAL TEST — PROJECT MANAGER
+==================================================
+
+Login as Project Manager.
+
+Verify:
+
+Dashboard loads.
+
+All permitted applications appear.
+
+Search works.
+
+Filters work.
+
+Pagination works.
+
+Application details opens.
+
+Workflow tracker works.
+
+Officer progress works.
+
+SLA monitoring works.
+
+Shortfalls are visible.
+
+Documents are visible.
+
+Scrutiny is visible.
+
+Fees are visible.
+
+Payments are visible.
+
+Timeline works.
+
+Reports work.
+
+Unauthorized edit actions are unavailable.
+
+==================================================
+77. CROSS-ROLE TEST
+==================================================
+
+Create/modify an application as LTP.
+
+Login/switch to Project Manager.
+
+Verify new state is visible.
+
+Move application to TPS.
+
+Project Manager sees TPS.
+
+TPS completes action.
+
+Project Manager sees next stage.
+
+Continue through multiple workflow stages.
+
+==================================================
+78. RBAC TEST
+==================================================
+
+Project Manager attempts to open:
+
+/admin/users
+
+Expected:
+
+Access denied.
+
+Attempts:
+
+/admin/roles
+
+Expected:
+
+Access denied.
+
+Attempts:
+
+/admin/settings
+
+Expected:
+
+Access denied.
+
+Can open:
+
+Project Manager Dashboard
+Applications
+Workflow
+Reports
+SLA
+Officer Progress
+
+according to permissions.
+
+==================================================
+79. DATA CONSISTENCY TEST
+==================================================
+
+Open an application from:
+
+Project Manager
+
+then:
+
+LTP
+TPS
+TPA
+
+Verify the same:
+
+applicationId
+status
+stage
+applicant
+project
+documents
+drawing
+fee
+payment
+
+are preserved.
+
+==================================================
+80. FINAL ACCEPTANCE CRITERIA
+==================================================
+
+Project Manager account is complete only when:
+
+1. New role PROJECT_MANAGER exists.
+2. Login works.
+3. RBAC works.
+4. Dashboard works.
+5. Applications overview works.
+6. Application search works.
+7. Application filters work.
+8. Application pagination works.
+9. Application details works.
+10. Workflow monitor works.
+11. Stage-by-stage progress works.
+12. Officer progress works.
+13. Officer workload works.
+14. SLA monitoring works.
+15. Delay detection works.
+16. Pending actions works.
+17. Shortfall monitoring works.
+18. Document monitoring works.
+19. Scrutiny monitoring works.
+20. Fee monitoring works.
+21. Payment monitoring works.
+22. Application timeline works.
+23. Reports work.
+24. Cross-role data updates work.
+25. No fake counters.
+26. No duplicate datasets.
+27. No unauthorized modification actions.
+28. Admin routes are blocked.
+29. Cards are aligned.
+30. Tables are aligned.
+31. No excessive empty space.
+32. Responsive design works.
+33. Search/filter/pagination work correctly.
+34. No console/runtime errors.
+35. Lint passes.
+36. Build passes.
+
+==================================================
+FINAL OBJECTIVE
+==================================================
+
+PROJECT MANAGER should provide a CENTRAL OPERATIONAL VIEW:
+
+ALL APPLICATIONS
+↓
+APPLICATION PROGRESS
+↓
+CURRENT WORKFLOW STAGE
+↓
+RESPONSIBLE OFFICER
+↓
+PENDING ACTION
+↓
+SLA
+↓
+DELAY / RISK
+↓
+DOCUMENT / SCRUTINY / FEE / PAYMENT STATUS
+↓
+FINAL APPROVAL
+
+The Project Manager should be able to understand the complete state of the
+approval operation without needing Administrator privileges.
+
+Make this a real RBAC role using the existing application's shared data
+and workflow architecture.
+
+Do NOT build a fake dashboard with hardcoded statistics.
+Do NOT duplicate application data.
+Do NOT give unauthorized approval/configuration powers.

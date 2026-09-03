@@ -14,9 +14,10 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // RBAC — Role-Based Access Control
 // ============================================================
 
-export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "ADMIN" {
+export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "ADMIN" | "PROJECT_MANAGER" {
   if (role === "ADMIN") return "ADMIN";
   if (role === "LTP") return "LTP";
+  if (role === "PROJECT_MANAGER") return "PROJECT_MANAGER";
   return "OFFICER";
 }
 
@@ -37,6 +38,19 @@ export function canAccessView(user: User, view: string, roles: Record<RoleKey, R
   const adminViews = ["admin-dashboard", "admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates", "admin-audit", "admin-settings"];
   if (adminViews.includes(view)) {
     return user.role === "ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
+  }
+  // Project Manager views — only PROJECT_MANAGER role (or ADMIN) can access
+  const pmViews = ["pm-dashboard", "pm-applications", "pm-application-details", "pm-workflow", "pm-officers", "pm-officer-details", "pm-sla", "pm-reports", "pm-shortfalls", "pm-help"];
+  if (pmViews.includes(view)) {
+    return user.role === "PROJECT_MANAGER" || user.role === "ADMIN";
+  }
+  // Project Manager cannot access LTP or Officer operational views (they are read-only monitors)
+  if (user.role === "PROJECT_MANAGER") {
+    const ltpOpsViews = ["ltp-create-application", "ltp-drawings", "ltp-documents", "ltp-fees", "ltp-payment", "ltp-receipt", "ltp-shortfalls", "ltp-profile"];
+    const officerOpsViews = ["officer-review", "officer-applications", "officer-documents"];
+    if (ltpOpsViews.includes(view) || officerOpsViews.includes(view)) {
+      return false;
+    }
   }
   return true;
 }

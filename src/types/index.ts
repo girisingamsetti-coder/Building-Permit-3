@@ -13,7 +13,8 @@ export type RoleKey =
   | "DIRECTOR_DP"
   | "ADDL_COMMISSIONER"
   | "COMMISSIONER"
-  | "ADMIN";
+  | "ADMIN"
+  | "PROJECT_MANAGER";
 
 export interface Role {
   key: RoleKey;
@@ -52,7 +53,11 @@ export type Permission =
   | "role:manage"
   | "config:manage"
   | "audit:view"
-  | "notifications:manage";
+  | "notifications:manage"
+  // ---- Project Manager monitoring permissions (read-only) ----
+  | "reports:view"
+  | "officer_progress:view"
+  | "sla:view";
 
 // ---------- Users ----------
 export type UserStatus = "ACTIVE" | "INACTIVE" | "PENDING" | "SUSPENDED";
@@ -584,6 +589,17 @@ export type ViewKey =
   | "admin-workflow"
   | "admin-templates"
   | "admin-audit"
-  | "admin-settings";
+  | "admin-settings"
+  // Project Manager views (read-only monitoring)
+  | "pm-dashboard"
+  | "pm-applications"
+  | "pm-application-details"
+  | "pm-workflow"
+  | "pm-officers"
+  | "pm-officer-details"
+  | "pm-sla"
+  | "pm-reports"
+  | "pm-shortfalls"
+  | "pm-help";
 
-export type Portal = "LTP" | "OFFICER" | "ADMIN";
+export type Portal = "LTP" | "OFFICER" | "ADMIN" | "PROJECT_MANAGER";

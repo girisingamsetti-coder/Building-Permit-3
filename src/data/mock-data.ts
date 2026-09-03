@@ -118,6 +118,25 @@ export const ROLES: Record<RoleKey, Role> = {
     color: "slate",
     permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage"],
   },
+  PROJECT_MANAGER: {
+    key: "PROJECT_MANAGER",
+    title: "Project Manager",
+    fullName: "Project Manager",
+    description: "Monitors, tracks and reports on the overall building permit approval operation. Read-only — no approval or configuration authority.",
+    level: 50,
+    color: "violet",
+    permissions: [
+      "application:view_all",
+      "document:view",
+      "drawing:view",
+      "shortfall:view",
+      "audit:view",
+      "remarks:add",
+      "reports:view",
+      "officer_progress:view",
+      "sla:view",
+    ],
+  },
 };
 
 // ============================================================
@@ -134,6 +153,7 @@ export const USERS: User[] = [
   { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:30:00" },
   { id: "u-com-01", name: "Dr. Pratap Reddy", role: "COMMISSIONER", email: "commissioner@demo.gov.in", phone: "+91 98220 00001", employeeId: "MUN-COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T11:20:00" },
   { id: "u-admin-01", name: "Shri. Kailash Patil", role: "ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
+  { id: "u-pm-01", name: "Shri. Rajesh Kumar", role: "PROJECT_MANAGER", email: "projectmanager@demo.gov.in", phone: "+91 99230 55678", employeeId: "MUN-PM-0001", designation: "Project Manager", zone: "Head Office", avatarColor: "violet", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:50:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -154,6 +174,7 @@ export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string;
   { role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", password: "demo1234", label: "Additional Commissioner" },
   { role: "COMMISSIONER", email: "commissioner@demo.gov.in", password: "demo1234", label: "Commissioner" },
   { role: "ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "System Administrator" },
+  { role: "PROJECT_MANAGER", email: "projectmanager@demo.gov.in", password: "demo1234", label: "Project Manager" },
 ];
 
 // Re-export for compatibility
