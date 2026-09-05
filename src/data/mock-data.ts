@@ -699,6 +699,47 @@ export const SEED_APPLICATIONS: Application[] = [
     fee: makeFee(2950, 8, false, 296450),
     payment: { id: "pay-27", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
+
+  // Mock apps for specific tabs
+  buildApp("app-28", "MC/BP/2026/04/0028", "Draft Project 1", "RESIDENTIAL", 1200, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-01T10:00:00"], "Smt. Sunitha Varma", "+91 94295 41671", "sunitha@email.com", "Plot 79, Sy. 116/A, Vidya N...", {
+    drawings: [],
+    documents: [],
+  }),
+  buildApp("app-29", "MC/BP/2026/04/0029", "Draft Project 2", "COMMERCIAL", 2500, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-02T11:00:00"], "Shri. Bhavani Bhat", "+91 93668 82517", "bhavani@email.com", "Plot 142, Sy. 275/C, Nalapa...", {
+    drawings: [],
+    documents: [],
+  }),
+  buildApp("app-30", "MC/BP/2026/04/0030", "Scrutiny Failed Proj", "COMMERCIAL", 3100, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", undefined, ["2026-09-03T09:00:00", "2026-09-03T09:05:00"], "Shri. Bhavani Acharya", "+91 99491 61748", "bhavania@email.com", "Plot 152, Sy. 83/C, Malkapu...", {
+    drawings: makeDrawings([{ v: 1, passed: false, date: "2026-09-03T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "failed", "2026-09-03T09:06:00", "SCR/2026/0030"),
+    documents: [],
+  }),
+  buildApp("app-31", "MC/BP/2026/04/0031", "Docs Pending Proj", "RESIDENTIAL", 1400, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-09-04T10:00:00", "2026-09-04T10:05:00", "2026-09-04T10:10:00"], "Shri. Anil Sastry", "+91 99870 71539", "anils@email.com", "Plot 161, Sy. 52/B2, Sakha...", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-04T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-09-04T10:06:00", "SCR/2026/0031"),
+    documents: makeDocuments("required"),
+  }),
+  buildApp("app-32", "MC/BP/2026/04/0032", "Payment Failed Proj", "COMMERCIAL", 4100, "PAYMENT_FAILED", "PAYMENT", undefined, ["2026-09-05T09:00:00"], "Shri. Suresh Singh", "+91 99733 22239", "suresh@email.com", "Plot 120, Sy. 205/A1, Inavol...", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T09:00:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T09:01:00", "SCR/2026/0032"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(4100, 8, false, 412000),
+    payment: { id: "pay-32", transactionId: "TXN123", referenceNo: "REF123", status: "FAILED", amount: 412000, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+  buildApp("app-33", "MC/BP/2026/04/0033", "Payment Pending Proj", "COMMERCIAL", 2200, "PAYMENT_PENDING", "PAYMENT", undefined, ["2026-09-05T10:00:00"], "Smt. Indira Murthy", "+91 98296 94910", "indira@email.com", "Plot 219, Sy. 325/B2, Neer...", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T10:00:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T10:01:00", "SCR/2026/0033"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(2200, 8, false, 221000),
+    payment: { id: "pay-33", transactionId: "", referenceNo: "", status: "PENDING", amount: 221000, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
+  buildApp("app-34", "MC/BP/2026/04/0034", "Fee Gen Proj", "RESIDENTIAL", 1800, "FEE_GENERATED", "PAYMENT", undefined, ["2026-09-05T11:00:00"], "Shri. Harish Sharma", "+91 93752 94059", "harish@email.com", "Plot 111, Sy. 148/C, Neeruk...", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T11:00:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T11:01:00", "SCR/2026/0034"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(1800, 8, false, 181000),
+    payment: { id: "pay-34", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
+  }),
 ];
 
 // ============================================================

@@ -284,7 +284,7 @@ export const useAppStore = create<AppState>()(
   sidebarCollapsed: false,
   mobileNavOpen: false,
   theme: "light",
-  dashboardVersion: "v2",
+  dashboardVersion: "v3",
   processingAppIds: [],
   viewHistory: [],
 
@@ -301,7 +301,7 @@ export const useAppStore = create<AppState>()(
     if (user.status === "PENDING") return { ok: false, error: "Your account is pending approval. Please try again later." };
     const portal = portalForRole(user.role);
     set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
-    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
+    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [], dashboardVersion: "v3" });
     return { ok: true };
   },
 
@@ -310,11 +310,11 @@ export const useAppStore = create<AppState>()(
     if (!user) return;
     const portal = portalForRole(role);
     set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
-    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [] });
+    set({ user: { ...user, lastLogin: nowISO() }, isAuthenticated: true, authStage: "login", view: defaultViewForPortal(portal), portal, viewHistory: [], dashboardVersion: "v3" });
   },
 
   logout: () =>
-    set({ user: null, isAuthenticated: false, authStage: "login", view: "login", selectedApplicationId: null, mobileNavOpen: false, viewHistory: [] }),
+    set({ user: null, isAuthenticated: false, authStage: "login", view: "login", selectedApplicationId: null, mobileNavOpen: false, viewHistory: [], dashboardVersion: "v3" }),
 
   setAuthStage: (authStage) => set({ authStage }),
   setPendingEmail: (pendingEmail) => set({ pendingEmail }),
