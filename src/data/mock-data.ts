@@ -711,13 +711,13 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
   buildApp("app-30", "MC/BP/2026/04/0030", "Scrutiny Failed Proj", "COMMERCIAL", 3100, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", undefined, ["2026-09-03T09:00:00", "2026-09-03T09:05:00"], "Shri. Bhavani Acharya", "+91 99491 61748", "bhavania@email.com", "Plot 152, Sy. 83/C, Malkapu...", {
     drawings: makeDrawings([{ v: 1, passed: false, date: "2026-09-03T09:05:00" }]),
-    scrutiny: makeScrutinyReport(1, "failed", "2026-09-03T09:06:00", "SCR/2026/0030"),
+    scrutiny: makeScrutinyReport(1, "front_setback", "2026-09-03T09:06:00", "SCR/2026/0030"),
     documents: [],
   }),
   buildApp("app-31", "MC/BP/2026/04/0031", "Docs Pending Proj", "RESIDENTIAL", 1400, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-09-04T10:00:00", "2026-09-04T10:05:00", "2026-09-04T10:10:00"], "Shri. Anil Sastry", "+91 99870 71539", "anils@email.com", "Plot 161, Sy. 52/B2, Sakha...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-04T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-09-04T10:06:00", "SCR/2026/0031"),
-    documents: makeDocuments("required"),
+    documents: makeDocuments("early"),
   }),
   buildApp("app-32", "MC/BP/2026/04/0032", "Payment Failed Proj", "COMMERCIAL", 4100, "PAYMENT_FAILED", "PAYMENT", undefined, ["2026-09-05T09:00:00"], "Shri. Suresh Singh", "+91 99733 22239", "suresh@email.com", "Plot 120, Sy. 205/A1, Inavol...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T09:00:00" }]),

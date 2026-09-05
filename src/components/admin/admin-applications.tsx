@@ -176,7 +176,7 @@ export function AdminApplications() {
                   const days = daysRemaining(a.expectedSLA);
                   const sla = slaBadgeProps(days);
                   // Mock payment status formatting
-                  const isPaid = a.status === "APPROVED" || a.status === "REJECTED" || a.payment?.status === "PAID";
+                  const isPaid = a.status === "APPROVED" || a.status === "REJECTED" || (a.payment?.status as string) === "PAID";
                   const openShortfalls = a.shortfalls?.filter((s) => s.status === "OPEN" || s.status === "REOPENED" || s.status === "OVERDUE") ?? [];
                   const firstShortfall = openShortfalls[0];
                   
