@@ -370,7 +370,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   if (!typeSelected) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+        <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
           <DialogTitle className="sr-only">Select application type</DialogTitle>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
@@ -427,8 +427,8 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
       <DialogContent
-        className="max-w-4xl w-full p-0 gap-0 flex flex-col overflow-hidden"
-        style={{ height: "90vh", maxHeight: "90vh" }}
+        className="max-w-6xl w-full p-0 gap-0 flex flex-col overflow-hidden"
+        style={{ height: "640px", maxHeight: "90vh" }}
       >
         <DialogTitle className="sr-only">New Application — {cur.label}</DialogTitle>
 
