@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useAppStore } from "@/store/app-store";
 import { StatusBadge, RoleBadge } from "@/components/design-system/badges";
 import { formatDate } from "@/components/design-system/workflow";
 import { Search, Filter, MoreHorizontal, Clock, ArrowRight, FilePlus2 } from "lucide-react";
