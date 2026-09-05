@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { useMemo } from "react";
 import type {
   Application,
@@ -100,6 +101,7 @@ interface AppState {
   sidebarCollapsed: boolean;
   mobileNavOpen: boolean;
   theme: "light" | "dark";
+  dashboardVersion: "v1" | "v2" | "v3";
   // processing flags
   processingAppIds: string[]; // apps currently being processed (scrutiny/payment)
   // navigation history (for smart back button)
@@ -119,6 +121,7 @@ interface AppState {
   setSidebarCollapsed: (v: boolean) => void;
   setMobileNavOpen: (v: boolean) => void;
   toggleTheme: () => void;
+  setDashboardVersion: (v: "v1" | "v2" | "v3") => void;
 
   // ---- application lifecycle (LTP) ----
   createApplication: (data: {
@@ -258,8 +261,10 @@ function setAppStatus(app: Application, status: ApplicationStatus, stage?: Workf
 // ============================================================
 // STORE IMPLEMENTATION
 // ============================================================
-export const useAppStore = create<AppState>((set, get) => ({
-  user: null,
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      user: null,
   isAuthenticated: false,
   authStage: "login",
   pendingEmail: undefined,
@@ -279,6 +284,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   sidebarCollapsed: false,
   mobileNavOpen: false,
   theme: "light",
+  dashboardVersion: "v2",
   processingAppIds: [],
   viewHistory: [],
 
@@ -330,6 +336,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
   setMobileNavOpen: (mobileNavOpen) => set({ mobileNavOpen }),
   toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
+  setDashboardVersion: (dashboardVersion) => set({ dashboardVersion }),
 
   // ---- APPLICATION LIFECYCLE ----
   createApplication: (data) => {
@@ -1347,7 +1354,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       }, ...s.adminAuditLog],
     }));
   },
-}));
+    }),
+    {
+      name: "building-permit-store",
+    }
+  )
+);
 
 // ============================================================
 // SELECTORS

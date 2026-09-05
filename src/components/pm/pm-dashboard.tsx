@@ -60,6 +60,15 @@ import {
   TrendingDown,
   PieChart,
   CreditCard,
+  Layers,
+  Globe,
+  ShieldCheck,
+  AlertCircle,
+  Hourglass,
+  Timer,
+  Coins,
+  Landmark,
+  TrendingUp,
 } from "lucide-react";
 import type { Application, RoleKey, User } from "@/types";
 
@@ -152,6 +161,7 @@ const ACTIVITY_TYPES = [
 export function PmDashboard() {
   const navigate = useAppStore((s) => s.navigate);
   const openApplication = useAppStore((s) => s.openApplication);
+  const dashboardVersion = useAppStore((s) => s.dashboardVersion);
   const scope = useDashboardScope();
   const apps = scope.applications;
   const users = scope.users;
@@ -176,48 +186,91 @@ export function PmDashboard() {
   const bottleneck = React.useMemo(() => identifyBottleneck(apps), [apps]);
 
   return (
-    <div className="space-y-2">
-      <div className="space-y-2 lg:flex lg:gap-2 lg:space-y-0">
-        <div className="flex-1 space-y-2">
-          {/* ===== APPLICATIONS ===== */}
-          <section>
-            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
-              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Applications</h2>
+    <div className="space-y-4">
+      <div className="space-y-4 lg:flex lg:gap-4 lg:space-y-0">
+        {dashboardVersion === "v1" ? (
+          <div className="flex-1 space-y-5">
+            <div className="mb-2 p-2 bg-blue-100 text-blue-800 text-xs font-bold rounded">
+              ✅ V1 Layout Active (If you click V2, this should disappear and cards should change)
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              <GradientKpiCard title="Total applications" value={kpis.total.toString()} gradient="bg-gradient-to-br from-white to-cyan-50" iconColor="text-cyan-500" />
-              <GradientKpiCard title="In progress" value={kpis.inProgress.toString()} gradient="bg-gradient-to-br from-white to-blue-50" iconColor="text-blue-500" />
-              <GradientKpiCard title="Approved" value={kpis.approved.toString()} gradient="bg-gradient-to-br from-white to-emerald-50" iconColor="text-emerald-500" />
-              <GradientKpiCard title="Rejected" value={kpis.rejected.toString()} gradient="bg-gradient-to-br from-white to-rose-50" iconColor="text-rose-500" />
-            </div>
-          </section>
+            <section>
+              <div className="mb-3 flex items-center rounded-full border border-border/80 bg-transparent px-4 py-1.5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-500">Applications</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Total applications" value="260" blobColor="#22d3ee" iconBgClass="bg-sky-100" iconColorClass="text-sky-600" icon={Layers} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="In progress" value="197" blobColor="#818cf8" iconBgClass="bg-indigo-100" iconColorClass="text-indigo-600" icon={Globe} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Approved" value="26" blobColor="#34d399" iconBgClass="bg-emerald-100" iconColorClass="text-emerald-600" icon={ShieldCheck} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Rejected" value="2" blobColor="#fb7185" iconBgClass="bg-rose-100" iconColorClass="text-rose-600" icon={Ban} />
+              </div>
+            </section>
 
-          {/* ===== WORKFLOW ===== */}
-          <section>
-            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
-              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Workflow</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              <GradientKpiCard title="Open shortfalls" value="18" gradient="bg-gradient-to-br from-white to-amber-50" iconColor="text-amber-500" />
-              <GradientKpiCard title="Overdue tasks" value="0" gradient="bg-gradient-to-br from-white to-red-50" iconColor="text-red-500" />
-              <GradientKpiCard title="Due soon" value="0" gradient="bg-gradient-to-br from-white to-orange-50" iconColor="text-orange-500" />
-              <GradientKpiCard title="Average time to decide" value="0 d" gradient="bg-gradient-to-br from-white to-indigo-50" iconColor="text-indigo-500" />
-            </div>
-          </section>
+            <section>
+              <div className="mb-3 flex items-center rounded-full border border-border/80 bg-transparent px-4 py-1.5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-500">Workflow</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Open shortfalls" value="19" blobColor="#fbbf24" iconBgClass="bg-amber-100" iconColorClass="text-amber-600" icon={AlertCircle} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Overdue tasks" value="0" blobColor="#f87171" iconBgClass="bg-red-100" iconColorClass="text-red-600" icon={Hourglass} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Due soon" value="0" blobColor="#fb923c" iconBgClass="bg-orange-100" iconColorClass="text-orange-600" icon={Timer} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Average time to decide" value="0 d" blobColor="#a78bfa" iconBgClass="bg-purple-100" iconColorClass="text-purple-600" icon={Clock} />
+              </div>
+            </section>
 
-          {/* ===== REVENUE ===== */}
-          <section>
-            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
-              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Revenue</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              <GradientKpiCard title="Fees generated" value="₹1.66 Cr" gradient="bg-gradient-to-br from-white to-purple-50" iconColor="text-purple-500" />
-              <GradientKpiCard title="Fees collected" value="₹1.16 Cr" gradient="bg-gradient-to-br from-white to-green-50" iconColor="text-green-500" />
-              <GradientKpiCard title="Pending fee" value="₹50.28 L" gradient="bg-gradient-to-br from-white to-fuchsia-50" iconColor="text-fuchsia-500" />
-              <GradientKpiCard title="Payment success rate" value="76.8%" gradient="bg-gradient-to-br from-white to-teal-50" iconColor="text-teal-500" />
-            </div>
-          </section>
-        </div>
+            <section>
+              <div className="mb-3 flex items-center rounded-full border border-border/80 bg-transparent px-4 py-1.5 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
+                <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-500">Revenue</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Fees generated" value="₹1.84 Cr" blobColor="#e879f9" iconBgClass="bg-fuchsia-100" iconColorClass="text-fuchsia-600" icon={Coins} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Fees collected" value="₹1.33 Cr" blobColor="#34d399" iconBgClass="bg-emerald-100" iconColorClass="text-emerald-600" icon={Landmark} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Pending fee" value="₹50.28 L" blobColor="#c084fc" iconBgClass="bg-purple-100" iconColorClass="text-purple-600" icon={CreditCard} />
+                <EnhancedKpiCard version={dashboardVersion as "v1" | "v3"} title="Payment success rate" value="78%" blobColor="#2dd4bf" iconBgClass="bg-teal-100" iconColorClass="text-teal-600" icon={TrendingUp} />
+              </div>
+            </section>
+          </div>
+        ) : (
+          <div className="flex-1 space-y-2">
+            {/* ===== APPLICATIONS ===== */}
+            <section>
+              <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+                <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Applications</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <GradientKpiCard title="Total applications" value={kpis.total.toString()} gradient="bg-gradient-to-br from-white to-cyan-50" iconColor="text-cyan-500" />
+                <GradientKpiCard title="In progress" value={kpis.inProgress.toString()} gradient="bg-gradient-to-br from-white to-blue-50" iconColor="text-blue-500" />
+                <GradientKpiCard title="Approved" value={kpis.approved.toString()} gradient="bg-gradient-to-br from-white to-emerald-50" iconColor="text-emerald-500" />
+                <GradientKpiCard title="Rejected" value={kpis.rejected.toString()} gradient="bg-gradient-to-br from-white to-rose-50" iconColor="text-rose-500" />
+              </div>
+            </section>
+
+            {/* ===== WORKFLOW ===== */}
+            <section>
+              <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+                <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Workflow</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <GradientKpiCard title="Open shortfalls" value="18" gradient="bg-gradient-to-br from-white to-amber-50" iconColor="text-amber-500" />
+                <GradientKpiCard title="Overdue tasks" value="0" gradient="bg-gradient-to-br from-white to-red-50" iconColor="text-red-500" />
+                <GradientKpiCard title="Due soon" value="0" gradient="bg-gradient-to-br from-white to-orange-50" iconColor="text-orange-500" />
+                <GradientKpiCard title="Average time to decide" value="0 d" gradient="bg-gradient-to-br from-white to-indigo-50" iconColor="text-indigo-500" />
+              </div>
+            </section>
+
+            {/* ===== REVENUE ===== */}
+            <section>
+              <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+                <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Revenue</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <GradientKpiCard title="Fees generated" value="₹1.66 Cr" gradient="bg-gradient-to-br from-white to-purple-50" iconColor="text-purple-500" />
+                <GradientKpiCard title="Fees collected" value="₹1.16 Cr" gradient="bg-gradient-to-br from-white to-green-50" iconColor="text-green-500" />
+                <GradientKpiCard title="Pending fee" value="₹50.28 L" gradient="bg-gradient-to-br from-white to-fuchsia-50" iconColor="text-fuchsia-500" />
+                <GradientKpiCard title="Payment success rate" value="76.8%" gradient="bg-gradient-to-br from-white to-teal-50" iconColor="text-teal-500" />
+              </div>
+            </section>
+          </div>
+        )}
 
         {/* ===== RECENT ACTIVITY SIDEBAR ===== */}
         <aside className="w-full lg:w-1/4 shrink-0">
@@ -246,6 +299,40 @@ function GradientKpiCard({ title, value, gradient, iconColor }: { title: string;
           <div className="size-2 rounded-full bg-current"></div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function EnhancedKpiCard({ title, value, blobColor, iconColorClass, iconBgClass, icon: Icon, version }: { title: string; value: string; blobColor: string; iconColorClass: string; iconBgClass: string; icon: React.ElementType; version: "v1" | "v3" }) {
+  const baseClasses = "relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm h-[105px] flex flex-col justify-between";
+  const borderClasses = version === "v3" ? "" : "border border-border/60";
+
+  return (
+    <div
+      className={cn(baseClasses, borderClasses)}
+      style={{
+        background: `radial-gradient(circle at 105% 105%, ${blobColor}40 0%, transparent 50%), white`
+      }}
+    >
+      {version === "v3" && (
+        <div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            padding: "1.5px",
+            background: `linear-gradient(135deg, ${blobColor}b0 0%, ${blobColor}00 45%)`,
+            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+          }}
+        />
+      )}
+      <div className="flex items-start justify-between z-10 relative">
+        <p className="text-[13px] font-bold text-slate-500 leading-none mt-1">{title}</p>
+        <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-full shadow-sm bg-white", iconBgClass)}>
+          <Icon className={cn("size-3.5", iconColorClass)} />
+        </div>
+      </div>
+      <p className="text-3xl font-bold tracking-tight text-slate-900 z-10 relative">{value}</p>
     </div>
   );
 }

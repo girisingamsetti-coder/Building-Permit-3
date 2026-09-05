@@ -30,7 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function AdminDashboard() {
-  const { navigate } = useAppStore();
+  const { navigate, dashboardVersion } = useAppStore();
 
   return (
     <div className="bg-[#F8F9FB] min-h-screen text-slate-800 font-sans px-2 pt-1 pb-20">
@@ -45,12 +45,21 @@ export function AdminDashboard() {
             <div className="border border-slate-200 bg-white rounded-xl px-4 py-2">
               <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">APPLICATIONS</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              <KpiCard label="Total applications" value="246" icon={<FileStack className="size-4 text-blue-500" />} gradient="bg-gradient-to-tr from-cyan-100/80 via-white to-white" />
-              <KpiCard label="In progress" value="190" icon={<Activity className="size-4 text-blue-600" />} gradient="bg-gradient-to-tr from-blue-200/60 via-white to-white" />
-              <KpiCard label="Approved" value="21" icon={<CheckCircle2 className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-emerald-100/80 via-white to-white" />
-              <KpiCard label="Rejected" value="0" icon={<XCircle className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-rose-100/80 via-white to-white" />
-            </div>
+            {dashboardVersion === 'v1' || dashboardVersion === 'v3' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Total applications" value="246" icon={<FileStack className="size-4 text-blue-500" />} blobColor="#3b82f6" iconBgClass="bg-blue-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="In progress" value="190" icon={<Activity className="size-4 text-indigo-500" />} blobColor="#6366f1" iconBgClass="bg-indigo-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Approved" value="21" icon={<CheckCircle2 className="size-4 text-emerald-500" />} blobColor="#10b981" iconBgClass="bg-emerald-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Rejected" value="0" icon={<XCircle className="size-4 text-rose-500" />} blobColor="#f43f5e" iconBgClass="bg-rose-100" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <KpiCard label="Total applications" value="246" icon={<FileStack className="size-4 text-blue-500" />} gradient="bg-gradient-to-tr from-cyan-100/80 via-white to-white" />
+                <KpiCard label="In progress" value="190" icon={<Activity className="size-4 text-blue-600" />} gradient="bg-gradient-to-tr from-blue-200/60 via-white to-white" />
+                <KpiCard label="Approved" value="21" icon={<CheckCircle2 className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-emerald-100/80 via-white to-white" />
+                <KpiCard label="Rejected" value="0" icon={<XCircle className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-rose-100/80 via-white to-white" />
+              </div>
+            )}
           </div>
 
           {/* Workflow Row */}
@@ -58,12 +67,21 @@ export function AdminDashboard() {
             <div className="border border-slate-200 bg-white rounded-xl px-4 py-2">
               <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">WORKFLOW</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              <KpiCard label="Open shortfalls" value="18" icon={<AlertTriangle className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-amber-100/80 via-white to-white" />
-              <KpiCard label="Overdue tasks" value="0" icon={<Clock className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-rose-100/80 via-white to-white" />
-              <KpiCard label="Due soon" value="0" icon={<Timer className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-amber-100/80 via-white to-white" />
-              <KpiCard label="Average time to decide" value="0 d" icon={<PieChart className="size-4 text-indigo-500" />} gradient="bg-gradient-to-tr from-indigo-100/60 via-white to-white" />
-            </div>
+            {dashboardVersion === 'v1' || dashboardVersion === 'v3' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Open shortfalls" value="18" icon={<AlertTriangle className="size-4 text-amber-500" />} blobColor="#f59e0b" iconBgClass="bg-amber-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Overdue tasks" value="0" icon={<Clock className="size-4 text-red-500" />} blobColor="#ef4444" iconBgClass="bg-red-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Due soon" value="0" icon={<Timer className="size-4 text-orange-500" />} blobColor="#f97316" iconBgClass="bg-orange-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Average time to decide" value="0 d" icon={<PieChart className="size-4 text-purple-500" />} blobColor="#a855f7" iconBgClass="bg-purple-100" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <KpiCard label="Open shortfalls" value="18" icon={<AlertTriangle className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-amber-100/80 via-white to-white" />
+                <KpiCard label="Overdue tasks" value="0" icon={<Clock className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-rose-100/80 via-white to-white" />
+                <KpiCard label="Due soon" value="0" icon={<Timer className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-amber-100/80 via-white to-white" />
+                <KpiCard label="Average time to decide" value="0 d" icon={<PieChart className="size-4 text-indigo-500" />} gradient="bg-gradient-to-tr from-indigo-100/60 via-white to-white" />
+              </div>
+            )}
           </div>
 
           {/* Revenue Row */}
@@ -71,12 +89,21 @@ export function AdminDashboard() {
             <div className="border border-slate-200 bg-white rounded-xl px-4 py-2">
               <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-600">REVENUE</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              <KpiCard label="Fees generated" value="₹1.66 Cr" icon={<CircleDollarSign className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-purple-100/80 via-white to-white" />
-              <KpiCard label="Fees collected" value="₹1.16 Cr" icon={<Wallet className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-emerald-100/80 via-white to-white" />
-              <KpiCard label="Pending fee" value="₹50.28 L" icon={<Receipt className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-pink-100/80 via-white to-white" />
-              <KpiCard label="Payment success rate" value="76.8%" icon={<TrendingUp className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-cyan-100/80 via-white to-white" />
-            </div>
+            {dashboardVersion === 'v1' || dashboardVersion === 'v3' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Fees generated" value="₹1.66 Cr" icon={<CircleDollarSign className="size-4 text-purple-500" />} blobColor="#a855f7" iconBgClass="bg-purple-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Fees collected" value="₹1.16 Cr" icon={<Wallet className="size-4 text-emerald-500" />} blobColor="#10b981" iconBgClass="bg-emerald-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Pending fee" value="₹50.28 L" icon={<Receipt className="size-4 text-rose-500" />} blobColor="#f43f5e" iconBgClass="bg-rose-100" />
+                <EnhancedAdminKpiCard version={dashboardVersion as "v1" | "v3"} label="Payment success rate" value="76.8%" icon={<TrendingUp className="size-4 text-cyan-500" />} blobColor="#06b6d4" iconBgClass="bg-cyan-100" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                <KpiCard label="Fees generated" value="₹1.66 Cr" icon={<CircleDollarSign className="size-4 text-amber-500" />} gradient="bg-gradient-to-tr from-purple-100/80 via-white to-white" />
+                <KpiCard label="Fees collected" value="₹1.16 Cr" icon={<Wallet className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-emerald-100/80 via-white to-white" />
+                <KpiCard label="Pending fee" value="₹50.28 L" icon={<Receipt className="size-4 text-rose-500" />} gradient="bg-gradient-to-tr from-pink-100/80 via-white to-white" />
+                <KpiCard label="Payment success rate" value="76.8%" icon={<TrendingUp className="size-4 text-emerald-500" />} gradient="bg-gradient-to-tr from-cyan-100/80 via-white to-white" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -295,9 +322,9 @@ export function AdminDashboard() {
                   const circumference = 2 * Math.PI * radius;
                   const GAP = 10; // wide gap for visible white space between rounded caps
                   const segments = [
-                    { label: "Passed",  value: 348, color: "#10b981" },
-                    { label: "Failed",  value: 150, color: "#ef4444" },
-                    { label: "Running", value: 1,   color: "#94a3b8" },
+                    { label: "Passed", value: 348, color: "#10b981" },
+                    { label: "Failed", value: 150, color: "#ef4444" },
+                    { label: "Running", value: 1, color: "#94a3b8" },
                   ];
                   const total = segments.reduce((s, d) => s + d.value, 0);
                   let offset = 0;
@@ -305,14 +332,14 @@ export function AdminDashboard() {
                     <div className="relative" style={{ width: size, height: size }}>
                       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
                         {/* Track */}
-                        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={thickness} />
+                        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={thickness} />
                         {segments.map((seg, i) => {
                           const dash = Math.max(0, (seg.value / total) * circumference - GAP);
                           const gap = circumference - dash;
                           const el = (
                             <circle
                               key={i}
-                              cx={size/2} cy={size/2} r={radius}
+                              cx={size / 2} cy={size / 2} r={radius}
                               fill="none"
                               stroke={seg.color}
                               strokeWidth={thickness}
@@ -520,6 +547,40 @@ function KpiCard({ label, value, icon, gradient }: { label: string; value: strin
         <div className="size-6 rounded-md bg-white/70 flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110">{icon}</div>
       </div>
       <p className="text-2xl font-bold text-slate-900 relative z-10 tabular-nums">{value}</p>
+    </div>
+  );
+}
+
+function EnhancedAdminKpiCard({ label, value, blobColor, iconBgClass, icon, version }: { label: string; value: string; blobColor: string; iconBgClass: string; icon: React.ReactNode; version: "v1" | "v3" }) {
+  const baseClasses = "relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm h-[105px] flex flex-col justify-between transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer";
+  const borderClasses = version === "v3" ? "" : "border border-slate-200";
+
+  return (
+    <div
+      className={cn(baseClasses, borderClasses)}
+      style={{
+        background: `radial-gradient(circle at 105% 105%, ${blobColor}40 0%, transparent 50%), white`
+      }}
+    >
+      {version === "v3" && (
+        <div
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{
+            padding: "1.5px",
+            background: `linear-gradient(135deg, ${blobColor}b0 0%, ${blobColor}00 45%)`,
+            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+            WebkitMaskComposite: "xor",
+            maskComposite: "exclude",
+          }}
+        />
+      )}
+      <div className="flex items-start justify-between z-10 relative">
+        <p className="text-[13px] font-bold text-slate-500 leading-none mt-1">{label}</p>
+        <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-full shadow-sm bg-white", iconBgClass)}>
+          {icon}
+        </div>
+      </div>
+      <p className="text-3xl font-bold tracking-tight text-slate-900 z-10 relative">{value}</p>
     </div>
   );
 }
@@ -754,57 +815,57 @@ function RoseStageChart() {
       <div className="flex-1 flex items-center justify-center">
         <svg viewBox="0 0 180 180" className="w-full max-w-[260px] h-auto">
           <defs>
-          {data.map((d) => {
-            const r = minR + (d.value / maxVal) * (maxR - minR);
-            return (
-              <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor={d.colorFrom} />
-                <stop offset="100%" stopColor={d.color} />
-              </radialGradient>
-            );
-          })}
+            {data.map((d) => {
+              const r = minR + (d.value / maxVal) * (maxR - minR);
+              return (
+                <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stopColor={d.colorFrom} />
+                  <stop offset="100%" stopColor={d.color} />
+                </radialGradient>
+              );
+            })}
           </defs>
           {data.map((d, i) => {
-          const r = minR + (d.value / maxVal) * (maxR - minR);
-          const startAngle = i * sliceAngle - Math.PI / 2;
-          const endAngle = startAngle + sliceAngle;
-          const gapAngle = 0.04;
+            const r = minR + (d.value / maxVal) * (maxR - minR);
+            const startAngle = i * sliceAngle - Math.PI / 2;
+            const endAngle = startAngle + sliceAngle;
+            const gapAngle = 0.04;
 
-          const x1 = cx + r * Math.cos(startAngle + gapAngle);
-          const y1 = cy + r * Math.sin(startAngle + gapAngle);
-          const x2 = cx + r * Math.cos(endAngle - gapAngle);
-          const y2 = cy + r * Math.sin(endAngle - gapAngle);
-          const xi1 = cx + minR * Math.cos(startAngle + gapAngle);
-          const yi1 = cy + minR * Math.sin(startAngle + gapAngle);
-          const xi2 = cx + minR * Math.cos(endAngle - gapAngle);
-          const yi2 = cy + minR * Math.sin(endAngle - gapAngle);
+            const x1 = cx + r * Math.cos(startAngle + gapAngle);
+            const y1 = cy + r * Math.sin(startAngle + gapAngle);
+            const x2 = cx + r * Math.cos(endAngle - gapAngle);
+            const y2 = cy + r * Math.sin(endAngle - gapAngle);
+            const xi1 = cx + minR * Math.cos(startAngle + gapAngle);
+            const yi1 = cy + minR * Math.sin(startAngle + gapAngle);
+            const xi2 = cx + minR * Math.cos(endAngle - gapAngle);
+            const yi2 = cy + minR * Math.sin(endAngle - gapAngle);
 
-          const path = `M ${xi1} ${yi1} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${xi2} ${yi2} A ${minR} ${minR} 0 0 0 ${xi1} ${yi1} Z`;
+            const path = `M ${xi1} ${yi1} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${xi2} ${yi2} A ${minR} ${minR} 0 0 0 ${xi1} ${yi1} Z`;
 
-          const midAngle = (startAngle + endAngle) / 2;
-          const labelR = r * 0.65 + minR * 0.35;
-          const lx = cx + labelR * Math.cos(midAngle);
-          const ly = cy + labelR * Math.sin(midAngle);
+            const midAngle = (startAngle + endAngle) / 2;
+            const labelR = r * 0.65 + minR * 0.35;
+            const lx = cx + labelR * Math.cos(midAngle);
+            const ly = cy + labelR * Math.sin(midAngle);
 
-          return (
-            <g
-              key={i}
-              className="cursor-pointer transition-all duration-200 origin-center"
-              style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.25))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none', transform: hoveredIndex === i ? 'scale(1.03)' : 'scale(1)' }}
-              onMouseEnter={() => setHoveredIndex(i)}
-              onMouseLeave={() => setHoveredIndex(null)}
-            >
-              <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
-              {d.value >= 9 && (
-                <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
-                  {d.value}
-                </text>
-              )}
-            </g>
-          );
-        })}
-        {/* Center circle */}
-        <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
+            return (
+              <g
+                key={i}
+                className="cursor-pointer transition-all duration-200 origin-center"
+                style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.25))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none', transform: hoveredIndex === i ? 'scale(1.03)' : 'scale(1)' }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
+                {d.value >= 9 && (
+                  <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
+                    {d.value}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {/* Center circle */}
+          <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
         </svg>
       </div>
 
