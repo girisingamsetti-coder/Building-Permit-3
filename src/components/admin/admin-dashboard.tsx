@@ -857,14 +857,14 @@ function PipelineRingChart() {
       {/* Legend at bottom */}
       <div className="w-full space-y-1.5 px-1">
         {placed.map((s) => (
-          <div key={s.num} className="flex items-center justify-between">
+          <div key={s.num} className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0" style={{ backgroundColor: s.color }}>{s.num}</span>
-              <span className="text-[10px] text-slate-600 font-medium">{s.label}</span>
+              <span className="text-[10px] text-slate-800 font-bold">{s.label}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold text-slate-800">{s.value}</span>
-              <span className="text-[9px] text-slate-400">{s.pct}%</span>
+              <span className="text-[9px] text-slate-400 font-medium">{s.pct}%</span>
             </div>
           </div>
         ))}
