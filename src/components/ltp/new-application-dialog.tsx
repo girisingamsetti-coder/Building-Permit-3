@@ -170,7 +170,7 @@ function appLabel(k: AppTypeKey | "") { return k === "COMMERCIAL_BP" ? "Commerci
 // ─── SMALL HELPERS ──────────────────────────────────────────────────────────
 function F({ label, required, error, hint, children, full }: { label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode; full?: boolean }) {
   return (
-    <div className={cn("space-y-1.5", full && "col-span-2")}>
+    <div className={cn("space-y-1.5", full && "col-span-3")}>
       <Label className="text-xs font-medium text-slate-700">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
       {children}
       {hint && !error && <p className="text-[11px] text-slate-400">{hint}</p>}
@@ -179,7 +179,7 @@ function F({ label, required, error, hint, children, full }: { label: string; re
   );
 }
 function Divider({ title }: { title: string }) {
-  return <div className="col-span-2 border-t border-slate-100 pt-4 pb-0"><p className="text-xs font-semibold text-slate-600">{title}</p></div>;
+  return <div className="col-span-3 border-t border-slate-100 pt-4 pb-0"><p className="text-xs font-semibold text-slate-600">{title}</p></div>;
 }
 function RV({ label, value }: { label: string; value?: string }) {
   return <div><p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p><p className="mt-0.5 text-sm text-slate-800">{value?.trim() || "—"}</p></div>;
@@ -348,7 +348,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
             <p className="mt-1 text-sm text-slate-600">Now entering drawing scrutiny.</p>
           </div>
           <div className="px-8 py-6 space-y-4">
-            <div className="grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+            <div className="col-span-3 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
               <RV label="Application No." value={submittedAppNo} />
               <RV label="Type" value={appLabel(data.appType as AppTypeKey)} />
               <RV label="Applicant" value={data.applicant.fullName} />
@@ -370,7 +370,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   if (!typeSelected) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden">
+        <DialogContent className="w-[95vw] max-w-3xl p-0 gap-0">
           <DialogTitle className="sr-only">Select application type</DialogTitle>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
@@ -427,8 +427,8 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
       <DialogContent
-        className="max-w-6xl w-full p-0 gap-0 flex flex-col overflow-hidden"
-        style={{ height: "640px", maxHeight: "90vh" }}
+        className="w-[95vw] max-w-none p-0 gap-0 flex flex-col overflow-hidden"
+        style={{ height: "95vh", maxHeight: "95vh" }}
       >
         <DialogTitle className="sr-only">New Application — {cur.label}</DialogTitle>
 
@@ -494,7 +494,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 1: APPLICANT ── */}
             {step === 1 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="Full name" required error={errors.fullName} full><Input value={data.applicant.fullName} onChange={(e) => upd("applicant", { fullName: e.target.value })} placeholder="e.g. Smt. Kavitha Reddy" /></F>
                 <F label="Father's / husband's name" error={errors.fathersName}><Input value={data.applicant.fathersName} onChange={(e) => upd("applicant", { fathersName: e.target.value })} placeholder="e.g. Shri. Ravi Reddy" /></F>
                 <F label="Mobile number" required error={errors.mobile} hint="10-digit Indian number"><Input value={data.applicant.mobile} onChange={(e) => upd("applicant", { mobile: e.target.value })} placeholder="e.g. 9876543210" inputMode="tel" /></F>
@@ -507,7 +507,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 2: OWNER ── */}
             {step === 2 && (
-              <div className="space-y-4">
+              <div className="space-y-4 max-w-2xl">
                 <div className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <Checkbox id="same" checked={data.owner.sameAsApplicant} onCheckedChange={(v) => upd("owner", { sameAsApplicant: !!v })} />
                   <div><Label htmlFor="same" className="cursor-pointer text-sm font-medium">The applicant is the owner of the land</Label><p className="text-xs text-slate-500 mt-0.5">Check this if the applicant and the land owner are the same person.</p></div>
@@ -515,14 +515,14 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                 {data.owner.sameAsApplicant ? (
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                     <div className="flex items-center gap-2 text-emerald-700 mb-3"><CheckCircle2 className="size-4" /><p className="text-sm font-medium">Owner details copied from applicant</p></div>
-                    <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 text-sm">
                       <RV label="Name" value={data.applicant.fullName} />
                       <RV label="Mobile" value={data.applicant.mobile} />
-                      <div className="col-span-2"><RV label="Address" value={data.applicant.address} /></div>
+                      <div className="col-span-full"><RV label="Address" value={data.applicant.address} /></div>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <F label="Owner's full name" required error={errors.ownerFullName} full><Input value={data.owner.fullName} onChange={(e) => upd("owner", { fullName: e.target.value })} placeholder="e.g. Shri. Rajesh Kumar" /></F>
                     <F label="Owner's mobile number" required error={errors.ownerMobile}><Input value={data.owner.mobile} onChange={(e) => upd("owner", { mobile: e.target.value })} placeholder="10-digit mobile" /></F>
                     <F label="Owner's address" required error={errors.ownerAddress} full><Textarea rows={3} value={data.owner.address} onChange={(e) => upd("owner", { address: e.target.value })} placeholder="Complete postal address" /></F>
@@ -533,7 +533,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 3: PROPERTY ── */}
             {step === 3 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="District" required error={errors.district}><Input value={data.property.district} onChange={(e) => upd("property", { district: e.target.value })} placeholder="e.g. Hyderabad" /></F>
                 <F label="Mandal"><Input value={data.property.mandal} onChange={(e) => upd("property", { mandal: e.target.value })} placeholder="e.g. Serilingampally" /></F>
                 <F label="Village"><Input value={data.property.village} onChange={(e) => upd("property", { village: e.target.value })} placeholder="e.g. Kondapur" /></F>
@@ -544,7 +544,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 4: LOCATION ── */}
             {step === 4 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="Zone" required error={errors.zone}>
                   <Select value={data.location.zone} onValueChange={(v) => upd("location", { zone: v })}>
                     <SelectTrigger><SelectValue placeholder="Select zone" /></SelectTrigger>
@@ -567,7 +567,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 5: SURVEY ── */}
             {step === 5 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="Survey number(s)" required error={errors.surveyNumbers} hint="Separate multiple with a comma." full><Input value={data.survey.surveyNumbers} onChange={(e) => upd("survey", { surveyNumbers: e.target.value })} placeholder="e.g. Sy. 144/B2, Sy. 145/A1" /></F>
                 <F label="Plot number"><Input value={data.survey.plotNumber} onChange={(e) => upd("survey", { plotNumber: e.target.value })} placeholder="e.g. Plot 14" /></F>
                 <F label="Layout name"><Input value={data.survey.layoutName} onChange={(e) => upd("survey", { layoutName: e.target.value })} placeholder="e.g. Greenfield Enclave" /></F>
@@ -591,7 +591,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 6: DEVELOPMENT ── */}
             {step === 6 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="Building use" required error={errors.buildingUse}>
                   <Select value={data.development.buildingUse} onValueChange={(v) => upd("development", { buildingUse: v })}>
                     <SelectTrigger><SelectValue placeholder="Select building use" /></SelectTrigger>
@@ -620,14 +620,14 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 7: BUILDING ── */}
             {step === 7 && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <F label="Plot area (sq m)" hint="Carried forward from Survey — read only."><Input value={data.survey.plotArea || "—"} readOnly className="bg-slate-50 cursor-default" /></F>
                 <F label="Built-up area (sq m)" required error={errors.builtUpArea}><Input type="number" min={0} value={data.building.builtUpArea} onChange={(e) => upd("building", { builtUpArea: e.target.value })} placeholder="e.g. 1780" /></F>
                 <F label="Total floor area (sq m)" error={errors.totalFloorArea}><Input type="number" min={0} value={data.building.totalFloorArea} onChange={(e) => upd("building", { totalFloorArea: e.target.value })} placeholder="e.g. 5600" /></F>
                 <F label="Ground coverage (sq m)" error={errors.groundCoverage}><Input type="number" min={0} value={data.building.groundCoverage} onChange={(e) => upd("building", { groundCoverage: e.target.value })} placeholder="e.g. 125" /></F>
                 <F label="Parking area (sq m)"><Input type="number" min={0} value={data.building.parkingArea} onChange={(e) => upd("building", { parkingArea: e.target.value })} placeholder="e.g. 200" /></F>
                 {/* Calculated */}
-                <div className="col-span-2 grid grid-cols-2 gap-3">
+                <div className="col-span-1 sm:col-span-3 grid grid-cols-2 gap-3">
                   <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"><p className="text-[10px] font-semibold uppercase tracking-widest text-blue-500">Achieved FAR</p><p className="mt-1 text-2xl font-bold text-blue-700">{far}</p></div>
                   <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"><p className="text-[10px] font-semibold uppercase tracking-widest text-blue-500">Achieved coverage</p><p className="mt-1 text-2xl font-bold text-blue-700">{cov}</p></div>
                 </div>
@@ -660,19 +660,21 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
 
             {/* ── STEP 9: REVIEW ── */}
             {step === 9 && (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-2"><Info className="size-4 shrink-0 text-amber-600 mt-0.5" /><p className="text-sm text-amber-800">Review all details carefully. Click <strong>Edit</strong> on any section to go back and make changes.</p></div>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {STEPS.slice(0, 8).map((s) => { const ok = Object.keys(validate(s.id, data)).length === 0; return <div key={s.id} className={cn("flex items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-medium border", ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700")}>{ok ? <CheckCircle2 className="size-3.5 shrink-0" /> : <AlertCircle className="size-3.5 shrink-0" />}<span className="truncate">{s.short}</span></div>; })}
+                <div className="grid grid-cols-8 gap-2">
+                  {STEPS.slice(0, 8).map((s) => { const ok = Object.keys(validate(s.id, data)).length === 0; return <div key={s.id} className={cn("flex items-center gap-1.5 rounded-lg px-2 py-1 text-[10px] font-medium border", ok ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-700")}>{ok ? <CheckCircle2 className="size-3 shrink-0" /> : <AlertCircle className="size-3 shrink-0" />}<span className="truncate">{s.short}</span></div>; })}
                 </div>
-                <ReviewCard title="Applicant details" step={1} onEdit={editStep}><RV label="Full name" value={data.applicant.fullName} /><RV label="Mobile" value={data.applicant.mobile} /><RV label="Email" value={data.applicant.email} /><RV label="Aadhaar (last 4)" value={data.applicant.aadhaarLast4 ? `****${data.applicant.aadhaarLast4}` : ""} /><div className="col-span-full"><RV label="Address" value={data.applicant.address} /></div></ReviewCard>
-                <ReviewCard title="Owner details" step={2} onEdit={editStep}>{data.owner.sameAsApplicant ? <div className="col-span-full flex items-center gap-2 text-sm text-emerald-700"><CheckCircle2 className="size-4" />Same as applicant</div> : <><RV label="Full name" value={data.owner.fullName} /><RV label="Mobile" value={data.owner.mobile} /><div className="col-span-full"><RV label="Address" value={data.owner.address} /></div></>}</ReviewCard>
-                <ReviewCard title="Property" step={3} onEdit={editStep}><RV label="District" value={data.property.district} /><RV label="Mandal" value={data.property.mandal} /><RV label="Village" value={data.property.village} /><RV label="Locality" value={data.property.locality} /><RV label="Ward" value={data.property.wardNumber} /></ReviewCard>
-                <ReviewCard title="Location" step={4} onEdit={editStep}><RV label="Zone" value={data.location.zone} /><RV label="Street" value={data.location.streetName} /><RV label="PIN" value={data.location.pinCode} /><RV label="N boundary" value={data.location.boundaryNorth} /><RV label="S boundary" value={data.location.boundarySouth} /></ReviewCard>
-                <ReviewCard title="Survey and plot" step={5} onEdit={editStep}><RV label="Survey nos." value={data.survey.surveyNumbers} /><RV label="Plot no." value={data.survey.plotNumber} /><RV label="Plot area (sq m)" value={data.survey.plotArea} /><RV label="Land use" value={data.survey.landUse} /><RV label="Tenure" value={data.survey.tenure} /></ReviewCard>
-                <ReviewCard title="Development" step={6} onEdit={editStep}><RV label="Building use" value={data.development.buildingUse} /><RV label="Occupancy" value={data.development.occupancyType} /><RV label="Floors" value={data.development.floorsAboveGround} /><RV label="Height (m)" value={data.development.buildingHeight} /></ReviewCard>
-                <ReviewCard title="Building" step={7} onEdit={editStep}><RV label="Built-up (sq m)" value={data.building.builtUpArea} /><RV label="FAR" value={far} /><RV label="Coverage" value={cov} /><RV label="Setback F/R" value={`${data.building.setbackFront || "—"} / ${data.building.setbackRear || "—"} m`} /></ReviewCard>
-                <ReviewCard title="LTP" step={8} onEdit={editStep}><RV label="LTP" value={user?.name} /><RV label="Licence" value={user?.licenseNo} /><div className="col-span-full"><div className={cn("flex items-center gap-2 text-sm", data.ltp.declarationAccepted ? "text-emerald-700" : "text-red-600")}>{data.ltp.declarationAccepted ? <CheckCircle2 className="size-4" /> : <AlertCircle className="size-4" />}{data.ltp.declarationAccepted ? "Declaration accepted" : "Declaration not yet accepted"}</div></div></ReviewCard>
+                <div className="grid grid-cols-2 gap-3">
+                  <ReviewCard title="Applicant details" step={1} onEdit={editStep}><RV label="Full name" value={data.applicant.fullName} /><RV label="Mobile" value={data.applicant.mobile} /><RV label="Email" value={data.applicant.email} /><div className="col-span-full"><RV label="Address" value={data.applicant.address} /></div></ReviewCard>
+                  <ReviewCard title="Owner details" step={2} onEdit={editStep}>{data.owner.sameAsApplicant ? <div className="col-span-full flex items-center gap-2 text-sm text-emerald-700"><CheckCircle2 className="size-4" />Same as applicant</div> : <><RV label="Full name" value={data.owner.fullName} /><RV label="Mobile" value={data.owner.mobile} /><div className="col-span-full"><RV label="Address" value={data.owner.address} /></div></>}</ReviewCard>
+                  <ReviewCard title="Property" step={3} onEdit={editStep}><RV label="District" value={data.property.district} /><RV label="Mandal" value={data.property.mandal} /><RV label="Village" value={data.property.village} /><RV label="Locality" value={data.property.locality} /><RV label="Ward" value={data.property.wardNumber} /></ReviewCard>
+                  <ReviewCard title="Location" step={4} onEdit={editStep}><RV label="Zone" value={data.location.zone} /><RV label="Street" value={data.location.streetName} /><RV label="PIN" value={data.location.pinCode} /><RV label="N boundary" value={data.location.boundaryNorth} /><RV label="S boundary" value={data.location.boundarySouth} /></ReviewCard>
+                  <ReviewCard title="Survey and plot" step={5} onEdit={editStep}><RV label="Survey nos." value={data.survey.surveyNumbers} /><RV label="Plot no." value={data.survey.plotNumber} /><RV label="Plot area (sq m)" value={data.survey.plotArea} /><RV label="Land use" value={data.survey.landUse} /><RV label="Tenure" value={data.survey.tenure} /></ReviewCard>
+                  <ReviewCard title="Development" step={6} onEdit={editStep}><RV label="Building use" value={data.development.buildingUse} /><RV label="Occupancy" value={data.development.occupancyType} /><RV label="Floors" value={data.development.floorsAboveGround} /><RV label="Height (m)" value={data.development.buildingHeight} /></ReviewCard>
+                  <ReviewCard title="Building" step={7} onEdit={editStep}><RV label="Built-up (sq m)" value={data.building.builtUpArea} /><RV label="FAR" value={far} /><RV label="Coverage" value={cov} /><RV label="Setback F/R" value={`${data.building.setbackFront || "—"} / ${data.building.setbackRear || "—"} m`} /></ReviewCard>
+                  <ReviewCard title="LTP" step={8} onEdit={editStep}><RV label="LTP" value={user?.name} /><RV label="Licence" value={user?.licenseNo} /><div className="col-span-full"><div className={cn("flex items-center gap-2 text-sm", data.ltp.declarationAccepted ? "text-emerald-700" : "text-red-600")}>{data.ltp.declarationAccepted ? <CheckCircle2 className="size-4" /> : <AlertCircle className="size-4" />}{data.ltp.declarationAccepted ? "Declaration accepted" : "Declaration not yet accepted"}</div></div></ReviewCard>
+                </div>
               </div>
             )}
 
