@@ -92,24 +92,24 @@ export function Sidebar() {
                     onClick={() => navigate(item.view)}
                     title={collapsed ? item.label : undefined}
                     className={cn(
-                      "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-bold transition-all duration-200",
                       collapsed && "justify-center px-0",
                       active
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
                     )}
                   >
                     <Icon
                       className={cn(
                         "size-4 shrink-0 transition-transform",
                         active
-                          ? "text-sidebar-primary"
-                          : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"
+                          ? "text-primary-foreground"
+                          : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground group-hover:scale-110"
                       )}
                     />
                     {!collapsed && <span className="truncate">{item.label}</span>}
                     {active && !collapsed && (
-                      <span className="ml-auto size-1.5 rounded-full bg-sidebar-primary" />
+                      <span className="ml-auto size-1.5 rounded-full bg-primary-foreground" />
                     )}
                   </button>
                 </li>

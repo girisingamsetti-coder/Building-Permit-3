@@ -461,12 +461,6 @@ export function Topbar() {
 
       {/* Search & Date Filter */}
       <div className="hidden sm:flex items-center gap-2 ml-auto">
-        {/* Date Filter */}
-        <Button variant="outline" size="sm" className="h-9 gap-2 px-3 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex">
-          <Calendar className="size-4" />
-          <span>Date filter</span>
-          <ChevronDown className="size-3.5 opacity-50 ml-1" />
-        </Button>
 
         {/* Search */}
         <div ref={searchContainerRef} className="relative w-48 lg:w-64">
@@ -512,6 +506,13 @@ export function Topbar() {
           />
         )}
       </div>
+
+        {/* Date Filter */}
+        <Button variant="outline" size="sm" className="h-9 gap-2 px-3 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex">
+          <Calendar className="size-4" />
+          <span>Date filter</span>
+          <ChevronDown className="size-3.5 opacity-50 ml-1" />
+        </Button>
       </div>
 
       <div className="flex items-center gap-1.5 ml-1">

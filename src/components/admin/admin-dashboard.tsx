@@ -180,14 +180,14 @@ export function AdminDashboard() {
                 {/* Legend */}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1 w-full px-2">
                   {[
-                    { label: "Approved", color: "#10b981" },
-                    { label: "TPA", color: "#3b82f6" },
-                    { label: "With applicant", color: "#f43f5e" },
-                    { label: "ZAD/ZDD", color: "#8b5cf6" },
-                    { label: "Director", color: "#0284c7" },
-                    { label: "Addl Comr.", color: "#eab308" },
-                    { label: "ZJD", color: "#f97316" },
-                    { label: "Commissioner", color: "#d946ef" },
+                    { label: "Approved", color: "#64748b" },
+                    { label: "TPA", color: "#0ea5e9" },
+                    { label: "With applicant", color: "#f59e0b" },
+                    { label: "ZAD/ZDD", color: "#f43f5e" },
+                    { label: "Director", color: "#94a3b8" },
+                    { label: "Addl Comr.", color: "#d97706" },
+                    { label: "ZJD", color: "#e11d48" },
+                    { label: "Commissioner", color: "#fb7185" },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
@@ -712,14 +712,14 @@ function PolarStatusChart() {
 }
 function RoseStageChart() {
   const data = [
-    { label: "Approved", value: 21, color: "#10b981" },
-    { label: "TPA", value: 18, color: "#3b82f6" },
-    { label: "With applicant", value: 14, color: "#f43f5e" },
-    { label: "ZAD/ZDD", value: 9, color: "#8b5cf6" },
-    { label: "Director", value: 4, color: "#0284c7" },
-    { label: "Addl Comr.", value: 3, color: "#eab308" },
-    { label: "ZJD", value: 2, color: "#f97316" },
-    { label: "Commissioner", value: 2, color: "#d946ef" },
+    { label: "Approved", value: 21, color: "#64748b" },
+    { label: "TPA", value: 18, color: "#0ea5e9" },
+    { label: "With applicant", value: 14, color: "#f59e0b" },
+    { label: "ZAD/ZDD", value: 9, color: "#f43f5e" },
+    { label: "Director", value: 4, color: "#94a3b8" },
+    { label: "Addl Comr.", value: 3, color: "#d97706" },
+    { label: "ZJD", value: 2, color: "#e11d48" },
+    { label: "Commissioner", value: 2, color: "#fb7185" },
   ];
 
   const maxVal = Math.max(...data.map(d => d.value));
@@ -778,9 +778,9 @@ function PipelineRingChart() {
   const guideR = R + rW / 2 + 6;
 
   const segments = [
-    { label: "With applicant", value: 187, pct: 76, color: "#f97316", num: "01" },
-    { label: "In review desk", value: 38, pct: 15, color: "#38bdf8", num: "02" },
-    { label: "Closed", value: 21, pct: 9, color: "#fb923c", num: "03" },
+    { label: "With applicant", value: 187, pct: 76, color: "#f59e0b", num: "01" },
+    { label: "In review desk", value: 38, pct: 15, color: "#0ea5e9", num: "02" },
+    { label: "Closed", value: 21, pct: 9, color: "#64748b", num: "03" },
   ];
 
   const GAP_DEG = 4;
