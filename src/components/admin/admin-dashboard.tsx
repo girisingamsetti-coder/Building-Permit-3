@@ -322,20 +322,7 @@ export function AdminDashboard() {
                 <StatusRow label="Running" count="1" percent="0%" color="bg-slate-400" />
               </div>
 
-              <div className="space-y-2 mt-auto border-t border-slate-100 pt-4">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-amber-600">Correction due</span>
-                  <span className="font-bold text-amber-600">19</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-rose-600">Critical findings</span>
-                  <span className="font-bold text-rose-600">104</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="font-medium text-slate-800">Major findings</span>
-                  <span className="font-bold text-slate-800">221</span>
-                </div>
-              </div>
+
             </div>
 
             <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
@@ -830,7 +817,7 @@ function PipelineRingChart() {
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Chart */}
-      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[200px] mx-auto">
+      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[220px] mx-auto">
         {/* Outer guide circle */}
         <circle cx={cx} cy={cy} r={guideR} fill="none" stroke="#e2e8f0" strokeWidth="1" />
 

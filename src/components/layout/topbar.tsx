@@ -12,6 +12,7 @@ import {
   Menu,
   ChevronDown,
   LogOut,
+  Calendar,
   User,
   Settings,
   Users,
@@ -458,9 +459,18 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Search — now functional */}
-      <div ref={searchContainerRef} className="relative hidden w-64 sm:block lg:w-96 ml-auto">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      {/* Search & Date Filter */}
+      <div className="hidden sm:flex items-center gap-2 ml-auto">
+        {/* Date Filter */}
+        <Button variant="outline" size="sm" className="h-9 gap-2 px-3 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex">
+          <Calendar className="size-4" />
+          <span>Date filter</span>
+          <ChevronDown className="size-3.5 opacity-50 ml-1" />
+        </Button>
+
+        {/* Search */}
+        <div ref={searchContainerRef} className="relative w-48 lg:w-64">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
           ref={searchInputRef}
           type="text"
@@ -501,6 +511,7 @@ export function Topbar() {
             onClose={() => setSearchOpen(false)}
           />
         )}
+      </div>
       </div>
 
       <div className="flex items-center gap-1.5 ml-1">
