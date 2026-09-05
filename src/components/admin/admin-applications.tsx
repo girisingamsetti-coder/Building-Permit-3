@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { PageHeader } from "@/components/design-system/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAppStore } from "@/store/app-store";
 import {
   Select,
   SelectContent,
@@ -14,7 +15,7 @@ import {
 import { useAppStore } from "@/store/app-store";
 import { StatusBadge, RoleBadge } from "@/components/design-system/badges";
 import { formatDate } from "@/components/design-system/workflow";
-import { Search, Filter, MoreHorizontal, Clock, ArrowRight } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Clock, ArrowRight, FilePlus2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
@@ -94,8 +95,12 @@ export function AdminApplications() {
           title="Applications" 
           description="" 
         />
-        <Button variant="default" className="bg-blue-600 hover:bg-blue-700 text-white rounded-full">
-          New application
+        <Button
+          variant="default"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full gap-1.5"
+          onClick={() => navigate("ltp-create-application")}
+        >
+          <FilePlus2 className="size-4" /> New application
         </Button>
       </div>
 
