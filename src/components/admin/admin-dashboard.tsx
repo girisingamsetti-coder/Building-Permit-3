@@ -712,14 +712,14 @@ function PolarStatusChart() {
 }
 function RoseStageChart() {
   const data = [
-    { label: "Approved", value: 21, color: "#64748b" },
-    { label: "TPA", value: 18, color: "#0ea5e9" },
-    { label: "With applicant", value: 14, color: "#f59e0b" },
-    { label: "ZAD/ZDD", value: 9, color: "#f43f5e" },
-    { label: "Director", value: 4, color: "#94a3b8" },
-    { label: "Addl Comr.", value: 3, color: "#d97706" },
-    { label: "ZJD", value: 2, color: "#e11d48" },
-    { label: "Commissioner", value: 2, color: "#fb7185" },
+    { label: "Approved", value: 21, color: "#64748b", colorFrom: "#f1f5f9", id: "stage0" },
+    { label: "TPA", value: 18, color: "#0ea5e9", colorFrom: "#e0f2fe", id: "stage1" },
+    { label: "With applicant", value: 14, color: "#f59e0b", colorFrom: "#fef3c7", id: "stage2" },
+    { label: "ZAD/ZDD", value: 9, color: "#f43f5e", colorFrom: "#ffe4e6", id: "stage3" },
+    { label: "Director", value: 4, color: "#94a3b8", colorFrom: "#f8fafc", id: "stage4" },
+    { label: "Addl Comr.", value: 3, color: "#d97706", colorFrom: "#fef3c7", id: "stage5" },
+    { label: "ZJD", value: 2, color: "#e11d48", colorFrom: "#ffe4e6", id: "stage6" },
+    { label: "Commissioner", value: 2, color: "#fb7185", colorFrom: "#fff1f2", id: "stage7" },
   ];
 
   const maxVal = Math.max(...data.map(d => d.value));
@@ -731,6 +731,17 @@ function RoseStageChart() {
 
   return (
     <svg viewBox="0 0 180 180" className="w-full max-w-[260px] h-auto">
+      <defs>
+        {data.map((d) => {
+          const r = minR + (d.value / maxVal) * (maxR - minR);
+          return (
+            <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor={d.colorFrom} />
+              <stop offset="100%" stopColor={d.color} />
+            </radialGradient>
+          );
+        })}
+      </defs>
       {data.map((d, i) => {
         const r = minR + (d.value / maxVal) * (maxR - minR);
         const startAngle = i * sliceAngle - Math.PI / 2;
@@ -756,7 +767,7 @@ function RoseStageChart() {
 
         return (
           <g key={i} className="cursor-pointer transition-opacity hover:opacity-80">
-            <path d={path} fill={d.color} stroke="white" strokeWidth="1" />
+            <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
             {d.value >= 9 && (
               <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
                 {d.value}
@@ -778,9 +789,9 @@ function PipelineRingChart() {
   const guideR = R + rW / 2 + 6;
 
   const segments = [
-    { label: "With applicant", value: 187, pct: 76, color: "#f59e0b", num: "01" },
-    { label: "In review desk", value: 38, pct: 15, color: "#0ea5e9", num: "02" },
-    { label: "Closed", value: 21, pct: 9, color: "#64748b", num: "03" },
+    { label: "With applicant", value: 187, pct: 76, color: "#f59e0b", colorFrom: "#fef3c7", num: "01", id: "pipe0" },
+    { label: "In review desk", value: 38, pct: 15, color: "#0ea5e9", colorFrom: "#e0f2fe", num: "02", id: "pipe1" },
+    { label: "Closed", value: 21, pct: 9, color: "#64748b", colorFrom: "#f1f5f9", num: "03", id: "pipe2" },
   ];
 
   const GAP_DEG = 4;
@@ -817,7 +828,15 @@ function PipelineRingChart() {
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Chart */}
-      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[220px] mx-auto">
+      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[220px] mx-auto overflow-visible">
+        <defs>
+          {segments.map((s) => (
+            <radialGradient key={s.id} id={s.id} cx={cx} cy={cy} r={R + rW / 2} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
+              <stop offset="65%" stopColor={s.colorFrom} />
+              <stop offset="100%" stopColor={s.color} />
+            </radialGradient>
+          ))}
+        </defs>
         {/* Outer guide circle */}
         <circle cx={cx} cy={cy} r={guideR} fill="none" stroke="#e2e8f0" strokeWidth="1" />
 
@@ -827,7 +846,7 @@ function PipelineRingChart() {
             key={s.num}
             d={arcPath(s.startAngle, s.endAngle, R)}
             fill="none"
-            stroke={s.color}
+            stroke={`url(#${s.id})`}
             strokeWidth={rW}
             strokeLinecap="round"
             className="cursor-pointer transition-opacity hover:opacity-80"
