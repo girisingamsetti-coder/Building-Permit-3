@@ -61,7 +61,6 @@ export { DEMO_CREDENTIALS, ROLES };
 export function defaultViewForPortal(portal: Portal): ViewKey {
   if (portal === "LTP") return "ltp-dashboard";
   if (portal === "OFFICER") return "officer-dashboard";
-  if (portal === "PROJECT_MANAGER") return "pm-dashboard";
   return "admin-dashboard";
 }
 
@@ -491,7 +490,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       applications: updateApp(s.applications, appId, (app) => {
         const latest = app.drawings[app.drawings.length - 1];
         let updated: Application = { ...app, drawings: app.drawings.map((d) => d.id === latest.id ? { ...d, status: "SCRUTINY_IN_PROGRESS" as const } : d) };
-        updated = addAudit(updated, { user: "System", role: "TPS", action: `Auto-scrutiny started (v${latest.version})`, oldStatus: app.status, newStatus: "SCRUTINY_IN_PROGRESS" });
+        updated = addAudit(updated, { user: "System", role: "SUPER_ADMIN", action: `Auto-scrutiny started (v${latest.version})`, oldStatus: app.status, newStatus: "SCRUTINY_IN_PROGRESS" });
         updated = setAppStatus(updated, "SCRUTINY_IN_PROGRESS");
         return updated;
       }),
@@ -508,11 +507,11 @@ export const useAppStore = create<AppState>((set, get) => ({
           let updated: Application = { ...app, scrutinyReport: report };
           updated = { ...updated, drawings: updated.drawings.map((d) => d.id === latest.id ? { ...d, status: passed ? "SCRUTINY_PASSED" as const : "SCRUTINY_FAILED" as const } : d) };
           const newStatus = passed ? "SCRUTINY_PASSED" : "SCRUTINY_FAILED";
-          updated = addAudit(updated, { user: "System", role: "TPS", action: `Auto-scrutiny ${passed ? "passed" : "failed"} (v${latest.version})`, oldStatus: app.status, newStatus });
+          updated = addAudit(updated, { user: "System", role: "SUPER_ADMIN", action: `Auto-scrutiny ${passed ? "passed" : "failed"} (v${latest.version})`, oldStatus: app.status, newStatus });
           if (passed) {
-            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "TPS" }, "Scrutiny passed", report.summary, "COMPLETED");
+            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" }, "Scrutiny passed", report.summary, "COMPLETED");
           } else {
-            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "TPS" }, "Scrutiny failed — re-upload required", report.summary, "FAILED");
+            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" }, "Scrutiny failed — re-upload required", report.summary, "FAILED");
           }
           updated = setAppStatus(updated, newStatus, passed ? "DOCUMENTS" : "DRAWING_SCRUTINY");
           return updated;
@@ -647,9 +646,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (allUploaded && app.status === "DOCUMENT_UPLOAD_PENDING") {
           updated = addAudit(updated, { user: user.name, role: user.role, action: "All required documents uploaded", oldStatus: app.status, newStatus: "DOCUMENT_VERIFICATION" });
           updated = setAppStatus(updated, "DOCUMENT_VERIFICATION", "DOCUMENTS");
-          // Assign to TPA for verification
-          const tpa = USERS.find((u) => u.role === "TPA")!;
-          updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: now };
+          // Assign to Zonal Head for verification
+          const zh = USERS.find((u) => u.role === "ZONAL_HEAD")!;
+          updated = { ...updated, assignedOfficer: { name: zh.name, role: zh.role }, assignedAt: now };
         } else {
           updated = addAudit(updated, { user: user.name, role: user.role, action: `Document uploaded: ${docCode} v${newVersion}` });
         }
@@ -690,7 +689,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (!result) return app;
         const fee = feeService.toApplicationFee(result, 0);
         let updated: Application = { ...app, fee };
-        updated = addAudit(updated, { user: "System (Fee Engine)", role: "TPA", action: "Fee calculated", oldStatus: app.status, newStatus: "FEE_GENERATED" });
+        updated = addAudit(updated, { user: "System (Fee Engine)", role: "SUPER_ADMIN", action: "Fee calculated", oldStatus: app.status, newStatus: "FEE_GENERATED" });
         updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
         return updated;
       }),
@@ -749,19 +748,19 @@ export const useAppStore = create<AppState>((set, get) => ({
             };
             const updatedFee = { ...a.fee, paidAmount: a.fee.total, outstanding: 0 };
             let updated: Application = { ...a, payment: updatedPayment, fee: updatedFee };
-            updated = addAudit(updated, { user: "Mock Payment Gateway", role: a.assignedOfficer?.role ?? "TPA", action: "Payment verified", oldStatus: a.status, newStatus: "PAYMENT_SUCCESS", remarks: `Txn: ${result.transactionId}` });
-            updated = addWorkflowHistory(updated, "PAYMENT", { name: "Mock Payment Gateway", role: "TPA" }, "Payment received", `₹${a.fee.total.toLocaleString("en-IN")} via ${method}`, "COMPLETED");
-            // Auto-advance to TPS_TECHNICAL_SCRUTINY
-            const tps = USERS.find((u) => u.role === "TPS")!;
-            updated = setAppStatus(updated, "TPS_TECHNICAL_SCRUTINY", "TPS_TECHNICAL_SCRUTINY");
-            updated = { ...updated, assignedOfficer: { name: tps.name, role: tps.role }, assignedAt: nowISO() };
-            updated = addWorkflowHistory(updated, "TPS_TECHNICAL_SCRUTINY", { name: tps.name, role: tps.role }, "Assigned to TPS for technical scrutiny", undefined, "CURRENT");
+            updated = addAudit(updated, { user: "Mock Payment Gateway", role: a.assignedOfficer?.role ?? "SUPER_ADMIN", action: "Payment verified", oldStatus: a.status, newStatus: "PAYMENT_SUCCESS", remarks: `Txn: ${result.transactionId}` });
+            updated = addWorkflowHistory(updated, "PAYMENT", { name: "Mock Payment Gateway", role: "SUPER_ADMIN" }, "Payment received", `₹${a.fee.total.toLocaleString("en-IN")} via ${method}`, "COMPLETED");
+            // Auto-advance to ZONAL_HEAD_REVIEW
+            const zh = USERS.find((u) => u.role === "ZONAL_HEAD")!;
+            updated = setAppStatus(updated, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW");
+            updated = { ...updated, assignedOfficer: { name: zh.name, role: zh.role }, assignedAt: nowISO() };
+            updated = addWorkflowHistory(updated, "ZONAL_HEAD_REVIEW", { name: zh.name, role: zh.role }, "Assigned to Zonal Head for review", undefined, "CURRENT");
             return updated;
           } else {
             // PAYMENT FAILED
             const updatedPayment: Payment = { ...a.payment, status: "FAILED", completedAt: result.completedAt };
             let updated: Application = { ...a, payment: updatedPayment };
-            updated = addAudit(updated, { user: "Mock Payment Gateway", role: "TPA", action: "Payment failed", oldStatus: a.status, newStatus: "PAYMENT_PENDING" });
+            updated = addAudit(updated, { user: "Mock Payment Gateway", role: "SUPER_ADMIN", action: "Payment failed", oldStatus: a.status, newStatus: "PAYMENT_PENDING" });
             updated = setAppStatus(updated, "PAYMENT_PENDING", "PAYMENT");
             return updated;
           }
@@ -811,7 +810,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         // Set new status
         const newStatus = statusForStage(nextStageKey);
         updated = setAppStatus(updated, newStatus, nextStageKey);
-        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "TPS" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
         return updated;
       }),
     }));
@@ -846,7 +845,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         updated = addAudit(updated, { user: user.name, role: user.role, action: `Approved & forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
         updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved — forwarded to ${nextStage.label}`, remarks, "COMPLETED");
         updated = setAppStatus(updated, statusForStage(nextStageKey), nextStageKey);
-        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "TPS" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+        updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
         return updated;
       }),
     }));
@@ -880,7 +879,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         // Return to TPA or previous review stage
-        const returnStage: WorkflowStageKey = app.currentStage === "COMMISSIONER_REVIEW" ? "ADDITIONAL_COMMISSIONER_REVIEW" : "TPA_REVIEW";
+        const returnStage: WorkflowStageKey = app.currentStage === "COMMISSIONER_REVIEW" ? "ADDITIONAL_COMMISSIONER_REVIEW" : "ZONAL_HEAD_REVIEW";
         const returnStageInfo = getStage(returnStage)!;
         let updated: Application = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "RETURNED" as const } : w) };
         const returnOfficer = getAssignedOfficerForStage(returnStage, USERS);
@@ -888,7 +887,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         updated = addAudit(updated, { user: user.name, role: user.role, action: `Returned to ${returnStageInfo.label}`, oldStatus: app.status, newStatus: "RETURNED", remarks });
         updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Returned to ${returnStageInfo.label}`, remarks, "RETURNED");
         updated = setAppStatus(updated, "RETURNED", returnStage);
-        updated = addWorkflowHistory(updated, returnStage, returnOfficer ? { name: returnOfficer.name, role: returnOfficer.role } : { name: "System", role: "TPA" }, `Returned for correction`, remarks, "CURRENT");
+        updated = addWorkflowHistory(updated, returnStage, returnOfficer ? { name: returnOfficer.name, role: returnOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Returned for correction`, remarks, "CURRENT");
         return updated;
       }),
     }));
@@ -902,18 +901,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         let updated = addAudit(app, { user: user.name, role: user.role, action: "Technical scrutiny report submitted", remarks });
-        updated = addWorkflowHistory(updated, "TPS_TECHNICAL_SCRUTINY", { name: user.name, role: user.role }, "Technical scrutiny submitted", remarks, "COMPLETED");
-        // Forward to TPA
-        const nextStage = getStage("TPA_REVIEW")!;
-        const tpa = USERS.find((u) => u.role === "TPA")!;
+        updated = addWorkflowHistory(updated, "ZONAL_HEAD_REVIEW", { name: user.name, role: user.role }, "Technical scrutiny submitted", remarks, "COMPLETED");
+        // Forward to next stage
+        const nextStage = getStage("ZONAL_HEAD_REVIEW")!;
+        const tpa = USERS.find((u) => u.role === "ZONAL_HEAD")!;
         updated = { ...updated, assignedOfficer: { name: tpa.name, role: tpa.role }, assignedAt: nowISO() };
-        updated = setAppStatus(updated, "TPA_REVIEW", "TPA_REVIEW");
-        updated = addWorkflowHistory(updated, "TPA_REVIEW", { name: tpa.name, role: tpa.role }, "Assigned to TPA", undefined, "CURRENT");
+        updated = setAppStatus(updated, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW");
+        updated = addWorkflowHistory(updated, "ZONAL_HEAD_REVIEW", { name: tpa.name, role: tpa.role }, "Assigned", undefined, "CURRENT");
         return updated;
       }),
     }));
     const app = get().applications.find((a) => a.id === appId)!;
-    const { notification, smsLog } = NotificationFactory.applicationForwarded(app, "TPA Review");
+    const { notification, smsLog } = NotificationFactory.applicationForwarded(app, "Zonal Head Review");
     set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
   },
 
@@ -967,7 +966,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         const hasOpen = updated.shortfalls.some((sf) => sf.status !== "RESOLVED");
         if (!hasOpen) {
           // Resume to the stage where shortfall was raised
-          const raisedAt = app.shortfalls.find((sf) => sf.id === shortfallId)?.stageRaisedAt ?? "TPA_REVIEW";
+          const raisedAt = app.shortfalls.find((sf) => sf.id === shortfallId)?.stageRaisedAt ?? "ZONAL_HEAD_REVIEW";
           const stageInfo = getStage(raisedAt)!;
           const officer = getAssignedOfficerForStage(raisedAt, USERS);
           updated = { ...updated, assignedOfficer: officer, assignedAt: nowISO() };
@@ -1036,7 +1035,7 @@ export const useAppStore = create<AppState>((set, get) => ({
           if (result) {
             const fee = feeService.toApplicationFee(result, 0);
             updated = { ...updated, fee };
-            updated = addAudit(updated, { user: "System (Fee Engine)", role: "TPA", action: "All documents verified — fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
+            updated = addAudit(updated, { user: "System (Fee Engine)", role: "SUPER_ADMIN", action: "All documents verified — fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
             updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
           }
         }
@@ -1362,7 +1361,7 @@ export function useVisibleApplications() {
   const user = useAppStore((s) => s.user);
   return useMemo(() => {
     if (!user) return [];
-    if (user.role === "ADMIN") return applications;
+    if (user.role === "SUPER_ADMIN") return applications;
     if (user.role === "LTP") return applications.filter((a) => a.ltpId === user.id);
     return applications.filter((a) => {
       const roles = rolesForStage(a.currentStage);
@@ -1376,7 +1375,7 @@ export function useAssignedApplications() {
   const applications = useAppStore((s) => s.applications);
   const user = useAppStore((s) => s.user);
   return useMemo(() => {
-    if (!user || user.role === "LTP" || user.role === "ADMIN") return [];
+    if (!user || user.role === "LTP" || user.role === "SUPER_ADMIN") return [];
     return applications.filter((a) => {
       if (["APPROVED", "REJECTED"].includes(a.status)) return false;
       return rolesForStage(a.currentStage).includes(user.role);
@@ -1393,7 +1392,7 @@ export function useAllReviewableApplications() {
   const user = useAppStore((s) => s.user);
   return useMemo(() => {
     if (!user) return [];
-    if (user.role === "ADMIN") return applications;
+    if (user.role === "SUPER_ADMIN") return applications;
     if (user.role === "LTP") return applications.filter((a) => a.ltpId === user.id);
     // Officers with document:verify or document:reject see ALL applications that
     // have at least one uploaded document (so they can review documents even
@@ -1438,11 +1437,8 @@ function statusForStage(stage: WorkflowStageKey): ApplicationStatus {
     DOCUMENTS: "DOCUMENT_VERIFICATION",
     FEE_GENERATED: "FEE_GENERATED",
     PAYMENT: "PAYMENT_PENDING",
-    TPS_TECHNICAL_SCRUTINY: "TPS_TECHNICAL_SCRUTINY",
-    TPA_REVIEW: "TPA_REVIEW",
-    ZAD_ZDD_REVIEW: "ZAD_ZDD_REVIEW",
-    ZJD_REVIEW: "ZJD_REVIEW",
-    DIRECTOR_DP_REVIEW: "DIRECTOR_DP_REVIEW",
+    ZONAL_HEAD_REVIEW: "ZONAL_HEAD_REVIEW",
+    DIRECTOR_REVIEW: "DIRECTOR_REVIEW",
     ADDITIONAL_COMMISSIONER_REVIEW: "ADDITIONAL_COMMISSIONER_REVIEW",
     COMMISSIONER_REVIEW: "COMMISSIONER_REVIEW",
     FINAL_DECISION: "APPROVED",

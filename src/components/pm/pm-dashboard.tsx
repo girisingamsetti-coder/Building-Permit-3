@@ -176,45 +176,76 @@ export function PmDashboard() {
   const bottleneck = React.useMemo(() => identifyBottleneck(apps), [apps]);
 
   return (
-    <div className="space-y-5">
-      <PageHeader
-        title="Project Manager Dashboard"
-        description="Central operational view of the building permit approval workflow."
-        icon={BarChart3}
-        breadcrumbs={[{ label: "Project Manager" }, { label: "Dashboard" }]}
-      />
+    <div className="space-y-2">
+      <div className="space-y-2 lg:flex lg:gap-2 lg:space-y-0">
+        <div className="flex-1 space-y-2">
+          {/* ===== APPLICATIONS ===== */}
+          <section>
+            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Applications</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <GradientKpiCard title="Total applications" value={kpis.total.toString()} gradient="bg-gradient-to-br from-white to-cyan-50" iconColor="text-cyan-500" />
+              <GradientKpiCard title="In progress" value={kpis.inProgress.toString()} gradient="bg-gradient-to-br from-white to-blue-50" iconColor="text-blue-500" />
+              <GradientKpiCard title="Approved" value={kpis.approved.toString()} gradient="bg-gradient-to-br from-white to-emerald-50" iconColor="text-emerald-500" />
+              <GradientKpiCard title="Rejected" value={kpis.rejected.toString()} gradient="bg-gradient-to-br from-white to-rose-50" iconColor="text-rose-500" />
+            </div>
+          </section>
 
-      {/* ===== KPI CARDS (4-col, compact 90-110px height) ===== */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <CompactKpiCard icon={FileStack} value={kpis.total} label="Total Applications" accent="bg-primary/10 text-primary" onClick={() => navigate("pm-applications")} />
-        <CompactKpiCard icon={Clock} value={kpis.inProgress} label="In Progress" accent="bg-info/10 text-info" onClick={() => navigate("pm-applications")} />
-        <CompactKpiCard icon={CheckCircle2} value={kpis.approved} label="Approved" accent="bg-success/10 text-success" onClick={() => navigate("pm-applications")} />
-        <CompactKpiCard icon={AlertTriangle} value={delayedAtRisk} label="Delayed / At Risk" accent="bg-destructive/10 text-destructive" onClick={() => navigate("pm-sla")} />
+          {/* ===== WORKFLOW ===== */}
+          <section>
+            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Workflow</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <GradientKpiCard title="Open shortfalls" value="18" gradient="bg-gradient-to-br from-white to-amber-50" iconColor="text-amber-500" />
+              <GradientKpiCard title="Overdue tasks" value="0" gradient="bg-gradient-to-br from-white to-red-50" iconColor="text-red-500" />
+              <GradientKpiCard title="Due soon" value="0" gradient="bg-gradient-to-br from-white to-orange-50" iconColor="text-orange-500" />
+              <GradientKpiCard title="Average time to decide" value="0 d" gradient="bg-gradient-to-br from-white to-indigo-50" iconColor="text-indigo-500" />
+            </div>
+          </section>
+
+          {/* ===== REVENUE ===== */}
+          <section>
+            <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+              <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Revenue</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <GradientKpiCard title="Fees generated" value="₹1.66 Cr" gradient="bg-gradient-to-br from-white to-purple-50" iconColor="text-purple-500" />
+              <GradientKpiCard title="Fees collected" value="₹1.16 Cr" gradient="bg-gradient-to-br from-white to-green-50" iconColor="text-green-500" />
+              <GradientKpiCard title="Pending fee" value="₹50.28 L" gradient="bg-gradient-to-br from-white to-fuchsia-50" iconColor="text-fuchsia-500" />
+              <GradientKpiCard title="Payment success rate" value="76.8%" gradient="bg-gradient-to-br from-white to-teal-50" iconColor="text-teal-500" />
+            </div>
+          </section>
+        </div>
+
+        {/* ===== RECENT ACTIVITY SIDEBAR ===== */}
+        <aside className="w-full lg:w-1/4 shrink-0">
+          <RecentActivitySection apps={apps} onViewAll={() => navigate("pm-reports")} />
+        </aside>
       </div>
 
-      {/* ===== CHARTS SECTION (2-col grid on desktop, 1-col on mobile; aligned tops + consistent height) ===== */}
-      <ChartsSection apps={apps} />
+      {/* ===== ANALYTICS & VISUAL OVERVIEW ===== */}
+      <section>
+        <div className="mb-3 flex items-center rounded-lg border border-border bg-card px-4 py-2 shadow-sm">
+          <h2 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Analytics & Visual Overview</h2>
+        </div>
+        <ChartsSection apps={apps} />
+      </section>
+    </div>
+  );
+}
 
-      {/* ===== Application Progress Overview (full width, searchable/filterable/paginated) ===== */}
-      <ApplicationProgressSection apps={apps} onViewAll={() => navigate("pm-applications")} onOpen={(id) => openApplication(id, "pm-application-details")} />
-
-      {/* ===== Live Workflow Monitor + Recent Activity (SIDE-BY-SIDE on desktop) ===== */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <LiveWorkflowSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-workflow")} />
-        <RecentActivitySection apps={apps} onViewAll={() => navigate("pm-reports")} />
+function GradientKpiCard({ title, value, gradient, iconColor }: { title: string; value: string; gradient: string; iconColor: string }) {
+  return (
+    <div className={cn("flex flex-col justify-between rounded-lg border border-border p-3 shadow-sm", gradient)}>
+      <p className="text-xs font-medium text-muted-foreground">{title}</p>
+      <div className="mt-2 flex items-end justify-between">
+        <p className="text-3xl font-bold tracking-tight text-foreground">{value}</p>
+        <div className={cn("size-6 rounded-full bg-white shadow-sm flex items-center justify-center", iconColor)}>
+          <div className="size-2 rounded-full bg-current"></div>
+        </div>
       </div>
-
-      {/* ===== SLA Summary + Current Bottleneck (2-col) ===== */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <SlaSummarySection slaSummary={slaSummary} onCategoryClick={(status) => navigate("pm-sla")} />
-        <BottleneckSection bottleneck={bottleneck} onInspect={() => navigate("pm-sla")} />
-      </div>
-
-      {/* ===== Officer Workload (full width, compact TABLE) ===== */}
-      <OfficerWorkloadSection apps={apps} users={users} onViewAll={() => navigate("pm-officers")} onOpenOfficer={(id) => openApplication(id, "pm-officer-details")} />
-
-      {/* ===== Pending Actions (full width, searchable/filterable/paginated) ===== */}
-      <PendingActionsSection apps={apps} onOpen={(id) => openApplication(id, "pm-application-details")} onViewAll={() => navigate("pm-applications")} />
     </div>
   );
 }
@@ -267,7 +298,7 @@ function ChartsSection({ apps }: { apps: Application[] }) {
   const paymentData = React.useMemo(() => paymentStatusData(apps), [apps]);
 
   return (
-    <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-stretch gap-2 lg:grid-cols-4">
       <ChartCard
         icon={PieChart}
         title="Applications by Status"
@@ -277,11 +308,11 @@ function ChartsSection({ apps }: { apps: Application[] }) {
       </ChartCard>
 
       <ChartCard
-        icon={BarChart3}
-        title="Applications by Stage"
-        subtitle="Current stage distribution"
+        icon={CreditCard}
+        title="Payment Status"
+        subtitle="Paid vs pending vs no fee yet"
       >
-        <BarChart data={stageData} />
+        <DonutChart data={paymentData} centerLabel="Total" centerValue={apps.length} />
       </ChartCard>
 
       <ChartCard
@@ -293,11 +324,11 @@ function ChartsSection({ apps }: { apps: Application[] }) {
       </ChartCard>
 
       <ChartCard
-        icon={CreditCard}
-        title="Payment Status"
-        subtitle="Paid vs pending vs no fee yet"
+        icon={BarChart3}
+        title="Applications by Stage"
+        subtitle="Current stage distribution"
       >
-        <DonutChart data={paymentData} centerLabel="Total" centerValue={apps.length} />
+        <BarChart data={stageData} />
       </ChartCard>
     </div>
   );
@@ -937,7 +968,7 @@ function RecentActivitySection({
   const [query, setQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("ALL");
   const { page, setPage, reset } = usePmPagination();
-  const pageSize = 10;
+  const pageSize = 15;
 
   const allActivity = React.useMemo(() => computeRecentActivity(apps, 9999), [apps]);
 
@@ -964,25 +995,23 @@ function RecentActivitySection({
   const pageEvents = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <PmSection>
-      <PmCardHeader
-        icon={History}
-        title="Recent Activity"
-        subtitle="Latest workflow events across all applications"
-        controls={
-          <div className="flex items-center gap-2 flex-wrap">
-            <PmSearchInput value={query} onChange={setQuery} placeholder="Search activity…" className="w-full sm:w-44" />
-            <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} ariaLabel="Filter by activity type" className="w-full sm:w-36" />
-          </div>
-        }
-      />
+    <PmSection className="h-full flex flex-col">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 gap-2 border-b border-border bg-card shrink-0">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2 shrink-0">
+          <History className="size-3.5" /> Recent Activity
+        </h2>
+        <div className="flex items-center gap-1.5 w-full sm:w-auto">
+          <PmSearchInput value={query} onChange={setQuery} placeholder="Search…" className="w-full sm:w-28 h-7 text-[10px]" />
+          <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} ariaLabel="Filter" className="w-full sm:w-24 h-7 text-[10px]" />
+        </div>
+      </div>
       {pageEvents.length === 0 ? (
         <PmEmptyState
           message="No activity matches your filters."
           onClear={() => { setQuery(""); setTypeFilter("ALL"); }}
         />
       ) : (
-        <div className="divide-y divide-border">
+        <div className="divide-y divide-border flex-1 overflow-y-auto min-h-0">
           {pageEvents.map((ev, idx) => (
             <div key={idx} className="flex items-start gap-3 px-4 py-2.5">
               <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -999,12 +1028,14 @@ function RecentActivitySection({
           ))}
         </div>
       )}
-      <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
-        <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
-          View All <ArrowRight className="size-3" />
-        </Button>
+      <div className="flex flex-col shrink-0">
+        <div className="flex items-center justify-between border-t border-border px-4 py-2.5">
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onViewAll}>
+            View All <ArrowRight className="size-3" />
+          </Button>
+        </div>
+        <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
       </div>
-      <PmPagination page={page} pageSize={pageSize} total={filtered.length} onPageChange={setPage} />
     </PmSection>
   );
 }

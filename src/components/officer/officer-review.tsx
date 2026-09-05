@@ -252,7 +252,7 @@ export function OfficerReview() {
   const userRole = user.role;
   const userObj = user;
   const stage = getStage(app.currentStage);
-  const stageRole = stage?.role ?? "TPS";
+  const stageRole = stage?.role ?? "ZONAL_HEAD";
   const isDecided = app.status === "APPROVED" || app.status === "REJECTED";
   const openShortfall = hasOpenShortfall(app);
 
@@ -830,7 +830,7 @@ function DocumentsTab({ app, user }: { app: Application; user: AppUser }) {
   const [rejectTarget, setRejectTarget] = React.useState<{ docId: string; docName: string } | null>(null);
   const [rejectReason, setRejectReason] = React.useState("");
 
-  const isTPA = user.role === "TPA";
+  const isTPA = user.role === "ZONAL_HEAD";
 
   function handleVerify(docId: string, docName: string) {
     verifyDocument(app.id, docId);

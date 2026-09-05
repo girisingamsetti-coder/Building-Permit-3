@@ -175,7 +175,7 @@ export const NotificationFactory = {
       message: `LTP has responded to shortfall ${shortfallId} on ${app.applicationNo}. Review the response.`,
       applicationId: app.id,
       applicationNo: app.applicationNo,
-      recipientRole: "TPA",
+      recipientRole: "ZONAL_HEAD",
     });
   },
   shortfallResolved(app: Application, shortfallId: string) {

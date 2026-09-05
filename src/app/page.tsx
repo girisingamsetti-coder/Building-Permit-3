@@ -22,10 +22,20 @@ import { LtpProfile, LtpHelp } from "@/components/ltp/ltp-profile";
 import { OfficerDashboard } from "@/components/officer/officer-dashboard";
 import { OfficerApplications } from "@/components/officer/officer-applications";
 import { OfficerReview } from "@/components/officer/officer-review";
+import { OfficerTasks } from "@/components/officer/officer-tasks";
+import { OfficerShortfalls } from "@/components/officer/officer-shortfalls";
+import { OfficerPayments } from "@/components/officer/officer-payments";
 import { OfficerDocuments } from "@/components/officer/officer-documents";
+import { OfficerReports } from "@/components/officer/officer-reports";
+import { OfficerSettings } from "@/components/officer/officer-settings";
 
 // Admin views
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { AdminApplications } from "@/components/admin/admin-applications";
+import { AdminShortfalls } from "@/components/admin/admin-shortfalls";
+import { AdminPayments } from "@/components/admin/admin-payments";
+import { AdminDocuments } from "@/components/admin/admin-documents";
+import { AdminReports } from "@/components/admin/admin-reports";
 import { AdminUsers } from "@/components/admin/admin-users";
 import { AdminRoles } from "@/components/admin/admin-roles";
 import { AdminApplicationTypes } from "@/components/admin/admin-application-types";
@@ -70,20 +80,30 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "ltp-profile": LtpProfile,
   "ltp-help": LtpHelp,
   // officer
-  "officer-dashboard": OfficerDashboard,
-  "officer-review": OfficerReview,
+  "officer-dashboard":    OfficerDashboard,
+  "officer-review":       OfficerReview,
   "officer-applications": OfficerApplications,
-  "officer-documents": OfficerDocuments,
+  "officer-tasks":        OfficerTasks,
+  "officer-shortfalls":   OfficerShortfalls,
+  "officer-payments":     OfficerPayments,
+  "officer-documents":    OfficerDocuments,
+  "officer-reports":      OfficerReports,
+  "officer-settings":     OfficerSettings,
   // admin
-  "admin-dashboard": AdminDashboard,
-  "admin-users": AdminUsers,
-  "admin-roles": AdminRoles,
+  "admin-dashboard":         AdminDashboard,
+  "admin-applications":      AdminApplications,
+  "admin-shortfalls":        AdminShortfalls,
+  "admin-payments":          AdminPayments,
+  "admin-documents":         AdminDocuments,
+  "admin-reports":           AdminReports,
+  "admin-users":             AdminUsers,
+  "admin-roles":             AdminRoles,
   "admin-application-types": AdminApplicationTypes,
-  "admin-fee-structures": AdminFeeStructures,
-  "admin-workflow": AdminWorkflow,
-  "admin-templates": AdminTemplates,
-  "admin-audit": AdminAudit,
-  "admin-settings": AdminSettings,
+  "admin-fee-structures":    AdminFeeStructures,
+  "admin-workflow":          AdminWorkflow,
+  "admin-templates":         AdminTemplates,
+  "admin-audit":             AdminAudit,
+  "admin-settings":          AdminSettings,
   // project manager (read-only monitoring)
   "pm-dashboard": PmDashboard,
   "pm-applications": PmApplications,
@@ -112,9 +132,8 @@ export default function Home() {
   // Route guard — redirect unauthorized users to their default view
   React.useEffect(() => {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
-      const portal = user.role === "ADMIN" ? "admin-dashboard"
+      const portal = user.role === "SUPER_ADMIN" ? "admin-dashboard"
         : user.role === "LTP" ? "ltp-dashboard"
-        : user.role === "PROJECT_MANAGER" ? "pm-dashboard"
         : "officer-dashboard";
       navigate(portal);
     }

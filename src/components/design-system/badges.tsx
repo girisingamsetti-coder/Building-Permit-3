@@ -43,11 +43,8 @@ const STATUS_MAP: Record<
   PAYMENT_PENDING: { label: "Payment Pending", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: Clock },
   PAYMENT_PROCESSING: { label: "Payment Processing", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   PAYMENT_SUCCESS: { label: "Payment Successful", cls: "bg-success/10 text-success border-success/30", icon: CheckCircle2 },
-  TPS_TECHNICAL_SCRUTINY: { label: "TPS Technical Scrutiny", cls: "bg-info/10 text-info border-info/30", icon: Clock },
-  TPA_REVIEW: { label: "TPA Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
-  ZAD_ZDD_REVIEW: { label: "ZAD/ZDD Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
-  ZJD_REVIEW: { label: "ZJD Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
-  DIRECTOR_DP_REVIEW: { label: "Director – DP Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  ZONAL_HEAD_REVIEW: { label: "Zonal Head Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
+  DIRECTOR_REVIEW: { label: "Director Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   ADDITIONAL_COMMISSIONER_REVIEW: { label: "Addl. Commissioner Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   COMMISSIONER_REVIEW: { label: "Commissioner Review", cls: "bg-info/10 text-info border-info/30", icon: Clock },
   SHORTFALL_RAISED: { label: "Shortfall Raised", cls: "bg-warning/15 text-warning-foreground border-warning/40", icon: AlertTriangle },
@@ -159,16 +156,11 @@ export function ShortfallTypeBadge({ type }: { type: ShortfallType }) {
 // ---------- Role Badge ----------
 const ROLE_COLOR: Record<RoleKey, string> = {
   LTP: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-900",
-  TPS: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-900",
-  TPA: "bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-900",
-  ZAD: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-900",
-  ZDD: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-900",
-  ZJD: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900",
-  DIRECTOR_DP: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900",
-  ADDL_COMMISSIONER: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900",
+  ZONAL_HEAD: "bg-cyan-100 text-cyan-800 border-cyan-200 dark:bg-cyan-950 dark:text-cyan-300 dark:border-cyan-900",
+  DIRECTOR: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900",
+  ADDITIONAL_COMMISSIONER: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900",
   COMMISSIONER: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900",
-  ADMIN: "bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
-  PROJECT_MANAGER: "bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-950 dark:text-violet-300 dark:border-violet-900",
+  SUPER_ADMIN: "bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
 };
 
 export function RoleBadge({ role, label }: { role: RoleKey; label?: string }) {

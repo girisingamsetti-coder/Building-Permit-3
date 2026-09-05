@@ -62,11 +62,8 @@ function slaTone(days: number | null): { cls: string; label: string } {
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "ALL", label: "All statuses" },
-  { value: "TPS_TECHNICAL_SCRUTINY", label: "TPS Technical Scrutiny" },
-  { value: "TPA_REVIEW", label: "TPA Review" },
-  { value: "ZAD_ZDD_REVIEW", label: "ZAD / ZDD Review" },
-  { value: "ZJD_REVIEW", label: "ZJD Review" },
-  { value: "DIRECTOR_DP_REVIEW", label: "Director – DP Review" },
+  { value: "ZONAL_HEAD_REVIEW", label: "Zonal Head Review" },
+  { value: "DIRECTOR_REVIEW", label: "Director Review" },
   { value: "ADDITIONAL_COMMISSIONER_REVIEW", label: "Addl. Commissioner Review" },
   { value: "COMMISSIONER_REVIEW", label: "Commissioner Review" },
   { value: "SHORTFALL_RAISED", label: "Shortfall Raised" },
@@ -75,11 +72,8 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 ];
 
 const PENDING_REVIEW_STATUSES: ApplicationStatus[] = [
-  "TPS_TECHNICAL_SCRUTINY",
-  "TPA_REVIEW",
-  "ZAD_ZDD_REVIEW",
-  "ZJD_REVIEW",
-  "DIRECTOR_DP_REVIEW",
+  "ZONAL_HEAD_REVIEW",
+  "DIRECTOR_REVIEW",
   "ADDITIONAL_COMMISSIONER_REVIEW",
   "COMMISSIONER_REVIEW",
   "SHORTFALL_RAISED",

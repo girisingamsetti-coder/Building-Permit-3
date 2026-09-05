@@ -2,9 +2,11 @@ import type {
   Application,
   ApplicationStatus,
   Permission,
+  Portal,
   Role,
   RoleKey,
   User,
+  ViewKey,
   WorkflowAction,
   WorkflowStageKey,
 } from "@/types";
@@ -14,10 +16,9 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // RBAC — Role-Based Access Control
 // ============================================================
 
-export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "ADMIN" | "PROJECT_MANAGER" {
-  if (role === "ADMIN") return "ADMIN";
+export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "SUPER_ADMIN" {
+  if (role === "SUPER_ADMIN") return "SUPER_ADMIN";
   if (role === "LTP") return "LTP";
-  if (role === "PROJECT_MANAGER") return "PROJECT_MANAGER";
   return "OFFICER";
 }
 
@@ -37,20 +38,7 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
   const adminViews = ["admin-dashboard", "admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates", "admin-audit", "admin-settings"];
   if (adminViews.includes(view)) {
-    return user.role === "ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
-  }
-  // Project Manager views — only PROJECT_MANAGER role (or ADMIN) can access
-  const pmViews = ["pm-dashboard", "pm-applications", "pm-application-details", "pm-workflow", "pm-officers", "pm-officer-details", "pm-sla", "pm-reports", "pm-shortfalls", "pm-help"];
-  if (pmViews.includes(view)) {
-    return user.role === "PROJECT_MANAGER" || user.role === "ADMIN";
-  }
-  // Project Manager cannot access LTP or Officer operational views (they are read-only monitors)
-  if (user.role === "PROJECT_MANAGER") {
-    const ltpOpsViews = ["ltp-create-application", "ltp-drawings", "ltp-documents", "ltp-fees", "ltp-payment", "ltp-receipt", "ltp-shortfalls", "ltp-profile"];
-    const officerOpsViews = ["officer-review", "officer-applications", "officer-documents"];
-    if (ltpOpsViews.includes(view) || officerOpsViews.includes(view)) {
-      return false;
-    }
+    return user.role === "SUPER_ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
   }
   return true;
 }
@@ -60,15 +48,12 @@ export function rolesForStage(stage: WorkflowStageKey): RoleKey[] {
   const map: Record<WorkflowStageKey, RoleKey[]> = {
     APPLICATION_CREATED: ["LTP"],
     DRAWING_SCRUTINY: ["LTP"],
-    DOCUMENTS: ["LTP", "TPA"],
+    DOCUMENTS: ["ZONAL_HEAD"],
     FEE_GENERATED: ["LTP"],
     PAYMENT: ["LTP"],
-    TPS_TECHNICAL_SCRUTINY: ["TPS"],
-    TPA_REVIEW: ["TPA"],
-    ZAD_ZDD_REVIEW: ["ZAD", "ZDD"],
-    ZJD_REVIEW: ["ZJD"],
-    DIRECTOR_DP_REVIEW: ["DIRECTOR_DP"],
-    ADDITIONAL_COMMISSIONER_REVIEW: ["ADDL_COMMISSIONER"],
+    ZONAL_HEAD_REVIEW: ["ZONAL_HEAD"],
+    DIRECTOR_REVIEW: ["DIRECTOR"],
+    ADDITIONAL_COMMISSIONER_REVIEW: ["ADDITIONAL_COMMISSIONER"],
     COMMISSIONER_REVIEW: ["COMMISSIONER"],
     FINAL_DECISION: ["COMMISSIONER"],
   };
@@ -77,7 +62,8 @@ export function rolesForStage(stage: WorkflowStageKey): RoleKey[] {
 
 // Can this user view this application?
 export function canViewApplication(user: User, app: Application): boolean {
-  if (user.role === "ADMIN") return true;
+  if (user.role === "SUPER_ADMIN" || user.role === "DIRECTOR") return true;
+  if (user.role === "ZONAL_HEAD" && app.project.zone !== user.zone) return false;
   if (user.role === "LTP") return app.ltpId === user.id;
   // Officers can view all applications assigned to their stage/role
   const stageRoles = rolesForStage(app.currentStage);
@@ -88,7 +74,17 @@ export function canViewApplication(user: User, app: Application): boolean {
 
 // Which applications are visible to this user?
 export function getVisibleApplications(user: User, apps: Application[]): Application[] {
-  if (user.role === "ADMIN") return apps;
+  if (user.role === "SUPER_ADMIN" || user.role === "DIRECTOR") return apps;
+  
+  if (user.role === "ZONAL_HEAD") {
+    return apps.filter((a) => {
+      if (a.project.zone !== user.zone) return false;
+      const stageRoles = rolesForStage(a.currentStage);
+      if (stageRoles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
+      return a.workflowHistory.some((w) => w.actor.role === user.role);
+    });
+  }
+
   if (user.role === "LTP") return apps.filter((a) => a.ltpId === user.id);
   // Officers see apps at their stage + apps they've acted on
   return apps.filter((a) => {
@@ -100,10 +96,11 @@ export function getVisibleApplications(user: User, apps: Application[]): Applica
 
 // Applications currently assigned to this officer for review
 export function getAssignedApplications(user: User, apps: Application[]): Application[] {
-  if (user.role === "LTP" || user.role === "ADMIN") return [];
+  if (user.role === "LTP" || user.role === "SUPER_ADMIN") return [];
   const stageRoles = rolesForStage;
   return apps.filter((a) => {
     if (["APPROVED", "REJECTED"].includes(a.status)) return false;
+    if (user.role === "ZONAL_HEAD" && a.project.zone !== user.zone) return false;
     const roles = stageRoles(a.currentStage);
     return roles.includes(user.role);
   });
@@ -111,7 +108,7 @@ export function getAssignedApplications(user: User, apps: Application[]): Applic
 
 // Get allowed actions for this user on this application
 export function getAllowedActions(user: User, app: Application): WorkflowAction[] {
-  if (user.role === "ADMIN") return ["ADD_REMARKS"];
+  if (user.role === "SUPER_ADMIN") return ["ADD_REMARKS"];
   if (user.role === "LTP") return [];
 
   const stage = getStage(app.currentStage);
@@ -199,4 +196,148 @@ export function getLtpActions(app: Application): string[] {
       break;
   }
   return actions;
+}
+
+// ============================================================
+// DYNAMIC NAV — permission-driven sidebar
+// ============================================================
+//
+// Each of the 8 modules declares:
+//   - `view`        : the ViewKey to navigate to for each portal
+//   - `requiredAny` : user must have AT LEAST ONE of these permissions
+//                     (empty = always visible for that portal)
+//
+// When Super Admin changes a role's permissions via the Roles panel,
+// getDynamicNav() re-evaluates and the sidebar immediately reflects
+// the updated access for every user of that role.
+// ============================================================
+
+export interface DynamicNavItem {
+  view: ViewKey;
+  label: string;
+  permKey: string; // stable key for React list rendering
+}
+
+type ModuleDef = {
+  label: string;
+  permKey: string;
+  requiredAny: Permission[];        // show if user has ANY of these
+  views: Record<Portal, ViewKey>;   // which view to open per portal
+};
+
+const MODULE_DEFS: ModuleDef[] = [
+  {
+    label: "Dashboard",
+    permKey: "dashboard",
+    requiredAny: [],   // always visible
+    views: {
+      LTP:        "ltp-dashboard",
+      OFFICER:    "officer-dashboard",
+      SUPER_ADMIN: "admin-dashboard",
+    },
+  },
+  {
+    label: "Applications",
+    permKey: "applications",
+    requiredAny: ["application:view_own", "application:view_all"],
+    views: {
+      LTP:        "ltp-applications",
+      OFFICER:    "officer-applications",
+      SUPER_ADMIN: "admin-applications",
+    },
+  },
+  {
+    label: "Tasks",
+    permKey: "tasks",
+    requiredAny: [
+      "drawing:upload", "drawing:scrutinize",
+      "workflow:approve", "workflow:forward", "workflow:return", "workflow:reject",
+      "document:verify", "document:reject",
+    ],
+    views: {
+      LTP:        "ltp-drawings",
+      OFFICER:    "officer-tasks",
+      SUPER_ADMIN: "admin-workflow",
+    },
+  },
+  {
+    label: "Shortfalls",
+    permKey: "shortfalls",
+    requiredAny: ["shortfall:raise", "shortfall:view", "shortfall:resolve"],
+    views: {
+      LTP:        "ltp-shortfalls",
+      OFFICER:    "officer-shortfalls",
+      SUPER_ADMIN: "admin-shortfalls",
+    },
+  },
+  {
+    label: "Payments",
+    permKey: "payments",
+    requiredAny: ["payment:initiate", "payment:verify", "fee:manage", "fee:calculate"],
+    views: {
+      LTP:        "ltp-payment",
+      OFFICER:    "officer-payments",
+      SUPER_ADMIN: "admin-payments",
+    },
+  },
+  {
+    label: "Documents",
+    permKey: "documents",
+    requiredAny: ["document:upload", "document:view", "document:verify", "document:reject"],
+    views: {
+      LTP:        "ltp-documents",
+      OFFICER:    "officer-documents",
+      SUPER_ADMIN: "admin-documents",
+    },
+  },
+  {
+    label: "Reports",
+    permKey: "reports",
+    requiredAny: ["reports:view", "application:view_all", "sla:view", "officer_progress:view"],
+    views: {
+      LTP:        "ltp-fees",
+      OFFICER:    "officer-reports",
+      SUPER_ADMIN: "admin-reports",
+    },
+  },
+  {
+    label: "Settings",
+    permKey: "settings",
+    requiredAny: [],   // always visible — scope differs per portal
+    views: {
+      LTP:        "ltp-profile",
+      OFFICER:    "officer-settings",
+      SUPER_ADMIN: "admin-settings",
+    },
+  },
+];
+
+/**
+ * Returns the ordered list of nav items that this user is allowed to see,
+ * based on their effective permissions from the (mutable) roles store.
+ *
+ * Call this inside the Sidebar component with live store state so it
+ * re-evaluates whenever Super Admin changes any role permission.
+ */
+export function getDynamicNav(
+  user: User,
+  portal: Portal,
+  roles: Record<RoleKey, Role>
+): DynamicNavItem[] {
+  const effectivePerms = getEffectivePermissions(user, roles);
+
+  return MODULE_DEFS
+    .filter((mod) => {
+      // No permission requirement → always show
+      if (mod.requiredAny.length === 0) return true;
+      // SUPER_ADMIN always sees everything
+      if (user.role === "SUPER_ADMIN") return true;
+      // Otherwise check if user has at least one required permission
+      return mod.requiredAny.some((p) => effectivePerms.has(p));
+    })
+    .map((mod) => ({
+      view: mod.views[portal],
+      label: mod.label,
+      permKey: mod.permKey,
+    }));
 }

@@ -166,7 +166,7 @@ export interface OfficerWorkload {
  */
 export function computeOfficerWorkloads(apps: Application[], users: User[]): OfficerWorkload[] {
   const officers = users.filter(
-    (u) => u.role !== "LTP" && u.role !== "ADMIN" && u.role !== "PROJECT_MANAGER" && u.active
+    (u) => u.role !== "LTP" && u.role !== "SUPER_ADMIN" && u.active
   );
   return officers.map((officer) => {
     // Assigned = applications where this officer is the assignedOfficer AND the app is not completed

@@ -86,16 +86,11 @@ const ALL_PERMISSIONS = Object.keys(PERMISSION_LABELS) as Permission[];
 
 const ROLE_ORDER: RoleKey[] = [
   "LTP",
-  "TPS",
-  "TPA",
-  "ZAD",
-  "ZDD",
-  "ZJD",
-  "DIRECTOR_DP",
-  "ADDL_COMMISSIONER",
+  "ZONAL_HEAD",
+  "DIRECTOR",
+  "ADDITIONAL_COMMISSIONER",
   "COMMISSIONER",
-  "ADMIN",
-  "PROJECT_MANAGER",
+  "SUPER_ADMIN",
 ];
 
 const PERMISSION_CATEGORIES: { name: string; permissions: Permission[] }[] = [
@@ -506,7 +501,7 @@ export function AdminRoles() {
       >
         <Accordion type="single" collapsible className="w-full">
           {roleList
-            .filter((r) => r.key !== "ADMIN")
+            .filter((r) => r.key !== "SUPER_ADMIN")
             .map((r) => {
               const stages = WORKFLOW_STAGES.filter((s) => s.role === r.key);
               return (

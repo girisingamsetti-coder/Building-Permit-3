@@ -32,67 +32,31 @@ export const ROLES: Record<RoleKey, Role> = {
     key: "LTP",
     title: "LTP",
     fullName: "Licensed Technical Person",
-    description: "Creates and submits building approval applications on behalf of applicants.",
+    description: "Creates and submits building approval applications.",
     level: 0,
     color: "emerald",
     permissions: ["application:create", "application:view_own", "drawing:upload", "document:upload", "payment:initiate", "remarks:add"],
   },
-  TPS: {
-    key: "TPS",
-    title: "TPS",
-    fullName: "Town Planning Supervisor",
-    description: "Performs technical scrutiny of drawings, submits technical scrutiny report, raises technical shortfalls, forwards to TPA.",
-    level: 1,
-    color: "teal",
-    permissions: ["application:view_all", "drawing:scrutinize", "workflow:forward", "shortfall:raise", "remarks:add"],
-  },
-  TPA: {
-    key: "TPA",
-    title: "TPA",
-    fullName: "Town Planning Assistant",
-    description: "Reviews applications and technical scrutiny, raises document/fee shortfalls, verifies documents, forwards to ZAD/ZDD.",
-    level: 1,
-    color: "teal",
-    permissions: ["application:view_all", "document:verify", "document:reject", "document:view", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "remarks:add"],
-  },
-  ZAD: {
-    key: "ZAD",
-    title: "ZAD",
-    fullName: "Zonal Assistant Director",
+  ZONAL_HEAD: {
+    key: "ZONAL_HEAD",
+    title: "Zonal Head",
+    fullName: "Zonal Head",
     description: "Reviews applications at zonal level, raises shortfalls, approves/forwards.",
     level: 2,
     color: "cyan",
-    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "remarks:add"],
+    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "remarks:add", "document:verify", "document:reject", "document:view"],
   },
-  ZDD: {
-    key: "ZDD",
-    title: "ZDD",
-    fullName: "Zonal Deputy Director",
-    description: "Approves/forwards applications within the zone.",
-    level: 2,
-    color: "cyan",
-    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "remarks:add"],
-  },
-  ZJD: {
-    key: "ZJD",
-    title: "ZJD",
-    fullName: "Zonal Joint Director",
-    description: "Reviews, approves, forwards, and may raise/report fee shortfalls.",
-    level: 3,
-    color: "amber",
-    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "shortfall:resolve", "remarks:add"],
-  },
-  DIRECTOR_DP: {
-    key: "DIRECTOR_DP",
-    title: "Director – DP",
-    fullName: "Director of Town & Country Planning",
+  DIRECTOR: {
+    key: "DIRECTOR",
+    title: "Director",
+    fullName: "Director",
     description: "Director-level review, shortfall reporting and forwarding.",
     level: 4,
     color: "amber",
     permissions: ["application:view_all", "workflow:approve", "workflow:forward", "shortfall:raise", "shortfall:resolve", "remarks:add"],
   },
-  ADDL_COMMISSIONER: {
-    key: "ADDL_COMMISSIONER",
+  ADDITIONAL_COMMISSIONER: {
+    key: "ADDITIONAL_COMMISSIONER",
     title: "Addl. Commissioner",
     fullName: "Additional Commissioner",
     description: "Senior review and forwarding to Commissioner.",
@@ -109,33 +73,14 @@ export const ROLES: Record<RoleKey, Role> = {
     color: "rose",
     permissions: ["application:view_all", "workflow:approve", "workflow:reject", "workflow:return", "remarks:add"],
   },
-  ADMIN: {
-    key: "ADMIN",
-    title: "Administrator",
+  SUPER_ADMIN: {
+    key: "SUPER_ADMIN",
+    title: "Super Admin",
     fullName: "System Administrator",
     description: "Manages users, roles, configuration, fee structures and audit.",
     level: 99,
     color: "slate",
-    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage"],
-  },
-  PROJECT_MANAGER: {
-    key: "PROJECT_MANAGER",
-    title: "Project Manager",
-    fullName: "Project Manager",
-    description: "Monitors, tracks and reports on the overall building permit approval operation. Read-only — no approval or configuration authority.",
-    level: 50,
-    color: "violet",
-    permissions: [
-      "application:view_all",
-      "document:view",
-      "drawing:view",
-      "shortfall:view",
-      "audit:view",
-      "remarks:add",
-      "reports:view",
-      "officer_progress:view",
-      "sla:view",
-    ],
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
   },
 };
 
@@ -144,16 +89,11 @@ export const ROLES: Record<RoleKey, Role> = {
 // ============================================================
 export const USERS: User[] = [
   { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14578", licenseNo: "LTP-MC-2019-0457", designation: "Architect & Licensed Technical Person", zone: "Zone IV — West", avatarColor: "emerald", department: "Private Practice", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:12:00" },
-  { id: "u-tps-01", name: "Smt. Meena Kulkarni", role: "TPS", email: "tps@demo.gov.in", phone: "+91 99230 87120", employeeId: "MUN-TPS-1042", designation: "Town Planning Supervisor", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:40:00" },
-  { id: "u-tpa-01", name: "Shri. Rajesh Patil", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 98700 33214", employeeId: "MUN-TPA-0218", designation: "Town Planning Assistant", zone: "Zone IV — West", avatarColor: "teal", department: "Department of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
-  { id: "u-zad-01", name: "Shri. Suresh Kadam", role: "ZAD", email: "zad@demo.gov.in", phone: "+91 98190 44521", employeeId: "MUN-ZAD-0156", designation: "Zonal Assistant Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-19T17:25:00" },
-  { id: "u-zdd-01", name: "Shri. Ramesh Iyer", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 98190 33214", employeeId: "MUN-ZDD-0218", designation: "Zonal Deputy Director", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-19T17:25:00" },
-  { id: "u-zjd-01", name: "Smt. Anjali Rao", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 99700 51288", employeeId: "MUN-ZJD-0107", designation: "Zonal Joint Director", zone: "Zone IV — West", avatarColor: "amber", department: "Zonal Office — West", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:05:00" },
-  { id: "u-dir-01", name: "Shri. Suresh Nair", role: "DIRECTOR_DP", email: "director@demo.gov.in", phone: "+91 98690 70011", employeeId: "MUN-DIR-0009", designation: "Director, Town & Country Planning", zone: "Head Office", avatarColor: "amber", department: "Directorate of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:55:00" },
-  { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:30:00" },
+  { id: "u-zh-01", name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", email: "zh@demo.gov.in", phone: "+91 99230 87120", employeeId: "MUN-ZH-1042", designation: "Zonal Head", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:40:00" },
+  { id: "u-dir-01", name: "Shri. Suresh Nair", role: "DIRECTOR", email: "director@demo.gov.in", phone: "+91 98690 70011", employeeId: "MUN-DIR-0009", designation: "Director", zone: "Head Office", avatarColor: "amber", department: "Directorate of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:55:00" },
+  { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:30:00" },
   { id: "u-com-01", name: "Dr. Pratap Reddy", role: "COMMISSIONER", email: "commissioner@demo.gov.in", phone: "+91 98220 00001", employeeId: "MUN-COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T11:20:00" },
-  { id: "u-admin-01", name: "Shri. Kailash Patil", role: "ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
-  { id: "u-pm-01", name: "Shri. Rajesh Kumar", role: "PROJECT_MANAGER", email: "projectmanager@demo.gov.in", phone: "+91 99230 55678", employeeId: "MUN-PM-0001", designation: "Project Manager", zone: "Head Office", avatarColor: "violet", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:50:00" },
+  { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -165,16 +105,11 @@ export function getUserByRole(role: RoleKey): User {
 // ============================================================
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
   { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP — Applicant Portal" },
-  { role: "TPS", email: "tps@demo.gov.in", password: "demo1234", label: "TPS — Technical Scrutiny" },
-  { role: "TPA", email: "tpa@demo.gov.in", password: "demo1234", label: "TPA — Application Review" },
-  { role: "ZAD", email: "zad@demo.gov.in", password: "demo1234", label: "ZAD — Zonal Asst. Director" },
-  { role: "ZDD", email: "zdd@demo.gov.in", password: "demo1234", label: "ZDD — Zonal Deputy Director" },
-  { role: "ZJD", email: "zjd@demo.gov.in", password: "demo1234", label: "ZJD — Zonal Joint Director" },
-  { role: "DIRECTOR_DP", email: "director@demo.gov.in", password: "demo1234", label: "Director — Town & Country Planning" },
-  { role: "ADDL_COMMISSIONER", email: "addlcomm@demo.gov.in", password: "demo1234", label: "Additional Commissioner" },
+  { role: "ZONAL_HEAD", email: "zh@demo.gov.in", password: "demo1234", label: "Zonal Head" },
+  { role: "DIRECTOR", email: "director@demo.gov.in", password: "demo1234", label: "Director" },
+  { role: "ADDITIONAL_COMMISSIONER", email: "addlcomm@demo.gov.in", password: "demo1234", label: "Additional Commissioner" },
   { role: "COMMISSIONER", email: "commissioner@demo.gov.in", password: "demo1234", label: "Commissioner" },
-  { role: "ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "System Administrator" },
-  { role: "PROJECT_MANAGER", email: "projectmanager@demo.gov.in", password: "demo1234", label: "Project Manager" },
+  { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Super Admin" },
 ];
 
 // Re-export for compatibility
@@ -349,16 +284,13 @@ function makeWorkflowHistory(
   const entries: WorkflowHistoryEntry[] = [];
   const actorMap: Record<string, { name: string; role: RoleKey }> = {
     APPLICATION_CREATED: { name: "Ar. Vikram Deshpande", role: "LTP" },
-    DRAWING_SCRUTINY: { name: "System (Auto-Scrutiny)", role: "TPS" },
-    DOCUMENTS: { name: "Shri. Rajesh Patil", role: "TPA" },
-    FEE_GENERATED: { name: "System (Fee Engine)", role: "TPA" },
+    DRAWING_SCRUTINY: { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" },
+    DOCUMENTS: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
+    FEE_GENERATED: { name: "System (Fee Engine)", role: "SUPER_ADMIN" },
     PAYMENT: { name: "Ar. Vikram Deshpande", role: "LTP" },
-    TPS_TECHNICAL_SCRUTINY: { name: "Smt. Meena Kulkarni", role: "TPS" },
-    TPA_REVIEW: { name: "Shri. Rajesh Patil", role: "TPA" },
-    ZAD_ZDD_REVIEW: { name: "Shri. Ramesh Iyer", role: "ZDD" },
-    ZJD_REVIEW: { name: "Smt. Anjali Rao", role: "ZJD" },
-    DIRECTOR_DP_REVIEW: { name: "Shri. Suresh Nair", role: "DIRECTOR_DP" },
-    ADDITIONAL_COMMISSIONER_REVIEW: { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" },
+    ZONAL_HEAD_REVIEW: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
+    DIRECTOR_REVIEW: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+    ADDITIONAL_COMMISSIONER_REVIEW: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" },
     COMMISSIONER_REVIEW: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
     FINAL_DECISION: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
   };
@@ -368,12 +300,9 @@ function makeWorkflowHistory(
     DOCUMENTS: status === "DOCUMENT_UPLOAD_PENDING" ? "Awaiting document upload" : "Documents verified",
     FEE_GENERATED: "Fee generated",
     PAYMENT: status === "PAYMENT_PENDING" ? "Payment pending" : "Payment received",
-    TPS_TECHNICAL_SCRUTINY: "Technical scrutiny completed — forwarded to TPA",
-    TPA_REVIEW: "Forwarded to ZAD/ZDD",
-    ZAD_ZDD_REVIEW: "Forwarded to ZJD",
-    ZJD_REVIEW: "Forwarded to Director – DP",
-    DIRECTOR_DP_REVIEW: "Forwarded to Addl. Commissioner",
-    ADDITIONAL_COMMISSIONER_REVIEW: "Forwarded to Commissioner",
+    ZONAL_HEAD_REVIEW: "Zonal Head Review completed",
+    DIRECTOR_REVIEW: "Director Review completed",
+    ADDITIONAL_COMMISSIONER_REVIEW: "Addl. Commissioner Review completed",
     COMMISSIONER_REVIEW: status === "APPROVED" ? "Application approved" : status === "REJECTED" ? "Application rejected" : "Under final review",
     FINAL_DECISION: status === "APPROVED" ? "Final approval granted" : status === "REJECTED" ? "Final rejection issued" : "Awaiting final decision",
   };
@@ -384,7 +313,7 @@ function makeWorkflowHistory(
       id: `wf-${appNo}-${idx}`,
       stage: s.key,
       stageLabel: s.label,
-      actor: actorMap[s.key] ?? { name: "System", role: "TPS" },
+      actor: actorMap[s.key] ?? { name: "System", role: "SUPER_ADMIN" },
       action: actionMap[s.key] ?? s.label,
       remarks: isCurrent && status === "SHORTFALL_RAISED" ? "Shortfall raised — response awaited." : undefined,
       timestamp: dates[idx] ?? "",
@@ -400,41 +329,41 @@ function makeAuditLog(appNo: string, stage: WorkflowStageKey, dates: string[]): 
   const actions = [
     { order: 0, user: "Ar. Vikram Deshpande", role: "LTP" as const, action: "Application created", old: undefined, new: "DRAFT" },
     { order: 0, user: "Ar. Vikram Deshpande", role: "LTP" as const, action: "Drawing v1 uploaded", old: "DRAFT", new: "DRAWING_UPLOADED" },
-    { order: 1, user: "System", role: "TPS" as const, action: "Auto-scrutiny executed (v1)", old: "DRAWING_UPLOADED", new: "SCRUTINY_IN_PROGRESS" },
+    { order: 1, user: "System", role: "SUPER_ADMIN" as const, action: "Auto-scrutiny executed (v1)", old: "DRAWING_UPLOADED", new: "SCRUTINY_IN_PROGRESS" },
   ];
   if (currentOrder >= 1) {
     entries.push({ id: "a1", user: "Ar. Vikram Deshpande", role: "LTP", action: "Application created", entity: "Application", entityId: appNo, timestamp: dates[0], newStatus: "DRAFT", ip: "103.21.58.10", device: "Chrome / Windows" });
     entries.push({ id: "a2", user: "Ar. Vikram Deshpande", role: "LTP", action: "Drawing v1 uploaded", entity: "Drawing", entityId: appNo, timestamp: dates[0], oldStatus: "DRAFT", newStatus: "DRAWING_UPLOADED", ip: "103.21.58.10", device: "Chrome / Windows" });
-    entries.push({ id: "a3", user: "System", role: "TPS", action: "Auto-scrutiny executed (v1)", entity: "ScrutinyReport", entityId: appNo, timestamp: dates[0], oldStatus: "DRAWING_UPLOADED", newStatus: "SCRUTINY_PASSED", ip: "10.0.0.4", device: "System" });
+    entries.push({ id: "a3", user: "System", role: "SUPER_ADMIN", action: "Auto-scrutiny executed (v1)", entity: "ScrutinyReport", entityId: appNo, timestamp: dates[0], oldStatus: "DRAWING_UPLOADED", newStatus: "SCRUTINY_PASSED", ip: "10.0.0.4", device: "System" });
   }
   if (currentOrder >= 2) {
     entries.push({ id: "a4", user: "Ar. Vikram Deshpande", role: "LTP", action: "Documents uploaded", entity: "Document", entityId: appNo, timestamp: dates[1], oldStatus: "SCRUTINY_PASSED", newStatus: "DOCUMENT_UPLOAD_PENDING", ip: "103.21.58.10", device: "Chrome / Windows" });
-    entries.push({ id: "a5", user: "Shri. Rajesh Patil", role: "TPA", action: "Documents verified", entity: "Document", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFICATION", newStatus: "DOCUMENT_VERIFIED", ip: "10.0.0.18", device: "Edge / Windows" });
+    entries.push({ id: "a5", user: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", action: "Documents verified", entity: "Document", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFICATION", newStatus: "DOCUMENT_VERIFIED", ip: "10.0.0.18", device: "Edge / Windows" });
   }
   if (currentOrder >= 3) {
-    entries.push({ id: "a6", user: "System", role: "TPA", action: "Fee calculated", entity: "ApplicationFee", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFIED", newStatus: "FEE_GENERATED", ip: "10.0.0.4", device: "System" });
+    entries.push({ id: "a6", user: "System", role: "SUPER_ADMIN", action: "Fee calculated", entity: "ApplicationFee", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFIED", newStatus: "FEE_GENERATED", ip: "10.0.0.4", device: "System" });
   }
   if (currentOrder >= 4) {
     entries.push({ id: "a7", user: "Ar. Vikram Deshpande", role: "LTP", action: "Payment initiated", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "FEE_GENERATED", newStatus: "PAYMENT_PROCESSING", ip: "103.21.58.10", device: "Chrome / Windows" });
-    entries.push({ id: "a8", user: "Mock Payment Gateway", role: "TPA", action: "Payment verified", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "PAYMENT_PROCESSING", newStatus: "PAYMENT_SUCCESS", ip: "10.0.0.4", device: "Webhook (Mock)" });
+    entries.push({ id: "a8", user: "Mock Payment Gateway", role: "SUPER_ADMIN", action: "Payment verified", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "PAYMENT_PROCESSING", newStatus: "PAYMENT_SUCCESS", ip: "10.0.0.4", device: "Webhook (Mock)" });
   }
   if (currentOrder >= 5) {
-    entries.push({ id: "a9", user: "Smt. Meena Kulkarni", role: "TPS", action: "Forwarded to TPA", entity: "Application", entityId: appNo, timestamp: dates[4], oldStatus: "TPS_TECHNICAL_SCRUTINY", newStatus: "TPA_REVIEW", ip: "10.0.0.18", device: "Edge / Windows", remarks: "Technical scrutiny complete. Drawings comply with DCR." });
+    entries.push({ id: "a9", user: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", action: "Forwarded to TPA", entity: "Application", entityId: appNo, timestamp: dates[4], oldStatus: "ZONAL_HEAD_REVIEW", newStatus: "ZONAL_HEAD_REVIEW", ip: "10.0.0.18", device: "Edge / Windows", remarks: "Technical scrutiny complete. Drawings comply with DCR." });
   }
   if (currentOrder >= 6) {
-    entries.push({ id: "a10", user: "Shri. Rajesh Patil", role: "TPA", action: "Forwarded to ZAD/ZDD", entity: "Application", entityId: appNo, timestamp: dates[5], oldStatus: "TPA_REVIEW", newStatus: "ZAD_ZDD_REVIEW", ip: "10.0.0.19", device: "Chrome / Windows" });
+    entries.push({ id: "a10", user: "Shri. Rajesh Patil", role: "ZONAL_HEAD", action: "Forwarded to ZAD/ZDD", entity: "Application", entityId: appNo, timestamp: dates[5], oldStatus: "ZONAL_HEAD_REVIEW", newStatus: "ZONAL_HEAD_REVIEW", ip: "10.0.0.19", device: "Chrome / Windows" });
   }
   if (currentOrder >= 7) {
-    entries.push({ id: "a11", user: "Shri. Ramesh Iyer", role: "ZDD", action: "Forwarded to ZJD", entity: "Application", entityId: appNo, timestamp: dates[6], oldStatus: "ZAD_ZDD_REVIEW", newStatus: "ZJD_REVIEW", ip: "10.0.0.22", device: "Firefox / Windows" });
+    entries.push({ id: "a11", user: "Shri. Ramesh Iyer", role: "DIRECTOR", action: "Forwarded to ZJD", entity: "Application", entityId: appNo, timestamp: dates[6], oldStatus: "ZONAL_HEAD_REVIEW", newStatus: "ZONAL_HEAD_REVIEW", ip: "10.0.0.22", device: "Firefox / Windows" });
   }
   if (currentOrder >= 8) {
-    entries.push({ id: "a12", user: "Smt. Anjali Rao", role: "ZJD", action: "Forwarded to Director – DP", entity: "Application", entityId: appNo, timestamp: dates[7], oldStatus: "ZJD_REVIEW", newStatus: "DIRECTOR_DP_REVIEW", ip: "10.0.0.25", device: "Chrome / macOS" });
+    entries.push({ id: "a12", user: "Smt. Anjali Rao", role: "DIRECTOR", action: "Forwarded to Director – DP", entity: "Application", entityId: appNo, timestamp: dates[7], oldStatus: "ZONAL_HEAD_REVIEW", newStatus: "DIRECTOR_REVIEW", ip: "10.0.0.25", device: "Chrome / macOS" });
   }
   if (currentOrder >= 9) {
-    entries.push({ id: "a13", user: "Shri. Suresh Nair", role: "DIRECTOR_DP", action: "Forwarded to Addl. Commissioner", entity: "Application", entityId: appNo, timestamp: dates[8], oldStatus: "DIRECTOR_DP_REVIEW", newStatus: "ADDITIONAL_COMMISSIONER_REVIEW", ip: "10.0.0.30", device: "Edge / Windows" });
+    entries.push({ id: "a13", user: "Shri. Suresh Nair", role: "DIRECTOR", action: "Forwarded to Addl. Commissioner", entity: "Application", entityId: appNo, timestamp: dates[8], oldStatus: "DIRECTOR_REVIEW", newStatus: "ADDITIONAL_COMMISSIONER_REVIEW", ip: "10.0.0.30", device: "Edge / Windows" });
   }
   if (currentOrder >= 10) {
-    entries.push({ id: "a14", user: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER", action: "Forwarded to Commissioner", entity: "Application", entityId: appNo, timestamp: dates[9], oldStatus: "ADDITIONAL_COMMISSIONER_REVIEW", newStatus: "COMMISSIONER_REVIEW", ip: "10.0.0.35", device: "Chrome / Windows" });
+    entries.push({ id: "a14", user: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER", action: "Forwarded to Commissioner", entity: "Application", entityId: appNo, timestamp: dates[9], oldStatus: "ADDITIONAL_COMMISSIONER_REVIEW", newStatus: "COMMISSIONER_REVIEW", ip: "10.0.0.35", device: "Chrome / Windows" });
   }
   if (currentOrder >= 11) {
     entries.push({ id: "a15", user: "Dr. Pratap Reddy", role: "COMMISSIONER", action: "Final decision: approved", entity: "Application", entityId: appNo, timestamp: dates[10], oldStatus: "COMMISSIONER_REVIEW", newStatus: "APPROVED", ip: "10.0.0.40", device: "Chrome / macOS", remarks: "Approved with conditions." });
@@ -524,7 +453,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 3. SCRUTINY PASSED → DOCUMENT_UPLOAD_PENDING
-  buildApp("app-3", "MC/BP/2026/04/0003", "Shahane Bungalow — G+1", "RESIDENTIAL", 560, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-15T09:00:00", "2026-01-15T09:05:00", "2026-01-15T11:00:00"], "Shri. Deepak Shahane", "+91 98220 14503", "deepak.shahane@email.com", "Kothrud, Pune — 411038", {
+  buildApp("app-3", "MC/BP/2026/04/0003", "Shahane Bungalow — G+1", "RESIDENTIAL", 560, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-15T09:00:00", "2026-01-15T09:05:00", "2026-01-15T11:00:00"], "Shri. Deepak Shahane", "+91 98220 14503", "deepak.shahane@email.com", "Kothrud, Pune — 411038", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-15T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-15T11:00:00", "SCR/2026/0003"),
     documents: makeDocuments("early"),
@@ -540,63 +469,63 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 5. TPS_TECHNICAL_SCRUTINY — payment done, at TPS
-  buildApp("app-5", "MC/BP/2026/04/0005", "Greenfield Residency — Apartment", "RESIDENTIAL", 1780, "TPS_TECHNICAL_SCRUTINY", "TPS_TECHNICAL_SCRUTINY", { name: "Smt. Meena Kulkarni", role: "TPS" }, ["2026-01-05T09:28:00", "2026-01-05T09:30:00", "2026-01-05T09:31:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T12:00:00", "2026-01-09T16:00:00"], "Shri. Nikhil Patil", "+91 98220 14505", "nikhil.patil@email.com", "Baner, Pune — 411045", {
+  buildApp("app-5", "MC/BP/2026/04/0005", "Greenfield Residency — Apartment", "RESIDENTIAL", 1780, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:28:00", "2026-01-05T09:30:00", "2026-01-05T09:31:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T12:00:00", "2026-01-09T16:00:00"], "Shri. Nikhil Patil", "+91 98220 14505", "nikhil.patil@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:30:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-05T09:31:00", "SCR/2026/0005"),
     documents: makeDocuments("verified"),
     fee: (() => { const f = makeFee(1780, 8, true); return f; })(),
     payment: makePayment(267850, true, "2026-01-08"),
-    remarks: [{ id: "r-5-1", author: { name: "Smt. Meena Kulkarni", role: "TPS" }, text: "Application received. Beginning technical scrutiny.", timestamp: "2026-01-09T16:05:00", type: "INFO" }],
+    remarks: [{ id: "r-5-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Application received. Beginning technical scrutiny.", timestamp: "2026-01-09T16:05:00", type: "INFO" }],
   }),
 
   // 6. TPA_REVIEW — TPS forwarded, at TPA
-  buildApp("app-6", "MC/BP/2026/04/0006", "Crescent Plaza — Commercial", "COMMERCIAL", 6400, "TPA_REVIEW", "TPA_REVIEW", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-04T10:00:00", "2026-01-04T10:05:00", "2026-01-04T10:06:00", "2026-01-05T11:00:00", "2026-01-06T09:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Smt. Meena Joshi", "+91 98220 14506", "meena.joshi@email.com", "Aundh, Pune — 411007", {
+  buildApp("app-6", "MC/BP/2026/04/0006", "Crescent Plaza — Commercial", "COMMERCIAL", 6400, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-04T10:00:00", "2026-01-04T10:05:00", "2026-01-04T10:06:00", "2026-01-05T11:00:00", "2026-01-06T09:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Smt. Meena Joshi", "+91 98220 14506", "meena.joshi@email.com", "Aundh, Pune — 411007", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-04T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-04T10:06:00", "SCR/2026/0006"),
     documents: makeDocuments("verified"),
     fee: makeFee(6400, 8, true),
     payment: makePayment(853300, true, "2026-01-06"),
-    remarks: [{ id: "r-6-1", author: { name: "Smt. Meena Kulkarni", role: "TPS" }, text: "Technical scrutiny complete. FAR compliant. Forwarding to TPA.", timestamp: "2026-01-08T10:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-6-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Technical scrutiny complete. FAR compliant. Forwarding to TPA.", timestamp: "2026-01-08T10:00:00", type: "DECISION" }],
   }),
 
   // 7. ZAD_ZDD_REVIEW
-  buildApp("app-7", "MC/BP/2026/04/0007", "Hillview Heights — Group Housing", "RESIDENTIAL", 12200, "ZAD_ZDD_REVIEW", "ZAD_ZDD_REVIEW", { name: "Shri. Ramesh Iyer", role: "ZDD" }, ["2026-01-03T10:00:00", "2026-01-03T10:05:00", "2026-01-03T10:06:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Shri. Ramesh Iyer", "+91 98220 14507", "ramesh.iyer@email.com", "Bavdhan, Pune — 411021", {
+  buildApp("app-7", "MC/BP/2026/04/0007", "Hillview Heights — Group Housing", "RESIDENTIAL", 12200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-03T10:00:00", "2026-01-03T10:05:00", "2026-01-03T10:06:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Shri. Ramesh Iyer", "+91 98220 14507", "ramesh.iyer@email.com", "Bavdhan, Pune — 411021", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-03T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "ground_coverage", "2026-01-03T10:06:00", "SCR/2026/0007"),
     documents: makeDocuments("verified"),
     fee: makeFee(12200, 8, true),
     payment: makePayment(1618300, true, "2026-01-05"),
-    remarks: [{ id: "r-7-1", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "All documents verified. Fee paid. Forwarding to Zonal office.", timestamp: "2026-01-07T15:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-7-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "All documents verified. Fee paid. Forwarding to Zonal office.", timestamp: "2026-01-07T15:00:00", type: "DECISION" }],
   }),
 
   // 8. ZJD_REVIEW
-  buildApp("app-8", "MC/BP/2026/04/0008", "Sunrise Apartments — G+4", "RESIDENTIAL", 3200, "ZJD_REVIEW", "ZJD_REVIEW", { name: "Smt. Anjali Rao", role: "ZJD" }, ["2026-01-02T09:00:00", "2026-01-02T09:05:00", "2026-01-02T09:06:00", "2026-01-03T11:00:00", "2026-01-04T10:00:00", "2026-01-05T14:00:00", "2026-01-06T09:00:00", "2026-01-07T11:00:00", "2026-01-08T15:00:00"], "Smt. Anjali Deshmukh", "+91 98220 14508", "anjali.deshmukh@email.com", "Wakad, Pune — 411057", {
+  buildApp("app-8", "MC/BP/2026/04/0008", "Sunrise Apartments — G+4", "RESIDENTIAL", 3200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-02T09:00:00", "2026-01-02T09:05:00", "2026-01-02T09:06:00", "2026-01-03T11:00:00", "2026-01-04T10:00:00", "2026-01-05T14:00:00", "2026-01-06T09:00:00", "2026-01-07T11:00:00", "2026-01-08T15:00:00"], "Smt. Anjali Deshmukh", "+91 98220 14508", "anjali.deshmukh@email.com", "Wakad, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T09:06:00", "SCR/2026/0008"),
     documents: makeDocuments("verified"),
     fee: makeFee(3200, 8, true),
     payment: makePayment(446600, true, "2026-01-04"),
-    remarks: [{ id: "r-8-1", author: { name: "Shri. Ramesh Iyer", role: "ZDD" }, text: "Zonal review complete. Forwarding to ZJD.", timestamp: "2026-01-08T15:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-8-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Zonal review complete. Forwarding to ZJD.", timestamp: "2026-01-08T15:00:00", type: "DECISION" }],
   }),
 
   // 9. DIRECTOR_DP_REVIEW
-  buildApp("app-9", "MC/BP/2026/04/0009", "Riverside Towers — Commercial", "COMMERCIAL", 8900, "DIRECTOR_DP_REVIEW", "DIRECTOR_DP_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR_DP" }, ["2026-01-02T08:00:00", "2026-01-02T08:05:00", "2026-01-02T08:06:00", "2026-01-03T10:00:00", "2026-01-04T09:00:00", "2026-01-05T13:00:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T09:00:00", "2026-01-09T11:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-9", "MC/BP/2026/04/0009", "Riverside Towers — Commercial", "COMMERCIAL", 8900, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-02T08:00:00", "2026-01-02T08:05:00", "2026-01-02T08:06:00", "2026-01-03T10:00:00", "2026-01-04T09:00:00", "2026-01-05T13:00:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T09:00:00", "2026-01-09T11:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T08:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T08:06:00", "SCR/2026/0009"),
     documents: makeDocuments("verified"),
     fee: makeFee(8900, 8, true),
     payment: makePayment(1186300, true, "2026-01-04"),
-    remarks: [{ id: "r-9-1", author: { name: "Smt. Anjali Rao", role: "ZJD" }, text: "Approved at ZJD level. Forwarding to Director.", timestamp: "2026-01-09T11:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-9-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Approved at ZJD level. Forwarding to Director.", timestamp: "2026-01-09T11:00:00", type: "DECISION" }],
   }),
 
   // 10. ADDITIONAL_COMMISSIONER_REVIEW
-  buildApp("app-10", "MC/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
+  buildApp("app-10", "MC/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-01T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-01T09:06:00", "SCR/2026/0010"),
     documents: makeDocuments("verified"),
     fee: makeFee(4500, 8, true),
     payment: makePayment(616300, true, "2026-01-03"),
-    remarks: [{ id: "r-10-1", author: { name: "Shri. Suresh Nair", role: "DIRECTOR_DP" }, text: "Director-level review complete. Forwarding to Addl. Commissioner.", timestamp: "2026-01-09T14:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-10-1", author: { name: "Shri. Suresh Nair", role: "DIRECTOR" }, text: "Director-level review complete. Forwarding to Addl. Commissioner.", timestamp: "2026-01-09T14:00:00", type: "DECISION" }],
   }),
 
   // 11. COMMISSIONER_REVIEW
@@ -606,7 +535,7 @@ export const SEED_APPLICATIONS: Application[] = [
     documents: makeDocuments("verified"),
     fee: makeFee(11200, 8, true),
     payment: makePayment(1486300, true, "2025-12-30"),
-    remarks: [{ id: "r-11-1", author: { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" }, text: "Reviewed and forwarding to Commissioner for final decision.", timestamp: "2026-01-06T14:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-11-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and forwarding to Commissioner for final decision.", timestamp: "2026-01-06T14:00:00", type: "DECISION" }],
   }),
 
   // 12. APPROVED
@@ -617,14 +546,14 @@ export const SEED_APPLICATIONS: Application[] = [
     fee: makeFee(1800, 8, true),
     payment: makePayment(271300, true, "2025-12-22"),
     remarks: [
-      { id: "r-12-1", author: { name: "Smt. Lakshmi Menon", role: "ADDL_COMMISSIONER" }, text: "Forwarded to Commissioner.", timestamp: "2025-12-28T14:00:00", type: "DECISION" },
+      { id: "r-12-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Forwarded to Commissioner.", timestamp: "2025-12-28T14:00:00", type: "DECISION" },
       { id: "r-12-2", author: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, text: "Approved. Conditions: STP operational before occupancy; 10% area reserved for EWS.", timestamp: "2025-12-29T16:30:00", type: "DECISION" },
     ],
     progress: 100,
   }),
 
   // 13. SHORTFALL_RAISED — active shortfall at TPA review
-  buildApp("app-13", "MC/BP/2026/04/0013", "Orchid Greens — Group Housing", "RESIDENTIAL", 6800, "SHORTFALL_RAISED", "TPA_REVIEW", { name: "Shri. Rajesh Patil", role: "TPA" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-11T14:00:00", "2026-01-12T09:00:00", "2026-01-13T15:00:00", "2026-01-14T11:00:00"], "Shri. Suresh Reddy", "+91 98220 14513", "suresh.reddy@email.com", "Bavdhan, Pune — 411021", {
+  buildApp("app-13", "MC/BP/2026/04/0013", "Orchid Greens — Group Housing", "RESIDENTIAL", 6800, "SHORTFALL_RAISED", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-11T14:00:00", "2026-01-12T09:00:00", "2026-01-13T15:00:00", "2026-01-14T11:00:00"], "Shri. Suresh Reddy", "+91 98220 14513", "suresh.reddy@email.com", "Bavdhan, Pune — 411021", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-10T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-10T10:06:00", "SCR/2026/0013"),
     documents: makeDocuments("shortfall"),
@@ -636,19 +565,19 @@ export const SEED_APPLICATIONS: Application[] = [
       type: "DOCUMENT",
       title: "Structural Stability Certificate — missing SE stamp",
       description: "The structural stability certificate uploaded on 11-Jan does not bear the stamp and signature of a Licensed Structural Engineer. Re-upload a properly stamped certificate.",
-      raisedBy: { name: "Shri. Rajesh Patil", role: "TPA" },
+      raisedBy: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
       raisedAt: "2026-01-14T11:00:00",
       dueDate: "2026-01-21",
       status: "OPEN",
       applicationId: "app-13",
       applicationNo: "MC/BP/2026/04/0013",
-      stageRaisedAt: "TPA_REVIEW",
+      stageRaisedAt: "ZONAL_HEAD_REVIEW",
     }],
-    remarks: [{ id: "r-13-1", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "Structural certificate requires licensed SE stamp. Shortfall SF/2026/0042 raised.", timestamp: "2026-01-14T11:00:00", type: "INSTRUCTION" }],
+    remarks: [{ id: "r-13-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Structural certificate requires licensed SE stamp. Shortfall SF/2026/0042 raised.", timestamp: "2026-01-14T11:00:00", type: "INSTRUCTION" }],
   }),
 
   // 14. Shortfall resolved, back in workflow (ZAD_ZDD_REVIEW with resolved shortfall)
-  buildApp("app-14", "MC/BP/2026/04/0014", "Pinnacle Corporate Park", "COMMERCIAL", 7600, "ZAD_ZDD_REVIEW", "ZAD_ZDD_REVIEW", { name: "Shri. Ramesh Iyer", role: "ZDD" }, ["2026-01-05T09:00:00", "2026-01-05T09:05:00", "2026-01-05T09:06:00", "2026-01-06T11:00:00", "2026-01-07T10:00:00", "2026-01-08T14:00:00", "2026-01-09T09:00:00", "2026-01-12T15:00:00"], "Smt. Pooja Mehta", "+91 98220 14514", "pooja.mehta@email.com", "Wakad, Pune — 411057", {
+  buildApp("app-14", "MC/BP/2026/04/0014", "Pinnacle Corporate Park", "COMMERCIAL", 7600, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:00:00", "2026-01-05T09:05:00", "2026-01-05T09:06:00", "2026-01-06T11:00:00", "2026-01-07T10:00:00", "2026-01-08T14:00:00", "2026-01-09T09:00:00", "2026-01-12T15:00:00"], "Smt. Pooja Mehta", "+91 98220 14514", "pooja.mehta@email.com", "Wakad, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-05T09:06:00", "SCR/2026/0014"),
     documents: makeDocuments("verified"),
@@ -660,23 +589,23 @@ export const SEED_APPLICATIONS: Application[] = [
       type: "DOCUMENT",
       title: "Fire NOC — expired",
       description: "The submitted Fire NOC expired on 31-Dec-2025. Please upload a renewed NOC.",
-      raisedBy: { name: "Shri. Rajesh Patil", role: "TPA" },
+      raisedBy: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
       raisedAt: "2026-01-09T09:00:00",
       dueDate: "2026-01-15",
       status: "RESOLVED",
       applicationId: "app-14",
       applicationNo: "MC/BP/2026/04/0014",
-      stageRaisedAt: "TPA_REVIEW",
+      stageRaisedAt: "ZONAL_HEAD_REVIEW",
       response: { text: "Renewed Fire NOC uploaded. Valid until 31-Dec-2027.", respondedAt: "2026-01-11T10:00:00", supportingDocument: "Fire_NOC_Renewed_2026.pdf" },
-      reviewedBy: { name: "Shri. Rajesh Patil", role: "TPA" },
+      reviewedBy: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
       reviewedAt: "2026-01-11T14:00:00",
-      resolvedBy: { name: "Shri. Rajesh Patil", role: "TPA" },
+      resolvedBy: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
       resolvedAt: "2026-01-11T14:00:00",
       resolution: "Renewed NOC verified. Valid until 31-Dec-2027. Shortfall resolved, forwarding application.",
     }],
     remarks: [
-      { id: "r-14-1", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "Fire NOC expired. Shortfall raised.", timestamp: "2026-01-09T09:00:00", type: "INSTRUCTION" },
-      { id: "r-14-2", author: { name: "Shri. Rajesh Patil", role: "TPA" }, text: "Renewed NOC verified. Resolving shortfall and forwarding to ZAD/ZDD.", timestamp: "2026-01-11T14:00:00", type: "DECISION" },
+      { id: "r-14-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Fire NOC expired. Shortfall raised.", timestamp: "2026-01-09T09:00:00", type: "INSTRUCTION" },
+      { id: "r-14-2", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Renewed NOC verified. Resolving shortfall and forwarding to ZAD/ZDD.", timestamp: "2026-01-11T14:00:00", type: "DECISION" },
     ],
   }),
 

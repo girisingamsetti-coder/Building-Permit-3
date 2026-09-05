@@ -96,11 +96,8 @@ interface KpiDef {
 }
 
 const OFFICER_REVIEW_STAGES: WorkflowStageKey[] = [
-  "TPS_TECHNICAL_SCRUTINY",
-  "TPA_REVIEW",
-  "ZAD_ZDD_REVIEW",
-  "ZJD_REVIEW",
-  "DIRECTOR_DP_REVIEW",
+  "ZONAL_HEAD_REVIEW",
+  "DIRECTOR_REVIEW",
   "ADDITIONAL_COMMISSIONER_REVIEW",
   "COMMISSIONER_REVIEW",
   "FINAL_DECISION",
@@ -154,69 +151,11 @@ export function OfficerDashboard() {
     );
 
     switch (role) {
-      case "TPS":
-        return [
-          {
-            label: "Assigned Applications",
-            value: scope.applications.length,
-            icon: ClipboardCheck,
-            accent: "primary",
-            onClick: () => navigate("officer-applications"),
-          },
-          {
-            label: "Pending Scrutiny",
-            value: atStage("TPS_TECHNICAL_SCRUTINY"),
-            icon: Clock,
-            accent: "info",
-          },
-          {
-            label: "Completed Scrutiny",
-            value: myCompletedActions,
-            icon: CheckCircle2,
-            accent: "success",
-          },
-          {
-            label: "SLA At Risk",
-            value: atRisk,
-            icon: AlertTriangle,
-            accent: "amber",
-            onClick: () => navigate("officer-applications"),
-          },
-        ];
-      case "TPA":
+      case "ZONAL_HEAD":
         return [
           {
             label: "Pending Reviews",
-            value: atStage("TPA_REVIEW"),
-            icon: Clock,
-            accent: "info",
-          },
-          {
-            label: "Completed Reviews",
-            value: myCompletedActions,
-            icon: CheckCircle2,
-            accent: "success",
-          },
-          {
-            label: "Open Shortfalls",
-            value: openShortfalls,
-            icon: FileWarning,
-            accent: "warning",
-          },
-          {
-            label: "SLA At Risk",
-            value: atRisk,
-            icon: AlertTriangle,
-            accent: "amber",
-            onClick: () => navigate("officer-applications"),
-          },
-        ];
-      case "ZAD":
-      case "ZDD":
-        return [
-          {
-            label: "Pending Approvals",
-            value: atStage("ZAD_ZDD_REVIEW"),
+            value: atStage("ZONAL_HEAD_REVIEW"),
             icon: Clock,
             accent: "info",
           },
@@ -240,39 +179,11 @@ export function OfficerDashboard() {
             accent: "success",
           },
         ];
-      case "ZJD":
+      case "DIRECTOR":
         return [
           {
             label: "Pending Decisions",
-            value: atStage("ZJD_REVIEW"),
-            icon: Clock,
-            accent: "info",
-          },
-          {
-            label: "Open Shortfalls",
-            value: openShortfalls,
-            icon: FileWarning,
-            accent: "warning",
-          },
-          {
-            label: "SLA At Risk",
-            value: atRisk,
-            icon: AlertTriangle,
-            accent: "amber",
-            onClick: () => navigate("officer-applications"),
-          },
-          {
-            label: "Completed Decisions",
-            value: myCompletedActions,
-            icon: CheckCircle2,
-            accent: "success",
-          },
-        ];
-      case "DIRECTOR_DP":
-        return [
-          {
-            label: "Pending Decisions",
-            value: atStage("DIRECTOR_DP_REVIEW"),
+            value: atStage("DIRECTOR_REVIEW"),
             icon: Clock,
             accent: "info",
           },
@@ -296,7 +207,7 @@ export function OfficerDashboard() {
             accent: "success",
           },
         ];
-      case "ADDL_COMMISSIONER":
+      case "ADDITIONAL_COMMISSIONER":
         return [
           {
             label: "Pending Reviews",
@@ -475,20 +386,7 @@ export function OfficerDashboard() {
           <BarChart data={stageData} />
         </ChartCard>
 
-        {/* TPS-only: scrutiny results donut */}
-        {role === "TPS" && (
-          <ChartCard
-            icon={CheckCircle2}
-            title="Scrutiny Results"
-            subtitle="Passed · failed · pending scrutiny reports"
-          >
-            <DonutChart
-              data={scrutinyData}
-              centerLabel="Reports"
-              centerValue={totalScrutiny}
-            />
-          </ChartCard>
-        )}
+
 
         <ChartCard
           icon={Gauge}

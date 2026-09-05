@@ -41,33 +41,15 @@ export function getDashboardScope(user: User | null, allApps: Application[], all
     return { user: {} as User, role: "LTP", applications: [], users: [], projectIds: [], isGlobal: false };
   }
 
-  // ---- ADMIN: organization-wide ----
-  if (user.role === "ADMIN") {
+  // ---- SUPER_ADMIN: organization-wide ----
+  if (user.role === "SUPER_ADMIN") {
     return {
       user,
-      role: "ADMIN",
+      role: "SUPER_ADMIN",
       applications: allApps,
       users: allUsers,
       projectIds: [],
       isGlobal: true,
-    };
-  }
-
-  // ---- PROJECT_MANAGER: assigned projects only ----
-  if (user.role === "PROJECT_MANAGER") {
-    // PM sees all applications in their assigned scope.
-    // In this demo, PM oversees the entire approval operation (monitoring role).
-    const scopedApps = allApps;
-    const scopedUsers = allUsers.filter(
-      (u) => u.role !== "ADMIN" && u.role !== "PROJECT_MANAGER"
-    );
-    return {
-      user,
-      role: "PROJECT_MANAGER",
-      applications: scopedApps,
-      users: scopedUsers,
-      projectIds: [],
-      isGlobal: false,
     };
   }
 

@@ -192,14 +192,7 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Bottom: minimal footer */}
-        <div className="relative z-10 space-y-1">
-          <div className="h-px w-12 rounded-full bg-sidebar-primary/40" />
-          <p className="text-[11px] text-sidebar-foreground/50">
-            LTP Approval · Building Permit Management System
-          </p>
-          <p className="text-[10px] text-sidebar-foreground/40">© 2026</p>
-        </div>
+
       </aside>
 
       {/* ---------- RIGHT: login card ---------- */}
@@ -407,13 +400,7 @@ function LoginForm() {
                 )}
               </div>
 
-              {/* Footer */}
-              <div className="border-t border-border pt-4 text-center">
-                <p className="text-[11px] text-muted-foreground">
-                  LTP Approval · Building Permit Management System
-                </p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground/70">© 2026</p>
-              </div>
+
             </div>
           </div>
         </div>

@@ -5,16 +5,11 @@
 // ---------- Roles & Permissions (RBAC) ----------
 export type RoleKey =
   | "LTP"
-  | "TPS"
-  | "TPA"
-  | "ZAD"
-  | "ZDD"
-  | "ZJD"
-  | "DIRECTOR_DP"
-  | "ADDL_COMMISSIONER"
+  | "ZONAL_HEAD"
+  | "DIRECTOR"
+  | "ADDITIONAL_COMMISSIONER"
   | "COMMISSIONER"
-  | "ADMIN"
-  | "PROJECT_MANAGER";
+  | "SUPER_ADMIN";
 
 export interface Role {
   key: RoleKey;
@@ -95,11 +90,8 @@ export type ApplicationStatus =
   | "PAYMENT_PENDING"
   | "PAYMENT_PROCESSING"
   | "PAYMENT_SUCCESS"
-  | "TPS_TECHNICAL_SCRUTINY"
-  | "TPA_REVIEW"
-  | "ZAD_ZDD_REVIEW"
-  | "ZJD_REVIEW"
-  | "DIRECTOR_DP_REVIEW"
+  | "ZONAL_HEAD_REVIEW"
+  | "DIRECTOR_REVIEW"
   | "ADDITIONAL_COMMISSIONER_REVIEW"
   | "COMMISSIONER_REVIEW"
   | "SHORTFALL_RAISED"
@@ -378,11 +370,8 @@ export type WorkflowStageKey =
   | "DOCUMENTS"
   | "FEE_GENERATED"
   | "PAYMENT"
-  | "TPS_TECHNICAL_SCRUTINY"
-  | "TPA_REVIEW"
-  | "ZAD_ZDD_REVIEW"
-  | "ZJD_REVIEW"
-  | "DIRECTOR_DP_REVIEW"
+  | "ZONAL_HEAD_REVIEW"
+  | "DIRECTOR_REVIEW"
   | "ADDITIONAL_COMMISSIONER_REVIEW"
   | "COMMISSIONER_REVIEW"
   | "FINAL_DECISION";
@@ -563,6 +552,7 @@ export type ViewKey =
   | "login"
   | "forgot-password"
   | "otp"
+  // LTP views
   | "ltp-dashboard"
   | "ltp-applications"
   | "ltp-application-details"
@@ -577,10 +567,17 @@ export type ViewKey =
   | "ltp-notifications"
   | "ltp-profile"
   | "ltp-help"
+  // Officer views
   | "officer-dashboard"
   | "officer-review"
   | "officer-applications"
+  | "officer-tasks"
+  | "officer-shortfalls"
+  | "officer-payments"
   | "officer-documents"
+  | "officer-reports"
+  | "officer-settings"
+  // Admin views
   | "admin-dashboard"
   | "admin-users"
   | "admin-roles"
@@ -590,7 +587,12 @@ export type ViewKey =
   | "admin-templates"
   | "admin-audit"
   | "admin-settings"
-  // Project Manager views (read-only monitoring)
+  | "admin-applications"
+  | "admin-shortfalls"
+  | "admin-payments"
+  | "admin-documents"
+  | "admin-reports"
+  // Legacy PM views (kept for compatibility)
   | "pm-dashboard"
   | "pm-applications"
   | "pm-application-details"
@@ -602,4 +604,4 @@ export type ViewKey =
   | "pm-shortfalls"
   | "pm-help";
 
-export type Portal = "LTP" | "OFFICER" | "ADMIN" | "PROJECT_MANAGER";
+export type Portal = "LTP" | "OFFICER" | "SUPER_ADMIN";

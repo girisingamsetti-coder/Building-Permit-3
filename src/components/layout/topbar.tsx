@@ -504,41 +504,6 @@ export function Topbar() {
       </div>
 
       <div className="ml-auto flex items-center gap-1.5">
-        {/* Role switcher (demo) */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="hidden md:inline-flex gap-2">
-              <Zap className="size-3.5 text-amber-500" />
-              <span className="text-xs">Demo Role</span>
-              <ChevronDown className="size-3 opacity-60" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel className="flex items-center gap-2 text-xs">
-              <Users className="size-3.5" /> Switch demo role
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {DEMO_CREDENTIALS.map((c) => (
-              <DropdownMenuItem
-                key={c.role}
-                onClick={() => {
-                  loginAsRole(c.role);
-                  toast({
-                    title: `Signed in as ${ROLES[c.role].fullName}`,
-                    description: `Demo role switched to ${c.label}`,
-                  });
-                }}
-                className="flex items-center justify-between gap-2"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{ROLES[c.role].fullName}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">{c.email}</p>
-                </div>
-                <RoleBadge role={c.role} />
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
 
         {/* Theme toggle */}
         <Button
@@ -669,11 +634,15 @@ export function Topbar() {
             <DropdownMenuItem onClick={() => navigate("ltp-profile")}>
               <User className="size-4" /> Profile
             </DropdownMenuItem>
-            {portal === "ADMIN" && (
+            {portal === "SUPER_ADMIN" && (
               <DropdownMenuItem onClick={() => navigate("admin-settings")}>
                 <Settings className="size-4" /> Settings
               </DropdownMenuItem>
             )}
+
+            {/* Switch User */}
+            <SwitchUserPanel />
+
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
               <LogOut className="size-4" /> Sign out
@@ -694,11 +663,11 @@ function UserAvatar({ color, name }: { color?: string; name?: string }) {
     .toUpperCase();
   const colorMap: Record<string, string> = {
     emerald: "bg-emerald-500",
-    teal: "bg-teal-500",
-    cyan: "bg-cyan-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-    slate: "bg-slate-500",
+    teal:    "bg-teal-500",
+    cyan:    "bg-cyan-500",
+    amber:   "bg-amber-500",
+    rose:    "bg-rose-500",
+    slate:   "bg-slate-500",
   };
   return (
     <div
@@ -709,5 +678,93 @@ function UserAvatar({ color, name }: { color?: string; name?: string }) {
     >
       {initials}
     </div>
+  );
+}
+
+// ============================================================
+// SWITCH USER PANEL
+// Renders inline inside the profile DropdownMenuContent.
+// Lists all demo accounts; clicking one logs in as that user.
+// ============================================================
+function SwitchUserPanel() {
+  const { loginAsRole, user } = useAppStore();
+  const { toast } = useToast();
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      {/* Trigger row */}
+      <DropdownMenuItem
+        onSelect={(e) => {
+          e.preventDefault(); // keep dropdown open
+          setOpen((v) => !v);
+        }}
+        className="flex items-center justify-between cursor-pointer"
+      >
+        <span className="flex items-center gap-2">
+          <Users className="size-4" />
+          Switch User
+        </span>
+        <ChevronDown
+          className={cn(
+            "size-3.5 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180"
+          )}
+        />
+      </DropdownMenuItem>
+
+      {/* Expandable list */}
+      {open && (
+        <div className="mx-1 mb-1 overflow-hidden rounded-md border border-border bg-muted/30">
+          {DEMO_CREDENTIALS.map((c) => {
+            const isCurrent = user?.role === c.role;
+            return (
+              <button
+                key={c.role}
+                disabled={isCurrent}
+                onClick={() => {
+                  loginAsRole(c.role);
+                  toast({
+                    title: `Switched to ${ROLES[c.role].fullName}`,
+                    description: c.email,
+                  });
+                }}
+                className={cn(
+                  "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors",
+                  isCurrent
+                    ? "cursor-default opacity-50"
+                    : "hover:bg-sidebar-accent/60 cursor-pointer"
+                )}
+              >
+                {/* Mini avatar */}
+                <span
+                  className={cn(
+                    "flex size-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white",
+                    {
+                      "bg-emerald-500": c.role === "LTP",
+                      "bg-teal-500":    c.role === "ZONAL_HEAD",
+                      "bg-cyan-500":    c.role === "DIRECTOR",
+                      "bg-amber-500":   c.role === "ADDITIONAL_COMMISSIONER",
+                      "bg-rose-500":    c.role === "COMMISSIONER",
+                      "bg-slate-600":   c.role === "SUPER_ADMIN",
+                    }
+                  )}
+                >
+                  {ROLES[c.role].title.slice(0, 2).toUpperCase()}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium truncate">{ROLES[c.role].fullName}</span>
+                  <span className="block text-[10px] text-muted-foreground truncate">{c.email}</span>
+                </span>
+                {isCurrent && (
+                  <span className="text-[9px] font-semibold text-primary">Active</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 }

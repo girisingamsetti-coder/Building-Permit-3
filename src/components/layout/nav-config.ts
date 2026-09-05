@@ -2,29 +2,12 @@ import type { Portal, ViewKey } from "@/types";
 import {
   LayoutDashboard,
   FileStack,
-  Upload,
-  FileSearch,
-  FolderClosed,
-  ReceiptIndianRupee,
-  CreditCard,
-  AlertTriangle,
-  Bell,
-  User,
-  CircleHelp,
-  ClipboardCheck,
-  Settings,
-  Users,
-  ShieldCheck,
-  FileCog,
-  Calculator,
-  Workflow,
-  MailWarning,
-  History,
-  FileCheck2,
-  Activity,
-  Gauge,
-  BarChart3,
   ClipboardList,
+  AlertTriangle,
+  CreditCard,
+  FolderClosed,
+  BarChart3,
+  Settings,
   type LucideIcon,
 } from "lucide-react";
 
@@ -39,128 +22,75 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+/**
+ * Unified 8-module navigation for every portal.
+ * All users see the same module labels; each portal maps to the
+ * views appropriate for its level of access.
+ *
+ * Modules:
+ *  1. Dashboard
+ *  2. Applications
+ *  3. Tasks        (LTP: drawings & scrutiny queue  | Officer: review queue | Admin: workflow mgmt)
+ *  4. Shortfalls
+ *  5. Payments
+ *  6. Documents
+ *  7. Reports
+ *  8. Settings
+ */
 export const NAV: Record<Portal, NavGroup[]> = {
+  // ----------------------------------------------------------------
+  // LTP — applicant portal
+  // ----------------------------------------------------------------
   LTP: [
     {
-      label: "Overview",
-      items: [{ view: "ltp-dashboard", label: "Dashboard", icon: LayoutDashboard }],
-    },
-    {
-      label: "Applications",
+      label: "",
       items: [
-        { view: "ltp-applications", label: "My Applications", icon: FileStack },
-      ],
-    },
-    {
-      label: "Submission",
-      items: [
-        { view: "ltp-drawings", label: "Drawings & Scrutiny", icon: Upload },
-        { view: "ltp-documents", label: "Documents", icon: FolderClosed },
-        { view: "ltp-fees", label: "Fees", icon: ReceiptIndianRupee },
-        { view: "ltp-payment", label: "Payments", icon: CreditCard },
-      ],
-    },
-    {
-      label: "Communication",
-      items: [
-        { view: "ltp-shortfalls", label: "Shortfalls", icon: AlertTriangle },
-        { view: "ltp-notifications", label: "Notifications", icon: Bell },
-      ],
-    },
-    {
-      label: "Account",
-      items: [
-        { view: "ltp-profile", label: "Profile", icon: User },
-        { view: "ltp-help", label: "Help & Support", icon: CircleHelp },
+        { view: "ltp-dashboard",     label: "Dashboard",     icon: LayoutDashboard },
+        { view: "ltp-applications",  label: "Applications",  icon: FileStack },
+        { view: "ltp-drawings",      label: "Tasks",         icon: ClipboardList },
+        { view: "ltp-shortfalls",    label: "Shortfalls",    icon: AlertTriangle },
+        { view: "ltp-payment",       label: "Payments",      icon: CreditCard },
+        { view: "ltp-documents",     label: "Documents",     icon: FolderClosed },
+        { view: "ltp-fees",          label: "Reports",       icon: BarChart3 },
+        { view: "ltp-profile",       label: "Settings",      icon: Settings },
       ],
     },
   ],
+
+  // ----------------------------------------------------------------
+  // OFFICER — Zonal Head | Director | Additional Commissioner | Commissioner
+  // ----------------------------------------------------------------
   OFFICER: [
     {
-      label: "Workspace",
-      items: [{ view: "officer-dashboard", label: "Dashboard", icon: LayoutDashboard }],
-    },
-    {
-      label: "Review",
+      label: "",
       items: [
-        { view: "officer-applications", label: "Assigned Queue", icon: ClipboardCheck },
-        { view: "officer-review", label: "Application Review", icon: FileSearch },
-        { view: "officer-documents", label: "Document Review", icon: FileCheck2 },
-      ],
-    },
-    {
-      label: "Tracking",
-      items: [
-        { view: "ltp-shortfalls", label: "Shortfalls", icon: AlertTriangle },
-        { view: "ltp-notifications", label: "Notifications", icon: Bell },
-      ],
-    },
-    {
-      label: "Account",
-      items: [{ view: "ltp-profile", label: "Profile", icon: User }],
-    },
-  ],
-  ADMIN: [
-    {
-      label: "Administration",
-      items: [{ view: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard }],
-    },
-    {
-      label: "Access Control",
-      items: [
-        { view: "admin-users", label: "Users", icon: Users },
-        { view: "admin-roles", label: "Roles & Permissions", icon: ShieldCheck },
-      ],
-    },
-    {
-      label: "Configuration",
-      items: [
-        { view: "admin-application-types", label: "Application Types", icon: FileCog },
-        { view: "admin-fee-structures", label: "Fee Structures", icon: Calculator },
-        { view: "admin-workflow", label: "Workflow Stages", icon: Workflow },
-        { view: "admin-templates", label: "Notification / SMS", icon: MailWarning },
-        { view: "admin-settings", label: "System Settings", icon: Settings },
-      ],
-    },
-    {
-      label: "Monitoring",
-      items: [
-        { view: "admin-audit", label: "Audit Logs", icon: History },
-        { view: "ltp-notifications", label: "Notifications", icon: Bell },
+        { view: "officer-dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+        { view: "officer-applications", label: "Applications", icon: FileStack },
+        { view: "officer-tasks",        label: "Tasks",        icon: ClipboardList },
+        { view: "officer-shortfalls",   label: "Shortfalls",   icon: AlertTriangle },
+        { view: "officer-payments",     label: "Payments",     icon: CreditCard },
+        { view: "officer-documents",    label: "Documents",    icon: FolderClosed },
+        { view: "officer-reports",      label: "Reports",      icon: BarChart3 },
+        { view: "officer-settings",     label: "Settings",     icon: Settings },
       ],
     },
   ],
-  PROJECT_MANAGER: [
+
+  // ----------------------------------------------------------------
+  // SUPER_ADMIN — full system access including admin configuration
+  // ----------------------------------------------------------------
+  SUPER_ADMIN: [
     {
-      label: "Overview",
-      items: [{ view: "pm-dashboard", label: "Dashboard", icon: LayoutDashboard }],
-    },
-    {
-      label: "Monitoring",
+      label: "",
       items: [
-        { view: "pm-applications", label: "Applications", icon: FileStack },
-        { view: "pm-workflow", label: "Workflow Monitor", icon: Activity },
-        { view: "pm-officers", label: "Officer Progress", icon: Users },
-        { view: "pm-sla", label: "SLA & Delays", icon: Gauge },
-      ],
-    },
-    {
-      label: "Reports",
-      items: [
-        { view: "pm-reports", label: "Progress Reports", icon: BarChart3 },
-        { view: "pm-shortfalls", label: "Shortfalls", icon: AlertTriangle },
-      ],
-    },
-    {
-      label: "Communication",
-      items: [
-        { view: "ltp-notifications", label: "Notifications", icon: Bell },
-      ],
-    },
-    {
-      label: "Help",
-      items: [
-        { view: "pm-help", label: "Help & Support", icon: CircleHelp },
+        { view: "admin-dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+        { view: "admin-applications", label: "Applications", icon: FileStack },
+        { view: "admin-workflow",     label: "Tasks",        icon: ClipboardList },
+        { view: "admin-shortfalls",   label: "Shortfalls",   icon: AlertTriangle },
+        { view: "admin-payments",     label: "Payments",     icon: CreditCard },
+        { view: "admin-documents",    label: "Documents",    icon: FolderClosed },
+        { view: "admin-reports",      label: "Reports",      icon: BarChart3 },
+        { view: "admin-settings",     label: "Settings",     icon: Settings },
       ],
     },
   ],

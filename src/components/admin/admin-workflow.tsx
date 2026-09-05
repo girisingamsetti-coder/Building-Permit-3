@@ -236,7 +236,7 @@ export function AdminWorkflow() {
   const defaultStages = totalStages - customizedStages;
   const boundRoles = new Set(WORKFLOW_STAGES.map((s) => effectiveRole(s, overrides[s.key]))).size;
 
-  const roleOptions = Object.values(roles).filter((r) => r.key !== "ADMIN");
+  const roleOptions = Object.values(roles).filter((r) => r.key !== "SUPER_ADMIN");
 
   // Group stages by category
   const grouped: Record<CategoryKey, WorkflowStage[]> = { intake: [], scrutiny: [], approval: [], post: [] };

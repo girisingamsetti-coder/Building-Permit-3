@@ -3,21 +3,54 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
-import { NAV } from "./nav-config";
+import { getDynamicNav } from "@/lib/permissions";
 import { ROLES } from "@/data/mock-data";
-import { Building2, ChevronLeft, LogOut, ShieldCheck, ExternalLink } from "lucide-react";
+import {
+  LayoutDashboard, FileStack, ClipboardList, AlertTriangle,
+  CreditCard, FolderClosed, BarChart3, Settings,
+  Building2, ChevronLeft, LogOut,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import type { ViewKey } from "@/types";
+
+// Icon map keyed by the module's permKey
+const MODULE_ICONS: Record<string, LucideIcon> = {
+  dashboard:    LayoutDashboard,
+  applications: FileStack,
+  tasks:        ClipboardList,
+  shortfalls:   AlertTriangle,
+  payments:     CreditCard,
+  documents:    FolderClosed,
+  reports:      BarChart3,
+  settings:     Settings,
+};
 
 export function Sidebar() {
-  const { portal, view, navigate, sidebarCollapsed, setSidebarCollapsed, user, logout } =
-    useAppStore();
-  const groups = NAV[portal];
-  const role = user?.role;
-  const roleInfo = role ? ROLES[role] : null;
-  const collapsed = sidebarCollapsed;
+  // Read live mutable `roles` from store — so sidebar re-renders whenever
+  // Super Admin updates any role's permissions via the Roles panel.
+  const portal    = useAppStore((s) => s.portal);
+  const view      = useAppStore((s) => s.view);
+  const user      = useAppStore((s) => s.user);
+  const roles     = useAppStore((s) => s.roles);           // ← live mutable
+  const navigate  = useAppStore((s) => s.navigate);
+  const collapsed = useAppStore((s) => s.sidebarCollapsed);
+  const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
+  const logout    = useAppStore((s) => s.logout);
+
+  // Compute visible nav items dynamically from live permissions.
+  // getDynamicNav filters the 8 modules by the user's current effective
+  // permissions, so any change Super Admin makes to a role propagates here.
+  const navItems = React.useMemo(() => {
+    if (!user) return [];
+    return getDynamicNav(user, portal, roles);
+  }, [user, portal, roles]);
+
+  const roleInfo = user?.role ? ROLES[user.role] : null;
+
+
 
   return (
     <aside
@@ -34,71 +67,55 @@ export function Sidebar() {
         {!collapsed && (
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold leading-tight text-sidebar-foreground">
-              LTP Approval
+              Nirman AP
             </p>
             <p className="truncate text-[11px] text-sidebar-foreground/60">
-              Building Permit Management System
+              Building Permission Authority
             </p>
           </div>
         )}
       </div>
 
-      {/* Portal label */}
-      {!collapsed && (
-        <div className="px-4 pt-4 pb-1">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="size-3.5 text-sidebar-primary" />
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/70">
-              {portal === "LTP" ? "LTP Portal" : portal === "OFFICER" ? "Officer Workspace" : portal === "PROJECT_MANAGER" ? "Project Manager" : "Administration"}
-            </span>
-          </div>
-        </div>
-      )}
 
-      {/* Nav */}
+
+
+      {/* Dynamic Nav — re-renders whenever roles change */}
       <ScrollArea className="flex-1 px-2 py-2">
-        <nav className="space-y-4">
-          {groups.map((group) => (
-            <div key={group.label} className="space-y-1">
-              {!collapsed && (
-                <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">
-                  {group.label}
-                </p>
-              )}
-              <ul className="space-y-0.5">
-                {group.items.map((item) => {
-                  const active = view === item.view;
-                  const Icon = item.icon;
-                  return (
-                    <li key={item.view}>
-                      <button
-                        onClick={() => navigate(item.view)}
-                        title={collapsed ? item.label : undefined}
-                        className={cn(
-                          "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                          collapsed && "justify-center px-0",
-                          active
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
-                            : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
-                        )}
-                      >
-                        <Icon
-                          className={cn(
-                            "size-4 shrink-0 transition-transform",
-                            active ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"
-                          )}
-                        />
-                        {!collapsed && <span className="truncate">{item.label}</span>}
-                        {active && !collapsed && (
-                          <span className="ml-auto size-1.5 rounded-full bg-sidebar-primary" />
-                        )}
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
+        <nav>
+          <ul className="space-y-0.5">
+            {navItems.map((item) => {
+              const active = view === item.view;
+              const Icon = MODULE_ICONS[item.permKey] ?? LayoutDashboard;
+              return (
+                <li key={item.permKey}>
+                  <button
+                    onClick={() => navigate(item.view)}
+                    title={collapsed ? item.label : undefined}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                      collapsed && "justify-center px-0",
+                      active
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm"
+                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                    )}
+                  >
+                    <Icon
+                      className={cn(
+                        "size-4 shrink-0 transition-transform",
+                        active
+                          ? "text-sidebar-primary"
+                          : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground"
+                      )}
+                    />
+                    {!collapsed && <span className="truncate">{item.label}</span>}
+                    {active && !collapsed && (
+                      <span className="ml-auto size-1.5 rounded-full bg-sidebar-primary" />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </nav>
       </ScrollArea>
 
@@ -143,7 +160,7 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setSidebarCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-md hover:text-foreground hover:border-primary/40 transition-colors"
+        className="absolute -right-3 top-1/2 -translate-y-1/2 z-40 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-md hover:text-foreground hover:border-primary/40 transition-colors"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
         <ChevronLeft className={cn("size-3.5 transition-transform", collapsed && "rotate-180")} />
@@ -161,11 +178,11 @@ function Avatar({ color, name }: { color?: string; name?: string }) {
     .toUpperCase();
   const colorMap: Record<string, string> = {
     emerald: "bg-emerald-500",
-    teal: "bg-teal-500",
-    cyan: "bg-cyan-500",
-    amber: "bg-amber-500",
-    rose: "bg-rose-500",
-    slate: "bg-slate-500",
+    teal:    "bg-teal-500",
+    cyan:    "bg-cyan-500",
+    amber:   "bg-amber-500",
+    rose:    "bg-rose-500",
+    slate:   "bg-slate-500",
   };
   return (
     <div
