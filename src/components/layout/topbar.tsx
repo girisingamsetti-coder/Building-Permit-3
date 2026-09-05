@@ -508,7 +508,7 @@ export function Topbar() {
       </div>
 
         {/* Date Filter */}
-        <Button variant="outline" size="sm" className="h-9 gap-2 px-3 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex">
+        <Button variant="outline" size="sm" className="h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full">
           <Calendar className="size-4" />
           <span>Date filter</span>
           <ChevronDown className="size-3.5 opacity-50 ml-1" />

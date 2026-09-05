@@ -32,6 +32,7 @@ export function DonutChart({
   centerLabel?: string;
   centerValue?: string | number;
 }) {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const total = data.reduce((sum, d) => sum + d.value, 0);
   const radius = (size - thickness) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -66,16 +67,22 @@ export function DonutChart({
               fill="none" stroke="currentColor" strokeWidth={thickness}
               className="text-muted/20"
             />
-            {segmentData.map((seg) => (
+            {segmentData.map((seg, i) => (
               <circle
                 key={seg.key}
                 cx={size / 2} cy={size / 2} r={radius}
                 fill="none"
                 stroke={seg.color}
-                strokeWidth={thickness}
+                strokeWidth={hoveredIndex === i ? thickness + 4 : thickness}
                 strokeDasharray={`${seg.dash} ${circumference - seg.dash}`}
                 strokeDashoffset={-seg.offset}
-                className="transition-all duration-300"
+                className="cursor-pointer transition-all duration-200"
+                style={{
+                  opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4,
+                  filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.25))' : 'none',
+                }}
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
               />
             ))}
           </svg>
@@ -93,14 +100,20 @@ export function DonutChart({
         {data.map((d, i) => (
           <div
             key={i}
-            className="grid grid-cols-[1fr_auto_auto] items-center gap-2 text-xs leading-[26px]"
+            className="grid grid-cols-[1fr_auto_auto] items-center gap-2 text-xs leading-[26px] cursor-pointer rounded px-1 transition-all duration-200"
+            style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4 }}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
           >
             <span className="flex min-w-0 items-center gap-1.5">
               <span
-                className="size-2 shrink-0 rounded-full"
-                style={{ background: d.color ?? getDefaultColor(i) }}
+                className="size-2 shrink-0 rounded-full transition-all duration-200"
+                style={{
+                  background: d.color ?? getDefaultColor(i),
+                  transform: hoveredIndex === i ? 'scale(1.5)' : 'scale(1)',
+                }}
               />
-              <span className="truncate text-muted-foreground" title={d.label}>{d.label}</span>
+              <span className="truncate font-medium" style={{ color: hoveredIndex === i ? (d.color ?? getDefaultColor(i)) : undefined }} title={d.label}>{d.label}</span>
             </span>
             <span className="text-right font-semibold tabular-nums text-foreground">{d.value}</span>
             <span className="w-9 text-right tabular-nums text-muted-foreground">
@@ -125,6 +138,8 @@ export function BarChart({
   barHeight?: number;
   showValues?: boolean;
 }) {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+
   if (data.length === 0) {
     return (
       <div className="flex h-full min-h-[180px] items-center justify-center">
@@ -137,9 +152,19 @@ export function BarChart({
   return (
     <div className="space-y-1.5">
       {data.map((d, i) => (
-        <div key={i} className="space-y-0.5">
+        <div
+          key={i}
+          className="space-y-0.5 cursor-pointer rounded px-1 transition-all duration-200"
+          style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.5 }}
+          onMouseEnter={() => setHoveredIndex(i)}
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
           <div className="flex items-center justify-between text-xs leading-[20px]">
-            <span className="truncate font-medium" title={d.label}>{d.label}</span>
+            <span
+              className="truncate font-medium transition-all duration-200"
+              style={{ color: hoveredIndex === i ? (d.color ?? getDefaultColor(i)) : undefined }}
+              title={d.label}
+            >{d.label}</span>
             {showValues && <span className="font-semibold tabular-nums">{d.value}</span>}
           </div>
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/40">
@@ -148,6 +173,9 @@ export function BarChart({
               style={{
                 width: `${(d.value / maxVal) * 100}%`,
                 background: d.color ?? getDefaultColor(i),
+                filter: hoveredIndex === i ? 'brightness(1.2)' : 'none',
+                transform: hoveredIndex === i ? 'scaleY(1.4)' : 'scaleY(1)',
+                transformOrigin: 'center',
               }}
             />
           </div>

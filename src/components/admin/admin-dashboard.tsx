@@ -168,43 +168,27 @@ export function AdminDashboard() {
         {/* Analytics & Visual Overview */}
         <div>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer relative">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer relative flex flex-col">
               <h3 className="text-xs font-bold text-slate-800 mb-2">Pipeline</h3>
-              <PipelineRingChart />
+              <div className="flex-1">
+                <PipelineRingChart />
+              </div>
             </div>
 
             <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
               <h3 className="text-xs font-bold text-slate-800 mb-1">Applications by stage</h3>
-              <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="flex-1 flex flex-col">
                 <RoseStageChart />
-                {/* Legend */}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1 w-full px-2">
-                  {[
-                    { label: "Approved", color: "#64748b" },
-                    { label: "TPA", color: "#0ea5e9" },
-                    { label: "With applicant", color: "#f59e0b" },
-                    { label: "ZAD/ZDD", color: "#f43f5e" },
-                    { label: "Director", color: "#94a3b8" },
-                    { label: "Addl Comr.", color: "#d97706" },
-                    { label: "ZJD", color: "#e11d48" },
-                    { label: "Commissioner", color: "#fb7185" },
-                  ].map(item => (
-                    <div key={item.label} className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                      <span className="text-[9px] font-bold text-slate-700 truncate">{item.label}</span>
-                    </div>
-                  ))}
-                </div>
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold text-slate-800">Applicant-Side Pipeline</h3>
                 <span className="text-lg font-bold text-slate-800">187</span>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="flex-1 flex flex-col justify-end space-y-1.5">
                 <PipelineBar label="Draft — not yet filed" count="35" color="bg-slate-400" percent={35 / 187} />
                 <PipelineBar label="Filed, awaiting a drawing" count="20" color="bg-slate-500" percent={20 / 187} />
                 <PipelineBar label="In automated scrutiny" count="33" color="bg-sky-500" percent={33 / 187} />
@@ -303,25 +287,59 @@ export function AdminDashboard() {
             <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
               <h3 className="text-xs font-bold text-slate-800 mb-6">Automated scrutiny</h3>
 
-              <div className="flex justify-center mb-4">
-                <div className="relative size-24">
-                  <svg viewBox="0 0 100 100" className="-rotate-90 w-full h-full">
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" strokeWidth="16" strokeDasharray="251.2" strokeDashoffset="75.36" />
-                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#ef4444" strokeWidth="16" strokeDasharray="251.2" strokeDashoffset="175.84" className="rotate-[252deg] origin-center" />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-bold text-slate-800">499</span>
-                    <span className="text-[10px] font-bold text-slate-500">RUNS</span>
-                  </div>
-                </div>
+              <div className="flex-1 flex justify-center items-center mb-4">
+                {(() => {
+                  const size = 128;
+                  const thickness = 22;
+                  const radius = (size - thickness) / 2;
+                  const circumference = 2 * Math.PI * radius;
+                  const GAP = 10; // wide gap for visible white space between rounded caps
+                  const segments = [
+                    { label: "Passed",  value: 348, color: "#10b981" },
+                    { label: "Failed",  value: 150, color: "#ef4444" },
+                    { label: "Running", value: 1,   color: "#94a3b8" },
+                  ];
+                  const total = segments.reduce((s, d) => s + d.value, 0);
+                  let offset = 0;
+                  return (
+                    <div className="relative" style={{ width: size, height: size }}>
+                      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+                        {/* Track */}
+                        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="#f1f5f9" strokeWidth={thickness} />
+                        {segments.map((seg, i) => {
+                          const dash = Math.max(0, (seg.value / total) * circumference - GAP);
+                          const gap = circumference - dash;
+                          const el = (
+                            <circle
+                              key={i}
+                              cx={size/2} cy={size/2} r={radius}
+                              fill="none"
+                              stroke={seg.color}
+                              strokeWidth={thickness}
+                              strokeDasharray={`${dash} ${gap}`}
+                              strokeDashoffset={-offset}
+                              strokeLinecap="round"
+                              className="transition-all duration-200 cursor-pointer hover:brightness-110"
+                            />
+                          );
+                          offset += (seg.value / total) * circumference;
+                          return el;
+                        })}
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-xl font-bold text-slate-800">499</span>
+                        <span className="text-[10px] font-bold text-slate-500">RUNS</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
-              <div className="space-y-1.5 mb-4">
+              <div className="flex-1 flex flex-col justify-center space-y-1.5">
                 <StatusRow label="Passed" count="348" percent="70%" color="bg-emerald-500" />
                 <StatusRow label="Failed" count="150" percent="30%" color="bg-rose-500" />
                 <StatusRow label="Running" count="1" percent="0%" color="bg-slate-400" />
               </div>
-
 
             </div>
 
@@ -698,7 +716,7 @@ function PolarStatusChart() {
             stroke="white"
             strokeWidth="1"
             strokeLinejoin="round"
-            className="transition-all duration-300 hover:opacity-80 cursor-pointer"
+            className="cursor-pointer transition-all duration-200 hover:brightness-110 hover:drop-shadow-lg"
           />
         );
       })}
@@ -711,15 +729,17 @@ function PolarStatusChart() {
   );
 }
 function RoseStageChart() {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+
   const data = [
-    { label: "Approved", value: 21, color: "#64748b", colorFrom: "#f1f5f9", id: "stage0" },
-    { label: "TPA", value: 18, color: "#0ea5e9", colorFrom: "#e0f2fe", id: "stage1" },
-    { label: "With applicant", value: 14, color: "#f59e0b", colorFrom: "#fef3c7", id: "stage2" },
-    { label: "ZAD/ZDD", value: 9, color: "#f43f5e", colorFrom: "#ffe4e6", id: "stage3" },
-    { label: "Director", value: 4, color: "#94a3b8", colorFrom: "#f8fafc", id: "stage4" },
-    { label: "Addl Comr.", value: 3, color: "#d97706", colorFrom: "#fef3c7", id: "stage5" },
-    { label: "ZJD", value: 2, color: "#e11d48", colorFrom: "#ffe4e6", id: "stage6" },
-    { label: "Commissioner", value: 2, color: "#fb7185", colorFrom: "#fff1f2", id: "stage7" },
+    { label: "Approved", value: 21, color: "#10b981", colorFrom: "#d1fae5", id: "stage0" },
+    { label: "TPA", value: 18, color: "#3b82f6", colorFrom: "#dbeafe", id: "stage1" },
+    { label: "With applicant", value: 14, color: "#f43f5e", colorFrom: "#ffe4e6", id: "stage2" },
+    { label: "ZAD/ZDD", value: 9, color: "#8b5cf6", colorFrom: "#ede9fe", id: "stage3" },
+    { label: "Director", value: 4, color: "#0ea5e9", colorFrom: "#e0f2fe", id: "stage4" },
+    { label: "Addl Comr.", value: 3, color: "#eab308", colorFrom: "#fef9c3", id: "stage5" },
+    { label: "ZJD", value: 2, color: "#f97316", colorFrom: "#ffedd5", id: "stage6" },
+    { label: "Commissioner", value: 2, color: "#d946ef", colorFrom: "#fae8ff", id: "stage7" },
   ];
 
   const maxVal = Math.max(...data.map(d => d.value));
@@ -730,59 +750,85 @@ function RoseStageChart() {
   const sliceAngle = (2 * Math.PI) / data.length;
 
   return (
-    <svg viewBox="0 0 180 180" className="w-full max-w-[260px] h-auto">
-      <defs>
-        {data.map((d) => {
+    <div className="flex flex-col items-center justify-between gap-2 h-full">
+      <div className="flex-1 flex items-center justify-center">
+        <svg viewBox="0 0 180 180" className="w-full max-w-[260px] h-auto">
+          <defs>
+          {data.map((d) => {
+            const r = minR + (d.value / maxVal) * (maxR - minR);
+            return (
+              <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor={d.colorFrom} />
+                <stop offset="100%" stopColor={d.color} />
+              </radialGradient>
+            );
+          })}
+          </defs>
+          {data.map((d, i) => {
           const r = minR + (d.value / maxVal) * (maxR - minR);
+          const startAngle = i * sliceAngle - Math.PI / 2;
+          const endAngle = startAngle + sliceAngle;
+          const gapAngle = 0.04;
+
+          const x1 = cx + r * Math.cos(startAngle + gapAngle);
+          const y1 = cy + r * Math.sin(startAngle + gapAngle);
+          const x2 = cx + r * Math.cos(endAngle - gapAngle);
+          const y2 = cy + r * Math.sin(endAngle - gapAngle);
+          const xi1 = cx + minR * Math.cos(startAngle + gapAngle);
+          const yi1 = cy + minR * Math.sin(startAngle + gapAngle);
+          const xi2 = cx + minR * Math.cos(endAngle - gapAngle);
+          const yi2 = cy + minR * Math.sin(endAngle - gapAngle);
+
+          const path = `M ${xi1} ${yi1} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${xi2} ${yi2} A ${minR} ${minR} 0 0 0 ${xi1} ${yi1} Z`;
+
+          const midAngle = (startAngle + endAngle) / 2;
+          const labelR = r * 0.65 + minR * 0.35;
+          const lx = cx + labelR * Math.cos(midAngle);
+          const ly = cy + labelR * Math.sin(midAngle);
+
           return (
-            <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor={d.colorFrom} />
-              <stop offset="100%" stopColor={d.color} />
-            </radialGradient>
+            <g
+              key={i}
+              className="cursor-pointer transition-all duration-200 origin-center"
+              style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.25))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none', transform: hoveredIndex === i ? 'scale(1.03)' : 'scale(1)' }}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
+              {d.value >= 9 && (
+                <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
+                  {d.value}
+                </text>
+              )}
+            </g>
           );
         })}
-      </defs>
-      {data.map((d, i) => {
-        const r = minR + (d.value / maxVal) * (maxR - minR);
-        const startAngle = i * sliceAngle - Math.PI / 2;
-        const endAngle = startAngle + sliceAngle;
-        const gapAngle = 0.04;
+        {/* Center circle */}
+        <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
+        </svg>
+      </div>
 
-        const x1 = cx + r * Math.cos(startAngle + gapAngle);
-        const y1 = cy + r * Math.sin(startAngle + gapAngle);
-        const x2 = cx + r * Math.cos(endAngle - gapAngle);
-        const y2 = cy + r * Math.sin(endAngle - gapAngle);
-        const xi1 = cx + minR * Math.cos(startAngle + gapAngle);
-        const yi1 = cy + minR * Math.sin(startAngle + gapAngle);
-        const xi2 = cx + minR * Math.cos(endAngle - gapAngle);
-        const yi2 = cy + minR * Math.sin(endAngle - gapAngle);
-
-        const path = `M ${xi1} ${yi1} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${xi2} ${yi2} A ${minR} ${minR} 0 0 0 ${xi1} ${yi1} Z`;
-
-        // Label position at midpoint angle
-        const midAngle = (startAngle + endAngle) / 2;
-        const labelR = r * 0.65 + minR * 0.35;
-        const lx = cx + labelR * Math.cos(midAngle);
-        const ly = cy + labelR * Math.sin(midAngle);
-
-        return (
-          <g key={i} className="cursor-pointer transition-opacity hover:opacity-80">
-            <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
-            {d.value >= 9 && (
-              <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
-                {d.value}
-              </text>
-            )}
-          </g>
-        );
-      })}
-      {/* Center circle */}
-      <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
-    </svg>
+      {/* Inline legend with hover highlight */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 w-full px-2">
+        {data.map((d, i) => (
+          <div
+            key={d.label}
+            className="flex items-center gap-1.5 transition-all duration-200 cursor-pointer rounded px-1"
+            style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4, fontWeight: hoveredIndex === i ? 800 : undefined }}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div className="w-2 h-2 rounded-full shrink-0 transition-all duration-200" style={{ backgroundColor: d.color, transform: hoveredIndex === i ? 'scale(1.4)' : 'scale(1)' }} />
+            <span className="text-[9px] font-bold text-slate-700 truncate">{d.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
 function PipelineRingChart() {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
   const cx = 100, cy = 100;
   const R = 64;
   const rW = 18;
@@ -826,9 +872,9 @@ function PipelineRingChart() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center justify-between gap-3 h-full">
       {/* Chart */}
-      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[220px] mx-auto overflow-visible">
+      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[260px] mx-auto overflow-visible">
         <defs>
           {segments.map((s) => (
             <radialGradient key={s.id} id={s.id} cx={cx} cy={cy} r={R + rW / 2} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
@@ -841,15 +887,18 @@ function PipelineRingChart() {
         <circle cx={cx} cy={cy} r={guideR} fill="none" stroke="#e2e8f0" strokeWidth="1" />
 
         {/* Thick colored segments */}
-        {placed.map((s) => (
+        {placed.map((s, i) => (
           <path
             key={s.num}
             d={arcPath(s.startAngle, s.endAngle, R)}
             fill="none"
             stroke={`url(#${s.id})`}
-            strokeWidth={rW}
+            strokeWidth={hoveredIndex === i ? rW + 4 : rW}
             strokeLinecap="round"
-            className="cursor-pointer transition-opacity hover:opacity-80"
+            className="cursor-pointer transition-all duration-200"
+            style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 8px rgba(0,0,0,0.3))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none' }}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
           />
         ))}
 
@@ -875,11 +924,20 @@ function PipelineRingChart() {
 
       {/* Legend at bottom */}
       <div className="w-full space-y-1.5 px-1">
-        {placed.map((s) => (
-          <div key={s.num} className="flex items-center justify-center gap-4">
+        {placed.map((s, i) => (
+          <div
+            key={s.num}
+            className="flex items-center justify-center gap-4 cursor-pointer rounded px-1 transition-all duration-200"
+            style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4 }}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0" style={{ backgroundColor: s.color }}>{s.num}</span>
-              <span className="text-[10px] text-slate-800 font-bold">{s.label}</span>
+              <span
+                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0 transition-all duration-200"
+                style={{ backgroundColor: s.color, transform: hoveredIndex === i ? 'scale(1.3)' : 'scale(1)' }}
+              >{s.num}</span>
+              <span className="text-[10px] font-bold" style={{ color: hoveredIndex === i ? s.color : '#1e293b' }}>{s.label}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-bold text-slate-800">{s.value}</span>
