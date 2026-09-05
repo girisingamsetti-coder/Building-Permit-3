@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--max-old-space-size=1024' next dev -H 0.0.0.0 -p 3000",
     "dev:turbo": "NODE_OPTIONS='--max-old-space-size=1024' next dev -H 0.0.0.0 -p 3000 --no-turbopack",
-    "build": "next build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/",
+    "build": "next build",
     "start": "NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000 node .next/standalone/server.js",
     "preview": "NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000 node .next/standalone/server.js",
     "lint": "eslint .",
