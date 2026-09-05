@@ -346,9 +346,10 @@ function RV({ label, value }: { label: string; value?: string }) {
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export function LtpCreateApplication() {
+export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {}) {
   const { user, navigate, createApplication, openApplication } = useAppStore();
   const { toast } = useToast();
+  const isModal = !!onClose;
 
   // ---- Pre-wizard: type selection ----
   const [typeSelected, setTypeSelected] = React.useState(false);
@@ -577,7 +578,7 @@ export function LtpCreateApplication() {
   if (!typeSelected) {
     return (
       <div className="space-y-6">
-        <PageBackButton fallbackView="ltp-applications" fallbackLabel="My Applications" />
+        {!isModal && <PageBackButton fallbackView="ltp-applications" fallbackLabel="My Applications" />}
         <div className="flex items-center gap-3">
           <div className="flex size-10 items-center justify-center rounded-xl bg-blue-600 text-white"><FilePlus2 className="size-5" /></div>
           <div>
@@ -657,8 +658,8 @@ export function LtpCreateApplication() {
   // WIZARD LAYOUT
   // ============================================================
   return (
-    <div className="space-y-5 animate-in fade-in duration-200">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="My Applications" />
+    <div className={cn("space-y-5 animate-in fade-in duration-200", isModal && "space-y-3")}>
+      {!isModal && <PageBackButton fallbackView="ltp-applications" fallbackLabel="My Applications" />}
 
       {/* Application header */}
       <div className="flex flex-wrap items-start justify-between gap-2">
