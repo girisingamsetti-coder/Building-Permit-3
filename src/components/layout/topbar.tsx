@@ -447,7 +447,7 @@ export function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:px-5">
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-white dark:bg-background px-3 sm:px-5">
       {/* Mobile menu */}
       <Button
         variant="ghost"
@@ -459,7 +459,7 @@ export function Topbar() {
       </Button>
 
       {/* Search — now functional */}
-      <div ref={searchContainerRef} className="relative hidden flex-1 max-w-md sm:block">
+      <div ref={searchContainerRef} className="relative hidden w-64 sm:block lg:w-96 ml-auto">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <input
           ref={searchInputRef}
@@ -476,8 +476,8 @@ export function Topbar() {
               searchInputRef.current?.blur();
             }
           }}
-          placeholder="Search applications, officers, documents…"
-          className="h-9 w-full rounded-md border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
+          placeholder="Search here..."
+          className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
         />
         {searchQuery && (
           <button
@@ -503,7 +503,7 @@ export function Topbar() {
         )}
       </div>
 
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 ml-1">
 
         {/* Theme toggle */}
         <Button

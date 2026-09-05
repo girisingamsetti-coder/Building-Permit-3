@@ -41,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col min-w-0">
         <Topbar />
         <main className="flex flex-1 flex-col overflow-y-auto">
-          <div className="w-full px-2 py-4 animate-fade-in-up">
+          <div className="w-full px-2 pt-1 pb-4 animate-fade-in-up">
             {children}
           </div>
 
