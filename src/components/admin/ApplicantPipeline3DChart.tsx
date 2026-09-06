@@ -94,8 +94,8 @@ export function ApplicantPipeline3DChart({
   }
 
   return (
-    <div className={cn("flex flex-col w-full h-full gap-4", className)}>
-      <div className="relative w-full max-w-[140px] mx-auto aspect-square flex items-center justify-center">
+    <div className={cn("flex flex-col w-full h-full gap-1", className)}>
+      <div className="flex-1 relative w-full max-w-[90%] mx-auto flex items-center justify-center">
         <svg viewBox="0 0 400 400" className="w-full h-full overflow-visible z-10 drop-shadow-xl">
         <defs>
           {segments.map((seg, i) => (
@@ -147,7 +147,7 @@ export function ApplicantPipeline3DChart({
       </div>
 
       {/* Compact 2-col Legend */}
-      <div className="flex-1 grid grid-cols-2 gap-x-3 gap-y-1 px-1 content-end">
+      <div className="flex-1 grid grid-cols-2 gap-x-3 gap-y-1 px-1 content-end -mt-8">
         {rawData.map((d, i) => {
           const color = colors[i % colors.length];
           return (

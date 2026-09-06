@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -196,51 +196,51 @@ export function AdminDashboard() {
         {/* Analytics & Visual Overview */}
         <div>
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-2">
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer relative flex flex-col">
-              <h3 className="text-xs font-bold text-slate-800 mb-2">Pipeline</h3>
-              <div className="flex-1">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer relative flex flex-col min-h-[310px]">
+              <h3 className="text-xs font-bold text-slate-800 mb-0">Pipeline</h3>
+              <div className="flex-1 -mt-8">
                 <PipelineRingChart />
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
-              <h3 className="text-xs font-bold text-slate-800 mb-1">Applications by stage</h3>
-              <div className="flex-1 flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
+              <h3 className="text-xs font-bold text-slate-800 mb-0">Applications by stage</h3>
+              <div className="flex-1 flex flex-col -mt-8">
                 <RoseStageChart />
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer">
-              <div className="flex items-center justify-between mb-4">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer min-h-[310px] flex flex-col">
+              <div className="flex items-center justify-between mb-0">
                 <h3 className="text-xs font-bold text-slate-800">Applicant-Side Pipeline</h3>
                 <span className="text-lg font-bold text-slate-800">187</span>
               </div>
 
-              <div className="flex-1 flex flex-col justify-end items-center">
+              <div className="flex-1 flex flex-col justify-end items-center -mt-8">
                 <ApplicantPipeline3DChart />
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer">
-              <div className="flex justify-between items-center mb-6">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer min-h-[310px] flex flex-col">
+              <div className="flex justify-between items-center mb-0">
                 <h3 className="text-xs font-bold text-slate-800">Applications by status</h3>
                 <a href="#" className="text-xs text-blue-600 hover:underline font-medium">Open the register →</a>
               </div>
 
-              <div className="flex justify-center mt-1 mb-2 px-4">
+              <div className="flex-1 flex justify-center items-center -mt-8 mb-1 px-4">
                 <PolarStatusChart />
               </div>
 
-              <div className="space-y-1">
-                <StatusRow label="Draft" count="35" percent="14%" color="bg-slate-400" />
-                <StatusRow label="Preparing (drawings, documents)" count="59" percent="24%" color="bg-purple-500" />
-                <StatusRow label="Awaiting payment" count="23" percent="9%" color="bg-amber-500" />
-                <StatusRow label="Under departmental review" count="55" percent="22%" color="bg-sky-500" />
-                <StatusRow label="With the applicant (shortfall)" count="15" percent="6%" color="bg-rose-500" />
-                <StatusRow label="Approved" count="21" percent="9%" color="bg-emerald-500" />
+              <div className="space-y-1 -mt-8">
+                <StatusRow label="Draft" count="35" color="bg-slate-400" />
+                <StatusRow label="Preparing (drawings, documents)" count="59" color="bg-purple-500" />
+                <StatusRow label="Awaiting payment" count="23" color="bg-amber-500" />
+                <StatusRow label="Under departmental review" count="55" color="bg-sky-500" />
+                <StatusRow label="With the applicant (shortfall)" count="15" color="bg-rose-500" />
+                <StatusRow label="Approved" count="21" color="bg-emerald-500" />
               </div>
             </div>
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xs font-bold text-slate-800">Fees and collection</h3>
                 <a href="#" className="text-xs text-blue-600 hover:underline font-medium">Register →</a>
@@ -254,7 +254,7 @@ export function AdminDashboard() {
                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                   <div className="h-full bg-emerald-500 w-[70%]"></div>
                 </div>
-                <div className="text-[10px] text-slate-400 mt-1">70%</div>
+
               </div>
 
               <div className="space-y-3 flex-1">
@@ -276,7 +276,7 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
               <h3 className="text-xs font-bold text-slate-800 mb-6">Payment attempts</h3>
 
               <div className="flex items-baseline gap-2 mb-4 mt-1">
@@ -304,12 +304,12 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
               <h3 className="text-xs font-bold text-slate-800 mb-6">Automated scrutiny</h3>
 
               <div className="flex-1 flex justify-center items-center mb-4">
                 {(() => {
-                  const size = 128;
+                  const size = 154;
                   const thickness = 22;
                   const radius = (size - thickness) / 2;
                   const circumference = 2 * Math.PI * radius;
@@ -356,14 +356,14 @@ export function AdminDashboard() {
               </div>
 
               <div className="flex-1 flex flex-col justify-center space-y-1.5">
-                <StatusRow label="Passed" count="348" percent="70%" color="bg-emerald-500" />
-                <StatusRow label="Failed" count="150" percent="30%" color="bg-rose-500" />
-                <StatusRow label="Running" count="1" percent="0%" color="bg-slate-400" />
+                <StatusRow label="Passed" count="348" color="bg-emerald-500" />
+                <StatusRow label="Failed" count="150" color="bg-rose-500" />
+                <StatusRow label="Running" count="1" color="bg-slate-400" />
               </div>
 
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-xs font-bold text-slate-800">Shortfalls</h3>
                 <a href="#" className="text-xs text-blue-600 hover:underline font-medium">Register →</a>
@@ -571,17 +571,14 @@ function PipelineBar({ label, count, color, percent }: { label: string; count: s
   );
 }
 
-function StatusRow({ label, count, percent, color }: { label: string; count: string; percent: string; color: string }) {
+function StatusRow({ label, count, color }: { label: string; count: string; color: string }) {
   return (
     <div className="flex justify-between items-center text-[11px]">
       <div className="flex items-center gap-1.5">
         <div className={cn("w-2 h-2 rounded-full", color)}></div>
         <span className="text-slate-600 truncate max-w-[140px] font-medium">{label}</span>
       </div>
-      <div className="flex gap-4">
-        <span className="font-semibold text-slate-800 tabular-nums">{count}</span>
-        <span className="text-slate-400 w-6 text-right tabular-nums">{percent}</span>
-      </div>
+      <span className="font-semibold text-slate-800 tabular-nums">{count}</span>
     </div>
   );
 }
@@ -703,7 +700,7 @@ function PolarStatusChart() {
   const cy = 95;
 
   return (
-    <svg viewBox="0 0 200 135" className="w-full h-auto max-w-[180px] mx-auto drop-shadow-sm overflow-visible">
+    <svg viewBox="0 0 200 135" className="w-full h-auto max-w-[90%] mx-auto drop-shadow-sm overflow-visible">
       <defs>
         {data.map((d) => {
           const r = minRadius + Math.max(0.15, (d.value / maxVal)) * availableRadius;
@@ -761,9 +758,9 @@ function RoseStageChart() {
   const sliceAngle = (2 * Math.PI) / data.length;
 
   return (
-    <div className="flex flex-col items-center justify-between gap-2 h-full">
-      <div className="flex-1 flex items-center justify-center">
-        <svg viewBox="0 0 180 180" className="w-full max-w-[140px] h-auto">
+    <div className="flex flex-col items-center justify-between gap-0 h-full w-full">
+      <div className="flex-1 flex items-center justify-center w-full">
+        <svg viewBox="0 0 180 180" className="w-full max-w-[90%] h-auto">
           <defs>
             {data.map((d) => {
               const r = minR + (d.value / maxVal) * (maxR - minR);
@@ -807,7 +804,7 @@ function RoseStageChart() {
           <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
         </svg>
       </div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 w-full px-2">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 w-full px-2 -mt-8">
         {data.map((d, i) => (
           <div key={d.label} className="flex items-center gap-1.5 transition-all duration-200 cursor-pointer rounded px-1"
             style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4, fontWeight: hoveredIndex === i ? 800 : undefined }}
@@ -859,8 +856,9 @@ function PipelineRingChart() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-between gap-3 h-full">
-      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[140px] mx-auto overflow-visible">
+    <div className="flex flex-col items-center justify-between gap-0 h-full w-full">
+      <div className="flex-1 flex items-center justify-center w-full">
+        <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[90%] mx-auto overflow-visible" style={{ transform: 'scale(0.9)' }}>
         <defs>
           {segments.map((s) => (
             <radialGradient key={s.id} id={s.id} cx={cx} cy={cy} r={R + rW / 2} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
@@ -891,7 +889,8 @@ function PipelineRingChart() {
         <text x={cx} y={cy + 8} textAnchor="middle" fontSize="5.5" fontWeight="600" fill="#94a3b8" letterSpacing="0.5">TOTAL</text>
         <text x={cx} y={cy + 16} textAnchor="middle" fontSize="4.5" fontWeight="400" fill="#cbd5e1" letterSpacing="0.5">PIPELINE</text>
       </svg>
-      <div className="w-full space-y-1.5 px-1">
+      </div>
+      <div className="w-full space-y-1.5 px-1 -mt-8">
         {placed.map((s, i) => (
           <div key={s.num} className="flex items-center justify-center gap-4 cursor-pointer rounded px-1 transition-all duration-200"
             style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4 }}
@@ -901,10 +900,7 @@ function PipelineRingChart() {
                 style={{ backgroundColor: s.color, transform: hoveredIndex === i ? 'scale(1.3)' : 'scale(1)' }}>{s.num}</span>
               <span className="text-[10px] font-bold" style={{ color: hoveredIndex === i ? s.color : '#1e293b' }}>{s.label}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold text-slate-800">{s.value}</span>
-              <span className="text-[9px] text-slate-400 font-medium">{s.pct}%</span>
-            </div>
+            <span className="text-[10px] font-bold text-slate-800">{s.value}</span>
           </div>
         ))}
       </div>
