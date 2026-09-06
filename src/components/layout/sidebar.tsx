@@ -42,6 +42,8 @@ export function Sidebar() {
   const setDashboardVersion = useAppStore((s) => s.setDashboardVersion);
   const recentActivityVersion = useAppStore((s) => s.recentActivityVersion);
   const setRecentActivityVersion = useAppStore((s) => s.setRecentActivityVersion);
+  const cVersion = useAppStore((s) => s.cVersion);
+  const setCVersion = useAppStore((s) => s.setCVersion);
   const logout    = useAppStore((s) => s.logout);
 
   // Compute visible nav items dynamically from live permissions.
@@ -124,60 +126,62 @@ export function Sidebar() {
           <div className="mt-8 px-2 space-y-4">
             <div>
               {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Dashboard Version</p>}
-              <div className={cn("flex gap-2", collapsed ? "flex-col" : "")}>
-                <Button
-                  variant={dashboardVersion === 'v1' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setDashboardVersion('v1')}
-                >
-                  V1
-                </Button>
-                <Button
-                  variant={dashboardVersion === 'v2' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setDashboardVersion('v2')}
-                >
-                  V2
-                </Button>
-                <Button
-                  variant={dashboardVersion === 'v3' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setDashboardVersion('v3')}
-                >
-                  V3
-                </Button>
+              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
+                {(['v1', 'v2', 'v3'] as const).map(v => (
+                  <button
+                    key={v}
+                    className={cn(
+                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
+                      collapsed && "px-0",
+                      dashboardVersion === v
+                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
+                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                    )}
+                    onClick={() => setDashboardVersion(v)}
+                  >
+                    {v.toUpperCase()}
+                  </button>
+                ))}
               </div>
             </div>
             <div>
               {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Recent Activity</p>}
-              <div className={cn("flex gap-2", collapsed ? "flex-col" : "")}>
-                <Button
-                  variant={recentActivityVersion === 'r1' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setRecentActivityVersion('r1')}
-                >
-                  R1
-                </Button>
-                <Button
-                  variant={recentActivityVersion === 'r2' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setRecentActivityVersion('r2')}
-                >
-                  R2
-                </Button>
-                <Button
-                  variant={recentActivityVersion === 'r3' ? 'default' : 'outline'}
-                  size="sm"
-                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                  onClick={() => setRecentActivityVersion('r3')}
-                >
-                  R3
-                </Button>
+              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
+                {(['r1', 'r2', 'r3'] as const).map(r => (
+                  <button
+                    key={r}
+                    className={cn(
+                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
+                      collapsed && "px-0",
+                      recentActivityVersion === r
+                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
+                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                    )}
+                    onClick={() => setRecentActivityVersion(r)}
+                  >
+                    {r.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Cards</p>}
+              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
+                {(['c1', 'c2', 'c3'] as const).map(c => (
+                  <button
+                    key={c}
+                    className={cn(
+                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
+                      collapsed && "px-0",
+                      cVersion === c
+                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
+                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                    )}
+                    onClick={() => setCVersion(c)}
+                  >
+                    {c.toUpperCase()}
+                  </button>
+                ))}
               </div>
             </div>
           </div>

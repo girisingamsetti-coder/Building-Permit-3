@@ -31,7 +31,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function AdminDashboard() {
-  const { navigate, dashboardVersion, recentActivityVersion } = useAppStore();
+  const { navigate, dashboardVersion, recentActivityVersion, cVersion } = useAppStore();
+
+  if (cVersion === 'c3') {
+    return <DashboardErrorState />;
+  }
 
   return (
     <div className="bg-[#F8F9FB] min-h-screen text-slate-800 font-sans px-2 pt-1 pb-20">
@@ -111,23 +115,42 @@ export function AdminDashboard() {
         {/* Right Sidebar (Recent Activity) - 25% width */}
         <div className="hidden xl:block xl:col-span-1 relative">
           <div className="absolute inset-0">
-            <div className={cn("border rounded-xl shadow-sm h-full flex flex-col overflow-hidden transition-all duration-300",
-              recentActivityVersion === 'r2' ? "border-blue-200 bg-gradient-to-tr from-blue-50/80 via-white to-white shadow-blue-100/50" :
-              recentActivityVersion === 'r3' ? "border-purple-200 bg-gradient-to-tr from-purple-50/80 via-white to-white shadow-purple-100/50" :
-              "border-slate-200 bg-white"
-            )}>
-              <div className="flex items-center justify-between p-4 pb-3 shrink-0 border-b border-slate-100 mb-2">
-                <h3 className="text-sm font-bold text-slate-800">Recent Activity</h3>
+            <div 
+              className={cn("border rounded-xl shadow-sm h-full flex flex-col overflow-hidden transition-all duration-300 relative",
+                recentActivityVersion === 'r2' ? "border-blue-200 shadow-blue-100/50" :
+                recentActivityVersion === 'r3' ? "shadow-purple-100/50 border-transparent" :
+                recentActivityVersion === 'r1' ? "border-cyan-200 shadow-cyan-100/50" :
+                "border-slate-200 bg-white"
+              )}
+              style={
+                recentActivityVersion === 'r1' ? { background: "radial-gradient(ellipse at 100% 50%, #0ea5e940 0%, transparent 60%), white" } :
+                recentActivityVersion === 'r2' ? { background: "radial-gradient(ellipse at 0% 50%, #3b82f640 0%, transparent 60%), white" } :
+                recentActivityVersion === 'r3' ? { background: "radial-gradient(ellipse at 100% 50%, #a855f740 0%, transparent 60%), white" } :
+                undefined
+              }
+            >
+              {recentActivityVersion === 'r3' && (
+                <div className="absolute inset-0 rounded-xl pointer-events-none z-10" style={{ padding: "1.5px", background: `linear-gradient(135deg, #a855f7b0 0%, #a855f700 45%)`, WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude" }} />
+              )}
+              <div className="flex items-center justify-between p-4 pb-3 shrink-0 border-b border-slate-100 mb-2 relative z-20">
+                <button className={cn(
+                  "text-xs font-bold bg-white border shadow-sm px-3 py-1.5 rounded-full transition-colors z-20 relative",
+                  recentActivityVersion === 'r1' ? "border-cyan-200 text-cyan-700 hover:bg-cyan-50" :
+                  recentActivityVersion === 'r2' ? "border-blue-200 text-blue-700 hover:bg-blue-50" :
+                  "border-purple-200 text-purple-700 hover:bg-purple-50"
+                )}>
+                  Recent Activity
+                </button>
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
-                    <input type="text" placeholder="Search..." className="!h-6 w-28 pl-6 pr-2 !py-0 text-[10px] rounded-full border border-slate-200 bg-slate-50 focus:outline-none focus:border-blue-400 transition-colors" />
+                    <input type="text" placeholder="Search..." className="!h-6 w-28 pl-6 pr-2 !py-0 text-[10px] font-bold placeholder:text-slate-400 text-slate-600 rounded-full border border-slate-200 bg-slate-50 focus:outline-none focus:border-blue-400 transition-colors" />
                   </div>
                   <Select defaultValue="all">
-                    <SelectTrigger className="!h-6 w-28 px-2 !py-0 text-[10px] rounded-full border border-slate-200 bg-slate-50 focus:ring-0 focus:border-blue-400">
+                    <SelectTrigger className="!h-6 w-28 px-2 !py-0 text-[10px] font-bold text-slate-400 rounded-full border border-slate-200 bg-slate-50 focus:ring-0 focus:border-blue-400">
                       <SelectValue placeholder="Activity" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl text-xs">
+                    <SelectContent className="rounded-xl text-xs font-medium">
                       <SelectItem value="all" className="text-xs rounded-md">Activity</SelectItem>
                       <SelectItem value="scrutiny" className="text-xs rounded-md">Scrutiny</SelectItem>
                       <SelectItem value="applications" className="text-xs rounded-md">Applications</SelectItem>
@@ -137,7 +160,7 @@ export function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-5 pb-2">
+              <div className="flex-1 overflow-y-auto px-5 pb-2 relative z-20">
                 <div className="relative border-l-2 border-slate-100 ml-2 space-y-2.5 pb-1 pt-0">
                   <ActivityItem
                     appNo="BP/2026/000226"
@@ -208,9 +231,14 @@ export function AdminDashboard() {
             </div>
 
             <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
-              <h3 className="text-xs font-bold text-slate-800 mb-0">Applications by stage</h3>
-              <div className="flex-1 flex flex-col -mt-8">
-                <RoseStageChart />
+              <div className="flex justify-between items-center mb-0">
+                <h3 className="text-xs font-bold text-slate-800">Applications by stage</h3>
+                {cVersion === 'c2' && (
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">73</span>
+                )}
+              </div>
+              <div className={cn("flex-1 flex flex-col", cVersion === 'c2' ? "mt-3" : "-mt-8")}>
+                {cVersion === 'c2' ? <HorizontalBarStageChart /> : <RoseStageChart />}
               </div>
             </div>
 
@@ -220,8 +248,8 @@ export function AdminDashboard() {
                 <span className="text-lg font-bold text-slate-800">187</span>
               </div>
 
-              <div className="flex-1 flex flex-col justify-end items-center -mt-8">
-                <ApplicantPipeline3DChart />
+              <div className={cn("flex-1 flex flex-col justify-end items-center", cVersion === 'c2' ? "mt-4" : "-mt-8")}>
+                {cVersion === 'c2' ? <ApplicantPipelineDonutChart /> : <ApplicantPipeline3DChart />}
               </div>
             </div>
 
@@ -231,16 +259,16 @@ export function AdminDashboard() {
                 <a href="#" className="text-xs text-blue-600 hover:underline font-medium">Open the register →</a>
               </div>
 
-              <div className="flex-1 flex justify-center items-center -mt-8 mb-1 px-4">
-                <PolarStatusChart />
+              <div className={cn("flex-1 flex justify-center items-center mb-1 px-4", cVersion === 'c2' ? "" : "-mt-8")}>
+                {cVersion === 'c2' ? <ColumnStatusChart /> : <PolarStatusChart />}
               </div>
 
-              <div className="space-y-1 -mt-8">
+              <div className={cn("space-y-1", cVersion === 'c2' ? "mb-1 mt-1" : "-mt-8")}>
                 <StatusRow label="Draft" count="35" color="bg-slate-400" />
-                <StatusRow label="Preparing (drawings, documents)" count="59" color="bg-purple-500" />
-                <StatusRow label="Awaiting payment" count="23" color="bg-amber-500" />
-                <StatusRow label="Under departmental review" count="55" color="bg-sky-500" />
-                <StatusRow label="With the applicant (shortfall)" count="15" color="bg-rose-500" />
+                <StatusRow label="Preparing" count="59" color="bg-purple-500" />
+                <StatusRow label="Payment Pending" count="23" color="bg-amber-500" />
+                <StatusRow label="Dept. Review" count="55" color="bg-sky-500" />
+                <StatusRow label="Shortfall" count="15" color="bg-rose-500" />
                 <StatusRow label="Approved" count="21" color="bg-emerald-500" />
               </div>
             </div>
@@ -670,8 +698,13 @@ function WorkloadBar({ name, val, max, color }: { name: string; val: number; max
 
 
 function ActivityItem({ appNo, time, title, desc, user, dot }: { appNo: string; time: string; title: string; desc: string; user: string; dot: string }) {
+  const { recentActivityVersion } = useAppStore();
+  
   return (
-    <div className="relative pl-5 group transition-colors hover:bg-slate-50/80 rounded-md p-1 -ml-1 cursor-pointer">
+    <div className={cn(
+      "relative pl-5 group transition-all duration-200 rounded-md p-2 -mx-2 cursor-pointer",
+      "hover:bg-white hover:shadow-md hover:scale-[1.02] hover:z-10 outline outline-1 outline-transparent hover:outline-slate-200"
+    )}>
       <div className={cn("absolute -left-[22px] top-1.5 size-[11px] rounded-full border-2 border-white shadow-sm", dot)}></div>
       <div className="flex items-center gap-2 mb-0.5">
         <span className="text-xs font-bold text-slate-800">{appNo}</span>
@@ -907,6 +940,209 @@ function PipelineRingChart() {
             <span className="text-[10px] font-bold text-slate-800">{s.value}</span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function HorizontalBarStageChart() {
+  const data = [
+    { label: "Approved", value: 21, color: "#10b981" },
+    { label: "TPA", value: 18, color: "#3b82f6" },
+    { label: "With applicant", value: 14, color: "#f43f5e" },
+    { label: "ZAD/ZDD", value: 9, color: "#8b5cf6" },
+    { label: "Director", value: 4, color: "#0ea5e9" },
+    { label: "Addl Comr.", value: 3, color: "#eab308" },
+    { label: "ZJD", value: 2, color: "#f97316" },
+    { label: "Commissioner", value: 2, color: "#d946ef" },
+  ];
+  const maxVal = Math.max(...data.map(d => d.value));
+
+  return (
+    <div className="flex flex-col justify-center h-full w-full px-1 gap-2.5">
+      {data.map((d, i) => {
+        const percent = (d.value / maxVal) * 100;
+        return (
+          <div key={i} className="flex items-center gap-2">
+            <div className="w-[85px] text-[11px] font-bold text-slate-700 truncate" title={d.label}>
+              {d.label}
+            </div>
+            <div className="flex-1 h-[6px] bg-slate-100 rounded-full overflow-hidden flex items-center">
+              <div className="h-full rounded-full transition-all duration-500" style={{ width: `${percent}%`, backgroundColor: d.color }}></div>
+            </div>
+            <div className="w-6 text-right text-[11px] font-bold text-slate-800 tabular-nums">
+              {d.value}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ApplicantPipelineDonutChart() {
+  const rawData = [
+    { label: "Draft", value: 35 },
+    { label: "Filed", value: 20 },
+    { label: "In Scrutiny", value: 33 },
+    { label: "Scrutiny Failed", value: 19 },
+    { label: "Documents Pending", value: 40 },
+    { label: "Payment Pending", value: 18 },
+    { label: "Payment Declined", value: 8 },
+    { label: "Returned", value: 14 },
+    { label: "Officer Pending", value: 2 },
+  ];
+
+  const colors = [
+    "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", 
+    "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"
+  ];
+
+  const sortedData = [...rawData].sort((a, b) => b.value - a.value);
+  const total = sortedData.reduce((s, d) => s + d.value, 0);
+
+  const labelToColor = sortedData.reduce((acc, d, i) => {
+    acc[d.label] = colors[i % colors.length];
+    return acc;
+  }, {} as Record<string, string>);
+
+  const size = 200;
+  const thickness = 22;
+  const radius = (size - thickness) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const GAP = 14; 
+
+  let offset = 0;
+
+  return (
+    <div className="flex flex-col w-full h-full gap-1">
+      <div className="flex-1 relative w-full max-w-[90%] mx-auto flex items-center justify-center">
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="drop-shadow-sm z-10" style={{ transform: 'rotate(-90deg) scale(0.95)' }}>
+          {sortedData.map((seg, i) => {
+            const targetLength = (seg.value / total) * circumference;
+            const dash = Math.max(0.1, targetLength - GAP);
+            const gap = circumference - dash;
+            
+            const el = (
+              <circle
+                key={i}
+                cx={size / 2} cy={size / 2} r={radius}
+                fill="none"
+                stroke={colors[i % colors.length]}
+                strokeWidth={thickness}
+                strokeDasharray={`${dash} ${gap}`}
+                strokeDashoffset={-offset}
+                strokeLinecap="round"
+                className="transition-all duration-200 cursor-pointer hover:brightness-110"
+              />
+            );
+            offset += targetLength;
+            return el;
+          })}
+        </svg>
+      </div>
+
+      <div className="flex-1 grid grid-cols-2 gap-x-3 gap-y-1 px-1 content-end -mt-8">
+        {rawData.map((d, i) => {
+          const color = labelToColor[d.label];
+          return (
+            <div key={i} className="flex items-center justify-between gap-1.5 text-[10px] min-w-0">
+              <div className="flex items-center gap-1 min-w-0">
+                <div
+                  className="w-2 h-2 shrink-0 rounded-full shadow-sm"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="text-slate-500 truncate font-medium">{d.label}</span>
+              </div>
+              <span className="font-bold text-slate-700 tabular-nums shrink-0">{d.value}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ColumnStatusChart() {
+  const data = [
+    { value: 35, label: "Draft", color: "#3b82f6", colorDark: "#1e3a8a", colorLight: "#93c5fd", id: "col0" },
+    { value: 59, label: "Preparing", color: "#8b5cf6", colorDark: "#4c1d95", colorLight: "#d8b4fe", id: "col1" },
+    { value: 23, label: "Payment", color: "#f59e0b", colorDark: "#713f12", colorLight: "#fcd34d", id: "col2" },
+    { value: 55, label: "Dept. Review", color: "#0ea5e9", colorDark: "#0c4a6e", colorLight: "#7dd3fc", id: "col3" },
+    { value: 15, label: "Shortfall", color: "#f43f5e", colorDark: "#881337", colorLight: "#fda4af", id: "col4" },
+    { value: 21, label: "Approved", color: "#10b981", colorDark: "#064e3b", colorLight: "#6ee7b7", id: "col5" },
+  ];
+
+  const maxVal = Math.max(...data.map(d => d.value));
+  const cx = 200;
+  const cy = 165;
+  const w = 18; 
+  const dx = 8; 
+  const dy = -6; 
+  const gap = 31; 
+  
+  const totalW = data.length * gap - (gap - w);
+  const startX = (cx - totalW) / 2;
+
+  return (
+    <svg viewBox="0 0 200 175" className="w-full h-auto max-w-[90%] mx-auto drop-shadow-sm overflow-visible">
+      <defs>
+        {data.map((d) => (
+          <linearGradient key={d.id} id={d.id} x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stopColor={d.colorDark} />
+            <stop offset="100%" stopColor={d.color} />
+          </linearGradient>
+        ))}
+      </defs>
+      
+      {data.map((d, i) => {
+        const height = Math.max(15, (d.value / maxVal) * 135);
+        const x = startX + i * gap;
+        const y = cy - height;
+        
+        return (
+          <g key={i} className="cursor-pointer transition-transform duration-300 hover:-translate-y-1">
+            <rect x={x} y={y} width={w} height={height} fill={`url(#${d.id})`} stroke="white" strokeWidth="0.5" />
+            <polygon points={`${x},${y} ${x+w},${y} ${x+w+dx},${y+dy} ${x+dx},${y+dy}`} fill={d.colorLight} stroke="white" strokeWidth="0.5" />
+            <polygon points={`${x+w},${y} ${x+w+dx},${y+dy} ${x+w+dx},${y+height+dy} ${x+w},${y+height}`} fill={d.color} stroke="white" strokeWidth="0.5" />
+            
+            <text x={x + w / 2} y={cy - 10} textAnchor="start" fontSize="9" fontWeight="700" fill="white" transform={`rotate(-90 ${x + w / 2} ${cy - 10})`} opacity="0.9">
+              {d.value}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function DashboardErrorState() {
+  const { setCVersion } = useAppStore();
+  
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4 absolute inset-0 z-50">
+      <div className="max-w-md w-full bg-white border border-slate-200 rounded-xl shadow-lg p-8 text-center space-y-6">
+        <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertTriangle className="w-10 h-10 text-rose-600" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">System Error</h2>
+          <p className="text-slate-600">The dashboard could not be loaded due to a critical system error. Please contact your administrator or try again later.</p>
+        </div>
+        <div className="pt-4 flex gap-3 justify-center">
+          <button 
+            onClick={() => setCVersion("c1")}
+            className="px-5 py-2.5 bg-slate-100 text-slate-700 font-semibold rounded-lg hover:bg-slate-200 transition-colors"
+          >
+            Go Back
+          </button>
+          <button 
+            onClick={() => window.location.reload()}
+            className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          >
+            Refresh Page
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -103,6 +103,7 @@ interface AppState {
   theme: "light" | "dark";
   dashboardVersion: "v1" | "v2" | "v3";
   recentActivityVersion: "r1" | "r2" | "r3";
+  cVersion: "c1" | "c2" | "c3";
   // processing flags
   processingAppIds: string[]; // apps currently being processed (scrutiny/payment)
   // navigation history (for smart back button)
@@ -124,6 +125,7 @@ interface AppState {
   toggleTheme: () => void;
   setDashboardVersion: (v: "v1" | "v2" | "v3") => void;
   setRecentActivityVersion: (v: "r1" | "r2" | "r3") => void;
+  setCVersion: (v: "c1" | "c2" | "c3") => void;
 
   // ---- application lifecycle (LTP) ----
   createApplication: (data: {
@@ -287,7 +289,8 @@ export const useAppStore = create<AppState>()(
   mobileNavOpen: false,
   theme: "light",
   dashboardVersion: "v3",
-  recentActivityVersion: "r1",
+  recentActivityVersion: "r3",
+  cVersion: "c1",
   processingAppIds: [],
   viewHistory: [],
 
@@ -341,6 +344,7 @@ export const useAppStore = create<AppState>()(
   toggleTheme: () => set((s) => ({ theme: s.theme === "light" ? "dark" : "light" })),
   setDashboardVersion: (dashboardVersion) => set({ dashboardVersion }),
   setRecentActivityVersion: (recentActivityVersion) => set({ recentActivityVersion }),
+  setCVersion: (cVersion) => set({ cVersion }),
 
   // ---- APPLICATION LIFECYCLE ----
   createApplication: (data) => {

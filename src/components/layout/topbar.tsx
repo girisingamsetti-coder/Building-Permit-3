@@ -44,6 +44,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { timeAgo } from "@/components/design-system/workflow";
 import { RoleBadge } from "@/components/design-system/badges";
 import { useToast } from "@/hooks/use-toast";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import type { NotificationType, RoleKey, ViewKey } from "@/types";
 
 const NOTIF_ICON: Record<NotificationType, string> = {
@@ -410,6 +412,14 @@ export function Topbar() {
   // Search state
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchOpen, setSearchOpen] = React.useState(false);
+  const [dateRange, setDateRange] = React.useState<{ from: Date | undefined; to?: Date | undefined }>({
+    from: undefined,
+  });
+  const [tempDateRange, setTempDateRange] = React.useState<{ from: Date | undefined; to?: Date | undefined }>({
+    from: undefined,
+  });
+  const [datePreset, setDatePreset] = React.useState("Overall");
+  const [isDatePickerOpen, setIsDatePickerOpen] = React.useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const searchContainerRef = React.useRef<HTMLDivElement>(null);
   const { results, loading } = useGlobalSearch(searchQuery);
@@ -515,11 +525,84 @@ export function Topbar() {
         </div>
 
         {/* Date Filter */}
-        <Button variant="outline" size="sm" className="h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full">
-          <Calendar className="size-4" />
-          <span>Date filter</span>
-          <ChevronDown className="size-3.5 opacity-50 ml-1" />
-        </Button>
+        <Popover open={isDatePickerOpen} onOpenChange={(open) => {
+          setIsDatePickerOpen(open);
+          if (open) {
+            setTempDateRange(dateRange);
+          }
+        }}>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className={cn("h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full", dateRange.from && "text-foreground")}>
+              <Calendar className="size-4" />
+              <span>
+                {datePreset !== "Custom" && datePreset !== "Overall" ? (
+                  datePreset
+                ) : dateRange.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "LLL dd, y")} -{" "}
+                      {format(dateRange.to, "LLL dd, y")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "LLL dd, y")
+                  )
+                ) : (
+                  "Date filter"
+                )}
+              </span>
+              <ChevronDown className="size-3.5 opacity-50 ml-1" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3 shadow-lg rounded-xl border-slate-200" align="end">
+            <div className="flex gap-4">
+              <div className="flex flex-col gap-1.5 w-32 shrink-0">
+                {(["Overall", "Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Custom"] as const).map(preset => (
+                  <button
+                    key={preset}
+                    onClick={() => {
+                      setDatePreset(preset);
+                      const now = new Date();
+                      if (preset === "Overall") setTempDateRange({ from: undefined, to: undefined });
+                      else if (preset === "Today") setTempDateRange({ from: startOfDay(now), to: endOfDay(now) });
+                      else if (preset === "Yesterday") setTempDateRange({ from: startOfDay(subDays(now, 1)), to: endOfDay(subDays(now, 1)) });
+                      else if (preset === "Last 7 Days") setTempDateRange({ from: startOfDay(subDays(now, 7)), to: endOfDay(now) });
+                      else if (preset === "Last 30 Days") setTempDateRange({ from: startOfDay(subDays(now, 30)), to: endOfDay(now) });
+                    }}
+                    className={cn(
+                      "text-left px-3 py-1.5 text-[13px] rounded-md transition-colors border",
+                      datePreset === preset 
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-100 font-semibold"
+                        : "bg-slate-50/50 text-slate-700 border-slate-100 hover:bg-slate-100"
+                    )}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+              <div className="border-l border-slate-100 pl-4">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={tempDateRange?.from}
+                  selected={tempDateRange as any}
+                  onSelect={(range) => {
+                    setTempDateRange(range as any);
+                    setDatePreset("Custom");
+                  }}
+                  numberOfMonths={1}
+                  className="p-0"
+                />
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-slate-100 flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsDatePickerOpen(false)} className="text-xs font-semibold px-4">Cancel</Button>
+              <Button size="sm" onClick={() => {
+                setDateRange(tempDateRange);
+                setIsDatePickerOpen(false);
+              }} className="bg-indigo-600 hover:bg-indigo-700 text-xs text-white font-semibold px-5">Apply</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="flex items-center gap-1.5 ml-1">
