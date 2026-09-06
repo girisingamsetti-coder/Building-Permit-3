@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function AdminDashboard() {
-  const { navigate, dashboardVersion } = useAppStore();
+  const { navigate, dashboardVersion, recentActivityVersion } = useAppStore();
 
   return (
     <div className="bg-[#F8F9FB] min-h-screen text-slate-800 font-sans px-2 pt-1 pb-20">
@@ -111,7 +111,11 @@ export function AdminDashboard() {
         {/* Right Sidebar (Recent Activity) - 25% width */}
         <div className="hidden xl:block xl:col-span-1 relative">
           <div className="absolute inset-0">
-            <div className="border border-slate-200 bg-white rounded-xl shadow-sm h-full flex flex-col overflow-hidden">
+            <div className={cn("border rounded-xl shadow-sm h-full flex flex-col overflow-hidden transition-all duration-300",
+              recentActivityVersion === 'r2' ? "border-blue-200 bg-gradient-to-tr from-blue-50/80 via-white to-white shadow-blue-100/50" :
+              recentActivityVersion === 'r3' ? "border-purple-200 bg-gradient-to-tr from-purple-50/80 via-white to-white shadow-purple-100/50" :
+              "border-slate-200 bg-white"
+            )}>
               <div className="flex items-center justify-between p-4 pb-3 shrink-0 border-b border-slate-100 mb-2">
                 <h3 className="text-sm font-bold text-slate-800">Recent Activity</h3>
                 <div className="flex items-center gap-2">

@@ -40,6 +40,8 @@ export function Sidebar() {
   const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
   const dashboardVersion = useAppStore((s) => s.dashboardVersion);
   const setDashboardVersion = useAppStore((s) => s.setDashboardVersion);
+  const recentActivityVersion = useAppStore((s) => s.recentActivityVersion);
+  const setRecentActivityVersion = useAppStore((s) => s.setRecentActivityVersion);
   const logout    = useAppStore((s) => s.logout);
 
   // Compute visible nav items dynamically from live permissions.
@@ -119,33 +121,64 @@ export function Sidebar() {
             })}
           </ul>
 
-          <div className="mt-8 px-2">
-            {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Dashboard Version</p>}
-            <div className={cn("flex gap-2", collapsed ? "flex-col" : "")}>
-              <Button
-                variant={dashboardVersion === 'v1' ? 'default' : 'outline'}
-                size="sm"
-                className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                onClick={() => setDashboardVersion('v1')}
-              >
-                V1
-              </Button>
-              <Button
-                variant={dashboardVersion === 'v2' ? 'default' : 'outline'}
-                size="sm"
-                className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                onClick={() => setDashboardVersion('v2')}
-              >
-                V2
-              </Button>
-              <Button
-                variant={dashboardVersion === 'v3' ? 'default' : 'outline'}
-                size="sm"
-                className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
-                onClick={() => setDashboardVersion('v3')}
-              >
-                V3
-              </Button>
+          <div className="mt-8 px-2 space-y-4">
+            <div>
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Dashboard Version</p>}
+              <div className={cn("flex gap-2", collapsed ? "flex-col" : "")}>
+                <Button
+                  variant={dashboardVersion === 'v1' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setDashboardVersion('v1')}
+                >
+                  V1
+                </Button>
+                <Button
+                  variant={dashboardVersion === 'v2' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setDashboardVersion('v2')}
+                >
+                  V2
+                </Button>
+                <Button
+                  variant={dashboardVersion === 'v3' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setDashboardVersion('v3')}
+                >
+                  V3
+                </Button>
+              </div>
+            </div>
+            <div>
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Recent Activity</p>}
+              <div className={cn("flex gap-2", collapsed ? "flex-col" : "")}>
+                <Button
+                  variant={recentActivityVersion === 'r1' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setRecentActivityVersion('r1')}
+                >
+                  R1
+                </Button>
+                <Button
+                  variant={recentActivityVersion === 'r2' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setRecentActivityVersion('r2')}
+                >
+                  R2
+                </Button>
+                <Button
+                  variant={recentActivityVersion === 'r3' ? 'default' : 'outline'}
+                  size="sm"
+                  className={cn("flex-1", collapsed && "h-8 px-0 text-xs")}
+                  onClick={() => setRecentActivityVersion('r3')}
+                >
+                  R3
+                </Button>
+              </div>
             </div>
           </div>
         </nav>
