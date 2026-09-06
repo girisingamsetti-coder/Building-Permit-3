@@ -107,7 +107,6 @@ export function OfficerDocuments() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="officer-dashboard" />
       <PageHeader
         title="Document Review"
         description="Verify, reject, or raise shortfalls on uploaded documents across all assigned applications."

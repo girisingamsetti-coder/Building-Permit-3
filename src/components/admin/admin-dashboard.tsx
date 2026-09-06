@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import { DonutChart, BarChart } from "@/components/dashboard/charts";
+import { ApplicantPipeline3DChart } from "./ApplicantPipeline3DChart";
 import {
   FileStack,
   Activity,
@@ -209,22 +210,14 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col">
+            <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xs font-bold text-slate-800">Applicant-Side Pipeline</h3>
                 <span className="text-lg font-bold text-slate-800">187</span>
               </div>
 
-              <div className="flex-1 flex flex-col justify-end space-y-1.5">
-                <PipelineBar label="Draft — not yet filed" count="35" color="bg-slate-400" percent={35 / 187} />
-                <PipelineBar label="Filed, awaiting a drawing" count="20" color="bg-slate-500" percent={20 / 187} />
-                <PipelineBar label="In automated scrutiny" count="33" color="bg-sky-500" percent={33 / 187} />
-                <PipelineBar label="Scrutiny failed — correction due" count="19" color="bg-rose-500" percent={19 / 187} />
-                <PipelineBar label="Documents outstanding" count="40" color="bg-amber-500" percent={40 / 187} />
-                <PipelineBar label="Awaiting payment" count="18" color="bg-amber-600" percent={18 / 187} />
-                <PipelineBar label="Payment declined" count="8" color="bg-rose-600" percent={8 / 187} />
-                <PipelineBar label="Returned on a shortfall" count="14" color="bg-rose-400" percent={14 / 187} />
-                <PipelineBar label="Answered — awaiting an officer" count="2" color="bg-slate-300" percent={2 / 187} />
+              <div className="flex-1 flex flex-col justify-end items-center">
+                <ApplicantPipeline3DChart />
               </div>
             </div>
 
@@ -538,7 +531,6 @@ export function AdminDashboard() {
     </div>
   );
 }
-
 function KpiCard({ label, value, icon, gradient }: { label: string; value: string; icon: React.ReactNode; gradient: string }) {
   return (
     <div className={cn("group relative overflow-hidden rounded-xl border border-slate-200 p-4 shadow-sm h-[105px] transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer", gradient)}>
@@ -554,31 +546,14 @@ function KpiCard({ label, value, icon, gradient }: { label: string; value: strin
 function EnhancedAdminKpiCard({ label, value, blobColor, iconBgClass, icon, version }: { label: string; value: string; blobColor: string; iconBgClass: string; icon: React.ReactNode; version: "v1" | "v3" }) {
   const baseClasses = "relative overflow-hidden rounded-2xl bg-white p-4 shadow-sm h-[105px] flex flex-col justify-between transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer";
   const borderClasses = version === "v3" ? "" : "border border-slate-200";
-
   return (
-    <div
-      className={cn(baseClasses, borderClasses)}
-      style={{
-        background: `radial-gradient(circle at 105% 105%, ${blobColor}40 0%, transparent 50%), white`
-      }}
-    >
+    <div className={cn(baseClasses, borderClasses)} style={{ background: `radial-gradient(circle at 105% 105%, ${blobColor}40 0%, transparent 50%), white` }}>
       {version === "v3" && (
-        <div
-          className="absolute inset-0 rounded-2xl pointer-events-none"
-          style={{
-            padding: "1.5px",
-            background: `linear-gradient(135deg, ${blobColor}b0 0%, ${blobColor}00 45%)`,
-            WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-            WebkitMaskComposite: "xor",
-            maskComposite: "exclude",
-          }}
-        />
+        <div className="absolute inset-0 rounded-2xl pointer-events-none" style={{ padding: "1.5px", background: `linear-gradient(135deg, ${blobColor}b0 0%, ${blobColor}00 45%)`, WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)", WebkitMaskComposite: "xor", maskComposite: "exclude" }} />
       )}
       <div className="flex items-start justify-between z-10 relative">
         <p className="text-[13px] font-bold text-slate-500 leading-none mt-1">{label}</p>
-        <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-full shadow-sm bg-white", iconBgClass)}>
-          {icon}
-        </div>
+        <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-full shadow-sm bg-white", iconBgClass)}>{icon}</div>
       </div>
       <p className="text-3xl font-bold tracking-tight text-slate-900 z-10 relative">{value}</p>
     </div>
@@ -692,6 +667,7 @@ function WorkloadBar({ name, val, max, color }: { name: string; val: number; max
   );
 }
 
+
 function ActivityItem({ appNo, time, title, desc, user, dot }: { appNo: string; time: string; title: string; desc: string; user: string; dot: string }) {
   return (
     <div className="relative pl-5 group transition-colors hover:bg-slate-50/80 rounded-md p-1 -ml-1 cursor-pointer">
@@ -709,12 +685,12 @@ function ActivityItem({ appNo, time, title, desc, user, dot }: { appNo: string; 
 
 function PolarStatusChart() {
   const data = [
-    { value: 35, id: "grad0", colorFrom: "#dbeafe", colorTo: "#3b82f6" }, // Draft — blue
-    { value: 59, id: "grad1", colorFrom: "#ede9fe", colorTo: "#8b5cf6" }, // Preparing — violet
-    { value: 23, id: "grad2", colorFrom: "#fef9c3", colorTo: "#eab308" }, // Awaiting payment — amber
-    { value: 55, id: "grad3", colorFrom: "#e0f2fe", colorTo: "#0284c7" }, // Under review — sky
-    { value: 15, id: "grad4", colorFrom: "#ffe4e6", colorTo: "#f43f5e" }, // With applicant — rose
-    { value: 21, id: "grad5", colorFrom: "#d1fae5", colorTo: "#10b981" }, // Approved — emerald
+    { value: 35, id: "grad0", colorFrom: "#dbeafe", colorTo: "#3b82f6" },
+    { value: 59, id: "grad1", colorFrom: "#ede9fe", colorTo: "#8b5cf6" },
+    { value: 23, id: "grad2", colorFrom: "#fef9c3", colorTo: "#eab308" },
+    { value: 55, id: "grad3", colorFrom: "#e0f2fe", colorTo: "#0284c7" },
+    { value: 15, id: "grad4", colorFrom: "#ffe4e6", colorTo: "#f43f5e" },
+    { value: 21, id: "grad5", colorFrom: "#d1fae5", colorTo: "#10b981" },
   ];
 
   const maxVal = Math.max(...data.map(d => d.value));
@@ -727,37 +703,23 @@ function PolarStatusChart() {
   const cy = 95;
 
   return (
-    <svg viewBox="0 0 200 135" className="w-full h-auto drop-shadow-sm overflow-visible">
+    <svg viewBox="0 0 200 135" className="w-full h-auto max-w-[180px] mx-auto drop-shadow-sm overflow-visible">
       <defs>
-        {/* Radial gradients: light at center (cx,cy), dark at outer edge */}
         {data.map((d) => {
           const r = minRadius + Math.max(0.15, (d.value / maxVal)) * availableRadius;
           return (
-            <radialGradient
-              key={d.id}
-              id={d.id}
-              cx={cx}
-              cy={cy}
-              r={r}
-              fx={cx}
-              fy={cy}
-              gradientUnits="userSpaceOnUse"
-            >
+            <radialGradient key={d.id} id={d.id} cx={cx} cy={cy} r={r} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor={d.colorFrom} />
               <stop offset="100%" stopColor={d.colorTo} />
             </radialGradient>
           );
         })}
       </defs>
-
-      {/* Background baseline */}
       <line x1="5" y1={cy} x2="195" y2={cy} stroke="#e2e8f0" strokeWidth="2" strokeLinecap="round" />
-
       {data.map((d, i) => {
         const startAngle = Math.PI - i * sliceAngle;
         const endAngle = Math.PI - (i + 1) * sliceAngle;
         const r = minRadius + Math.max(0.15, (d.value / maxVal)) * availableRadius;
-
         const ox1 = cx + r * Math.cos(startAngle);
         const oy1 = cy - r * Math.sin(startAngle);
         const ox2 = cx + r * Math.cos(endAngle);
@@ -766,32 +728,21 @@ function PolarStatusChart() {
         const iy1 = cy - minRadius * Math.sin(startAngle);
         const ix2 = cx + minRadius * Math.cos(endAngle);
         const iy2 = cy - minRadius * Math.sin(endAngle);
-
         const path = `M ${ix1} ${iy1} L ${ox1} ${oy1} A ${r} ${r} 0 0 1 ${ox2} ${oy2} L ${ix2} ${iy2} A ${minRadius} ${minRadius} 0 0 0 ${ix1} ${iy1} Z`;
-
         return (
-          <path
-            key={i}
-            d={path}
-            fill={`url(#${d.id})`}
-            stroke="white"
-            strokeWidth="1"
-            strokeLinejoin="round"
-            className="cursor-pointer transition-all duration-200 hover:brightness-110 hover:drop-shadow-lg"
-          />
+          <path key={i} d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" strokeLinejoin="round"
+            className="cursor-pointer transition-all duration-200 hover:brightness-110 hover:drop-shadow-lg" />
         );
       })}
-
-      {/* Center circle */}
       <circle cx={cx} cy={cy} r={16} fill="white" stroke="#f1f5f9" strokeWidth="3" />
       <text x={cx} y={cy + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill="#1e293b">246</text>
       <text x={cx} y={cy + 13} textAnchor="middle" fontSize="5" fontWeight="700" fill="#94a3b8" letterSpacing="0.05em">FILES</text>
     </svg>
   );
 }
+
 function RoseStageChart() {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
-
   const data = [
     { label: "Approved", value: 21, color: "#10b981", colorFrom: "#d1fae5", id: "stage0" },
     { label: "TPA", value: 18, color: "#3b82f6", colorFrom: "#dbeafe", id: "stage1" },
@@ -802,7 +753,6 @@ function RoseStageChart() {
     { label: "ZJD", value: 2, color: "#f97316", colorFrom: "#ffedd5", id: "stage6" },
     { label: "Commissioner", value: 2, color: "#d946ef", colorFrom: "#fae8ff", id: "stage7" },
   ];
-
   const maxVal = Math.max(...data.map(d => d.value));
   const minR = 18;
   const maxR = 78;
@@ -813,7 +763,7 @@ function RoseStageChart() {
   return (
     <div className="flex flex-col items-center justify-between gap-2 h-full">
       <div className="flex-1 flex items-center justify-center">
-        <svg viewBox="0 0 180 180" className="w-full max-w-[260px] h-auto">
+        <svg viewBox="0 0 180 180" className="w-full max-w-[140px] h-auto">
           <defs>
             {data.map((d) => {
               const r = minR + (d.value / maxVal) * (maxR - minR);
@@ -830,7 +780,6 @@ function RoseStageChart() {
             const startAngle = i * sliceAngle - Math.PI / 2;
             const endAngle = startAngle + sliceAngle;
             const gapAngle = 0.04;
-
             const x1 = cx + r * Math.cos(startAngle + gapAngle);
             const y1 = cy + r * Math.sin(startAngle + gapAngle);
             const x2 = cx + r * Math.cos(endAngle - gapAngle);
@@ -839,46 +788,30 @@ function RoseStageChart() {
             const yi1 = cy + minR * Math.sin(startAngle + gapAngle);
             const xi2 = cx + minR * Math.cos(endAngle - gapAngle);
             const yi2 = cy + minR * Math.sin(endAngle - gapAngle);
-
             const path = `M ${xi1} ${yi1} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${xi2} ${yi2} A ${minR} ${minR} 0 0 0 ${xi1} ${yi1} Z`;
-
             const midAngle = (startAngle + endAngle) / 2;
             const labelR = r * 0.65 + minR * 0.35;
             const lx = cx + labelR * Math.cos(midAngle);
             const ly = cy + labelR * Math.sin(midAngle);
-
             return (
-              <g
-                key={i}
-                className="cursor-pointer transition-all duration-200 origin-center"
+              <g key={i} className="cursor-pointer transition-all duration-200 origin-center"
                 style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 6px rgba(0,0,0,0.25))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none', transform: hoveredIndex === i ? 'scale(1.03)' : 'scale(1)' }}
-                onMouseEnter={() => setHoveredIndex(i)}
-                onMouseLeave={() => setHoveredIndex(null)}
-              >
+                onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)}>
                 <path d={path} fill={`url(#${d.id})`} stroke="white" strokeWidth="1" />
                 {d.value >= 9 && (
-                  <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">
-                    {d.value}
-                  </text>
+                  <text x={lx} y={ly + 3} textAnchor="middle" fontSize="7" fontWeight="600" fill="white" opacity="0.9">{d.value}</text>
                 )}
               </g>
             );
           })}
-          {/* Center circle */}
           <circle cx={cx} cy={cy} r={minR - 2} fill="white" stroke="#f1f5f9" strokeWidth="2" />
         </svg>
       </div>
-
-      {/* Inline legend with hover highlight */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 w-full px-2">
         {data.map((d, i) => (
-          <div
-            key={d.label}
-            className="flex items-center gap-1.5 transition-all duration-200 cursor-pointer rounded px-1"
+          <div key={d.label} className="flex items-center gap-1.5 transition-all duration-200 cursor-pointer rounded px-1"
             style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4, fontWeight: hoveredIndex === i ? 800 : undefined }}
-            onMouseEnter={() => setHoveredIndex(i)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
+            onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)}>
             <div className="w-2 h-2 rounded-full shrink-0 transition-all duration-200" style={{ backgroundColor: d.color, transform: hoveredIndex === i ? 'scale(1.4)' : 'scale(1)' }} />
             <span className="text-[9px] font-bold text-slate-700 truncate">{d.label}</span>
           </div>
@@ -894,22 +827,16 @@ function PipelineRingChart() {
   const R = 64;
   const rW = 18;
   const guideR = R + rW / 2 + 6;
-
   const segments = [
     { label: "With applicant", value: 187, pct: 76, color: "#f59e0b", colorFrom: "#fef3c7", num: "01", id: "pipe0" },
     { label: "In review desk", value: 38, pct: 15, color: "#0ea5e9", colorFrom: "#e0f2fe", num: "02", id: "pipe1" },
     { label: "Closed", value: 21, pct: 9, color: "#64748b", colorFrom: "#f1f5f9", num: "03", id: "pipe2" },
   ];
-
   const GAP_DEG = 4;
   const total = 360;
   let currentAngle = -90;
 
-  type SegmentData = typeof segments[0] & {
-    startAngle: number; endAngle: number; midAngle: number;
-    junctionAngle: number;
-  };
-
+  type SegmentData = typeof segments[0] & { startAngle: number; endAngle: number; midAngle: number; junctionAngle: number; };
   const placed: SegmentData[] = segments.map((s) => {
     const sweep = s.pct / 100 * (total - segments.length * GAP_DEG);
     const startAngle = currentAngle + GAP_DEG / 2;
@@ -924,7 +851,6 @@ function PipelineRingChart() {
     const rad = (angleDeg * Math.PI) / 180;
     return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
   }
-
   function arcPath(startDeg: number, endDeg: number, r: number) {
     const s = polarToXY(startDeg, r);
     const e = polarToXY(endDeg, r);
@@ -934,8 +860,7 @@ function PipelineRingChart() {
 
   return (
     <div className="flex flex-col items-center justify-between gap-3 h-full">
-      {/* Chart */}
-      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[260px] mx-auto overflow-visible">
+      <svg viewBox="0 0 200 200" className="w-full h-auto max-w-[140px] mx-auto overflow-visible">
         <defs>
           {segments.map((s) => (
             <radialGradient key={s.id} id={s.id} cx={cx} cy={cy} r={R + rW / 2} fx={cx} fy={cy} gradientUnits="userSpaceOnUse">
@@ -944,60 +869,36 @@ function PipelineRingChart() {
             </radialGradient>
           ))}
         </defs>
-        {/* Outer guide circle */}
         <circle cx={cx} cy={cy} r={guideR} fill="none" stroke="#e2e8f0" strokeWidth="1" />
-
-        {/* Thick colored segments */}
         {placed.map((s, i) => (
-          <path
-            key={s.num}
-            d={arcPath(s.startAngle, s.endAngle, R)}
-            fill="none"
-            stroke={`url(#${s.id})`}
-            strokeWidth={hoveredIndex === i ? rW + 4 : rW}
-            strokeLinecap="round"
+          <path key={s.num} d={arcPath(s.startAngle, s.endAngle, R)} fill="none" stroke={`url(#${s.id})`}
+            strokeWidth={hoveredIndex === i ? rW + 4 : rW} strokeLinecap="round"
             className="cursor-pointer transition-all duration-200"
             style={{ filter: hoveredIndex === i ? 'brightness(1.15) drop-shadow(0 2px 8px rgba(0,0,0,0.3))' : hoveredIndex !== null ? 'opacity(0.6)' : 'none' }}
-            onMouseEnter={() => setHoveredIndex(i)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          />
+            onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)} />
         ))}
-
-        {/* Numbered junction dots */}
         {placed.map((s) => {
           const pos = polarToXY(s.junctionAngle, guideR);
           return (
             <g key={`dot-${s.num}`}>
               <circle cx={pos.x} cy={pos.y} r={8} fill={s.color} />
-              <text x={pos.x} y={pos.y + 3.5} textAnchor="middle" fontSize="6" fontWeight="700" fill="white">
-                {s.num}
-              </text>
+              <text x={pos.x} y={pos.y + 3.5} textAnchor="middle" fontSize="6" fontWeight="700" fill="white">{s.num}</text>
             </g>
           );
         })}
-
-        {/* Center */}
         <circle cx={cx} cy={cy} r={R - rW / 2 - 3} fill="white" />
         <text x={cx} y={cy - 4} textAnchor="middle" fontSize="20" fontWeight="800" fill="#0f172a">246</text>
         <text x={cx} y={cy + 8} textAnchor="middle" fontSize="5.5" fontWeight="600" fill="#94a3b8" letterSpacing="0.5">TOTAL</text>
         <text x={cx} y={cy + 16} textAnchor="middle" fontSize="4.5" fontWeight="400" fill="#cbd5e1" letterSpacing="0.5">PIPELINE</text>
       </svg>
-
-      {/* Legend at bottom */}
       <div className="w-full space-y-1.5 px-1">
         {placed.map((s, i) => (
-          <div
-            key={s.num}
-            className="flex items-center justify-center gap-4 cursor-pointer rounded px-1 transition-all duration-200"
+          <div key={s.num} className="flex items-center justify-center gap-4 cursor-pointer rounded px-1 transition-all duration-200"
             style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.4 }}
-            onMouseEnter={() => setHoveredIndex(i)}
-            onMouseLeave={() => setHoveredIndex(null)}
-          >
+            onMouseEnter={() => setHoveredIndex(i)} onMouseLeave={() => setHoveredIndex(null)}>
             <div className="flex items-center gap-2">
-              <span
-                className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0 transition-all duration-200"
-                style={{ backgroundColor: s.color, transform: hoveredIndex === i ? 'scale(1.3)' : 'scale(1)' }}
-              >{s.num}</span>
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full text-white text-[8px] font-bold shrink-0 transition-all duration-200"
+                style={{ backgroundColor: s.color, transform: hoveredIndex === i ? 'scale(1.3)' : 'scale(1)' }}>{s.num}</span>
               <span className="text-[10px] font-bold" style={{ color: hoveredIndex === i ? s.color : '#1e293b' }}>{s.label}</span>
             </div>
             <div className="flex items-center gap-1.5">

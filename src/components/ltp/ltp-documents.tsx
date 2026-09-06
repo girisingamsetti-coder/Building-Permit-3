@@ -83,7 +83,6 @@ export function LtpDocuments() {
   if (!app) {
     return (
       <div className="space-y-6">
-        <PageBackButton fallbackView="ltp-applications" />
         <PageHeader title="Documents" icon={FolderClosed} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Documents" }]} />
         <EmptyState icon={FileWarning} title="No applications" />
       </div>
@@ -135,7 +134,6 @@ export function LtpDocuments() {
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-applications" />
       <PageHeader
         title="Documents"
         description="Upload, verify and track all required documents for your application."

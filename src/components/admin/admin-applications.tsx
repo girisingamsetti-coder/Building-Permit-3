@@ -64,6 +64,14 @@ export function AdminApplications() {
   const [status, setStatus] = useState("ALL");
   const [type, setType] = useState("ALL");
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Reset page when filters change
+  React.useEffect(() => {
+    setPage(1);
+  }, [activeTab, query, status, type]);
+
   const filtered = useMemo(() => {
     let list = [...applications];
     if (activeTab === "Draft") list = list.filter(a => a.status === "DRAFT");
@@ -88,6 +96,16 @@ export function AdminApplications() {
     // In a real app, type filtering would happen here
     return list;
   }, [applications, query, status, activeTab]);
+
+  const isTotalAppsTab = activeTab === "Total applications";
+  const totalApps = filtered.length;
+  const totalPages = isTotalAppsTab ? 1 : Math.max(1, Math.ceil(totalApps / pageSize));
+  
+  const pageApps = useMemo(() => {
+    if (isTotalAppsTab) return filtered;
+    const startIndex = (page - 1) * pageSize;
+    return filtered.slice(startIndex, startIndex + pageSize);
+  }, [filtered, page, pageSize, isTotalAppsTab]);
 
   return (
     <div className="flex h-full flex-col space-y-4 animate-in fade-in duration-300">
@@ -157,7 +175,7 @@ export function AdminApplications() {
           </div>
           
           <div className="px-4 py-2 bg-slate-50/50 border-b border-slate-100 text-xs font-medium text-slate-500">
-            {filtered.length} applications
+            {totalApps} applications {isTotalAppsTab ? "(Showing all)" : ""}
           </div>
 
           <div className="overflow-x-auto">
@@ -178,7 +196,7 @@ export function AdminApplications() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((a) => {
+                {pageApps.map((a) => {
                   const days = daysRemaining(a.expectedSLA);
                   const sla = slaBadgeProps(days);
                   // Mock payment status formatting
@@ -306,8 +324,56 @@ export function AdminApplications() {
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination */}
+          {!isTotalAppsTab && totalApps > 0 && (
+            <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3 bg-slate-50/50">
+              <div className="text-xs text-slate-500">
+                Showing <span className="font-medium text-slate-700">{(page - 1) * pageSize + 1}</span> to{" "}
+                <span className="font-medium text-slate-700">{Math.min(page * pageSize, totalApps)}</span> of{" "}
+                <span className="font-medium text-slate-700">{totalApps}</span> records
+              </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-md px-3 text-xs border-slate-200"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Previous
+                </Button>
+                <div className="flex items-center gap-1 px-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                    <Button
+                      key={p}
+                      variant={p === page ? "default" : "ghost"}
+                      size="sm"
+                      className={cn(
+                        "h-7 w-7 p-0 rounded-full text-xs",
+                        p === page ? "bg-blue-600 text-white hover:bg-blue-700" : "text-slate-600 hover:bg-slate-200"
+                      )}
+                      onClick={() => setPage(p)}
+                    >
+                      {p}
+                    </Button>
+                  ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 rounded-md px-3 text-xs border-slate-200"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       <NewApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }
+

@@ -391,6 +391,7 @@ export function Topbar() {
   const {
     user,
     portal,
+    view,
     notifications,
     mobileNavOpen,
     setMobileNavOpen,
@@ -459,53 +460,59 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
+      {/* Module Title */}
+      <div className="flex items-center ml-2">
+        <h2 className="text-lg font-semibold tracking-tight capitalize text-slate-800 dark:text-slate-100">
+          {(view.includes("-") ? view.split("-").slice(1).join(" ") : view).replace(/_/g, " ")}
+        </h2>
+      </div>
+
       {/* Search & Date Filter */}
       <div className="hidden sm:flex items-center gap-2 ml-auto">
-
         {/* Search */}
         <div ref={searchContainerRef} className="relative w-48 lg:w-64">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          ref={searchInputRef}
-          type="text"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setSearchOpen(true);
-          }}
-          onFocus={() => setSearchOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSearchOpen(false);
-              searchInputRef.current?.blur();
-            }
-          }}
-          placeholder="Search here..."
-          className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setSearchOpen(false);
-              searchInputRef.current?.focus();
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setSearchOpen(true);
             }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            aria-label="Clear search"
-          >
-            <X className="size-4" />
-          </button>
-        )}
-        {searchOpen && (
-          <SearchDropdown
-            query={searchQuery}
-            results={results}
-            loading={loading}
-            onSelect={handleSearchSelect}
-            onClose={() => setSearchOpen(false)}
+            onFocus={() => setSearchOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setSearchOpen(false);
+                searchInputRef.current?.blur();
+              }
+            }}
+            placeholder="Search here..."
+            className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
           />
-        )}
-      </div>
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setSearchOpen(false);
+                searchInputRef.current?.focus();
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+          {searchOpen && (
+            <SearchDropdown
+              query={searchQuery}
+              results={results}
+              loading={loading}
+              onSelect={handleSearchSelect}
+              onClose={() => setSearchOpen(false)}
+            />
+          )}
+        </div>
 
         {/* Date Filter */}
         <Button variant="outline" size="sm" className="h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full">
@@ -675,11 +682,11 @@ function UserAvatar({ color, name }: { color?: string; name?: string }) {
     .toUpperCase();
   const colorMap: Record<string, string> = {
     emerald: "bg-emerald-500",
-    teal:    "bg-teal-500",
-    cyan:    "bg-cyan-500",
-    amber:   "bg-amber-500",
-    rose:    "bg-rose-500",
-    slate:   "bg-slate-500",
+    teal: "bg-teal-500",
+    cyan: "bg-cyan-500",
+    amber: "bg-amber-500",
+    rose: "bg-rose-500",
+    slate: "bg-slate-500",
   };
   return (
     <div
@@ -755,11 +762,11 @@ function SwitchUserPanel() {
                     "flex size-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white",
                     {
                       "bg-emerald-500": c.role === "LTP",
-                      "bg-teal-500":    c.role === "ZONAL_HEAD",
-                      "bg-cyan-500":    c.role === "DIRECTOR",
-                      "bg-amber-500":   c.role === "ADDITIONAL_COMMISSIONER",
-                      "bg-rose-500":    c.role === "COMMISSIONER",
-                      "bg-slate-600":   c.role === "SUPER_ADMIN",
+                      "bg-teal-500": c.role === "ZONAL_HEAD",
+                      "bg-cyan-500": c.role === "DIRECTOR",
+                      "bg-amber-500": c.role === "ADDITIONAL_COMMISSIONER",
+                      "bg-rose-500": c.role === "COMMISSIONER",
+                      "bg-slate-600": c.role === "SUPER_ADMIN",
                     }
                   )}
                 >

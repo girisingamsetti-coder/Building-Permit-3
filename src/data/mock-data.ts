@@ -740,6 +740,30 @@ export const SEED_APPLICATIONS: Application[] = [
     fee: makeFee(1800, 8, false, 181000),
     payment: { id: "pay-34", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
+  ...(() => {
+    const generated: import("@/types").Application[] = [];
+    const statuses = [
+      { status: "DRAFT" as import("@/types").ApplicationStatus, stage: "APPLICATION_CREATED" as import("@/types").WorkflowStageKey },
+      { status: "SCRUTINY_FAILED" as import("@/types").ApplicationStatus, stage: "DRAWING_SCRUTINY" as import("@/types").WorkflowStageKey },
+      { status: "DOCUMENT_UPLOAD_PENDING" as import("@/types").ApplicationStatus, stage: "DOCUMENTS" as import("@/types").WorkflowStageKey },
+      { status: "PAYMENT_PENDING" as import("@/types").ApplicationStatus, stage: "PAYMENT" as import("@/types").WorkflowStageKey },
+      { status: "ZONAL_HEAD_REVIEW" as import("@/types").ApplicationStatus, stage: "ZONAL_HEAD_REVIEW" as import("@/types").WorkflowStageKey },
+      { status: "SHORTFALL_RAISED" as import("@/types").ApplicationStatus, stage: "ZONAL_HEAD_REVIEW" as import("@/types").WorkflowStageKey },
+      { status: "APPROVED" as import("@/types").ApplicationStatus, stage: "FINAL_DECISION" as import("@/types").WorkflowStageKey },
+    ];
+    let counter = 35;
+    for (const st of statuses) {
+      for (let i = 0; i < 12; i++) {
+        const id = counter++;
+        const appNo = `MC/BP/2026/04/${String(id).padStart(4, '0')}`;
+        generated.push(buildApp(`app-${id}`, appNo, `Generated Project ${id}`, "RESIDENTIAL", 1500 + i * 100, st.status, st.stage, undefined, ["2026-09-06T10:00:00"], `Generated Applicant ${id}`, "+91 99999 99999", "gen@email.com", "Pune, MH", {
+          drawings: st.status !== "DRAFT" ? makeDrawings([{ v: 1, passed: st.status !== "SCRUTINY_FAILED", date: "2026-09-06T10:00:00" }]) : [],
+          documents: st.stage === "ZONAL_HEAD_REVIEW" || st.stage === "FINAL_DECISION" ? makeDocuments("verified") : [],
+        }));
+      }
+    }
+    return generated;
+  })(),
 ];
 
 // ============================================================

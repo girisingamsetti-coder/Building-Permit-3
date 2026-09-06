@@ -1356,7 +1356,7 @@ export const useAppStore = create<AppState>()(
   },
     }),
     {
-      name: "building-permit-store",
+      name: "building-permit-store-v2",
     }
   )
 );

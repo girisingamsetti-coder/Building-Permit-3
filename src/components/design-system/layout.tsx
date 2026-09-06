@@ -10,12 +10,7 @@ import { LucideIcon, ChevronRight, Inbox, ArrowUpRight, ArrowDownRight } from "l
 
 // ---------- Page Header ----------
 export function PageHeader({
-  title,
-  description,
-  breadcrumbs,
   actions,
-  icon: Icon,
-  badge,
 }: {
   title: string;
   description?: string;
@@ -24,48 +19,14 @@ export function PageHeader({
   icon?: LucideIcon;
   badge?: React.ReactNode;
 }) {
+  // If no actions, return null since title, description, and paths are hidden
+  if (!actions) {
+    return null;
+  }
+
   return (
-    <div className="space-y-3 border-b border-border pb-5">
-      {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
-          {breadcrumbs.map((b, i) => (
-            <React.Fragment key={i}>
-              {b.onClick ? (
-                <button
-                  onClick={b.onClick}
-                  className="hover:text-foreground transition-colors"
-                >
-                  {b.label}
-                </button>
-              ) : (
-                <span className={i === breadcrumbs.length - 1 ? "text-foreground font-medium" : ""}>
-                  {b.label}
-                </span>
-              )}
-              {i < breadcrumbs.length - 1 && <ChevronRight className="size-3" />}
-            </React.Fragment>
-          ))}
-        </nav>
-      )}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
-          {Icon && (
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Icon className="size-5" />
-            </div>
-          )}
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-semibold tracking-tight text-balance">{title}</h1>
-              {badge}
-            </div>
-            {description && (
-              <p className="text-sm text-muted-foreground max-w-2xl text-balance">{description}</p>
-            )}
-          </div>
-        </div>
-        {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
-      </div>
+    <div className="flex items-center justify-end pb-2">
+      <div className="flex items-center gap-2 flex-wrap">{actions}</div>
     </div>
   );
 }
