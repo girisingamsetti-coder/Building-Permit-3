@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import { getDynamicNav } from "@/lib/permissions";
 import { ROLES } from "@/data/mock-data";
+import {
   LayoutDashboard, FileStack, ClipboardList, AlertTriangle,
   CreditCard, FolderClosed, BarChart3, Settings,
   Building2, ChevronLeft, LogOut, Box,

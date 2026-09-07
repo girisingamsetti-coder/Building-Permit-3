@@ -267,6 +267,7 @@ const MODULE_DEFS: ModuleDef[] = [
     views: {
       LTP:        "ltp-drawings",
       OFFICER:    "officer-tasks",
+      SUPER_ADMIN: "admin-workflow",
     },
   },
   {

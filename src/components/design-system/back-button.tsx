@@ -31,6 +31,7 @@ const VIEW_LABELS: Record<ViewKey, string> = {
   "ltp-notifications": "Notifications",
   "ltp-profile": "Profile",
   "ltp-help": "Help & Support",
+  "ltp-bim": "BIM",
   "officer-dashboard": "Dashboard",
   "officer-review": "Application Review",
   "officer-applications": "Applications",
@@ -40,6 +41,7 @@ const VIEW_LABELS: Record<ViewKey, string> = {
   "officer-documents": "Documents",
   "officer-reports": "Reports",
   "officer-settings": "Settings",
+  "officer-bim": "BIM",
   "admin-dashboard": "Dashboard",
   "admin-applications": "Applications",
   "admin-shortfalls": "Shortfalls",
@@ -54,6 +56,7 @@ const VIEW_LABELS: Record<ViewKey, string> = {
   "admin-templates": "Notification / SMS",
   "admin-audit": "Audit Logs",
   "admin-settings": "Settings",
+  "admin-bim": "BIM",
   // Legacy PM views
   "pm-dashboard": "Dashboard",
   "pm-applications": "Applications",

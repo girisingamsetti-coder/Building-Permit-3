@@ -436,7 +436,6 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
         showCloseButton={false}
         className="w-[70vw] max-w-[70vw] sm:max-w-[70vw] p-0 gap-0 flex flex-col overflow-hidden bg-white border-0 shadow-[0_20px_60px_rgba(0,0,0,0.22)] rounded-[16px]"
         style={{ height: "85vh", maxHeight: "85vh" }}
-        overlayClassName="bg-black/45 backdrop-blur-none"
       >
         <DialogTitle className="sr-only">New Application — {cur.label}</DialogTitle>
 
