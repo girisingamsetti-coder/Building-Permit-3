@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { SystemSettings } from "@/types";
+import { AdminWorkflow } from "./admin-workflow";
+import { ClipboardList } from "lucide-react";
 
 // ============================================================
 // Constants — option lists for select / toggle inputs
@@ -238,6 +240,9 @@ export function AdminSettings() {
             <TabsTrigger value="demo">
               <FlaskConical className="size-3.5" /> Demo Mode
             </TabsTrigger>
+            <TabsTrigger value="tasks">
+              <ClipboardList className="size-3.5" /> Tasks
+            </TabsTrigger>
           </TabsList>
 
           {/* ---------- General ---------- */}
@@ -378,6 +383,11 @@ export function AdminSettings() {
                 <li>Seed data is loaded on first run and may be reset by an administrator.</li>
               </ul>
             </div>
+          </TabsContent>
+
+          {/* ---------- Tasks / Workflow ---------- */}
+          <TabsContent value="tasks" className="space-y-4">
+            <AdminWorkflow />
           </TabsContent>
         </Tabs>
       </SectionCard>

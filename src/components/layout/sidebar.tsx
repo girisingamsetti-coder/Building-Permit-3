@@ -61,7 +61,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative z-30 flex h-full flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-300 ease-out",
+        "relative z-30 flex h-full flex-col bg-[#111225] text-white transition-[width] duration-300 ease-out border-r border-[#1f213a] shadow-2xl",
         collapsed ? "w-[68px]" : "w-64"
       )}
     >
@@ -98,25 +98,22 @@ export function Sidebar() {
                     onClick={() => navigate(item.view)}
                     title={collapsed ? item.label : undefined}
                     className={cn(
-                      "group flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-bold transition-all duration-200",
+                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-3 text-[15px] font-semibold transition-all duration-200",
                       collapsed && "justify-center px-0",
                       active
-                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
-                        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                        ? "bg-[#3D405B] text-white"
+                        : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                     )}
                   >
                     <Icon
                       className={cn(
-                        "size-4 shrink-0 transition-transform",
+                        "size-[18px] shrink-0 transition-transform",
                         active
-                          ? "text-primary-foreground"
-                          : "text-sidebar-foreground/60 group-hover:text-sidebar-foreground group-hover:scale-110"
+                          ? "text-white"
+                          : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110"
                       )}
                     />
                     {!collapsed && <span className="truncate">{item.label}</span>}
-                    {active && !collapsed && (
-                      <span className="ml-auto size-1.5 rounded-full bg-primary-foreground" />
-                    )}
                   </button>
                 </li>
               );
@@ -125,8 +122,8 @@ export function Sidebar() {
 
           <div className="mt-8 px-2 space-y-4">
             <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Dashboard Version</p>}
-              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Dashboard Version</p>}
+              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
                 {(['v1', 'v2', 'v3'] as const).map(v => (
                   <button
                     key={v}
@@ -134,8 +131,8 @@ export function Sidebar() {
                       "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
                       collapsed && "px-0",
                       dashboardVersion === v
-                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
-                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
+                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                     )}
                     onClick={() => setDashboardVersion(v)}
                   >
@@ -145,8 +142,8 @@ export function Sidebar() {
               </div>
             </div>
             <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Recent Activity</p>}
-              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Recent Activity</p>}
+              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
                 {(['r1', 'r2', 'r3'] as const).map(r => (
                   <button
                     key={r}
@@ -154,8 +151,8 @@ export function Sidebar() {
                       "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
                       collapsed && "px-0",
                       recentActivityVersion === r
-                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
-                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
+                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                     )}
                     onClick={() => setRecentActivityVersion(r)}
                   >
@@ -165,17 +162,17 @@ export function Sidebar() {
               </div>
             </div>
             <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/50">Cards</p>}
-              <div className={cn("flex gap-1 p-1 border border-sidebar-border rounded-lg bg-sidebar-accent/30", collapsed ? "flex-col" : "")}>
-                {(['c1', 'c2', 'c3'] as const).map(c => (
+              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Cards</p>}
+              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
+                {(['c1', 'c2'] as const).map(c => (
                   <button
                     key={c}
                     className={cn(
                       "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
                       collapsed && "px-0",
                       cVersion === c
-                        ? "bg-primary text-primary-foreground shadow-md scale-[1.02]"
-                        : "bg-transparent text-sidebar-foreground/75 hover:bg-sidebar-accent/80 hover:text-sidebar-foreground"
+                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
+                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                     )}
                     onClick={() => setCVersion(c)}
                   >

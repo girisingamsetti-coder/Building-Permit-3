@@ -37,6 +37,8 @@ import {
   Loader2,
   ShieldCheck,
   ChevronDown,
+  Flower2,
+  User,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -94,7 +96,7 @@ function BrandLogo({ compact = false }: { compact?: boolean }) {
 function LoginForm() {
   const { login, loginAsRole, setAuthStage, setPendingEmail } = useAppStore();
   const { toast } = useToast();
-  const [email, setEmail] = React.useState("ltp@demo.gov.in");
+  const [email, setEmail] = React.useState("admin@demo.gov.in");
   const [password, setPassword] = React.useState("demo1234");
   const [showPw, setShowPw] = React.useState(false);
   const [remember, setRemember] = React.useState(true);
@@ -153,258 +155,154 @@ function LoginForm() {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full overflow-hidden bg-background">
-      {/* ---------- LEFT: branding panel (desktop only) ---------- */}
-      <aside className="relative hidden w-[42%] flex-col justify-between overflow-hidden bg-sidebar px-10 py-10 text-sidebar-foreground lg:flex xl:w-[40%]">
-        <div className="absolute inset-0 bg-grid opacity-[0.06]" />
-        <div className="absolute -right-20 -top-20 size-72 rounded-full bg-sidebar-primary/15 blur-3xl" />
+    <div 
+      className="relative flex min-h-screen w-full flex-col items-center justify-center bg-cover bg-center font-sans"
+      style={{ backgroundImage: "url('/bg-city.png')" }}
+    >
 
-        {/* Top: logo */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-              <Building2 className="size-5" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-base font-semibold tracking-tight">LTP Approval</p>
-              <p className="text-[11px] text-sidebar-foreground/60">
-                Building Permit Management System
-              </p>
-            </div>
+
+      {/* Main Glassmorphism Card */}
+      <div className="relative z-10 w-full max-w-[420px] rounded-[24px] border border-white/20 bg-black/25 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        {/* Header */}
+        <div className="flex flex-col items-center mb-8 text-center">
+          <div className="relative flex items-center justify-center h-36 w-auto mb-2 drop-shadow-[0_0_8px_rgba(253,224,71,0.6)]">
+            <img src="/amaravati-logo.png" alt="Logo" className="h-full w-auto object-contain" />
           </div>
+          <h1 className="font-serif text-[22px] tracking-[0.1em] text-white drop-shadow-md uppercase">
+            Nirman Amaravati
+          </h1>
+          <p className="mt-2 text-[14px] text-white/80 font-medium">
+            Login to your Portal
+          </p>
         </div>
 
-        {/* Center: branding */}
-        <div className="relative z-10 space-y-5">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sidebar-border bg-sidebar-accent/40 px-3 py-1 text-[11px]">
-            <ShieldCheck className="size-3.5 text-sidebar-primary" />
-            <span className="text-sidebar-foreground/80">Digital Government Service</span>
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-semibold leading-snug tracking-tight text-balance xl:text-3xl">
-              Online Building Permit Application &amp; Approval Portal
-            </h1>
-            <p className="max-w-sm text-sm leading-relaxed text-sidebar-foreground/65">
-              A unified digital platform for Licensed Technical Persons and
-              approval officers to submit, scrutinise and approve building permit
-              applications.
-            </p>
-          </div>
-        </div>
-
-
-      </aside>
-
-      {/* ---------- RIGHT: login card ---------- */}
-      <main className="flex w-full flex-col lg:w-[58%] xl:w-[60%]">
-        <div className="flex min-h-screen flex-col">
-          {/* Mobile branding header */}
-          <div className="border-b border-border bg-sidebar px-5 py-3.5 lg:hidden">
-            <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-                <Building2 className="size-5" />
-              </div>
-              <div className="leading-tight">
-                <p className="text-sm font-semibold text-sidebar-foreground">LTP Approval</p>
-                <p className="text-[10px] text-sidebar-foreground/60">
-                  Building Permit Management System
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Login card */}
-          <div className="flex flex-1 items-center justify-center px-5 py-8 sm:px-8">
-            <div className="w-full max-w-[400px] space-y-6">
-              {/* Header */}
-              <div className="space-y-1.5">
-                <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-                  Welcome back
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Sign in to your account to continue.
-                </p>
-              </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                {/* Email / Mobile */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs font-medium">
-                    Email / Mobile Number
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      type="text"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setEmailError("");
-                        setError("");
-                      }}
-                      placeholder="Enter your registered email or mobile number"
-                      className={cn(
-                        "h-10 pl-9",
-                        emailError && "border-destructive focus-visible:ring-destructive/20"
-                      )}
-                      aria-invalid={!!emailError}
-                      autoComplete="username"
-                    />
-                  </div>
-                  {emailError && (
-                    <p className="flex items-center gap-1 text-[11px] text-destructive">
-                      <AlertCircle className="size-3" />
-                      {emailError}
-                    </p>
-                  )}
-                </div>
-
-                {/* Password */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-xs font-medium">
-                    Password
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      type={showPw ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setPwError("");
-                        setError("");
-                      }}
-                      placeholder="Enter password"
-                      className={cn(
-                        "h-10 pl-9 pr-9",
-                        pwError && "border-destructive focus-visible:ring-destructive/20"
-                      )}
-                      aria-invalid={!!pwError}
-                      autoComplete="current-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPw((s) => !s)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      aria-label={showPw ? "Hide password" : "Show password"}
-                    >
-                      {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                    </button>
-                  </div>
-                  {pwError && (
-                    <p className="flex items-center gap-1 text-[11px] text-destructive">
-                      <AlertCircle className="size-3" />
-                      {pwError}
-                    </p>
-                  )}
-                </div>
-
-                {/* Remember + Forgot */}
-                <div className="flex items-center justify-between">
-                  <label
-                    htmlFor="remember"
-                    className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground select-none"
-                  >
-                    <Checkbox
-                      id="remember"
-                      checked={remember}
-                      onCheckedChange={(v) => setRemember(v === true)}
-                    />
-                    Remember me
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPendingEmail(email);
-                      setAuthStage("forgot");
-                    }}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
-                {/* General error */}
-                {error && (
-                  <div
-                    role="alert"
-                    className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive"
-                  >
-                    <AlertCircle className="size-4 shrink-0" />
-                    {error}
-                  </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          {/* Email / ID */}
+          <div className="space-y-1">
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-white/60" strokeWidth={1.5} />
+              <Input
+                id="email"
+                type="text"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setEmailError("");
+                  setError("");
+                }}
+                placeholder="Citizen ID or Email"
+                className={cn(
+                  "h-[50px] pl-12 rounded-[12px] border-white/20 bg-white/10 text-[15px] text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30 transition-all",
+                  emailError && "border-red-400 focus-visible:ring-red-400/30"
                 )}
-
-                {/* Submit */}
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" /> Signing in…
-                    </>
-                  ) : (
-                    <>
-                      Sign In <ArrowRight className="size-4" />
-                    </>
-                  )}
-                </Button>
-              </form>
-
-              {/* Security note */}
-              <p className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
-                <ShieldCheck className="size-3" />
-                Secure access to the Building Permit Management System
-              </p>
-
-              {/* Demo / Development Access */}
-              <div className="space-y-2.5 rounded-lg border border-dashed border-border bg-muted/20 p-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-foreground">Demo access</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Demo / Development Access
-                    </p>
-                  </div>
-                </div>
-                <Select value={demoRole} onValueChange={handleDemoRoleSelect}>
-                  <SelectTrigger className="h-9 w-full text-xs">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DEMO_CREDENTIALS.map((c) => (
-                      <SelectItem key={c.role} value={c.role} className="text-xs">
-                        <span className="font-medium">{ROLES[c.role].title}</span>
-                        <span className="text-muted-foreground"> — {c.label.split("—")[0].trim()}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {demoRole && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => loginAsRole(demoRole as RoleKey)}
-                  >
-                    Sign in as {ROLES[demoRole as RoleKey].title}
-                    <ArrowRight className="size-3.5" />
-                  </Button>
-                )}
-              </div>
-
-
+                aria-invalid={!!emailError}
+              />
             </div>
+            {emailError && <p className="pl-1 text-[11px] text-red-300">{emailError}</p>}
           </div>
+
+          {/* Password */}
+          <div className="space-y-1">
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-white/60" strokeWidth={1.5} />
+              <Input
+                id="password"
+                type={showPw ? "text" : "password"}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPwError("");
+                  setError("");
+                }}
+                placeholder="Password"
+                className={cn(
+                  "h-[50px] pl-12 pr-12 rounded-[12px] border-white/20 bg-white/10 text-[15px] text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30 transition-all",
+                  pwError && "border-red-400 focus-visible:ring-red-400/30"
+                )}
+                aria-invalid={!!pwError}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw((s) => !s)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/90 transition-colors"
+              >
+                {showPw ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+              </button>
+            </div>
+            {pwError && <p className="pl-1 text-[11px] text-red-300">{pwError}</p>}
+          </div>
+
+          {/* Forgot Password */}
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setPendingEmail(email);
+                setAuthStage("forgot");
+              }}
+              className="text-[13px] text-white/80 hover:text-white underline-offset-4 hover:underline transition-all"
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          {/* Remember Me */}
+          <div className="flex items-center pt-2 pb-2">
+            <label htmlFor="remember" className="flex cursor-pointer items-center gap-2 text-[13px] text-white/80 select-none hover:text-white transition-colors">
+              <Checkbox
+                id="remember"
+                checked={remember}
+                onCheckedChange={(v) => setRemember(v === true)}
+                className="border-white/40 data-[state=checked]:bg-white/20 data-[state=checked]:text-white rounded-sm"
+              />
+              Remember Me
+            </label>
+          </div>
+
+          {/* General Error */}
+          {error && (
+            <div className="rounded-md bg-red-500/20 border border-red-500/30 px-3 py-2 text-[12px] text-red-200 text-center backdrop-blur-sm">
+              {error}
+            </div>
+          )}
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            className="h-[50px] w-full rounded-[12px] border border-[#FDE047]/60 bg-gradient-to-b from-[#FDE047]/20 to-black/40 text-[#FDE047] text-[15px] font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:bg-black/50 transition-all uppercase tracking-wider"
+            disabled={loading}
+          >
+            {loading ? <Loader2 className="size-5 animate-spin" /> : "LOG IN"}
+          </Button>
+
+        </form>
+
+        {/* Demo Roles - hidden discrete trigger at bottom right */}
+        <div className="absolute -bottom-12 right-0">
+          <Select value={demoRole} onValueChange={handleDemoRoleSelect}>
+            <SelectTrigger className="h-6 w-[120px] bg-black/40 border-white/10 text-[10px] text-white/40 focus:ring-0">
+              <SelectValue placeholder="Demo Access" />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/20 text-white backdrop-blur-xl">
+              {DEMO_CREDENTIALS.map((c) => (
+                <SelectItem key={c.role} value={c.role} className="text-xs hover:bg-white/10">
+                  {ROLES[c.role].title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </main>
+      </div>
+
+      {/* Footer */}
+      <div className="absolute bottom-6 w-full text-center">
+        <div className="flex items-center justify-center gap-4 text-[12px] text-white/60">
+          <button className="hover:text-white transition-colors">Terms of Service</button>
+          <div className="h-3 w-px bg-white/30" />
+          <button className="hover:text-white transition-colors">Privacy Policy</button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -109,31 +109,33 @@ export function AdminApplications() {
 
   return (
     <div className="flex h-full flex-col space-y-4 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between">
+      <div>
         <PageHeader 
           title="Applications" 
           description="" 
         />
+      </div>
+
+      <div className="flex items-center justify-between pb-2 gap-4">
+        <div className="flex flex-wrap gap-2">
+          {TABS.map((tab) => (
+            <Button
+              key={tab}
+              variant={activeTab === tab ? "default" : "outline"}
+              onClick={() => setActiveTab(tab)}
+              className={cn("rounded-full shadow-sm text-xs px-4 h-8", activeTab === tab ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" : "text-slate-600 hover:bg-slate-50")}
+            >
+              {tab}
+            </Button>
+          ))}
+        </div>
         <Button
           variant="default"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full gap-1.5"
+          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full gap-1.5 whitespace-nowrap"
           onClick={() => setDialogOpen(true)}
         >
           <FilePlus2 className="size-4" /> New application
         </Button>
-      </div>
-
-      <div className="flex flex-wrap gap-2 pb-2">
-        {TABS.map((tab) => (
-          <Button
-            key={tab}
-            variant={activeTab === tab ? "default" : "outline"}
-            onClick={() => setActiveTab(tab)}
-            className={cn("rounded-full shadow-sm text-xs px-4 h-8", activeTab === tab ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" : "text-slate-600 hover:bg-slate-50")}
-          >
-            {tab}
-          </Button>
-        ))}
       </div>
 
       <div className="flex flex-col gap-0 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">

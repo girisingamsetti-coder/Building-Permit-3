@@ -47,6 +47,11 @@ import {
   Pencil,
   PartyPopper,
   Save,
+  Clock,
+  CreditCard,
+  Activity,
+  PieChart,
+  Upload,
 } from "lucide-react";
 
 // ─── TYPES ──────────────────────────────────────────────────────────────────
@@ -78,11 +83,11 @@ const INIT: WizardData = {
 
 // ─── STEPS ──────────────────────────────────────────────────────────────────
 const STEPS = [
-  { id: 1, label: "Applicant details", short: "Applicant", icon: User },
-  { id: 2, label: "Owner details", short: "Owner", icon: Users },
-  { id: 3, label: "Property details", short: "Property", icon: Building2 },
+  { id: 1, label: "Applicant", short: "Applicant", icon: User },
+  { id: 2, label: "Owner", short: "Owner", icon: Users },
+  { id: 3, label: "Property", short: "Property", icon: Building2 },
   { id: 4, label: "Location", short: "Location", icon: MapPin },
-  { id: 5, label: "Survey and plot", short: "Survey", icon: FileText },
+  { id: 5, label: "Survey and Plot", short: "Survey", icon: FileText },
   { id: 6, label: "Development", short: "Development", icon: Hammer },
   { id: 7, label: "Building", short: "Building", icon: Home },
   { id: 8, label: "LTP", short: "LTP", icon: HardHat },
@@ -171,8 +176,10 @@ function appLabel(k: AppTypeKey | "") { return k === "COMMERCIAL_BP" ? "Commerci
 function F({ label, required, error, hint, children, full }: { label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode; full?: boolean }) {
   return (
     <div className={cn("space-y-1.5", full && "col-span-3")}>
-      <Label className="text-xs font-medium text-slate-700">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
-      {children}
+      <Label className="text-[11px] font-semibold text-[#374151]">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
+      <div className="[&_input]:h-[36px] [&_input]:rounded-[8px] [&_input]:border-[#D7DCE2] [&_input]:bg-white [&_input]:text-[13px] [&_input]:text-[#374151] [&_input]:placeholder-[#9CA3AF] [&_input]:focus-visible:border-[#4C8E88] [&_input]:focus-visible:ring-0 [&_input]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_textarea]:min-h-[80px] [&_textarea]:rounded-[8px] [&_textarea]:border-[#D7DCE2] [&_textarea]:bg-white [&_textarea]:text-[13px] [&_textarea]:text-[#374151] [&_textarea]:focus-visible:border-[#4C8E88] [&_textarea]:focus-visible:ring-0 [&_textarea]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_button[role='combobox']]:h-[36px] [&_button[role='combobox']]:rounded-[8px] [&_button[role='combobox']]:border-[#D7DCE2] [&_button[role='combobox']]:bg-white [&_button[role='combobox']]:text-[13px] [&_button[role='combobox']]:text-[#374151] [&_button[role='combobox']]:focus:border-[#4C8E88] [&_button[role='combobox']]:focus:ring-0 [&_button[role='combobox']]:focus:shadow-[0_0_0_3px_rgba(76,142,136,0.12)]">
+        {children}
+      </div>
       {hint && !error && <p className="text-[11px] text-slate-400">{hint}</p>}
       {error && <p className="flex items-center gap-1 text-[11px] text-red-600" role="alert"><AlertCircle className="size-3 shrink-0" />{error}</p>}
     </div>
@@ -234,7 +241,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
       setSavedAt(dr.at);
       toast({ title: "Draft restored", description: `Continuing draft ${dr.dno}` });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // Autosave
@@ -381,7 +388,6 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                 <p className="text-xs text-slate-500">Select the application type to begin</p>
               </div>
             </div>
-            <button onClick={handleClose} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"><X className="size-4" /></button>
           </div>
           {/* Content */}
           <div className="space-y-4 p-6">
@@ -411,7 +417,7 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
           </div>
           {/* Footer */}
           <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-6 py-3">
-            <Button variant="ghost" onClick={handleClose} className="text-slate-600">Cancel</Button>
+            <Button variant="outline" onClick={handleClose} className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium h-[36px] px-4 rounded-[8px]">Close</Button>
             <Button onClick={handleStart} disabled={!selectedType} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-6">
               Start Application <ArrowRight className="size-4" />
             </Button>
@@ -427,31 +433,27 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
       <DialogContent
-        className="w-[95vw] max-w-none p-0 gap-0 flex flex-col overflow-hidden"
-        style={{ height: "95vh", maxHeight: "95vh" }}
+        showCloseButton={false}
+        className="w-[70vw] max-w-[70vw] sm:max-w-[70vw] p-0 gap-0 flex flex-col overflow-hidden bg-white border-0 shadow-[0_20px_60px_rgba(0,0,0,0.22)] rounded-[16px]"
+        style={{ height: "85vh", maxHeight: "85vh" }}
+        overlayClassName="bg-black/45 backdrop-blur-none"
       >
         <DialogTitle className="sr-only">New Application — {cur.label}</DialogTitle>
 
         {/* ── HEADER (fixed) ─────────────────────────────────────────── */}
-        <div className="shrink-0 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-3">
+        <div className="shrink-0 flex items-center justify-between border-b border-[#E4E7EC] bg-white px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-blue-600 text-white"><FilePlus2 className="size-4" /></div>
+            <div className="flex size-9 items-center justify-center rounded-lg bg-[#E8F3F1] text-[#0D5B56]"><FilePlus2 className="size-5" /></div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">New Application</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="font-mono text-[11px] text-blue-700">{draftNo}</span>
-                <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0 text-[10px] font-semibold text-amber-700">Draft</span>
-                <span className="text-[11px] text-slate-400">— {appLabel(data.appType as AppTypeKey)}</span>
-                {savedAt && <span className="text-[11px] text-emerald-600 flex items-center gap-0.5"><CheckCircle2 className="size-3" />Saved {new Date(savedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}</span>}
-              </div>
+              <p className="text-[18px] font-semibold text-[#1F2933]">New Application</p>
+              <p className="text-[12px] text-[#98A2B3]">Submit a new land allotment application to APCRDA</p>
             </div>
           </div>
-          <button onClick={handleClose} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"><X className="size-4" /></button>
         </div>
 
         {/* ── HORIZONTAL STEPPER (fixed) ──────────────────────────────── */}
-        <div className="shrink-0 border-b border-slate-100 bg-slate-50/80 px-4 py-3">
-          <div className="flex items-center overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+        <div className="shrink-0 border-b border-[#E4E7EC] bg-white px-6 py-4">
+          <div className="flex items-center overflow-x-auto justify-between" style={{ scrollbarWidth: "none" }}>
             {STEPS.map((s, idx) => {
               const done = completed.has(s.id);
               const active = s.id === step;
@@ -463,22 +465,22 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                     onClick={() => reachable && !active && setStep(s.id)}
                     disabled={!reachable || active}
                     aria-current={active ? "step" : undefined}
-                    className={cn("flex flex-col items-center gap-1 shrink-0 px-1 transition-all", reachable && !active ? "cursor-pointer" : "cursor-default")}
+                    className={cn("flex flex-col items-center gap-2 shrink-0 transition-all", reachable && !active ? "cursor-pointer" : "cursor-default")}
                   >
                     <div className={cn(
-                      "flex size-8 items-center justify-center rounded-full border-2 text-xs font-bold transition-all",
-                      done && "border-emerald-500 bg-emerald-500 text-white",
-                      active && "border-blue-600 bg-blue-600 text-white ring-3 ring-blue-100 ring-offset-1",
-                      !done && !active && "border-slate-200 bg-white text-slate-400"
+                      "flex size-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all",
+                      active && "border-[#0D5B56] bg-[#E8F3F1] text-[#0D5B56]",
+                      done && !active && "border-[#0D5B56] bg-[#0D5B56] text-white",
+                      !done && !active && "border-[#E4E7EC] bg-white text-[#98A2B3]"
                     )}>
-                      {done ? <Check className="size-3.5" /> : <Icon className="size-3.5" />}
+                      {done && !active ? <Check className="size-4" /> : <Icon className="size-4" />}
                     </div>
-                    <span className={cn("text-[9px] font-medium whitespace-nowrap", active ? "text-blue-700" : done ? "text-emerald-600" : "text-slate-400")}>
-                      {s.short}
+                    <span className={cn("text-[11px] font-medium whitespace-nowrap", active ? "text-[#1F2933]" : done ? "text-[#0D5B56]" : "text-[#98A2B3]")}>
+                      {s.label}
                     </span>
                   </button>
                   {idx < STEPS.length - 1 && (
-                    <div className={cn("mx-1 h-px flex-1 min-w-[12px] rounded-full transition-colors", done ? "bg-emerald-400" : "bg-slate-200")} />
+                    <div className={cn("mx-2 h-px flex-1 min-w-[20px] transition-colors", done ? "bg-[#0D5B56]" : "bg-[#E4E7EC]")} />
                   )}
                 </React.Fragment>
               );
@@ -487,10 +489,9 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
         </div>
 
         {/* ── SCROLLABLE BODY ─────────────────────────────────────────── */}
-        <div ref={bodyRef} className="flex-1 overflow-y-auto">
-          <div className="px-6 py-5">
-            <h3 className="text-base font-semibold text-slate-900">{cur.label}</h3>
-            <p className="text-sm text-slate-500 mt-0.5 mb-5">{stepDesc(step)}</p>
+        <div ref={bodyRef} className="flex-1 overflow-y-auto bg-white">
+          <div className="px-8 py-8 w-full">
+            <h3 className="text-[18px] font-semibold text-[#374151] mb-6">{cur.label}</h3>
 
             {/* ── STEP 1: APPLICANT ── */}
             {step === 1 && (
@@ -700,31 +701,29 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
         </div>
 
         {/* ── FOOTER (fixed) ──────────────────────────────────────────── */}
-        <div className="shrink-0 flex items-center justify-between border-t border-slate-100 bg-white px-6 py-3">
-          {/* Left: Cancel or Previous */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={handleClose} className="text-slate-500 hover:text-slate-700">Cancel</Button>
-            {step > 1 && <Button variant="outline" onClick={handlePrev} className="gap-1.5 rounded-full"><ArrowLeft className="size-4" /> Previous</Button>}
+        <div className="shrink-0 flex items-center justify-between border-t border-[#E4E7EC] bg-white px-6 py-4 sticky bottom-0">
+          {/* Left: Close */}
+          <div className="flex items-center">
+            <Button variant="outline" onClick={handleClose} className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium h-[36px] px-4 rounded-[8px]">Close</Button>
           </div>
 
-          {/* Centre: step count + save */}
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => { saveDraft(data, step, draftNo); setSavedAt(new Date().toISOString()); toast({ title: "Draft saved" }); }} className="gap-1 text-slate-500 text-xs">
-              <Save className="size-3.5" />Save draft
+          {/* Right: step count + Next/Submit */}
+          <div className="flex items-center gap-4">
+            <span className="text-[12px] text-[#98A2B3]">Step {step} of {STEPS.length}</span>
+            {step > 1 && <Button variant="outline" onClick={handlePrev} className="gap-1.5 rounded-[8px] h-[36px] font-medium border-[#D7DCE2] text-[#374151] shadow-sm px-4"><ArrowLeft className="size-4" /> Previous</Button>}
+            <Button variant="outline" onClick={() => { saveDraft(data, step, draftNo); setSavedAt(new Date().toISOString()); toast({ title: "Draft saved" }); }} className="gap-1.5 rounded-[8px] h-[36px] font-medium border-[#D7DCE2] text-[#374151] shadow-sm px-4">
+              <Save className="size-4" /> Save
             </Button>
-            <span className="text-xs text-slate-400">Step {step} of {STEPS.length}</span>
+            {step < 10 ? (
+              <Button onClick={handleNext} className="gap-2 bg-[#0D5B56] hover:bg-[#084A46] text-white rounded-[8px] h-[36px] px-4 font-medium shadow-sm">
+                Next <ArrowRight className="size-4" />
+              </Button>
+            ) : (
+              <Button onClick={handleSubmit} disabled={!finalConfirm || !allOk || submitting} className="gap-2 bg-[#0D5B56] hover:bg-[#084A46] text-white rounded-[8px] h-[36px] px-4 font-medium shadow-sm disabled:opacity-50">
+                {submitting ? <><Loader2 className="size-4 animate-spin" />Submitting…</> : <><FileCheck className="size-4" />Submit</>}
+              </Button>
+            )}
           </div>
-
-          {/* Right: Next or Submit */}
-          {step < 10 ? (
-            <Button onClick={handleNext} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-6">
-              {editFromReview && step < 9 ? "Back to review" : "Next"} <ArrowRight className="size-4" />
-            </Button>
-          ) : (
-            <Button onClick={handleSubmit} disabled={!finalConfirm || !allOk || submitting} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-6 disabled:opacity-50">
-              {submitting ? <><Loader2 className="size-4 animate-spin" />Submitting…</> : <><FileCheck className="size-4" />Submit</>}
-            </Button>
-          )}
         </div>
       </DialogContent>
     </Dialog>

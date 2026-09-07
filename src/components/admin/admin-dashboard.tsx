@@ -33,9 +33,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export function AdminDashboard() {
   const { navigate, dashboardVersion, recentActivityVersion, cVersion } = useAppStore();
 
-  if (cVersion === 'c3') {
-    return <DashboardErrorState />;
-  }
+
 
   return (
     <div className="bg-[#F8F9FB] min-h-screen text-slate-800 font-sans px-2 pt-1 pb-20">
@@ -233,12 +231,12 @@ export function AdminDashboard() {
             <div className="col-span-1 border border-slate-200 bg-white rounded-xl p-3 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer flex flex-col min-h-[310px]">
               <div className="flex justify-between items-center mb-0">
                 <h3 className="text-xs font-bold text-slate-800">Applications by stage</h3>
-                {cVersion === 'c2' && (
+                {(cVersion === 'c2' || cVersion === 'c3') && (
                   <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-full">73</span>
                 )}
               </div>
-              <div className={cn("flex-1 flex flex-col", cVersion === 'c2' ? "mt-3" : "-mt-8")}>
-                {cVersion === 'c2' ? <HorizontalBarStageChart /> : <RoseStageChart />}
+              <div className={cn("flex-1 flex flex-col", (cVersion === 'c2' || cVersion === 'c3') ? "mt-3" : "-mt-8")}>
+                {cVersion === 'c3' ? <SpiralStageChart /> : cVersion === 'c2' ? <HorizontalBarStageChart /> : <RoseStageChart />}
               </div>
             </div>
 
@@ -248,8 +246,8 @@ export function AdminDashboard() {
                 <span className="text-lg font-bold text-slate-800">187</span>
               </div>
 
-              <div className={cn("flex-1 flex flex-col justify-end items-center", cVersion === 'c2' ? "mt-4" : "-mt-8")}>
-                {cVersion === 'c2' ? <ApplicantPipelineDonutChart /> : <ApplicantPipeline3DChart />}
+              <div className={cn("flex-1 flex flex-col justify-end items-center", (cVersion === 'c2' || cVersion === 'c3') ? "mt-4" : "-mt-8")}>
+                {(cVersion === 'c2' || cVersion === 'c3') ? <ApplicantPipelineDonutChart /> : <ApplicantPipeline3DChart />}
               </div>
             </div>
 
@@ -259,11 +257,11 @@ export function AdminDashboard() {
                 <a href="#" className="text-xs text-blue-600 hover:underline font-medium">Open the register →</a>
               </div>
 
-              <div className={cn("flex-1 flex justify-center items-center mb-1 px-4", cVersion === 'c2' ? "" : "-mt-8")}>
-                {cVersion === 'c2' ? <ColumnStatusChart /> : <PolarStatusChart />}
+              <div className={cn("flex-1 flex justify-center items-center mb-1 px-4", (cVersion === 'c2' || cVersion === 'c3') ? "" : "-mt-8")}>
+                {(cVersion === 'c2' || cVersion === 'c3') ? <ColumnStatusChart /> : <PolarStatusChart />}
               </div>
 
-              <div className={cn("space-y-1", cVersion === 'c2' ? "mb-1 mt-1" : "-mt-8")}>
+              <div className={cn("space-y-1", (cVersion === 'c2' || cVersion === 'c3') ? "mb-1 mt-1" : "-mt-8")}>
                 <StatusRow label="Draft" count="35" color="bg-slate-400" />
                 <StatusRow label="Preparing" count="59" color="bg-purple-500" />
                 <StatusRow label="Payment Pending" count="23" color="bg-amber-500" />
@@ -1147,3 +1145,50 @@ function DashboardErrorState() {
     </div>
   );
 }
+
+function SpiralStageChart() {
+  const segments = [
+    { num: "01", color: "#f2f5ea", textColor: "#333" },
+    { num: "02", color: "#4ecdc4", textColor: "#fff" },
+    { num: "03", color: "#29b6f6", textColor: "#fff" },
+    { num: "04", color: "#e0f7fa", textColor: "#333" },
+    { num: "05", color: "#facc15", textColor: "#333" },
+    { num: "06", color: "#ec407a", textColor: "#fff" },
+  ];
+
+  return (
+    <div className="flex-1 flex justify-center items-center h-full w-full relative">
+      <svg viewBox="-110 -110 220 220" className="w-full h-full max-h-[220px] drop-shadow-xl overflow-visible">
+        {segments.map((seg, i) => {
+          const angle = i * 60;
+          return (
+            <g key={i} transform={`rotate(${angle})`} className="cursor-pointer transition-transform duration-300 hover:scale-[1.03]">
+              {/* Swirly petal shape matching the image */}
+              <path 
+                d="M 30,0 C 50,70 100,50 100,0 A 100 100 0 0 0 50,-86.6 C 30,-50 20,-30 30,0 Z"
+                fill={seg.color} 
+                stroke="#rgba(0,0,0,0.05)"
+                strokeWidth="1"
+                filter="drop-shadow(2px 4px 6px rgba(0,0,0,0.15))"
+              />
+              <text 
+                x="55" y="-35" 
+                fill={seg.textColor} 
+                fontSize="24" 
+                fontWeight="800" 
+                transform={`rotate(${-angle} 55 -35)`}
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                {seg.num}
+              </text>
+            </g>
+          );
+        })}
+        {/* Center cutout */}
+        <circle cx="0" cy="0" r="30" fill="#ffffff" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.1))" />
+      </svg>
+    </div>
+  );
+}
+
