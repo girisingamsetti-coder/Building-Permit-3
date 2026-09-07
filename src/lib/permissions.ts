@@ -247,6 +247,16 @@ const MODULE_DEFS: ModuleDef[] = [
     },
   },
   {
+    label: "BIM",
+    permKey: "bim",
+    requiredAny: [], // Accessible by anyone who can see the portal
+    views: {
+      LTP:        "ltp-bim",
+      OFFICER:    "officer-bim",
+      SUPER_ADMIN: "admin-bim",
+    },
+  },
+  {
     label: "Tasks",
     permKey: "tasks",
     requiredAny: [

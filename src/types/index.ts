@@ -568,6 +568,7 @@ export type ViewKey =
   | "ltp-notifications"
   | "ltp-profile"
   | "ltp-help"
+  | "ltp-bim"
   // Officer views
   | "officer-dashboard"
   | "officer-review"
@@ -578,6 +579,7 @@ export type ViewKey =
   | "officer-documents"
   | "officer-reports"
   | "officer-settings"
+  | "officer-bim"
   // Admin views
   | "admin-dashboard"
   | "admin-users"
@@ -588,6 +590,7 @@ export type ViewKey =
   | "admin-templates"
   | "admin-audit"
   | "admin-settings"
+  | "admin-bim"
   | "admin-applications"
   | "admin-shortfalls"
   | "admin-payments"

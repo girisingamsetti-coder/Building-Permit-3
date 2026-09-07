@@ -5,10 +5,9 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import { getDynamicNav } from "@/lib/permissions";
 import { ROLES } from "@/data/mock-data";
-import {
   LayoutDashboard, FileStack, ClipboardList, AlertTriangle,
   CreditCard, FolderClosed, BarChart3, Settings,
-  Building2, ChevronLeft, LogOut,
+  Building2, ChevronLeft, LogOut, Box,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +25,7 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   documents:    FolderClosed,
   reports:      BarChart3,
   settings:     Settings,
+  bim:          Box,
 };
 
 export function Sidebar() {

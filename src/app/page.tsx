@@ -31,6 +31,7 @@ import { OfficerSettings } from "@/components/officer/officer-settings";
 
 // Admin views
 import { AdminDashboard } from "@/components/admin/admin-dashboard";
+import { BimModule } from "@/components/shared/bim-module";
 import { AdminApplications } from "@/components/admin/admin-applications";
 import { AdminShortfalls } from "@/components/admin/admin-shortfalls";
 import { AdminPayments } from "@/components/admin/admin-payments";
@@ -79,6 +80,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "ltp-notifications": LtpNotifications,
   "ltp-profile": LtpProfile,
   "ltp-help": LtpHelp,
+  "ltp-bim": BimModule,
   // officer
   "officer-dashboard":    OfficerDashboard,
   "officer-review":       OfficerReview,
@@ -89,6 +91,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "officer-documents":    OfficerDocuments,
   "officer-reports":      OfficerReports,
   "officer-settings":     OfficerSettings,
+  "officer-bim":          BimModule,
   // admin
   "admin-dashboard":         AdminDashboard,
   "admin-applications":      AdminApplications,
@@ -104,6 +107,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "admin-templates":         AdminTemplates,
   "admin-audit":             AdminAudit,
   "admin-settings":          AdminSettings,
+  "admin-bim":               BimModule,
   // project manager (read-only monitoring)
   "pm-dashboard": PmDashboard,
   "pm-applications": PmApplications,
