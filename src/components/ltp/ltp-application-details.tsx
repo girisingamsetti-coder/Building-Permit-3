@@ -68,10 +68,12 @@ import {
   Share2,
   ChevronRight,
   Flag,
+  Box,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
+import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
 
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
@@ -153,6 +155,7 @@ export function LtpApplicationDetails() {
           <TabsTrigger value="overview" className="gap-1.5"><Info className="size-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="workflow" className="gap-1.5"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
           <TabsTrigger value="drawings" className="gap-1.5"><Upload className="size-3.5" /> Drawings &amp; Scrutiny</TabsTrigger>
+          <TabsTrigger value="bim" className="gap-1.5"><Box className="size-3.5 text-cyan-600" /> BIM Module <Badge variant="outline" className="ml-1 border-cyan-500/40 text-[9px] text-cyan-600 bg-cyan-50 dark:bg-cyan-950">3D</Badge></TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FolderClosed className="size-3.5" /> Documents</TabsTrigger>
           <TabsTrigger value="fees" className="gap-1.5"><ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payment</TabsTrigger>
           <TabsTrigger value="shortfalls" className="gap-1.5"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
@@ -168,6 +171,9 @@ export function LtpApplicationDetails() {
         </TabsContent>
         <TabsContent value="drawings" className="space-y-6">
           <DrawingsTab app={app} />
+        </TabsContent>
+        <TabsContent value="bim" className="space-y-6">
+          <BimWorkspaceContainer applicationId={app.applicationNo} projectData={app.project} userRole="LTP" />
         </TabsContent>
         <TabsContent value="documents" className="space-y-6">
           <DocumentsTab app={app} />

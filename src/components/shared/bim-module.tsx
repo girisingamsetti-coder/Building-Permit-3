@@ -1,88 +1,102 @@
 "use client";
+
 import * as React from "react";
+import {
+  Box,
+  Building,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  Search,
+  Filter,
+  ArrowRight,
+  UploadCloud,
+  Layers,
+  Sparkles,
+  BarChart3,
+  Eye,
+} from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/design-system/layout";
-import { Box, UploadCloud, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useAppStore } from "@/store/app-store";
+import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
+import { MOCK_BIM_MODELS } from "@/data/mock-bim-data";
 
 export function BimModule() {
+  const { applications, user } = useAppStore();
+  const [selectedAppId, setSelectedAppId] = React.useState<string>("MC/BP/2026/04/0001");
+  const [searchQuery, setSearchQuery] = React.useState("");
+
+  const bimAppsList = React.useMemo(() => {
+    return applications.map((app) => {
+      const bimData = MOCK_BIM_MODELS[app.applicationNo];
+      const hasBim = !!bimData;
+      const status = bimData ? bimData.status : "BIM_NOT_SUBMITTED";
+      const violations = bimData ? bimData.rules.filter((r) => r.status === "FAIL").length : 0;
+      return {
+        ...app,
+        hasBim,
+        bimStatus: status,
+        bimVersion: bimData?.currentVersion || 1,
+        violationsCount: violations,
+        activeFileName: bimData?.activeFileName || "Model_Pending.ifc",
+      };
+    });
+  }, [applications]);
+
+  const filteredApps = bimAppsList.filter(
+    (a) =>
+      a.applicationNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.applicant.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6">
       <PageHeader
-        title="BIM Validation & Approval"
-        description="Apply and automatically validate BIM models (IFC/Revit) for building permits."
+        title="BIM Scrutiny & Digital Permit Module"
+        description="Independent spatial engine for 3D IFC model validation, DCR compliance scrutiny, and digital twin analysis."
         icon={Box}
+        badge={
+          <Badge variant="outline" className="border-cyan-500/40 text-cyan-600 bg-cyan-50 dark:bg-cyan-950 dark:text-cyan-300">
+            Loosely Coupled Module
+          </Badge>
+        }
       />
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="col-span-1 md:col-span-2 space-y-4">
-          <SectionCard title="Upload BIM Model">
-            <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 transition-colors hover:bg-slate-100 hover:border-blue-300 cursor-pointer">
-              <UploadCloud className="w-12 h-12 text-slate-300 mb-4" />
-              <h3 className="text-lg font-semibold text-slate-700">Drag & Drop BIM Files Here</h3>
-              <p className="text-sm text-slate-500 mt-1 text-center">Supports .ifc, .rvt, and .nwd files up to 500MB.</p>
-              <button className="mt-6 px-5 py-2.5 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
-                Browse Files
-              </button>
-            </div>
-          </SectionCard>
-          
-          <SectionCard title="Recent Validations">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 border border-slate-100 rounded-lg bg-white shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
-                    <CheckCircle2 className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Commercial_Tower_A.ifc</p>
-                    <p className="text-xs text-slate-500">Validation passed • 14 rules checked</p>
-                  </div>
-                </div>
-                <button className="text-xs font-medium text-blue-600 hover:underline">View Report</button>
-              </div>
 
-              <div className="flex items-center justify-between p-3 border border-slate-100 rounded-lg bg-white shadow-sm">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
-                    <AlertTriangle className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Residential_Block_C.rvt</p>
-                    <p className="text-xs text-slate-500">2 Warnings • Setback rules violation</p>
-                  </div>
-                </div>
-                <button className="text-xs font-medium text-blue-600 hover:underline">Review Issues</button>
-              </div>
-            </div>
-          </SectionCard>
-        </div>
+      {/* Application Selector Bar */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Active Application Reference:
+            </span>
+            <select
+              value={selectedAppId}
+              onChange={(e) => setSelectedAppId(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-mono font-bold dark:border-slate-700 dark:bg-slate-800"
+            >
+              {bimAppsList.map((app) => (
+                <option key={app.id} value={app.applicationNo}>
+                  {app.applicationNo} — {app.project.name} ({app.bimStatus === "BIM_SCRUTINY_PASSED" ? "PASS" : "FAIL"})
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="col-span-1 space-y-4">
-          <SectionCard title="Validation Rules Setup">
-            <div className="space-y-4">
-              <p className="text-sm text-slate-600 leading-relaxed">
-                The automated validation engine currently checks for structural integrity, setback compliance, and floor area ratio (FAR).
-              </p>
-              <ul className="space-y-2 text-sm text-slate-700">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Structural compliance
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Setback limits
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> FAR & Height restrictions
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Fire safety code
-                </li>
-              </ul>
-              <button className="w-full mt-2 px-4 py-2 bg-slate-100 text-slate-700 text-sm font-semibold rounded-lg hover:bg-slate-200 transition-colors">
-                Configure Rules
-              </button>
-            </div>
-          </SectionCard>
+          <div className="text-xs text-slate-500">
+            Selected Application ID: <span className="font-mono font-semibold text-cyan-600">{selectedAppId}</span>
+          </div>
         </div>
       </div>
+
+      {/* Embedded BIM Workspace for the Selected Application */}
+      <BimWorkspaceContainer
+        applicationId={selectedAppId}
+        userRole={user?.role || "LTP"}
+      />
     </div>
   );
 }

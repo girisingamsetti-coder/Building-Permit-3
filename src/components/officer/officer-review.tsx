@@ -97,6 +97,7 @@ import {
   XCircle,
   RefreshCw,
   Flag,
+  Box,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type {
@@ -107,6 +108,7 @@ import type {
   User as AppUser,
   WorkflowAction,
 } from "@/types";
+import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
 
 // ---------- Helpers ----------
 function daysRemaining(iso?: string): number | null {
@@ -792,6 +794,10 @@ function RightPane({ app, user }: { app: Application; user: AppUser }) {
               </Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="bim" className="gap-1.5">
+            <Box className="size-3.5 text-cyan-600" /> BIM Module
+            <Badge variant="outline" className="text-[9px] bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">3D</Badge>
+          </TabsTrigger>
         </TabsList>
 
         {/* Drawings tab */}
@@ -815,6 +821,15 @@ function RightPane({ app, user }: { app: Application; user: AppUser }) {
           ) : (
             <EmptyState icon={ScrollText} title="No scrutiny report" description="Scrutiny findings will appear here once drawings have been processed." />
           )}
+        </TabsContent>
+
+        {/* BIM tab */}
+        <TabsContent value="bim" className="space-y-3">
+          <BimWorkspaceContainer
+            applicationId={app.applicationNo}
+            projectData={app.project}
+            userRole={user.role}
+          />
         </TabsContent>
       </Tabs>
     </SectionCard>
