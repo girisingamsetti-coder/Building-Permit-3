@@ -142,7 +142,7 @@ export function Sidebar() {
                         onClick={() => navigate(view2D)}
                         title="2D Building Drawings & DCR Scrutiny"
                         className={cn(
-                          "flex-1 flex items-center justify-start gap-2 py-1 px-4 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                          "flex items-center justify-start gap-2 py-1 px-4 rounded-[14px] text-[13px] font-bold transition-all duration-200",
                           is2DActive
                             ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
                             : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
@@ -155,7 +155,7 @@ export function Sidebar() {
                         onClick={() => navigate(view3D)}
                         title="3D BIM Scrutiny & Digital Twin"
                         className={cn(
-                          "flex-1 flex items-center justify-start gap-2 py-1 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                          "flex items-center justify-start gap-2 py-1 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
                           is3DActive
                             ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
                             : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
