@@ -96,7 +96,7 @@ export function Sidebar() {
       {/* Dynamic Nav — re-renders whenever roles change */}
       <ScrollArea className="flex-1 px-2 py-2">
         <nav>
-          <ul className="space-y-0.5">
+          <ul className="space-y-0">
             {navItems.map((item) => {
               if (item.permKey === "bim") {
                 const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
@@ -177,7 +177,7 @@ export function Sidebar() {
                     onClick={() => navigate(item.view)}
                     title={collapsed ? item.label : undefined}
                     className={cn(
-                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-3 text-[13px] font-semibold transition-all duration-200",
+                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
                       collapsed && "justify-center px-0",
                       active
                         ? "bg-[#3D405B] text-white"
