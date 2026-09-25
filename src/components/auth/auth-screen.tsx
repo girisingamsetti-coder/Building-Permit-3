@@ -45,6 +45,16 @@ import {
   Ruler,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { FeeWizard } from "@/components/wizard/fee-wizard";
+import { StatusWizard } from "@/components/wizard/status-wizard";
+import { DeveloperRegistrationWizard } from "@/components/wizard/developer-registration-wizard";
+import { DeveloperStatusWizard } from "@/components/wizard/developer-status-wizard";
+import { DeveloperRenewalWizard } from "@/components/wizard/developer-renewal-wizard";
+import { RegisteredDeveloperWizard } from "@/components/wizard/registered-developer-wizard";
+import { DeveloperConsentWizard } from "@/components/wizard/developer-consent-wizard";
+import { LtpRegistrationWizard } from "@/components/wizard/ltp-registration-wizard";
+import { LtpRenewalWizard } from "@/components/wizard/ltp-renewal-wizard";
+import { LtpViewWizard } from "@/components/wizard/ltp-view-wizard";
 import {
   InputOTP,
   InputOTPGroup,
@@ -111,7 +121,23 @@ function LoginForm() {
   const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
   const [version, setVersion] = React.useState<"v1" | "v2">("v1");
+  const [mounted, setMounted] = React.useState(false);
+  const [showFeeWizard, setShowFeeWizard] = React.useState(false);
+  const [showStatusWizard, setShowStatusWizard] = React.useState(false);
+  const [showDevRegWizard, setShowDevRegWizard] = React.useState(false);
+  const [showDevStatusWizard, setShowDevStatusWizard] = React.useState<string | null>(null);
+  const [showDevRenewalWizard, setShowDevRenewalWizard] = React.useState<string | null>(null);
+  const [showRegDevWizard, setShowRegDevWizard] = React.useState<"developer" | "tpa" | "ltp" | null>(null);
+  const [showConsentWizard, setShowConsentWizard] = React.useState<{type: "developer" | "tpa" | "ltp", title: string} | null>(null);
+  const [showLtpRegWizard, setShowLtpRegWizard] = React.useState(false);
+  const [showLtpRenewalWizard, setShowLtpRenewalWizard] = React.useState(false);
+  const [showLtpViewWizard, setShowLtpViewWizard] = React.useState(false);
   const useAltBg = version === "v2";
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const QUICK_CARDS = [
     {
@@ -237,19 +263,24 @@ function LoginForm() {
 
       {/* Quick Action Cards */}
       <div className={cn(
-        "absolute top-1/2 -translate-y-1/2 w-full px-8 md:px-24 lg:px-32 flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none",
-        useAltBg ? "justify-start" : "justify-end",
-        showLoginBox ? "opacity-0 translate-y-8" : "opacity-100 translate-y-0"
+        "absolute top-[40%] -translate-y-1/2 w-full px-8 md:px-24 lg:px-32 flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none justify-start",
+        showLoginBox ? "opacity-0 pointer-events-none" : "opacity-100"
       )}>
         {QUICK_CARDS.map((card, idx) => {
           const Icon = card.icon;
           return (
-            <div key={idx} className={cn(
-              "w-full max-w-[320px] rounded-[24px] p-6 flex flex-col gap-4 backdrop-blur-xl transition-all shadow-xl pointer-events-auto",
-              useAltBg 
-                ? "bg-white/90 border border-white text-gray-900" 
-                : "bg-[#0b1221]/80 border border-white/10 text-white"
-            )}>
+            <div 
+              key={idx} 
+              className={cn(
+                "w-full max-w-[320px] rounded-[24px] p-6 flex flex-col gap-4 backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
+                "border border-[#d4af37]",
+                useAltBg 
+                  ? "bg-white/90 text-gray-900" 
+                  : "bg-transparent text-white",
+                !mounted ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
+              )}
+              style={{ transitionDelay: showLoginBox ? "0ms" : `${600 + idx * 300}ms` }}
+            >
               <div className={cn(
                 "size-12 rounded-full flex items-center justify-center mb-2",
                 useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
@@ -262,12 +293,64 @@ function LoginForm() {
               </div>
               <div className="flex-1 mt-4 space-y-2">
                 {card.links.map((link, i) => (
-                  <a key={i} href="#" className={cn(
-                    "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
-                    useAltBg 
-                      ? "text-gray-700 hover:text-[#8c1c13] border-gray-200" 
-                      : "text-white/80 hover:text-white border-white/10"
-                  )}>
+                  <a 
+                    key={i} 
+                    href="#" 
+                    onClick={(e) => {
+                      if (link === "Pay your fees here") {
+                        e.preventDefault();
+                        setShowFeeWizard(true);
+                      } else if (link === "Search your application status") {
+                        e.preventDefault();
+                        setShowStatusWizard(true);
+                      } else if (link === "Developer Registration") {
+                        e.preventDefault();
+                        setShowDevRegWizard(true);
+                      } else if (link === "Developer Registration Status") {
+                        e.preventDefault();
+                        setShowDevStatusWizard(link);
+                      } else if (link === "Developer Renewal") {
+                        e.preventDefault();
+                        setShowDevRenewalWizard("Developer Renewal");
+                      } else if (link === "Payment and Renewal") {
+                        e.preventDefault();
+                        setShowDevRenewalWizard("Payment and Renewal");
+                      } else if (link === "List of Registered Developer") {
+                        e.preventDefault();
+                        setShowRegDevWizard("developer");
+                      } else if (link === "List of Registered TPAs") {
+                        e.preventDefault();
+                        setShowRegDevWizard("tpa");
+                      } else if (link === "List of Registered LTPs") {
+                        e.preventDefault();
+                        setShowRegDevWizard("ltp");
+                      } else if (link === "Developer Consent Link") {
+                        e.preventDefault();
+                        setShowConsentWizard({ type: "developer", title: link });
+                      } else if (link === "TPAs Consent Link") {
+                        e.preventDefault();
+                        setShowConsentWizard({ type: "tpa", title: link });
+                      } else if (link === "New Registration") {
+                        e.preventDefault();
+                        setShowLtpRegWizard(true);
+                      } else if (link === "LTP Renewal") {
+                        e.preventDefault();
+                        setShowLtpRenewalWizard(true);
+                      } else if (link === "LTP View") {
+                        e.preventDefault();
+                        setShowLtpViewWizard(true);
+                      } else if (link === "LTP Consent Link") {
+                        e.preventDefault();
+                        setShowConsentWizard({ type: "ltp", title: link });
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
+                      useAltBg 
+                        ? "text-gray-700 hover:text-[#8c1c13] border-gray-200" 
+                        : "text-white/80 hover:text-white border-white/10"
+                    )}
+                  >
                     <span>{link}</span>
                     <ArrowRight className="size-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
@@ -288,12 +371,12 @@ function LoginForm() {
           <button
             onClick={() => setShowLoginBox(false)}
             className={cn(
-              "absolute top-4 right-4 p-2 rounded-full transition-colors",
-              useAltBg ? "text-red-600 hover:bg-red-50" : "text-red-400 hover:bg-red-500/20 hover:text-red-300"
+              "absolute top-4 right-4 p-2 rounded-full text-white transition-all duration-300 transform hover:translate-y-[-2px] hover:shadow-lg active:translate-y-[0px] active:scale-95 shadow-md z-20",
+              "bg-gradient-to-r from-[#8c1c13] to-[#bf2b1d] hover:from-[#5e1914] hover:to-[#8c1c13] border border-[#5e1914]"
             )}
             aria-label="Close"
           >
-            <X className="size-5" />
+            <X className="size-4" />
           </button>
           {/* Header */}
           <div className="flex flex-col items-center mb-8 text-center">
@@ -433,6 +516,28 @@ function LoginForm() {
           </button>
         ))}
       </div>
+
+      {showFeeWizard && <FeeWizard onClose={() => setShowFeeWizard(false)} />}
+      {showStatusWizard && <StatusWizard onClose={() => setShowStatusWizard(false)} />}
+      {showDevRegWizard && <DeveloperRegistrationWizard onClose={() => setShowDevRegWizard(false)} />}
+      {showDevStatusWizard && (
+        <DeveloperStatusWizard 
+          title={showDevStatusWizard} 
+          onClose={() => setShowDevStatusWizard(null)} 
+        />
+      )}
+      {showDevRenewalWizard && <DeveloperRenewalWizard title={showDevRenewalWizard} onClose={() => setShowDevRenewalWizard(null)} />}
+      {showRegDevWizard && <RegisteredDeveloperWizard type={showRegDevWizard} onClose={() => setShowRegDevWizard(null)} />}
+      {showConsentWizard && (
+        <DeveloperConsentWizard 
+          type={showConsentWizard.type} 
+          title={showConsentWizard.title} 
+          onClose={() => setShowConsentWizard(null)} 
+        />
+      )}
+      {showLtpRegWizard && <LtpRegistrationWizard onClose={() => setShowLtpRegWizard(false)} />}
+      {showLtpRenewalWizard && <LtpRenewalWizard onClose={() => setShowLtpRenewalWizard(false)} />}
+      {showLtpViewWizard && <LtpViewWizard onClose={() => setShowLtpViewWizard(false)} />}
     </div>
   );
 }
