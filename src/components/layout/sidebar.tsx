@@ -177,7 +177,7 @@ export function Sidebar() {
                     onClick={() => navigate(item.view)}
                     title={collapsed ? item.label : undefined}
                     className={cn(
-                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-3 text-[15px] font-semibold transition-all duration-200",
+                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-3 text-[13px] font-semibold transition-all duration-200",
                       collapsed && "justify-center px-0",
                       active
                         ? "bg-[#3D405B] text-white"
