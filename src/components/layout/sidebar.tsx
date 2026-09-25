@@ -106,67 +106,57 @@ export function Sidebar() {
 
                 if (collapsed) {
                   return (
-                    <li key="bim-switcher" className="my-0.5 flex flex-col items-center gap-0.5">
+                    <li key="bim-switcher" className="flex flex-col items-center gap-0.5 my-0.5">
                       <button
                         onClick={() => navigate(view2D)}
-                        title="2D Building Drawings & Scrutiny"
+                        title="2D Drawings"
                         className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
-                          is2DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
-                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                          "flex size-9 items-center justify-center rounded-[12px] text-[10px] font-bold transition-all duration-200",
+                          is2DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                         )}
-                      >
-                        2D
-                      </button>
+                      >2D</button>
                       <button
                         onClick={() => navigate(view3D)}
-                        title="3D BIM Scrutiny & Digital Twin"
+                        title="3D BIM"
                         className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
-                          is3DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
-                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                          "flex size-9 items-center justify-center rounded-[12px] text-[10px] font-bold transition-all duration-200",
+                          is3DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                         )}
-                      >
-                        3D
-                      </button>
+                      >3D</button>
                     </li>
                   );
                 }
 
                 return (
-                  <li key="bim-switcher" className="rounded-[18px] overflow-hidden border border-[#2b2d4c]/60 bg-[#191a32]/60">
-                    {/* 2D row */}
-                    <button
-                      onClick={() => navigate(view2D)}
-                      title="2D Building Drawings & DCR Scrutiny"
-                      className={cn(
-                        "group flex w-full items-center gap-4 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
-                        is2DActive
-                          ? "bg-[#3D405B] text-white"
-                          : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                      )}
-                    >
-                      <Layers className={cn("size-[18px] shrink-0", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110 transition-transform")} />
-                      <span className="truncate">2D Drawings</span>
-                    </button>
-                    {/* divider */}
-                    <div className="h-px bg-[#2b2d4c]/60 mx-3" />
-                    {/* 3D row */}
-                    <button
-                      onClick={() => navigate(view3D)}
-                      title="3D BIM Scrutiny & Digital Twin"
-                      className={cn(
-                        "group flex w-full items-center gap-4 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
-                        is3DActive
-                          ? "bg-[#3D405B] text-white"
-                          : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                      )}
-                    >
-                      <Box className={cn("size-[18px] shrink-0", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110 transition-transform")} />
-                      <span className="truncate">3D BIM Model</span>
-                    </button>
+                  <li key="bim-switcher">
+                    <div className="flex w-full items-center rounded-[18px] overflow-hidden border border-[#2b2d4c]/50 bg-[#191a32]/50">
+                      {/* 2D half */}
+                      <button
+                        onClick={() => navigate(view2D)}
+                        title="2D Building Drawings & DCR Scrutiny"
+                        className={cn(
+                          "group flex flex-1 items-center gap-3 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                          is2DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                        )}
+                      >
+                        <Layers className={cn("size-[18px] shrink-0 transition-transform", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
+                        <span>2D</span>
+                      </button>
+                      {/* vertical divider */}
+                      <div className="w-px self-stretch bg-[#2b2d4c]/80" />
+                      {/* 3D half */}
+                      <button
+                        onClick={() => navigate(view3D)}
+                        title="3D BIM Scrutiny & Digital Twin"
+                        className={cn(
+                          "group flex flex-1 items-center gap-2 px-3 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                          is3DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                        )}
+                      >
+                        <Box className={cn("size-[18px] shrink-0 transition-transform", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
+                        <span>3D</span>
+                      </button>
+                    </div>
                   </li>
                 );
               }
