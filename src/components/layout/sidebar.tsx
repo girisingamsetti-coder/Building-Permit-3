@@ -136,35 +136,37 @@ export function Sidebar() {
                 }
 
                 return (
-                  <li key="bim-switcher" className="my-0.5">
-                    <div className="flex w-full items-center rounded-[18px] bg-[#191a32] p-0.5 border border-[#2b2d4c]/70 shadow-inner">
-                      <button
-                        onClick={() => navigate(view2D)}
-                        title="2D Building Drawings & DCR Scrutiny"
-                        className={cn(
-                          "flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-[14px] text-[13px] font-bold transition-all duration-200",
-                          is2DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
-                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
-                        )}
-                      >
-                        <Layers className={cn("size-4 shrink-0", is2DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
-                        <span>2D</span>
-                      </button>
-                      <button
-                        onClick={() => navigate(view3D)}
-                        title="3D BIM Scrutiny & Digital Twin"
-                        className={cn(
-                          "flex-1 flex items-center justify-center gap-1.5 py-1 px-2 rounded-[14px] text-[13px] font-bold transition-all duration-200",
-                          is3DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
-                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
-                        )}
-                      >
-                        <Box className={cn("size-4 shrink-0", is3DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
-                        <span>3D</span>
-                      </button>
-                    </div>
+                  <li key="bim-switcher" className="rounded-[18px] overflow-hidden border border-[#2b2d4c]/60 bg-[#191a32]/60">
+                    {/* 2D row */}
+                    <button
+                      onClick={() => navigate(view2D)}
+                      title="2D Building Drawings & DCR Scrutiny"
+                      className={cn(
+                        "group flex w-full items-center gap-4 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                        is2DActive
+                          ? "bg-[#3D405B] text-white"
+                          : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                      )}
+                    >
+                      <Layers className={cn("size-[18px] shrink-0", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110 transition-transform")} />
+                      <span className="truncate">2D Drawings</span>
+                    </button>
+                    {/* divider */}
+                    <div className="h-px bg-[#2b2d4c]/60 mx-3" />
+                    {/* 3D row */}
+                    <button
+                      onClick={() => navigate(view3D)}
+                      title="3D BIM Scrutiny & Digital Twin"
+                      className={cn(
+                        "group flex w-full items-center gap-4 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                        is3DActive
+                          ? "bg-[#3D405B] text-white"
+                          : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                      )}
+                    >
+                      <Box className={cn("size-[18px] shrink-0", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110 transition-transform")} />
+                      <span className="truncate">3D BIM Model</span>
+                    </button>
                   </li>
                 );
               }
