@@ -289,8 +289,8 @@ export const useAppStore = create<AppState>()(
   mobileNavOpen: false,
   theme: "light",
   dashboardVersion: "v3",
-  recentActivityVersion: "r3",
-  cVersion: "c1",
+  recentActivityVersion: "r2",
+  cVersion: "c2",
   processingAppIds: [],
   viewHistory: [],
 

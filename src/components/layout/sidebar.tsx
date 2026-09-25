@@ -67,18 +67,14 @@ export function Sidebar() {
       )}
     >
       {/* Brand */}
-      <div className="flex h-16 items-center gap-2.5 border-b border-sidebar-border px-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-sm">
-          <Building2 className="size-5" />
-        </div>
-        {!collapsed && (
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight text-sidebar-foreground">
-              Nirman AP
-            </p>
-            <p className="truncate text-[11px] text-sidebar-foreground/60">
-              Building Permission Authority
-            </p>
+      <div className="flex h-16 items-center justify-center border-b border-sidebar-border px-4">
+        {!collapsed ? (
+          <h1 className="text-2xl font-bold tracking-widest text-white uppercase text-center w-full">
+            BBAS
+          </h1>
+        ) : (
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#3D405B] text-white shadow-sm font-bold">
+            B
           </div>
         )}
       </div>
@@ -122,66 +118,9 @@ export function Sidebar() {
           </ul>
 
           <div className="mt-8 px-2 space-y-4">
-            <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Dashboard Version</p>}
-              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
-                {(['v1', 'v2', 'v3'] as const).map(v => (
-                  <button
-                    key={v}
-                    className={cn(
-                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
-                      collapsed && "px-0",
-                      dashboardVersion === v
-                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
-                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                    )}
-                    onClick={() => setDashboardVersion(v)}
-                  >
-                    {v.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Recent Activity</p>}
-              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
-                {(['r1', 'r2', 'r3'] as const).map(r => (
-                  <button
-                    key={r}
-                    className={cn(
-                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
-                      collapsed && "px-0",
-                      recentActivityVersion === r
-                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
-                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                    )}
-                    onClick={() => setRecentActivityVersion(r)}
-                  >
-                    {r.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              {!collapsed && <p className="mb-2 px-1 text-[10px] font-bold uppercase tracking-wider text-[#9E9FB1]/70">Cards</p>}
-              <div className={cn("flex gap-1 p-1 border border-[#1f213a] rounded-lg bg-[#0C0D1E]", collapsed ? "flex-col" : "")}>
-                {(['c1', 'c2'] as const).map(c => (
-                  <button
-                    key={c}
-                    className={cn(
-                      "flex-1 h-8 rounded-md text-xs font-bold transition-all duration-200 flex items-center justify-center",
-                      collapsed && "px-0",
-                      cVersion === c
-                        ? "bg-[#3D405B] text-white shadow-md scale-[1.02]"
-                        : "bg-transparent text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                    )}
-                    onClick={() => setCVersion(c)}
-                  >
-                    {c.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
+
+
+
           </div>
         </nav>
       </ScrollArea>
