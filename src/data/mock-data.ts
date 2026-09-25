@@ -154,49 +154,65 @@ type ScrutinyScenario = "front_setback" | "ground_coverage" | "far_fsi" | "parki
 
 function makeScrutinyReport(version: number, scenario: ScrutinyScenario, date: string, reportNo?: string) {
   const checks: import("@/types").ScrutinyCheck[] = [
-    { id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL",
+    {
+      id: "sc-1", rule: "Front Setback Compliance", category: "Setbacks", severity: "CRITICAL",
       status: scenario === "front_setback" ? "FAIL" : "PASS",
       message: scenario === "front_setback" ? "Front setback 4.8 m is below minimum 6.0 m." : "Front setback 6.2 m exceeds minimum 6.0 m.",
       recommendation: scenario === "front_setback" ? "Increase front setback to a minimum of 6.0 m." : undefined,
-      expectedValue: "6.0 m", observedValue: scenario === "front_setback" ? "4.8 m" : "6.2 m" },
+      expectedValue: "6.0 m", observedValue: scenario === "front_setback" ? "4.8 m" : "6.2 m"
+    },
     { id: "sc-2", rule: "Rear Setback Compliance", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "Rear setback 4.1 m compliant.", expectedValue: "3.0 m", observedValue: "4.1 m" },
-    { id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR",
+    {
+      id: "sc-3", rule: "Side Setback (East)", category: "Setbacks", severity: "MAJOR",
       status: scenario === "side_setback" ? "FAIL" : "PASS",
       message: scenario === "side_setback" ? "Side setback 1.9 m is below required 3.0 m." : "3.2 m compliant.",
       recommendation: scenario === "side_setback" ? "Revise side setback to minimum 3.0 m." : undefined,
-      expectedValue: "3.0 m", observedValue: scenario === "side_setback" ? "1.9 m" : "3.2 m" },
+      expectedValue: "3.0 m", observedValue: scenario === "side_setback" ? "1.9 m" : "3.2 m"
+    },
     { id: "sc-4", rule: "Side Setback (West)", category: "Setbacks", severity: "MAJOR", status: "PASS", message: "3.0 m compliant.", expectedValue: "3.0 m", observedValue: "3.0 m" },
-    { id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR",
+    {
+      id: "sc-5", rule: "Ground Coverage", category: "Bulk & Density", severity: "MAJOR",
       status: scenario === "ground_coverage" ? "FAIL" : "PASS",
       message: scenario === "ground_coverage" ? "Coverage 68% exceeds permissible 60%." : "Coverage 58% within 60% limit.",
       recommendation: scenario === "ground_coverage" ? "Reduce ground coverage within permissible limit." : undefined,
-      expectedValue: "60%", observedValue: scenario === "ground_coverage" ? "68%" : "58%" },
-    { id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL",
+      expectedValue: "60%", observedValue: scenario === "ground_coverage" ? "68%" : "58%"
+    },
+    {
+      id: "sc-6", rule: "FAR / FSI Compliance", category: "Bulk & Density", severity: "CRITICAL",
       status: scenario === "far_fsi" ? "FAIL" : "PASS",
       message: scenario === "far_fsi" ? "Achieved FAR 1.82 exceeds permissible 1.50." : "Achieved FAR 1.42 against permissible 1.50.",
       recommendation: scenario === "far_fsi" ? "Revise built-up area to reduce FAR within permissible limit." : undefined,
-      expectedValue: "1.50", observedValue: scenario === "far_fsi" ? "1.82" : "1.42" },
-    { id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR",
+      expectedValue: "1.50", observedValue: scenario === "far_fsi" ? "1.82" : "1.42"
+    },
+    {
+      id: "sc-7", rule: "Height Restriction", category: "Bulk & Density", severity: "MAJOR",
       status: scenario === "height" ? "FAIL" : "PASS",
       message: scenario === "height" ? "Building height 18.4 m exceeds permissible 15 m." : "Building height 14.8 m within 15 m limit.",
       recommendation: scenario === "height" ? "Revise building height to within permissible limit." : undefined,
-      expectedValue: "15 m", observedValue: scenario === "height" ? "18.4 m" : "14.8 m" },
-    { id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR",
+      expectedValue: "15 m", observedValue: scenario === "height" ? "18.4 m" : "14.8 m"
+    },
+    {
+      id: "sc-8", rule: "Parking Provision", category: "Amenities", severity: "MAJOR",
       status: scenario === "parking" ? "FAIL" : "PASS",
       message: scenario === "parking" ? "16 ECS provided, 24 required." : "24 ECS provided, 22 required.",
       recommendation: scenario === "parking" ? "Provide required parking spaces (24 ECS)." : undefined,
-      expectedValue: "24 ECS", observedValue: scenario === "parking" ? "16 ECS" : "24 ECS" },
+      expectedValue: "24 ECS", observedValue: scenario === "parking" ? "16 ECS" : "24 ECS"
+    },
     { id: "sc-9", rule: "Rain Water Harvesting", category: "Sustainability", severity: "MINOR", status: "PASS", message: "RWH pit shown at NE corner." },
-    { id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR",
+    {
+      id: "sc-10", rule: "Sewage Treatment Plant", category: "Sustainability", severity: "MINOR",
       status: scenario === "passed_warnings" ? "WARNING" : "PASS",
       message: scenario === "passed_warnings" ? "STP capacity calculation sheet not attached." : "STP of 30 KLD provided.",
-      recommendation: scenario === "passed_warnings" ? "Attach STP capacity calculation." : undefined },
+      recommendation: scenario === "passed_warnings" ? "Attach STP capacity calculation." : undefined
+    },
     { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL", status: "PASS", message: "Stair width 1.8 m compliant." },
     { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
-    { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR",
+    {
+      id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR",
       status: scenario === "passed_warnings" ? "WARNING" : "PASS",
       message: scenario === "passed_warnings" ? "Landscape plan missing tree species details." : "Tree species indicated on landscape plan.",
-      recommendation: scenario === "passed_warnings" ? "Add tree species details to landscape plan." : undefined },
+      recommendation: scenario === "passed_warnings" ? "Add tree species details to landscape plan." : undefined
+    },
     { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
     { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "MINOR", status: "PASS", message: "Title block and north arrow present." },
   ];
@@ -609,8 +625,38 @@ export const SEED_APPLICATIONS: Application[] = [
     ],
   }),
 
+  // 15. DIRECTOR_REVIEW
+  buildApp("app-15", "MC/BP/2026/04/0015", "Silver Oaks IT Park", "COMMERCIAL", 24000, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-12T11:00:00", "2026-01-15T09:00:00", "2026-01-18T14:00:00"], "Shri. Alok Singh", "+91 98220 14515", "alok.singh@email.com", "Hinjewadi, Pune — 411057", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-10T10:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-10T10:06:00", "SCR/2026/0015"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(24000, 8, true),
+    payment: makePayment(3186300, true, "2026-01-12"),
+    remarks: [{ id: "r-15-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Approved at Zonal level. Forwarding to Director due to high built-up area.", timestamp: "2026-01-18T14:00:00", type: "DECISION" }],
+  }),
+
+  // 16. ADDITIONAL_COMMISSIONER_REVIEW
+  buildApp("app-16", "MC/BP/2026/04/0016", "Lumina Residential Complex", "RESIDENTIAL", 18500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-08T09:00:00", "2026-01-08T09:05:00", "2026-01-08T09:06:00", "2026-01-10T11:00:00", "2026-01-13T10:00:00", "2026-01-16T14:00:00", "2026-01-19T11:00:00"], "Smt. Reena Patel", "+91 98220 14516", "reena.patel@email.com", "Viman Nagar, Pune — 411014", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-08T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed", "2026-01-08T09:06:00", "SCR/2026/0016"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(18500, 8, true),
+    payment: makePayment(2416300, true, "2026-01-10"),
+    remarks: [{ id: "r-16-1", author: { name: "Shri. Suresh Nair", role: "DIRECTOR" }, text: "Director review complete. Forwarding for Addl. Commissioner review.", timestamp: "2026-01-19T11:00:00", type: "DECISION" }],
+  }),
+
+  // 17. COMMISSIONER_REVIEW (using 17A to avoid conflict with the existing app-17)
+  buildApp("app-17a", "MC/BP/2026/04/0017A", "Grand Mall & Multiplex", "COMMERCIAL", 35000, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-15T09:00:00", "2025-12-15T09:05:00", "2025-12-15T09:06:00", "2025-12-17T11:00:00", "2025-12-20T10:00:00", "2025-12-25T14:00:00", "2025-12-30T11:00:00", "2026-01-05T15:00:00"], "Shri. Karan Johar", "+91 98220 14517", "karan.johar@email.com", "Magarpatta, Pune — 411028", {
+    drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-15T09:05:00" }]),
+    scrutiny: makeScrutinyReport(1, "passed_warnings", "2025-12-15T09:06:00", "SCR/2026/0017"),
+    documents: makeDocuments("verified"),
+    fee: makeFee(35000, 8, true),
+    payment: makePayment(4586300, true, "2025-12-17"),
+    remarks: [{ id: "r-17-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and recommended for Commissioner's final approval.", timestamp: "2026-01-05T15:00:00", type: "DECISION" }],
+  }),
+
   // ============================================================
-  // 11 ADDITIONAL PENDING PAYMENT APPLICATIONS
+  // ADDITIONAL PENDING PAYMENT APPLICATIONS
   // ============================================================
   buildApp("app-17", "MC/BP/2026/04/0017", "Riverstone Commercial Complex", "COMMERCIAL", 2850, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-15T10:00:00", "2026-08-15T10:05:00", "2026-08-16T14:00:00", "2026-08-20T18:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-15T10:05:00" }]),

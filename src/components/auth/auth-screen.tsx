@@ -105,6 +105,7 @@ function LoginForm() {
   const [pwError, setPwError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const [demoRole, setDemoRole] = React.useState<string>("");
+  const [showLoginBox, setShowLoginBox] = React.useState(false);
 
   function validate(): boolean {
     let ok = true;
@@ -155,25 +156,60 @@ function LoginForm() {
   }
 
   return (
-    <div 
-      className="relative flex min-h-screen w-full flex-col items-center justify-center bg-cover bg-center font-sans"
+    <div
+      className="relative flex min-h-screen w-full flex-col items-start justify-center pl-8 md:pl-24 lg:pl-32 bg-cover bg-center font-sans overflow-hidden"
       style={{ backgroundImage: "url('/bg-city.png')" }}
     >
+      {/* Government Banner Header */}
+      <div className="absolute top-0 left-0 w-full flex items-center justify-between px-6 md:px-20 lg:px-28 py-2 bg-[#fdf8ef]/95 shadow-md z-20 border-b border-orange-200 backdrop-blur-md">
+        
+        {/* Left: Narayana */}
+        <div className="flex items-center gap-3">
+          <img src="/narayana.png" alt="Sri Ponguru Narayana" className="h-14 md:h-20 w-auto object-contain drop-shadow-md" />
+          <div className="hidden md:flex flex-col">
+            <span className="text-[14px] font-bold text-[#8c1c13]">Sri Ponguru Narayana</span>
+            <span className="text-[11px] text-gray-800 font-semibold">Hon'ble Minister for MA&UD</span>
+            <span className="text-[11px] text-gray-800 font-semibold">Andhra Pradesh Government</span>
+          </div>
+        </div>
 
+        {/* Center: APCRDA & AP Govt */}
+        <div className="flex items-center gap-6 md:gap-12">
+          <img src="/apcrda.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
+          <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">BBAS</div>
+          <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
+        </div>
 
+        {/* Right: CBN */}
+        <div className="flex items-center gap-3 text-right">
+          <div className="hidden md:flex flex-col">
+            <span className="text-[14px] font-bold text-[#8c1c13]">Sri Nara Chandrababu Naidu</span>
+            <span className="text-[11px] text-gray-800 font-semibold">Hon'ble Chief Minister</span>
+            <span className="text-[11px] text-gray-800 font-semibold">Andhra Pradesh Government</span>
+          </div>
+          <img src="/cbn.png" alt="Sri Nara Chandrababu Naidu" className="h-14 md:h-20 w-auto object-contain drop-shadow-md" />
+        </div>
+
+        {/* Extra Login Button attached to header bottom edge */}
+        {!showLoginBox && (
+          <div className="absolute -bottom-12 right-0 md:right-8">
+            <Button 
+              onClick={() => setShowLoginBox(true)}
+              className="bg-[#8c1c13] hover:bg-red-900 text-white font-bold px-8 py-6 rounded-t-none rounded-b-xl shadow-lg tracking-wider text-sm transition-transform hover:scale-105"
+            >
+              LOGIN
+            </Button>
+          </div>
+        )}
+      </div>
       {/* Main Glassmorphism Card */}
-      <div className="relative z-10 w-full max-w-[420px] rounded-[24px] border border-white/20 bg-black/25 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+      {showLoginBox && (
+        <div className="relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] border border-white/20 bg-black/25 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500">
         {/* Header */}
         <div className="flex flex-col items-center mb-8 text-center">
-          <div className="relative flex items-center justify-center h-36 w-auto mb-2 drop-shadow-[0_0_8px_rgba(253,224,71,0.6)]">
-            <img src="/amaravati-logo.png" alt="Logo" className="h-full w-auto object-contain" />
-          </div>
           <h1 className="font-serif text-[22px] tracking-[0.1em] text-white drop-shadow-md uppercase">
-            Nirman Amaravati
+            BBAS AMARAVATI
           </h1>
-          <p className="mt-2 text-[14px] text-white/80 font-medium">
-            Login to your Portal
-          </p>
         </div>
 
         {/* Form */}
@@ -278,31 +314,8 @@ function LoginForm() {
 
         </form>
 
-        {/* Demo Roles - hidden discrete trigger at bottom right */}
-        <div className="absolute -bottom-12 right-0">
-          <Select value={demoRole} onValueChange={handleDemoRoleSelect}>
-            <SelectTrigger className="h-6 w-[120px] bg-black/40 border-white/10 text-[10px] text-white/40 focus:ring-0">
-              <SelectValue placeholder="Demo Access" />
-            </SelectTrigger>
-            <SelectContent className="bg-black/80 border-white/20 text-white backdrop-blur-xl">
-              {DEMO_CREDENTIALS.map((c) => (
-                <SelectItem key={c.role} value={c.role} className="text-xs hover:bg-white/10">
-                  {ROLES[c.role].title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
       </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-6 w-full text-center">
-        <div className="flex items-center justify-center gap-4 text-[12px] text-white/60">
-          <button className="hover:text-white transition-colors">Terms of Service</button>
-          <div className="h-3 w-px bg-white/30" />
-          <button className="hover:text-white transition-colors">Privacy Policy</button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -483,10 +496,10 @@ function OtpScreen({ email, onBack }: { email: string; onBack: () => void }) {
                 <>
                   <Loader2 className="size-4 animate-spin" /> Verifying…
                 </>
-                ) : (
-                  <>Verify &amp; continue</>
-                )}
-              </Button>
+              ) : (
+                <>Verify &amp; continue</>
+              )}
+            </Button>
           </form>
           <button
             onClick={onBack}

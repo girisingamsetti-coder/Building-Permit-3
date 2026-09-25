@@ -234,15 +234,15 @@ export function LtpFees() {
                 {isVerifying
                   ? "Documents under verification"
                   : isDocPending
-                  ? "Upload drawings & documents first"
-                  : "Fee generation pending"}
+                    ? "Upload drawings & documents first"
+                    : "Fee generation pending"}
               </p>
               <p className="max-w-md text-sm text-muted-foreground">
                 {isVerifying
                   ? "Fee will be auto-generated when all documents are verified by TPA. You will be notified once the fee is ready."
                   : isDocPending
-                  ? "Complete drawing scrutiny and upload all required documents. Once verified, the fee will be auto-generated."
-                  : "The fee for this application will be generated automatically once the prerequisite stages are complete."}
+                    ? "Complete drawing scrutiny and upload all required documents. Once verified, the fee will be auto-generated."
+                    : "The fee for this application will be generated automatically once the prerequisite stages are complete."}
               </p>
             </div>
             <div className="flex gap-2">

@@ -103,7 +103,10 @@ export function getVisibleApplications(user: User, apps: Application[]): Applica
 
 // Applications currently assigned to this officer for review
 export function getAssignedApplications(user: User, apps: Application[]): Application[] {
-  if (user.role === "LTP" || user.role === "SUPER_ADMIN") return [];
+  if (user.role === "LTP") return [];
+  if (user.role === "SUPER_ADMIN") {
+    return apps.filter((a) => !["APPROVED", "REJECTED"].includes(a.status));
+  }
   const stageRoles = rolesForStage;
   return apps.filter((a) => {
     if (["APPROVED", "REJECTED"].includes(a.status)) return false;
