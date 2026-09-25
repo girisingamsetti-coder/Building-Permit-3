@@ -233,7 +233,7 @@ function LoginForm() {
 
         {/* Center: APCRDA & AP Govt */}
         <div className="flex items-center gap-6 md:gap-12">
-          <img src="/apcrda.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
+          <img src="/APCRDA.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
           <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">BBAS</div>
           <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
         </div>
