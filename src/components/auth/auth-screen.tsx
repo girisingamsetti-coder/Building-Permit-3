@@ -39,6 +39,10 @@ import {
   ChevronDown,
   Flower2,
   User,
+  X,
+  Users,
+  HardHat,
+  Ruler,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -108,6 +112,27 @@ function LoginForm() {
   const [showLoginBox, setShowLoginBox] = React.useState(false);
   const [version, setVersion] = React.useState<"v1" | "v2">("v1");
   const useAltBg = version === "v2";
+
+  const QUICK_CARDS = [
+    {
+      title: "Citizen Service",
+      icon: Users,
+      desc: "Pay a fee or follow a file — no login needed.",
+      links: ["Pay your fees here", "Search your application status"]
+    },
+    {
+      title: "Developer & TPAs",
+      icon: HardHat,
+      desc: "Register, renew and check developers and Town Planning Assistants.",
+      links: ["Developer Registration", "Developer Registration Status", "Developer Renewal", "List of Registered Developer", "Developer Consent Link", "TPAs Consent Link", "List of Registered TPAs"]
+    },
+    {
+      title: "LTP",
+      icon: Ruler,
+      desc: "Licensed Technical Persons register, renew and be found.",
+      links: ["New Registration", "List of Registered LTPs", "LTP Renewal", "Payment and Renewal", "LTP View", "LTP Consent Link"]
+    }
+  ];
 
   function validate(): boolean {
     let ok = true;
@@ -209,12 +234,67 @@ function LoginForm() {
           </div>
         )}
       </div>
+
+      {/* Quick Action Cards */}
+      <div className={cn(
+        "absolute top-1/2 -translate-y-1/2 w-full px-8 md:px-24 lg:px-32 flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none",
+        useAltBg ? "justify-start" : "justify-end",
+        showLoginBox ? "opacity-0 translate-y-8" : "opacity-100 translate-y-0"
+      )}>
+        {QUICK_CARDS.map((card, idx) => {
+          const Icon = card.icon;
+          return (
+            <div key={idx} className={cn(
+              "w-full max-w-[320px] rounded-[24px] p-6 flex flex-col gap-4 backdrop-blur-xl transition-all shadow-xl pointer-events-auto",
+              useAltBg 
+                ? "bg-white/90 border border-white text-gray-900" 
+                : "bg-[#0b1221]/80 border border-white/10 text-white"
+            )}>
+              <div className={cn(
+                "size-12 rounded-full flex items-center justify-center mb-2",
+                useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
+              )}>
+                <Icon className="size-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-1">{card.title}</h3>
+                <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+              </div>
+              <div className="flex-1 mt-4 space-y-2">
+                {card.links.map((link, i) => (
+                  <a key={i} href="#" className={cn(
+                    "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
+                    useAltBg 
+                      ? "text-gray-700 hover:text-[#8c1c13] border-gray-200" 
+                      : "text-white/80 hover:text-white border-white/10"
+                  )}>
+                    <span>{link}</span>
+                    <ArrowRight className="size-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Main Glassmorphism Card */}
       {showLoginBox && (
         <div className={cn(
           "relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] p-8 backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500",
           useAltBg ? "bg-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-300" : "bg-black/25 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20"
         )}>
+          {/* Close Button */}
+          <button
+            onClick={() => setShowLoginBox(false)}
+            className={cn(
+              "absolute top-4 right-4 p-2 rounded-full transition-colors",
+              useAltBg ? "text-red-600 hover:bg-red-50" : "text-red-400 hover:bg-red-500/20 hover:text-red-300"
+            )}
+            aria-label="Close"
+          >
+            <X className="size-5" />
+          </button>
           {/* Header */}
           <div className="flex flex-col items-center mb-8 text-center">
             <h1 className={cn(
