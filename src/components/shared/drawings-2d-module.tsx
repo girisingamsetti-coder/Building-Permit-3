@@ -220,40 +220,17 @@ export function Drawings2DModule() {
 
   return (
     <div className="space-y-6">
-      {/* Header with 2D / 3D Switch */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <PageHeader
-            title="2D CAD Drawing & Scrutiny Engine"
-            description="Comprehensive vector CAD drawing validation, automatic DCR setback verification, and regulatory rule scrutiny."
-            icon={Layers}
-            badge={
-              <Badge variant="outline" className="border-indigo-500/40 text-indigo-600 bg-indigo-50 dark:bg-indigo-950 dark:text-indigo-300">
-                Auto-DCR Engine
-              </Badge>
-            }
-          />
-        </div>
-
-        {/* Top 2D / 3D Mode Switcher */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted border border-border shadow-sm shrink-0">
-          <Button
-            size="sm"
-            variant="default"
-            className="h-8 gap-1.5 text-xs font-semibold shadow-sm bg-primary text-primary-foreground"
-          >
-            <Layers className="size-3.5" /> 2D Drawings
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => navigate(bimPortalView)}
-            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-background"
-          >
-            <Box className="size-3.5" /> 3D BIM Model
-          </Button>
-        </div>
-      </div>
+      {/* Header */}
+      <PageHeader
+        title="2D CAD Drawing & Scrutiny Engine"
+        description="Comprehensive vector CAD drawing validation, automatic DCR setback verification, and regulatory rule scrutiny."
+        icon={Layers}
+        badge={
+          <Badge variant="outline" className="border-indigo-500/40 text-indigo-600 bg-indigo-50 dark:bg-indigo-950 dark:text-indigo-300">
+            Auto-DCR Engine
+          </Badge>
+        }
+      />
 
       {/* Application Selector Bar */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
