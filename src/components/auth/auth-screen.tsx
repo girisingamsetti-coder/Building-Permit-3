@@ -263,8 +263,9 @@ function LoginForm() {
 
       {/* Quick Action Cards */}
       <div className={cn(
-        "absolute top-[40%] -translate-y-1/2 w-full px-8 md:px-24 lg:px-32 flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none justify-start",
-        showLoginBox ? "opacity-0 pointer-events-none" : "opacity-100"
+        "absolute top-[40%] -translate-y-1/2 w-full flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none",
+        useAltBg ? "justify-end px-4 md:px-8 lg:px-12" : "justify-start px-8 md:px-24 lg:px-32",
+        showLoginBox ? "pointer-events-none" : ""
       )}>
         {QUICK_CARDS.map((card, idx) => {
           const Icon = card.icon;
@@ -277,9 +278,9 @@ function LoginForm() {
                 useAltBg 
                   ? "bg-white/90 text-gray-900" 
                   : "bg-transparent text-white",
-                !mounted ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
+                (!mounted || showLoginBox) ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
               )}
-              style={{ transitionDelay: showLoginBox ? "0ms" : `${600 + idx * 300}ms` }}
+              style={{ transitionDelay: showLoginBox ? "0ms" : (mounted ? `${idx * 250}ms` : `${600 + idx * 300}ms`) }}
             >
               <div className={cn(
                 "size-12 rounded-full flex items-center justify-center mb-2",
