@@ -129,31 +129,31 @@ export function Sidebar() {
 
                 return (
                   <li key="bim-switcher">
-                    <div className="flex w-full items-center rounded-[18px] overflow-hidden border border-[#2b2d4c]/50 bg-[#191a32]/50">
-                      {/* 2D half */}
+                    <div className="flex w-full items-center justify-center rounded-[18px] border border-[#2b2d4c]/50 bg-[#191a32]/50 overflow-hidden">
+                      {/* 2D button */}
                       <button
                         onClick={() => navigate(view2D)}
                         title="2D Building Drawings & DCR Scrutiny"
                         className={cn(
-                          "group flex flex-1 items-center gap-3 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                          "group flex items-center gap-2 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
                           is2DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                         )}
                       >
-                        <Layers className={cn("size-[18px] shrink-0 transition-transform", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
+                        <Layers className={cn("size-[16px] shrink-0 transition-transform", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white")} />
                         <span>2D</span>
                       </button>
                       {/* vertical divider */}
                       <div className="w-px self-stretch bg-[#2b2d4c]/80" />
-                      {/* 3D half */}
+                      {/* 3D button */}
                       <button
                         onClick={() => navigate(view3D)}
                         title="3D BIM Scrutiny & Digital Twin"
                         className={cn(
-                          "group flex flex-1 items-center gap-2 px-3 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                          "group flex items-center gap-2 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
                           is3DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
                         )}
                       >
-                        <Box className={cn("size-[18px] shrink-0 transition-transform", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
+                        <Box className={cn("size-[16px] shrink-0 transition-transform", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white")} />
                         <span>3D</span>
                       </button>
                     </div>
