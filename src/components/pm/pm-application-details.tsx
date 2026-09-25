@@ -59,10 +59,12 @@ import {
   Info,
   ArrowRight,
   Flag,
+  Building2,
 } from "lucide-react";
 import type { Application, WorkflowHistoryEntry } from "@/types";
 import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 import { computeSLA } from "@/components/pm/pm-helpers";
+import { ApplicationOccupancyTab } from "@/components/occupancy/application-occupancy-tab";
 
 // ============================================================
 // PROJECT MANAGER — Application Details (read-only)
@@ -149,6 +151,9 @@ export function PmApplicationDetails() {
           <TabsTrigger value="activity" className="gap-1.5">
             <History className="size-3.5" /> Activity
           </TabsTrigger>
+          <TabsTrigger value="occupancy" className="gap-1.5">
+            <Building2 className="size-3.5 text-blue-600" /> Occupancy Module
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -171,6 +176,9 @@ export function PmApplicationDetails() {
         </TabsContent>
         <TabsContent value="activity" className="space-y-6">
           <ActivityTab app={app} />
+        </TabsContent>
+        <TabsContent value="occupancy" className="space-y-6">
+          <ApplicationOccupancyTab app={app} />
         </TabsContent>
       </Tabs>
     </div>

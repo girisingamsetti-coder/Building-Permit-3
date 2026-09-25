@@ -8,7 +8,9 @@ import { ROLES } from "@/data/mock-data";
 import {
   LayoutDashboard, FileStack, ClipboardList, AlertTriangle,
   CreditCard, FolderClosed, BarChart3, Settings,
-  Building2, ChevronLeft, LogOut, Box,
+  Building2, ChevronLeft, LogOut, Box, Layers,
+  MapPin, FileBadge2, FileWarning, Gavel, UserRoundCog,
+  HardHat, Briefcase, IdCard, Send,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,17 +18,26 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import type { ViewKey } from "@/types";
 
-// Icon map keyed by the module's permKey
 const MODULE_ICONS: Record<string, LucideIcon> = {
-  dashboard:    LayoutDashboard,
-  applications: FileStack,
-  tasks:        ClipboardList,
-  shortfalls:   AlertTriangle,
-  payments:     CreditCard,
-  documents:    FolderClosed,
-  reports:      BarChart3,
-  settings:     Settings,
-  bim:          Box,
+  dashboard:      LayoutDashboard,
+  applications:   FileStack,
+  bim:            Box,
+  occupancy:      Building2,
+  tasks:          ClipboardList,
+  shortfalls:     AlertTriangle,
+  inspections:    MapPin,
+  nocs:           FileBadge2,
+  "show-cause":   FileWarning,
+  revocations:    Gavel,
+  "ltp-changes":  UserRoundCog,
+  "work-initiated": HardHat,
+  developers:     Briefcase,
+  professionals:  IdCard,
+  outward:        Send,
+  payments:       CreditCard,
+  documents:      FolderClosed,
+  reports:        BarChart3,
+  settings:       Settings,
 };
 
 export function Sidebar() {
@@ -87,6 +98,77 @@ export function Sidebar() {
         <nav>
           <ul className="space-y-0.5">
             {navItems.map((item) => {
+              if (item.permKey === "bim") {
+                const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
+                const view3D: ViewKey = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
+                const is2DActive = view === view2D || view === "ltp-drawings";
+                const is3DActive = view === view3D;
+
+                if (collapsed) {
+                  return (
+                    <li key="bim-switcher" className="my-1.5 flex flex-col items-center gap-1">
+                      <button
+                        onClick={() => navigate(view2D)}
+                        title="2D Building Drawings & Scrutiny"
+                        className={cn(
+                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
+                          is2DActive
+                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
+                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                        )}
+                      >
+                        2D
+                      </button>
+                      <button
+                        onClick={() => navigate(view3D)}
+                        title="3D BIM Scrutiny & Digital Twin"
+                        className={cn(
+                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
+                          is3DActive
+                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
+                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                        )}
+                      >
+                        3D
+                      </button>
+                    </li>
+                  );
+                }
+
+                return (
+                  <li key="bim-switcher" className="my-1">
+                    <div className="flex w-full items-center rounded-[18px] bg-[#191a32] p-1 border border-[#2b2d4c]/70 shadow-inner">
+                      <button
+                        onClick={() => navigate(view2D)}
+                        title="2D Building Drawings & DCR Scrutiny"
+                        className={cn(
+                          "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                          is2DActive
+                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
+                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
+                        )}
+                      >
+                        <Layers className={cn("size-4 shrink-0", is2DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
+                        <span>2D</span>
+                      </button>
+                      <button
+                        onClick={() => navigate(view3D)}
+                        title="3D BIM Scrutiny & Digital Twin"
+                        className={cn(
+                          "flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                          is3DActive
+                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
+                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
+                        )}
+                      >
+                        <Box className={cn("size-4 shrink-0", is3DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
+                        <span>3D</span>
+                      </button>
+                    </div>
+                  </li>
+                );
+              }
+
               const active = view === item.view;
               const Icon = MODULE_ICONS[item.permKey] ?? LayoutDashboard;
               return (

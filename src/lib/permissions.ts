@@ -37,7 +37,7 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
   const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
-  const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim"];
+  const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim", "admin-2d-drawings"];
   
   if (configViews.includes(view)) {
     return user.role === "SUPER_ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
@@ -267,15 +267,21 @@ const MODULE_DEFS: ModuleDef[] = [
     },
   },
   {
+    label: "Occupancy",
+    permKey: "occupancy",
+    requiredAny: [], // Accessible by anyone who can see the portal
+    views: {
+      LTP:        "ltp-occupancy",
+      OFFICER:    "officer-occupancy",
+      SUPER_ADMIN: "admin-occupancy",
+    },
+  },
+  {
     label: "Tasks",
     permKey: "tasks",
-    requiredAny: [
-      "drawing:upload", "drawing:scrutinize",
-      "workflow:approve", "workflow:forward", "workflow:return", "workflow:reject",
-      "document:verify", "document:reject",
-    ],
+    requiredAny: [],
     views: {
-      LTP:        "ltp-drawings",
+      LTP:        "ltp-tasks",
       OFFICER:    "officer-tasks",
       SUPER_ADMIN: "admin-tasks",
     },
@@ -283,7 +289,7 @@ const MODULE_DEFS: ModuleDef[] = [
   {
     label: "Shortfalls",
     permKey: "shortfalls",
-    requiredAny: ["shortfall:raise", "shortfall:view", "shortfall:resolve"],
+    requiredAny: [],
     views: {
       LTP:        "ltp-shortfalls",
       OFFICER:    "officer-shortfalls",
@@ -291,11 +297,101 @@ const MODULE_DEFS: ModuleDef[] = [
     },
   },
   {
+    label: "Site Inspections",
+    permKey: "inspections",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-inspections",
+      OFFICER:    "officer-inspections",
+      SUPER_ADMIN: "admin-inspections",
+    },
+  },
+  {
+    label: "NOCs",
+    permKey: "nocs",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-nocs",
+      OFFICER:    "officer-nocs",
+      SUPER_ADMIN: "admin-nocs",
+    },
+  },
+  {
+    label: "Show Cause",
+    permKey: "show-cause",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-show-cause",
+      OFFICER:    "officer-show-cause",
+      SUPER_ADMIN: "admin-show-cause",
+    },
+  },
+  {
+    label: "Revoke Proceedings",
+    permKey: "revocations",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-revocations",
+      OFFICER:    "officer-revocations",
+      SUPER_ADMIN: "admin-revocations",
+    },
+  },
+  {
+    label: "Change of LTP",
+    permKey: "ltp-changes",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-changes",
+      OFFICER:    "officer-ltp-changes",
+      SUPER_ADMIN: "admin-ltp-changes",
+    },
+  },
+  {
+    label: "Work Initiated",
+    permKey: "work-initiated",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-work-initiated",
+      OFFICER:    "officer-work-initiated",
+      SUPER_ADMIN: "admin-work-initiated",
+    },
+  },
+  {
+    label: "Developers",
+    permKey: "developers",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-developers",
+      OFFICER:    "officer-developers",
+      SUPER_ADMIN: "admin-developers",
+    },
+  },
+  {
+    label: "LTP",
+    permKey: "professionals",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-professionals",
+      OFFICER:    "officer-professionals",
+      SUPER_ADMIN: "admin-professionals",
+    },
+  },
+  {
+    label: "Outward",
+    permKey: "outward",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-outward",
+      OFFICER:    "officer-outward",
+      SUPER_ADMIN: "admin-outward",
+    },
+  },
+  {
     label: "Payments",
     permKey: "payments",
-    requiredAny: ["payment:initiate", "payment:verify", "fee:manage", "fee:calculate"],
+    requiredAny: [],
     views: {
-      LTP:        "ltp-payment",
+      LTP:        "ltp-payments",
       OFFICER:    "officer-payments",
       SUPER_ADMIN: "admin-payments",
     },

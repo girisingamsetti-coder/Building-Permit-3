@@ -25,9 +25,11 @@ import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container"
 import { MOCK_BIM_MODELS } from "@/data/mock-bim-data";
 
 export function BimModule() {
-  const { applications, user } = useAppStore();
+  const { applications, user, navigate, portal } = useAppStore();
   const [selectedAppId, setSelectedAppId] = React.useState<string>("MC/BP/2026/04/0001");
   const [searchQuery, setSearchQuery] = React.useState("");
+
+  const drawings2DPortalView = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
 
   const bimAppsList = React.useMemo(() => {
     return applications.map((app) => {
@@ -55,16 +57,40 @@ export function BimModule() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="BIM Scrutiny & Digital Permit Module"
-        description="Independent spatial engine for 3D IFC model validation, DCR compliance scrutiny, and digital twin analysis."
-        icon={Box}
-        badge={
-          <Badge variant="outline" className="border-cyan-500/40 text-cyan-600 bg-cyan-50 dark:bg-cyan-950 dark:text-cyan-300">
-            Loosely Coupled Module
-          </Badge>
-        }
-      />
+      {/* Header with 2D / 3D Switch */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <PageHeader
+            title="3D BIM Scrutiny & Digital Twin Module"
+            description="Independent spatial engine for 3D IFC model validation, DCR compliance scrutiny, and digital twin analysis."
+            icon={Box}
+            badge={
+              <Badge variant="outline" className="border-cyan-500/40 text-cyan-600 bg-cyan-50 dark:bg-cyan-950 dark:text-cyan-300">
+                3D Spatial Twin
+              </Badge>
+            }
+          />
+        </div>
+
+        {/* Top 2D / 3D Mode Switcher */}
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted border border-border shadow-sm shrink-0">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => navigate(drawings2DPortalView)}
+            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-background"
+          >
+            <Layers className="size-3.5" /> 2D Drawings
+          </Button>
+          <Button
+            size="sm"
+            variant="default"
+            className="h-8 gap-1.5 text-xs font-semibold shadow-sm bg-primary text-primary-foreground"
+          >
+            <Box className="size-3.5" /> 3D BIM Model
+          </Button>
+        </div>
+      </div>
 
       {/* Application Selector Bar */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">

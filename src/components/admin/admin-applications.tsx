@@ -310,7 +310,7 @@ export function AdminApplications() {
                               variant="outline"
                               size="sm"
                               className="h-7 text-[11px] rounded-full px-3"
-                              onClick={() => openApplication(a.id, "admin-dashboard")}
+                              onClick={() => openApplication(a.id, "pm-application-details")}
                             >
                               View
                             </Button>

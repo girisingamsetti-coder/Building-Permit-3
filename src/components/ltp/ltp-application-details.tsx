@@ -74,6 +74,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
 import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
+import { ApplicationOccupancyTab } from "@/components/occupancy/application-occupancy-tab";
 
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
@@ -161,6 +162,7 @@ export function LtpApplicationDetails() {
           <TabsTrigger value="shortfalls" className="gap-1.5"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="remarks" className="gap-1.5"><MessageSquare className="size-3.5" /> Remarks {app.remarks.length > 0 && <Badge className="ml-1 bg-muted text-muted-foreground text-[9px]">{app.remarks.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="audit" className="gap-1.5"><History className="size-3.5" /> Audit Log</TabsTrigger>
+          <TabsTrigger value="occupancy" className="gap-1.5"><Building2 className="size-3.5 text-blue-600" /> Occupancy Module</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -189,6 +191,9 @@ export function LtpApplicationDetails() {
         </TabsContent>
         <TabsContent value="audit" className="space-y-6">
           <AuditTab app={app} />
+        </TabsContent>
+        <TabsContent value="occupancy" className="space-y-6">
+          <ApplicationOccupancyTab app={app} />
         </TabsContent>
       </Tabs>
     </div>

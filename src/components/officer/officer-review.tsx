@@ -109,6 +109,7 @@ import type {
   WorkflowAction,
 } from "@/types";
 import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
+import { ApplicationOccupancyTab } from "@/components/occupancy/application-occupancy-tab";
 
 // ---------- Helpers ----------
 function daysRemaining(iso?: string): number | null {
@@ -798,6 +799,9 @@ function RightPane({ app, user }: { app: Application; user: AppUser }) {
             <Box className="size-3.5 text-cyan-600" /> BIM Module
             <Badge variant="outline" className="text-[9px] bg-cyan-50 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">3D</Badge>
           </TabsTrigger>
+          <TabsTrigger value="occupancy" className="gap-1.5">
+            <Building2 className="size-3.5 text-blue-600" /> Occupancy
+          </TabsTrigger>
         </TabsList>
 
         {/* Drawings tab */}
@@ -830,6 +834,11 @@ function RightPane({ app, user }: { app: Application; user: AppUser }) {
             projectData={app.project}
             userRole={user.role}
           />
+        </TabsContent>
+
+        {/* Occupancy tab */}
+        <TabsContent value="occupancy" className="space-y-3">
+          <ApplicationOccupancyTab app={app} />
         </TabsContent>
       </Tabs>
     </SectionCard>
