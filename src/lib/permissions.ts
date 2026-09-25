@@ -236,6 +236,7 @@ type ModuleDef = {
 };
 
 const MODULE_DEFS: ModuleDef[] = [
+  // 1 — Dashboard
   {
     label: "Dashboard",
     permKey: "dashboard",
@@ -246,6 +247,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-dashboard",
     },
   },
+  // 2 — Applications
   {
     label: "Applications",
     permKey: "applications",
@@ -256,26 +258,18 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-applications",
     },
   },
+  // 3 — 2D / 3D (BIM switch — rendered as segmented pill in sidebar)
   {
     label: "BIM",
     permKey: "bim",
-    requiredAny: [], // Accessible by anyone who can see the portal
+    requiredAny: [],
     views: {
       LTP:        "ltp-bim",
       OFFICER:    "officer-bim",
       SUPER_ADMIN: "admin-bim",
     },
   },
-  {
-    label: "Occupancy",
-    permKey: "occupancy",
-    requiredAny: [], // Accessible by anyone who can see the portal
-    views: {
-      LTP:        "ltp-occupancy",
-      OFFICER:    "officer-occupancy",
-      SUPER_ADMIN: "admin-occupancy",
-    },
-  },
+  // 4 — Tasks
   {
     label: "Tasks",
     permKey: "tasks",
@@ -286,6 +280,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-tasks",
     },
   },
+  // 5 — Shortfalls
   {
     label: "Shortfalls",
     permKey: "shortfalls",
@@ -296,6 +291,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-shortfalls",
     },
   },
+  // 6 — Site Inspections
   {
     label: "Site Inspections",
     permKey: "inspections",
@@ -306,6 +302,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-inspections",
     },
   },
+  // 7 — NOCs
   {
     label: "NOCs",
     permKey: "nocs",
@@ -316,6 +313,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-nocs",
     },
   },
+  // 8 — Show Cause
   {
     label: "Show Cause",
     permKey: "show-cause",
@@ -326,6 +324,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-show-cause",
     },
   },
+  // 9 — Revoke Proceedings
   {
     label: "Revoke Proceedings",
     permKey: "revocations",
@@ -336,6 +335,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-revocations",
     },
   },
+  // 10 — Change of LTP
   {
     label: "Change of LTP",
     permKey: "ltp-changes",
@@ -346,6 +346,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-ltp-changes",
     },
   },
+  // 11 — Work Initiated
   {
     label: "Work Initiated",
     permKey: "work-initiated",
@@ -356,6 +357,18 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-work-initiated",
     },
   },
+  // 12 — Occupancy
+  {
+    label: "Occupancy",
+    permKey: "occupancy",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-occupancy",
+      OFFICER:    "officer-occupancy",
+      SUPER_ADMIN: "admin-occupancy",
+    },
+  },
+  // 13 — Developers
   {
     label: "Developers",
     permKey: "developers",
@@ -366,6 +379,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-developers",
     },
   },
+  // 14 — LTP (Licensed Technical Persons)
   {
     label: "LTP",
     permKey: "professionals",
@@ -376,6 +390,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-professionals",
     },
   },
+  // 15 — Outward
   {
     label: "Outward",
     permKey: "outward",
@@ -386,6 +401,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-outward",
     },
   },
+  // 16 — Payments
   {
     label: "Payments",
     permKey: "payments",
@@ -396,6 +412,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-payments",
     },
   },
+  // 17 — Documents
   {
     label: "Documents",
     permKey: "documents",
@@ -406,6 +423,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-documents",
     },
   },
+  // 18 — Reports
   {
     label: "Reports",
     permKey: "reports",
@@ -416,6 +434,7 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-reports",
     },
   },
+  // 19 — Settings
   {
     label: "Settings",
     permKey: "settings",
