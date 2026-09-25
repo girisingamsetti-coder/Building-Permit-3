@@ -47,7 +47,7 @@ export function ProjectPropertyStep({
           <h4 className="text-sm font-semibold">Project Information</h4>
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <Field label="Project Name" required error={errors.projectName}>
+          <Field label="Project Name" error={errors.projectName}>
             <Input className="h-11 w-full" value={data.projectName} onChange={(e) => update("projectName", e.target.value)} placeholder="e.g. Greenfield Residency" />
           </Field>
           <Field label="Project Type">
@@ -72,10 +72,10 @@ export function ProjectPropertyStep({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Built-up Area (sq.m)" required error={errors.builtUpArea}>
+          <Field label="Built-up Area (sq.m)" error={errors.builtUpArea}>
             <Input className="h-11 w-full" type="number" value={data.builtUpArea} onChange={(e) => update("builtUpArea", e.target.value)} placeholder="e.g. 1780" />
           </Field>
-          <Field label="Plot Area (sq.m)" required error={errors.plotArea}>
+          <Field label="Plot Area (sq.m)" error={errors.plotArea}>
             <Input className="h-11 w-full" type="number" value={data.plotArea} onChange={(e) => update("plotArea", e.target.value)} placeholder="e.g. 1250" />
           </Field>
           <Field label="Number of Floors">
@@ -96,13 +96,13 @@ export function ProjectPropertyStep({
           <h4 className="text-sm font-semibold">Property Information</h4>
         </div>
         <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-          <Field label="Survey Number" required error={errors.surveyNo}>
+          <Field label="Survey Number" error={errors.surveyNo}>
             <Input className="h-11 w-full" value={data.surveyNo} onChange={(e) => update("surveyNo", e.target.value)} placeholder="e.g. Hissa 14/2" />
           </Field>
           <Field label="Plot Number">
             <Input className="h-11 w-full" value={data.plotNo} onChange={(e) => update("plotNo", e.target.value)} placeholder="e.g. Plot 14" />
           </Field>
-          <Field label="Ward" required error={errors.ward}>
+          <Field label="Ward" error={errors.ward}>
             <Select value={data.ward} onValueChange={(v) => update("ward", v)}>
               <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Select ward" /></SelectTrigger>
               <SelectContent>
@@ -112,7 +112,7 @@ export function ProjectPropertyStep({
               </SelectContent>
             </Select>
           </Field>
-          <Field label="Zone" required error={errors.zone}>
+          <Field label="Zone" error={errors.zone}>
             <Select value={data.zone} onValueChange={(v) => update("zone", v)}>
               <SelectTrigger className="h-11 w-full"><SelectValue placeholder="Select zone" /></SelectTrigger>
               <SelectContent>

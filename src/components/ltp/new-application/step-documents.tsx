@@ -6,14 +6,14 @@ import { Button } from "@/components/ui/button";
 import { Upload, X, CheckCircle2 } from "lucide-react";
 
 const DOC_CHECKLIST = [
-  { code: "DOC_712", name: "7/12 Land Extract", required: true },
-  { code: "DOC_PROP_CARD", name: "Property Card / Mutation", required: true },
-  { code: "DOC_ARCH", name: "Architectural Drawings (stamped)", required: true },
-  { code: "DOC_STRUCT", name: "Structural Drawings & Stability Certificate", required: true },
-  { code: "DOC_FIRE_NOC", name: "NOC from Fire Department", required: true },
+  { code: "DOC_712", name: "7/12 Land Extract", required: false },
+  { code: "DOC_PROP_CARD", name: "Property Card / Mutation", required: false },
+  { code: "DOC_ARCH", name: "Architectural Drawings (stamped)", required: false },
+  { code: "DOC_STRUCT", name: "Structural Drawings & Stability Certificate", required: false },
+  { code: "DOC_FIRE_NOC", name: "NOC from Fire Department", required: false },
   { code: "DOC_ENV", name: "Environmental Clearance", required: false },
-  { code: "DOC_AUTH", name: "Society / Landowner Authorization", required: true },
-  { code: "DOC_AFFIDAVIT", name: "Affidavit — Ownership", required: true },
+  { code: "DOC_AUTH", name: "Society / Landowner Authorization", required: false },
+  { code: "DOC_AFFIDAVIT", name: "Affidavit — Ownership", required: false },
 ];
 
 export function DocumentsStep({

@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { SystemSettings } from "@/types";
 import { AdminWorkflow } from "./admin-workflow";
 import { ClipboardList } from "lucide-react";
+import { OfficerSettings } from "../officer/officer-settings";
 
 // ============================================================
 // Constants — option lists for select / toggle inputs
@@ -88,6 +89,11 @@ export function AdminSettings() {
   // Local form state — initialised once from the store (the "draft" being edited)
   const [form, setForm] = React.useState<SystemSettings>(storeSettings);
   const [saving, setSaving] = React.useState(false);
+  const user = useAppStore((s) => s.user);
+
+  if (user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER") {
+    return <OfficerSettings />;
+  }
 
   const dirty = !settingsEqual(form, storeSettings);
 

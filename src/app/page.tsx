@@ -45,6 +45,7 @@ import { AdminWorkflow } from "@/components/admin/admin-workflow";
 import { AdminTemplates } from "@/components/admin/admin-templates";
 import { AdminAudit } from "@/components/admin/admin-audit";
 import { AdminSettings } from "@/components/admin/admin-settings";
+import { AdminTasks } from "@/components/admin/admin-tasks";
 
 // Project Manager views
 import { PmDashboard } from "@/components/pm/pm-dashboard";
@@ -107,6 +108,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "admin-templates":         AdminTemplates,
   "admin-audit":             AdminAudit,
   "admin-settings":          AdminSettings,
+  "admin-tasks":             AdminTasks,
   "admin-bim":               BimModule,
   // project manager (read-only monitoring)
   "pm-dashboard": PmDashboard,

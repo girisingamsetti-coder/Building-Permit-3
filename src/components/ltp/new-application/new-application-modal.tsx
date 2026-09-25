@@ -135,32 +135,16 @@ export function NewApplicationModal({
   function validateStep(s: number): boolean {
     const errs: Record<string, string> = {};
     if (s === 0) {
-      if (!appData.appType) errs.appType = "Application type is required.";
-      if (!appData.applicantName.trim()) errs.applicantName = "Applicant name is required.";
-      if (!appData.applicantContact.trim()) {
-        errs.applicantContact = "Mobile number is required.";
-      } else if (!/^[+\d\s-]{10,}$/.test(appData.applicantContact)) {
-        errs.applicantContact = "Please enter a valid mobile number.";
-      }
+      // Validations removed
       if (appData.applicantEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(appData.applicantEmail)) {
         errs.applicantEmail = "Please enter a valid email address.";
       }
     } else if (s === 1) {
-      if (!projectData.projectName.trim()) errs.projectName = "Project name is required.";
-      if (!projectData.builtUpArea) errs.builtUpArea = "Built-up area is required.";
-      if (!projectData.plotArea) errs.plotArea = "Plot area is required.";
-      if (!projectData.surveyNo.trim()) errs.surveyNo = "Survey number is required.";
-      if (!projectData.ward) errs.ward = "Ward is required.";
-      if (!projectData.zone) errs.zone = "Zone is required.";
+      // Validations removed
     } else if (s === 2) {
-      if (drawingFiles.length === 0) errs.drawing = "Please upload the required drawing.";
-      else if (drawingFiles.some((f) => f.status !== "done")) errs.drawing = "Please wait for upload to complete.";
+      // Validations removed
     } else if (s === 3) {
-      // Document validation — all required docs must be uploaded
-      const requiredCount = 7; // 7 required docs
-      if (Object.keys(uploadedDocs).length < requiredCount) {
-        errs.documents = "Please upload all required documents.";
-      }
+      // Document validation removed
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;

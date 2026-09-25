@@ -85,7 +85,7 @@ export const NAV: Record<Portal, NavGroup[]> = {
       items: [
         { view: "admin-dashboard",    label: "Dashboard",    icon: LayoutDashboard },
         { view: "admin-applications", label: "Applications", icon: FileStack },
-        { view: "admin-workflow",     label: "Tasks",        icon: ClipboardList },
+        { view: "admin-tasks",        label: "Tasks",        icon: ClipboardList },
         { view: "admin-shortfalls",   label: "Shortfalls",   icon: AlertTriangle },
         { view: "admin-payments",     label: "Payments",     icon: CreditCard },
         { view: "admin-documents",    label: "Documents",    icon: FolderClosed },

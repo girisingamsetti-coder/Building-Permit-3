@@ -17,7 +17,7 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // ============================================================
 
 export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "SUPER_ADMIN" {
-  if (role === "SUPER_ADMIN") return "SUPER_ADMIN";
+  if (role === "SUPER_ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER") return "SUPER_ADMIN";
   if (role === "LTP") return "LTP";
   return "OFFICER";
 }
@@ -36,10 +36,17 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 }
 
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
-  const adminViews = ["admin-dashboard", "admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates", "admin-audit", "admin-settings"];
-  if (adminViews.includes(view)) {
+  const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
+  const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim"];
+  
+  if (configViews.includes(view)) {
     return user.role === "SUPER_ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
   }
+  
+  if (generalAdminViews.includes(view)) {
+    return user.role === "SUPER_ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER" || hasPermission(user, "config:manage" as Permission, roles);
+  }
+  
   return true;
 }
 
@@ -267,7 +274,7 @@ const MODULE_DEFS: ModuleDef[] = [
     views: {
       LTP:        "ltp-drawings",
       OFFICER:    "officer-tasks",
-      SUPER_ADMIN: "admin-workflow",
+      SUPER_ADMIN: "admin-tasks",
     },
   },
   {

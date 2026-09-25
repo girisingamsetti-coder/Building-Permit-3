@@ -110,53 +110,6 @@ function nonNeg(v: string) { return !v.trim() || (!isNaN(Number(v)) && Number(v)
 
 function validate(step: number, d: WizardData): Record<string, string> {
   const e: Record<string, string> = {};
-  if (step === 1) {
-    if (!d.applicant.fullName.trim()) e.fullName = "Full name is required.";
-    if (!d.applicant.mobile.trim()) e.mobile = "Mobile is required.";
-    else if (!mob(d.applicant.mobile)) e.mobile = "Enter a valid 10-digit Indian mobile.";
-    if (d.applicant.email && !email(d.applicant.email)) e.email = "Enter a valid email.";
-    if (d.applicant.aadhaarLast4 && !/^\d{4}$/.test(d.applicant.aadhaarLast4)) e.aadhaarLast4 = "Enter exactly last 4 digits.";
-    if (!d.applicant.address.trim()) e.address = "Address is required.";
-  }
-  if (step === 2 && !d.owner.sameAsApplicant) {
-    if (!d.owner.fullName.trim()) e.ownerFullName = "Owner's full name is required.";
-    if (!d.owner.mobile.trim()) e.ownerMobile = "Mobile is required.";
-    else if (!mob(d.owner.mobile)) e.ownerMobile = "Enter a valid 10-digit Indian mobile.";
-    if (!d.owner.address.trim()) e.ownerAddress = "Owner's address is required.";
-  }
-  if (step === 3 && !d.property.district.trim()) e.district = "District is required.";
-  if (step === 4) {
-    if (!d.location.zone.trim()) e.zone = "Zone is required.";
-    if (!d.location.streetName.trim()) e.streetName = "Street name is required.";
-    if (d.location.pinCode && !pin(d.location.pinCode)) e.pinCode = "Enter a valid 6-digit PIN.";
-    if (d.location.latitude && !num(d.location.latitude)) e.latitude = "Enter a valid decimal.";
-    if (d.location.longitude && !num(d.location.longitude)) e.longitude = "Enter a valid decimal.";
-  }
-  if (step === 5) {
-    if (!d.survey.surveyNumbers.trim()) e.surveyNumbers = "Survey number(s) are required.";
-    if (!d.survey.plotArea.trim()) e.plotArea = "Plot area is required.";
-    else if (!num(d.survey.plotArea) || Number(d.survey.plotArea) <= 0) e.plotArea = "Enter a valid positive area.";
-    if (!nonNeg(d.survey.abuttingRoadWidth)) e.abuttingRoadWidth = "Enter a valid non-negative number.";
-  }
-  if (step === 6) {
-    if (!d.development.buildingUse.trim()) e.buildingUse = "Building use is required.";
-    if (!d.development.occupancyType.trim()) e.occupancyType = "Occupancy type is required.";
-    if (!nonNeg(d.development.floorsAboveGround)) e.floorsAboveGround = "Must be zero or positive.";
-    if (!nonNeg(d.development.basements)) e.basements = "Must be zero or positive.";
-    if (!nonNeg(d.development.dwellingUnits)) e.dwellingUnits = "Must be zero or positive.";
-    if (!nonNeg(d.development.buildingHeight)) e.buildingHeight = "Must be a valid number.";
-  }
-  if (step === 7) {
-    if (!d.building.builtUpArea.trim()) e.builtUpArea = "Built-up area is required.";
-    else if (!num(d.building.builtUpArea) || Number(d.building.builtUpArea) <= 0) e.builtUpArea = "Enter a valid positive area.";
-    if (!nonNeg(d.building.totalFloorArea)) e.totalFloorArea = "Enter a valid non-negative area.";
-    if (!nonNeg(d.building.groundCoverage)) e.groundCoverage = "Enter a valid non-negative area.";
-    if (!nonNeg(d.building.setbackFront)) e.setbackFront = "Must be zero or positive.";
-    if (!nonNeg(d.building.setbackRear)) e.setbackRear = "Must be zero or positive.";
-    if (!nonNeg(d.building.setbackLeft)) e.setbackLeft = "Must be zero or positive.";
-    if (!nonNeg(d.building.setbackRight)) e.setbackRight = "Must be zero or positive.";
-  }
-  if (step === 8 && !d.ltp.declarationAccepted) e.declarationAccepted = "You must accept the declaration.";
   return e;
 }
 
@@ -176,7 +129,7 @@ function appLabel(k: AppTypeKey | "") { return k === "COMMERCIAL_BP" ? "Commerci
 function F({ label, required, error, hint, children, full }: { label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode; full?: boolean }) {
   return (
     <div className={cn("space-y-1.5", full && "col-span-3")}>
-      <Label className="text-[11px] font-semibold text-[#374151]">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
+      <Label className="text-[11px] font-semibold text-[#374151]">{label}</Label>
       <div className="[&_input]:h-[36px] [&_input]:rounded-[8px] [&_input]:border-[#D7DCE2] [&_input]:bg-white [&_input]:text-[13px] [&_input]:text-[#374151] [&_input]:placeholder-[#9CA3AF] [&_input]:focus-visible:border-[#4C8E88] [&_input]:focus-visible:ring-0 [&_input]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_textarea]:min-h-[80px] [&_textarea]:rounded-[8px] [&_textarea]:border-[#D7DCE2] [&_textarea]:bg-white [&_textarea]:text-[13px] [&_textarea]:text-[#374151] [&_textarea]:focus-visible:border-[#4C8E88] [&_textarea]:focus-visible:ring-0 [&_textarea]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_button[role='combobox']]:h-[36px] [&_button[role='combobox']]:rounded-[8px] [&_button[role='combobox']]:border-[#D7DCE2] [&_button[role='combobox']]:bg-white [&_button[role='combobox']]:text-[13px] [&_button[role='combobox']]:text-[#374151] [&_button[role='combobox']]:focus:border-[#4C8E88] [&_button[role='combobox']]:focus:ring-0 [&_button[role='combobox']]:focus:shadow-[0_0_0_3px_rgba(76,142,136,0.12)]">
         {children}
       </div>
@@ -377,50 +330,70 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   if (!typeSelected) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="w-[95vw] max-w-3xl p-0 gap-0">
+        <DialogContent className="w-[95vw] max-w-5xl p-12 gap-8 bg-[#FAFBFC] border-none shadow-2xl">
           <DialogTitle className="sr-only">Select application type</DialogTitle>
+          
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
-            <div className="flex items-center gap-3">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-blue-600 text-white"><FilePlus2 className="size-4" /></div>
-              <div>
-                <p className="text-base font-semibold text-slate-900">New Application</p>
-                <p className="text-xs text-slate-500">Select the application type to begin</p>
-              </div>
-            </div>
+          <div className="space-y-3 text-left">
+            <h2 className="text-[28px] font-semibold tracking-tight text-[#0F172A]">New application</h2>
+            <p className="text-[15px] text-[#475569] leading-relaxed max-w-4xl">
+              Choose what you are applying for. This decides the number series, the drawings required and the fees charged, and cannot be changed later.
+            </p>
           </div>
-          {/* Content */}
-          <div className="space-y-4 p-6">
-            <div className="rounded-lg border border-blue-100 bg-blue-50 p-3 flex gap-2">
-              <Info className="size-4 shrink-0 text-blue-600 mt-0.5" />
-              <p className="text-xs text-blue-800">Your application is auto-saved as a draft at every step — you can close and continue later.</p>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {APP_TYPES.map((t) => {
-                const Icon = t.icon;
-                const sel = selectedType === t.key;
-                return (
-                  <button key={t.key} onClick={() => setSelectedType(t.key)}
-                    className={cn("flex flex-col items-start gap-3 rounded-xl border-2 p-4 text-left transition-all", sel ? "border-blue-500 bg-blue-50 ring-2 ring-blue-200" : "border-slate-200 bg-white hover:border-blue-300")}>
-                    <div className={cn("flex size-10 items-center justify-center rounded-lg", sel ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500")}><Icon className="size-5" /></div>
-                    <div>
-                      <div className="flex items-start justify-between gap-1">
-                        <p className={cn("text-sm font-semibold leading-snug", sel ? "text-blue-900" : "text-slate-800")}>{t.label}</p>
-                        {sel && <CheckCircle2 className="size-4 shrink-0 text-blue-600 mt-0.5" />}
-                      </div>
-                      <p className="mt-1 text-xs text-slate-500">{t.desc}</p>
+
+          {/* Content Options */}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {APP_TYPES.map((t) => {
+              const Icon = t.icon;
+              const sel = selectedType === t.key;
+              const numberPrefix = t.key === "LAYOUT_APPROVAL" ? "Numbered LP/..." : "Numbered BP/...";
+              
+              return (
+                <button 
+                  key={t.key} 
+                  onClick={() => setSelectedType(t.key)}
+                  className={cn(
+                    "relative flex items-start gap-4 rounded-xl border-[1.5px] p-6 text-left transition-all duration-200", 
+                    sel ? "border-[#3B82F6] bg-[#F4F8FF] shadow-sm ring-1 ring-[#3B82F6]" : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                  )}
+                >
+                  <Icon className={cn("size-6 mt-0.5 shrink-0", sel ? "text-[#3B82F6]" : "text-[#64748B]")} />
+                  <div className="flex flex-col gap-1.5 w-full">
+                    <p className={cn("text-[17px] font-medium leading-snug", sel ? "text-[#1E40AF]" : "text-[#0F172A]")}>{t.label}</p>
+                    <p className="text-[14px] text-[#64748B] mb-3">{t.desc}</p>
+                    
+                    <div className="flex flex-col items-start gap-2.5 mt-1">
+                      <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1 text-[13px] font-medium text-[#475569]">
+                        {numberPrefix}
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-[#BAE6FD] bg-[#F0F9FF] px-3.5 py-1 text-[13px] font-medium text-[#0284C7]">
+                        Drawing scrutiny required
+                      </span>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
-          {/* Footer */}
-          <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-6 py-3">
-            <Button variant="outline" onClick={handleClose} className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium h-[36px] px-4 rounded-[8px]">Close</Button>
-            <Button onClick={handleStart} disabled={!selectedType} className="gap-2 bg-blue-600 hover:bg-blue-700 rounded-full px-6">
-              Start Application <ArrowRight className="size-4" />
-            </Button>
+
+          {/* Footer Info & Button */}
+          <div className="flex flex-col gap-6 mt-2">
+            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4.5 px-5 text-[14px] text-[#475569] leading-relaxed shadow-sm">
+              An application number is issued as soon as you begin, and the file is saved as a draft. You can leave at any point and pick up where you left off — nothing is filed until you submit it.
+            </div>
+            <div className="flex justify-end">
+              <Button 
+                onClick={handleStart} 
+                disabled={!selectedType} 
+                className={cn(
+                  "gap-2 rounded-full px-6 py-5 text-[15px] font-medium transition-all shadow-md",
+                  selectedType ? "bg-gradient-to-r from-[#A78BFA] to-[#818CF8] hover:opacity-90 text-white" : "bg-[#CBD5E1] text-[#94A3B8]"
+                )}
+              >
+                {!selectedType && <div className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />}
+                Start application <ArrowRight className="size-4" />
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
