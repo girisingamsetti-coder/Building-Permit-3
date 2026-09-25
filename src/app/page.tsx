@@ -7,7 +7,7 @@ import { AuthScreen } from "@/components/auth/auth-screen";
 import { AppShell } from "@/components/layout/app-shell";
 
 // LTP views
-import { LtpDashboard } from "@/components/ltp/ltp-dashboard";
+import { UnifiedDashboard } from "@/components/dashboard/unified-dashboard";
 import { LtpApplications } from "@/components/ltp/ltp-applications";
 import { LtpCreateApplication } from "@/components/ltp/ltp-create-application";
 import { LtpApplicationDetails } from "@/components/ltp/ltp-application-details";
@@ -82,7 +82,7 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "forgot-password": AuthScreen,
   otp: AuthScreen,
   // ltp
-  "ltp-dashboard": LtpDashboard,
+  "ltp-dashboard": UnifiedDashboard,
   "ltp-applications": LtpApplications,
   "ltp-create-application": LtpCreateApplication,
   "ltp-application-details": LtpApplicationDetails,
@@ -111,55 +111,55 @@ const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   "ltp-outward": OutwardView,
   "ltp-payments": PaymentsView,
   // officer
-  "officer-dashboard":    OfficerDashboard,
-  "officer-review":       OfficerReview,
+  "officer-dashboard": OfficerDashboard,
+  "officer-review": OfficerReview,
   "officer-applications": OfficerApplications,
-  "officer-tasks":        TasksView,
-  "officer-shortfalls":   ShortfallsView,
-  "officer-payments":     PaymentsView,
-  "officer-inspections":  InspectionsView,
-  "officer-nocs":         NocsView,
-  "officer-show-cause":   ShowCauseView,
-  "officer-revocations":  RevocationsView,
-  "officer-ltp-changes":  LtpChangesView,
+  "officer-tasks": TasksView,
+  "officer-shortfalls": ShortfallsView,
+  "officer-payments": PaymentsView,
+  "officer-inspections": InspectionsView,
+  "officer-nocs": NocsView,
+  "officer-show-cause": ShowCauseView,
+  "officer-revocations": RevocationsView,
+  "officer-ltp-changes": LtpChangesView,
   "officer-work-initiated": WorkInitiatedView,
-  "officer-developers":   DevelopersView,
+  "officer-developers": DevelopersView,
   "officer-professionals": ProfessionalsView,
-  "officer-outward":      OutwardView,
-  "officer-documents":    OfficerDocuments,
-  "officer-reports":      OfficerReports,
-  "officer-settings":     OfficerSettings,
-  "officer-bim":          BimModule,
-  "officer-2d-drawings":  Drawings2DModule,
-  "officer-occupancy":    OccupancyView,
+  "officer-outward": OutwardView,
+  "officer-documents": OfficerDocuments,
+  "officer-reports": OfficerReports,
+  "officer-settings": OfficerSettings,
+  "officer-bim": BimModule,
+  "officer-2d-drawings": Drawings2DModule,
+  "officer-occupancy": OccupancyView,
   // admin
-  "admin-dashboard":         AdminDashboard,
-  "admin-applications":      AdminApplications,
-  "admin-occupancy":         OccupancyView,
-  "admin-shortfalls":        ShortfallsView,
-  "admin-payments":          PaymentsView,
-  "admin-tasks":             TasksView,
-  "admin-inspections":       InspectionsView,
-  "admin-nocs":              NocsView,
-  "admin-show-cause":        ShowCauseView,
-  "admin-revocations":       RevocationsView,
-  "admin-ltp-changes":       LtpChangesView,
-  "admin-work-initiated":    WorkInitiatedView,
-  "admin-developers":        DevelopersView,
-  "admin-professionals":     ProfessionalsView,
-  "admin-outward":           OutwardView,
-  "admin-documents":         AdminDocuments,
-  "admin-reports":           AdminReports,
-  "admin-users":             AdminUsers,
-  "admin-roles":             AdminRoles,
+  "admin-dashboard": AdminDashboard,
+  "admin-applications": AdminApplications,
+  "admin-occupancy": OccupancyView,
+  "admin-shortfalls": ShortfallsView,
+  "admin-payments": PaymentsView,
+  "admin-tasks": TasksView,
+  "admin-inspections": InspectionsView,
+  "admin-nocs": NocsView,
+  "admin-show-cause": ShowCauseView,
+  "admin-revocations": RevocationsView,
+  "admin-ltp-changes": LtpChangesView,
+  "admin-work-initiated": WorkInitiatedView,
+  "admin-developers": DevelopersView,
+  "admin-professionals": ProfessionalsView,
+  "admin-outward": OutwardView,
+  "admin-documents": AdminDocuments,
+  "admin-reports": AdminReports,
+  "admin-users": AdminUsers,
+  "admin-roles": AdminRoles,
   "admin-application-types": AdminApplicationTypes,
-  "admin-fee-structures":    AdminFeeStructures,
-  "admin-workflow":          AdminWorkflow,
-  "admin-templates":         AdminTemplates,
-  "admin-audit":             AdminAudit,
-  "admin-settings":          AdminSettings,
-  "admin-bim":               BimModule,
-  "admin-2d-drawings":       Drawings2DModule,
+  "admin-fee-structures": AdminFeeStructures,
+  "admin-workflow": AdminWorkflow,
+  "admin-templates": AdminTemplates,
+  "admin-audit": AdminAudit,
+  "admin-settings": AdminSettings,
+  "admin-bim": BimModule,
+  "admin-2d-drawings": Drawings2DModule,
   // project manager (read-only monitoring)
   "pm-dashboard": PmDashboard,
   "pm-applications": PmApplications,
@@ -190,7 +190,7 @@ export default function Home() {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
       const portal = user.role === "SUPER_ADMIN" ? "admin-dashboard"
         : user.role === "LTP" ? "ltp-dashboard"
-        : "officer-dashboard";
+          : "officer-dashboard";
       navigate(portal);
     }
   }, [isAuthenticated, user, view, roles, navigate]);
@@ -199,7 +199,7 @@ export default function Home() {
     return <AuthScreen />;
   }
 
-  const ViewComponent = VIEW_REGISTRY[view] ?? LtpDashboard;
+  const ViewComponent = VIEW_REGISTRY[view] ?? UnifiedDashboard;
 
   return (
     <AppShell>

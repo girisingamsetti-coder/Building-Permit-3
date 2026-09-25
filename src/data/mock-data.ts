@@ -88,11 +88,6 @@ export const ROLES: Record<RoleKey, Role> = {
 // USERS — demo officers for every role (2026)
 // ============================================================
 export const USERS: User[] = [
-  { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14578", licenseNo: "LTP-MC-2019-0457", designation: "Architect & Licensed Technical Person", zone: "Zone IV — West", avatarColor: "emerald", department: "Private Practice", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:12:00" },
-  { id: "u-zh-01", name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", email: "zh@demo.gov.in", phone: "+91 99230 87120", employeeId: "MUN-ZH-1042", designation: "Zonal Head", zone: "Zone IV — West", avatarColor: "cyan", department: "Zonal Office", active: true, status: "ACTIVE", lastLogin: "2026-01-20T08:40:00" },
-  { id: "u-dir-01", name: "Shri. Suresh Nair", role: "DIRECTOR", email: "director@demo.gov.in", phone: "+91 98690 70011", employeeId: "MUN-DIR-0009", designation: "Director", zone: "Head Office", avatarColor: "amber", department: "Directorate of Town Planning", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:55:00" },
-  { id: "u-addl-01", name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER", email: "addlcomm@demo.gov.in", phone: "+91 98220 55601", employeeId: "MUN-ADDC-0007", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T10:30:00" },
-  { id: "u-com-01", name: "Dr. Pratap Reddy", role: "COMMISSIONER", email: "commissioner@demo.gov.in", phone: "+91 98220 00001", employeeId: "MUN-COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Office of the Commissioner", active: true, status: "ACTIVE", lastLogin: "2026-01-20T11:20:00" },
   { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
 ];
 
@@ -104,11 +99,6 @@ export function getUserByRole(role: RoleKey): User {
 // DEMO CREDENTIALS
 // ============================================================
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
-  { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP — Applicant Portal" },
-  { role: "ZONAL_HEAD", email: "zh@demo.gov.in", password: "demo1234", label: "Zonal Head" },
-  { role: "DIRECTOR", email: "director@demo.gov.in", password: "demo1234", label: "Director" },
-  { role: "ADDITIONAL_COMMISSIONER", email: "addlcomm@demo.gov.in", password: "demo1234", label: "Additional Commissioner" },
-  { role: "COMMISSIONER", email: "commissioner@demo.gov.in", password: "demo1234", label: "Commissioner" },
   { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Super Admin" },
 ];
 
