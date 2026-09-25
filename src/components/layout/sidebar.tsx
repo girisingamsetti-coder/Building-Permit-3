@@ -105,56 +105,53 @@ export function Sidebar() {
                 const is3DActive = view === view3D;
 
                 if (collapsed) {
+                  // collapsed: single square that shows active mode, click toggles
                   return (
-                    <li key="bim-switcher" className="flex flex-col items-center gap-0.5 my-0.5">
+                    <li key="bim-switcher" className="flex justify-center my-0.5">
                       <button
-                        onClick={() => navigate(view2D)}
-                        title="2D Drawings"
-                        className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-[10px] font-bold transition-all duration-200",
-                          is2DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                        )}
-                      >2D</button>
-                      <button
-                        onClick={() => navigate(view3D)}
-                        title="3D BIM"
-                        className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-[10px] font-bold transition-all duration-200",
-                          is3DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                        )}
-                      >3D</button>
+                        onClick={() => navigate(is2DActive ? view3D : view2D)}
+                        title={is2DActive ? "Switch to 3D BIM" : "Switch to 2D Drawings"}
+                        className="relative flex size-9 items-center justify-center rounded-[12px] bg-[#191a32] border border-[#2b2d4c]/70 text-[10px] font-bold transition-all duration-200 text-[#9E9FB1] hover:text-white hover:border-cyan-500/40"
+                      >
+                        <span className={cn("transition-all duration-200", is2DActive ? "text-cyan-400" : "text-purple-400")}>
+                          {is2DActive ? "2D" : "3D"}
+                        </span>
+                      </button>
                     </li>
                   );
                 }
 
+                // expanded: sliding segmented toggle pill
                 return (
-                  <li key="bim-switcher">
-                    <div className="flex w-full items-center rounded-[18px] overflow-hidden border border-[#2b2d4c]/50 bg-[#191a32]/50">
-                      {/* 2D half */}
+                  <li key="bim-switcher" className="px-1 py-0.5">
+                    {/* track */}
+                    <div className="relative flex w-full rounded-full bg-[#0d0e1e] border border-[#2b2d4c]/80 p-[3px] shadow-inner">
+                      {/* sliding indicator */}
+                      <span
+                        className={cn(
+                          "absolute top-[3px] bottom-[3px] w-[calc(50%-3px)] rounded-full transition-all duration-300 ease-in-out shadow-lg",
+                          is2DActive
+                            ? "left-[3px] bg-gradient-to-r from-cyan-600/80 to-[#3D405B]"
+                            : "left-[calc(50%)] bg-gradient-to-r from-[#3D405B] to-purple-700/70"
+                        )}
+                      />
+                      {/* 2D button */}
                       <button
                         onClick={() => navigate(view2D)}
                         title="2D Building Drawings & DCR Scrutiny"
-                        className={cn(
-                          "group flex flex-1 items-center gap-3 px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
-                          is2DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                        )}
+                        className="relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 rounded-full text-[12px] font-bold transition-colors duration-200"
                       >
-                        <Layers className={cn("size-[18px] shrink-0 transition-transform", is2DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
-                        <span>2D</span>
+                        <Layers className={cn("size-3.5 shrink-0 transition-colors duration-200", is2DActive ? "text-cyan-300" : "text-[#9E9FB1]")} />
+                        <span className={cn("transition-colors duration-200", is2DActive ? "text-white" : "text-[#9E9FB1]")}>2D</span>
                       </button>
-                      {/* vertical divider */}
-                      <div className="w-px self-stretch bg-[#2b2d4c]/80" />
-                      {/* 3D half */}
+                      {/* 3D button */}
                       <button
                         onClick={() => navigate(view3D)}
                         title="3D BIM Scrutiny & Digital Twin"
-                        className={cn(
-                          "group flex flex-1 items-center gap-2 px-3 py-1.5 text-[13px] font-semibold transition-all duration-200",
-                          is3DActive ? "bg-[#3D405B] text-white" : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
-                        )}
+                        className="relative z-10 flex flex-1 items-center justify-center gap-1.5 py-1.5 rounded-full text-[12px] font-bold transition-colors duration-200"
                       >
-                        <Box className={cn("size-[18px] shrink-0 transition-transform", is3DActive ? "text-cyan-400" : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110")} />
-                        <span>3D</span>
+                        <Box className={cn("size-3.5 shrink-0 transition-colors duration-200", is3DActive ? "text-purple-300" : "text-[#9E9FB1]")} />
+                        <span className={cn("transition-colors duration-200", is3DActive ? "text-white" : "text-[#9E9FB1]")}>3D</span>
                       </button>
                     </div>
                   </li>
