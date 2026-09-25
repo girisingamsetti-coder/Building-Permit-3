@@ -106,6 +106,8 @@ function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
+  const [version, setVersion] = React.useState<"v1" | "v2">("v1");
+  const useAltBg = version === "v2";
 
   function validate(): boolean {
     let ok = true;
@@ -157,12 +159,17 @@ function LoginForm() {
 
   return (
     <div
-      className="relative flex min-h-screen w-full flex-col items-start justify-center pl-8 md:pl-24 lg:pl-32 bg-cover bg-center font-sans overflow-hidden"
-      style={{ backgroundImage: "url('/bg-city.png')" }}
+      className={cn(
+        "relative flex min-h-screen w-full flex-col justify-center font-sans overflow-hidden transition-all duration-700",
+        useAltBg ? "items-end pr-8 md:pr-24 lg:pr-32" : "items-start pl-8 md:pl-24 lg:pl-32",
+        version === "v1" && "bg-cover bg-center",
+        version === "v2" && "bg-cover bg-center"
+      )}
+      style={{ backgroundImage: useAltBg ? "url('/BBBAS%202.png')" : "url('/bg-city.png')" }}
     >
       {/* Government Banner Header */}
       <div className="absolute top-0 left-0 w-full flex items-center justify-between px-6 md:px-20 lg:px-28 py-2 bg-[#fdf8ef]/95 shadow-md z-20 border-b border-orange-200 backdrop-blur-md">
-        
+
         {/* Left: Narayana */}
         <div className="flex items-center gap-3">
           <img src="/narayana.png" alt="Sri Ponguru Narayana" className="h-14 md:h-20 w-auto object-contain drop-shadow-md" />
@@ -193,7 +200,7 @@ function LoginForm() {
         {/* Extra Login Button attached to header bottom edge */}
         {!showLoginBox && (
           <div className="absolute -bottom-12 right-0 md:right-8">
-            <Button 
+            <Button
               onClick={() => setShowLoginBox(true)}
               className="bg-[#8c1c13] hover:bg-red-900 text-white font-bold px-8 py-6 rounded-t-none rounded-b-xl shadow-lg tracking-wider text-sm transition-transform hover:scale-105"
             >
@@ -204,118 +211,148 @@ function LoginForm() {
       </div>
       {/* Main Glassmorphism Card */}
       {showLoginBox && (
-        <div className="relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] border border-white/20 bg-black/25 p-8 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500">
-        {/* Header */}
-        <div className="flex flex-col items-center mb-8 text-center">
-          <h1 className="font-serif text-[22px] tracking-[0.1em] text-white drop-shadow-md uppercase">
-            BBAS AMARAVATI
-          </h1>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-          {/* Email / ID */}
-          <div className="space-y-1">
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-white/60" strokeWidth={1.5} />
-              <Input
-                id="email"
-                type="text"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setEmailError("");
-                  setError("");
-                }}
-                placeholder="Citizen ID or Email"
-                className={cn(
-                  "h-[50px] pl-12 rounded-[12px] border-white/20 bg-white/10 text-[15px] text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30 transition-all",
-                  emailError && "border-red-400 focus-visible:ring-red-400/30"
-                )}
-                aria-invalid={!!emailError}
-              />
-            </div>
-            {emailError && <p className="pl-1 text-[11px] text-red-300">{emailError}</p>}
+        <div className={cn(
+          "relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] p-8 backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500",
+          useAltBg ? "bg-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-300" : "bg-black/25 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20"
+        )}>
+          {/* Header */}
+          <div className="flex flex-col items-center mb-8 text-center">
+            <h1 className={cn(
+              "font-serif text-[22px] tracking-[0.1em] uppercase drop-shadow-sm",
+              useAltBg ? "text-[#5e1914]" : "text-white drop-shadow-md"
+            )}>
+              BBAS AMARAVATI
+            </h1>
           </div>
 
-          {/* Password */}
-          <div className="space-y-1">
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-white/60" strokeWidth={1.5} />
-              <Input
-                id="password"
-                type={showPw ? "text" : "password"}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  setPwError("");
-                  setError("");
-                }}
-                placeholder="Password"
-                className={cn(
-                  "h-[50px] pl-12 pr-12 rounded-[12px] border-white/20 bg-white/10 text-[15px] text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30 transition-all",
-                  pwError && "border-red-400 focus-visible:ring-red-400/30"
-                )}
-                aria-invalid={!!pwError}
-              />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {/* Email / ID */}
+            <div className="space-y-1">
+              <div className="relative">
+                <User className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : "text-white/60")} strokeWidth={1.5} />
+                <Input
+                  id="email"
+                  type="text"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailError("");
+                    setError("");
+                  }}
+                  placeholder="Citizen ID or Email"
+                  className={cn(
+                    "h-[50px] pl-12 rounded-[12px] text-[15px] transition-all",
+                    useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
+                    emailError && (useAltBg ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
+                  )}
+                  aria-invalid={!!emailError}
+                />
+              </div>
+              {emailError && <p className="pl-1 text-[11px] text-red-300">{emailError}</p>}
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1">
+              <div className="relative">
+                <Lock className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : "text-white/60")} strokeWidth={1.5} />
+                <Input
+                  id="password"
+                  type={showPw ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPwError("");
+                    setError("");
+                  }}
+                  placeholder="Password"
+                  className={cn(
+                    "h-[50px] pl-12 pr-12 rounded-[12px] text-[15px] transition-all",
+                    useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
+                    pwError && (useAltBg ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
+                  )}
+                  aria-invalid={!!pwError}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPw((s) => !s)}
+                  className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", useAltBg ? "text-gray-400 hover:text-gray-600" : "text-white/50 hover:text-white/90")}
+                >
+                  {showPw ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+                </button>
+              </div>
+              {pwError && <p className="pl-1 text-[11px] text-red-300">{pwError}</p>}
+            </div>
+
+            {/* Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between pt-2 pb-2">
+              <label htmlFor="remember" className={cn("flex cursor-pointer items-center gap-2 text-[13px] select-none transition-colors", useAltBg ? "text-[#5e1914] font-medium" : "text-white/80 hover:text-white")}>
+                <Checkbox
+                  id="remember"
+                  checked={remember}
+                  onCheckedChange={(v) => setRemember(v === true)}
+                  className={cn("rounded-sm", useAltBg ? "border-gray-400 data-[state=checked]:bg-[#5e1914] data-[state=checked]:text-white" : "border-white/40 data-[state=checked]:bg-white/20 data-[state=checked]:text-white")}
+                />
+                Remember Me
+              </label>
               <button
                 type="button"
-                onClick={() => setShowPw((s) => !s)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/90 transition-colors"
+                onClick={() => {
+                  setPendingEmail(email);
+                  setAuthStage("forgot");
+                }}
+                className={cn("text-[13px] underline-offset-4 hover:underline transition-all", useAltBg ? "text-[#5e1914]" : "text-white/80 hover:text-white")}
               >
-                {showPw ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
+                Forgot Password?
               </button>
             </div>
-            {pwError && <p className="pl-1 text-[11px] text-red-300">{pwError}</p>}
-          </div>
 
-          {/* Forgot Password */}
-          <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                setPendingEmail(email);
-                setAuthStage("forgot");
-              }}
-              className="text-[13px] text-white/80 hover:text-white underline-offset-4 hover:underline transition-all"
+            {/* General Error */}
+            {error && (
+              <div className={cn(
+                "rounded-md px-3 py-2 text-[12px] text-center backdrop-blur-sm transition-all",
+                useAltBg
+                  ? "bg-red-50 border border-red-200 text-red-600"
+                  : "bg-red-500/20 border border-red-500/30 text-red-200"
+              )}>
+                {error}
+              </div>
+            )}
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              className={cn(
+                "h-[50px] w-full rounded-[12px] text-[15px] font-bold transition-all uppercase tracking-wider",
+                useAltBg
+                  ? "bg-gradient-to-r from-[#9a7b4f] via-[#dcb871] to-[#9a7b4f] text-[#3a100a] shadow-md hover:shadow-lg border-none"
+                  : "border border-[#FDE047]/60 bg-gradient-to-b from-[#FDE047]/20 to-black/40 text-[#FDE047] shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:bg-black/50"
+              )}
+              disabled={loading}
             >
-              Forgot Password?
-            </button>
-          </div>
+              {loading ? <Loader2 className="size-5 animate-spin" /> : "LOG IN"}
+            </Button>
 
-          {/* Remember Me */}
-          <div className="flex items-center pt-2 pb-2">
-            <label htmlFor="remember" className="flex cursor-pointer items-center gap-2 text-[13px] text-white/80 select-none hover:text-white transition-colors">
-              <Checkbox
-                id="remember"
-                checked={remember}
-                onCheckedChange={(v) => setRemember(v === true)}
-                className="border-white/40 data-[state=checked]:bg-white/20 data-[state=checked]:text-white rounded-sm"
-              />
-              Remember Me
-            </label>
-          </div>
+          </form>
 
-          {/* General Error */}
-          {error && (
-            <div className="rounded-md bg-red-500/20 border border-red-500/30 px-3 py-2 text-[12px] text-red-200 text-center backdrop-blur-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Submit */}
-          <Button
-            type="submit"
-            className="h-[50px] w-full rounded-[12px] border border-[#FDE047]/60 bg-gradient-to-b from-[#FDE047]/20 to-black/40 text-[#FDE047] text-[15px] font-bold shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:bg-black/50 transition-all uppercase tracking-wider"
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="size-5 animate-spin" /> : "LOG IN"}
-          </Button>
-
-        </form>
-
-      </div>
+        </div>
       )}
+
+      {/* Version Selector */}
+      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-lg">
+        {(["v1", "v2"] as const).map((v) => (
+          <button
+            key={v}
+            onClick={() => setVersion(v)}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-xs font-bold transition-all uppercase",
+              version === v ? "bg-white text-black shadow-sm" : "text-white hover:bg-white/20"
+            )}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
