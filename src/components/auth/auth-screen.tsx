@@ -120,7 +120,7 @@ function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
-  const [version, setVersion] = React.useState<"v1" | "v2">("v1");
+  const [version, setVersion] = React.useState<"v1" | "v2" | "v3">("v1");
   const [mounted, setMounted] = React.useState(false);
   const [showFeeWizard, setShowFeeWizard] = React.useState(false);
   const [showStatusWizard, setShowStatusWizard] = React.useState(false);
@@ -213,8 +213,7 @@ function LoginForm() {
       className={cn(
         "relative flex min-h-screen w-full flex-col justify-center font-sans overflow-hidden transition-all duration-700",
         useAltBg ? "items-end pr-8 md:pr-24 lg:pr-32" : "items-start pl-8 md:pl-24 lg:pl-32",
-        version === "v1" && "bg-cover bg-center",
-        version === "v2" && "bg-cover bg-center"
+        "bg-cover bg-center"
       )}
       style={{ backgroundImage: useAltBg ? "url('/BBBAS%202.png')" : "url('/bg-city.png')" }}
     >
@@ -504,7 +503,7 @@ function LoginForm() {
 
       {/* Version Selector */}
       <div className="absolute bottom-6 right-6 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-lg">
-        {(["v1", "v2"] as const).map((v) => (
+        {(["v1", "v2", "v3"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setVersion(v)}
