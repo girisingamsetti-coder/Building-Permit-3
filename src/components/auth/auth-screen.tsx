@@ -297,7 +297,9 @@ function LoginForm() {
                   "border border-[#d4af37]",
                   useAltBg
                     ? "bg-white/90 text-gray-900"
-                    : "bg-transparent text-white",
+                    : version === "v4"
+                      ? "bg-[#fdf8ef]/95 text-[#8c1c13]"
+                      : "bg-transparent text-white",
                   (!mounted || showLoginBox) ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
                 )}
                 style={{ transitionDelay: showLoginBox ? "0ms" : (mounted ? `${idx * 250}ms` : `${600 + idx * 300}ms`) }}
@@ -318,13 +320,13 @@ function LoginForm() {
                   <>
                     <div className={cn(
                       "size-12 rounded-full flex items-center justify-center mb-2",
-                      useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
+                      version === "v4" ? "bg-[#8c1c13]/10 text-[#8c1c13]" : useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
                     )}>
                       <Icon className="size-6" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1">{card.title}</h3>
-                      <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+                      <p className={cn("text-[13px] leading-relaxed", version === "v4" ? "text-[#8c1c13]/80" : useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
                     </div>
                   </>
                 )}
@@ -383,9 +385,11 @@ function LoginForm() {
                       }}
                       className={cn(
                         "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
-                        useAltBg
-                          ? "text-gray-700 hover:text-[#8c1c13] border-gray-200"
-                          : "text-white/80 hover:text-white border-white/10"
+                        version === "v4"
+                          ? "text-[#8c1c13]/80 hover:text-[#8c1c13] border-[#8c1c13]/20"
+                          : useAltBg
+                            ? "text-gray-700 hover:text-[#8c1c13] border-gray-200"
+                            : "text-white/80 hover:text-white border-white/10"
                       )}
                     >
                       <span>{link}</span>
