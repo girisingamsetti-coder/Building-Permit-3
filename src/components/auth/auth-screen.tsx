@@ -299,13 +299,13 @@ function LoginForm() {
             >
               {version === "v3" ? (
                 <>
-                  <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-3">
                     <div className="size-10 rounded-full flex items-center justify-center border-[1.5px] border-[#d4af37] text-[#d4af37] shrink-0 bg-transparent">
                       <Icon className="size-5" />
                     </div>
                     <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
                   </div>
-                  <div className="pl-[52px]">
+                  <div className="pl-[52px] -mt-2">
                     <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
                   </div>
                 </>
