@@ -207,10 +207,21 @@ function LoginForm() {
     if (cred) {
       setEmail(cred.email);
       setPassword(cred.password);
-      toast({
-        title: "Demo credentials loaded",
-        description: `${ROLES[role].fullName} — click Sign In to continue.`,
-      });
+      
+      // Auto-login
+      setLoading(true);
+      setTimeout(() => {
+        const res = login(cred.email, cred.password);
+        setLoading(false);
+        if (res.ok) {
+          toast({
+            title: "Welcome",
+            description: `Signed in as ${ROLES[role].fullName}.`,
+          });
+        } else {
+          setError(res.error ?? "Login failed.");
+        }
+      }, 400);
     }
   }
 
