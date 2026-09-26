@@ -286,7 +286,8 @@ function LoginForm() {
             <div 
               key={idx} 
               className={cn(
-                "w-full max-w-[320px] rounded-[24px] p-6 flex flex-col gap-4 backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
+                "w-full max-w-[320px] rounded-[24px] flex flex-col backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
+                version === "v3" ? "px-6 pb-6 pt-3 gap-3" : "p-6 gap-4",
                 "border border-[#d4af37]",
                 useAltBg 
                   ? "bg-white/90 text-gray-900" 
