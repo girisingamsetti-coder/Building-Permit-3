@@ -609,7 +609,7 @@ function LoginForm() {
               </div>
             </div>
 
-            <div className="relative z-10 mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-between text-[11px] text-slate-500 max-w-6xl mx-auto">
+            <div className="relative z-10 mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-center gap-4 md:gap-8 text-[11px] text-slate-500 max-w-6xl mx-auto">
               <div>Copyrights @ APCRDA | All rights reserved</div>
               <div>Designed & Developed by <strong className="text-slate-700">Clove Technologies</strong></div>
             </div>
