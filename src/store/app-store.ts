@@ -210,6 +210,7 @@ interface AppState {
   submitRegistration: (data: Omit<PendingRegistration, "id" | "submittedAt" | "status">) => void;
   approveRegistration: (id: string, approvedBy: string) => void;
   rejectRegistration: (id: string, reason: string) => void;
+  undoRegistrationAction: (id: string) => void;
 }
 
 // ============================================================
@@ -1424,6 +1425,14 @@ export const useAppStore = create<AppState>()(
     set((s) => ({
       pendingRegistrations: s.pendingRegistrations.map((r) =>
         r.id === id ? { ...r, status: "REJECTED" as const, rejectedAt: nowISO(), rejectionReason: reason } : r
+      ),
+    }));
+  },
+
+  undoRegistrationAction: (id) => {
+    set((s) => ({
+      pendingRegistrations: s.pendingRegistrations.map((r) =>
+        r.id === id ? { ...r, status: "PENDING" as const, approvedAt: undefined, approvedBy: undefined, rejectedAt: undefined, rejectionReason: undefined } : r
       ),
     }));
   },

@@ -55,6 +55,7 @@ export function ProfessionalsView() {
   const pendingRegistrations = useAppStore((s) => s.pendingRegistrations);
   const approveRegistration = useAppStore((s) => s.approveRegistration);
   const rejectRegistration = useAppStore((s) => s.rejectRegistration);
+  const undoRegistrationAction = useAppStore((s) => s.undoRegistrationAction);
   const user = useAppStore((s) => s.user);
 
   const ltpPending = pendingRegistrations.filter((r) => r.type === "LTP");
@@ -226,6 +227,14 @@ export function ProfessionalsView() {
                         </Button>
                       </>
                     )}
+                  </div>
+                )}
+                {reg.status === "REJECTED" && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button size="sm" variant="outline" className="h-7 text-xs border-rose-200 text-rose-700 hover:bg-rose-50"
+                      onClick={() => undoRegistrationAction(reg.id)}>
+                      Undo Reject
+                    </Button>
                   </div>
                 )}
               </div>
