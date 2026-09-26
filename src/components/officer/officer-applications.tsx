@@ -243,7 +243,11 @@ export function OfficerApplications() {
                   const days = daysRemaining(a.expectedSLA);
                   const sla = slaTone(days);
                   return (
-                    <tr key={a.id} className="group transition-colors hover:bg-muted/30">
+                    <tr 
+                      key={a.id} 
+                      className="group cursor-pointer transition-colors hover:bg-muted/30"
+                      onClick={() => openApplication(a.id, "officer-review")}
+                    >
                       <td className="px-4 py-3">
                         <button
                           onClick={() => openApplication(a.id, "officer-review")}

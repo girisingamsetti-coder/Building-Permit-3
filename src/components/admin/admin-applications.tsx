@@ -207,7 +207,11 @@ export function AdminApplications() {
                   const firstShortfall = openShortfalls[0];
                   
                   return (
-                    <tr key={a.id} className="group transition-colors hover:bg-slate-50/50">
+                    <tr 
+                      key={a.id} 
+                      className="group cursor-pointer transition-colors hover:bg-slate-50/50"
+                      onClick={() => openApplication(a.id, "pm-application-details")}
+                    >
                       <td className="px-4 py-3 align-top">
                         <div className="font-semibold text-slate-900 text-[13px]">{a.applicationNo}</div>
                         <div className="text-[11px] text-slate-500 mt-0.5">{a.project.type === "LAYOUT_APPROVAL" ? "Layout approval" : "Commercial building permission"}</div>
