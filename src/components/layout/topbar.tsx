@@ -607,17 +607,6 @@ export function Topbar() {
 
       <div className="flex items-center gap-1.5 ml-1">
 
-        {/* Theme toggle */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleTheme}
-          title="Toggle theme"
-          className="text-muted-foreground"
-        >
-          {theme === "light" ? <Moon className="size-4.5" /> : <Sun className="size-4.5" />}
-        </Button>
-
         {/* Notifications */}
         <Popover>
           <PopoverTrigger asChild>
