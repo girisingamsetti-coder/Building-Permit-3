@@ -550,23 +550,23 @@ function LoginForm() {
 
       {/* V3 Extra Information Sections */}
       {version === "v3" && (
-        <div ref={infoRef} className="flex flex-col bg-white">
+        <div ref={infoRef} className="flex flex-col bg-[url('/bg-city.png')] bg-cover bg-center bg-fixed py-16 gap-12 border-t border-[#d4af37]/30">
           {/* What is BIM? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="p-12 md:p-24 flex flex-col justify-center">
+          <div className="max-w-7xl mx-auto w-full px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="p-10 md:p-16 flex flex-col justify-center bg-white/90 backdrop-blur-xl border-[1.5px] border-[#d4af37] shadow-xl rounded-[32px]">
               <h2 className="text-3xl font-bold text-slate-800 mb-2">What is BIM?</h2>
               <h3 className="text-xl font-semibold text-slate-500 mb-6">Building information modelling</h3>
               <p className="text-sm text-slate-600 leading-relaxed text-justify">
                 Building Information Modelling (BIM) is the process of developing a virtual, three-dimensional, information-rich model to design, construct, and maintain a building project. BIM is much more than software used to produce a pretty 3D graphic. Because a variety of information can be embedded into the model, BIM can also be used to manage the project's Building Approval, construction schedule (4D), to track project costs (5D), and, once constructed, facility management (6D).
               </p>
             </div>
-            <div className="min-h-[400px] w-full bg-[url('/bim_sketch.jpg')] bg-contain bg-no-repeat bg-center border-l border-b border-slate-200"></div>
+            <div className="min-h-[400px] w-full bg-[url('/bim_sketch.jpg')] bg-contain bg-no-repeat bg-center bg-white/90 backdrop-blur-xl border-[1.5px] border-[#d4af37] shadow-xl rounded-[32px]"></div>
           </div>
 
           {/* What is BBAS? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="min-h-[400px] w-full bg-[url('/bbas_sketch.jpg')] bg-cover bg-center border-r border-b border-slate-200 order-2 md:order-1"></div>
-            <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
+          <div className="max-w-7xl mx-auto w-full px-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="min-h-[400px] w-full bg-[url('/bbas_sketch.jpg')] bg-cover bg-center bg-white/90 backdrop-blur-xl border-[1.5px] border-[#d4af37] shadow-xl rounded-[32px] order-2 md:order-1"></div>
+            <div className="p-10 md:p-16 flex flex-col justify-center bg-white/90 backdrop-blur-xl border-[1.5px] border-[#d4af37] shadow-xl rounded-[32px] order-1 md:order-2">
               <h2 className="text-3xl font-bold text-slate-800 mb-2">What is BBAS?</h2>
               <h3 className="text-xl font-semibold text-slate-500 mb-6">BIM Based building approval system</h3>
               <p className="text-sm text-slate-600 leading-relaxed text-justify mb-4">
