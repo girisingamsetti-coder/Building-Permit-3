@@ -273,8 +273,16 @@ export function DevelopersView() {
                       <div className="text-[10px] text-muted-foreground">{item.activeProjects} active projects</div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-[11px] text-foreground font-medium">To: {item.validTo}</div>
-                      <div className="text-[10px] text-muted-foreground">({item.experienceYears} yrs exp)</div>
+                      <div className="text-[11px] font-medium text-slate-700">
+                        <span className="text-muted-foreground">From:</span> {new Date(item.validFrom).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </div>
+                      <div className={cn(
+                        "text-[11px] font-semibold mt-0.5",
+                        new Date(item.validTo) < new Date() ? "text-rose-600" :
+                        (new Date(item.validTo).getTime() - Date.now()) < 90 * 86400000 ? "text-amber-600" : "text-emerald-600"
+                      )}>
+                        <span className="text-muted-foreground font-medium">To:</span> {new Date(item.validTo).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                      </div>
                     </td>
                     <td className="py-3 px-4">
                       <Badge
