@@ -204,3 +204,16 @@
     animation: fade-in-up 0.35s ease-out both;
   }
 }
+
+/* Global Typography Adjustments */
+@layer base {
+  th, 
+  thead th {
+    font-weight: 700 !important;
+  }
+  
+  td, 
+  tbody td {
+    font-weight: 500 !important;
+  }
+}
