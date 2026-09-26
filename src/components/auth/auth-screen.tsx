@@ -597,9 +597,6 @@ function LoginForm() {
               </div>
 
               <div className="flex flex-col items-center md:items-end gap-6">
-                <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded text-black font-bold p-3 px-8 shadow-md border border-orange-300 text-xl tracking-wider">
-                  BIMDCR
-                </div>
                 <div className="flex gap-4 text-blue-500">
                   <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Instagram className="size-4" /></button>
                   <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Twitter className="size-4" /></button>
