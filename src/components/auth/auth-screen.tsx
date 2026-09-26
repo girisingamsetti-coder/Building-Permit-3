@@ -124,7 +124,7 @@ function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
-  const [version, setVersion] = React.useState<"v1" | "v2" | "v3" | "v4">("v1");
+  const [version, setVersion] = React.useState<"v1" | "v2" | "v3" | "v4">("v4");
   const [mounted, setMounted] = React.useState(false);
   const [showFeeWizard, setShowFeeWizard] = React.useState(false);
   const [showStatusWizard, setShowStatusWizard] = React.useState(false);
@@ -251,7 +251,7 @@ function LoginForm() {
           {/* Center: APCRDA & AP Govt */}
           <div className="flex items-center gap-6 md:gap-12">
             <img src="/APCRDA.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
-            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : "Bhavana Nirmaan"}</div>
+            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "BIM Bhavan" : version === "v1" ? "Amaravati Nirmaan" : "Bhavana Nirmaan"}</div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
 
@@ -425,7 +425,7 @@ function LoginForm() {
                 "font-serif text-[22px] tracking-[0.1em] uppercase drop-shadow-sm",
                 useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white drop-shadow-md"
               )}>
-                {version === "v3" ? "Nirmaan Amaravati" : "Bhavana Nirmaan AMARAVATI"}
+                {version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "BIM Bhavan AMARAVATI" : version === "v1" ? "Amaravati Nirmaan AMARAVATI" : "Bhavana Nirmaan AMARAVATI"}
               </h1>
             </div>
 
