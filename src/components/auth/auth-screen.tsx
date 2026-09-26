@@ -295,16 +295,32 @@ function LoginForm() {
               )}
               style={{ transitionDelay: showLoginBox ? "0ms" : (mounted ? `${idx * 250}ms` : `${600 + idx * 300}ms`) }}
             >
-              <div className={cn(
-                "size-12 rounded-full flex items-center justify-center mb-2",
-                useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
-              )}>
-                <Icon className="size-6" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-1">{card.title}</h3>
-                <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
-              </div>
+              {version === "v3" ? (
+                <>
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="size-10 rounded-full flex items-center justify-center border-[1.5px] border-[#d4af37] text-[#d4af37] shrink-0 bg-transparent">
+                      <Icon className="size-5" />
+                    </div>
+                    <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
+                  </div>
+                  <div>
+                    <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={cn(
+                    "size-12 rounded-full flex items-center justify-center mb-2",
+                    useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
+                  )}>
+                    <Icon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-1">{card.title}</h3>
+                    <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+                  </div>
+                </>
+              )}
               <div className="flex-1 mt-4 space-y-2">
                 {card.links.map((link, i) => (
                   <a 
