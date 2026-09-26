@@ -89,6 +89,7 @@ export const ROLES: Record<RoleKey, Role> = {
 // ============================================================
 export const USERS: User[] = [
   { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
+  { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14500", employeeId: "LTP-0001", designation: "Licensed Architect", zone: "Pune", avatarColor: "emerald", department: "Private", active: true, status: "ACTIVE", lastLogin: "2026-01-21T09:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -100,6 +101,7 @@ export function getUserByRole(role: RoleKey): User {
 // ============================================================
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
   { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Super Admin" },
+  { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP (Architect)" },
 ];
 
 // Re-export for compatibility
