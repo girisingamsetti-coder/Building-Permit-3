@@ -82,7 +82,7 @@ export function Sidebar() {
       <div className="flex h-16 items-center justify-center border-b border-sidebar-border px-4">
         {!collapsed ? (
           <h1 className="text-2xl font-bold tracking-widest text-white uppercase text-center w-full">
-            BBAS
+            Bhavana Nirmaan
           </h1>
         ) : (
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#3D405B] text-white shadow-sm font-bold">

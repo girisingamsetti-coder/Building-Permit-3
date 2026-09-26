@@ -251,7 +251,7 @@ function LoginForm() {
           {/* Center: APCRDA & AP Govt */}
           <div className="flex items-center gap-6 md:gap-12">
             <img src="/APCRDA.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
-            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">BBAS</div>
+            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : "Bhavana Nirmaan"}</div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
 
@@ -293,7 +293,7 @@ function LoginForm() {
                 key={idx}
                 className={cn(
                   "w-full max-w-[320px] rounded-[24px] flex flex-col backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
-                  version === "v3" ? "px-6 pb-6 pt-3 gap-3" : "p-6 gap-4",
+                  version === "v3" || version === "v4" ? "px-6 pb-6 pt-3 gap-3" : "p-6 gap-4",
                   "border border-[#d4af37]",
                   useAltBg
                     ? "bg-white/90 text-gray-900"
@@ -304,16 +304,16 @@ function LoginForm() {
                 )}
                 style={{ transitionDelay: showLoginBox ? "0ms" : (mounted ? `${idx * 250}ms` : `${600 + idx * 300}ms`) }}
               >
-                {version === "v3" ? (
+                {version === "v3" || version === "v4" ? (
                   <>
                     <div className="flex items-center justify-between w-full gap-3">
                       <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
-                      <div className="size-10 rounded-full flex items-center justify-center border-[1.5px] border-[#d4af37] text-[#d4af37] shrink-0 bg-transparent">
+                      <div className={cn("size-10 rounded-full flex items-center justify-center border-[1.5px] shrink-0 bg-transparent", version === "v4" ? "border-[#8c1c13] text-[#8c1c13]" : "border-[#d4af37] text-[#d4af37]")}>
                         <Icon className="size-5" strokeWidth={2.5} />
                       </div>
                     </div>
                     <div className="-mt-2">
-                      <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+                      <p className={cn("text-[13px] leading-relaxed", version === "v4" ? "text-[#8c1c13]/80" : useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
                     </div>
                   </>
                 ) : (
@@ -406,7 +406,7 @@ function LoginForm() {
         {showLoginBox && (
           <div className={cn(
             "relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] p-8 backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500",
-            useAltBg ? "bg-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-300" : "bg-black/25 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20"
+            useAltBg ? "bg-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-300" : version === "v4" ? "bg-[#fdf8ef]/95 shadow-xl border border-[#d4af37]" : "bg-black/25 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20"
           )}>
             {/* Close Button */}
             <button
@@ -423,9 +423,9 @@ function LoginForm() {
             <div className="flex flex-col items-center mb-8 text-center">
               <h1 className={cn(
                 "font-serif text-[22px] tracking-[0.1em] uppercase drop-shadow-sm",
-                useAltBg ? "text-[#5e1914]" : "text-white drop-shadow-md"
+                useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white drop-shadow-md"
               )}>
-                BBAS AMARAVATI
+                {version === "v3" ? "Nirmaan Amaravati" : "Bhavana Nirmaan AMARAVATI"}
               </h1>
             </div>
 
@@ -434,7 +434,7 @@ function LoginForm() {
               {/* Email / ID */}
               <div className="space-y-1">
                 <div className="relative">
-                  <User className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : "text-white/60")} strokeWidth={1.5} />
+                  <User className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : version === "v4" ? "text-[#8c1c13]/60" : "text-white/60")} strokeWidth={1.5} />
                   <Input
                     id="email"
                     type="text"
@@ -447,8 +447,8 @@ function LoginForm() {
                     placeholder="Citizen ID or Email"
                     className={cn(
                       "h-[50px] pl-12 rounded-[12px] text-[15px] transition-all",
-                      useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
-                      emailError && (useAltBg ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
+                      useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : version === "v4" ? "bg-white/50 border-[#8c1c13]/20 text-[#8c1c13] placeholder:text-[#8c1c13]/50 focus-visible:border-[#8c1c13]/40 focus-visible:ring-1 focus-visible:ring-[#8c1c13]/30" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
+                      emailError && (useAltBg || version === "v4" ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
                     )}
                     aria-invalid={!!emailError}
                   />
@@ -459,7 +459,7 @@ function LoginForm() {
               {/* Password */}
               <div className="space-y-1">
                 <div className="relative">
-                  <Lock className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : "text-white/60")} strokeWidth={1.5} />
+                  <Lock className={cn("absolute left-4 top-1/2 size-[18px] -translate-y-1/2", useAltBg ? "text-gray-400" : version === "v4" ? "text-[#8c1c13]/60" : "text-white/60")} strokeWidth={1.5} />
                   <Input
                     id="password"
                     type={showPw ? "text" : "password"}
@@ -472,15 +472,15 @@ function LoginForm() {
                     placeholder="Password"
                     className={cn(
                       "h-[50px] pl-12 pr-12 rounded-[12px] text-[15px] transition-all",
-                      useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
-                      pwError && (useAltBg ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
+                      useAltBg ? "bg-white border-gray-300 text-gray-800 placeholder:text-gray-400 focus-visible:ring-gray-300 focus-visible:border-gray-400 shadow-sm" : version === "v4" ? "bg-white/50 border-[#8c1c13]/20 text-[#8c1c13] placeholder:text-[#8c1c13]/50 focus-visible:border-[#8c1c13]/40 focus-visible:ring-1 focus-visible:ring-[#8c1c13]/30" : "border-white/20 bg-white/10 text-white placeholder:text-white/50 focus-visible:border-white/40 focus-visible:ring-1 focus-visible:ring-white/30",
+                      pwError && (useAltBg || version === "v4" ? "border-red-500 focus-visible:ring-red-500/30" : "border-red-400 focus-visible:ring-red-400/30")
                     )}
                     aria-invalid={!!pwError}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPw((s) => !s)}
-                    className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", useAltBg ? "text-gray-400 hover:text-gray-600" : "text-white/50 hover:text-white/90")}
+                    className={cn("absolute right-4 top-1/2 -translate-y-1/2 transition-colors", useAltBg ? "text-gray-400 hover:text-gray-600" : version === "v4" ? "text-[#8c1c13]/50 hover:text-[#8c1c13]/90" : "text-white/50 hover:text-white/90")}
                   >
                     {showPw ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
                   </button>
@@ -490,12 +490,12 @@ function LoginForm() {
 
               {/* Remember Me & Forgot Password */}
               <div className="flex items-center justify-between pt-2 pb-2">
-                <label htmlFor="remember" className={cn("flex cursor-pointer items-center gap-2 text-[13px] select-none transition-colors", useAltBg ? "text-[#5e1914] font-medium" : "text-white/80 hover:text-white")}>
+                <label htmlFor="remember" className={cn("flex cursor-pointer items-center gap-2 text-[13px] select-none transition-colors", useAltBg ? "text-[#5e1914] font-medium" : version === "v4" ? "text-[#8c1c13]/80 font-medium hover:text-[#8c1c13]" : "text-white/80 hover:text-white")}>
                   <Checkbox
                     id="remember"
                     checked={remember}
                     onCheckedChange={(v) => setRemember(v === true)}
-                    className={cn("rounded-sm", useAltBg ? "border-gray-400 data-[state=checked]:bg-[#5e1914] data-[state=checked]:text-white" : "border-white/40 data-[state=checked]:bg-white/20 data-[state=checked]:text-white")}
+                    className={cn("rounded-sm", useAltBg ? "border-gray-400 data-[state=checked]:bg-[#5e1914] data-[state=checked]:text-white" : version === "v4" ? "border-[#8c1c13]/40 data-[state=checked]:bg-[#8c1c13] data-[state=checked]:text-white" : "border-white/40 data-[state=checked]:bg-white/20 data-[state=checked]:text-white")}
                   />
                   Remember Me
                 </label>
@@ -505,7 +505,7 @@ function LoginForm() {
                     setPendingEmail(email);
                     setAuthStage("forgot");
                   }}
-                  className={cn("text-[13px] underline-offset-4 hover:underline transition-all", useAltBg ? "text-[#5e1914]" : "text-white/80 hover:text-white")}
+                  className={cn("text-[13px] underline-offset-4 hover:underline transition-all", useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white/80 hover:text-white")}
                 >
                   Forgot Password?
                 </button>
@@ -530,7 +530,9 @@ function LoginForm() {
                   "h-[50px] w-full rounded-[12px] text-[15px] font-bold transition-all uppercase tracking-wider",
                   useAltBg
                     ? "bg-gradient-to-r from-[#9a7b4f] via-[#dcb871] to-[#9a7b4f] text-[#3a100a] shadow-md hover:shadow-lg border-none"
-                    : "border border-[#FDE047]/60 bg-gradient-to-b from-[#FDE047]/20 to-black/40 text-[#FDE047] shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:bg-black/50"
+                    : version === "v4"
+                      ? "bg-[#8c1c13] text-white shadow-md hover:shadow-lg border border-[#5e1914]"
+                      : "border border-[#FDE047]/60 bg-gradient-to-b from-[#FDE047]/20 to-black/40 text-[#FDE047] shadow-[0_0_15px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:bg-black/50"
                 )}
                 disabled={loading}
               >
@@ -582,19 +584,19 @@ function LoginForm() {
               ></div>
             </div>
 
-          {/* What is BBAS? Section */}
+          {/* What is Nirmaan Amaravati? Section */}
           <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1">
               <div className="absolute inset-0 bg-[url('/bbas_blueprint.jpg')] bg-cover bg-center"></div>
             </div>
             <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">What is BBAS?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">What is Nirmaan Amaravati?</h2>
               <h3 className="text-xl font-semibold text-gray-700 mb-6">BIM Based building approval system</h3>
               <p className="text-[13px] text-gray-600 leading-relaxed text-justify mb-4">
-                BIM Based Building Approval System (BBAS) is a 3D BIM consolidated Single Model (Architectural+Structural+MEP model) that can be scrutinized in the process flow and one can track the file through its tracking system.
+                Nirmaan Amaravati is a 3D BIM consolidated Single Model (Architectural+Structural+MEP model) that can be scrutinized in the process flow and one can track the file through its tracking system.
               </p>
               <p className="text-[13px] text-gray-600 leading-relaxed text-justify">
-                BBAS is a GIS based 3D model approval system and it is a core system that is responsible for providing permissions with various development permits at one platform. All NOC's (such as fire/ high-rise/environmental clearance and so on) are integrated in this BBAS system.
+                Nirmaan Amaravati is a GIS based 3D model approval system and it is a core system that is responsible for providing permissions with various development permits at one platform. All NOC's (such as fire/ high-rise/environmental clearance and so on) are integrated in this Nirmaan Amaravati system.
               </p>
             </div>
           </div>
