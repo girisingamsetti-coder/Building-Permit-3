@@ -296,7 +296,7 @@ function LoginForm() {
                   <div className="flex items-center justify-between w-full gap-3">
                     <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
                     <div className="size-10 rounded-full flex items-center justify-center border-[1.5px] border-[#d4af37] text-[#d4af37] shrink-0 bg-transparent">
-                      <Icon className="size-5" />
+                      <Icon className="size-5" strokeWidth={2.5} />
                     </div>
                   </div>
                   <div className="-mt-2">
