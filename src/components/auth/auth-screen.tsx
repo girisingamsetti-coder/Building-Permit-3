@@ -562,7 +562,10 @@ function LoginForm() {
                   Building Information Modelling (BIM) is the process of developing a virtual, three-dimensional, information-rich model to design, construct, and maintain a building project. BIM is much more than software used to produce a pretty 3D graphic. Because a variety of information can be embedded into the model, BIM can also be used to manage the project's Building Approval, construction schedule (4D), to track project costs (5D), and, once constructed, facility management (6D).
                 </p>
               </div>
-              <div className="min-h-[400px] w-full bg-[url('/bim_sketch_new.jpg')] bg-contain bg-no-repeat bg-center border-l border-b border-[#d4af37]/30 bg-white sepia saturate-[3] hue-rotate-[-15deg] contrast-150 brightness-110"></div>
+              <div 
+                className="min-h-[400px] w-full bg-[url('/bim_sketch_new.jpg')] bg-contain bg-no-repeat bg-center border-l border-b border-[#d4af37]/30 bg-white"
+                style={{ filter: "sepia(1) saturate(5) hue-rotate(-15deg) contrast(1.5) brightness(1.2)" }}
+              ></div>
             </div>
 
           {/* What is BBAS? Section */}
