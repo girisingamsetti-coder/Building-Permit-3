@@ -567,10 +567,10 @@ function LoginForm() {
           </div>
 
           {/* Footer */}
-          <footer className="relative bg-[#fafafa] py-12 px-6 border-t border-slate-200 overflow-hidden">
-            {/* faint background city */}
-            <div className="absolute inset-0 opacity-10 bg-[url('/bg-city.png')] bg-cover bg-bottom bg-no-repeat pointer-events-none" />
-            <div className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+          <footer className="relative bg-[url('/bg-city.png')] bg-cover bg-center border-t border-slate-200 overflow-hidden">
+            {/* glassmorphism overlay */}
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-xl pointer-events-none" />
+            <div className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-10 py-12 px-6">
               <div className="flex flex-col items-center">
                 <img src="/APCRDA.png" alt="APCRDA Logo" className="h-[100px] w-auto mb-2" />
               </div>
