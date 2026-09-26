@@ -562,12 +562,16 @@ function LoginForm() {
                   Building Information Modelling (BIM) is the process of developing a virtual, three-dimensional, information-rich model to design, construct, and maintain a building project. BIM is much more than software used to produce a pretty 3D graphic. Because a variety of information can be embedded into the model, BIM can also be used to manage the project's Building Approval, construction schedule (4D), to track project costs (5D), and, once constructed, facility management (6D).
                 </p>
               </div>
-              <div className="min-h-[400px] w-full bg-[url('/bim_sketch.jpg')] bg-contain bg-no-repeat bg-center border-l border-b border-[#d4af37]/30 bg-white sepia saturate-[5] hue-rotate-[-15deg] contrast-150 brightness-110"></div>
+              <div className="min-h-[400px] w-full relative border-l border-b border-[#d4af37]/30 bg-[#c5a028]">
+                <div className="absolute inset-0 bg-[url('/bim_sketch.jpg')] bg-contain bg-no-repeat bg-center mix-blend-screen grayscale contrast-125"></div>
+              </div>
             </div>
 
           {/* What is BBAS? Section */}
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="min-h-[400px] w-full bg-[url('/bbas_sketch.jpg')] bg-cover bg-center border-r border-b border-[#d4af37]/30 order-2 md:order-1 bg-white sepia saturate-[5] hue-rotate-[-15deg] contrast-150 brightness-110"></div>
+            <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1 bg-[#c5a028]">
+              <div className="absolute inset-0 bg-[url('/bbas_sketch.jpg')] bg-cover bg-center mix-blend-screen grayscale contrast-125"></div>
+            </div>
             <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">What is BBAS?</h2>
               <h3 className="text-xl font-semibold text-gray-700 mb-6">BIM Based building approval system</h3>
