@@ -60,11 +60,13 @@ import {
   ArrowRight,
   Flag,
   Building2,
+  Box,
 } from "lucide-react";
 import type { Application, WorkflowHistoryEntry } from "@/types";
 import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 import { computeSLA } from "@/components/pm/pm-helpers";
 import { ApplicationOccupancyTab } from "@/components/occupancy/application-occupancy-tab";
+import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
 
 // ============================================================
 // PROJECT MANAGER — Application Details (read-only)
@@ -137,6 +139,10 @@ export function PmApplicationDetails() {
           <TabsTrigger value="drawings" className="gap-1.5">
             <Upload className="size-3.5" /> Drawings
           </TabsTrigger>
+          <TabsTrigger value="bim" className="gap-1.5">
+            <Box className="size-3.5 text-cyan-600" /> BIM Module
+            <Badge variant="outline" className="ml-1 border-cyan-500/40 text-[9px] text-cyan-600 bg-cyan-50 dark:bg-cyan-950">3D</Badge>
+          </TabsTrigger>
           <TabsTrigger value="fees" className="gap-1.5">
             <ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payments
           </TabsTrigger>
@@ -167,6 +173,9 @@ export function PmApplicationDetails() {
         </TabsContent>
         <TabsContent value="drawings" className="space-y-6">
           <DrawingsTab app={app} />
+        </TabsContent>
+        <TabsContent value="bim" className="space-y-6">
+          <BimWorkspaceContainer applicationId={app.applicationNo} projectData={app.project} userRole="PM" />
         </TabsContent>
         <TabsContent value="fees" className="space-y-6">
           <FeesTab app={app} />
