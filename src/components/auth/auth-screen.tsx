@@ -278,7 +278,7 @@ function LoginForm() {
       <div className={cn(
         "absolute top-[40%] -translate-y-1/2 w-full flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none",
         useAltBg ? "justify-end px-4 md:px-8 lg:px-12" : "justify-start px-8 md:px-24 lg:px-32",
-        version === "v3" ? "lg:pr-24" : "",
+        version === "v3" ? "lg:pr-40" : "",
         showLoginBox ? "pointer-events-none" : ""
       )}>
         {QUICK_CARDS.map((card, idx) => {
