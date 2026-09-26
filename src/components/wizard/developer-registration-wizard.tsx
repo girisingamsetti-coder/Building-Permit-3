@@ -1,5 +1,5 @@
 import * as React from "react";
-import { X, RefreshCw, Volume2, EyeOff, ChevronUp } from "lucide-react";
+import { X, RefreshCw, Volume2, EyeOff, ChevronUp, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/app-store";
 
 interface DeveloperRegistrationWizardProps {
   onClose: () => void;
@@ -33,6 +34,44 @@ const FormRow = ({
 );
 
 export function DeveloperRegistrationWizard({ onClose }: DeveloperRegistrationWizardProps) {
+  const submitRegistration = useAppStore((s) => s.submitRegistration);
+  const [submitted, setSubmitted] = React.useState(false);
+  const [companyName, setCompanyName] = React.useState("");
+  const [authorizedPerson, setAuthorizedPerson] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [pan, setPan] = React.useState("");
+  const [reraNumber, setReraNumber] = React.useState("");
+
+  function handleSubmit() {
+    submitRegistration({
+      type: "DEVELOPER",
+      name: authorizedPerson || companyName || "(Unknown)",
+      email,
+      phone,
+      companyName,
+      pan,
+      reraNumber,
+      authorizedPerson,
+    });
+    setSubmitted(true);
+  }
+
+  if (submitted) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-10 flex flex-col items-center gap-4 max-w-md w-full">
+          <CheckCircle2 className="size-16 text-green-500" />
+          <h2 className="text-xl font-bold text-slate-800">Registration Submitted!</h2>
+          <p className="text-sm text-slate-500 text-center">
+            Your developer registration has been submitted. The concerned authority will review and approve it. You will be notified once your account is activated.
+          </p>
+          <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white px-8 mt-2">Close</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
       <div className="relative w-full max-w-5xl h-[90vh] bg-white rounded-lg shadow-2xl flex flex-col">
@@ -200,7 +239,10 @@ export function DeveloperRegistrationWizard({ onClose }: DeveloperRegistrationWi
 
             <Input placeholder="E N T E R  C A P T C H A" className="h-9 bg-white text-[13px] border-gray-400 rounded-sm text-center tracking-[0.2em] w-[200px] mb-6" />
             
-            <Button className="bg-[#428bca] hover:bg-[#3071a9] text-white font-medium px-8 h-9 rounded-sm shadow-sm transition-colors w-[200px]">
+            <Button
+              className="bg-[#428bca] hover:bg-[#3071a9] text-white font-medium px-8 h-9 rounded-sm shadow-sm transition-colors w-[200px]"
+              onClick={handleSubmit}
+            >
               Submit
             </Button>
           </div>

@@ -204,6 +204,43 @@ interface AppState {
   updateApplicationType: (key: ApplicationType, data: Partial<Pick<ApplicationTypeConfig, "name" | "description" | "typicalDuration">>) => void;
   updateSystemSettings: (data: Partial<SystemSettings>) => void;
   updateWorkflowStage: (stageKey: string, data: { role?: RoleKey; allowedActions?: string[]; canApprove?: boolean; canRaiseShortfall?: boolean }) => void;
+
+  // ---- registration workflow ----
+  pendingRegistrations: PendingRegistration[];
+  submitRegistration: (data: Omit<PendingRegistration, "id" | "submittedAt" | "status">) => void;
+  approveRegistration: (id: string, approvedBy: string) => void;
+  rejectRegistration: (id: string, reason: string) => void;
+}
+
+// ============================================================
+// PENDING REGISTRATION TYPE
+// ============================================================
+export interface PendingRegistration {
+  id: string;
+  type: "LTP" | "DEVELOPER";
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  submittedAt: string;
+  approvedAt?: string;
+  rejectedAt?: string;
+  rejectionReason?: string;
+  approvedBy?: string;
+  // Common fields
+  name: string;
+  email: string;
+  phone: string;
+  address?: string;
+  // LTP-specific
+  licenseNo?: string;
+  council?: string;
+  qualification?: string;
+  designation?: string;
+  zone?: string;
+  // Developer-specific
+  companyName?: string;
+  pan?: string;
+  reraNumber?: string;
+  authorizedPerson?: string;
+  companyType?: string;
 }
 
 // ============================================================
@@ -293,6 +330,7 @@ export const useAppStore = create<AppState>()(
   cVersion: "c2",
   processingAppIds: [],
   viewHistory: [],
+  pendingRegistrations: [],
 
   // ---- AUTH ----
   login: (email, password) => {
@@ -1362,9 +1400,36 @@ export const useAppStore = create<AppState>()(
       }, ...s.adminAuditLog],
     }));
   },
+
+  // ---- REGISTRATION WORKFLOW ----
+  submitRegistration: (data) => {
+    const reg: PendingRegistration = {
+      ...data,
+      id: genId("reg"),
+      status: "PENDING",
+      submittedAt: nowISO(),
+    };
+    set((s) => ({ pendingRegistrations: [reg, ...s.pendingRegistrations] }));
+  },
+
+  approveRegistration: (id, approvedBy) => {
+    set((s) => ({
+      pendingRegistrations: s.pendingRegistrations.map((r) =>
+        r.id === id ? { ...r, status: "APPROVED" as const, approvedAt: nowISO(), approvedBy } : r
+      ),
+    }));
+  },
+
+  rejectRegistration: (id, reason) => {
+    set((s) => ({
+      pendingRegistrations: s.pendingRegistrations.map((r) =>
+        r.id === id ? { ...r, status: "REJECTED" as const, rejectedAt: nowISO(), rejectionReason: reason } : r
+      ),
+    }));
+  },
     }),
     {
-      name: "building-permit-store-v2",
+      name: "building-permit-store-v3",
     }
   )
 );

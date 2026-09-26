@@ -1,18 +1,40 @@
 import * as React from "react";
-import { X, Calendar, Eye, Image as ImageIcon, ChevronRight } from "lucide-react";
+import { X, Calendar, Eye, Image as ImageIcon, ChevronRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/app-store";
 
 interface LtpRegistrationWizardProps {
   onClose: () => void;
 }
 
 export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
+  const submitRegistration = useAppStore((s) => s.submitRegistration);
   const [step, setStep] = React.useState(1);
+  const [submitted, setSubmitted] = React.useState(false);
   const totalSteps = 4;
+  // Form state
+  const [firstName, setFirstName] = React.useState("");
+  const [lastName, setLastName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [licenseNo, setLicenseNo] = React.useState("");
+  const [qualification, setQualification] = React.useState("");
+
+  function handleSubmit() {
+    submitRegistration({
+      type: "LTP",
+      name: `${firstName} ${lastName}`.trim() || "(Unknown)",
+      email,
+      phone,
+      licenseNo,
+      qualification,
+    });
+    setSubmitted(true);
+  }
 
   const STEPS = [
     "Personal Information",
@@ -20,6 +42,21 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
     "Attach Mandatory Documents",
     "Login Information"
   ];
+
+  if (submitted) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="bg-white rounded-xl shadow-2xl p-10 flex flex-col items-center gap-4 max-w-md w-full">
+          <CheckCircle2 className="size-16 text-green-500" />
+          <h2 className="text-xl font-bold text-slate-800">Registration Submitted!</h2>
+          <p className="text-sm text-slate-500 text-center">
+            Your LTP registration has been submitted successfully. The concerned authority will review and approve your application. You will be notified once approved.
+          </p>
+          <Button onClick={onClose} className="bg-green-600 hover:bg-green-700 text-white px-8 mt-2">Close</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
@@ -348,6 +385,7 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
                 </Button>
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 shadow-sm"
+                  onClick={handleSubmit}
                 >
                   Submit Registration
                 </Button>

@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { MOCK_DEVELOPERS, type DeveloperRecord } from "@/data/modules-data";
+import { useAppStore } from "@/store/app-store";
 
 const REGISTERS = [
   { key: "ALL", label: "All Developers" },
@@ -47,6 +48,16 @@ export function DevelopersView() {
   const [searchTerm, setSearchTerm] = React.useState("");
   const [activeTab, setActiveTab] = React.useState<string>("ALL");
   const [selectedDev, setSelectedDev] = React.useState<DeveloperRecord | null>(null);
+  const [rejectReason, setRejectReason] = React.useState("");
+  const [rejectingId, setRejectingId] = React.useState<string | null>(null);
+
+  const pendingRegistrations = useAppStore((s) => s.pendingRegistrations);
+  const approveRegistration = useAppStore((s) => s.approveRegistration);
+  const rejectRegistration = useAppStore((s) => s.rejectRegistration);
+  const user = useAppStore((s) => s.user);
+
+  const devPending = pendingRegistrations.filter((r) => r.type === "DEVELOPER");
+  const pendingCount = devPending.filter((r) => r.status === "PENDING").length;
 
   const developers = MOCK_DEVELOPERS;
 
@@ -135,6 +146,80 @@ export function DevelopersView() {
           Showing <strong>{filtered.length}</strong> of {developers.length} registered developers
         </div>
       </div>
+
+      {/* Pending Registrations from Portal */}
+      {devPending.length > 0 && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 shadow-sm overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-3 border-b border-amber-200 bg-amber-100/60">
+            <AlertTriangle className="size-4 text-amber-600" />
+            <span className="text-sm font-bold text-amber-800">Pending Developer Registrations from Portal</span>
+            {pendingCount > 0 && (
+              <span className="ml-auto rounded-full bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5">{pendingCount} awaiting</span>
+            )}
+          </div>
+          <div className="divide-y divide-amber-100">
+            {devPending.map((reg) => (
+              <div key={reg.id} className="flex items-center gap-4 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm text-slate-800">{reg.companyName || reg.name}</span>
+                    <span className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                      reg.status === "PENDING" ? "bg-amber-100 text-amber-700 border border-amber-300" :
+                      reg.status === "APPROVED" ? "bg-emerald-100 text-emerald-700 border border-emerald-300" :
+                      "bg-rose-100 text-rose-700 border border-rose-300"
+                    )}>{reg.status}</span>
+                  </div>
+                  <div className="text-xs text-slate-500 mt-0.5 flex gap-4 flex-wrap">
+                    {reg.authorizedPerson && <span>Contact: {reg.authorizedPerson}</span>}
+                    <span>{reg.email}</span>
+                    <span>{reg.phone}</span>
+                    {reg.pan && <span>PAN: {reg.pan}</span>}
+                    {reg.reraNumber && <span>RERA: {reg.reraNumber}</span>}
+                    <span className="text-slate-400">Submitted: {new Date(reg.submittedAt).toLocaleDateString("en-IN")}</span>
+                  </div>
+                  {reg.status === "REJECTED" && reg.rejectionReason && (
+                    <div className="text-xs text-rose-600 mt-0.5">Reason: {reg.rejectionReason}</div>
+                  )}
+                  {reg.status === "APPROVED" && (
+                    <div className="text-xs text-emerald-600 mt-0.5">Approved by: {reg.approvedBy}</div>
+                  )}
+                </div>
+                {reg.status === "PENDING" && (
+                  <div className="flex items-center gap-2 shrink-0">
+                    {rejectingId === reg.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="text-xs border border-rose-300 rounded px-2 py-1 h-7 w-48"
+                          placeholder="Rejection reason..."
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                        />
+                        <Button size="sm" variant="destructive" className="h-7 text-xs"
+                          onClick={() => { rejectRegistration(reg.id, rejectReason); setRejectingId(null); setRejectReason(""); }}>
+                          Confirm
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setRejectingId(null)}>Cancel</Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Button size="sm" className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                          onClick={() => approveRegistration(reg.id, user?.name ?? "Admin")}>
+                          Approve
+                        </Button>
+                        <Button size="sm" variant="destructive" className="h-7 text-xs"
+                          onClick={() => setRejectingId(reg.id)}>
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
