@@ -144,13 +144,6 @@ function LoginForm() {
     return () => clearTimeout(timer);
   }, []);
 
-  React.useEffect(() => {
-    if (version === "v3" && infoRef.current) {
-      setTimeout(() => {
-        infoRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-    }
-  }, [version]);
 
   const QUICK_CARDS = [
     {
