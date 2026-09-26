@@ -43,10 +43,6 @@ import {
   Users,
   HardHat,
   Ruler,
-  Instagram,
-  Twitter,
-  Facebook,
-  Youtube,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { FeeWizard } from "@/components/wizard/fee-wizard";
@@ -124,7 +120,7 @@ function LoginForm() {
   const [loading, setLoading] = React.useState(false);
   const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
-  const [version, setVersion] = React.useState<"v1" | "v2" | "v3">("v1");
+  const [version, setVersion] = React.useState<"v1" | "v2">("v1");
   const [mounted, setMounted] = React.useState(false);
   const [showFeeWizard, setShowFeeWizard] = React.useState(false);
   const [showStatusWizard, setShowStatusWizard] = React.useState(false);
@@ -132,25 +128,16 @@ function LoginForm() {
   const [showDevStatusWizard, setShowDevStatusWizard] = React.useState<string | null>(null);
   const [showDevRenewalWizard, setShowDevRenewalWizard] = React.useState<string | null>(null);
   const [showRegDevWizard, setShowRegDevWizard] = React.useState<"developer" | "tpa" | "ltp" | null>(null);
-  const [showConsentWizard, setShowConsentWizard] = React.useState<{type: "developer" | "tpa" | "ltp", title: string} | null>(null);
+  const [showConsentWizard, setShowConsentWizard] = React.useState<{ type: "developer" | "tpa" | "ltp", title: string } | null>(null);
   const [showLtpRegWizard, setShowLtpRegWizard] = React.useState(false);
   const [showLtpRenewalWizard, setShowLtpRenewalWizard] = React.useState(false);
   const [showLtpViewWizard, setShowLtpViewWizard] = React.useState(false);
   const useAltBg = version === "v2";
-  const infoRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
-
-  React.useEffect(() => {
-    if (version === "v3" && infoRef.current) {
-      setTimeout(() => {
-        infoRef.current?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
-    }
-  }, [version]);
 
   const QUICK_CARDS = [
     {
@@ -222,12 +209,12 @@ function LoginForm() {
   }
 
   return (
-    <div className={cn("relative w-full bg-white", version === "v3" ? "h-screen overflow-y-auto overflow-x-hidden" : "h-screen overflow-hidden")}>
-      <div
-        className={cn(
-          "relative flex min-h-screen w-full flex-col justify-center font-sans overflow-hidden transition-all duration-700 shrink-0",
+    <div
+      className={cn(
+        "relative flex min-h-screen w-full flex-col justify-center font-sans overflow-hidden transition-all duration-700",
         useAltBg ? "items-end pr-8 md:pr-24 lg:pr-32" : "items-start pl-8 md:pl-24 lg:pl-32",
-        "bg-cover bg-center"
+        version === "v1" && "bg-cover bg-center",
+        version === "v2" && "bg-cover bg-center"
       )}
       style={{ backgroundImage: useAltBg ? "url('/BBBAS%202.png')" : "url('/bg-city.png')" }}
     >
@@ -283,13 +270,13 @@ function LoginForm() {
         {QUICK_CARDS.map((card, idx) => {
           const Icon = card.icon;
           return (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className={cn(
                 "w-full max-w-[320px] rounded-[24px] p-6 flex flex-col gap-4 backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
                 "border border-[#d4af37]",
-                useAltBg 
-                  ? "bg-white/90 text-gray-900" 
+                useAltBg
+                  ? "bg-white/90 text-gray-900"
                   : "bg-transparent text-white",
                 (!mounted || showLoginBox) ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
               )}
@@ -307,9 +294,9 @@ function LoginForm() {
               </div>
               <div className="flex-1 mt-4 space-y-2">
                 {card.links.map((link, i) => (
-                  <a 
-                    key={i} 
-                    href="#" 
+                  <a
+                    key={i}
+                    href="#"
                     onClick={(e) => {
                       if (link === "Pay your fees here") {
                         e.preventDefault();
@@ -360,8 +347,8 @@ function LoginForm() {
                     }}
                     className={cn(
                       "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
-                      useAltBg 
-                        ? "text-gray-700 hover:text-[#8c1c13] border-gray-200" 
+                      useAltBg
+                        ? "text-gray-700 hover:text-[#8c1c13] border-gray-200"
                         : "text-white/80 hover:text-white border-white/10"
                     )}
                   >
@@ -516,11 +503,8 @@ function LoginForm() {
       )}
 
       {/* Version Selector */}
-      <div className={cn(
-        "absolute z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-lg transition-all",
-        version === "v3" ? "bottom-6 right-6 fixed" : "bottom-6 right-6"
-      )}>
-        {(["v1", "v2", "v3"] as const).map((v) => (
+      <div className="absolute bottom-6 right-6 z-30 flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/20 shadow-lg">
+        {(["v1", "v2"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setVersion(v)}
@@ -533,111 +517,23 @@ function LoginForm() {
           </button>
         ))}
       </div>
-      
-      </div>
-
-      {/* V3 Extra Information Sections */}
-      {version === "v3" && (
-        <div ref={infoRef} className="flex flex-col bg-white">
-          {/* What is BIM? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="p-12 md:p-24 flex flex-col justify-center">
-              <h2 className="text-3xl font-bold text-slate-800 mb-2">What is BIM?</h2>
-              <h3 className="text-xl font-semibold text-slate-500 mb-6">Building information modelling</h3>
-              <p className="text-sm text-slate-600 leading-relaxed text-justify">
-                Building Information Modelling (BIM) is the process of developing a virtual, three-dimensional, information-rich model to design, construct, and maintain a building project. BIM is much more than software used to produce a pretty 3D graphic. Because a variety of information can be embedded into the model, BIM can also be used to manage the project's Building Approval, construction schedule (4D), to track project costs (5D), and, once constructed, facility management (6D).
-              </p>
-            </div>
-            <div className="min-h-[400px] w-full bg-[url('/bim_sketch.jpg')] bg-cover bg-center border-l border-b border-slate-200"></div>
-          </div>
-
-          {/* What is BBAS? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="min-h-[400px] w-full bg-[url('/bbas_sketch.jpg')] bg-cover bg-center border-r border-b border-slate-200 order-2 md:order-1"></div>
-            <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
-              <h2 className="text-3xl font-bold text-slate-800 mb-2">What is BBAS?</h2>
-              <h3 className="text-xl font-semibold text-slate-500 mb-6">BIM Based building approval system</h3>
-              <p className="text-sm text-slate-600 leading-relaxed text-justify mb-4">
-                BIM Based Building Approval System (BBAS) is a 3D BIM consolidated Single Model (Architectural+Structural+MEP model) that can be scrutinized in the process flow and one can track the file through its tracking system.
-              </p>
-              <p className="text-sm text-slate-600 leading-relaxed text-justify">
-                BBAS is a GIS based 3D model approval system and it is a core system that is responsible for providing permissions with various development permits at one platform. All NOC's (such as fire/ high-rise/environmental clearance and so on) are integrated in this BBAS system.
-              </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <footer className="relative bg-[#fafafa] py-12 px-6 border-t border-slate-200 overflow-hidden">
-            {/* faint background city */}
-            <div className="absolute inset-0 opacity-10 bg-[url('/bg-city.png')] bg-cover bg-bottom bg-no-repeat pointer-events-none" />
-            <div className="relative z-10 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-              <div className="flex flex-col items-center">
-                <img src="/APCRDA.png" alt="APCRDA Logo" className="h-[100px] w-auto mb-2" />
-              </div>
-              
-              <div className="flex flex-col gap-6">
-                <div className="flex gap-16 md:gap-24">
-                  <div>
-                    <h4 className="font-bold text-slate-800 mb-4 text-sm">Portal map</h4>
-                    <ul className="space-y-3 text-[13px] text-slate-600">
-                      <li><button className="hover:text-blue-600">Home</button></li>
-                      <li><button className="hover:text-blue-600">About Us</button></li>
-                      <li><button className="hover:text-blue-600">Dashboard</button></li>
-                      <li><button className="hover:text-blue-600">Downloads</button></li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-800 mb-4 text-sm">Support</h4>
-                    <ul className="space-y-3 text-[13px] text-slate-600">
-                      <li><button className="hover:text-blue-600">Help manuals</button></li>
-                      <li><button className="hover:text-blue-600">FAQ</button></li>
-                      <li><button className="hover:text-blue-600">Helpdesk</button></li>
-                      <li><button className="hover:text-blue-600">Contact Us</button></li>
-                    </ul>
-                  </div>
-                </div>
-                <div className="text-[11px] text-slate-500 mt-2 text-center md:text-left">
-                  Designed & Developed by <strong className="text-slate-700">Clove Technologies</strong>
-                </div>
-              </div>
-
-              <div className="flex flex-col items-center md:items-end gap-6">
-                <div className="flex gap-4 text-blue-500">
-                  <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Instagram className="size-4" /></button>
-                  <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Twitter className="size-4" /></button>
-                  <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Facebook className="size-4" /></button>
-                  <button className="hover:text-blue-700 bg-blue-50 p-1.5 rounded-md"><Youtube className="size-4" /></button>
-                </div>
-                <div className="text-xs text-slate-500 mt-2">
-                  Visitors count: <span className="font-mono">1,204,500</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative z-10 mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-center text-[11px] text-slate-500 max-w-6xl mx-auto">
-              <div>Copyrights @ APCRDA | All rights reserved</div>
-            </div>
-          </footer>
-        </div>
-      )}
-
 
       {showFeeWizard && <FeeWizard onClose={() => setShowFeeWizard(false)} />}
       {showStatusWizard && <StatusWizard onClose={() => setShowStatusWizard(false)} />}
       {showDevRegWizard && <DeveloperRegistrationWizard onClose={() => setShowDevRegWizard(false)} />}
       {showDevStatusWizard && (
-        <DeveloperStatusWizard 
-          title={showDevStatusWizard} 
-          onClose={() => setShowDevStatusWizard(null)} 
+        <DeveloperStatusWizard
+          title={showDevStatusWizard}
+          onClose={() => setShowDevStatusWizard(null)}
         />
       )}
       {showDevRenewalWizard && <DeveloperRenewalWizard title={showDevRenewalWizard} onClose={() => setShowDevRenewalWizard(null)} />}
       {showRegDevWizard && <RegisteredDeveloperWizard type={showRegDevWizard} onClose={() => setShowRegDevWizard(null)} />}
       {showConsentWizard && (
-        <DeveloperConsentWizard 
-          type={showConsentWizard.type} 
-          title={showConsentWizard.title} 
-          onClose={() => setShowConsentWizard(null)} 
+        <DeveloperConsentWizard
+          type={showConsentWizard.type}
+          title={showConsentWizard.title}
+          onClose={() => setShowConsentWizard(null)}
         />
       )}
       {showLtpRegWizard && <LtpRegistrationWizard onClose={() => setShowLtpRegWizard(false)} />}
