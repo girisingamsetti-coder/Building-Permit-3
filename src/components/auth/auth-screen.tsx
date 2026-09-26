@@ -569,8 +569,8 @@ function LoginForm() {
 
           {/* What is BBAS? Section */}
           <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1 bg-[#826a1b]">
-              <div className="absolute inset-0 bg-[url('/bbas_sketch.jpg')] bg-cover bg-center mix-blend-screen grayscale contrast-150"></div>
+            <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1">
+              <div className="absolute inset-0 bg-[url('/bbas_blueprint.jpg')] bg-cover bg-center"></div>
             </div>
             <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
               <h2 className="text-3xl font-bold text-gray-900 mb-2">What is BBAS?</h2>
