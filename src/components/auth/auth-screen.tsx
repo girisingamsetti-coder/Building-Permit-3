@@ -305,7 +305,7 @@ function LoginForm() {
                     </div>
                     <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
                   </div>
-                  <div>
+                  <div className="pl-[52px]">
                     <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
                   </div>
                 </>
