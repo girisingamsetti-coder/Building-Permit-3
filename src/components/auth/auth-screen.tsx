@@ -575,24 +575,29 @@ function LoginForm() {
                 <img src="/APCRDA.png" alt="APCRDA Logo" className="h-[100px] w-auto mb-2" />
               </div>
               
-              <div className="flex gap-16 md:gap-24">
-                <div>
-                  <h4 className="font-bold text-slate-800 mb-4 text-sm">Portal map</h4>
-                  <ul className="space-y-3 text-[13px] text-slate-600">
-                    <li><button className="hover:text-blue-600">Home</button></li>
-                    <li><button className="hover:text-blue-600">About Us</button></li>
-                    <li><button className="hover:text-blue-600">Dashboard</button></li>
-                    <li><button className="hover:text-blue-600">Downloads</button></li>
-                  </ul>
+              <div className="flex flex-col gap-6">
+                <div className="flex gap-16 md:gap-24">
+                  <div>
+                    <h4 className="font-bold text-slate-800 mb-4 text-sm">Portal map</h4>
+                    <ul className="space-y-3 text-[13px] text-slate-600">
+                      <li><button className="hover:text-blue-600">Home</button></li>
+                      <li><button className="hover:text-blue-600">About Us</button></li>
+                      <li><button className="hover:text-blue-600">Dashboard</button></li>
+                      <li><button className="hover:text-blue-600">Downloads</button></li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-800 mb-4 text-sm">Support</h4>
+                    <ul className="space-y-3 text-[13px] text-slate-600">
+                      <li><button className="hover:text-blue-600">Help manuals</button></li>
+                      <li><button className="hover:text-blue-600">FAQ</button></li>
+                      <li><button className="hover:text-blue-600">Helpdesk</button></li>
+                      <li><button className="hover:text-blue-600">Contact Us</button></li>
+                    </ul>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-slate-800 mb-4 text-sm">Support</h4>
-                  <ul className="space-y-3 text-[13px] text-slate-600">
-                    <li><button className="hover:text-blue-600">Help manuals</button></li>
-                    <li><button className="hover:text-blue-600">FAQ</button></li>
-                    <li><button className="hover:text-blue-600">Helpdesk</button></li>
-                    <li><button className="hover:text-blue-600">Contact Us</button></li>
-                  </ul>
+                <div className="text-[11px] text-slate-500 mt-2 text-center md:text-left">
+                  Designed & Developed by <strong className="text-slate-700">Clove Technologies</strong>
                 </div>
               </div>
 
@@ -609,9 +614,8 @@ function LoginForm() {
               </div>
             </div>
 
-            <div className="relative z-10 mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-between text-[11px] text-slate-500 max-w-6xl mx-auto">
+            <div className="relative z-10 mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row justify-center text-[11px] text-slate-500 max-w-6xl mx-auto">
               <div>Copyrights @ APCRDA | All rights reserved</div>
-              <div>Designed & Developed by <strong className="text-slate-700">Clove Technologies</strong></div>
             </div>
           </footer>
         </div>
