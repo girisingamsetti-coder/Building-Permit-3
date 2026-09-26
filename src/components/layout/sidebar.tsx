@@ -21,6 +21,7 @@ import type { ViewKey } from "@/types";
 const MODULE_ICONS: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   applications: FileStack,
+  "2d-drawings": Layers,
   bim: Box,
   occupancy: Building2,
   tasks: ClipboardList,

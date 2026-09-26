@@ -258,15 +258,26 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-applications",
     },
   },
-  // 3 — 2D / 3D (BIM switch — rendered as segmented pill in sidebar)
+  // 3 — 3D (BIM)
   {
-    label: "BIM",
+    label: "3D (BIM)",
     permKey: "bim",
     requiredAny: [],
     views: {
       LTP:        "ltp-bim",
       OFFICER:    "officer-bim",
       SUPER_ADMIN: "admin-bim",
+    },
+  },
+  // 3.5 — 2D
+  {
+    label: "2D Drawings",
+    permKey: "2d-drawings",
+    requiredAny: [],
+    views: {
+      LTP:        "ltp-2d-drawings",
+      OFFICER:    "officer-2d-drawings",
+      SUPER_ADMIN: "admin-2d-drawings",
     },
   },
   // 4 — Tasks
@@ -461,8 +472,18 @@ export function getDynamicNav(
 ): DynamicNavItem[] {
   const effectivePerms = getEffectivePermissions(user, roles);
 
+  const allowedForLtp = new Set([
+    "dashboard", "applications", "2d-drawings", "bim", "tasks", 
+    "shortfalls", "nocs", "show-cause", "revocations", "work-initiated",
+    "occupancy", "outward", "payments", "documents", "reports"
+  ]);
+
   return MODULE_DEFS
     .filter((mod) => {
+      // Hide modules not explicitly allowed for LTP
+      if (portal === "LTP" && !allowedForLtp.has(mod.permKey)) {
+        return false;
+      }
       // No permission requirement → always show
       if (mod.requiredAny.length === 0) return true;
       // SUPER_ADMIN always sees everything
