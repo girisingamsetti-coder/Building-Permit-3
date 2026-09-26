@@ -563,8 +563,7 @@ function LoginForm() {
                 </p>
               </div>
               <div 
-                className="min-h-[400px] w-full bg-[url('/bim_sketch_new.jpg')] bg-contain bg-no-repeat bg-center border-l border-b border-[#d4af37]/30 bg-white"
-                style={{ filter: "sepia(1) saturate(5) hue-rotate(-15deg) contrast(1.5) brightness(1.2)" }}
+                className="min-h-[400px] w-full bg-[url('/bim_sketch_shaded.png')] bg-cover bg-center border-l border-b border-[#d4af37]/30 bg-white"
               ></div>
             </div>
 
