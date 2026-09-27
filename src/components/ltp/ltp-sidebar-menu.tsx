@@ -44,7 +44,7 @@ const LTP_MODULES: LtpModuleDef[] = [
     submenus: [
       { id: "draft-application", label: "Draft Applications" },
       { id: "submitted-applications", label: "Submitted Permission Files" },
-      { id: "objected-files", label: "Objected / Query Files" },
+      { id: "objected-files", label: "Objections" },
     ],
   },
   {

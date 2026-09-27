@@ -270,9 +270,13 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Objected Files &amp; Shortfall Notices</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                {ltpActiveMenu === "objected-files" ? "Objections" : "Shortfall Notices"}
+              </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Files flagged with scrutiny objections or shortfall requirements that need your response.
+                {ltpActiveMenu === "objected-files"
+                  ? "Files flagged with scrutiny objections or compliance queries that need your response."
+                  : "Requirements and shortfalls raised by officers that need your response."}
               </p>
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
