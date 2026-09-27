@@ -177,22 +177,20 @@ export function Sidebar() {
       )}
     >
       {/* Brand */}
-      <div className={cn("flex h-16 items-center justify-center border-b px-4", currentTheme.brand)}>
+      <div className={cn("flex h-16 items-center border-b", currentTheme.brand, collapsed ? "justify-center px-2" : "justify-start px-3")}>
         {!collapsed ? (
-          <div className="flex items-center gap-2.5">
-            {isLTP && (
-              <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-md", currentTheme.badge)}>
-                BN
-              </div>
-            )}
-            <h1 className={cn("text-base font-bold tracking-wider uppercase text-center", currentTheme.brandText)}>
-              Bhavana Nirmaan
-            </h1>
-          </div>
+          <img
+            src="/bhavana-nirman-logo.jpg"
+            alt="Bhavana Nirman"
+            className="h-10 w-auto object-contain object-left"
+            style={{ maxWidth: "180px" }}
+          />
         ) : (
-          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg shadow-sm font-bold", currentTheme.collapsedBadge)}>
-            B
-          </div>
+          <img
+            src="/bn-icon.png"
+            alt="BN"
+            className="size-9 object-contain"
+          />
         )}
       </div>
 

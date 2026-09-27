@@ -53,7 +53,7 @@ const LTP_MODULES: LtpModuleDef[] = [
     hasIcon: false,
     submenus: [
       { id: "cc-issued", label: "Commencement Certificates" },
-      { id: "work-initiated", label: "Site Initiation Notices" },
+      { id: "work-initiated", label: "Work Initiation" },
     ],
   },
   {
