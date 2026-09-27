@@ -180,19 +180,16 @@ export function Sidebar() {
       <div className={cn("flex h-16 items-center justify-center border-b px-4", currentTheme.brand)}>
         {!collapsed ? (
           <div className="flex items-center gap-2.5">
-            {isLTP && (
-              <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-md", currentTheme.badge)}>
-                BN
-              </div>
-            )}
-            <h1 className={cn("text-base font-bold tracking-wider uppercase text-center", currentTheme.brandText)}>
-              Bhavana Nirmaan
+            <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain" />
+            <h1 
+              className="text-lg font-black tracking-widest text-[#801824]"
+              style={{ fontFamily: "ui-rounded, 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif" }}
+            >
+              BHAVANA NIRMAAN
             </h1>
           </div>
         ) : (
-          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg shadow-sm font-bold", currentTheme.collapsedBadge)}>
-            B
-          </div>
+          <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain" />
         )}
       </div>
 
