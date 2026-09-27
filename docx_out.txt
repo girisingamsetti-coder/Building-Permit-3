@@ -1,0 +1,320 @@
+Andhra Pradesh Capital Region Development Authority
+LTP User Manual
+BIM Based Building Permit System (BBAS)
+Licensed Technical Person portal
+Portal: bbas.ap.gov.in
+Audience: Architects, Structural Engineers, and other LTPs
+Module-wise user guide with live portal screenshots. Share this Word file as-is, or use File → Save As → PDF.
+Contents
+1. Introduction
+2. Portal access and login
+3. Public dashboard
+4. Role entry points
+5. LTP portal overview
+6. Application Submission
+7. Application Status
+8. Proceeding Status
+9. Commencement Certificate
+10. Change of LTP
+11. Occupancy
+12. Common actions
+13. End-to-end lifecycle
+
+1. Introduction
+BBAS is APCRDA’s online system for building permission in the Amaravati Capital Region. An LTP prepares the application, attaches the BIM / drawing files, pays fees where required, and tracks the file until a Building Permit Order is issued. After approval, the same login is used for commencement, work-start notification, change of LTP, and occupancy.
+
+
+2. Portal access and login
+2.1 Open the BBAS home page
+1. In a browser, go to https://bbas.ap.gov.in (page: Default.aspx).
+2. Confirm the header shows BIM Based Building Permit System under APCRDA.
+3. Use Home, Dashboard, Downloads, or Login from the top bar.
+
+Figure 2.1 — BBAS home page (bbas.ap.gov.in/Default.aspx)
+2.2 Downloads (orders, manuals, plugin)
+1. Click Downloads on the top menu.
+2. Under Documents, open Govt orders, Amaravati Zoning Plan and Regulations, Qualification of Licensed Technical Personnel, or the BIM Model Builder Plugin.
+3. Under Help manuals, open How to Apply, BIM Modeling Help Manual, or the BIM Modeling Guide video before you start a new file.
+
+Figure 2.2 — Downloads menu: documents and help manuals
+2.3 Login to BIMDCR (LTP / officer login)
+1. Click Login. The BIMDCR login page opens (BPAMSClient/login.aspx).
+2. Enter Username and Password.
+3. Type the captcha shown in the image. Use the refresh icon if it is unreadable, or the speaker icon for audio captcha.
+4. Click Login.
+5. If you forgot the password, use Forgot password on this page.
+
+Figure 2.3 — BIMDCR login: username, password, captcha, Login
+
+3. Public dashboard
+Anyone can open Dashboard from the home page to see aggregate Pre Proceeding / Post Proceeding statistics. This is a read-only public view, not your personal file list.
+1. Click Dashboard.
+2. Select Pre Proceeding or Post proceeding.
+3. Use the Abstract tab for charts, or Application(s) for the list view.
+
+Figure 3.1 — Pre Proceeding abstract: received, scrutiny, documents, payment, proceeding issued
+Typical Pre Proceeding stages shown on the abstract:
+
+4. Role entry points (before / without LTP workspace)
+From the public site you can also open role-specific services. These tiles sit on the landing area used for citizen, developer/TPA, and LTP self-service.
+
+Figure 4.1 — Citizen Service, Developer & TPAs, and LTP entry tiles
+4.1 Citizen Service
+1. Open the Citizen Service tile.
+2. Use Pay your fees here to pay a generated fee memo.
+3. Use Search your application status with the BA number to see the current stage.
+4.2 Developer & TPAs
+1. Open the Developer & TPAs tile.
+2. Choose the required link:
+
+
+Figure 4.2 — Developer & TPAs tile with registration, renewal, lists, and consent links
+4.3 LTP public services (registration and renewal)
+Use these links if you are not yet registered, or you need to renew / pay / view your LTP record. After you have a valid licence, use Login (Section 2.3) to work on building files.
+1. Open the LTP tile.
+2. Select the required service:
+
+
+Figure 4.3 — LTP tile: New Registration, list, renewal, payment, view, consent
+5. LTP portal overview (after login)
+After a successful login, the LTP workspace (SWC Admin) opens. The left sidebar is the module list. The header shows your name, last login, role, and licence validity (example: Structural Engineer, valid to 30-03-2027).
+
+Header icons on every screen: Notifications, Activities, Help, and User (profile / logout).
+
+6. Module: Application Submission
+This is where a new building permission file is created. Menu path: Application Submission → Draft Application or Submitted Applications.
+6.1 Draft Application — start and General Information
+1. Open Application Submission → Draft Application.
+2. A temporary application number is allotted (example: Temp/1168/0014/BP/2025). Status is Draft Mode. Risk category is shown (example: Low).
+3. Stay on tab Application Form → General Information.
+4. Fill Case Type (New), Permission Type (Building Permission), Nature of Permission (General).
+5. Select Application Type: Private / Govt land / CRDA land.
+6. Choose LPS Layout or Non-LPS. Use Change Plot if the plot must be switched.
+7. Select District, Mandal, LPS Village, Gram panchayat, then Township, Sector, Colony as applicable.
+8. Enter Nature of Site, Block No., Survey No / D.No / R.S.No, Plot No., Land Use Zone, Zoning District, Proposed Use, Proposed Activity, Road/Street, and Building Height.
+9. Click Save & Continue.
+
+Figure 6.1 — Draft Application: General Information (case type, LPS, location)
+
+Figure 6.2 — General Information continued: site identifiers, zone, proposed use, height
+6.2 Applicant Information
+1. Open Applicant Information.
+2. Check Licensed Technical Personnel’s Information (pre-filled from your login: type, name, licence number, mobile, validity, email, Aadhaar).
+3. Under Applicant’s Information, choose Usage Purpose: Self Use or Selling.
+4. Enter Owner Name, Door / Flat No., Road/Street, City, District, PinCode, Email, Mobile, and Aadhaar.
+5. Confirm the Structural Engineer name in the dropdown and the licence validity date.
+6. Click Save & Continue.
+
+Figure 6.3 — Applicant Information: LTP block (read-only) and owner start
+
+Figure 6.4 — Applicant Information: owner address, contact, Aadhaar, structural engineer
+6.3 Plot Details
+1. Open Plot Details.
+2. Under Proposed Construction, enter Proposed Plot Area (sq. mtr.) and Plot Structure. Answer Compound Wall and TDR (Yes/No).
+3. Under Site Details, set nearby religious structures, aerodrome, water bodies / railways / HT lines, market value (Rs per sq. yard), and whether the site abuts the IRR.
+4. Under Schedule of Boundaries, set North, South, West, and East (Plot / Road / Others) with plot numbers or road widths.
+5. Click Save & Continue.
+
+Figure 6.5 — Plot Details: proposed construction, site details, schedule of boundaries
+6.4 Application Checklist
+Answer every Yes/No item. These answers drive NOC needs and risk category (height, zoning, monuments, railway buffer, built-up area, and similar rules).
+1. Open Application Checklist.
+2. For each row, select Yes or No and add a Remark if needed.
+3. Typical checks include height greater than 10 m / 15 m (commercial) / 18 m (residential or group housing), monument buffer 100–200 m, railway 30 m, built-up area above 20,000 sq. m.
+4. Click Save & Continue.
+
+Figure 6.6 — Application Checklist: regulatory Yes/No questions
+6.5 Document Checklist
+1. Open Document Checklist. Use Primary first, then Additional if shown.
+2. For each required document, click Attach Files.
+3. Typical primary documents:
+
+Click a document name later to view the attachment or remarks.
+
+Figure 6.7 — Document Checklist (Primary) with Attach Files on each row
+6.6 Others
+1. Open Others.
+2. Enter Contractor’s all Risk policy number, Contractor’s Date, and Valid Upto.
+3. Enter Mortgage Deed No. (mandatory), Mortgage Deed Date, Floor handed Over, Sub Register Office, and Area (sq. mtr.).
+4. Answer Solar Panels are Available or Not?
+5. Click Save & Continue.
+
+Figure 6.8 — Other Details: CAR policy, mortgage deed, solar panels
+6.7 BIM Model (Revit .rvt)
+1. Open the top tab BIM Model.
+2. Under Attach Model, click Select Files.
+3. In the Attachments window, read the instruction: Please Attach only .rvt files.
+4. Click Select, choose the Revit model, and upload.
+5. After upload, the file appears in the list with a Download link and date.
+
+Figure 6.9 — BIM Model: system accepts only .rvt (Revit) files
+
+6.8 Drawing tab (AutoCAD .dwg) — when shown
+Some files show a Drawing tab instead of (or in addition to) BIM Model.
+1. Open Drawing.
+2. Under AutoCAD File, click Select Files.
+3. Attach .DWG files only.
+
+Figure 6.10 — Drawing tab: attach AutoCAD .dwg only
+6.9 Payments (draft)
+1. Open the Payments tab.
+2. Fee memos appear here after scrutiny generates them. A new draft often shows No data found and Grand Total 0.00.
+3. When memos exist, check Memo Type, Total Fees, Pay Status, and use Print Receipt / View Receipt after payment.
+
+Figure 6.11 — Payments tab on a draft (no memo until scrutiny / fee generation)
+6.10 Send to Scrutiny
+1. Complete Application Form, BIM/Drawing, and any required documents.
+2. Click Send to Scrutiny at the top right.
+3. Use Back if you need to return to the draft list without submitting.
+
+6.11 Submitted Applications
+1. Open Application Submission → Submitted Applications.
+2. Search or filter by BA No., Permission Type, Status, Submission Date, Owner, or Case Type.
+3. Click a BA number to open the file.
+
+Figure 6.12 — Submitted Applications list (search, filter, Excel export)
+7. Module: Application Status
+Menu path: Application Status. Use this module after the file has left your draft tray. Each sub-menu is a queue.
+
+7.1 Review Proceeding
+1. Open Application Status → Review Proceeding.
+2. Use search / column filters if the list is long.
+3. Click the BA No. to open the application in read or limited-edit mode.
+
+Figure 7.1 — Review Proceeding queue with Permission Type filter
+7.2 Objected Files — find the file
+1. Open Application Status → Objected Files.
+2. Note Status (example: Scrutiny Can Not Done in red).
+3. Click the BA No. (example: 1168/0156/BP/10/020/2026 (SUB-6)).
+
+Figure 7.2 — Objected Files: one record with status Scrutiny Can Not Done
+7.3 Objected Files — correct and resubmit
+The file reopens in Draft Mode so you can edit. Extra buttons appear: Proposal Flow, Action, Reports, Back.
+1. Walk the same tabs as a new draft: General Information, Applicant Information, Plot Details, Application Checklist, Document Checklist, Others.
+2. Fix the objected data (plot, height, checklist answers, missing attachments).
+3. Re-attach or replace the BIM .rvt if the model was the cause.
+4. Check Payments if a new memo was raised.
+5. Use Action / Send to Scrutiny (as available on that screen) to return the file to APCRDA.
+6. Use Proposal Flow to see where the file sat in the office chain.
+
+Figure 7.3 — Objected file opened: General Information with Proposal Flow / Action / Reports
+
+Figure 7.4 — Objected file: Plot Details (area, structure G+4, boundaries)
+
+Figure 7.5 — Objected file: Application Checklist (example: height > 10 m = Yes)
+
+Figure 7.6 — Objected file: Document Checklist — attach or replace missing papers
+
+Figure 7.7 — Objected file: BIM Model list with Download and upload dates
+7.4 Approved Files
+1. Open Application Status → Approved Files.
+2. Click the BA No. Status shows Approved. Proposal Status inside the file is often Proceeding Verified.
+3. Review form tabs in read mode. After approval, two extra form tabs appear: Letter and Apply for NOCs.
+
+Figure 7.8 — Approved Files list (example BA 1168/0001/BP/10/020/2025)
+
+Figure 7.9 — Approved file: General Information (LPS Mandadam, residential apartment, height 30)
+7.5 Letter — Building Permit Order
+1. On an approved / verified file, open Application Form → Letter.
+2. The Building Permit Order PDF (example: BPO1.pdf) opens in the viewer.
+3. Zoom, print, or download the order for the owner and site file.
+
+Figure 7.10 — Letter tab: APCRDA Building Permit Order (BPO)
+7.6 Apply for NOCs (External Fire example)
+1. Open Apply for NOCs.
+2. Read the on-screen rule. External Fire NOC is typically required for residential height > 18 m, commercial / group housing > 15 m, or public assembly > 6 m or > 500 sq. m.
+3. Answer Do you have Approved Fire NOC for this application?
+4. If Yes, attach the Fire NOC PDF (example: fire NOC.pdf).
+
+Figure 7.11 — Apply for NOCs: External Fire, Yes selected, fire NOC.pdf attached
+7.7 Proceeding Issued
+1. Open Application Status → Proceeding Issued.
+2. Search the BA No. to confirm the proceeding is on your list.
+3. Open the row to view reports, drawing plan, scrutiny report, and proceeding letter when those icons are shown.
+
+Figure 7.12 — Proceeding Issued queue (empty in this example)
+8. Module: Proceeding Status
+Menu path: Proceeding Status. Use this after a proceeding exists and APCRDA is verifying, raising shortfall, or issuing show-cause.
+
+8.1 Verified
+1. Open Proceeding Status → Verified.
+2. Click the BA No. Proposal Status should read Proceeding Verified (green).
+3. Use Proposal Flow and Reports as needed.
+4. Confirm Payments: memos such as General, Green fee charges, Labour Cess, and Development should show Paid with View Receipt.
+
+Figure 8.1 — Proceeding Status → Verified list
+
+Figure 8.2 — Verified file: General Information (Proceeding Verified)
+
+Figure 8.3 — Payments on a verified file: General, Green fee, Labour Cess, Development — all Paid
+
+Figure 8.4 — BIM Model history on a verified file (revision dates and Download)
+8.2 Shortfall and Review Shortfall Submission
+1. Open Proceeding Status → Shortfall to see files with pending deficiencies.
+2. Open the BA No., complete the missing items, and submit the shortfall reply.
+3. Then open Review Shortfall Submission to confirm APCRDA has received / is reviewing the reply.
+
+Figure 8.5 — Shortfall queue
+
+Figure 8.6 — Review Shortfall Submission queue
+8.3 Show Cause and Review Show Cause Submission
+1. Open Proceeding Status → Show Cause if a notice has been issued.
+2. Open the file, read the notice, attach the reply and supporting documents, and submit.
+3. Track the reply under Review Show Cause Submission.
+
+Figure 8.7 — Show Cause queue
+
+Figure 8.8 — Review Show Cause Submission queue
+9. Module: Commencement Certificate
+Menu path: Commencement Certificate → CC Issued or Work Initiated. Use this after the building permission proceeding is in force and construction is about to start.
+9.1 Work Initiated — open the file
+1. Open Commencement Certificate → Work Initiated (or CC Issued if you only need the issued certificate list).
+2. Find the BA No. (example: 1168/0001/BP/10/020/2025 (SUB-38)).
+3. Click the BA No. or Status link.
+
+Figure 9.1 — Work Initiated list: approved building permission ready for commencement notify
+9.2 Notify commencement date
+1. On the Work Initiation screen, confirm Application No., Submission Date, and Proposal Status (Proceeding Verified).
+2. Note Proceeding Issued On Date and Proceeding Issued By.
+3. Enter Commencement Date using the calendar.
+4. Click Notify.
+5. Use footer links if you need Drawing plan, Scrutiny Report, or Proceeding Letter.
+6. Use Reports or Back as required.
+
+Figure 9.2 — Work Initiation: pick Commencement Date and click Notify
+9.3 Work initiation summary (site and persons)
+After opening a work-initiated file you can also review setbacks, height, building use, LTP contacts, and owner contacts on the summary panels.
+
+Figure 9.3 — Work Initiation summary: setbacks / height, building use, LTP details, owner details
+10. Module: Change of LTP
+Menu path: Change Of LTP → Change LTP. Use this when the licensed technical person on an existing file must be replaced.
+1. Open Change Of LTP → Change LTP.
+2. Enter the File No. (mandatory).
+3. Click the search (magnifying glass) icon.
+4. Complete the on-screen change / consent steps for the new LTP. The incoming LTP must also complete LTP Consent Link from the public LTP tile if the system asks for it.
+
+Figure 10.1 — Change LTP: enter File No. and search
+11. Module: Occupancy
+Menu path: Occupancy → Occupancy List or Submitted Application. Use this after construction is complete and you need to intimate completion / apply for occupancy.
+1. Open Occupancy → Occupancy List.
+2. Click INTIMATE COMPLETION (top right) to notify APCRDA that the building is complete and ready for occupancy process.
+3. Use search, Filter, Find, and Clear to locate a BA No. on the list.
+4. Open Submitted Application to see occupancy applications already filed.
+
+Figure 11.1 — Occupancy List with INTIMATE COMPLETION action
+12. Common actions on every list and file
+
+
+
+13. End-to-end lifecycle (LTP view)
+1. Register / renew LTP on the public LTP tile; then Login.
+2. Application Submission → Draft Application: fill form tabs, attach .rvt / .dwg and documents, then Send to Scrutiny.
+3. Watch Submitted Applications and Application Status → Review Proceeding.
+4. If returned: Objected Files → correct → resubmit.
+5. Pay fee memos on the Payments tab or via Citizen Service → Pay your fees.
+6. When approved: Approved Files / Proceeding Issued → download Letter (BPO) and complete Apply for NOCs.
+7. Handle Proceeding Status (Verified, Shortfall, Show Cause) until the proceeding is clean.
+8. Commencement Certificate: after CC, open Work Initiated and Notify the commencement date.
+9. Use Change Of LTP only if the professional on the file must change.
+10. On completion: Occupancy → INTIMATE COMPLETION, then track Submitted Application.
+Source: live BBAS screens captured from bbas.ap.gov.in (LTP login as Structural Engineer). Share this .docx as-is, or use File → Save As → PDF.

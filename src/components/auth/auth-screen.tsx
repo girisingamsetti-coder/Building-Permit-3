@@ -320,13 +320,13 @@ function LoginForm() {
                   <>
                     <div className={cn(
                       "size-12 rounded-full flex items-center justify-center mb-2",
-                      version === "v4" ? "bg-[#8c1c13]/10 text-[#8c1c13]" : useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
+                      useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
                     )}>
                       <Icon className="size-6" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold mb-1">{card.title}</h3>
-                      <p className={cn("text-[13px] leading-relaxed", version === "v4" ? "text-[#8c1c13]/80" : useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
+                      <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
                     </div>
                   </>
                 )}
@@ -431,6 +431,24 @@ function LoginForm() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              
+              {/* Quick Login Role Selector */}
+              <div className="space-y-1 mb-2">
+                <Select onValueChange={handleDemoRoleSelect}>
+                  <SelectTrigger className={cn(
+                    "h-[50px] rounded-[12px] text-[15px] transition-all",
+                    useAltBg ? "bg-white border-gray-300 text-gray-800 focus:ring-gray-300 focus:border-gray-400" : version === "v4" ? "bg-white/50 border-[#8c1c13]/20 text-[#8c1c13] focus:border-[#8c1c13]/40 focus:ring-1 focus:ring-[#8c1c13]/30" : "bg-white/10 border-white/20 text-white focus:border-white/40 focus:ring-1 focus:ring-white/30"
+                  )}>
+                    <SelectValue placeholder="Quick login as..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DEMO_CREDENTIALS.map(c => (
+                      <SelectItem key={c.role} value={c.role}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Email / ID */}
               <div className="space-y-1">
                 <div className="relative">

@@ -1,3 +1,6 @@
+import os
+
+content = """
 "use client";
 
 import * as React from "react";
@@ -399,7 +402,7 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
   if (!typeSelected) {
     return (
       <div className={cn("flex flex-col bg-slate-50", onClose ? "h-full" : "min-h-screen")}>
-        {!onClose && <div className="border-b bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-10"><PageBackButton fallbackLabel="Back to dashboard" /><div className="flex items-center gap-2"><div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">SP</div><span className="text-sm font-medium text-slate-700">Srinivas</span></div></div>}
+        {!onClose && <div className="border-b bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-10"><PageBackButton label="Back to dashboard" /><div className="flex items-center gap-2"><div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">SP</div><span className="text-sm font-medium text-slate-700">Srinivas</span></div></div>}
         <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-slate-900">New Application</h1>
@@ -432,7 +435,7 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
       {!onClose && (
         <div className="border-b bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-4">
-            <PageBackButton fallbackLabel="Exit wizard" />
+            <PageBackButton label="Exit wizard" />
             <div className="h-6 w-px bg-slate-200" />
             <div className="flex items-center gap-2">
               <span className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
@@ -712,3 +715,7 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
     </div>
   );
 }
+"""
+
+with open('src/components/ltp/ltp-create-application.tsx', 'w', encoding='utf-8') as f:
+    f.write(content.strip())
