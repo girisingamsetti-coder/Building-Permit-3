@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -8,15 +8,12 @@ import {
   useDashboardScope,
   computeScopedKpis,
   applicationsByStatus,
-  applicationsByStage,
-  slaSummary,
   paymentStatusData,
   documentCompletionData,
   shortfallData,
-  applicationVolumeOverTime,
   scrutinyResultsData,
 } from "@/components/dashboard/dashboard-scope";
-import { DonutChart, BarChart } from "@/components/dashboard/charts";
+import { DonutChart } from "@/components/dashboard/charts";
 import { StatusBadge } from "@/components/design-system/badges";
 import {
   FileStack,
@@ -27,14 +24,9 @@ import {
   CreditCard,
   FileWarning,
   Clock,
-  TrendingUp,
   ArrowRight,
   Building2,
-  FilePlus2,
-  BarChart3,
-  Users,
   ChevronRight,
-  Gauge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -80,7 +72,7 @@ function AppRow({ app, onOpen }: { app: Application; onOpen: () => void }) {
 
 function EmptyChartState({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center h-[140px] text-slate-300 text-xs">{label}</div>
+    <div className="flex items-center justify-center h-[120px] text-slate-300 text-xs">{label}</div>
   );
 }
 
@@ -94,57 +86,27 @@ export function UnifiedDashboard() {
   const isAdmin = user?.role === "SUPER_ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
 
   const statusData = applicationsByStatus(scope.applications);
-  const stageData = applicationsByStage(scope.applications);
-  const slaData = slaSummary(scope.applications);
   const payData = paymentStatusData(scope.applications);
   const docData = documentCompletionData(scope.applications);
   const sfData = shortfallData(scope.applications);
-  const volumeData = applicationVolumeOverTime(scope.applications, 6);
   const scrutinyData = scrutinyResultsData(scope.applications);
 
   const applicationsView: ViewKey = isLTP ? "ltp-applications" : isAdmin ? "admin-applications" : "officer-applications";
 
-  const quickActions = React.useMemo(() => {
-    if (isLTP) return [
-      { label: "New Application", icon: FilePlus2, view: "ltp-applications" as ViewKey, color: "bg-blue-600 hover:bg-blue-700" },
-      { label: "My Applications", icon: FileStack, view: "ltp-applications" as ViewKey, color: "bg-slate-700 hover:bg-slate-800" },
-      { label: "Payments", icon: CreditCard, view: "ltp-payments" as ViewKey, color: "bg-emerald-600 hover:bg-emerald-700" },
-    ];
-    if (isAdmin) return [
-      { label: "All Applications", icon: FileStack, view: "admin-applications" as ViewKey, color: "bg-blue-600 hover:bg-blue-700" },
-      { label: "Reports", icon: BarChart3, view: "admin-reports" as ViewKey, color: "bg-violet-600 hover:bg-violet-700" },
-      { label: "Users", icon: Users, view: "admin-users" as ViewKey, color: "bg-slate-700 hover:bg-slate-800" },
-    ];
-    return [
-      { label: "My Queue", icon: FileStack, view: "officer-applications" as ViewKey, color: "bg-blue-600 hover:bg-blue-700" },
-      { label: "Shortfalls", icon: AlertTriangle, view: "officer-shortfalls" as ViewKey, color: "bg-amber-600 hover:bg-amber-700" },
-      { label: "Reports", icon: BarChart3, view: "officer-reports" as ViewKey, color: "bg-slate-700 hover:bg-slate-800" },
-    ];
-  }, [isLTP, isAdmin]);
-
   return (
-    <div className="min-h-screen bg-[#F8F9FB] text-slate-800 font-sans pb-20">
+    <div className="bg-[#F8F9FB] text-slate-800 font-sans">
+
       {/* Welcome Banner */}
-      <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
-            Welcome back, <span className="text-blue-600">{user?.name?.split(" ")[0]}</span>
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            {roleInfo?.fullName ?? user?.role} · {scope.isGlobal ? "Org-wide view" : `${scope.applications.length} application${scope.applications.length !== 1 ? "s" : ""} in your scope`}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          {quickActions.map((a) => (
-            <Button key={a.label} size="sm" onClick={() => navigate(a.view)}
-              className={cn("h-8 gap-1.5 text-xs text-white rounded-xl shadow-sm", a.color)}>
-              <a.icon className="size-3.5" />{a.label}
-            </Button>
-          ))}
-        </div>
+      <div className="mb-4">
+        <h1 className="text-xl font-black text-slate-900 tracking-tight">
+          Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
+        </h1>
+        <p className="text-xs text-slate-500 mt-0.5">
+          {roleInfo?.fullName ?? user?.role} · {scope.isGlobal ? "Org-wide view" : `${scope.applications.length} application${scope.applications.length !== 1 ? "s" : ""} in your scope`}
+        </p>
       </div>
 
-      {/* KPI Grid */}
+      {/* KPI Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
         <KpiCard label="Total" value={kpis.total} subLabel="applications" icon={<FileStack className="size-4 text-blue-500" />} color="bg-blue-100" />
         <KpiCard label="In Progress" value={kpis.inProgress} subLabel="active now" icon={<Activity className="size-4 text-indigo-500" />} color="bg-indigo-100" />
@@ -154,65 +116,34 @@ export function UnifiedDashboard() {
         <KpiCard label="Pending Pay" value={kpis.pendingPayments} subLabel="applications" icon={<CreditCard className="size-4 text-violet-500" />} color="bg-violet-100" />
       </div>
 
-      {/* Charts + Applications */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        <div className="xl:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Application Status</h3>
-              <Badge variant="outline" className="text-[10px]">{scope.applications.length} total</Badge>
-            </div>
-            {statusData.length > 0 ? <DonutChart data={statusData} centerLabel="Status" centerValue={kpis.total} /> : <EmptyChartState label="No applications yet" />}
+      {/* Application Status + Recent Activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
+
+        {/* Application Status */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 h-[381px] flex flex-col">
+          <div className="flex items-center justify-between mb-2 shrink-0">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Application Status</h3>
+            <Badge variant="outline" className="text-[10px]">{scope.applications.length} total</Badge>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">SLA Health</h3>
-              <Gauge className="size-4 text-slate-400" />
-            </div>
-            {slaData.length > 0 ? <DonutChart data={slaData} centerLabel="SLA" centerValue={kpis.inProgress} /> : <EmptyChartState label="No active applications" />}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Monthly Volume</h3>
-              <BarChart3 className="size-4 text-slate-400" />
-            </div>
-            {volumeData.some(d => d.value > 0) ? <BarChart data={volumeData} /> : <EmptyChartState label="No data yet" />}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Stage Breakdown</h3>
-              <Activity className="size-4 text-slate-400" />
-            </div>
-            {stageData.length > 0 ? <BarChart data={stageData} /> : <EmptyChartState label="No stage data" />}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Shortfalls</h3>
-              <FileWarning className="size-4 text-slate-400" />
-            </div>
-            {sfData.length > 0 ? <DonutChart data={sfData} centerLabel="Total" centerValue={sfData.reduce((s, d) => s + d.value, 0)} /> : <EmptyChartState label="No shortfalls" />}
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Documents</h3>
-              <FileStack className="size-4 text-slate-400" />
-            </div>
-            {docData.length > 0 ? <DonutChart data={docData} centerLabel="Docs" centerValue={docData.reduce((s, d) => s + d.value, 0)} /> : <EmptyChartState label="No document data" />}
+          <div className="flex-1 min-h-0">
+            {statusData.length > 0
+              ? <DonutChart data={statusData} centerLabel="Status" centerValue={kpis.total} />
+              : <EmptyChartState label="No applications yet" />}
           </div>
         </div>
 
-        {/* Recent Applications */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Applications</h3>
+        {/* Recent Activity */}
+        <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col h-[381px]">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 shrink-0">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Activity</h3>
             <Button variant="ghost" size="sm" onClick={() => navigate(applicationsView)}
-              className="h-7 gap-1 text-[11px] text-blue-600 hover:text-blue-700 px-2">
+              className="h-6 gap-1 text-[11px] text-[#801824] hover:text-[#941C2B] px-2">
               View all <ArrowRight className="size-3" />
             </Button>
           </div>
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 min-h-0 overflow-auto">
             {scope.applications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-40 gap-2 text-slate-400">
+              <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
                 <Building2 className="size-8 opacity-30" />
                 <span className="text-xs">No applications in your scope</span>
               </div>
@@ -224,7 +155,7 @@ export function UnifiedDashboard() {
             )}
           </div>
           {scope.applications.length > 0 && (
-            <div className="border-t border-slate-100 px-4 py-2 grid grid-cols-3 text-center">
+            <div className="border-t border-slate-100 px-4 py-1.5 grid grid-cols-3 text-center shrink-0">
               <div><div className="text-sm font-black text-emerald-600">{kpis.approved}</div><div className="text-[10px] text-slate-500">Approved</div></div>
               <div><div className="text-sm font-black text-amber-500">{kpis.inProgress}</div><div className="text-[10px] text-slate-500">In Progress</div></div>
               <div><div className="text-sm font-black text-rose-500">{kpis.rejected}</div><div className="text-[10px] text-slate-500">Rejected</div></div>
@@ -233,23 +164,46 @@ export function UnifiedDashboard() {
         </div>
       </div>
 
-      {/* Payments + Scrutiny */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Payment Status</h3>
-            <CreditCard className="size-4 text-slate-400" />
-          </div>
-          {payData.length > 0 ? <DonutChart data={payData} centerLabel="Fees" centerValue={payData.reduce((s, d) => s + d.value, 0)} /> : <EmptyChartState label="No payment data" />}
-        </div>
+      {/* Drawing Scrutiny | Payment Status | Documents | Shortfalls */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Drawing Scrutiny</h3>
             <Clock className="size-4 text-slate-400" />
           </div>
-          {scrutinyData.length > 0 ? <DonutChart data={scrutinyData} centerLabel="Plans" centerValue={scrutinyData.reduce((s, d) => s + d.value, 0)} /> : <EmptyChartState label="No scrutiny data" />}
+          {scrutinyData.length > 0
+            ? <DonutChart data={scrutinyData} centerLabel="Plans" centerValue={scrutinyData.reduce((s, d) => s + d.value, 0)} />
+            : <EmptyChartState label="No scrutiny data" />}
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Payment Status</h3>
+            <CreditCard className="size-4 text-slate-400" />
+          </div>
+          {payData.length > 0
+            ? <DonutChart data={payData} centerLabel="Fees" centerValue={payData.reduce((s, d) => s + d.value, 0)} />
+            : <EmptyChartState label="No payment data" />}
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Documents</h3>
+            <FileStack className="size-4 text-slate-400" />
+          </div>
+          {docData.length > 0
+            ? <DonutChart data={docData} centerLabel="Docs" centerValue={docData.reduce((s, d) => s + d.value, 0)} />
+            : <EmptyChartState label="No document data" />}
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Shortfalls</h3>
+            <FileWarning className="size-4 text-slate-400" />
+          </div>
+          {sfData.length > 0
+            ? <DonutChart data={sfData} centerLabel="Total" centerValue={sfData.reduce((s, d) => s + d.value, 0)} />
+            : <EmptyChartState label="No shortfalls" />}
         </div>
       </div>
+
     </div>
   );
 }

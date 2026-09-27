@@ -177,138 +177,140 @@ export function Sidebar() {
       )}
     >
       {/* Brand */}
-      <div className={cn("flex h-16 items-center border-b", currentTheme.brand, collapsed ? "justify-center px-2" : "justify-start px-3")}>
+      <div className={cn("flex h-16 items-center justify-center border-b px-4", currentTheme.brand)}>
         {!collapsed ? (
-          <img
-            src="/bhavana-nirman-logo.jpg"
-            alt="Bhavana Nirman"
-            className="h-10 w-auto object-contain object-left"
-            style={{ maxWidth: "180px" }}
-          />
+          <div className="flex items-center gap-2.5">
+            {isLTP && (
+              <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-md", currentTheme.badge)}>
+                BN
+              </div>
+            )}
+            <h1 className={cn("text-base font-bold tracking-wider uppercase text-center", currentTheme.brandText)}>
+              Bhavana Nirmaan
+            </h1>
+          </div>
         ) : (
-          <img
-            src="/bn-icon.png"
-            alt="BN"
-            className="size-9 object-contain"
-          />
+          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg shadow-sm font-bold", currentTheme.collapsedBadge)}>
+            B
+          </div>
         )}
       </div>
 
       {/* Dynamic Nav for Officer/Admin or LTP Menu for LTP */}
       {isLTP ? (
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <LtpSidebarMenu />
+          <LtpSidebarMenu collapsed={collapsed} />
         </div>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden no-scrollbar [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-2 py-2">
           <nav>
             <ul className="space-y-0">
               {navItems.map((item) => {
-              if (item.permKey === "bim") {
-                const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
-                const view3D: ViewKey = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
-                const is2DActive = view === view2D || view === "ltp-drawings";
-                const is3DActive = view === view3D;
+                if (item.permKey === "bim") {
+                  const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
+                  const view3D: ViewKey = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
+                  const is2DActive = view === view2D || view === "ltp-drawings";
+                  const is3DActive = view === view3D;
 
-                if (collapsed) {
+                  if (collapsed) {
+                    return (
+                      <li key="bim-switcher" className="my-0.5 flex flex-col items-center gap-0.5">
+                        <button
+                          onClick={() => navigate(view2D)}
+                          title="2D Building Drawings & Scrutiny"
+                          className={cn(
+                            "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
+                            is2DActive
+                              ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
+                              : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
+                          )}
+                        >
+                          2D
+                        </button>
+                        <button
+                          onClick={() => navigate(view3D)}
+                          title="3D BIM Scrutiny & Digital Twin"
+                          className={cn(
+                            "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
+                            is3DActive
+                              ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
+                              : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
+                          )}
+                        >
+                          3D
+                        </button>
+                      </li>
+                    );
+                  }
+
                   return (
-                    <li key="bim-switcher" className="my-0.5 flex flex-col items-center gap-0.5">
-                      <button
-                        onClick={() => navigate(view2D)}
-                        title="2D Building Drawings & Scrutiny"
-                        className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
-                          is2DActive
-                            ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
-                            : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
-                        )}
-                      >
-                        2D
-                      </button>
-                      <button
-                        onClick={() => navigate(view3D)}
-                        title="3D BIM Scrutiny & Digital Twin"
-                        className={cn(
-                          "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
-                          is3DActive
-                            ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
-                            : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
-                        )}
-                      >
-                        3D
-                      </button>
+                    <li key="bim-switcher" className="my-0.5">
+                      <div className="flex w-full items-center rounded-[18px] bg-[#F3EADF] p-0.5 border border-[#EADBCE] shadow-inner">
+                        <button
+                          onClick={() => navigate(view2D)}
+                          title="2D Building Drawings & DCR Scrutiny"
+                          className={cn(
+                            "flex items-center justify-start gap-2 py-1 px-4 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                            is2DActive
+                              ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
+                              : "text-[#5C1A20] hover:bg-[#EADBCE]/60 hover:text-[#801824]"
+                          )}
+                        >
+                          <Layers className={cn("size-4 shrink-0", is2DActive ? "text-[#FDF6ED]" : "text-[#801824]")} />
+                          <span>2D</span>
+                        </button>
+                        <button
+                          onClick={() => navigate(view3D)}
+                          title="3D BIM Scrutiny & Digital Twin"
+                          className={cn(
+                            "flex items-center justify-start gap-2 py-1 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
+                            is3DActive
+                              ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
+                              : "text-[#5C1A20] hover:bg-[#EADBCE]/60 hover:text-[#801824]"
+                          )}
+                        >
+                          <Box className={cn("size-4 shrink-0", is3DActive ? "text-[#FDF6ED]" : "text-[#801824]")} />
+                          <span>3D</span>
+                        </button>
+                      </div>
                     </li>
                   );
                 }
 
+                const active = view === item.view;
+                const Icon = MODULE_ICONS[item.permKey] ?? LayoutDashboard;
                 return (
-                  <li key="bim-switcher" className="my-0.5">
-                    <div className="flex w-full items-center rounded-[18px] bg-[#F3EADF] p-0.5 border border-[#EADBCE] shadow-inner">
-                      <button
-                        onClick={() => navigate(view2D)}
-                        title="2D Building Drawings & DCR Scrutiny"
+                  <li key={item.permKey}>
+                    <button
+                      onClick={() => navigate(item.view)}
+                      title={collapsed ? item.label : undefined}
+                      className={cn(
+                        "group flex w-full items-center gap-4 rounded-[18px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
+                        collapsed && "justify-center px-0",
+                        active
+                          ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
+                          : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
+                      )}
+                    >
+                      <Icon
                         className={cn(
-                          "flex items-center justify-start gap-2 py-1 px-4 rounded-[14px] text-[13px] font-bold transition-all duration-200",
-                          is2DActive
-                            ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
-                            : "text-[#5C1A20] hover:bg-[#EADBCE]/60 hover:text-[#801824]"
+                          "size-[18px] shrink-0 transition-transform",
+                          active
+                            ? "text-[#FDF6ED]"
+                            : "text-[#801824] group-hover:scale-110"
                         )}
-                      >
-                        <Layers className={cn("size-4 shrink-0", is2DActive ? "text-[#FDF6ED]" : "text-[#801824]")} />
-                        <span>2D</span>
-                      </button>
-                      <button
-                        onClick={() => navigate(view3D)}
-                        title="3D BIM Scrutiny & Digital Twin"
-                        className={cn(
-                          "flex items-center justify-start gap-2 py-1 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
-                          is3DActive
-                            ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
-                            : "text-[#5C1A20] hover:bg-[#EADBCE]/60 hover:text-[#801824]"
-                        )}
-                      >
-                        <Box className={cn("size-4 shrink-0", is3DActive ? "text-[#FDF6ED]" : "text-[#801824]")} />
-                        <span>3D</span>
-                      </button>
-                    </div>
+                      />
+                      {!collapsed && <span className="truncate">{item.label}</span>}
+                    </button>
                   </li>
                 );
-              }
+              })}
+            </ul>
 
-              const active = view === item.view;
-              const Icon = MODULE_ICONS[item.permKey] ?? LayoutDashboard;
-              return (
-                <li key={item.permKey}>
-                  <button
-                    onClick={() => navigate(item.view)}
-                    title={collapsed ? item.label : undefined}
-                    className={cn(
-                      "group flex w-full items-center gap-4 rounded-[18px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
-                      collapsed && "justify-center px-0",
-                      active
-                        ? "bg-[#801824] text-[#FDF6ED] shadow-sm ring-1 ring-[#801824]/20"
-                        : "text-[#5C1A20] hover:bg-[#F3EADF] hover:text-[#801824]"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "size-[18px] shrink-0 transition-transform",
-                        active
-                          ? "text-[#FDF6ED]"
-                          : "text-[#801824] group-hover:scale-110"
-                      )}
-                    />
-                    {!collapsed && <span className="truncate">{item.label}</span>}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-
-          <div className="mt-8 px-2 space-y-4">
-          </div>
-        </nav>
-      </div>
+            <div className="mt-8 px-2 space-y-4">
+            </div>
+          </nav>
+        </div>
       )}
 
       {/* Collapse toggle */}

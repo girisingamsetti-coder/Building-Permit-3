@@ -4,9 +4,13 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import {
-  Copy,
-  Layers,
   LayoutDashboard,
+  FolderOpen,
+  HardHat,
+  ClipboardCheck,
+  ShieldAlert,
+  Building2,
+  RefreshCw,
   ChevronDown,
   ChevronLeft,
 } from "lucide-react";
@@ -21,8 +25,7 @@ interface SubmenuItem {
 interface LtpModuleDef {
   id: string;
   label: string;
-  hasIcon?: boolean;
-  iconType?: "files" | "layers" | "dashboard";
+  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change";
   directMenuId?: string;
   submenus: SubmenuItem[];
 }
@@ -31,7 +34,6 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "dashboard",
     label: "Dashboard",
-    hasIcon: true,
     iconType: "dashboard",
     directMenuId: "dashboard",
     submenus: [],
@@ -39,8 +41,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "application-submission",
     label: "Applications",
-    hasIcon: true,
-    iconType: "files",
+    iconType: "applications",
     submenus: [
       { id: "draft-application", label: "Draft Applications" },
       { id: "submitted-applications", label: "Submitted Permission Files" },
@@ -50,7 +51,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "commencement",
     label: "Work Commencement",
-    hasIcon: false,
+    iconType: "commencement",
     submenus: [
       { id: "cc-issued", label: "Commencement Certificates" },
       { id: "work-initiated", label: "Work Initiation" },
@@ -59,8 +60,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "application-status",
     label: "Scrutiny & Sanction Tracking",
-    hasIcon: true,
-    iconType: "files",
+    iconType: "scrutiny",
     submenus: [
       { id: "review-proceeding", label: "In-Review Proceedings" },
       { id: "approved-files", label: "Sanctioned & Approved Files" },
@@ -70,8 +70,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "proceeding-status",
     label: "Compliance & Regulatory Notices",
-    hasIcon: true,
-    iconType: "files",
+    iconType: "compliance",
     submenus: [
       { id: "verified", label: "DCR & Document Verified Files" },
       { id: "shortfall", label: "Shortfall Notices" },
@@ -83,8 +82,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "occupancy",
     label: "Occupancy Certification (OC)",
-    hasIcon: true,
-    iconType: "files",
+    iconType: "occupancy",
     submenus: [
       { id: "occupancy-list", label: "Completion & OC Registry" },
       { id: "submitted-application", label: "Submitted OC Applications" },
@@ -93,8 +91,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "change-of-ltp",
     label: "LTP Change",
-    hasIcon: true,
-    iconType: "layers",
+    iconType: "ltp-change",
     directMenuId: "change-ltp",
     submenus: [],
   },
@@ -258,7 +255,7 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
   },
 };
 
-export function LtpSidebarMenu() {
+export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
   const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
@@ -302,6 +299,51 @@ export function LtpSidebarMenu() {
     }
   };
 
+  const getModuleIcon = (mod: LtpModuleDef, isActive: boolean) => {
+    const cls = cn(
+      "size-4 shrink-0 transition-colors",
+      isActive ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
+    );
+    switch (mod.iconType) {
+      case "dashboard":    return <LayoutDashboard className={cls} />;
+      case "applications": return <FolderOpen className={cls} />;
+      case "commencement": return <HardHat className={cls} />;
+      case "scrutiny":     return <ClipboardCheck className={cls} />;
+      case "compliance":   return <ShieldAlert className={cls} />;
+      case "occupancy":    return <Building2 className={cls} />;
+      case "ltp-change":   return <RefreshCw className={cls} />;
+    }
+  };
+
+  // ── Collapsed: icon-only rail ───────────────────────────────────────────
+  if (collapsed) {
+    return (
+      <div className="flex flex-col w-full items-center pt-2 pb-6 space-y-1">
+        {LTP_MODULES.map((mod) => {
+          const isActive =
+            mod.directMenuId === ltpActiveMenu ||
+            mod.submenus.some((s) => s.id === ltpActiveMenu);
+          return (
+            <button
+              key={mod.id}
+              title={mod.label}
+              onClick={() => handleModuleClick(mod)}
+              className={cn(
+                "flex size-10 items-center justify-center rounded-lg transition-all duration-150",
+                isActive
+                  ? cn(theme.selectedHeaderBg ?? "bg-[#801824]", theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]")
+                  : cn(theme.headerBg, theme.headerHoverBg)
+              )}
+            >
+              {getModuleIcon(mod, isActive)}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ── Expanded: full accordion menu ───────────────────────────────────────
   return (
     <div className="flex flex-col w-full text-sm font-sans select-none px-2 pt-2 space-y-1 pb-6">
       {LTP_MODULES.map((mod) => {
@@ -309,42 +351,16 @@ export function LtpSidebarMenu() {
         const hasSubmenus = mod.submenus.length > 0;
         return (
           <div key={mod.id} className="transition-all duration-150">
-            {/* Module Header Button */}
             <button
               onClick={() => handleModuleClick(mod)}
               className={cn(
                 "flex w-full items-center justify-between px-3.5 py-2.5 text-left transition-all duration-150 rounded-lg",
-                isOpen
-                  ? (theme.selectedHeaderBg ?? "bg-[#801824]")
-                  : theme.headerBg,
-                isOpen
-                  ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]")
-                  : theme.headerHoverBg
+                isOpen ? (theme.selectedHeaderBg ?? "bg-[#801824]") : theme.headerBg,
+                isOpen ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]") : theme.headerHoverBg
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                {mod.hasIcon && mod.iconType === "dashboard" ? (
-                  <LayoutDashboard
-                    className={cn(
-                      "size-4 shrink-0 transition-colors",
-                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
-                    )}
-                  />
-                ) : mod.hasIcon && mod.iconType === "layers" ? (
-                  <Layers
-                    className={cn(
-                      "size-4 shrink-0 transition-colors",
-                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
-                    )}
-                  />
-                ) : mod.hasIcon ? (
-                  <Copy
-                    className={cn(
-                      "size-4 shrink-0 transition-colors",
-                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
-                    )}
-                  />
-                ) : null}
+                {getModuleIcon(mod, isOpen)}
                 <span
                   className={cn(
                     "truncate tracking-wide transition-colors",
@@ -355,20 +371,12 @@ export function LtpSidebarMenu() {
                 </span>
               </div>
               {hasSubmenus && (
-                isOpen ? (
-                  <ChevronDown
-                    className={cn(
-                      "size-4 shrink-0 transition-colors",
-                      theme.selectedHeaderChevron ?? "text-[#FDF6ED]"
-                    )}
-                  />
-                ) : (
-                  <ChevronLeft className={cn("size-4 shrink-0 transition-colors", theme.headerChevron)} />
-                )
+                isOpen
+                  ? <ChevronDown className={cn("size-4 shrink-0", theme.selectedHeaderChevron ?? "text-[#FDF6ED]")} />
+                  : <ChevronLeft className={cn("size-4 shrink-0", theme.headerChevron)} />
               )}
             </button>
 
-            {/* Submenu Accordion Items */}
             {hasSubmenus && isOpen && (
               <div className={cn("mt-1 p-1 rounded-lg border shadow-xs animate-in fade-in-50 duration-150 space-y-0.5", theme.submenuBg, theme.submenuBorder)}>
                 {mod.submenus.map((sub) => {
@@ -396,3 +404,4 @@ export function LtpSidebarMenu() {
     </div>
   );
 }
+
