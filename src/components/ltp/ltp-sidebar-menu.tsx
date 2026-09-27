@@ -6,6 +6,7 @@ import { useAppStore } from "@/store/app-store";
 import {
   Copy,
   Layers,
+  LayoutDashboard,
   ChevronDown,
   ChevronLeft,
 } from "lucide-react";
@@ -21,12 +22,20 @@ interface LtpModuleDef {
   id: string;
   label: string;
   hasIcon?: boolean;
-  iconType?: "files" | "layers";
+  iconType?: "files" | "layers" | "dashboard";
   directMenuId?: string;
   submenus: SubmenuItem[];
 }
 
 const LTP_MODULES: LtpModuleDef[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    hasIcon: true,
+    iconType: "dashboard",
+    directMenuId: "dashboard",
+    submenus: [],
+  },
   {
     id: "commencement",
     label: "Work Commencement & CC",
@@ -250,7 +259,7 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
 };
 
 export function LtpSidebarMenu() {
-  const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "draft-application";
+  const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
   const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
   const navigate = useAppStore((s) => s.navigate);
@@ -263,7 +272,7 @@ export function LtpSidebarMenu() {
     return (
       LTP_MODULES.find(
         (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
-      )?.id ?? "application-submission"
+      )?.id ?? "dashboard"
     );
   });
 
@@ -318,7 +327,14 @@ export function LtpSidebarMenu() {
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                {mod.hasIcon && mod.iconType === "layers" ? (
+                {mod.hasIcon && mod.iconType === "dashboard" ? (
+                  <LayoutDashboard
+                    className={cn(
+                      "size-4 shrink-0 transition-colors",
+                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
+                    )}
+                  />
+                ) : mod.hasIcon && mod.iconType === "layers" ? (
                   <Layers
                     className={cn(
                       "size-4 shrink-0 transition-colors",

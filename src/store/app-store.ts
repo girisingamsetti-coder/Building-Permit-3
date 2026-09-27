@@ -337,7 +337,7 @@ export const useAppStore = create<AppState>()(
   processingAppIds: [],
   viewHistory: [],
   pendingRegistrations: [],
-  ltpActiveMenu: "draft-application",
+  ltpActiveMenu: "dashboard",
   setLtpActiveMenu: (menu) => set({ ltpActiveMenu: menu }),
   ltpTheme: "maroon-cream",
   setLtpTheme: (theme) => set({ ltpTheme: theme }),

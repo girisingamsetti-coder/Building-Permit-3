@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { StatusBadge, PriorityBadge } from "@/components/design-system/badges";
 import { NewApplicationDialog } from "@/components/ltp/new-application-dialog";
+import { UnifiedDashboard } from "@/components/dashboard/unified-dashboard";
 import {
   FilePlus2,
   Search,
@@ -27,7 +28,7 @@ import {
 import type { Application } from "@/types";
 
 export function LtpPortalView() {
-  const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "draft-application";
+  const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const applications = useAppStore((s) => s.applications);
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
@@ -42,6 +43,10 @@ export function LtpPortalView() {
   // Dynamic content based on selected menu
   const renderContent = () => {
     switch (ltpActiveMenu) {
+      case "dashboard": {
+        return <UnifiedDashboard />;
+      }
+
       case "draft-application": {
         const drafts = userApps.filter((a) => a.status === "DRAFT");
         return (
