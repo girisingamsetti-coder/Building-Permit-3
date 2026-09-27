@@ -41,22 +41,7 @@ export const NAV: Record<Portal, NavGroup[]> = {
   // ----------------------------------------------------------------
   // LTP — applicant portal
   // ----------------------------------------------------------------
-  LTP: [
-    {
-      label: "",
-      items: [
-        { view: "ltp-dashboard",     label: "Dashboard",     icon: LayoutDashboard },
-        { view: "ltp-applications",  label: "Applications",  icon: FileStack },
-        { view: "ltp-occupancy",     label: "Occupancy",     icon: ClipboardList },
-        { view: "ltp-drawings",      label: "Tasks",         icon: ClipboardList },
-        { view: "ltp-shortfalls",    label: "Shortfalls",    icon: AlertTriangle },
-        { view: "ltp-payment",       label: "Payments",      icon: CreditCard },
-        { view: "ltp-documents",     label: "Documents",     icon: FolderClosed },
-        { view: "ltp-fees",          label: "Reports",       icon: BarChart3 },
-        { view: "ltp-profile",       label: "Settings",      icon: Settings },
-      ],
-    },
-  ],
+  LTP: [],
 
   // ----------------------------------------------------------------
   // OFFICER — Zonal Head | Director | Additional Commissioner | Commissioner

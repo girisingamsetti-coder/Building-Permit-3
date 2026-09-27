@@ -36,6 +36,25 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 }
 
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
+  if (user.role === "LTP") {
+    const ltpAllowedViews = [
+      "ltp-applications",
+      "ltp-dashboard",
+      "ltp-create-application",
+      "ltp-application-details",
+      "ltp-drawings",
+      "ltp-scrutiny",
+      "ltp-documents",
+      "ltp-fees",
+      "ltp-payment",
+      "ltp-receipt",
+      "ltp-profile",
+      "ltp-notifications",
+      "ltp-help",
+    ];
+    return ltpAllowedViews.includes(view);
+  }
+
   const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
   const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim", "admin-2d-drawings"];
   
@@ -92,7 +111,7 @@ export function getVisibleApplications(user: User, apps: Application[]): Applica
     });
   }
 
-  if (user.role === "LTP") return apps.filter((a) => a.ltpId === user.id);
+  if (user.role === "LTP") return [];
   // Officers see apps at their stage + apps they've acted on
   return apps.filter((a) => {
     const stageRoles = rolesForStage(a.currentStage);
@@ -470,20 +489,15 @@ export function getDynamicNav(
   portal: Portal,
   roles: Record<RoleKey, Role>
 ): DynamicNavItem[] {
-  const effectivePerms = getEffectivePermissions(user, roles);
+  // LTP has all modules removed from navigation
+  if (portal === "LTP" || user.role === "LTP") {
+    return [];
+  }
 
-  const allowedForLtp = new Set([
-    "dashboard", "applications", "2d-drawings", "bim", "tasks", 
-    "shortfalls", "nocs", "show-cause", "revocations", "work-initiated",
-    "occupancy", "outward", "payments", "documents", "reports"
-  ]);
+  const effectivePerms = getEffectivePermissions(user, roles);
 
   return MODULE_DEFS
     .filter((mod) => {
-      // Hide modules not explicitly allowed for LTP
-      if (portal === "LTP" && !allowedForLtp.has(mod.permKey)) {
-        return false;
-      }
       // No permission requirement → always show
       if (mod.requiredAny.length === 0) return true;
       // SUPER_ADMIN always sees everything

@@ -233,12 +233,11 @@ export function LtpApplications() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="My Applications"
-        description="All building and project approval applications you have submitted."
+        title="Application Submission"
+        description="Prepare, submit, and track building permission applications."
         icon={FileStack}
         breadcrumbs={[
-          { label: "LTP Portal", onClick: () => navigate("ltp-dashboard") },
-          { label: "Applications" },
+          { label: "Application Submission" },
         ]}
         actions={
           <Button size="sm" onClick={() => setNewAppOpen(true)}>

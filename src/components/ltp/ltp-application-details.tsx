@@ -73,8 +73,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
-import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
-import { ApplicationOccupancyTab } from "@/components/occupancy/application-occupancy-tab";
 
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
@@ -87,7 +85,7 @@ export function LtpApplicationDetails() {
         <PageHeader
           title="Application Details"
           icon={FileText}
-          breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Applications", onClick: () => navigate("ltp-applications") }, { label: "Details" }]}
+          breadcrumbs={[{ label: "Application Submission", onClick: () => navigate("ltp-applications") }, { label: "Details" }]}
         />
         <EmptyState
           icon={FileWarning}
@@ -107,8 +105,7 @@ export function LtpApplicationDetails() {
         description={app.project.name}
         icon={FileText}
         breadcrumbs={[
-          { label: "LTP Portal", onClick: () => navigate("ltp-dashboard") },
-          { label: "Applications", onClick: () => navigate("ltp-applications") },
+          { label: "Application Submission", onClick: () => navigate("ltp-applications") },
           { label: app.applicationNo },
         ]}
         badge={<StatusBadge status={app.status} />}
@@ -156,13 +153,11 @@ export function LtpApplicationDetails() {
           <TabsTrigger value="overview" className="gap-1.5"><Info className="size-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="workflow" className="gap-1.5"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
           <TabsTrigger value="drawings" className="gap-1.5"><Upload className="size-3.5" /> Drawings &amp; Scrutiny</TabsTrigger>
-          <TabsTrigger value="bim" className="gap-1.5"><Box className="size-3.5 text-cyan-600" /> BIM Module <Badge variant="outline" className="ml-1 border-cyan-500/40 text-[9px] text-cyan-600 bg-cyan-50 dark:bg-cyan-950">3D</Badge></TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FolderClosed className="size-3.5" /> Documents</TabsTrigger>
           <TabsTrigger value="fees" className="gap-1.5"><ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payment</TabsTrigger>
           <TabsTrigger value="shortfalls" className="gap-1.5"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="remarks" className="gap-1.5"><MessageSquare className="size-3.5" /> Remarks {app.remarks.length > 0 && <Badge className="ml-1 bg-muted text-muted-foreground text-[9px]">{app.remarks.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="audit" className="gap-1.5"><History className="size-3.5" /> Audit Log</TabsTrigger>
-          <TabsTrigger value="occupancy" className="gap-1.5"><Building2 className="size-3.5 text-blue-600" /> Occupancy Module</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -173,9 +168,6 @@ export function LtpApplicationDetails() {
         </TabsContent>
         <TabsContent value="drawings" className="space-y-6">
           <DrawingsTab app={app} />
-        </TabsContent>
-        <TabsContent value="bim" className="space-y-6">
-          <BimWorkspaceContainer applicationId={app.applicationNo} projectData={app.project} userRole="LTP" />
         </TabsContent>
         <TabsContent value="documents" className="space-y-6">
           <DocumentsTab app={app} />
@@ -191,9 +183,6 @@ export function LtpApplicationDetails() {
         </TabsContent>
         <TabsContent value="audit" className="space-y-6">
           <AuditTab app={app} />
-        </TabsContent>
-        <TabsContent value="occupancy" className="space-y-6">
-          <ApplicationOccupancyTab app={app} />
         </TabsContent>
       </Tabs>
     </div>

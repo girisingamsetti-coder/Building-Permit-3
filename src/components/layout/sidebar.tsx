@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import type { ViewKey } from "@/types";
+import { LtpSidebarMenu } from "@/components/ltp/ltp-sidebar-menu";
 
 const MODULE_ICONS: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
@@ -71,34 +72,119 @@ export function Sidebar() {
 
 
 
+  const isLTP = portal === "LTP" || user?.role === "LTP";
+  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "apcrda-blue";
+
+  const ltpStyles = {
+    "apcrda-blue": {
+      aside: "bg-[#103A6A] border-[#0C2E54]",
+      brand: "bg-[#0C2B4F] border-[#081E38]",
+      badge: "bg-[#EAB308] text-[#0C2B4F]",
+      brandText: "text-white",
+      collapsedBadge: "bg-[#0C2B4F] text-[#EAB308]",
+      scroll: "[scrollbar-color:#4B77A8_#103A6A] [&::-webkit-scrollbar-track]:bg-[#103A6A] [&::-webkit-scrollbar-thumb]:bg-[#4B77A8] hover:[&::-webkit-scrollbar-thumb]:bg-[#93C5FD]",
+      footerWrapper: "border-[#0C2E54] bg-[#0C2B4F]",
+      footerInner: "bg-[#10355E] border-[#1A4E87]",
+      userName: "text-white",
+      userRole: "text-[#93C5FD]",
+      avatarBg: "bg-[#154884] text-white border border-[#3B82F6]/40",
+      logoutBtn: "text-[#93C5FD] hover:bg-[#154884] hover:text-white",
+    },
+    "charcoal-indigo": {
+      aside: "bg-[#141418] border-[#22222A]",
+      brand: "bg-[#101014] border-[#22222A]",
+      badge: "bg-indigo-600 text-white",
+      brandText: "text-white",
+      collapsedBadge: "bg-indigo-600 text-white",
+      scroll: "[scrollbar-color:#33333F_#101014] [&::-webkit-scrollbar-track]:bg-[#101014] [&::-webkit-scrollbar-thumb]:bg-[#33333F] hover:[&::-webkit-scrollbar-thumb]:bg-indigo-500",
+      footerWrapper: "border-[#22222A] bg-[#101014]",
+      footerInner: "bg-[#181820] border-[#272733]",
+      userName: "text-zinc-100",
+      userRole: "text-zinc-400",
+      avatarBg: "bg-indigo-600 text-white",
+      logoutBtn: "text-zinc-400 hover:bg-[#252530] hover:text-white",
+    },
+    "midnight-slate": {
+      aside: "bg-[#0B132B] border-[#1C2541]",
+      brand: "bg-[#080E21] border-[#1C2541]",
+      badge: "bg-sky-500 text-white",
+      brandText: "text-white",
+      collapsedBadge: "bg-sky-500 text-white",
+      scroll: "[scrollbar-color:#2C3D68_#080E21] [&::-webkit-scrollbar-track]:bg-[#080E21] [&::-webkit-scrollbar-thumb]:bg-[#2C3D68] hover:[&::-webkit-scrollbar-thumb]:bg-[#38BDF8]",
+      footerWrapper: "border-[#1C2541] bg-[#080E21]",
+      footerInner: "bg-[#0F1C3F] border-[#1C2541]",
+      userName: "text-slate-100",
+      userRole: "text-slate-400",
+      avatarBg: "bg-sky-600 text-white",
+      logoutBtn: "text-sky-300 hover:bg-[#152654] hover:text-white",
+    },
+    "clean-light": {
+      aside: "bg-[#F8FAFC] border-[#E2E8F0]",
+      brand: "bg-[#FFFFFF] border-[#E2E8F0]",
+      badge: "bg-blue-600 text-white",
+      brandText: "text-slate-900",
+      collapsedBadge: "bg-blue-600 text-white",
+      scroll: "[scrollbar-color:#CBD5E1_#F8FAFC] [&::-webkit-scrollbar-track]:bg-[#F8FAFC] [&::-webkit-scrollbar-thumb]:bg-[#CBD5E1] hover:[&::-webkit-scrollbar-thumb]:bg-[#94A3B8]",
+      footerWrapper: "border-[#E2E8F0] bg-[#FFFFFF]",
+      footerInner: "bg-[#F1F5F9] border-[#E2E8F0]",
+      userName: "text-slate-800",
+      userRole: "text-slate-500",
+      avatarBg: "bg-blue-600 text-white",
+      logoutBtn: "text-slate-600 hover:bg-[#E2E8F0] hover:text-slate-900",
+    },
+  }[ltpTheme] || {
+    aside: "bg-[#103A6A] border-[#0C2E54]",
+    brand: "bg-[#0C2B4F] border-[#081E38]",
+    badge: "bg-[#EAB308] text-[#0C2B4F]",
+    brandText: "text-white",
+    collapsedBadge: "bg-[#0C2B4F] text-[#EAB308]",
+    scroll: "[scrollbar-color:#4B77A8_#103A6A] [&::-webkit-scrollbar-track]:bg-[#103A6A] [&::-webkit-scrollbar-thumb]:bg-[#4B77A8] hover:[&::-webkit-scrollbar-thumb]:bg-[#93C5FD]",
+    footerWrapper: "border-[#0C2E54] bg-[#0C2B4F]",
+    footerInner: "bg-[#10355E] border-[#1A4E87]",
+    userName: "text-white",
+    userRole: "text-[#93C5FD]",
+    avatarBg: "bg-[#154884] text-white border border-[#3B82F6]/40",
+    logoutBtn: "text-[#93C5FD] hover:bg-[#154884] hover:text-white",
+  };
+
   return (
     <aside
       className={cn(
-        "relative z-30 flex h-full flex-col bg-[#111225] text-white transition-[width] duration-300 ease-out border-r border-[#1f213a] shadow-2xl",
+        "relative z-30 flex h-full flex-col text-white transition-[width] duration-300 ease-out border-r shadow-2xl",
+        isLTP ? ltpStyles.aside : "bg-[#111225] border-[#1f213a]",
         collapsed ? "w-[68px]" : "w-64"
       )}
     >
       {/* Brand */}
-      <div className="flex h-16 items-center justify-center border-b border-sidebar-border px-4">
+      <div className={cn("flex h-16 items-center justify-center border-b px-4", isLTP ? ltpStyles.brand : "border-sidebar-border")}>
         {!collapsed ? (
-          <h1 className="text-2xl font-bold tracking-widest text-white uppercase text-center w-full">
-            Bhavana Nirmaan
-          </h1>
+          <div className="flex items-center gap-2.5">
+            {isLTP && (
+              <div className={cn("flex size-7 shrink-0 items-center justify-center rounded-lg font-bold text-xs shadow-md", ltpStyles.badge)}>
+                BN
+              </div>
+            )}
+            <h1 className={cn("text-base font-bold tracking-wider uppercase text-center", isLTP ? ltpStyles.brandText : "text-white")}>
+              Bhavana Nirmaan
+            </h1>
+          </div>
         ) : (
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#3D405B] text-white shadow-sm font-bold">
+          <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg text-white shadow-sm font-bold", isLTP ? ltpStyles.collapsedBadge : "bg-[#3D405B]")}>
             B
           </div>
         )}
       </div>
 
-
-
-
-      {/* Dynamic Nav — re-renders whenever roles change */}
-      <ScrollArea className="flex-1 px-2 py-2">
-        <nav>
-          <ul className="space-y-0">
-            {navItems.map((item) => {
+      {/* Dynamic Nav for Officer/Admin or LTP Menu for LTP */}
+      {isLTP ? (
+        <div className={cn("flex-1 min-h-0 overflow-y-auto overflow-x-hidden [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full", ltpStyles.scroll)}>
+          <LtpSidebarMenu />
+        </div>
+      ) : (
+        <ScrollArea className="flex-1 min-h-0 px-2 py-2">
+          <nav>
+            <ul className="space-y-0">
+              {navItems.map((item) => {
               if (item.permKey === "bim") {
                 const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
                 const view3D: ViewKey = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
@@ -207,25 +293,30 @@ export function Sidebar() {
           </div>
         </nav>
       </ScrollArea>
+      )}
 
       {/* User card */}
-      <div className="border-t border-sidebar-border p-2">
+      <div className={cn("border-t p-2", isLTP ? ltpStyles.footerWrapper : "border-sidebar-border")}>
         {!collapsed ? (
-          <div className="rounded-lg bg-sidebar-accent/40 p-2.5">
+          <div className={cn("rounded-lg p-2.5", isLTP ? ltpStyles.footerInner : "bg-sidebar-accent/40")}>
             <div className="flex items-center gap-2.5">
-              <Avatar color={user?.avatarColor} name={user?.name} />
+              <Avatar
+                color={user?.avatarColor}
+                name={user?.name}
+                customClass={isLTP ? ltpStyles.avatarBg : undefined}
+              />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-medium text-sidebar-accent-foreground">
+                <p className={cn("truncate text-xs font-semibold", isLTP ? ltpStyles.userName : "text-sidebar-accent-foreground")}>
                   {user?.name}
                 </p>
-                <p className="truncate text-[10px] text-sidebar-foreground/60">
-                  {roleInfo?.fullName}
+                <p className={cn("truncate text-[10px]", isLTP ? ltpStyles.userRole : "text-sidebar-foreground/60")}>
+                  {roleInfo?.fullName ?? "Licensed Technical Person"}
                 </p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-7 text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                className={cn("size-7", isLTP ? ltpStyles.logoutBtn : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}
                 onClick={logout}
                 title="Sign out"
               >
@@ -258,7 +349,7 @@ export function Sidebar() {
   );
 }
 
-function Avatar({ color, name }: { color?: string; name?: string }) {
+function Avatar({ color, name, customClass }: { color?: string; name?: string; customClass?: string }) {
   const initials = (name ?? "U")
     .split(" ")
     .map((p) => p[0])
@@ -266,6 +357,7 @@ function Avatar({ color, name }: { color?: string; name?: string }) {
     .join("")
     .toUpperCase();
   const colorMap: Record<string, string> = {
+    indigo: "bg-indigo-600",
     emerald: "bg-emerald-500",
     teal: "bg-teal-500",
     cyan: "bg-cyan-500",
@@ -277,7 +369,7 @@ function Avatar({ color, name }: { color?: string; name?: string }) {
     <div
       className={cn(
         "flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold text-white",
-        colorMap[color ?? "slate"]
+        customClass || colorMap[color ?? "slate"]
       )}
     >
       {initials}

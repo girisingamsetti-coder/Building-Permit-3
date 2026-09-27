@@ -60,7 +60,7 @@ import { fileStore, readFileAsArrayBuffer, validateFile, genFileReference, exten
 // Re-export for views
 export { DEMO_CREDENTIALS, ROLES };
 export function defaultViewForPortal(portal: Portal): ViewKey {
-  if (portal === "LTP") return "ltp-dashboard";
+  if (portal === "LTP") return "ltp-applications";
   if (portal === "OFFICER") return "officer-dashboard";
   return "admin-dashboard";
 }
@@ -86,7 +86,7 @@ interface AppState {
   view: ViewKey;
   portal: Portal;
   selectedApplicationId: string | null;
-  // data — SINGLE SOURCE OF TRUTH
+  // data â€” SINGLE SOURCE OF TRUTH
   applications: Application[];
   notifications: NotificationRecord[];
   smsLogs: SmsLog[];
@@ -108,6 +108,11 @@ interface AppState {
   processingAppIds: string[]; // apps currently being processed (scrutiny/payment)
   // navigation history (for smart back button)
   viewHistory: ViewKey[];
+  // LTP specific menu & theme
+  ltpActiveMenu: string;
+  setLtpActiveMenu: (menu: string) => void;
+  ltpTheme: "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
+  setLtpTheme: (theme: "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light") => void;
 
   // ---- auth actions ----
   login: (email: string, password: string) => { ok: boolean; error?: string };
@@ -162,7 +167,7 @@ interface AppState {
 
   respondToShortfall: (appId: string, shortfallId: string, responseText: string, supportingDoc?: string) => void;
 
-  // Document review actions (reviewer-only — permission-checked)
+  // Document review actions (reviewer-only â€” permission-checked)
   verifyDocument: (appId: string, docId: string, remarks?: string) => { ok: boolean; error?: string };
   rejectDocument: (appId: string, docId: string, reason: string) => { ok: boolean; error?: string };
   raiseDocumentShortfall: (appId: string, docId: string, data: { reason: string; requiredAction: string; remarks?: string }) => { ok: boolean; error?: string };
@@ -179,7 +184,7 @@ interface AppState {
   resolveShortfall: (appId: string, shortfallId: string, resolution: string) => void;
   reopenShortfall: (appId: string, shortfallId: string, reason: string) => void;
 
-  // officer document actions — declared above with permission-checked signatures
+  // officer document actions â€” declared above with permission-checked signatures
 
   addRemark: (appId: string, text: string, type: Remark["type"]) => void;
 
@@ -245,7 +250,7 @@ export interface PendingRegistration {
 }
 
 // ============================================================
-// INTERNAL HELPERS — update application immutably + side effects
+// INTERNAL HELPERS â€” update application immutably + side effects
 // ============================================================
 function updateApp(
   apps: Application[],
@@ -316,7 +321,7 @@ export const useAppStore = create<AppState>()(
   applications: SEED_APPLICATIONS,
   notifications: SEED_NOTIFICATIONS,
   smsLogs: SEED_SMS_LOGS,
-  // RBAC / admin state — seeded from mock-data, mutable
+  // RBAC / admin state â€” seeded from mock-data, mutable
   users: USERS,
   roles: { ...ROLES } as Record<RoleKey, Role>,
   adminAuditLog: [] as AdminAuditEntry[],
@@ -332,6 +337,10 @@ export const useAppStore = create<AppState>()(
   processingAppIds: [],
   viewHistory: [],
   pendingRegistrations: [],
+  ltpActiveMenu: "draft-application",
+  setLtpActiveMenu: (menu) => set({ ltpActiveMenu: menu }),
+  ltpTheme: "apcrda-blue",
+  setLtpTheme: (theme) => set({ ltpTheme: theme }),
 
   // ---- AUTH ----
   login: (email, password) => {
@@ -339,7 +348,15 @@ export const useAppStore = create<AppState>()(
     if (!cred) return { ok: false, error: "No account found with this email." };
     if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
     const storeUsers = get().users;
-    const user = storeUsers.find((u) => u.role === cred.role) ?? storeUsers.find((u) => u.email === cred.email);
+    let user = storeUsers.find((u) => u.role === cred.role) ?? storeUsers.find((u) => u.email === cred.email);
+    // Fallback: if user was removed from store during session, re-seed from USERS constant
+    if (!user) {
+      const seedUser = USERS.find((u) => u.role === cred.role) ?? USERS.find((u) => u.email === cred.email);
+      if (seedUser) {
+        set((s) => ({ users: [...s.users, seedUser] }));
+        user = seedUser;
+      }
+    }
     if (!user) return { ok: false, error: "User account not found. Contact the administrator." };
     if (!user.active || user.status === "INACTIVE") return { ok: false, error: "Your account has been deactivated. Contact the administrator." };
     if (user.status === "SUSPENDED") return { ok: false, error: "Your account has been suspended. Contact the administrator." };
@@ -351,7 +368,15 @@ export const useAppStore = create<AppState>()(
   },
 
   loginAsRole: (role) => {
-    const user = get().users.find((u) => u.role === role);
+    let user = get().users.find((u) => u.role === role);
+    // Fallback: re-seed from USERS constant if not found in store
+    if (!user) {
+      const seedUser = USERS.find((u) => u.role === role);
+      if (seedUser) {
+        set((s) => ({ users: [...s.users, seedUser] }));
+        user = seedUser;
+      }
+    }
     if (!user) return;
     const portal = portalForRole(role);
     set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
@@ -416,7 +441,7 @@ export const useAppStore = create<AppState>()(
       { id: genId("doc"), name: "NOC from Fire Department", code: "DOC_FIRE_NOC", required: true },
       { id: genId("doc"), name: "Environmental Clearance", code: "DOC_ENV", required: false },
       { id: genId("doc"), name: "Society / Landowner Authorization", code: "DOC_AUTH", required: true },
-      { id: genId("doc"), name: "Affidavit — Ownership", code: "DOC_AFFIDAVIT", required: true },
+      { id: genId("doc"), name: "Affidavit â€” Ownership", code: "DOC_AFFIDAVIT", required: true },
     ];
     const uploadedCodes = data.uploadedDocCodes ?? [];
     const documents = baseDocs.map((d) => ({
@@ -425,7 +450,7 @@ export const useAppStore = create<AppState>()(
       ...(uploadedCodes.includes(d.code) ? { uploadedAt: now, uploadedBy: user.name, version: 1, fileSize: "1.2 MB", fileType: "pdf", fileReference: `demo://${d.code}_v1`, fileName: `${d.code}_v1.pdf` } : {}),
     }));
 
-    // Determine initial status: if drawing uploaded → DRAWING_UPLOADED, else DRAFT
+    // Determine initial status: if drawing uploaded â†’ DRAWING_UPLOADED, else DRAFT
     const initialStatus: ApplicationStatus = drawings.length > 0 ? "DRAWING_UPLOADED" : "DRAFT";
     const initialStage: WorkflowStageKey = drawings.length > 0 ? "DRAWING_SCRUTINY" : "APPLICATION_CREATED";
 
@@ -471,7 +496,7 @@ export const useAppStore = create<AppState>()(
         stage: "DRAWING_SCRUTINY" as WorkflowStageKey,
         stageLabel: "Drawing Scrutiny",
         actor: { name: user.name, role: user.role },
-        action: "Drawing v1 uploaded — awaiting scrutiny",
+        action: "Drawing v1 uploaded â€” awaiting scrutiny",
         timestamp: now,
         status: "CURRENT" as const,
       }] : [])],
@@ -554,7 +579,7 @@ export const useAppStore = create<AppState>()(
       set((s) => ({
         applications: updateApp(s.applications, appId, (app) => {
           const latest = app.drawings[app.drawings.length - 1];
-          // Deterministic: v1 fails (front setback), v2+ passes with warnings (so LTP experiences fail→reupload→pass)
+          // Deterministic: v1 fails (front setback), v2+ passes with warnings (so LTP experiences failâ†’reuploadâ†’pass)
           const scenario = latest.version >= 2 ? "passed_warnings" : "front_setback";
           const report = buildScrutinyResult(latest.version, scenario);
           const passed = report.status !== "FAILED";
@@ -565,7 +590,7 @@ export const useAppStore = create<AppState>()(
           if (passed) {
             updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" }, "Scrutiny passed", report.summary, "COMPLETED");
           } else {
-            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" }, "Scrutiny failed — re-upload required", report.summary, "FAILED");
+            updated = addWorkflowHistory(updated, "DRAWING_SCRUTINY", { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" }, "Scrutiny failed â€” re-upload required", report.summary, "FAILED");
           }
           updated = setAppStatus(updated, newStatus, passed ? "DOCUMENTS" : "DRAWING_SCRUTINY");
           return updated;
@@ -726,7 +751,7 @@ export const useAppStore = create<AppState>()(
       const requiredDocs = appBefore.documents.filter((d) => d.required);
       const allVerified = requiredDocs.length > 0 && requiredDocs.every((d) => d.status === "VERIFIED");
       if (!allVerified) {
-        // Block — do not generate fee
+        // Block â€” do not generate fee
         return;
       }
     }
@@ -791,7 +816,7 @@ export const useAppStore = create<AppState>()(
         applications: updateApp(s.applications, appId, (a) => {
           if (!a.payment || !a.fee) return a;
           if (result.verified) {
-            // PAYMENT SUCCESS — paid = total, outstanding = 0 (CONSISTENCY ENFORCED)
+            // PAYMENT SUCCESS â€” paid = total, outstanding = 0 (CONSISTENCY ENFORCED)
             const updatedPayment: Payment = {
               ...a.payment,
               status: "SUCCESS",
@@ -803,7 +828,7 @@ export const useAppStore = create<AppState>()(
             const updatedFee = { ...a.fee, paidAmount: a.fee.total, outstanding: 0 };
             let updated: Application = { ...a, payment: updatedPayment, fee: updatedFee };
             updated = addAudit(updated, { user: "Mock Payment Gateway", role: a.assignedOfficer?.role ?? "SUPER_ADMIN", action: "Payment verified", oldStatus: a.status, newStatus: "PAYMENT_SUCCESS", remarks: `Txn: ${result.transactionId}` });
-            updated = addWorkflowHistory(updated, "PAYMENT", { name: "Mock Payment Gateway", role: "SUPER_ADMIN" }, "Payment received", `₹${a.fee.total.toLocaleString("en-IN")} via ${method}`, "COMPLETED");
+            updated = addWorkflowHistory(updated, "PAYMENT", { name: "Mock Payment Gateway", role: "SUPER_ADMIN" }, "Payment received", `â‚¹${a.fee.total.toLocaleString("en-IN")} via ${method}`, "COMPLETED");
             // Auto-advance to ZONAL_HEAD_REVIEW
             const zh = USERS.find((u) => u.role === "ZONAL_HEAD")!;
             updated = setAppStatus(updated, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW");
@@ -879,7 +904,7 @@ export const useAppStore = create<AppState>()(
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         const currentStage = getStage(app.currentStage);
-        // If at commissioner level → final approval
+        // If at commissioner level â†’ final approval
         if (app.currentStage === "COMMISSIONER_REVIEW") {
           let updated: Application = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
           updated = addAudit(updated, { user: user.name, role: user.role, action: "Application approved", oldStatus: app.status, newStatus: "APPROVED", remarks });
@@ -897,7 +922,7 @@ export const useAppStore = create<AppState>()(
         const nextOfficer = getAssignedOfficerForStage(nextStageKey, USERS);
         updated = { ...updated, assignedOfficer: nextOfficer, assignedAt: nowISO() };
         updated = addAudit(updated, { user: user.name, role: user.role, action: `Approved & forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
-        updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved — forwarded to ${nextStage.label}`, remarks, "COMPLETED");
+        updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved â€” forwarded to ${nextStage.label}`, remarks, "COMPLETED");
         updated = setAppStatus(updated, statusForStage(nextStageKey), nextStageKey);
         updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
         return updated;
@@ -1016,7 +1041,7 @@ export const useAppStore = create<AppState>()(
     set((s) => ({
       applications: updateApp(s.applications, appId, (app) => {
         let updated: Application = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "RESOLVED" as const, resolvedBy: { name: user.name, role: user.role }, resolvedAt: nowISO(), resolution } : sf) };
-        // Check if all shortfalls resolved → resume workflow
+        // Check if all shortfalls resolved â†’ resume workflow
         const hasOpen = updated.shortfalls.some((sf) => sf.status !== "RESOLVED");
         if (!hasOpen) {
           // Resume to the stage where shortfall was raised
@@ -1026,7 +1051,7 @@ export const useAppStore = create<AppState>()(
           updated = { ...updated, assignedOfficer: officer, assignedAt: nowISO() };
           updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, oldStatus: "SHORTFALL_RAISED", newStatus: statusForStage(raisedAt), remarks: resolution });
           updated = setAppStatus(updated, statusForStage(raisedAt), raisedAt);
-          updated = addWorkflowHistory(updated, raisedAt, { name: user.name, role: user.role }, "Shortfall resolved — resuming review", resolution, "CURRENT");
+          updated = addWorkflowHistory(updated, raisedAt, { name: user.name, role: user.role }, "Shortfall resolved â€” resuming review", resolution, "CURRENT");
         } else {
           updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, remarks: resolution });
         }
@@ -1073,7 +1098,7 @@ export const useAppStore = create<AppState>()(
         const docName = updated.documents.find((d) => d.id === docId)?.name ?? "Document";
         const docVersion = updated.documents.find((d) => d.id === docId)?.version ?? 1;
         updated = addAudit(updated, { user: user.name, role: user.role, action: `Document verified: ${docName} v${docVersion}`, remarks });
-        // Check if all required docs verified → generate fee (auto-advance)
+        // Check if all required docs verified â†’ generate fee (auto-advance)
         const allVerified = updated.documents.filter((d) => d.required).every((d) => d.status === "VERIFIED");
         if (allVerified && (updated.status === "DOCUMENT_VERIFICATION" || updated.status === "DOCUMENT_UPLOAD_PENDING")) {
           updated = addWorkflowHistory(updated, "DOCUMENTS", { name: user.name, role: user.role }, "All required documents verified", undefined, "COMPLETED");
@@ -1089,7 +1114,7 @@ export const useAppStore = create<AppState>()(
           if (result) {
             const fee = feeService.toApplicationFee(result, 0);
             updated = { ...updated, fee };
-            updated = addAudit(updated, { user: "System (Fee Engine)", role: "SUPER_ADMIN", action: "All documents verified — fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
+            updated = addAudit(updated, { user: "System (Fee Engine)", role: "SUPER_ADMIN", action: "All documents verified â€” fee auto-generated", oldStatus: "DOCUMENT_VERIFICATION", newStatus: "FEE_GENERATED" });
             updated = setAppStatus(updated, "FEE_GENERATED", "FEE_GENERATED");
           }
         }
@@ -1183,7 +1208,7 @@ export const useAppStore = create<AppState>()(
           shortfallId: shortfallSeq,
           type: "DOCUMENT",
           title: `Shortfall: ${docName} v${docVersion}`,
-          description: `${data.reason}${data.remarks ? ` — ${data.remarks}` : ""}`,
+          description: `${data.reason}${data.remarks ? ` â€” ${data.remarks}` : ""}`,
           raisedBy: { name: user.name, role: user.role },
           raisedAt: now,
           dueDate: new Date(Date.now() + 7 * 86400000).toISOString(),
@@ -1345,7 +1370,7 @@ export const useAppStore = create<AppState>()(
       roles: { ...s.roles, [role]: { ...s.roles[role], permissions: newPerms } },
       adminAuditLog: [{
         id: genId("aaudit"), user: admin.name, role: admin.role, action: `Permission ${enabled ? "enabled" : "disabled"}`,
-        entity: "Permission", entityId: `${role} → ${permission}`, targetType: "Permission", targetId: role,
+        entity: "Permission", entityId: `${role} â†’ ${permission}`, targetType: "Permission", targetId: role,
         oldValue: enabled ? "disabled" : "enabled", newValue: enabled ? "enabled" : "disabled", timestamp: nowISO(),
         ip: "103.21.58.10", device: "Chrome / Windows",
       }, ...s.adminAuditLog],
@@ -1456,7 +1481,7 @@ export function useVisibleApplications() {
   return useMemo(() => {
     if (!user) return [];
     if (user.role === "SUPER_ADMIN") return applications;
-    if (user.role === "LTP") return applications.filter((a) => a.ltpId === user.id);
+    if (user.role === "LTP") return [];
     return applications.filter((a) => {
       const roles = rolesForStage(a.currentStage);
       if (roles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
@@ -1477,7 +1502,7 @@ export function useAssignedApplications() {
   }, [applications, user]);
 }
 
-// Returns ALL applications for officer document reviewers — every application
+// Returns ALL applications for officer document reviewers â€” every application
 // with at least one uploaded document (PENDING_VERIFICATION / VERIFIED / REJECTED /
 // SHORTFALL). This is broader than useVisibleApplications so the reviewer can see
 // every document awaiting review across the whole system.
@@ -1487,7 +1512,7 @@ export function useAllReviewableApplications() {
   return useMemo(() => {
     if (!user) return [];
     if (user.role === "SUPER_ADMIN") return applications;
-    if (user.role === "LTP") return applications.filter((a) => a.ltpId === user.id);
+    if (user.role === "LTP") return [];
     // Officers with document:verify or document:reject see ALL applications that
     // have at least one uploaded document (so they can review documents even
     // when the application isn't at the DOCUMENTS stage yet, e.g. a re-upload).
@@ -1582,13 +1607,13 @@ function buildScrutinyResult(version: number, scenario: ScrutinyScenario = "pass
       status: scenario === "passed_warnings" ? "WARNING" : "PASS",
       message: scenario === "passed_warnings" ? "STP capacity calculation sheet not attached." : "STP of 30 KLD provided.",
       recommendation: scenario === "passed_warnings" ? "Attach STP capacity calculation." : undefined },
-    { id: "sc-11", rule: "Fire Safety — Exit Width", category: "Fire & Safety", severity: "CRITICAL", status: "PASS", message: "Stair width 1.8 m compliant." },
-    { id: "sc-12", rule: "Fire Safety — Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
+    { id: "sc-11", rule: "Fire Safety â€” Exit Width", category: "Fire & Safety", severity: "CRITICAL", status: "PASS", message: "Stair width 1.8 m compliant." },
+    { id: "sc-12", rule: "Fire Safety â€” Refuge Area", category: "Fire & Safety", severity: "MAJOR", status: "PASS", message: "Refuge area provided at 7th floor." },
     { id: "sc-13", rule: "Tree Plantation", category: "Environment", severity: "MINOR",
       status: scenario === "passed_warnings" ? "WARNING" : "PASS",
       message: scenario === "passed_warnings" ? "Landscape plan missing tree species details." : "Tree species indicated on landscape plan.",
       recommendation: scenario === "passed_warnings" ? "Add tree species details to landscape plan." : undefined },
-    { id: "sc-14", rule: "Accessibility — Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
+    { id: "sc-14", rule: "Accessibility â€” Ramp", category: "Accessibility", severity: "MAJOR", status: "PASS", message: "1:12 ramp at main entrance." },
     { id: "sc-15", rule: "Title & North Arrow", category: "Drawing Standards", severity: "MINOR", status: "PASS", message: "Title block and north arrow present." },
   ];
   // Derive all counters from the checks array
@@ -1611,3 +1636,5 @@ function buildScrutinyResult(version: number, scenario: ScrutinyScenario = "pass
     checks,
   };
 }
+
+

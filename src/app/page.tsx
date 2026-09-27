@@ -17,6 +17,7 @@ import { LtpFees, LtpPayment, LtpReceipt } from "@/components/ltp/ltp-fees";
 import { LtpShortfalls } from "@/components/ltp/ltp-shortfalls";
 import { LtpNotifications } from "@/components/ltp/ltp-notifications";
 import { LtpProfile, LtpHelp } from "@/components/ltp/ltp-profile";
+import { LtpPortalView } from "@/components/ltp/ltp-portal-view";
 
 // Officer views
 import { OfficerDashboard } from "@/components/officer/officer-dashboard";
@@ -76,40 +77,44 @@ import { Drawings2DModule } from "@/components/shared/drawings-2d-module";
 
 import type { ViewKey } from "@/types";
 
+function BlankLtpView() {
+  return <div className="min-h-[85vh] w-full" />;
+}
+
 const VIEW_REGISTRY: Record<ViewKey, React.ComponentType> = {
   // auth
   login: AuthScreen,
   "forgot-password": AuthScreen,
   otp: AuthScreen,
   // ltp
-  "ltp-dashboard": UnifiedDashboard,
-  "ltp-applications": LtpApplications,
-  "ltp-create-application": LtpCreateApplication,
-  "ltp-application-details": LtpApplicationDetails,
-  "ltp-drawings": LtpDrawings,
-  "ltp-scrutiny": LtpScrutiny,
-  "ltp-documents": LtpDocuments,
-  "ltp-fees": LtpFees,
-  "ltp-payment": LtpPayment,
-  "ltp-receipt": LtpReceipt,
-  "ltp-shortfalls": ShortfallsView,
-  "ltp-notifications": LtpNotifications,
-  "ltp-profile": LtpProfile,
-  "ltp-help": LtpHelp,
-  "ltp-bim": BimModule,
-  "ltp-2d-drawings": Drawings2DModule,
-  "ltp-occupancy": OccupancyView,
-  "ltp-tasks": TasksView,
-  "ltp-inspections": InspectionsView,
-  "ltp-nocs": NocsView,
-  "ltp-show-cause": ShowCauseView,
-  "ltp-revocations": RevocationsView,
-  "ltp-changes": LtpChangesView,
-  "ltp-work-initiated": WorkInitiatedView,
-  "ltp-developers": DevelopersView,
-  "ltp-professionals": ProfessionalsView,
-  "ltp-outward": OutwardView,
-  "ltp-payments": PaymentsView,
+  "ltp-dashboard": BlankLtpView,
+  "ltp-applications": BlankLtpView,
+  "ltp-create-application": BlankLtpView,
+  "ltp-application-details": BlankLtpView,
+  "ltp-drawings": BlankLtpView,
+  "ltp-scrutiny": BlankLtpView,
+  "ltp-documents": BlankLtpView,
+  "ltp-fees": BlankLtpView,
+  "ltp-payment": BlankLtpView,
+  "ltp-receipt": BlankLtpView,
+  "ltp-shortfalls": BlankLtpView,
+  "ltp-notifications": BlankLtpView,
+  "ltp-profile": BlankLtpView,
+  "ltp-help": BlankLtpView,
+  "ltp-bim": BlankLtpView,
+  "ltp-2d-drawings": BlankLtpView,
+  "ltp-occupancy": BlankLtpView,
+  "ltp-tasks": BlankLtpView,
+  "ltp-inspections": BlankLtpView,
+  "ltp-nocs": BlankLtpView,
+  "ltp-show-cause": BlankLtpView,
+  "ltp-revocations": BlankLtpView,
+  "ltp-changes": BlankLtpView,
+  "ltp-work-initiated": BlankLtpView,
+  "ltp-developers": BlankLtpView,
+  "ltp-professionals": BlankLtpView,
+  "ltp-outward": BlankLtpView,
+  "ltp-payments": BlankLtpView,
   // officer
   "officer-dashboard": OfficerDashboard,
   "officer-review": OfficerReview,
@@ -189,7 +194,7 @@ export default function Home() {
   React.useEffect(() => {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
       const portal = user.role === "SUPER_ADMIN" ? "admin-dashboard"
-        : user.role === "LTP" ? "ltp-dashboard"
+        : user.role === "LTP" ? "ltp-applications"
           : "officer-dashboard";
       navigate(portal);
     }
@@ -199,7 +204,7 @@ export default function Home() {
     return <AuthScreen />;
   }
 
-  const ViewComponent = VIEW_REGISTRY[view] ?? UnifiedDashboard;
+  const ViewComponent = user?.role === "LTP" ? (view === "ltp-application-details" ? LtpApplicationDetails : LtpPortalView) : (VIEW_REGISTRY[view] ?? UnifiedDashboard);
 
   return (
     <AppShell>
