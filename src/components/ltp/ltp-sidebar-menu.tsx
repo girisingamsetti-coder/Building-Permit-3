@@ -140,13 +140,13 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
     selectedHeaderIcon: "text-[#FDF6ED]",
     selectedHeaderChevron: "text-[#FDF6ED]",
     submenuBg: "bg-[#FAF4EB]",
-    submenuBorder: "border-t border-[#E0D2BE] border-b border-[#E0D2BE]",
+    submenuBorder: "border border-[#E0D2BE]",
     submenuText: "text-[#5C1A20] font-medium text-[12.5px]",
     submenuHoverBg: "hover:bg-[#EFE3D3]",
     submenuHoverText: "hover:text-[#801824]",
     activeItemBg: "bg-[#EBDBC8]",
     activeItemText: "text-[#801824] font-bold",
-    activeIndicator: "border-l-4 border-[#801824] pl-5",
+    activeIndicator: "border-l-4 border-[#801824] pl-3",
     themeBox: "bg-[#FDFBF7] border-[#EADBCE] text-[#4A1017]",
     themeActiveBtn: "bg-[#801824] text-[#FDF6ED] font-semibold",
     themeInactiveBtn: "text-[#5C1A20] hover:bg-[#F3EADF]",
@@ -298,17 +298,17 @@ export function LtpSidebarMenu() {
   };
 
   return (
-    <div className="flex flex-col w-full text-sm font-sans select-none pb-6">
+    <div className="flex flex-col w-full text-sm font-sans select-none px-2 pt-2 space-y-1 pb-6">
       {LTP_MODULES.map((mod) => {
         const isOpen = openModuleId === mod.id;
         const hasSubmenus = mod.submenus.length > 0;
         return (
-          <div key={mod.id} className={cn(theme.moduleBorder, "last:border-b-0")}>
+          <div key={mod.id} className="transition-all duration-150">
             {/* Module Header Button */}
             <button
               onClick={() => handleModuleClick(mod)}
               className={cn(
-                "flex w-full items-center justify-between px-4 py-3 text-left transition-all duration-150",
+                "flex w-full items-center justify-between px-3.5 py-2.5 text-left transition-all duration-150 rounded-lg",
                 isOpen
                   ? (theme.selectedHeaderBg ?? "bg-[#801824]")
                   : theme.headerBg,
@@ -358,7 +358,7 @@ export function LtpSidebarMenu() {
 
             {/* Submenu Accordion Items */}
             {hasSubmenus && isOpen && (
-              <div className={cn("py-1.5 shadow-inner animate-in fade-in-50 duration-150", theme.submenuBg, theme.submenuBorder)}>
+              <div className={cn("mt-1 p-1 rounded-lg border shadow-xs animate-in fade-in-50 duration-150 space-y-0.5", theme.submenuBg, theme.submenuBorder)}>
                 {mod.submenus.map((sub) => {
                   const isActive = ltpActiveMenu === sub.id;
                   return (
@@ -366,7 +366,7 @@ export function LtpSidebarMenu() {
                       key={sub.id}
                       onClick={() => handleSelectSubmenu(sub.id)}
                       className={cn(
-                        "flex w-full items-center px-6 py-2.5 text-left transition-all duration-150",
+                        "flex w-full items-center px-4 py-2 text-left transition-all duration-150 rounded-md",
                         isActive
                           ? cn(theme.activeItemBg, theme.activeItemText, theme.activeIndicator)
                           : cn(theme.submenuText, theme.submenuHoverBg, theme.submenuHoverText)
