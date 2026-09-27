@@ -49,7 +49,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   },
   {
     id: "commencement",
-    label: "Work Commencement & CC",
+    label: "Work Commencement",
     hasIcon: false,
     submenus: [
       { id: "cc-issued", label: "Commencement Certificates" },
