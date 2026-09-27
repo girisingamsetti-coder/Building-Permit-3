@@ -37,15 +37,6 @@ const LTP_MODULES: LtpModuleDef[] = [
     submenus: [],
   },
   {
-    id: "commencement",
-    label: "Work Commencement & CC",
-    hasIcon: false,
-    submenus: [
-      { id: "cc-issued", label: "Commencement Certificates" },
-      { id: "work-initiated", label: "Site Initiation Notices" },
-    ],
-  },
-  {
     id: "application-submission",
     label: "Applications",
     hasIcon: true,
@@ -54,6 +45,15 @@ const LTP_MODULES: LtpModuleDef[] = [
       { id: "draft-application", label: "Draft Applications" },
       { id: "submitted-applications", label: "Submitted Permission Files" },
       { id: "objected-files", label: "Objected / Query Files" },
+    ],
+  },
+  {
+    id: "commencement",
+    label: "Work Commencement & CC",
+    hasIcon: false,
+    submenus: [
+      { id: "cc-issued", label: "Commencement Certificates" },
+      { id: "work-initiated", label: "Site Initiation Notices" },
     ],
   },
   {
