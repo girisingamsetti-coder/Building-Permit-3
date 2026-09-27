@@ -268,7 +268,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 2 — Applications
   {
-    label: "Applications",
+    label: "Building Permits",
     permKey: "applications",
     requiredAny: ["application:view_own", "application:view_all"],
     views: {
@@ -301,7 +301,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 4 — Tasks
   {
-    label: "Tasks",
+    label: "Scrutiny Tasks",
     permKey: "tasks",
     requiredAny: [],
     views: {
@@ -312,7 +312,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 5 — Shortfalls
   {
-    label: "Shortfalls",
+    label: "Shortfall Notices",
     permKey: "shortfalls",
     requiredAny: [],
     views: {
@@ -334,7 +334,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 7 — NOCs
   {
-    label: "NOCs",
+    label: "NOC Clearances",
     permKey: "nocs",
     requiredAny: [],
     views: {
@@ -345,7 +345,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 8 — Show Cause
   {
-    label: "Show Cause",
+    label: "Show Cause Notices",
     permKey: "show-cause",
     requiredAny: [],
     views: {
@@ -356,7 +356,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 9 — Revoke Proceedings
   {
-    label: "Revoke Proceedings",
+    label: "Permit Revocations",
     permKey: "revocations",
     requiredAny: [],
     views: {
@@ -365,9 +365,9 @@ const MODULE_DEFS: ModuleDef[] = [
       SUPER_ADMIN: "admin-revocations",
     },
   },
-  // 10 — Change of LTP
+  // 10 — LTP Change
   {
-    label: "Change of LTP",
+    label: "LTP Change",
     permKey: "ltp-changes",
     requiredAny: [],
     views: {
@@ -378,7 +378,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 11 — Work Initiated
   {
-    label: "Work Initiated",
+    label: "Work Commencement",
     permKey: "work-initiated",
     requiredAny: [],
     views: {
@@ -389,7 +389,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 12 — Occupancy
   {
-    label: "Occupancy",
+    label: "Occupancy (OC)",
     permKey: "occupancy",
     requiredAny: [],
     views: {
@@ -400,7 +400,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 13 — Developers
   {
-    label: "Developers",
+    label: "Developer Registry",
     permKey: "developers",
     requiredAny: [],
     views: {
@@ -411,7 +411,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 14 — LTP (Licensed Technical Persons)
   {
-    label: "LTP",
+    label: "LTP Directory",
     permKey: "professionals",
     requiredAny: [],
     views: {
@@ -422,7 +422,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 15 — Outward
   {
-    label: "Outward",
+    label: "Outward Despatch",
     permKey: "outward",
     requiredAny: [],
     views: {
@@ -433,7 +433,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 16 — Payments
   {
-    label: "Payments",
+    label: "Fee & Payments",
     permKey: "payments",
     requiredAny: [],
     views: {
@@ -444,7 +444,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 17 — Documents
   {
-    label: "Documents",
+    label: "Document Vault",
     permKey: "documents",
     requiredAny: ["document:upload", "document:view", "document:verify", "document:reject"],
     views: {
@@ -455,7 +455,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 18 — Reports
   {
-    label: "Reports",
+    label: "MIS Reports",
     permKey: "reports",
     requiredAny: ["reports:view", "application:view_all", "sla:view", "officer_progress:view"],
     views: {

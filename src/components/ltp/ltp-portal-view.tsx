@@ -48,9 +48,9 @@ export function LtpPortalView() {
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-4">
               <div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">Draft Application</h2>
+                <h2 className="text-xl font-bold tracking-tight text-slate-900">Draft Applications</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Prepare, edit, and submit new building permission applications.
+                  Prepare, edit, and lodge new building permission applications before formal submission.
                 </p>
               </div>
               <Button
@@ -130,9 +130,9 @@ export function LtpPortalView() {
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
               <div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">Submitted Applications</h2>
+                <h2 className="text-xl font-bold tracking-tight text-slate-900">Submitted Permission Files</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Track and monitor all your submitted building permit applications.
+                  Track and monitor all formally submitted building permit applications.
                 </p>
               </div>
               <div className="relative w-full sm:w-64">
@@ -205,9 +205,9 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Review Proceeding</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">In-Review Proceedings</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Applications currently under review in the APCRDA departmental proceeding chain.
+                Applications currently under departmental review and scrutiny chain.
               </p>
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -265,7 +265,7 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Objected Files &amp; Shortfalls</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Objected Files &amp; Shortfall Notices</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Files flagged with scrutiny objections or shortfall requirements that need your response.
               </p>
@@ -322,9 +322,9 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Approved Files &amp; Building Permit Orders</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Sanctioned &amp; Approved Files</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Sanctioned building permits with approved Building Permit Orders (BPO).
+                Sanctioned building permits with approved Building Permit Orders (BPO) and proceedings.
               </p>
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -378,7 +378,7 @@ export function LtpPortalView() {
         return (
           <div className="space-y-6 max-w-2xl">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Change Of LTP</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Change of LTP / Handover</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Transfer licensed technical person on an existing building permission file.
               </p>
@@ -408,7 +408,7 @@ export function LtpPortalView() {
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {ltpActiveMenu === "cc-issued" ? "Commencement Certificate (CC) Issued" : "Work Initiated"}
+                {ltpActiveMenu === "cc-issued" ? "Commencement Certificates (CC)" : "Site Initiation Notices"}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Notify commencement date for approved files to obtain the Commencement Certificate.
@@ -468,7 +468,7 @@ export function LtpPortalView() {
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {ltpActiveMenu === "occupancy-list" ? "Occupancy List" : "Occupancy - Submitted Applications"}
+                {ltpActiveMenu === "occupancy-list" ? "Completion & OC Registry" : "Submitted OC Applications"}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Intimate building completion and submit applications for Occupancy Certificate.

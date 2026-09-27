@@ -8,7 +8,6 @@ import {
   Layers,
   ChevronDown,
   ChevronLeft,
-  Palette,
 } from "lucide-react";
 
 export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
@@ -23,72 +22,72 @@ interface LtpModuleDef {
   label: string;
   hasIcon?: boolean;
   iconType?: "files" | "layers";
+  directMenuId?: string;
   submenus: SubmenuItem[];
 }
 
 const LTP_MODULES: LtpModuleDef[] = [
   {
     id: "commencement",
-    label: "Work Commencement (CC)",
+    label: "Work Commencement & CC",
     hasIcon: false,
     submenus: [
-      { id: "cc-issued", label: "CC Issued" },
-      { id: "work-initiated", label: "Work Initiated" },
+      { id: "cc-issued", label: "Commencement Certificates (CC)" },
+      { id: "work-initiated", label: "Site Initiation Notices" },
     ],
   },
   {
     id: "application-submission",
-    label: "Permit Applications",
+    label: "Applications",
     hasIcon: true,
     iconType: "files",
     submenus: [
       { id: "draft-application", label: "Draft Applications" },
-      { id: "submitted-applications", label: "Submitted Applications" },
+      { id: "submitted-applications", label: "Submitted Permission Files" },
+      { id: "objected-files", label: "Objected / Query Files" },
     ],
   },
   {
     id: "application-status",
-    label: "Application Tracking",
+    label: "Scrutiny & Sanction Tracking",
     hasIcon: true,
     iconType: "files",
     submenus: [
-      { id: "review-proceeding", label: "Review Proceedings" },
-      { id: "objected-files", label: "Objected Files" },
-      { id: "approved-files", label: "Approved Files" },
-      { id: "proceeding-issued", label: "Proceeding Issued" },
+      { id: "review-proceeding", label: "In-Review Proceedings" },
+      { id: "approved-files", label: "Sanctioned & Approved Files" },
+      { id: "proceeding-issued", label: "Sanction Orders Issued" },
     ],
   },
   {
     id: "proceeding-status",
-    label: "Proceedings & Compliance",
+    label: "Compliance & Regulatory Notices",
     hasIcon: true,
     iconType: "files",
     submenus: [
-      { id: "verified", label: "Verified Files" },
+      { id: "verified", label: "DCR & Document Verified Files" },
       { id: "shortfall", label: "Shortfall Notices" },
-      { id: "review-shortfall-submission", label: "Shortfall Resubmissions" },
-      { id: "show-cause", label: "Show Cause Notices" },
-      { id: "review-show-cause-submission", label: "Show Cause Responses" },
-    ],
-  },
-  {
-    id: "change-of-ltp",
-    label: "Change of LTP (Transfer)",
-    hasIcon: true,
-    iconType: "layers",
-    submenus: [
-      { id: "change-ltp", label: "Change LTP / Transfer" },
+      { id: "review-shortfall-submission", label: "Shortfall Compliance Submissions" },
+      { id: "show-cause", label: "Show Cause Directives" },
+      { id: "review-show-cause-submission", label: "Show Cause Explanations" },
     ],
   },
   {
     id: "occupancy",
-    label: "Occupancy Certificate (OC)",
+    label: "Occupancy Certification (OC)",
     hasIcon: true,
     iconType: "files",
     submenus: [
-      { id: "occupancy-list", label: "Occupancy List" },
-      { id: "submitted-application", label: "Submitted Applications" },
+      { id: "occupancy-list", label: "Completion & OC Registry" },
+      { id: "submitted-application", label: "Submitted OC Applications" },
     ],
+  },
+  {
+    id: "change-of-ltp",
+    label: "LTP Change",
+    hasIcon: true,
+    iconType: "layers",
+    directMenuId: "change-ltp",
+    submenus: [],
   },
 ];
 
@@ -104,6 +103,11 @@ interface ThemeDetails {
   headerText: string;
   headerIcon: string;
   headerChevron: string;
+  selectedHeaderBg?: string;
+  selectedHeaderHoverBg?: string;
+  selectedHeaderText?: string;
+  selectedHeaderIcon?: string;
+  selectedHeaderChevron?: string;
   submenuBg: string;
   submenuBorder: string;
   submenuText: string;
@@ -124,23 +128,28 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
     name: "BBAS Maroon & Cream",
     badge: "Official",
     dotColor: "bg-[#801824] border border-[#FDF6ED]/70",
-    moduleBorder: "border-b border-[#64131C]",
-    headerBg: "bg-[#801824]",
-    headerHoverBg: "hover:bg-[#941C2B]",
-    headerText: "text-[#FDF6ED] font-medium text-[13.5px]",
-    headerIcon: "text-[#FDF6ED]",
-    headerChevron: "text-[#FDF6ED]/80",
-    submenuBg: "bg-[#FDF6ED]",
-    submenuBorder: "border-t border-[#EBD8BF]",
+    moduleBorder: "border-b border-[#EADBCE]",
+    headerBg: "bg-transparent",
+    headerHoverBg: "hover:bg-[#F3EADF]",
+    headerText: "text-[#4A1017] font-semibold text-[13.5px]",
+    headerIcon: "text-[#801824]",
+    headerChevron: "text-[#801824]/60",
+    selectedHeaderBg: "bg-[#801824] shadow-xs",
+    selectedHeaderHoverBg: "hover:bg-[#941C2B]",
+    selectedHeaderText: "text-[#FDF6ED] font-bold text-[13.5px]",
+    selectedHeaderIcon: "text-[#FDF6ED]",
+    selectedHeaderChevron: "text-[#FDF6ED]",
+    submenuBg: "bg-[#FAF4EB]",
+    submenuBorder: "border-t border-[#E0D2BE] border-b border-[#E0D2BE]",
     submenuText: "text-[#5C1A20] font-medium text-[12.5px]",
-    submenuHoverBg: "hover:bg-[#F3E5D3]",
+    submenuHoverBg: "hover:bg-[#EFE3D3]",
     submenuHoverText: "hover:text-[#801824]",
-    activeItemBg: "bg-[#801824] shadow-sm",
-    activeItemText: "text-white font-bold",
-    activeIndicator: "",
-    themeBox: "bg-[#64131C] border-[#8A1C28] text-[#FDF6ED]",
-    themeActiveBtn: "bg-[#801824] text-[#FDF6ED] border border-[#A83240] font-semibold",
-    themeInactiveBtn: "text-[#F5D8B8] hover:bg-[#721520] hover:text-white",
+    activeItemBg: "bg-[#EBDBC8]",
+    activeItemText: "text-[#801824] font-bold",
+    activeIndicator: "border-l-4 border-[#801824] pl-5",
+    themeBox: "bg-[#FDFBF7] border-[#EADBCE] text-[#4A1017]",
+    themeActiveBtn: "bg-[#801824] text-[#FDF6ED] font-semibold",
+    themeInactiveBtn: "text-[#5C1A20] hover:bg-[#F3EADF]",
   },
   "apcrda-blue": {
     id: "apcrda-blue",
@@ -240,39 +249,36 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
   },
 };
 
-const THEME_OPTIONS: Array<{ id: LtpSidebarTheme; label: string; dotColor: string }> = [
-  { id: "maroon-cream", label: "BBAS Maroon", dotColor: "bg-[#801824] border border-[#FDF6ED]/70" },
-  { id: "apcrda-blue", label: "APCRDA Blue", dotColor: "bg-[#103A6A] border border-white/70" },
-  { id: "charcoal-indigo", label: "Charcoal Dark", dotColor: "bg-indigo-500" },
-  { id: "midnight-slate", label: "Midnight Slate", dotColor: "bg-sky-400" },
-  { id: "clean-light", label: "Enterprise Light", dotColor: "bg-blue-600" },
-];
-
 export function LtpSidebarMenu() {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "draft-application";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
   const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
-  const setLtpTheme = useAppStore((s) => s.setLtpTheme);
   const navigate = useAppStore((s) => s.navigate);
   const view = useAppStore((s) => s.view);
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
 
-  // Accordion open/close state matching the screenshots
-  const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
-    commencement: true,
-    "application-submission": true,
-    "application-status": true,
-    "proceeding-status": false,
-    "change-of-ltp": false,
-    occupancy: false,
+  // Single module expanded at a time
+  const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {
+    return (
+      LTP_MODULES.find(
+        (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
+      )?.id ?? "application-submission"
+    );
   });
 
+  // Keep parent module expanded if active menu changes
+  React.useEffect(() => {
+    const parentMod = LTP_MODULES.find(
+      (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
+    );
+    if (parentMod) {
+      setOpenModuleId(parentMod.id);
+    }
+  }, [ltpActiveMenu]);
+
   const toggleSection = (id: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+    setOpenModuleId((prev) => (prev === id ? null : id));
   };
 
   const handleSelectSubmenu = (menuId: string) => {
@@ -282,41 +288,77 @@ export function LtpSidebarMenu() {
     }
   };
 
+  const handleModuleClick = (mod: LtpModuleDef) => {
+    if (mod.submenus.length === 0 && mod.directMenuId) {
+      setOpenModuleId(mod.id);
+      handleSelectSubmenu(mod.directMenuId);
+      return;
+    }
+    toggleSection(mod.id);
+  };
+
   return (
     <div className="flex flex-col w-full text-sm font-sans select-none pb-6">
       {LTP_MODULES.map((mod) => {
-        const isOpen = !!openSections[mod.id];
+        const isOpen = openModuleId === mod.id;
+        const hasSubmenus = mod.submenus.length > 0;
         return (
           <div key={mod.id} className={cn(theme.moduleBorder, "last:border-b-0")}>
             {/* Module Header Button */}
             <button
-              onClick={() => toggleSection(mod.id)}
+              onClick={() => handleModuleClick(mod)}
               className={cn(
-                "flex w-full items-center justify-between px-4 py-3 text-left transition-colors duration-150",
-                theme.headerBg,
-                theme.headerHoverBg
+                "flex w-full items-center justify-between px-4 py-3 text-left transition-all duration-150",
+                isOpen
+                  ? (theme.selectedHeaderBg ?? "bg-[#801824]")
+                  : theme.headerBg,
+                isOpen
+                  ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]")
+                  : theme.headerHoverBg
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 {mod.hasIcon && mod.iconType === "layers" ? (
-                  <Layers className={cn("size-4 shrink-0", theme.headerIcon)} />
+                  <Layers
+                    className={cn(
+                      "size-4 shrink-0 transition-colors",
+                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
+                    )}
+                  />
                 ) : mod.hasIcon ? (
-                  <Copy className={cn("size-4 shrink-0", theme.headerIcon)} />
+                  <Copy
+                    className={cn(
+                      "size-4 shrink-0 transition-colors",
+                      isOpen ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
+                    )}
+                  />
                 ) : null}
-                <span className={cn("truncate tracking-wide", theme.headerText)}>
+                <span
+                  className={cn(
+                    "truncate tracking-wide transition-colors",
+                    isOpen ? (theme.selectedHeaderText ?? "text-[#FDF6ED] font-bold") : theme.headerText
+                  )}
+                >
                   {mod.label}
                 </span>
               </div>
-              {isOpen ? (
-                <ChevronDown className={cn("size-4 shrink-0", theme.headerChevron)} />
-              ) : (
-                <ChevronLeft className={cn("size-4 shrink-0", theme.headerChevron)} />
+              {hasSubmenus && (
+                isOpen ? (
+                  <ChevronDown
+                    className={cn(
+                      "size-4 shrink-0 transition-colors",
+                      theme.selectedHeaderChevron ?? "text-[#FDF6ED]"
+                    )}
+                  />
+                ) : (
+                  <ChevronLeft className={cn("size-4 shrink-0 transition-colors", theme.headerChevron)} />
+                )
               )}
             </button>
 
             {/* Submenu Accordion Items */}
-            {isOpen && (
-              <div className={cn("py-1 shadow-inner animate-in fade-in-50 duration-150", theme.submenuBg, theme.submenuBorder)}>
+            {hasSubmenus && isOpen && (
+              <div className={cn("py-1.5 shadow-inner animate-in fade-in-50 duration-150", theme.submenuBg, theme.submenuBorder)}>
                 {mod.submenus.map((sub) => {
                   const isActive = ltpActiveMenu === sub.id;
                   return (
@@ -325,10 +367,9 @@ export function LtpSidebarMenu() {
                       onClick={() => handleSelectSubmenu(sub.id)}
                       className={cn(
                         "flex w-full items-center px-6 py-2.5 text-left transition-all duration-150",
-                        theme.submenuText,
                         isActive
                           ? cn(theme.activeItemBg, theme.activeItemText, theme.activeIndicator)
-                          : cn(theme.submenuHoverBg, theme.submenuHoverText)
+                          : cn(theme.submenuText, theme.submenuHoverBg, theme.submenuHoverText)
                       )}
                     >
                       <span className="truncate">{sub.label}</span>
@@ -340,37 +381,6 @@ export function LtpSidebarMenu() {
           </div>
         );
       })}
-
-      {/* Theme Selector Panel in Sidebar */}
-      <div className="mt-5 px-3">
-        <div className={cn("rounded-lg p-2.5 border transition-all shadow-sm", theme.themeBox)}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold">
-              <Palette className="size-3.5 shrink-0" />
-              <span>Menu Theme</span>
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider opacity-80 px-1 py-0.5 rounded bg-black/10">
-              {theme.badge}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {THEME_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                onClick={() => setLtpTheme(opt.id)}
-                className={cn(
-                  "flex items-center gap-1.5 px-2 py-1.5 rounded text-[11px] font-medium transition-all text-left",
-                  ltpTheme === opt.id ? theme.themeActiveBtn : theme.themeInactiveBtn
-                )}
-                title={`Switch theme to ${opt.label}`}
-              >
-                <span className={cn("size-2.5 rounded-full shrink-0", opt.dotColor)} />
-                <span className="truncate">{opt.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
