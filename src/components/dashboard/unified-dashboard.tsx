@@ -3,17 +3,17 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
-import { ROLES } from "@/data/mock-data";
 import {
   useDashboardScope,
   computeScopedKpis,
   applicationsByStatus,
+  applicationsByStage,
   paymentStatusData,
   documentCompletionData,
   shortfallData,
   scrutinyResultsData,
 } from "@/components/dashboard/dashboard-scope";
-import { DonutChart } from "@/components/dashboard/charts";
+import { DonutChart, BarChart } from "@/components/dashboard/charts";
 import { StatusBadge } from "@/components/design-system/badges";
 import {
   FileStack,
@@ -81,11 +81,11 @@ export function UnifiedDashboard() {
   const scope = useDashboardScope();
   const kpis = computeScopedKpis(scope.applications);
 
-  const roleInfo = user?.role ? ROLES[user.role] : null;
   const isLTP = user?.role === "LTP";
   const isAdmin = user?.role === "SUPER_ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
 
   const statusData = applicationsByStatus(scope.applications);
+  const stageData = applicationsByStage(scope.applications);
   const payData = paymentStatusData(scope.applications);
   const docData = documentCompletionData(scope.applications);
   const sfData = shortfallData(scope.applications);
@@ -95,16 +95,6 @@ export function UnifiedDashboard() {
 
   return (
     <div className="bg-[#F8F9FB] text-slate-800 font-sans">
-
-      {/* Welcome Banner */}
-      <div className="mb-4">
-        <h1 className="text-xl font-black text-slate-900 tracking-tight">
-          Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
-        </h1>
-        <p className="text-xs text-slate-500 mt-0.5">
-          {roleInfo?.fullName ?? user?.role} · {scope.isGlobal ? "Org-wide view" : `${scope.applications.length} application${scope.applications.length !== 1 ? "s" : ""} in your scope`}
-        </p>
-      </div>
 
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
@@ -116,7 +106,7 @@ export function UnifiedDashboard() {
         <KpiCard label="Pending Pay" value={kpis.pendingPayments} subLabel="applications" icon={<CreditCard className="size-4 text-violet-500" />} color="bg-violet-100" />
       </div>
 
-      {/* Application Status + Recent Activity */}
+      {/* Application Status | Stage Breakdown | Recent Activity */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-4">
 
         {/* Application Status */}
@@ -132,8 +122,21 @@ export function UnifiedDashboard() {
           </div>
         </div>
 
+        {/* Stage Wise Breakdown */}
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 h-[381px] flex flex-col">
+          <div className="flex items-center justify-between mb-2 shrink-0">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Stage Breakdown</h3>
+            <Activity className="size-4 text-slate-400" />
+          </div>
+          <div className="flex-1 min-h-0">
+            {stageData.length > 0
+              ? <BarChart data={stageData} />
+              : <EmptyChartState label="No stage data" />}
+          </div>
+        </div>
+
         {/* Recent Activity */}
-        <div className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col h-[381px]">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm flex flex-col h-[381px]">
           <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100 shrink-0">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-600">Recent Activity</h3>
             <Button variant="ghost" size="sm" onClick={() => navigate(applicationsView)}

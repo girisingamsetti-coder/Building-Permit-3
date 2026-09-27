@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore, DEMO_CREDENTIALS, useVisibleApplications } from "@/store/app-store";
 import { ROLES, USERS } from "@/data/mock-data";
+import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import {
   Bell,
   Search,
@@ -470,11 +471,14 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Module Title */}
-      <div className="flex items-center ml-2">
-        <h2 className="text-lg font-semibold tracking-tight capitalize text-slate-800 dark:text-slate-100">
-          {(view.includes("-") ? view.split("-").slice(1).join(" ") : view).replace(/_/g, " ")}
-        </h2>
+      {/* Welcome + Role + Scope */}
+      <div className="flex flex-col justify-center ml-2">
+        <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+          Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
+        </span>
+        <span className="text-[11px] text-slate-400 leading-tight">
+          {user?.role ? (ROLES[user.role as keyof typeof ROLES]?.fullName ?? user.role) : ""}
+        </span>
       </div>
 
       {/* Search & Date Filter */}
