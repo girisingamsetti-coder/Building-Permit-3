@@ -73,9 +73,23 @@ export function Sidebar() {
 
 
   const isLTP = portal === "LTP" || user?.role === "LTP";
-  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "apcrda-blue";
+  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
 
   const ltpStyles = {
+    "maroon-cream": {
+      aside: "bg-[#801824] border-[#64131C]",
+      brand: "bg-[#64131C] border-[#4E0E15]",
+      badge: "bg-[#FDF6ED] text-[#801824] font-black",
+      brandText: "text-[#FDF6ED]",
+      collapsedBadge: "bg-[#64131C] text-[#FDF6ED]",
+      scroll: "[scrollbar-color:#A83240_#801824] [&::-webkit-scrollbar-track]:bg-[#801824] [&::-webkit-scrollbar-thumb]:bg-[#A83240] hover:[&::-webkit-scrollbar-thumb]:bg-[#FDF6ED]",
+      footerWrapper: "border-[#64131C] bg-[#64131C]",
+      footerInner: "bg-[#721520] border-[#8A1C28]",
+      userName: "text-[#FDF6ED]",
+      userRole: "text-[#F5D8B8]",
+      avatarBg: "bg-[#801824] text-[#FDF6ED] border border-[#F5D8B8]/40",
+      logoutBtn: "text-[#F5D8B8] hover:bg-[#801824] hover:text-white",
+    },
     "apcrda-blue": {
       aside: "bg-[#103A6A] border-[#0C2E54]",
       brand: "bg-[#0C2B4F] border-[#081E38]",
@@ -133,30 +147,45 @@ export function Sidebar() {
       logoutBtn: "text-slate-600 hover:bg-[#E2E8F0] hover:text-slate-900",
     },
   }[ltpTheme] || {
-    aside: "bg-[#103A6A] border-[#0C2E54]",
-    brand: "bg-[#0C2B4F] border-[#081E38]",
-    badge: "bg-[#EAB308] text-[#0C2B4F]",
-    brandText: "text-white",
-    collapsedBadge: "bg-[#0C2B4F] text-[#EAB308]",
-    scroll: "[scrollbar-color:#4B77A8_#103A6A] [&::-webkit-scrollbar-track]:bg-[#103A6A] [&::-webkit-scrollbar-thumb]:bg-[#4B77A8] hover:[&::-webkit-scrollbar-thumb]:bg-[#93C5FD]",
-    footerWrapper: "border-[#0C2E54] bg-[#0C2B4F]",
-    footerInner: "bg-[#10355E] border-[#1A4E87]",
-    userName: "text-white",
-    userRole: "text-[#93C5FD]",
-    avatarBg: "bg-[#154884] text-white border border-[#3B82F6]/40",
-    logoutBtn: "text-[#93C5FD] hover:bg-[#154884] hover:text-white",
+    aside: "bg-[#801824] border-[#64131C]",
+    brand: "bg-[#64131C] border-[#4E0E15]",
+    badge: "bg-[#FDF6ED] text-[#801824] font-black",
+    brandText: "text-[#FDF6ED]",
+    collapsedBadge: "bg-[#64131C] text-[#FDF6ED]",
+    scroll: "[scrollbar-color:#A83240_#801824] [&::-webkit-scrollbar-track]:bg-[#801824] [&::-webkit-scrollbar-thumb]:bg-[#A83240] hover:[&::-webkit-scrollbar-thumb]:bg-[#FDF6ED]",
+    footerWrapper: "border-[#64131C] bg-[#64131C]",
+    footerInner: "bg-[#721520] border-[#8A1C28]",
+    userName: "text-[#FDF6ED]",
+    userRole: "text-[#F5D8B8]",
+    avatarBg: "bg-[#801824] text-[#FDF6ED] border border-[#F5D8B8]/40",
+    logoutBtn: "text-[#F5D8B8] hover:bg-[#801824] hover:text-white",
+  };
+
+  const currentTheme = isLTP ? ltpStyles : {
+    aside: "bg-[#801824] border-[#64131C]",
+    brand: "bg-[#64131C] border-[#4E0E15]",
+    badge: "bg-[#FDF6ED] text-[#801824] font-black",
+    brandText: "text-[#FDF6ED]",
+    collapsedBadge: "bg-[#64131C] text-[#FDF6ED]",
+    scroll: "[scrollbar-color:#A83240_#801824] [&::-webkit-scrollbar-track]:bg-[#801824] [&::-webkit-scrollbar-thumb]:bg-[#A83240] hover:[&::-webkit-scrollbar-thumb]:bg-[#FDF6ED]",
+    footerWrapper: "border-[#64131C] bg-[#64131C]",
+    footerInner: "bg-[#721520] border-[#8A1C28]",
+    userName: "text-[#FDF6ED]",
+    userRole: "text-[#F5D8B8]",
+    avatarBg: "bg-[#801824] text-[#FDF6ED] border border-[#F5D8B8]/40",
+    logoutBtn: "text-[#F5D8B8] hover:bg-[#801824] hover:text-white",
   };
 
   return (
     <aside
       className={cn(
         "relative z-30 flex h-full flex-col text-white transition-[width] duration-300 ease-out border-r shadow-2xl",
-        isLTP ? ltpStyles.aside : "bg-[#111225] border-[#1f213a]",
+        currentTheme.aside,
         collapsed ? "w-[68px]" : "w-64"
       )}
     >
       {/* Brand */}
-      <div className={cn("flex h-16 items-center justify-center border-b px-4", isLTP ? ltpStyles.brand : "border-sidebar-border")}>
+      <div className={cn("flex h-16 items-center justify-center border-b px-4", currentTheme.brand)}>
         {!collapsed ? (
           <div className="flex items-center gap-2.5">
             {isLTP && (
@@ -200,8 +229,8 @@ export function Sidebar() {
                         className={cn(
                           "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
                           is2DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
-                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                            ? "bg-[#64131C] text-white shadow-sm ring-1 ring-white/20"
+                            : "text-[#F5D8B8] hover:bg-[#941C2B] hover:text-white"
                         )}
                       >
                         2D
@@ -212,8 +241,8 @@ export function Sidebar() {
                         className={cn(
                           "flex size-9 items-center justify-center rounded-[12px] text-xs font-bold transition-all duration-200",
                           is3DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/20"
-                            : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                            ? "bg-[#64131C] text-white shadow-sm ring-1 ring-white/20"
+                            : "text-[#F5D8B8] hover:bg-[#941C2B] hover:text-white"
                         )}
                       >
                         3D
@@ -224,18 +253,18 @@ export function Sidebar() {
 
                 return (
                   <li key="bim-switcher" className="my-0.5">
-                    <div className="flex w-full items-center rounded-[18px] bg-[#191a32] p-0.5 border border-[#2b2d4c]/70 shadow-inner">
+                    <div className="flex w-full items-center rounded-[18px] bg-[#64131C] p-0.5 border border-[#8A1C28] shadow-inner">
                       <button
                         onClick={() => navigate(view2D)}
                         title="2D Building Drawings & DCR Scrutiny"
                         className={cn(
                           "flex items-center justify-start gap-2 py-1 px-4 rounded-[14px] text-[13px] font-bold transition-all duration-200",
                           is2DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
-                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
+                            ? "bg-[#801824] text-white shadow-sm ring-1 ring-white/10"
+                            : "text-[#F5D8B8] hover:bg-[#721520] hover:text-white"
                         )}
                       >
-                        <Layers className={cn("size-4 shrink-0", is2DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
+                        <Layers className={cn("size-4 shrink-0", is2DActive ? "text-[#FDF6ED]" : "text-[#F5D8B8]")} />
                         <span>2D</span>
                       </button>
                       <button
@@ -244,11 +273,11 @@ export function Sidebar() {
                         className={cn(
                           "flex items-center justify-start gap-2 py-1 px-3 rounded-[14px] text-[13px] font-bold transition-all duration-200",
                           is3DActive
-                            ? "bg-[#3D405B] text-white shadow-sm ring-1 ring-white/10"
-                            : "text-[#9E9FB1] hover:bg-[#20223a] hover:text-white"
+                            ? "bg-[#801824] text-white shadow-sm ring-1 ring-white/10"
+                            : "text-[#F5D8B8] hover:bg-[#721520] hover:text-white"
                         )}
                       >
-                        <Box className={cn("size-4 shrink-0", is3DActive ? "text-cyan-400" : "text-[#9E9FB1]")} />
+                        <Box className={cn("size-4 shrink-0", is3DActive ? "text-[#FDF6ED]" : "text-[#F5D8B8]")} />
                         <span>3D</span>
                       </button>
                     </div>
@@ -267,16 +296,16 @@ export function Sidebar() {
                       "group flex w-full items-center gap-4 rounded-[18px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200",
                       collapsed && "justify-center px-0",
                       active
-                        ? "bg-[#3D405B] text-white"
-                        : "text-[#9E9FB1] hover:bg-[#202138] hover:text-white"
+                        ? "bg-[#64131C] text-[#FDF6ED] shadow-sm ring-1 ring-white/10"
+                        : "text-[#F5D8B8] hover:bg-[#941C2B] hover:text-white"
                     )}
                   >
                     <Icon
                       className={cn(
                         "size-[18px] shrink-0 transition-transform",
                         active
-                          ? "text-white"
-                          : "text-[#9E9FB1] group-hover:text-white group-hover:scale-110"
+                          ? "text-[#FDF6ED]"
+                          : "text-[#F5D8B8] group-hover:text-white group-hover:scale-110"
                       )}
                     />
                     {!collapsed && <span className="truncate">{item.label}</span>}
@@ -287,36 +316,31 @@ export function Sidebar() {
           </ul>
 
           <div className="mt-8 px-2 space-y-4">
-
-
-
           </div>
         </nav>
       </ScrollArea>
       )}
 
       {/* User card */}
-      <div className={cn("border-t p-2", isLTP ? ltpStyles.footerWrapper : "border-sidebar-border")}>
+      <div className={cn("border-t p-2", currentTheme.footerWrapper)}>
         {!collapsed ? (
-          <div className={cn("rounded-lg p-2.5", isLTP ? ltpStyles.footerInner : "bg-sidebar-accent/40")}>
+          <div className={cn("rounded-lg p-2.5", currentTheme.footerInner)}>
             <div className="flex items-center gap-2.5">
-              <Avatar
-                color={user?.avatarColor}
-                name={user?.name}
-                customClass={isLTP ? ltpStyles.avatarBg : undefined}
-              />
+              <div className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg font-bold text-sm shadow-sm", currentTheme.avatarBg)}>
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : "U"}
+              </div>
               <div className="min-w-0 flex-1">
-                <p className={cn("truncate text-xs font-semibold", isLTP ? ltpStyles.userName : "text-sidebar-accent-foreground")}>
-                  {user?.name}
+                <p className={cn("truncate text-xs font-semibold", currentTheme.userName)}>
+                  {user?.name ?? "User"}
                 </p>
-                <p className={cn("truncate text-[10px]", isLTP ? ltpStyles.userRole : "text-sidebar-foreground/60")}>
-                  {roleInfo?.fullName ?? "Licensed Technical Person"}
+                <p className={cn("truncate text-[10px]", currentTheme.userRole)}>
+                  {roleInfo?.fullName ?? user?.role ?? "Licensed Technical Person"}
                 </p>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn("size-7", isLTP ? ltpStyles.logoutBtn : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}
+                className={cn("size-7", currentTheme.logoutBtn)}
                 onClick={logout}
                 title="Sign out"
               >
@@ -328,7 +352,7 @@ export function Sidebar() {
           <Button
             variant="ghost"
             size="icon"
-            className="mx-auto text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            className={cn("mx-auto", currentTheme.logoutBtn)}
             onClick={logout}
             title="Sign out"
           >

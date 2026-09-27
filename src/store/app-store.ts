@@ -111,8 +111,8 @@ interface AppState {
   // LTP specific menu & theme
   ltpActiveMenu: string;
   setLtpActiveMenu: (menu: string) => void;
-  ltpTheme: "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
-  setLtpTheme: (theme: "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light") => void;
+  ltpTheme: "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
+  setLtpTheme: (theme: "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light") => void;
 
   // ---- auth actions ----
   login: (email: string, password: string) => { ok: boolean; error?: string };
@@ -339,7 +339,7 @@ export const useAppStore = create<AppState>()(
   pendingRegistrations: [],
   ltpActiveMenu: "draft-application",
   setLtpActiveMenu: (menu) => set({ ltpActiveMenu: menu }),
-  ltpTheme: "apcrda-blue",
+  ltpTheme: "maroon-cream",
   setLtpTheme: (theme) => set({ ltpTheme: theme }),
 
   // ---- AUTH ----

@@ -55,7 +55,7 @@ export function LtpPortalView() {
               </div>
               <Button
                 onClick={() => setNewAppOpen(true)}
-                className="bg-[#0F3E6E] hover:bg-[#144980] text-white gap-1.5 text-xs h-9 px-4 rounded-md shadow-sm"
+                className="bg-[#801824] hover:bg-[#941C2B] text-white gap-1.5 text-xs h-9 px-4 rounded-md shadow-sm"
               >
                 <FilePlus2 className="size-4" /> Draft New Application
               </Button>
@@ -70,7 +70,7 @@ export function LtpPortalView() {
                 </p>
                 <Button
                   onClick={() => setNewAppOpen(true)}
-                  className="mt-4 bg-[#0F3E6E] hover:bg-[#144980] text-white gap-1.5 text-xs h-8 px-3 rounded-md"
+                  className="mt-4 bg-[#801824] hover:bg-[#941C2B] text-white gap-1.5 text-xs h-8 px-3 rounded-md"
                 >
                   <FilePlus2 className="size-3.5" /> Start New Application
                 </Button>
@@ -78,7 +78,7 @@ export function LtpPortalView() {
             ) : (
               <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#0F3E6E]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                  <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
                     <tr>
                       <th className="px-4 py-3">Application No.</th>
                       <th className="px-4 py-3">Project Name</th>
@@ -148,7 +148,7 @@ export function LtpPortalView() {
 
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#0F3E6E]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
                   <tr>
                     <th className="px-4 py-3"># Application No.</th>
                     <th className="px-4 py-3">Project</th>
@@ -212,7 +212,7 @@ export function LtpPortalView() {
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#0F3E6E]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
                   <tr>
                     <th className="px-4 py-3">Application No.</th>
                     <th className="px-4 py-3">Project</th>
@@ -388,7 +388,7 @@ export function LtpPortalView() {
                 <label className="text-xs font-semibold text-slate-700">Enter File No. / Application No.</label>
                 <div className="flex gap-2">
                   <Input placeholder="e.g. BA 1168/0001/BP/..." className="h-9 text-xs" />
-                  <Button className="bg-[#0F3E6E] hover:bg-[#144980] text-white text-xs h-9 px-4">
+                  <Button className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-9 px-4">
                     Search File
                   </Button>
                 </div>
@@ -416,7 +416,7 @@ export function LtpPortalView() {
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#0F3E6E]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
                   <tr>
                     <th className="px-4 py-3">Application No.</th>
                     <th className="px-4 py-3">Project</th>
@@ -446,7 +446,7 @@ export function LtpPortalView() {
                         <td className="px-4 py-3 text-right">
                           <Button
                             size="sm"
-                            className="h-7 text-xs bg-[#0F3E6E] hover:bg-[#144980] text-white gap-1"
+                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1"
                           >
                             <Calendar className="size-3" /> Notify Commencement
                           </Button>
@@ -476,7 +476,7 @@ export function LtpPortalView() {
             </div>
             <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#0F3E6E]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
+                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
                   <tr>
                     <th className="px-4 py-3">Permit No.</th>
                     <th className="px-4 py-3">Project Name</th>
@@ -506,7 +506,7 @@ export function LtpPortalView() {
                         <td className="px-4 py-3 text-right">
                           <Button
                             size="sm"
-                            className="h-7 text-xs bg-[#0F3E6E] hover:bg-[#144980] text-white gap-1"
+                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1"
                           >
                             Intimate Completion
                           </Button>

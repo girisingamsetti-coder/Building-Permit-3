@@ -11,7 +11,7 @@ import {
   Palette,
 } from "lucide-react";
 
-export type LtpSidebarTheme = "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
+export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
 
 interface SubmenuItem {
   id: string;
@@ -118,11 +118,35 @@ interface ThemeDetails {
 }
 
 export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
+  "maroon-cream": {
+    id: "maroon-cream",
+    label: "BBAS Maroon",
+    name: "BBAS Maroon & Cream",
+    badge: "Official",
+    dotColor: "bg-[#801824] border border-[#FDF6ED]/70",
+    moduleBorder: "border-b border-[#64131C]",
+    headerBg: "bg-[#801824]",
+    headerHoverBg: "hover:bg-[#941C2B]",
+    headerText: "text-[#FDF6ED] font-medium text-[13.5px]",
+    headerIcon: "text-[#FDF6ED]",
+    headerChevron: "text-[#FDF6ED]/80",
+    submenuBg: "bg-[#FDF6ED]",
+    submenuBorder: "border-t border-[#EBD8BF]",
+    submenuText: "text-[#5C1A20] font-medium text-[12.5px]",
+    submenuHoverBg: "hover:bg-[#F3E5D3]",
+    submenuHoverText: "hover:text-[#801824]",
+    activeItemBg: "bg-[#801824] shadow-sm",
+    activeItemText: "text-white font-bold",
+    activeIndicator: "",
+    themeBox: "bg-[#64131C] border-[#8A1C28] text-[#FDF6ED]",
+    themeActiveBtn: "bg-[#801824] text-[#FDF6ED] border border-[#A83240] font-semibold",
+    themeInactiveBtn: "text-[#F5D8B8] hover:bg-[#721520] hover:text-white",
+  },
   "apcrda-blue": {
     id: "apcrda-blue",
     label: "APCRDA Blue",
     name: "APCRDA Official Blue",
-    badge: "Official",
+    badge: "Official Blue",
     dotColor: "bg-[#103A6A] border border-white/60",
     moduleBorder: "border-b border-[#0C2E54]",
     headerBg: "bg-[#103A6A]",
@@ -217,6 +241,7 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
 };
 
 const THEME_OPTIONS: Array<{ id: LtpSidebarTheme; label: string; dotColor: string }> = [
+  { id: "maroon-cream", label: "BBAS Maroon", dotColor: "bg-[#801824] border border-[#FDF6ED]/70" },
   { id: "apcrda-blue", label: "APCRDA Blue", dotColor: "bg-[#103A6A] border border-white/70" },
   { id: "charcoal-indigo", label: "Charcoal Dark", dotColor: "bg-indigo-500" },
   { id: "midnight-slate", label: "Midnight Slate", dotColor: "bg-sky-400" },
@@ -226,12 +251,12 @@ const THEME_OPTIONS: Array<{ id: LtpSidebarTheme; label: string; dotColor: strin
 export function LtpSidebarMenu() {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "draft-application";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
-  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "apcrda-blue";
+  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
   const setLtpTheme = useAppStore((s) => s.setLtpTheme);
   const navigate = useAppStore((s) => s.navigate);
   const view = useAppStore((s) => s.view);
 
-  const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["apcrda-blue"];
+  const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
 
   // Accordion open/close state matching the screenshots
   const [openSections, setOpenSections] = React.useState<Record<string, boolean>>({
