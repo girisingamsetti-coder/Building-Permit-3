@@ -413,7 +413,7 @@ export function LtpPortalView() {
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
               <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {ltpActiveMenu === "cc-issued" ? "Commencement Certificates (CC)" : "Site Initiation Notices"}
+                {ltpActiveMenu === "cc-issued" ? "Commencement Certificates" : "Site Initiation Notices"}
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Notify commencement date for approved files to obtain the Commencement Certificate.
