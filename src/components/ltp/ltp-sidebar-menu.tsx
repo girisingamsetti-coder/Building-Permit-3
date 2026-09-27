@@ -286,10 +286,6 @@ export function LtpSidebarMenu() {
     }
   }, [ltpActiveMenu]);
 
-  const toggleSection = (id: string) => {
-    setOpenModuleId((prev) => (prev === id ? null : id));
-  };
-
   const handleSelectSubmenu = (menuId: string) => {
     setLtpActiveMenu(menuId);
     if (view !== "ltp-applications") {
@@ -298,12 +294,12 @@ export function LtpSidebarMenu() {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
-    if (mod.submenus.length === 0 && mod.directMenuId) {
-      setOpenModuleId(mod.id);
+    setOpenModuleId(mod.id);
+    if (mod.submenus.length > 0) {
+      handleSelectSubmenu(mod.submenus[0].id);
+    } else if (mod.directMenuId) {
       handleSelectSubmenu(mod.directMenuId);
-      return;
     }
-    toggleSection(mod.id);
   };
 
   return (
