@@ -43,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
         <Topbar />
         <main className={cn("flex flex-1 flex-col min-h-0", isLtpDashboard ? "overflow-hidden" : "overflow-y-auto")}>
-          <div className={cn("w-full flex-1 flex flex-col min-h-0", isLtpDashboard ? "p-0 h-full" : "px-2 pt-1 pb-4 animate-fade-in-up")}>
+          <div key={view} className={cn("w-full flex-1 flex flex-col min-h-0 animate-in slide-in-from-top-4 fade-in duration-300 ease-out", isLtpDashboard ? "p-0 h-full" : "px-2 pt-1 pb-4")}>
             {children}
           </div>
 
