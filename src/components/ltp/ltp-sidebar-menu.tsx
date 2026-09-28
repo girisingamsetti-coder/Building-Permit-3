@@ -12,7 +12,6 @@ import {
   Building2,
   RefreshCw,
   ChevronDown,
-  ChevronLeft,
 } from "lucide-react";
 
 export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
@@ -258,7 +257,8 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
 export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
-  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
+  const rawTheme = useAppStore((s) => s.ltpTheme);
+  const ltpTheme = (!rawTheme || rawTheme === "apcrda-blue") ? "maroon-cream" : rawTheme;
   const navigate = useAppStore((s) => s.navigate);
   const view = useAppStore((s) => s.view);
 
@@ -291,11 +291,15 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
-    setOpenModuleId(mod.id);
-    if (mod.submenus.length > 0) {
-      handleSelectSubmenu(mod.submenus[0].id);
-    } else if (mod.directMenuId) {
-      handleSelectSubmenu(mod.directMenuId);
+    if (openModuleId === mod.id && !collapsed && mod.submenus.length > 0) {
+      setOpenModuleId(null);
+    } else {
+      setOpenModuleId(mod.id);
+      if (mod.submenus.length > 0) {
+        handleSelectSubmenu(mod.submenus[0].id);
+      } else if (mod.directMenuId) {
+        handleSelectSubmenu(mod.directMenuId);
+      }
     }
   };
 
@@ -370,10 +374,8 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
                   {mod.label}
                 </span>
               </div>
-              {hasSubmenus && (
-                isOpen
-                  ? <ChevronDown className={cn("size-4 shrink-0", theme.selectedHeaderChevron ?? "text-[#FDF6ED]")} />
-                  : <ChevronLeft className={cn("size-4 shrink-0", theme.headerChevron)} />
+              {hasSubmenus && isOpen && (
+                <ChevronDown className={cn("size-4 shrink-0", theme.selectedHeaderChevron ?? "text-[#FDF6ED]")} />
               )}
             </button>
 

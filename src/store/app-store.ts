@@ -1464,6 +1464,15 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "building-permit-store-v3",
+      version: 4,
+      migrate: (persistedState: any) => {
+        if (persistedState) {
+          if (persistedState.ltpTheme === "apcrda-blue" || !persistedState.ltpTheme) {
+            persistedState.ltpTheme = "maroon-cream";
+          }
+        }
+        return persistedState;
+      },
     }
   )
 );

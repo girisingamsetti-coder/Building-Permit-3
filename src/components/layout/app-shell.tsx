@@ -8,7 +8,9 @@ import { Topbar } from "./topbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { mobileNavOpen, setMobileNavOpen, theme } = useAppStore();
+  const { mobileNavOpen, setMobileNavOpen, theme, user, ltpActiveMenu, view } = useAppStore();
+
+  const isLtpDashboard = (user?.role === "LTP" && (ltpActiveMenu === "dashboard" || (!ltpActiveMenu && view === "ltp-applications"))) || view === "ltp-dashboard";
 
   // Apply theme class to <html>
   React.useEffect(() => {
@@ -38,10 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main */}
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
         <Topbar />
-        <main className="flex flex-1 flex-col overflow-y-auto">
-          <div className="w-full px-2 pt-1 pb-4 animate-fade-in-up">
+        <main className={cn("flex flex-1 flex-col min-h-0", isLtpDashboard ? "overflow-hidden" : "overflow-y-auto")}>
+          <div className={cn("w-full flex-1 flex flex-col min-h-0", isLtpDashboard ? "p-0 h-full" : "px-2 pt-1 pb-4 animate-fade-in-up")}>
             {children}
           </div>
 

@@ -544,7 +544,7 @@ export function LtpPortalView() {
   };
 
   return (
-    <div className="h-full overflow-hidden p-4 bg-[#F8F9FA]">
+    <div className={cn("h-full w-full", ltpActiveMenu === "dashboard" ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-hidden p-4 bg-[#F8F9FA]")}>
       {renderContent()}
 
       {/* New Application Dialog */}

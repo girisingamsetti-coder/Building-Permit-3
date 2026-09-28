@@ -65,7 +65,15 @@ export function Sidebar() {
   }, [user, portal, roles]);
 
   const isLTP = portal === "LTP" || user?.role === "LTP";
-  const ltpTheme = useAppStore((s) => s.ltpTheme) ?? "maroon-cream";
+  const rawLtpTheme = useAppStore((s) => s.ltpTheme);
+  const setLtpTheme = useAppStore((s) => s.setLtpTheme);
+  const ltpTheme = (!rawLtpTheme || rawLtpTheme === "apcrda-blue") ? "maroon-cream" : rawLtpTheme;
+
+  React.useEffect(() => {
+    if (rawLtpTheme === "apcrda-blue") {
+      setLtpTheme("maroon-cream");
+    }
+  }, [rawLtpTheme, setLtpTheme]);
 
   const ltpStyles = {
     "maroon-cream": {
