@@ -11,8 +11,8 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react";
-import type { Application } from "@/types";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
+import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 
 export interface SubmissionItem {
   id: string;
@@ -72,7 +72,7 @@ export function LtpSubmittedApplications({
 }: {
   onNewApp?: (appType?: string) => void;
 }) {
-  const applications = useAppStore((s) => s.applications);
+  const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
 
   // Search & Filter State

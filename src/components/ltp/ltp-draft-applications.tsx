@@ -14,6 +14,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import type { Application } from "@/types";
+import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 
 interface DraftItem {
@@ -31,7 +32,7 @@ export function LtpDraftApplications({
 }: {
   onNewApp: (appType?: string) => void;
 }) {
-  const applications = useAppStore((s) => s.applications);
+  const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
 
@@ -61,7 +62,7 @@ export function LtpDraftApplications({
   // Compute draft proposals from store or include the standard APCRDA demo draft
   const draftItems: DraftItem[] = React.useMemo(() => {
     const userDrafts = applications.filter(
-      (a) => (a.ltpId === user?.id || a.ltpId === "u-ltp-01") && a.status === "DRAFT"
+      (a) => a.status === "DRAFT"
     );
 
     // Format draft items

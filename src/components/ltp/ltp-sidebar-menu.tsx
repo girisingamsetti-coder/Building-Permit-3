@@ -96,6 +96,109 @@ const LTP_MODULES: LtpModuleDef[] = [
   },
 ];
 
+const ZONAL_MODULES: LtpModuleDef[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    iconType: "dashboard",
+    directMenuId: "dashboard",
+    submenus: [],
+  },
+  {
+    id: "registration",
+    label: "Registration",
+    iconType: "applications",
+    submenus: [
+      { id: "developer-verification", label: "Developer Verification" },
+      { id: "rejected-registration", label: "Rejected" },
+      { id: "approved-registration", label: "Approved" },
+      { id: "all-ltp-approved", label: "All LTP- Approved" },
+    ],
+  },
+  {
+    id: "application-status",
+    label: "Application Status",
+    iconType: "scrutiny",
+    submenus: [
+      { id: "review-proceeding", label: "Review Proceeding" },
+      { id: "proceeding-issued", label: "Proceeding Issued" },
+      { id: "revoke", label: "Revoke" },
+    ],
+  },
+  {
+    id: "proceeding-status",
+    label: "Proceeding Status",
+    iconType: "compliance",
+    submenus: [
+      { id: "verified", label: "Verified" },
+      { id: "shortfall", label: "Shortfall" },
+      { id: "review-shortfall-submission", label: "Review Shortfall Submission" },
+      { id: "show-cause", label: "Show Cause" },
+      { id: "review-show-cause-submission", label: "Review Show Cause Submission" },
+    ],
+  },
+  {
+    id: "change-of-ltp",
+    label: "Change Of LTP",
+    iconType: "ltp-change",
+    directMenuId: "change-ltp",
+    submenus: [],
+  },
+  {
+    id: "outward",
+    label: "Outward",
+    iconType: "applications",
+    directMenuId: "outward",
+    submenus: [],
+  },
+];
+
+const TPA_MODULES: LtpModuleDef[] = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    iconType: "dashboard",
+    directMenuId: "dashboard",
+    submenus: [],
+  },
+  {
+    id: "registration",
+    label: "Registration",
+    iconType: "applications",
+    submenus: [
+      { id: "all-ltp-in-process", label: "All LTP- In Process" },
+    ],
+  },
+  {
+    id: "application-status",
+    label: "Application Status",
+    iconType: "scrutiny",
+    submenus: [
+      { id: "review-proceeding", label: "Review Proceeding" },
+      { id: "proceeding-issued", label: "Proceeding Issued" },
+    ],
+  },
+  {
+    id: "proceeding-status",
+    label: "Proceeding Status",
+    iconType: "compliance",
+    submenus: [
+      { id: "verified", label: "Verified" },
+      { id: "shortfall", label: "Shortfall" },
+      { id: "review-shortfall-submission", label: "Review Shortfall Submission" },
+      { id: "show-cause", label: "Show Cause" },
+      { id: "review-show-cause-submission", label: "Review Show Cause Submission" },
+    ],
+  },
+  {
+    id: "outward",
+    label: "Outward",
+    iconType: "applications",
+    directMenuId: "outward",
+    submenus: [],
+  },
+];
+
 interface ThemeDetails {
   id: LtpSidebarTheme;
   label: string;
@@ -261,13 +364,16 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const ltpTheme = (!rawTheme || rawTheme === "apcrda-blue") ? "maroon-cream" : rawTheme;
   const navigate = useAppStore((s) => s.navigate);
   const view = useAppStore((s) => s.view);
+  const user = useAppStore((s) => s.user);
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
+  
+  const modules = user?.role === "TPA" ? TPA_MODULES : (user?.role === "ZDD" || user?.role === "ZJD") ? ZONAL_MODULES : LTP_MODULES;
 
   // Single module expanded at a time
   const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {
     return (
-      LTP_MODULES.find(
+      modules.find(
         (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
       )?.id ?? "dashboard"
     );
@@ -275,7 +381,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   // Keep parent module expanded if active menu changes
   React.useEffect(() => {
-    const parentMod = LTP_MODULES.find(
+    const parentMod = modules.find(
       (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
     );
     if (parentMod) {
@@ -323,7 +429,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   if (collapsed) {
     return (
       <div className="flex flex-col w-full items-center pt-2 pb-6 space-y-1">
-        {LTP_MODULES.map((mod) => {
+        {modules.map((mod) => {
           const isActive =
             mod.directMenuId === ltpActiveMenu ||
             mod.submenus.some((s) => s.id === ltpActiveMenu);
@@ -350,7 +456,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   // ── Expanded: full accordion menu ───────────────────────────────────────
   return (
     <div className="flex flex-col w-full text-sm font-sans select-none px-2 pt-2 space-y-1 pb-6">
-      {LTP_MODULES.map((mod) => {
+      {modules.map((mod) => {
         const isOpen = openModuleId === mod.id;
         const hasSubmenus = mod.submenus.length > 0;
         return (

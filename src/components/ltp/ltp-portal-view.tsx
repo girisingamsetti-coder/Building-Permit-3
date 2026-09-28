@@ -11,6 +11,7 @@ import { UnifiedDashboard } from "@/components/dashboard/unified-dashboard";
 import { LtpDraftApplications } from "@/components/ltp/ltp-draft-applications";
 import { LtpSubmittedApplications } from "@/components/ltp/ltp-submitted-applications";
 import { LtpSubmissionDetails } from "@/components/ltp/ltp-submission-details";
+import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpObjections } from "@/components/ltp/ltp-objections";
 import {
   FilePlus2,
@@ -34,16 +35,13 @@ import type { Application } from "@/types";
 export function LtpPortalView() {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
-  const applications = useAppStore((s) => s.applications);
+  const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
   const [newAppOpen, setNewAppOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  // Get LTP's applications or mock applications assigned to LTP
-  const userApps = React.useMemo(() => {
-    return applications.filter((a) => a.ltpId === user?.id || a.ltpId === "u-ltp-01");
-  }, [applications, user]);
+  const userApps = applications;
 
   // Dynamic content based on selected menu
   const renderContent = () => {
@@ -62,7 +60,8 @@ export function LtpPortalView() {
         );
       }
 
-      case "submitted-applications": {
+      case "submitted-applications":
+      case "all-ltp-in-process": {
         return (
           <LtpSubmittedApplications
             onNewApp={(_type) => {
@@ -132,7 +131,11 @@ export function LtpPortalView() {
       }
 
       case "objected-files":
-      case "shortfall": {
+      case "shortfall":
+      case "verified":
+      case "show-cause":
+      case "review-shortfall-submission":
+      case "review-show-cause-submission": {
         return <LtpObjections />;
       }
 

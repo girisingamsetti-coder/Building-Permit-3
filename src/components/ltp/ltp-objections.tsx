@@ -20,6 +20,7 @@ import {
   UploadCloud,
 } from "lucide-react";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
+import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 
 export interface ObjectionItem {
   id: string;
@@ -104,7 +105,7 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
 ];
 
 export function LtpObjections() {
-  const applications = useAppStore((s) => s.applications);
+  const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
 
   // Search & Filter State

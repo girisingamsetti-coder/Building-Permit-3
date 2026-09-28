@@ -17,8 +17,8 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // ============================================================
 
 export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "SUPER_ADMIN" {
-  if (role === "SUPER_ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER" || role === "ZDD" || role === "ZJD") return "SUPER_ADMIN";
-  if (role === "LTP") return "LTP";
+  if (role === "SUPER_ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER") return "SUPER_ADMIN";
+  if (role === "LTP" || role === "ZDD" || role === "ZJD" || role === "TPA") return "LTP";
   // TPA, ZONAL_HEAD, DIRECTOR land on the OFFICER portal
   return "OFFICER";
 }
@@ -37,7 +37,7 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 }
 
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
-  if (user.role === "LTP") {
+  if (user.role === "LTP" || user.role === "ZDD" || user.role === "ZJD" || user.role === "TPA") {
     const ltpAllowedViews = [
       "ltp-applications",
       "ltp-dashboard",
