@@ -285,66 +285,66 @@ export function OutwardView() {
       {/* Detail Dialog */}
       {selectedOutward && (
         <Dialog open={!!selectedOutward} onOpenChange={(open) => !open && setSelectedOutward(null)}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
+          <DialogContent className="max-w-lg bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <Barcode className="size-5 text-indigo-600" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <Barcode className="size-5 text-[#7A1316]" />
                   Consignment #{selectedOutward.trackingNumber}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedOutward.status === "ACKNOWLEDGED"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-blue-600 text-white"
+                      ? "bg-emerald-700 text-white"
+                      : "bg-[#7A1316] text-white"
                   )}
                 >
                   {selectedOutward.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs font-mono">
+              <DialogDescription className="text-xs font-mono text-slate-600">
                 Dispatch Record: {selectedOutward.dispatchNumber} · File #{selectedOutward.applicationNumber}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-2">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Document Type:</span>
-                  <span className="font-semibold text-foreground">{selectedOutward.documentType.replace(/_/g, " ")}</span>
+                  <span className="text-slate-500">Document Type:</span>
+                  <span className="font-semibold text-slate-800">{selectedOutward.documentType.replace(/_/g, " ")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Dispatch Mode:</span>
-                  <span className="font-medium text-foreground">{selectedOutward.dispatchMode.replace(/_/g, " ")}</span>
+                  <span className="text-slate-500">Dispatch Mode:</span>
+                  <span className="font-medium text-slate-800">{selectedOutward.dispatchMode.replace(/_/g, " ")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Dispatched By Officer:</span>
-                  <span className="text-foreground">{selectedOutward.senderOfficer}</span>
+                  <span className="text-slate-500">Dispatched By Officer:</span>
+                  <span className="text-slate-800">{selectedOutward.senderOfficer}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Dispatched At:</span>
-                  <span className="text-foreground">{selectedOutward.dispatchDate}</span>
+                  <span className="text-slate-500">Dispatched At:</span>
+                  <span className="text-slate-800">{selectedOutward.dispatchDate}</span>
                 </div>
                 {selectedOutward.deliveryDate && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Delivery / Acknowledged At:</span>
-                    <span className="font-bold text-emerald-600">{selectedOutward.deliveryDate}</span>
+                    <span className="text-slate-500">Delivery / Acknowledged At:</span>
+                    <span className="font-bold text-emerald-800">{selectedOutward.deliveryDate}</span>
                   </div>
                 )}
               </div>
 
-              <Card className="p-3 border">
-                <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
+              <Card className="p-3 border border-[#DCD5C8] bg-[#FBF3E4]">
+                <span className="text-[10px] text-[#7A1316] uppercase font-bold block mb-1">
                   Recipient Address & Acknowledgement
                 </span>
-                <div className="font-semibold text-foreground text-sm">{selectedOutward.recipientName}</div>
-                <div className="text-muted-foreground mt-1">{selectedOutward.recipientAddress}</div>
+                <div className="font-semibold text-slate-800 text-sm">{selectedOutward.recipientName}</div>
+                <div className="text-slate-600 mt-1">{selectedOutward.recipientAddress}</div>
               </Card>
 
               {selectedOutward.remarks && (
-                <div className="p-2.5 rounded-lg border bg-muted/30 text-[11px]">
-                  <strong>Dispatch Note:</strong> {selectedOutward.remarks}
+                <div className="p-2.5 rounded-lg border border-[#DCD5C8] bg-white/70 text-[11px] text-slate-700">
+                  <strong className="text-[#7A1316]">Dispatch Note:</strong> {selectedOutward.remarks}
                 </div>
               )}
             </div>

@@ -42,8 +42,8 @@ const LTP_MODULES: LtpModuleDef[] = [
     label: "Applications",
     iconType: "applications",
     submenus: [
-      { id: "draft-application", label: "Draft Applications" },
-      { id: "submitted-applications", label: "Submitted Permission Files" },
+      { id: "draft-application", label: "Drafts" },
+      { id: "submitted-applications", label: "Submissions" },
       { id: "objected-files", label: "Objections" },
     ],
   },

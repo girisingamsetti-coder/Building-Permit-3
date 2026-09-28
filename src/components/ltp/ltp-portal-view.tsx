@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input";
 import { StatusBadge, PriorityBadge } from "@/components/design-system/badges";
 import { NewApplicationDialog } from "@/components/ltp/new-application-dialog";
 import { UnifiedDashboard } from "@/components/dashboard/unified-dashboard";
+import { LtpDraftApplications } from "@/components/ltp/ltp-draft-applications";
+import { LtpSubmittedApplications } from "@/components/ltp/ltp-submitted-applications";
+import { LtpSubmissionDetails } from "@/components/ltp/ltp-submission-details";
+import { LtpObjections } from "@/components/ltp/ltp-objections";
 import {
   FilePlus2,
   Search,
@@ -29,6 +33,7 @@ import type { Application } from "@/types";
 
 export function LtpPortalView() {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
+  const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
   const applications = useAppStore((s) => s.applications);
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
@@ -48,158 +53,22 @@ export function LtpPortalView() {
       }
 
       case "draft-application": {
-        const drafts = userApps.filter((a) => a.status === "DRAFT");
         return (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">Draft Applications</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Prepare, edit, and lodge new building permission applications before formal submission.
-                </p>
-              </div>
-              <Button
-                onClick={() => setNewAppOpen(true)}
-                className="bg-[#801824] hover:bg-[#941C2B] text-white gap-1.5 text-xs h-9 px-4 rounded-md shadow-sm"
-              >
-                <FilePlus2 className="size-4" /> Draft New Application
-              </Button>
-            </div>
-
-            {drafts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-                <FileText className="size-10 text-slate-300 mb-3" />
-                <h3 className="text-sm font-semibold text-slate-800">No Draft Applications</h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm">
-                  You do not have any pending drafts. Click &quot;Draft New Application&quot; to begin filling in the APCRDA BBAS application.
-                </p>
-                <Button
-                  onClick={() => setNewAppOpen(true)}
-                  className="mt-4 bg-[#801824] hover:bg-[#941C2B] text-white gap-1.5 text-xs h-8 px-3 rounded-md"
-                >
-                  <FilePlus2 className="size-3.5" /> Start New Application
-                </Button>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-                    <tr>
-                      <th className="px-4 py-3">Application No.</th>
-                      <th className="px-4 py-3">Project Name</th>
-                      <th className="px-4 py-3">Applicant</th>
-                      <th className="px-4 py-3">Status</th>
-                      <th className="px-4 py-3">Last Updated</th>
-                      <th className="px-4 py-3 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {drafts.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs gap-1 border-slate-300"
-                          >
-                            Continue <ArrowRight className="size-3" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          <LtpDraftApplications
+            onNewApp={(_type) => {
+              setNewAppOpen(true);
+            }}
+          />
         );
       }
 
       case "submitted-applications": {
-        const submitted = userApps.filter((a) => a.status !== "DRAFT");
-        const filtered = searchQuery
-          ? submitted.filter(
-            (a) =>
-              a.applicationNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              a.project.name.toLowerCase().includes(searchQuery.toLowerCase())
-          )
-          : submitted;
-
         return (
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight text-slate-900">Submitted Permission Files</h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Track and monitor all formally submitted building permit applications.
-                </p>
-              </div>
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 size-3.5 text-slate-400" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search application no..."
-                  className="h-8 pl-8 text-xs bg-white"
-                />
-              </div>
-            </div>
-
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3"># Application No.</th>
-                    <th className="px-4 py-3">Project</th>
-                    <th className="px-4 py-3">Applicant</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Stage</th>
-                    <th className="px-4 py-3">Submitted</th>
-                    <th className="px-4 py-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="text-center py-8 text-slate-400">
-                        No submitted applications found.
-                      </td>
-                    </tr>
-                  ) : (
-                    filtered.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-slate-800">{app.project.name}</div>
-                          <div className="text-[10px] text-slate-400">{app.project.ward}</div>
-                        </td>
-                        <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3 text-slate-700 font-medium">{app.currentStageLabel}</td>
-                        <td className="px-4 py-3 text-slate-500">{new Date(app.submissionDate).toLocaleDateString("en-IN")}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs text-blue-600 hover:text-blue-800 gap-1"
-                          >
-                            Open <ArrowRight className="size-3" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <LtpSubmittedApplications
+            onNewApp={(_type) => {
+              setNewAppOpen(true);
+            }}
+          />
         );
       }
 
@@ -264,61 +133,7 @@ export function LtpPortalView() {
 
       case "objected-files":
       case "shortfall": {
-        const objectedApps = userApps.filter(
-          (a) => a.status === "SHORTFALL_RAISED" || a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED"
-        );
-        return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Objected Files &amp; Shortfall Notices</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Files flagged with scrutiny objections or shortfall requirements that need your response.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-amber-50 border-b border-amber-200 text-amber-900 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3">Application No.</th>
-                    <th className="px-4 py-3">Project</th>
-                    <th className="px-4 py-3">Objection / Shortfall Reason</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {objectedApps.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-8 text-slate-400">
-                        No objected files or active shortfalls.
-                      </td>
-                    </tr>
-                  ) : (
-                    objectedApps.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-amber-800">
-                          {app.shortfalls?.[0]?.description ?? "Scrutiny Can Not Done / Revised Drawings Required"}
-                        </td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs bg-amber-600 hover:bg-amber-700 text-white gap-1"
-                          >
-                            Correct &amp; Resubmit <ArrowRight className="size-3" />
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <LtpObjections />;
       }
 
       case "approved-files":
@@ -544,7 +359,7 @@ export function LtpPortalView() {
   };
 
   return (
-    <div className={cn("h-full w-full", ltpActiveMenu === "dashboard" ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-hidden p-4 bg-[#F8F9FA]")}>
+    <div className={cn("h-full w-full", (ltpActiveMenu === "dashboard" || ltpActiveMenu === "draft-application" || ltpActiveMenu === "submitted-applications") ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-hidden p-4 bg-[#F8F9FA]")}>
       {renderContent()}
 
       {/* New Application Dialog */}

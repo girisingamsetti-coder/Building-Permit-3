@@ -129,8 +129,8 @@ function appLabel(k: AppTypeKey | "") { return k === "COMMERCIAL_BP" ? "Commerci
 function F({ label, required, error, hint, children, full }: { label: string; required?: boolean; error?: string; hint?: string; children: React.ReactNode; full?: boolean }) {
   return (
     <div className={cn("space-y-1.5", full && "col-span-3")}>
-      <Label className="text-[11px] font-semibold text-[#374151]">{label}</Label>
-      <div className="[&_input]:h-[36px] [&_input]:rounded-[8px] [&_input]:border-[#D7DCE2] [&_input]:bg-white [&_input]:text-[13px] [&_input]:text-[#374151] [&_input]:placeholder-[#9CA3AF] [&_input]:focus-visible:border-[#4C8E88] [&_input]:focus-visible:ring-0 [&_input]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_textarea]:min-h-[80px] [&_textarea]:rounded-[8px] [&_textarea]:border-[#D7DCE2] [&_textarea]:bg-white [&_textarea]:text-[13px] [&_textarea]:text-[#374151] [&_textarea]:focus-visible:border-[#4C8E88] [&_textarea]:focus-visible:ring-0 [&_textarea]:focus-visible:shadow-[0_0_0_3px_rgba(76,142,136,0.12)] [&_button[role='combobox']]:h-[36px] [&_button[role='combobox']]:rounded-[8px] [&_button[role='combobox']]:border-[#D7DCE2] [&_button[role='combobox']]:bg-white [&_button[role='combobox']]:text-[13px] [&_button[role='combobox']]:text-[#374151] [&_button[role='combobox']]:focus:border-[#4C8E88] [&_button[role='combobox']]:focus:ring-0 [&_button[role='combobox']]:focus:shadow-[0_0_0_3px_rgba(76,142,136,0.12)]">
+      <Label className="text-[11px] font-semibold text-slate-800">{label}</Label>
+      <div className="[&_input]:h-[36px] [&_input]:rounded-[8px] [&_input]:border-[#DCD5C8] [&_input]:bg-white [&_input]:text-[13px] [&_input]:text-slate-800 [&_input]:placeholder-[#9CA3AF] [&_input]:focus-visible:border-[#7A1316] [&_input]:focus-visible:ring-0 [&_input]:focus-visible:shadow-[0_0_0_2px_rgba(122,19,22,0.15)] [&_textarea]:min-h-[80px] [&_textarea]:rounded-[8px] [&_textarea]:border-[#DCD5C8] [&_textarea]:bg-white [&_textarea]:text-[13px] [&_textarea]:text-slate-800 [&_textarea]:focus-visible:border-[#7A1316] [&_textarea]:focus-visible:ring-0 [&_textarea]:focus-visible:shadow-[0_0_0_2px_rgba(122,19,22,0.15)] [&_button[role='combobox']]:h-[36px] [&_button[role='combobox']]:rounded-[8px] [&_button[role='combobox']]:border-[#DCD5C8] [&_button[role='combobox']]:bg-white [&_button[role='combobox']]:text-[13px] [&_button[role='combobox']]:text-slate-800 [&_button[role='combobox']]:focus:border-[#7A1316] [&_button[role='combobox']]:focus:ring-0 [&_button[role='combobox']]:focus:shadow-[0_0_0_2px_rgba(122,19,22,0.15)]">
         {children}
       </div>
       {hint && !error && <p className="text-[11px] text-slate-400">{hint}</p>}
@@ -139,17 +139,17 @@ function F({ label, required, error, hint, children, full }: { label: string; re
   );
 }
 function Divider({ title }: { title: string }) {
-  return <div className="col-span-3 border-t border-slate-100 pt-4 pb-0"><p className="text-xs font-semibold text-slate-600">{title}</p></div>;
+  return <div className="col-span-3 border-t border-[#DCD5C8] pt-4 pb-0"><p className="text-xs font-bold text-[#7A1316]">{title}</p></div>;
 }
 function RV({ label, value }: { label: string; value?: string }) {
-  return <div><p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p><p className="mt-0.5 text-sm text-slate-800">{value?.trim() || "—"}</p></div>;
+  return <div><p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{label}</p><p className="mt-0.5 text-sm text-slate-900 font-medium">{value?.trim() || "—"}</p></div>;
 }
 function ReviewCard({ title, step, onEdit, children }: { title: string; step: number; onEdit: (s: number) => void; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-slate-200 overflow-hidden">
-      <div className="flex items-center justify-between bg-slate-50 px-4 py-2 border-b border-slate-100">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{title}</p>
-        <Button variant="ghost" size="sm" className="h-6 gap-1 text-[11px] text-blue-600 hover:bg-blue-50 px-2" onClick={() => onEdit(step)}><Pencil className="size-3" />Edit</Button>
+    <div className="rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] overflow-hidden shadow-2xs">
+      <div className="flex items-center justify-between bg-[#F5EBE1] px-4 py-2 border-b border-[#DCD5C8]">
+        <p className="text-[11px] font-black uppercase tracking-wider text-[#7A1316]">{title}</p>
+        <Button variant="ghost" size="sm" className="h-6 gap-1 text-[11px] text-[#7A1316] hover:bg-[#FAF4EB] font-bold px-2 cursor-pointer" onClick={() => onEdit(step)}><Pencil className="size-3" />Edit</Button>
       </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 sm:grid-cols-3">{children}</div>
     </div>
@@ -300,23 +300,23 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   if (submitted) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="max-w-lg p-0 overflow-hidden">
+        <DialogContent className="max-w-lg p-0 overflow-hidden bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-2xl">
           <DialogTitle className="sr-only">Application submitted</DialogTitle>
-          <div className="bg-gradient-to-br from-emerald-50 to-green-50 px-8 py-10 text-center">
-            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-100"><PartyPopper className="size-7 text-emerald-600" /></div>
-            <h2 className="text-lg font-bold text-slate-900">Application submitted!</h2>
-            <p className="mt-1 text-sm text-slate-600">Now entering drawing scrutiny.</p>
+          <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-8 py-8 text-center">
+            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-[#7A1316] text-white shadow-sm"><PartyPopper className="size-7" /></div>
+            <h2 className="text-xl font-black text-[#7A1316]">Application submitted!</h2>
+            <p className="mt-1 text-xs text-slate-600">Now entering automatic drawing scrutiny.</p>
           </div>
           <div className="px-8 py-6 space-y-4">
-            <div className="col-span-3 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
+            <div className="col-span-3 grid grid-cols-2 gap-3 rounded-xl border border-[#DCD5C8] bg-white p-4 text-xs">
               <RV label="Application No." value={submittedAppNo} />
               <RV label="Type" value={appLabel(data.appType as AppTypeKey)} />
               <RV label="Applicant" value={data.applicant.fullName} />
               <RV label="Date" value={new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })} />
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => { reset(); onOpenChange(false); }}>Close</Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => { reset(); onOpenChange(false); openApplication(submittedAppId, "ltp-application-details"); }}>
+            <div className="flex gap-2.5">
+              <Button variant="outline" className="flex-1 border-[#DCD5C8] text-slate-700 hover:bg-[#FBF3E4]" onClick={() => { reset(); onOpenChange(false); }}>Close</Button>
+              <Button className="flex-1 bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold" onClick={() => { reset(); onOpenChange(false); openApplication(submittedAppId, "ltp-application-details"); }}>
                 View Application <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -330,19 +330,19 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
   if (!typeSelected) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="w-[95vw] max-w-5xl p-12 gap-8 bg-[#FAFBFC] border-none shadow-2xl">
+        <DialogContent className="w-[95vw] max-w-5xl p-8 sm:p-10 gap-6 bg-[#FAF7F2] border-2 border-[#7A1316] rounded-2xl shadow-2xl">
           <DialogTitle className="sr-only">Select application type</DialogTitle>
           
           {/* Header */}
-          <div className="space-y-3 text-left">
-            <h2 className="text-[28px] font-semibold tracking-tight text-[#0F172A]">New application</h2>
-            <p className="text-[15px] text-[#475569] leading-relaxed max-w-4xl">
+          <div className="space-y-1.5 text-left border-b border-[#DCD5C8] pb-4">
+            <h2 className="text-2xl font-black tracking-tight text-[#7A1316]">New application</h2>
+            <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
               Choose what you are applying for. This decides the number series, the drawings required and the fees charged, and cannot be changed later.
             </p>
           </div>
 
           {/* Content Options */}
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {APP_TYPES.map((t) => {
               const Icon = t.icon;
               const sel = selectedType === t.key;
@@ -353,20 +353,20 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                   key={t.key} 
                   onClick={() => setSelectedType(t.key)}
                   className={cn(
-                    "relative flex items-start gap-4 rounded-xl border-[1.5px] p-6 text-left transition-all duration-200", 
-                    sel ? "border-[#3B82F6] bg-[#F4F8FF] shadow-sm ring-1 ring-[#3B82F6]" : "border-[#E2E8F0] bg-white hover:border-[#CBD5E1]"
+                    "relative flex items-start gap-4 rounded-xl border-2 p-5 text-left transition-all duration-200 cursor-pointer", 
+                    sel ? "border-[#7A1316] bg-[#FBF3E4] shadow-sm ring-1 ring-[#7A1316]" : "border-[#DCD5C8] bg-white hover:border-[#7A1316]/60 hover:bg-[#FDF6ED]"
                   )}
                 >
-                  <Icon className={cn("size-6 mt-0.5 shrink-0", sel ? "text-[#3B82F6]" : "text-[#64748B]")} />
-                  <div className="flex flex-col gap-1.5 w-full">
-                    <p className={cn("text-[17px] font-medium leading-snug", sel ? "text-[#1E40AF]" : "text-[#0F172A]")}>{t.label}</p>
-                    <p className="text-[14px] text-[#64748B] mb-3">{t.desc}</p>
+                  <Icon className={cn("size-6 mt-0.5 shrink-0", sel ? "text-[#7A1316]" : "text-slate-500")} />
+                  <div className="flex flex-col gap-1 w-full">
+                    <p className={cn("text-base font-bold leading-snug", sel ? "text-[#7A1316]" : "text-slate-900")}>{t.label}</p>
+                    <p className="text-xs text-slate-500 mb-2">{t.desc}</p>
                     
-                    <div className="flex flex-col items-start gap-2.5 mt-1">
-                      <span className="inline-flex items-center rounded-full border border-[#E2E8F0] bg-white px-3.5 py-1 text-[13px] font-medium text-[#475569]">
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="inline-flex items-center rounded-full border border-[#DCD5C8] bg-white px-3 py-0.5 text-xs font-semibold text-slate-700">
                         {numberPrefix}
                       </span>
-                      <span className="inline-flex items-center rounded-full border border-[#BAE6FD] bg-[#F0F9FF] px-3.5 py-1 text-[13px] font-medium text-[#0284C7]">
+                      <span className="inline-flex items-center rounded-full border border-[#DCD5C8] bg-[#FAF4EB] px-3 py-0.5 text-xs font-bold text-[#7A1316]">
                         Drawing scrutiny required
                       </span>
                     </div>
@@ -377,8 +377,8 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
           </div>
 
           {/* Footer Info & Button */}
-          <div className="flex flex-col gap-6 mt-2">
-            <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-4.5 px-5 text-[14px] text-[#475569] leading-relaxed shadow-sm">
+          <div className="flex flex-col gap-4 mt-2">
+            <div className="rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] p-3 text-xs text-slate-700 leading-relaxed shadow-2xs">
               An application number is issued as soon as you begin, and the file is saved as a draft. You can leave at any point and pick up where you left off — nothing is filed until you submit it.
             </div>
             <div className="flex justify-end">
@@ -386,11 +386,11 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                 onClick={handleStart} 
                 disabled={!selectedType} 
                 className={cn(
-                  "gap-2 rounded-full px-6 py-5 text-[15px] font-medium transition-all shadow-md",
-                  selectedType ? "bg-gradient-to-r from-[#A78BFA] to-[#818CF8] hover:opacity-90 text-white" : "bg-[#CBD5E1] text-[#94A3B8]"
+                  "gap-2 rounded-lg px-6 py-2 text-xs font-bold transition-all shadow-xs cursor-pointer",
+                  selectedType ? "bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10]" : "bg-slate-200 text-slate-400"
                 )}
               >
-                {!selectedType && <div className="size-4 rounded-full border-2 border-current border-t-transparent animate-spin" />}
+                {!selectedType && <div className="size-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />}
                 Start application <ArrowRight className="size-4" />
               </Button>
             </div>
@@ -407,24 +407,24 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
     <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
       <DialogContent
         showCloseButton={false}
-        className="w-[70vw] max-w-[70vw] sm:max-w-[70vw] p-0 gap-0 flex flex-col overflow-hidden bg-white border-0 shadow-[0_20px_60px_rgba(0,0,0,0.22)] rounded-[16px]"
+        className="w-[85vw] max-w-5xl sm:max-w-5xl p-0 gap-0 flex flex-col overflow-hidden bg-[#FAF7F2] border-2 border-[#7A1316] shadow-2xl rounded-2xl"
         style={{ height: "85vh", maxHeight: "85vh" }}
       >
         <DialogTitle className="sr-only">New Application — {cur.label}</DialogTitle>
 
         {/* ── HEADER (fixed) ─────────────────────────────────────────── */}
-        <div className="shrink-0 flex items-center justify-between border-b border-[#E4E7EC] bg-white px-6 py-4">
+        <div className="shrink-0 flex items-center justify-between border-b-2 border-[#7A1316] bg-[#FBF3E4] px-6 py-3.5 shadow-2xs">
           <div className="flex items-center gap-3">
-            <div className="flex size-9 items-center justify-center rounded-lg bg-[#E8F3F1] text-[#0D5B56]"><FilePlus2 className="size-5" /></div>
+            <div className="flex size-9 items-center justify-center rounded-lg bg-[#7A1316] text-white shadow-2xs"><FilePlus2 className="size-5" /></div>
             <div>
-              <p className="text-[18px] font-semibold text-[#1F2933]">New Application</p>
-              <p className="text-[12px] text-[#98A2B3]">Submit a new land allotment application to APCRDA</p>
+              <p className="text-base font-black text-[#7A1316]">New Application</p>
+              <p className="text-xs text-slate-600">Submit a new building permission application to APCRDA</p>
             </div>
           </div>
         </div>
 
         {/* ── HORIZONTAL STEPPER (fixed) ──────────────────────────────── */}
-        <div className="shrink-0 border-b border-[#E4E7EC] bg-white px-6 py-4">
+        <div className="shrink-0 border-b border-[#DCD5C8] bg-[#FAF7F2] px-6 py-3.5">
           <div className="flex items-center overflow-x-auto justify-between" style={{ scrollbarWidth: "none" }}>
             {STEPS.map((s, idx) => {
               const done = completed.has(s.id);
@@ -437,22 +437,22 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
                     onClick={() => reachable && !active && setStep(s.id)}
                     disabled={!reachable || active}
                     aria-current={active ? "step" : undefined}
-                    className={cn("flex flex-col items-center gap-2 shrink-0 transition-all", reachable && !active ? "cursor-pointer" : "cursor-default")}
+                    className={cn("flex flex-col items-center gap-1.5 shrink-0 transition-all", reachable && !active ? "cursor-pointer" : "cursor-default")}
                   >
                     <div className={cn(
-                      "flex size-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all",
-                      active && "border-[#0D5B56] bg-[#E8F3F1] text-[#0D5B56]",
-                      done && !active && "border-[#0D5B56] bg-[#0D5B56] text-white",
-                      !done && !active && "border-[#E4E7EC] bg-white text-[#98A2B3]"
+                      "flex size-9 items-center justify-center rounded-full border-2 text-xs font-bold transition-all shadow-2xs",
+                      active && "border-[#7A1316] bg-[#7A1316] text-white",
+                      done && !active && "border-[#7A1316] bg-[#FBF3E4] text-[#7A1316]",
+                      !done && !active && "border-[#DCD5C8] bg-white text-slate-400"
                     )}>
-                      {done && !active ? <Check className="size-4" /> : <Icon className="size-4" />}
+                      {done && !active ? <Check className="size-3.5 text-[#7A1316] font-black" /> : <Icon className="size-4" />}
                     </div>
-                    <span className={cn("text-[11px] font-medium whitespace-nowrap", active ? "text-[#1F2933]" : done ? "text-[#0D5B56]" : "text-[#98A2B3]")}>
+                    <span className={cn("text-[11px] font-semibold whitespace-nowrap", active ? "text-[#7A1316] font-black" : done ? "text-[#7A1316]" : "text-slate-500")}>
                       {s.label}
                     </span>
                   </button>
                   {idx < STEPS.length - 1 && (
-                    <div className={cn("mx-2 h-px flex-1 min-w-[20px] transition-colors", done ? "bg-[#0D5B56]" : "bg-[#E4E7EC]")} />
+                    <div className={cn("mx-2 h-0.5 flex-1 min-w-[20px] transition-colors", done ? "bg-[#7A1316]" : "bg-[#DCD5C8]")} />
                   )}
                 </React.Fragment>
               );
@@ -461,9 +461,9 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
         </div>
 
         {/* ── SCROLLABLE BODY ─────────────────────────────────────────── */}
-        <div ref={bodyRef} className="flex-1 overflow-y-auto bg-white">
-          <div className="px-8 py-8 w-full">
-            <h3 className="text-[18px] font-semibold text-[#374151] mb-6">{cur.label}</h3>
+        <div ref={bodyRef} className="flex-1 overflow-y-auto bg-[#FAF7F2]">
+          <div className="px-6 py-6 w-full max-w-4xl mx-auto bg-[#FBF3E4] border border-[#DCD5C8] rounded-xl my-4 shadow-xs">
+            <h3 className="text-base font-black text-[#7A1316] border-b border-[#DCD5C8] pb-2 mb-5 uppercase tracking-wide">{cur.label}</h3>
 
             {/* ── STEP 1: APPLICANT ── */}
             {step === 1 && (
@@ -673,25 +673,25 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
         </div>
 
         {/* ── FOOTER (fixed) ──────────────────────────────────────────── */}
-        <div className="shrink-0 flex items-center justify-between border-t border-[#E4E7EC] bg-white px-6 py-4 sticky bottom-0">
+        <div className="shrink-0 flex items-center justify-between border-t border-[#DCD5C8] bg-[#FBF3E4] px-6 py-3.5 sticky bottom-0">
           {/* Left: Close */}
           <div className="flex items-center">
-            <Button variant="outline" onClick={handleClose} className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 font-medium h-[36px] px-4 rounded-[8px]">Close</Button>
+            <Button variant="outline" onClick={handleClose} className="border-rose-600 text-rose-700 hover:bg-rose-50 font-bold text-xs h-[34px] px-4 rounded-lg cursor-pointer">Close</Button>
           </div>
 
           {/* Right: step count + Next/Submit */}
-          <div className="flex items-center gap-4">
-            <span className="text-[12px] text-[#98A2B3]">Step {step} of {STEPS.length}</span>
-            {step > 1 && <Button variant="outline" onClick={handlePrev} className="gap-1.5 rounded-[8px] h-[36px] font-medium border-[#D7DCE2] text-[#374151] shadow-sm px-4"><ArrowLeft className="size-4" /> Previous</Button>}
-            <Button variant="outline" onClick={() => { saveDraft(data, step, draftNo); setSavedAt(new Date().toISOString()); toast({ title: "Draft saved" }); }} className="gap-1.5 rounded-[8px] h-[36px] font-medium border-[#D7DCE2] text-[#374151] shadow-sm px-4">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-slate-600">Step {step} of {STEPS.length}</span>
+            {step > 1 && <Button variant="outline" onClick={handlePrev} className="gap-1.5 rounded-lg h-[34px] font-bold text-xs border-[#DCD5C8] bg-white text-slate-700 shadow-2xs px-4 cursor-pointer hover:bg-[#FAF4EB]"><ArrowLeft className="size-4" /> Previous</Button>}
+            <Button variant="outline" onClick={() => { saveDraft(data, step, draftNo); setSavedAt(new Date().toISOString()); toast({ title: "Draft saved" }); }} className="gap-1.5 rounded-lg h-[34px] font-bold text-xs border-[#DCD5C8] bg-white text-slate-700 shadow-2xs px-4 cursor-pointer hover:bg-[#FAF4EB]">
               <Save className="size-4" /> Save
             </Button>
             {step < 10 ? (
-              <Button onClick={handleNext} className="gap-2 bg-[#0D5B56] hover:bg-[#084A46] text-white rounded-[8px] h-[36px] px-4 font-medium shadow-sm">
+              <Button onClick={handleNext} className="gap-1.5 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded-lg h-[34px] px-5 font-bold text-xs shadow-2xs cursor-pointer border border-[#630E10]">
                 Next <ArrowRight className="size-4" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={!finalConfirm || !allOk || submitting} className="gap-2 bg-[#0D5B56] hover:bg-[#084A46] text-white rounded-[8px] h-[36px] px-4 font-medium shadow-sm disabled:opacity-50">
+              <Button onClick={handleSubmit} disabled={!finalConfirm || !allOk || submitting} className="gap-2 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded-lg h-[34px] px-5 font-bold text-xs shadow-2xs disabled:opacity-50 cursor-pointer border border-[#630E10]">
                 {submitting ? <><Loader2 className="size-4 animate-spin" />Submitting…</> : <><FileCheck className="size-4" />Submit</>}
               </Button>
             )}

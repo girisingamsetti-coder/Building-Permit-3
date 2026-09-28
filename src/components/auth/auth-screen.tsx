@@ -721,34 +721,34 @@ function ForgotPassword({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
-      <div className="absolute inset-0 bg-dotted opacity-30" />
-      <Card className="relative z-10 w-full max-w-md shadow-gov-lg">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+    <div className="flex min-h-screen items-center justify-center bg-[#FAF7F2] px-4 py-10">
+      <div className="absolute inset-0 bg-dotted opacity-20" />
+      <Card className="relative z-10 w-full max-w-md shadow-2xl bg-[#FAF7F2] border-2 border-[#7A1316]">
+        <CardHeader className="text-center bg-[#FBF3E4] border-b border-[#DCD5C8] rounded-t-lg">
+          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-white border border-[#DCD5C8] text-[#7A1316]">
             <KeyRound className="size-6" />
           </div>
-          <CardTitle className="text-xl">Reset your password</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl font-bold text-[#7A1316]">Reset your password</CardTitle>
+          <CardDescription className="text-slate-600">
             Enter your registered email and we&apos;ll send you a one-time password to
             verify your identity.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6 bg-[#FAF7F2]">
           {sent ? (
             <div className="space-y-4">
-              <div className="flex flex-col items-center gap-3 rounded-lg border border-success/30 bg-success/5 p-5 text-center">
-                <CheckCircle2 className="size-8 text-success" />
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-emerald-300 bg-[#FBF3E4] p-5 text-center">
+                <CheckCircle2 className="size-8 text-emerald-700" />
                 <div className="space-y-1">
-                  <p className="text-sm font-medium">OTP sent successfully</p>
-                  <p className="text-xs text-muted-foreground">
-                    We&apos;ve sent a 6-digit code to <span className="font-medium text-foreground">{email}</span>.
+                  <p className="text-sm font-semibold text-emerald-800">OTP sent successfully</p>
+                  <p className="text-xs text-slate-600">
+                    We&apos;ve sent a 6-digit code to <span className="font-semibold text-slate-900">{email}</span>.
                     The code is valid for 10 minutes.
                   </p>
                 </div>
               </div>
               <Button
-                className="w-full"
+                className="w-full bg-[#7A1316] hover:bg-[#8F161A] text-white"
                 size="lg"
                 onClick={() => setAuthStage("otp")}
               >
@@ -758,11 +758,11 @@ function ForgotPassword({ onBack }: { onBack: () => void }) {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="fp-email" className="text-xs font-medium">
+                <Label htmlFor="fp-email" className="text-xs font-semibold text-[#7A1316]">
                   Registered email
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                   <Input
                     id="fp-email"
                     type="email"
@@ -770,11 +770,11 @@ function ForgotPassword({ onBack }: { onBack: () => void }) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@gov.in"
-                    className="h-10 pl-9"
+                    className="h-10 pl-9 bg-white border-[#DCD5C8] focus:border-[#7A1316]"
                   />
                 </div>
               </div>
-              <Button type="submit" size="lg" className="w-full" disabled={loading}>
+              <Button type="submit" size="lg" className="w-full bg-[#7A1316] hover:bg-[#8F161A] text-white" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="size-4 animate-spin" /> Sending…
@@ -787,7 +787,7 @@ function ForgotPassword({ onBack }: { onBack: () => void }) {
           )}
           <button
             onClick={onBack}
-            className="flex w-full items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="flex w-full items-center justify-center gap-1.5 text-xs font-medium text-slate-600 hover:text-[#7A1316]"
           >
             <ArrowLeft className="size-3.5" /> Back to sign in
           </button>
@@ -828,19 +828,19 @@ function OtpScreen({ email, onBack }: { email: string; onBack: () => void }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-10">
-      <div className="absolute inset-0 bg-dotted opacity-30" />
-      <Card className="relative z-10 w-full max-w-md shadow-gov-lg">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+    <div className="flex min-h-screen items-center justify-center bg-[#FAF7F2] px-4 py-10">
+      <div className="absolute inset-0 bg-dotted opacity-20" />
+      <Card className="relative z-10 w-full max-w-md shadow-2xl bg-[#FAF7F2] border-2 border-[#7A1316]">
+        <CardHeader className="text-center bg-[#FBF3E4] border-b border-[#DCD5C8] rounded-t-lg">
+          <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-xl bg-white border border-[#DCD5C8] text-[#7A1316]">
             <Smartphone className="size-6" />
           </div>
-          <CardTitle className="text-xl">Verify your identity</CardTitle>
-          <CardDescription>
-            Enter the 6-digit code sent to <span className="font-medium text-foreground">{email || "your email"}</span>
+          <CardTitle className="text-xl font-bold text-[#7A1316]">Verify your identity</CardTitle>
+          <CardDescription className="text-slate-600">
+            Enter the 6-digit code sent to <span className="font-semibold text-slate-900">{email || "your email"}</span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="space-y-5 pt-6 bg-[#FAF7F2]">
           <form onSubmit={handleVerify} className="space-y-5">
             <div className="flex flex-col items-center gap-3">
               <InputOTP
@@ -860,14 +860,14 @@ function OtpScreen({ email, onBack }: { email: string; onBack: () => void }) {
                   <InputOTPSlot index={5} />
                 </InputOTPGroup>
               </InputOTP>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Didn&apos;t receive the code?{" "}
-                <button type="button" className="font-medium text-primary hover:underline">
+                <button type="button" className="font-semibold text-[#7A1316] hover:underline">
                   Resend in 0:42
                 </button>
               </p>
             </div>
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full bg-[#7A1316] hover:bg-[#8F161A] text-white" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="size-4 animate-spin" /> Verifying…
@@ -879,7 +879,7 @@ function OtpScreen({ email, onBack }: { email: string; onBack: () => void }) {
           </form>
           <button
             onClick={onBack}
-            className="flex w-full items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="flex w-full items-center justify-center gap-1.5 text-xs font-medium text-slate-600 hover:text-[#7A1316]"
           >
             <ArrowLeft className="size-3.5" /> Back to sign in
           </button>

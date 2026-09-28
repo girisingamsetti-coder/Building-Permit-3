@@ -341,77 +341,77 @@ export function ProfessionalsView() {
       {/* Detail Dialog */}
       {selectedProf && (
         <Dialog open={!!selectedProf} onOpenChange={(open) => !open && setSelectedProf(null)}>
-          <DialogContent className="max-w-xl">
-            <DialogHeader>
+          <DialogContent className="max-w-xl bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <IdCard className="size-5 text-teal-600" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <IdCard className="size-5 text-[#7A1316]" />
                   {selectedProf.name}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedProf.status === "APPROVED"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-teal-600 text-white"
+                      ? "bg-emerald-700 text-white"
+                      : "bg-[#7A1316] text-white"
                   )}
                 >
                   {selectedProf.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs font-mono">
+              <DialogDescription className="text-xs font-mono text-slate-600">
                 Registration #{selectedProf.registrationNumber} · {selectedProf.professionalType.replace("_", " ")}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1.5">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Licence Number:</span>
-                  <span className="font-mono font-semibold text-foreground">{selectedProf.licenceNo}</span>
+                  <span className="text-slate-500">Licence Number:</span>
+                  <span className="font-mono font-semibold text-slate-800">{selectedProf.licenceNo}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Council / Reg Body:</span>
-                  <span className="font-medium text-foreground">{selectedProf.councilRegistration}</span>
+                  <span className="text-slate-500">Council / Reg Body:</span>
+                  <span className="font-medium text-slate-800">{selectedProf.councilRegistration}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Degree / Qualification:</span>
-                  <span className="font-medium text-foreground">{selectedProf.qualification}</span>
+                  <span className="text-slate-500">Degree / Qualification:</span>
+                  <span className="font-medium text-slate-800">{selectedProf.qualification}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Professional Firm:</span>
-                  <span className="text-foreground">{selectedProf.organization}</span>
+                  <span className="text-slate-500">Professional Firm:</span>
+                  <span className="text-slate-800">{selectedProf.organization}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Licence Validity:</span>
-                  <span className="font-medium text-foreground">{selectedProf.validFrom} to {selectedProf.validTo}</span>
+                  <span className="text-slate-500">Licence Validity:</span>
+                  <span className="font-medium text-slate-800">{selectedProf.validFrom} to {selectedProf.validTo}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <Card className="p-3 border">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
+                <Card className="p-3 border border-[#DCD5C8] bg-[#FBF3E4]">
+                  <span className="text-[10px] text-[#7A1316] uppercase font-bold block mb-1">
                     Contact Details
                   </span>
-                  <div className="flex items-center gap-1.5 py-0.5">
-                    <Phone className="size-3 text-muted-foreground" /> {selectedProf.phone}
+                  <div className="flex items-center gap-1.5 py-0.5 text-slate-700">
+                    <Phone className="size-3 text-[#7A1316]" /> {selectedProf.phone}
                   </div>
-                  <div className="flex items-center gap-1.5 py-0.5">
-                    <Mail className="size-3 text-muted-foreground" /> {selectedProf.email}
+                  <div className="flex items-center gap-1.5 py-0.5 text-slate-700">
+                    <Mail className="size-3 text-[#7A1316]" /> {selectedProf.email}
                   </div>
-                  <div className="text-muted-foreground py-0.5 text-[11px]">
+                  <div className="text-slate-600 py-0.5 text-[11px]">
                     {selectedProf.address}, {selectedProf.district}
                   </div>
                 </Card>
 
-                <Card className="p-3 border">
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold block mb-1">
+                <Card className="p-3 border border-[#DCD5C8] bg-[#FBF3E4]">
+                  <span className="text-[10px] text-[#7A1316] uppercase font-bold block mb-1">
                     Activity & Track Record
                   </span>
-                  <div className="text-2xl font-bold text-foreground py-0.5">
+                  <div className="text-2xl font-bold text-[#7A1316] py-0.5">
                     {selectedProf.applicationsCount}
                   </div>
-                  <div className="text-muted-foreground text-[11px]">
+                  <div className="text-slate-600 text-[11px]">
                     Total files submitted across ULB zones
                   </div>
                 </Card>

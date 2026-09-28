@@ -256,8 +256,8 @@ function SectionDivider({ title, description }: { title: string; description?: s
   return (
     <div className="col-span-full mt-6 mb-2">
       <div className="flex items-center gap-4">
-        <h3 className="whitespace-nowrap text-sm font-semibold text-slate-800">{title}</h3>
-        <div className="h-px w-full bg-slate-200" />
+        <h3 className="whitespace-nowrap text-sm font-bold text-[#7A1316]">{title}</h3>
+        <div className="h-px w-full bg-[#DCD5C8]" />
       </div>
       {description && <p className="mt-1 text-[11px] text-slate-500">{description}</p>}
     </div>
@@ -266,10 +266,10 @@ function SectionDivider({ title, description }: { title: string; description?: s
 
 function ReviewSection({ title, onEdit, children }: { title: string; onEdit: () => void; children: React.ReactNode }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-4 py-3">
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-        <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 gap-1.5 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+    <div className="overflow-hidden rounded-xl border border-[#DCD5C8] bg-[#FBF3E4] shadow-xs">
+      <div className="flex items-center justify-between border-b border-[#DCD5C8] bg-[#F5EBE1] px-4 py-3">
+        <h3 className="text-sm font-bold text-[#7A1316]">{title}</h3>
+        <Button variant="ghost" size="sm" onClick={onEdit} className="h-8 gap-1.5 text-xs text-[#7A1316] hover:text-[#8F161A] hover:bg-[#FAF4EB]">
           <Pencil className="size-3" />Edit
         </Button>
       </div>
@@ -398,28 +398,28 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
 
   if (!typeSelected) {
     return (
-      <div className={cn("flex flex-col bg-slate-50", onClose ? "h-full" : "min-h-screen")}>
-        {!onClose && <div className="border-b bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-10"><PageBackButton fallbackLabel="Back to dashboard" /><div className="flex items-center gap-2"><div className="size-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm">SP</div><span className="text-sm font-medium text-slate-700">Srinivas</span></div></div>}
+      <div className={cn("flex flex-col bg-[#FAF7F2]", onClose ? "h-full" : "min-h-screen")}>
+        {!onClose && <div className="border-b-2 border-[#7A1316] bg-[#FBF3E4] px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-2xs"><PageBackButton fallbackLabel="Back to dashboard" /><div className="flex items-center gap-2"><div className="size-8 rounded-full bg-[#7A1316] text-white flex items-center justify-center font-bold text-sm">SP</div><span className="text-sm font-bold text-slate-800">Srinivas</span></div></div>}
         <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-slate-900">New Application</h1>
-            <p className="mt-1.5 text-sm text-slate-500">Select the type of application you want to submit.</p>
+            <h1 className="text-2xl font-black text-[#7A1316]">New Application</h1>
+            <p className="mt-1 text-xs text-slate-600">Select the type of application you want to submit.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {APP_TYPE_OPTIONS.map((opt) => {
               const Icon = opt.icon;
               const isSel = selectedType === opt.key;
               return (
-                <div key={opt.key} onClick={() => setSelectedType(opt.key)} className={cn("group relative cursor-pointer rounded-2xl border-2 p-5 transition-all hover:shadow-md", isSel ? "border-blue-600 bg-blue-50/50" : "border-slate-200 bg-white hover:border-blue-200")}>
-                  {isSel && <div className="absolute right-4 top-4 text-blue-600"><CheckCircle2 className="size-5" /></div>}
-                  <div className={cn("mb-4 inline-flex rounded-xl p-3", isSel ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600 group-hover:bg-blue-50 group-hover:text-blue-600")}><Icon className="size-6" /></div>
-                  <h3 className="font-semibold text-slate-900">{opt.label}</h3>
+                <div key={opt.key} onClick={() => setSelectedType(opt.key)} className={cn("group relative cursor-pointer rounded-xl border-2 p-5 transition-all hover:shadow-xs", isSel ? "border-[#7A1316] bg-[#FBF3E4] ring-1 ring-[#7A1316]" : "border-[#DCD5C8] bg-white hover:border-[#7A1316]/60 hover:bg-[#FDF6ED]")}>
+                  {isSel && <div className="absolute right-4 top-4 text-[#7A1316]"><CheckCircle2 className="size-5" /></div>}
+                  <div className={cn("mb-4 inline-flex rounded-xl p-3", isSel ? "bg-[#7A1316] text-white" : "bg-[#F5EBE1] text-[#7A1316] group-hover:bg-[#7A1316] group-hover:text-white transition-colors")}><Icon className="size-6" /></div>
+                  <h3 className={cn("font-bold", isSel ? "text-[#7A1316]" : "text-slate-900")}>{opt.label}</h3>
                   <p className="mt-1 text-xs text-slate-500 line-clamp-2">{opt.description}</p>
                 </div>
               );
             })}
           </div>
-          <div className="mt-8 flex justify-end"><Button size="lg" disabled={!selectedType} onClick={() => { setTypeSelected(true); setData((prev) => ({ ...prev, appType: selectedType as AppTypeKey })); }} className="px-8 font-medium">Continue<ArrowRight className="ml-2 size-4" /></Button></div>
+          <div className="mt-8 flex justify-end"><Button size="lg" disabled={!selectedType} onClick={() => { setTypeSelected(true); setData((prev) => ({ ...prev, appType: selectedType as AppTypeKey })); }} className="px-8 font-bold bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] cursor-pointer">Continue<ArrowRight className="ml-2 size-4" /></Button></div>
         </div>
       </div>
     );
@@ -428,26 +428,26 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
   const appTypeLabelShort = (key: AppTypeKey) => APP_TYPE_OPTIONS.find(o => o.key === key)?.label || "Application";
 
   return (
-    <div className={cn("flex flex-col bg-slate-50", onClose ? "h-full" : "min-h-screen")}>
+    <div className={cn("flex flex-col bg-[#FAF7F2]", onClose ? "h-full" : "min-h-screen")}>
       {!onClose && (
-        <div className="border-b bg-white px-6 py-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+        <div className="border-b-2 border-[#7A1316] bg-[#FBF3E4] px-6 py-3.5 flex items-center justify-between sticky top-0 z-30 shadow-2xs">
           <div className="flex items-center gap-4">
             <PageBackButton fallbackLabel="Exit wizard" />
-            <div className="h-6 w-px bg-slate-200" />
+            <div className="h-6 w-px bg-[#DCD5C8]" />
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+              <span className="flex items-center gap-1.5 rounded-md bg-[#FAF7F2] border border-[#DCD5C8] px-2 py-1 text-xs font-semibold text-[#7A1316]">
                 <FilePlus2 className="size-3.5" />Draft
               </span>
-              <span className="text-sm font-semibold text-slate-900">{draftNo}</span>
+              <span className="text-sm font-bold text-slate-900">{draftNo}</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-500">
-              {saveStatus === "saving" ? <><Loader2 className="size-3.5 animate-spin" />Saving...</> : saveStatus === "saved" ? <><Check className="size-3.5 text-emerald-500" />Saved {savedAt ? new Date(savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "just now"}</> : <><Save className="size-3.5" />Unsaved changes</>}
+              {saveStatus === "saving" ? <><Loader2 className="size-3.5 animate-spin" />Saving...</> : saveStatus === "saved" ? <><Check className="size-3.5 text-emerald-600" />Saved {savedAt ? new Date(savedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "just now"}</> : <><Save className="size-3.5" />Unsaved changes</>}
             </div>
-            <div className="flex items-center gap-2 border-l pl-4">
-              <div className="flex flex-col items-end hidden md:flex"><span className="text-sm font-bold text-slate-900">{user?.name || "LTP User"}</span><span className="text-[10px] uppercase tracking-wider text-slate-500">Structural Engineer</span></div>
-              <div className="flex size-9 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">SE</div>
+            <div className="flex items-center gap-2 border-l border-[#DCD5C8] pl-4">
+              <div className="flex flex-col items-end hidden md:flex"><span className="text-sm font-bold text-slate-900">{user?.name || "LTP User"}</span><span className="text-[10px] uppercase tracking-wider text-slate-500">Registered LTP</span></div>
+              <div className="flex size-9 items-center justify-center rounded-full bg-[#7A1316] font-bold text-white shadow-2xs">LTP</div>
             </div>
           </div>
         </div>
@@ -455,10 +455,10 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <div className="hidden w-64 flex-col border-r bg-white sm:flex shrink-0 z-20 overflow-y-auto">
-          <div className="p-5 border-b border-slate-100">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Creating</h2>
-            <p className="text-sm font-semibold text-slate-900 leading-snug">{appTypeLabelShort(data.appType as AppTypeKey)}</p>
+        <div className="hidden w-64 flex-col border-r border-[#DCD5C8] bg-[#FBF3E4] sm:flex shrink-0 z-20 overflow-y-auto">
+          <div className="p-4 border-b border-[#DCD5C8]">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#7A1316] mb-1">Creating</h2>
+            <p className="text-sm font-bold text-slate-900 leading-snug">{appTypeLabelShort(data.appType as AppTypeKey)}</p>
           </div>
           <div className="flex-1 p-3">
             <ol className="space-y-1">
@@ -470,13 +470,13 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
                 return (
                   <li key={s.id} className="relative">
                     {idx < WIZARD_STEPS.length - 1 && (
-                      <div className={cn("absolute left-5 top-8 h-full w-[2px] -ml-px", completedSteps.has(s.id) ? "bg-emerald-400" : "bg-slate-100")} />
+                      <div className={cn("absolute left-5 top-8 h-full w-[2px] -ml-px", completedSteps.has(s.id) ? "bg-[#7A1316]" : "bg-[#DCD5C8]")} />
                     )}
-                    <button onClick={() => isClickable && setStep(s.id)} disabled={!isClickable} className={cn("group flex w-full items-center gap-3 rounded-lg p-2 text-left transition-all", isCurrent ? "bg-blue-50" : isClickable ? "hover:bg-slate-50" : "opacity-50 cursor-not-allowed")}>
-                      <div className={cn("relative flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[10px] font-bold z-10 bg-white transition-colors", isDone ? "border-emerald-500 bg-emerald-500 text-white" : isCurrent ? "border-blue-600 border-2 text-blue-700" : "border-slate-300 text-slate-400")}>
+                    <button onClick={() => isClickable && setStep(s.id)} disabled={!isClickable} className={cn("group flex w-full items-center gap-3 rounded-lg p-2 text-left transition-all", isCurrent ? "bg-[#F5EBE1] border-l-4 border-[#7A1316]" : isClickable ? "hover:bg-[#FAF4EB]" : "opacity-50 cursor-not-allowed")}>
+                      <div className={cn("relative flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[10px] font-bold z-10 bg-white transition-colors", isDone ? "border-emerald-600 bg-emerald-600 text-white" : isCurrent ? "border-[#7A1316] border-2 bg-[#7A1316] text-white" : "border-[#DCD5C8] text-slate-400")}>
                         {isDone ? <Check className="size-3" strokeWidth={3} /> : s.id}
                       </div>
-                      <span className={cn("text-sm font-medium transition-colors", isCurrent ? "text-blue-700" : isDone ? "text-slate-900" : "text-slate-500")}>{s.label}</span>
+                      <span className={cn("text-xs font-semibold transition-colors", isCurrent ? "text-[#7A1316] font-bold" : isDone ? "text-slate-900" : "text-slate-500")}>{s.label}</span>
                     </button>
                   </li>
                 );
@@ -486,12 +486,12 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
         </div>
 
         {/* Main */}
-        <div className="flex flex-1 flex-col overflow-y-auto bg-slate-50">
-          <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8 flex flex-col min-h-full">
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-sm flex-1 mb-8">
-              <div className="border-b border-slate-100 px-6 py-5">
-                <h2 className="text-lg font-semibold text-slate-900">{currentStepMeta.label}</h2>
-                <p className="mt-0.5 text-sm text-slate-500">{stepDescription(step, data)}</p>
+        <div className="flex flex-1 flex-col overflow-y-auto bg-[#FAF7F2]">
+          <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8 flex flex-col min-h-full">
+            <div className="rounded-xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs flex-1 mb-6 overflow-hidden">
+              <div className="border-b border-[#DCD5C8] bg-[#F5EBE1] px-6 py-4">
+                <h2 className="text-base font-black text-[#7A1316] uppercase tracking-wide">{currentStepMeta.label}</h2>
+                <p className="mt-0.5 text-xs text-slate-600">{stepDescription(step, data)}</p>
               </div>
 
               <div className="px-6 py-6 space-y-6">
@@ -522,7 +522,19 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
                     <Field label="Sector"><Input value={data.general.sector} onChange={e => upd("general", {sector: e.target.value})} /></Field>
                     <Field label="Colony"><Input value={data.general.colony} onChange={e => upd("general", {colony: e.target.value})} /></Field>
                     <SectionDivider title="Site Identifiers" />
-                    <Field label="Nature of Site"><Input value={data.general.natureOfSite} onChange={e => upd("general", {natureOfSite: e.target.value})} /></Field>
+                    {data.general.lpsLayout === "Non-LPS" ? (
+                      <Field label="Nature of Site" required>
+                        <Input
+                          value={data.general.natureOfSite}
+                          onChange={e => upd("general", {natureOfSite: e.target.value})}
+                          placeholder="e.g. Approved Layout / Gramkantam / LRS"
+                        />
+                      </Field>
+                    ) : (
+                      <div className="col-span-1 sm:col-span-2 bg-[#FAF4EB] border border-[#E0D2BE] rounded p-2.5 text-xs text-slate-700">
+                        <span className="font-bold text-[#7A1316]">LPS Layout:</span> Nature of Site classification is not required.
+                      </div>
+                    )}
                     <Field label="Block No."><Input value={data.general.blockNo} onChange={e => upd("general", {blockNo: e.target.value})} /></Field>
                     <Field label="Survey No / D.No / R.S.No"><Input value={data.general.surveyNo} onChange={e => upd("general", {surveyNo: e.target.value})} /></Field>
                     <Field label="Plot No."><Input value={data.general.plotNo} onChange={e => upd("general", {plotNo: e.target.value})} /></Field>
@@ -692,16 +704,16 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
             </div>
 
             {/* Bottom Actions */}
-            <div className="sticky bottom-0 flex items-center justify-between border-t border-slate-200 bg-white p-4 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] sm:rounded-t-2xl sm:border-x">
-              <Button variant="outline" onClick={handleBack} disabled={step === 1 || submitting} className="w-24 border-slate-300">
+            <div className="sticky bottom-0 flex items-center justify-between border-t border-[#DCD5C8] bg-[#FBF3E4] p-4 shadow-sm rounded-t-xl border-x">
+              <Button variant="outline" onClick={handleBack} disabled={step === 1 || submitting} className="w-24 border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB] font-bold text-xs">
                 <ArrowLeft className="mr-1.5 size-4" />Back
               </Button>
               {step < WIZARD_STEPS.length ? (
-                <Button onClick={handleNext} className="w-32 bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm">
+                <Button onClick={handleNext} className="w-32 bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs shadow-2xs border border-[#630E10] cursor-pointer">
                   Continue<ArrowRight className="ml-1.5 size-4" />
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} disabled={submitting} className="w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm px-6">
+                <Button onClick={handleSubmit} disabled={submitting} className="w-auto bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs shadow-2xs px-6 border border-[#630E10] cursor-pointer">
                   {submitting ? <><Loader2 className="mr-2 size-4 animate-spin" />Sending to Scrutiny...</> : <><ShieldCheck className="mr-2 size-4" />Send to Scrutiny</>}
                 </Button>
               )}

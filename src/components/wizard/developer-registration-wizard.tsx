@@ -23,7 +23,7 @@ const FormRow = ({
   children: React.ReactNode 
 }) => (
   <div className="grid grid-cols-[1fr_1.5fr] items-start gap-2">
-    <div className="bg-gray-100 p-2 h-9 flex items-center border border-gray-100 text-gray-700 text-[13px]">
+    <div className="bg-[#FBF3E4] p-2 h-9 flex items-center border border-[#DCD5C8] text-slate-800 font-semibold text-[13px] rounded-xs">
       {required && <span className="text-red-500 mr-1">*</span>}
       {label}
     </div>
@@ -74,21 +74,21 @@ export function DeveloperRegistrationWizard({ onClose }: DeveloperRegistrationWi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
-      <div className="relative w-full max-w-5xl h-[90vh] bg-white rounded-lg shadow-2xl flex flex-col">
+      <div className="relative w-full max-w-5xl h-[90vh] bg-[#FAF7F2] rounded-xl shadow-2xl flex flex-col border-2 border-[#7A1316] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-gray-100 border-b border-gray-300 shrink-0">
-          <h2 className="text-lg font-bold text-black">Developer Registration</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded transition-colors text-black">
+        <div className="flex items-center justify-between px-5 py-3 bg-[#7A1316] text-white border-b border-[#630E10] shrink-0">
+          <h2 className="text-base font-black tracking-wide">Developer Registration</h2>
+          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer text-white">
             <X className="size-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#FAF7F2]">
           
           {/* Firm Information Section */}
           <div>
-            <div className="flex items-center gap-1 text-[#2563eb] text-[15px] font-medium border-b border-gray-200 pb-1 mb-3">
+            <div className="flex items-center gap-1 text-[#7A1316] text-[15px] font-bold border-b border-[#DCD5C8] pb-1 mb-3">
               <ChevronUp className="size-4" />
               Firm Information
             </div>
@@ -237,10 +237,10 @@ export function DeveloperRegistrationWizard({ onClose }: DeveloperRegistrationWi
               </div>
             </div>
 
-            <Input placeholder="E N T E R  C A P T C H A" className="h-9 bg-white text-[13px] border-gray-400 rounded-sm text-center tracking-[0.2em] w-[200px] mb-6" />
+            <Input placeholder="E N T E R  C A P T C H A" className="h-9 bg-white text-[13px] border-[#DCD5C8] rounded text-center tracking-[0.2em] w-[200px] mb-6" />
             
             <Button
-              className="bg-[#428bca] hover:bg-[#3071a9] text-white font-medium px-8 h-9 rounded-sm shadow-sm transition-colors w-[200px]"
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-8 h-9 rounded shadow-xs transition-colors w-[200px] border border-[#630E10] cursor-pointer"
               onClick={handleSubmit}
             >
               Submit

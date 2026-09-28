@@ -268,84 +268,84 @@ export function ShowCauseView() {
       {/* Detail Dialog */}
       {selectedNotice && (
         <Dialog open={!!selectedNotice} onOpenChange={(open) => !open && setSelectedNotice(null)}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <FileWarning className="size-5 text-amber-500" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <FileWarning className="size-5 text-[#7A1316]" />
                   Show Cause Notice: {selectedNotice.noticeNumber}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedNotice.status === "CLOSED"
-                      ? "bg-emerald-600 text-white"
+                      ? "bg-emerald-700 text-white"
                       : selectedNotice.status === "REFERRED_REVOCATION"
-                      ? "bg-red-600 text-white"
-                      : "bg-amber-500 text-white"
+                      ? "bg-red-700 text-white"
+                      : "bg-[#7A1316] text-white"
                   )}
                 >
                   {selectedNotice.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-xs text-slate-600">
                 Under {selectedNotice.section} · File #{selectedNotice.applicationNumber}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1.5">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Owner / Applicant:</span>
-                  <span className="font-semibold text-foreground">{selectedNotice.ownerName}</span>
+                  <span className="text-slate-500">Owner / Applicant:</span>
+                  <span className="font-semibold text-slate-800">{selectedNotice.ownerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">LTP on Record:</span>
-                  <span className="text-foreground">{selectedNotice.ltpName}</span>
+                  <span className="text-slate-500">LTP on Record:</span>
+                  <span className="text-slate-800">{selectedNotice.ltpName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Site Address:</span>
-                  <span className="text-foreground">{selectedNotice.siteAddress}</span>
+                  <span className="text-slate-500">Site Address:</span>
+                  <span className="text-slate-800">{selectedNotice.siteAddress}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Notice Issue Date:</span>
-                  <span className="text-foreground">{selectedNotice.issuedDate}</span>
+                  <span className="text-slate-500">Notice Issue Date:</span>
+                  <span className="text-slate-800">{selectedNotice.issuedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Explanation Due Date:</span>
-                  <span className="font-semibold text-amber-600 dark:text-amber-400">{selectedNotice.responseDueDate}</span>
+                  <span className="text-slate-500">Explanation Due Date:</span>
+                  <span className="font-semibold text-[#7A1316]">{selectedNotice.responseDueDate}</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg border border-red-500/20 bg-red-500/5 space-y-1">
-                <h4 className="font-semibold text-red-600 dark:text-red-400 text-xs flex items-center gap-1.5">
+              <div className="p-3 rounded-lg border border-[#7A1316]/20 bg-[#FBF3E4] space-y-1">
+                <h4 className="font-semibold text-[#7A1316] text-xs flex items-center gap-1.5">
                   <AlertTriangle className="size-3.5" /> Alleged Deviation / Violation:
                 </h4>
-                <p className="text-foreground font-medium text-xs leading-relaxed">{selectedNotice.violation}</p>
-                <p className="text-muted-foreground text-[11px] pt-1"><strong>Reason:</strong> {selectedNotice.reason}</p>
+                <p className="text-slate-800 font-medium text-xs leading-relaxed">{selectedNotice.violation}</p>
+                <p className="text-slate-600 text-[11px] pt-1"><strong>Reason:</strong> {selectedNotice.reason}</p>
               </div>
 
               {selectedNotice.applicantExplanation && (
-                <div className="p-3 rounded-lg border border-border bg-card space-y-1">
+                <div className="p-3 rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] space-y-1">
                   <div className="flex justify-between items-center mb-1">
-                    <h4 className="font-semibold text-foreground text-xs flex items-center gap-1.5">
-                      <MailCheck className="size-3.5 text-blue-500" /> Applicant Explanation
+                    <h4 className="font-semibold text-[#7A1316] text-xs flex items-center gap-1.5">
+                      <MailCheck className="size-3.5 text-[#7A1316]" /> Applicant Explanation
                     </h4>
-                    <span className="text-muted-foreground text-[11px]">Submitted: {selectedNotice.responseDate}</span>
+                    <span className="text-slate-500 text-[11px]">Submitted: {selectedNotice.responseDate}</span>
                   </div>
-                  <p className="text-muted-foreground text-xs leading-relaxed italic bg-muted/40 p-2.5 rounded border">
+                  <p className="text-slate-700 text-xs leading-relaxed italic bg-white/70 p-2.5 rounded border border-[#DCD5C8]">
                     "{selectedNotice.applicantExplanation}"
                   </p>
                 </div>
               )}
 
               {selectedNotice.decisionRemarks && (
-                <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-1">
-                  <h4 className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-1.5">
+                <div className="p-3 rounded-lg border border-emerald-600/20 bg-emerald-50 space-y-1">
+                  <h4 className="font-semibold text-emerald-800 text-xs flex items-center gap-1.5">
                     <Gavel className="size-3.5" /> Competent Authority Decision
                   </h4>
-                  <p className="text-foreground text-xs">{selectedNotice.decisionRemarks}</p>
-                  <div className="text-[10px] text-muted-foreground pt-1 flex justify-between">
+                  <p className="text-slate-800 text-xs">{selectedNotice.decisionRemarks}</p>
+                  <div className="text-[10px] text-slate-500 pt-1 flex justify-between">
                     <span>Decided By: {selectedNotice.decidedBy}</span>
                     <span>Date: {selectedNotice.decisionDate}</span>
                   </div>

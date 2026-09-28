@@ -132,11 +132,17 @@ export function DonutChart({
 export function BarChart({
   data,
   showValues = true,
+  color,
+  barClassName,
+  trackClassName,
 }: {
   data: ChartDatum[];
   height?: number;
   barHeight?: number;
   showValues?: boolean;
+  color?: string;
+  barClassName?: string;
+  trackClassName?: string;
 }) {
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
@@ -151,36 +157,154 @@ export function BarChart({
 
   return (
     <div className="space-y-1.5">
-      {data.map((d, i) => (
-        <div
-          key={i}
-          className="space-y-0.5 cursor-pointer rounded px-1 transition-all duration-200"
-          style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.5 }}
-          onMouseEnter={() => setHoveredIndex(i)}
-          onMouseLeave={() => setHoveredIndex(null)}
-        >
-          <div className="flex items-center justify-between text-xs leading-[20px]">
-            <span
-              className="truncate font-medium transition-all duration-200"
-              style={{ color: hoveredIndex === i ? (d.color ?? getDefaultColor(i)) : undefined }}
-              title={d.label}
-            >{d.label}</span>
-            {showValues && <span className="font-semibold tabular-nums">{d.value}</span>}
+      {data.map((d, i) => {
+        const itemColor = color ?? d.color ?? getDefaultColor(i);
+        return (
+          <div
+            key={i}
+            className="space-y-0.5 cursor-pointer rounded px-1 transition-all duration-200"
+            style={{ opacity: hoveredIndex === null || hoveredIndex === i ? 1 : 0.5 }}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            <div className="flex items-center justify-between text-xs leading-[20px]">
+              <span
+                className="truncate font-medium transition-all duration-200"
+                style={{ color: hoveredIndex === i ? itemColor : undefined }}
+                title={d.label}
+              >{d.label}</span>
+              {showValues && <span className="font-semibold tabular-nums text-slate-800">{d.value}</span>}
+            </div>
+            <div className={cn("h-1.5 w-full overflow-hidden rounded-full bg-[#E0D2BE]/60 dark:bg-muted/40", trackClassName)}>
+              <div
+                className={cn("h-full rounded-full transition-all duration-300", barClassName)}
+                style={{
+                  width: `${(d.value / maxVal) * 100}%`,
+                  background: itemColor,
+                  filter: hoveredIndex === i ? 'brightness(1.15)' : 'none',
+                  transform: hoveredIndex === i ? 'scaleY(1.3)' : 'scaleY(1)',
+                  transformOrigin: 'center',
+                }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted/40">
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------- Vertical Column Chart ----------
+// 6-column grid with values on top, vertical bars, and X-axis legend below.
+export function ColumnChart({
+  data,
+  showValues = true,
+  color = "#7A1316",
+  columnClassName,
+  trackClassName,
+}: {
+  data: ChartDatum[];
+  showValues?: boolean;
+  color?: string;
+  columnClassName?: string;
+  trackClassName?: string;
+}) {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+
+  if (data.length === 0) {
+    return (
+      <div className="flex h-full min-h-[140px] items-center justify-center">
+        <p className="text-sm text-muted-foreground">No data available</p>
+      </div>
+    );
+  }
+
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
+
+  return (
+    <div className="w-full h-full flex flex-col justify-between pt-1">
+      {/* Chart Plot Area */}
+      <div className="flex-1 min-h-[90px] w-full grid grid-cols-6 items-end gap-1.5 sm:gap-2 px-1 pb-1 border-b border-[#DCD5C8]">
+        {data.map((d, i) => {
+          const colColor = d.color ?? color;
+          const heightPct = Math.max(8, Math.round((d.value / maxVal) * 100));
+          const isHovered = hoveredIndex === i;
+
+          return (
             <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{
-                width: `${(d.value / maxVal) * 100}%`,
-                background: d.color ?? getDefaultColor(i),
-                filter: hoveredIndex === i ? 'brightness(1.2)' : 'none',
-                transform: hoveredIndex === i ? 'scaleY(1.4)' : 'scaleY(1)',
-                transformOrigin: 'center',
-              }}
-            />
-          </div>
-        </div>
-      ))}
+              key={i}
+              className="h-full flex flex-col justify-end items-center group cursor-pointer"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              {/* Value on top of column */}
+              {showValues && (
+                <span
+                  className={cn(
+                    "text-[10px] sm:text-[11px] font-bold tabular-nums mb-1 transition-all duration-200",
+                    isHovered ? "text-[#7A1316] scale-110" : "text-slate-800"
+                  )}
+                >
+                  {d.value.toLocaleString()}
+                </span>
+              )}
+
+              {/* Column bar container with subtle background track slot */}
+              <div className="w-[18px] sm:w-[19px] h-[80%] flex items-end justify-center rounded-t-full relative">
+                {/* Background Track Slot */}
+                <div
+                  className={cn(
+                    "absolute inset-0 rounded-t-full bg-[#E0D2BE]/30 dark:bg-muted/30 transition-colors",
+                    trackClassName,
+                    isHovered && "bg-[#E0D2BE]/60"
+                  )}
+                />
+
+                {/* Filled Maroon Column */}
+                <div
+                  className={cn(
+                    "w-full rounded-t-full transition-all duration-300 relative z-10",
+                    columnClassName
+                  )}
+                  style={{
+                    height: `${heightPct}%`,
+                    background: colColor,
+                    filter: isHovered ? "brightness(1.18)" : "none",
+                    boxShadow: isHovered
+                      ? "0 4px 10px rgba(122, 19, 22, 0.35)"
+                      : "0 2px 4px rgba(122, 19, 22, 0.15)",
+                  }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* X-Axis Legend (matches attached screenshot categories) */}
+      <div className="grid grid-cols-6 gap-1.5 sm:gap-2 px-1 pt-1.5">
+        {data.map((d, i) => {
+          const isHovered = hoveredIndex === i;
+          return (
+            <div
+              key={i}
+              className="text-center cursor-pointer transition-colors duration-200"
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+            >
+              <span
+                className={cn(
+                  "text-[9px] sm:text-[10px] font-semibold leading-tight line-clamp-2 block transition-colors",
+                  isHovered ? "text-[#7A1316] font-bold" : "text-slate-700"
+                )}
+                title={d.label}
+              >
+                {d.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

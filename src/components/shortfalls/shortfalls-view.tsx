@@ -269,60 +269,60 @@ export function ShortfallsView() {
       {/* Detail Dialog */}
       {selectedShortfall && (
         <Dialog open={!!selectedShortfall} onOpenChange={(open) => !open && setSelectedShortfall(null)}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <AlertTriangle className="size-5 text-amber-500" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <AlertTriangle className="size-5 text-[#7A1316]" />
                   Shortfall Memo: {selectedShortfall.shortfallNumber}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedShortfall.status === "RESOLVED"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-amber-500 text-white"
+                      ? "bg-emerald-700 text-white"
+                      : "bg-[#7A1316] text-white"
                   )}
                 >
                   {selectedShortfall.status.replace(/_/g, " ")}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-xs text-slate-600">
                 Application #{selectedShortfall.applicationNumber} · Cycle {selectedShortfall.cycle} ({selectedShortfall.stageName})
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Raised by Officer:</span>
-                  <span className="font-semibold text-foreground">{selectedShortfall.raisedBy} ({selectedShortfall.raisedDate})</span>
+                  <span className="text-slate-500">Raised by Officer:</span>
+                  <span className="font-semibold text-slate-800">{selectedShortfall.raisedBy} ({selectedShortfall.raisedDate})</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Compliance Due Date:</span>
-                  <span className="font-bold text-amber-600 dark:text-amber-400">{selectedShortfall.dueDate}</span>
+                  <span className="text-slate-500">Compliance Due Date:</span>
+                  <span className="font-bold text-[#7A1316]">{selectedShortfall.dueDate}</span>
                 </div>
                 {selectedShortfall.responseDate && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Applicant Response Date:</span>
-                    <span className="font-medium text-blue-600">{selectedShortfall.responseDate}</span>
+                    <span className="text-slate-500">Applicant Response Date:</span>
+                    <span className="font-medium text-[#7A1316]">{selectedShortfall.responseDate}</span>
                   </div>
                 )}
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-semibold text-xs text-foreground flex items-center gap-1.5">
-                  <FileText className="size-3.5 text-primary" /> Deficiencies & Required Rectifications:
+                <h4 className="font-semibold text-xs text-[#7A1316] flex items-center gap-1.5">
+                  <FileText className="size-3.5 text-[#7A1316]" /> Deficiencies & Required Rectifications:
                 </h4>
 
                 {selectedShortfall.items.map((item, idx) => (
                   <div
                     key={item.id}
-                    className="p-3 rounded-lg border border-border bg-card space-y-2"
+                    className="p-3 rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-foreground flex items-center gap-1.5">
-                        <span className="size-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold">
+                      <span className="font-semibold text-[#7A1316] flex items-center gap-1.5">
+                        <span className="size-5 rounded-full bg-[#7A1316] text-white flex items-center justify-center text-[10px] font-bold">
                           {idx + 1}
                         </span>
                         {item.category}
@@ -331,30 +331,30 @@ export function ShortfallsView() {
                         className={cn(
                           "text-[10px]",
                           item.resolved
-                            ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                            : "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                            ? "bg-emerald-600/15 text-emerald-800 border-emerald-600/30"
+                            : "bg-[#7A1316]/15 text-[#7A1316] border-[#7A1316]/30"
                         )}
                       >
                         {item.resolved ? "Resolved ✓" : "Outstanding"}
                       </Badge>
                     </div>
 
-                    <div className="p-2 rounded bg-muted/30 text-muted-foreground text-[11px]">
+                    <div className="p-2 rounded bg-white/70 border border-[#DCD5C8]/60 text-slate-700 text-[11px]">
                       <strong>Observation:</strong> {item.observation}
                     </div>
 
-                    <div className="text-[11px] text-foreground">
-                      <strong>Required Action:</strong> {item.requiredAction}
+                    <div className="text-[11px] text-slate-800">
+                      <strong className="text-[#7A1316]">Required Action:</strong> {item.requiredAction}
                     </div>
 
                     {item.resolutionRemarks && (
-                      <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-[11px]">
+                      <div className="p-2 rounded bg-emerald-50 border border-emerald-200 text-emerald-900 text-[11px]">
                         <strong>Resolution Note:</strong> {item.resolutionRemarks}
                       </div>
                     )}
 
                     {item.attachedDocumentName && (
-                      <div className="flex items-center gap-1.5 text-primary font-mono text-[11px] pt-1">
+                      <div className="flex items-center gap-1.5 text-[#7A1316] font-mono text-[11px] pt-1">
                         <Paperclip className="size-3" /> {item.attachedDocumentName}
                       </div>
                     )}

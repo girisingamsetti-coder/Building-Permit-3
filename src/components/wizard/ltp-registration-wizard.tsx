@@ -60,18 +60,18 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300 p-4">
-      <div className="relative w-full max-w-5xl h-[650px] max-h-[90vh] bg-white shadow-2xl flex flex-col border border-gray-300 rounded-xl overflow-hidden">
+      <div className="relative w-full max-w-5xl h-[650px] max-h-[90vh] bg-[#FAF7F2] shadow-2xl flex flex-col border-2 border-[#7A1316] rounded-xl overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-b from-gray-100 to-gray-200 border-b border-gray-300 shrink-0">
-          <h2 className="text-[15px] font-bold text-black">Welcome to Professional/ Consultant Registration Portal</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-300 rounded transition-colors text-black">
-            <X className="size-4" />
+        <div className="flex items-center justify-between px-5 py-3 bg-[#7A1316] text-white border-b border-[#630E10] shrink-0">
+          <h2 className="text-[15px] font-black tracking-wide">Welcome to Professional / Consultant Registration Portal</h2>
+          <button onClick={onClose} className="p-1 hover:bg-white/20 rounded-full transition-colors cursor-pointer text-white">
+            <X className="size-5" />
           </button>
         </div>
 
         {/* Stepper Progress */}
-        <div className="bg-gray-50 border-b border-gray-200 px-8 py-4 flex items-center justify-between shrink-0">
+        <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-8 py-3.5 flex items-center justify-between shrink-0">
           {STEPS.map((s, i) => {
             const current = i + 1;
             const isActive = current === step;
@@ -81,23 +81,23 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
                 <div className="flex flex-col items-center gap-1.5 flex-1 relative z-10">
                   <div 
                     className={cn(
-                      "size-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-colors",
-                      isActive ? "border-[#2980b9] bg-[#2980b9] text-white" : 
-                      isCompleted ? "border-green-500 bg-green-500 text-white" : "border-gray-300 bg-white text-gray-400"
+                      "size-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-colors shadow-2xs",
+                      isActive ? "border-[#7A1316] bg-[#7A1316] text-white" : 
+                      isCompleted ? "border-emerald-600 bg-emerald-600 text-white" : "border-[#DCD5C8] bg-white text-slate-400"
                     )}
                   >
                     {current}
                   </div>
                   <span className={cn(
                     "text-[11px] font-bold text-center",
-                    isActive ? "text-[#2980b9]" : 
-                    isCompleted ? "text-green-600" : "text-gray-400"
+                    isActive ? "text-[#7A1316]" : 
+                    isCompleted ? "text-emerald-700" : "text-slate-400"
                   )}>{s}</span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className="flex-1 h-px bg-gray-300 relative top-[-10px]">
+                  <div className="flex-1 h-0.5 bg-[#DCD5C8] relative top-[-10px]">
                     <div 
-                      className="h-full bg-green-500 transition-all duration-300"
+                      className="h-full bg-[#7A1316] transition-all duration-300"
                       style={{ width: isCompleted ? "100%" : "0%" }}
                     />
                   </div>
@@ -108,12 +108,12 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-white text-[12px] text-gray-800">
+        <div className="flex-1 overflow-y-auto p-6 bg-[#FAF7F2] text-[12px] text-slate-800">
           
           {/* Step 1: Personal Information */}
           {step === 1 && (
             <div className="animate-in slide-in-from-right-4 duration-300">
-              <div className="bg-gradient-to-b from-gray-100 to-gray-200 font-bold px-3 py-1.5 border border-gray-300 mb-4 text-[13px]">
+              <div className="bg-[#F5EBE1] text-[#7A1316] font-bold px-3 py-1.5 border border-[#DCD5C8] rounded mb-4 text-[13px] uppercase tracking-wide">
                 Personal Information
               </div>
               
@@ -371,7 +371,7 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
             {step < totalSteps ? (
               <Button 
                 onClick={() => setStep(s => s + 1)}
-                className="bg-[#2980b9] hover:bg-[#1a5a85] text-white font-bold px-8 shadow-sm flex items-center gap-2"
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-8 shadow-sm flex items-center gap-2 border border-[#630E10] cursor-pointer"
               >
                 Next <ChevronRight className="size-4" />
               </Button>
@@ -379,12 +379,12 @@ export function LtpRegistrationWizard({ onClose }: LtpRegistrationWizardProps) {
               <>
                 <Button 
                   variant="outline" 
-                  className="px-6 font-bold border-gray-400"
+                  className="px-6 font-bold border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
                 >
                   Reset
                 </Button>
                 <Button 
-                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 shadow-sm"
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-8 shadow-sm border border-[#630E10] cursor-pointer"
                   onClick={handleSubmit}
                 >
                   Submit Registration

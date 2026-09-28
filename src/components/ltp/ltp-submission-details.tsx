@@ -1,0 +1,2619 @@
+"use client";
+
+import * as React from "react";
+import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/app-store";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  Clock,
+  Layers,
+  FileText,
+  CreditCard,
+  Building2,
+  Check,
+  X,
+  Printer,
+  Download,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Calendar,
+  AlertCircle,
+  Paperclip,
+  Upload,
+  Save,
+  Flame,
+} from "lucide-react";
+import type { Application } from "@/types";
+
+export function LtpSubmissionDetails({
+  onBack,
+  baNo = "1168/0142/BP/10/015/2026",
+  proposalStatus = "Scrutiny Done/Proceeding Pending",
+  submissionDate = "23-07-2026",
+  isDraft = false,
+}: {
+  onBack?: () => void;
+  baNo?: string;
+  proposalStatus?: string;
+  submissionDate?: string;
+  isDraft?: boolean;
+}) {
+  const { applications, user, navigate } = useAppStore();
+
+  // Main Tabs: Application Form | Drawing | Payments
+  const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "payments">("form");
+
+  // Sub Tabs under Application Form
+  const [subTab, setSubTab] = React.useState<
+    | "general"
+    | "applicant"
+    | "plot"
+    | "app-checklist"
+    | "doc-checklist"
+    | "others"
+    | "nocs"
+  >("general");
+
+  // ─────────────────────────────────────────────────────────────
+  // 1. GENERAL INFORMATION STATE
+  // ─────────────────────────────────────────────────────────────
+  const [caseType, setCaseType] = React.useState("New");
+  const [permissionType, setPermissionType] = React.useState("Building Permission");
+  const [natureOfPermission, setNatureOfPermission] = React.useState("General");
+  const [applicationType, setApplicationType] = React.useState<"Private" | "Govt land" | "CRDA land">("Private");
+  const [isLpsLayout, setIsLpsLayout] = React.useState<"LPS Layout" | "Non-LPS">("Non-LPS");
+  const [district, setDistrict] = React.useState("Guntur");
+  const [mandal, setMandal] = React.useState("Thullur");
+  const [revenueVillage, setRevenueVillage] = React.useState("INAVOLU");
+  const [gramPanchayat, setGramPanchayat] = React.useState("INAVOLU");
+  const [governmentProposal, setGovernmentProposal] = React.useState("NA");
+
+  // LPS Layout Specific Fields (matching user screenshot)
+  const [lpsBlockNo, setLpsBlockNo] = React.useState("4137");
+  const [lpsSurveyNo, setLpsSurveyNo] = React.useState("231229230");
+  const [lpsPlotNo, setLpsPlotNo] = React.useState("11-502-4137-9-D82");
+  const [lpsLandUseZone, setLpsLandUseZone] = React.useState("Residential");
+  const [lpsZoningDistrict, setLpsZoningDistrict] = React.useState("R3-Medium to High density");
+  const [lpsProposedUse, setLpsProposedUse] = React.useState("Residential");
+  const [lpsProposedActivity, setLpsProposedActivity] = React.useState("Residential Apartment Bldg");
+  const [lpsRoadStreet, setLpsRoadStreet] = React.useState("ROAD");
+  const [lpsBuildingHeight, setLpsBuildingHeight] = React.useState("30");
+
+  // Nature of Site (5 Options)
+  const siteNatureOptions = [
+    {
+      id: "approved-layout",
+      title: "Approved Layout",
+      desc: "For developing Approved Layout",
+    },
+    {
+      id: "regularized-plot",
+      title: "Regularized Plot Under LRS/RLP",
+      desc: "For developing Regularized Plot Under LRS/RLP",
+    },
+    {
+      id: "plot-part-lrs",
+      title: "Plot Part Of LRS/RLP Layout but Not Regularized",
+      desc: "14% Open space charges +33% Penalization charges",
+    },
+    {
+      id: "gramkantam",
+      title: "Gramkantam",
+      desc: "14% Open space charges are not applicable",
+    },
+    {
+      id: "extended-habitation",
+      title: "Extended Habitation exempted from LPS",
+      desc: "14% Open space charges are applicable if applicant has not satisfying as per few conditions",
+    },
+  ];
+  const [selectedSiteNature, setSelectedSiteNature] = React.useState("gramkantam");
+
+  // Lower General Info Fields
+  const [layoutLocation, setLayoutLocation] = React.useState("INAVOLU");
+  const [blockNo, setBlockNo] = React.useState("NA");
+  const [rsNo, setRsNo] = React.useState("87-1");
+  const [zoningDistrict, setZoningDistrict] = React.useState("R1-Village Planning Zone");
+  const [landUseZone, setLandUseZone] = React.useState("Residential");
+  const [proposedActivity, setProposedActivity] = React.useState("Bungalow/ Dwelling / Non Apartment");
+  const [proposedUse, setProposedUse] = React.useState("Residential");
+  const [buildingHeight, setBuildingHeight] = React.useState("10.00 m");
+  const [roadStreet, setRoadStreet] = React.useState("12.00 m wide road");
+
+  // ─────────────────────────────────────────────────────────────
+  // 2. APPLICANT INFORMATION STATE (Image 1)
+  // ─────────────────────────────────────────────────────────────
+  const [sectionLtpOpen, setSectionLtpOpen] = React.useState(true);
+  const [sectionApplicantOpen, setSectionApplicantOpen] = React.useState(true);
+  const [sectionStructuralOpen, setSectionStructuralOpen] = React.useState(true);
+
+  // Licensed Technical Personnel's Information
+  const [ltpType, setLtpType] = React.useState("Engineer");
+  const [ltpAddress, setLtpAddress] = React.useState("$$");
+  const [ltpName, setLtpName] = React.useState("SRINIVAS ALLU");
+  const [ltpValidity, setLtpValidity] = React.useState("17/1/2028");
+  const [ltpLicenseNo, setLtpLicenseNo] = React.useState("MAU61-DPOVU(LE)/34/2021");
+  const [ltpEmail, setLtpEmail] = React.useState("sreenivasallu@gmail.com");
+  const [ltpMobile, setLtpMobile] = React.useState("9676865523");
+  const [ltpAadhaar, setLtpAadhaar] = React.useState("589412094381");
+  const [showLtpAadhaar, setShowLtpAadhaar] = React.useState(false);
+
+  // Applicant's Information
+  const [applicantUseType, setApplicantUseType] = React.useState<"Self Use" | "Selling">("Self Use");
+  const [ownerName, setOwnerName] = React.useState("Vadduri Veeraiah");
+  const [applicantRoadStreet, setApplicantRoadStreet] = React.useState("");
+  const [doorNo, setDoorNo] = React.useState("1-93");
+  const [applicantDistrict, setApplicantDistrict] = React.useState("Guntur");
+  const [city, setCity] = React.useState("Ainavolu");
+  const [applicantEmail, setApplicantEmail] = React.useState("krishnaltp@gmail.com");
+  const [pinCode, setPinCode] = React.useState("522503");
+  const [applicantMobile, setApplicantMobile] = React.useState("7989974399");
+  const [landlineNumber, setLandlineNumber] = React.useState("");
+  const [applicantAadhaar, setApplicantAadhaar] = React.useState("982345671234");
+  const [showApplicantAadhaar, setShowApplicantAadhaar] = React.useState(false);
+
+  // Structural Engineer Information
+  const [structuralName, setStructuralName] = React.useState("Select");
+  const [structuralAddress, setStructuralAddress] = React.useState("");
+  const [structuralValidity, setStructuralValidity] = React.useState("");
+
+  // ─────────────────────────────────────────────────────────────
+  // 3. PLOT DETAILS STATE (Image 2)
+  // ─────────────────────────────────────────────────────────────
+  const [sectionProposedOpen, setSectionProposedOpen] = React.useState(true);
+  const [sectionSiteDetailsOpen, setSectionSiteDetailsOpen] = React.useState(true);
+  const [sectionScheduleOpen, setSectionScheduleOpen] = React.useState(true);
+
+  // Proposed Construction
+  const [plotAreaProposed, setPlotAreaProposed] = React.useState("83.59");
+  const [plotAreaDocument, setPlotAreaDocument] = React.useState("83.61");
+  const [plotAreaGround, setPlotAreaGround] = React.useState("83.59");
+  const [plotStructure, setPlotStructure] = React.useState("Below 200 sq m");
+  const [isAffectingRoadWidening, setIsAffectingRoadWidening] = React.useState<"Yes" | "No">("No");
+  const [proposedBuiltUpArea, setProposedBuiltUpArea] = React.useState("57.02");
+  const [isCompoundWallProposed, setIsCompoundWallProposed] = React.useState<"Yes" | "No">("No");
+  const [roadWidthInput, setRoadWidthInput] = React.useState("0");
+
+  // Site Details
+  const [abutsExistingRoad, setAbutsExistingRoad] = React.useState<"Yes" | "No">("Yes");
+  const [statusOfRoad, setStatusOfRoad] = React.useState<"Public" | "Private">("Public");
+  const [natureOfRoad, setNatureOfRoad] = React.useState("CC - Concrete");
+  const [widthOfApproachRoad, setWidthOfApproachRoad] = React.useState("3");
+  const [plotNearbyReligious, setPlotNearbyReligious] = React.useState("NA");
+  const [vicinityAerodrome, setVicinityAerodrome] = React.useState<"Yes" | "No">("No");
+  const [vicinityWaterBodies, setVicinityWaterBodies] = React.useState<"Yes" | "No">("No");
+  const [marketValue, setMarketValue] = React.useState("5750");
+  const [abuttingIrr, setAbuttingIrr] = React.useState<"Yes" | "No">("No");
+
+  // Schedule of Boundaries
+  const [northBoundary, setNorthBoundary] = React.useState("Others");
+  const [northNo, setNorthNo] = React.useState("");
+  const [southBoundary, setSouthBoundary] = React.useState("Others");
+  const [southNo, setSouthNo] = React.useState("");
+  const [eastBoundary, setEastBoundary] = React.useState("Others");
+  const [eastNo, setEastNo] = React.useState("");
+  const [westBoundary, setWestBoundary] = React.useState("Others");
+  const [westNo, setWestNo] = React.useState("");
+
+  // ─────────────────────────────────────────────────────────────
+  // 4. APPLICATION CHECKLIST STATE (Image 3)
+  // ─────────────────────────────────────────────────────────────
+  const initialChecklist = [
+    {
+      id: 1,
+      desc: "Whether Zoning district is R1 zone, Individual Residential buildings and size of the plot is greater than 200.00sqmt. or height above 7m?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 2,
+      desc: "Whether the Zoning district of the plot is other than R1 zone?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 3,
+      desc: "Whether any applicability of clearance certificate for payment of tax arrears?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 4,
+      desc: "Whether the height of the building is greater than 10 mtr ?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 5,
+      desc: "Whether the Commercial building height is greater than 15 mtr.?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 6,
+      desc: "Whether the buildings of Educational, Cinema Theatres, Functional halls & other Assembly buildings where plot area is greater than 500 sq.m or height is greater than 6 mtr?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 7,
+      desc: "Whether Residential Building and the height of the building is greater than 18mtr or Group housing?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 8,
+      desc: "Whether In case of land leased/allotted by APCRDA ?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 9,
+      desc: "Proposed building with Built-up Area above 20000 Sq.m?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 10,
+      desc: "Whether the proposed site is located within the distance of above 100m and upto 200m from the protected Monuments as notified under Archaeological monuments and Ancient sites?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 11,
+      desc: "Whether edge of the proposed building is within 30 mts distance from the railway property boundary?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 12,
+      desc: "Whether site falls in Extended Habitation exempted from LPS?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 13,
+      desc: "Whether Site falls under IPLP/ RLP but not regularized?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+    {
+      id: 14,
+      desc: "Whether any approved plan/ regularized plan given in the proposed site?",
+      val: "No" as "Yes" | "No",
+      remark: "",
+    },
+  ];
+  const [checklistItems, setChecklistItems] = React.useState(initialChecklist);
+
+  const updateChecklistItem = (id: number, val: "Yes" | "No") => {
+    setChecklistItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, val } : item))
+    );
+  };
+
+  const updateChecklistRemark = (id: number, remark: string) => {
+    setChecklistItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, remark } : item))
+    );
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // 5. DOCUMENT CHECKLIST STATE (Image 4)
+  // ─────────────────────────────────────────────────────────────
+  const [docTab, setDocTab] = React.useState<"Primary" | "Additional">("Primary");
+
+  const [documentItems, setDocumentItems] = React.useState([
+    {
+      id: 1,
+      title:
+        "Original sale deed, registered under the provisions of the Indian Registration Act, 1908/Certified copy issued by Stamps and Registration Department for the perusal of the sanctioning authority and cross veri cation with the attested copy submitted with the building application.",
+      files: ["sale_deed_reg_doc_87_1.pdf (1.8 MB)"],
+      checked: true,
+    },
+    {
+      id: 2,
+      title:
+        "Certificate of Supervision shall be in the form prescribed by Commissioner and shall be duly signed by the Licensed Professional as per Section 209.1 (vii) per the Capital City ZR",
+      files: ["supervision_cert_signed.pdf (640 KB)"],
+      checked: true,
+    },
+    {
+      id: 3,
+      title:
+        "Attested copy of the Land Pooling Ownership Certificate issued by APCRDA or in case of other than land pooling equivalent document in support of ownership.",
+      files: ["lpoc_inavolu_allotment.pdf (2.1 MB)"],
+      checked: true,
+    },
+    {
+      id: 4,
+      title:
+        "The Owner and Builder/Developer shall give and Affidavit duly notarized to the effect that in the case of any violation from the sanction building plan.",
+      files: ["notarized_affidavit_violation_undertaking.pdf (512 KB)"],
+      checked: true,
+    },
+    {
+      id: 5,
+      title: "Certification of appointment to New LTP",
+      files: ["ltp_appointment_srinuvas_allu.pdf (420 KB)"],
+      checked: true,
+    },
+  ]);
+
+  // Document preview modal
+  const [previewDoc, setPreviewDoc] = React.useState<{ title: string; files: string[] } | null>(null);
+  const [uploadDocModal, setUploadDocModal] = React.useState<{ id: number; title: string } | null>(null);
+
+  // ─────────────────────────────────────────────────────────────
+  // 6. OTHERS STATE (Image 5)
+  // ─────────────────────────────────────────────────────────────
+  const [sectionOthersOpen, setSectionOthersOpen] = React.useState(true);
+  const [contractorRiskPolicyNo, setContractorRiskPolicyNo] = React.useState("");
+  const [contractorDate, setContractorDate] = React.useState("");
+  const [validUptoDate, setValidUptoDate] = React.useState("");
+  const [mortgageDeedNo, setMortgageDeedNo] = React.useState("");
+  const [mortgageDeedDate, setMortgageDeedDate] = React.useState("");
+  const [floorHandedOver, setFloorHandedOver] = React.useState("");
+  const [mortgageArea, setMortgageArea] = React.useState("0");
+  const [subRegisterOffice, setSubRegisterOffice] = React.useState("");
+
+  // Modals & Feedback
+  const [proposalFlowOpen, setProposalFlowOpen] = React.useState(false);
+  const [reportsOpen, setReportsOpen] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+
+  // ─────────────────────────────────────────────────────────────
+  // 7. APPLY FOR NOCS STATE (From Image)
+  // ─────────────────────────────────────────────────────────────
+  const [hasFireNoc, setHasFireNoc] = React.useState<"NA" | "No" | "Yes">("No");
+  const [fireNocRefNo, setFireNocRefNo] = React.useState("");
+  const [fireNocIssueDate, setFireNocIssueDate] = React.useState("");
+  const [fireNocDocAttached, setFireNocDocAttached] = React.useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  return (
+    <div className="w-full h-full bg-[#FAF7F2] flex flex-col font-sans text-slate-800 overflow-hidden select-none">
+      {/* ── TOP HEADER BAR (Maroon & Beige Theme) ── */}
+      <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs">
+        {/* Left: Application No & Proposal Status */}
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">
+              Application No.[BA No.] -{" "}
+              <span className="text-[#7A1316] font-mono">{baNo}</span>
+            </span>
+          </div>
+          <div className="text-xs font-bold text-[#1E3A8A] flex items-center gap-1.5">
+            <span>Proposal Status : </span>
+            <span className="text-[#7A1316] font-black">{proposalStatus}</span>
+          </div>
+        </div>
+
+        {/* Center: Submission Date */}
+        <div className="hidden md:flex items-center justify-center">
+          <div className="bg-[#FAF7F2] border border-[#DCD5C8] rounded-full px-3.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs">
+            {isDraft ? "Created Date: - " : "Submission Date: - "}<span className="font-bold text-slate-900">{submissionDate}</span>
+          </div>
+        </div>
+
+        {/* Right: Proposal Risk Category & Action Buttons */}
+        <div className="flex items-center flex-wrap gap-2">
+          {/* Proposal Risk Category */}
+          <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-700 mr-2">
+            <span>Proposal Risk Category : </span>
+            <span className="font-black text-emerald-800">Low</span>
+            <span className="text-slate-500 font-mono">➜</span>
+          </div>
+
+          {/* Action Buttons (Maroon Theme) */}
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => showToast("Model configuration updated")}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
+            >
+              Change Model
+            </button>
+            <button
+              onClick={() => setProposalFlowOpen(true)}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
+            >
+              Proposal Flow
+            </button>
+            <button
+              onClick={() => showToast("Submission successfully verified and recorded")}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
+            >
+              Submit
+            </button>
+            <button
+              onClick={() => setReportsOpen(true)}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
+            >
+              Reports
+            </button>
+            <button
+              onClick={onBack ? onBack : () => navigate("ltp-dashboard")}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10] flex items-center gap-1"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="absolute top-14 right-6 z-50 bg-[#7A1316] text-white text-xs font-semibold px-4 py-2 rounded-md shadow-lg flex items-center gap-2 animate-in fade-in-50 slide-in-from-top-2">
+          <CheckCircle2 className="size-4 text-emerald-400" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* ── MAIN TABS (Application Form | Drawing | Payments) ── */}
+      <div className="bg-[#FAF7F2] border-b border-[#DCD5C8] px-4 pt-2 flex items-center gap-1 shrink-0">
+        <button
+          onClick={() => setMainTab("form")}
+          className={cn(
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            mainTab === "form"
+              ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
+              : "text-slate-600 border-transparent hover:text-slate-900"
+          )}
+        >
+          Application Form
+        </button>
+        <button
+          onClick={() => setMainTab("drawing")}
+          className={cn(
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            mainTab === "drawing"
+              ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
+              : "text-slate-600 border-transparent hover:text-slate-900"
+          )}
+        >
+          Drawing
+        </button>
+        <button
+          onClick={() => setMainTab("payments")}
+          className={cn(
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            mainTab === "payments"
+              ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
+              : "text-slate-600 border-transparent hover:text-slate-900"
+          )}
+        >
+          Payments
+        </button>
+      </div>
+
+      {/* ── SUB-TABS (When Application Form is active) ── */}
+      {mainTab === "form" && (
+        <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
+          {[
+            { id: "general", label: "General Information" },
+            { id: "applicant", label: "Applicant Information" },
+            { id: "plot", label: "Plot Details" },
+            { id: "app-checklist", label: "Application Checklist" },
+            { id: "doc-checklist", label: "Document Checklist" },
+            { id: "others", label: "Others" },
+            { id: "nocs", label: "Apply for NOCs" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSubTab(tab.id as typeof subTab)}
+              className={cn(
+                "font-semibold transition-colors cursor-pointer relative py-0.5",
+                subTab === tab.id
+                  ? "text-[#7A1316] font-black underline underline-offset-4 decoration-2 decoration-[#7A1316]"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── CONTENT BODY AREA (Scrollable) ── */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 bg-[#FAF7F2]">
+        {/* ========================================================================= */}
+        {/* SUB-TAB 1: GENERAL INFORMATION                                           */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "general" && (
+          <div className="max-w-6xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
+            {/* Form Fields: Two Columns Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
+              {/* Row 1 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Case Type
+                </label>
+                <select
+                  value={caseType}
+                  onChange={(e) => setCaseType(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="New">New</option>
+                  <option value="Revision">Revision</option>
+                  <option value="Renewal">Renewal</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Permission Type
+                </label>
+                <select
+                  value={permissionType}
+                  onChange={(e) => setPermissionType(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="Building Permission">Building Permission</option>
+                  <option value="Layout Approval">Layout Approval</option>
+                  <option value="Occupancy Certificate">Occupancy Certificate</option>
+                </select>
+              </div>
+
+              {/* Row 2 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Nature of Permission
+                </label>
+                <select
+                  value={natureOfPermission}
+                  onChange={(e) => setNatureOfPermission(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="General">General</option>
+                  <option value="Special">Special</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Application Type
+                </label>
+                <div className="flex items-center gap-4 w-full sm:w-64">
+                  {(["Private", "Govt land", "CRDA land"] as const).map((opt) => (
+                    <label key={opt} className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                      <input
+                        type="radio"
+                        name="appType"
+                        checked={applicationType === opt}
+                        onChange={() => setApplicationType(opt)}
+                        className="accent-[#7A1316] cursor-pointer"
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Row 3 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Application is from LPS Layout?
+                </label>
+                <div className="flex items-center gap-4 w-full sm:w-64">
+                  {(["LPS Layout", "Non-LPS"] as const).map((opt) => (
+                    <label key={opt} className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                      <input
+                        type="radio"
+                        name="lpsLayout"
+                        checked={isLpsLayout === opt}
+                        onChange={() => setIsLpsLayout(opt)}
+                        className="accent-[#7A1316] cursor-pointer"
+                      />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Mandal
+                </label>
+                <select
+                  value={mandal}
+                  onChange={(e) => setMandal(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="Thullur">Thullur</option>
+                  <option value="Mangalagiri">Mangalagiri</option>
+                  <option value="Tadepalle">Tadepalle</option>
+                </select>
+              </div>
+
+              {/* Row 4 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> District
+                </label>
+                <select
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="Guntur">Guntur</option>
+                  <option value="Krishna">Krishna</option>
+                  <option value="NTR">NTR</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Gram panchayat
+                </label>
+                <select
+                  value={gramPanchayat}
+                  onChange={(e) => setGramPanchayat(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="INAVOLU">INAVOLU</option>
+                  <option value="Velagapudi">Velagapudi</option>
+                  <option value="Nelapadu">Nelapadu</option>
+                </select>
+              </div>
+
+              {/* Row 5 */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Revenue Village
+                </label>
+                <select
+                  value={revenueVillage}
+                  onChange={(e) => setRevenueVillage(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="INAVOLU">INAVOLU</option>
+                  <option value="Velagapudi">Velagapudi</option>
+                  <option value="Nelapadu">Nelapadu</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0">
+                  <span className="text-rose-600 font-black mr-1">*</span> Government Proposal
+                </label>
+                <select
+                  value={governmentProposal}
+                  onChange={(e) => setGovernmentProposal(e.target.value)}
+                  className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="NA">NA</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </div>
+
+            {/* When Non-LPS is selected: Nature of Site and site details are required. When LPS Layout is selected: these details are not required and removed. */}
+            {isLpsLayout === "Non-LPS" && (
+              <>
+                <hr className="border-[#DCD5C8]" />
+
+                {/* Nature of Site (5 Selectable Cards) */}
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900">
+                      <span className="text-rose-600 font-black mr-1">*</span> Nature of Site
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Select the Nature of Site you want to apply for (Required for Non-LPS layout)
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    {siteNatureOptions.map((opt) => {
+                      const isSelected = selectedSiteNature === opt.id;
+                      return (
+                        <div
+                          key={opt.id}
+                          onClick={() => setSelectedSiteNature(opt.id)}
+                          className={cn(
+                            "rounded-lg p-3 cursor-pointer transition-all duration-200 flex flex-col justify-between text-center relative",
+                            isSelected
+                              ? "border-2 border-[#7A1316] bg-[#FDF6ED] shadow-xs"
+                              : "border border-[#DCD5C8] bg-white/80 hover:bg-[#FAF4EB]"
+                          )}
+                        >
+                          <div className="flex flex-col items-center gap-1.5">
+                            <div
+                              className={cn(
+                                "size-4 rounded-full border flex items-center justify-center transition-colors",
+                                isSelected ? "border-[#7A1316] bg-[#7A1316]" : "border-slate-400 bg-white"
+                              )}
+                            >
+                              {isSelected && <div className="size-1.5 rounded-full bg-white" />}
+                            </div>
+                            <span className="text-xs font-bold text-slate-900 leading-tight">
+                              {opt.title}
+                            </span>
+                          </div>
+                          <div className="text-[10px] text-slate-500 mt-2 leading-snug">
+                            {opt.desc}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Lower Site Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs pt-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Layout Location
+                    </label>
+                    <select
+                      value={layoutLocation}
+                      onChange={(e) => setLayoutLocation(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="INAVOLU">INAVOLU</option>
+                      <option value="Thullur">Thullur</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Block No.
+                    </label>
+                    <select
+                      value={blockNo}
+                      onChange={(e) => setBlockNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="NA">NA</option>
+                      <option value="Block-A">Block-A</option>
+                      <option value="Block-B">Block-B</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> RS/TS/NTS/D No.
+                    </label>
+                    <input
+                      type="text"
+                      value={rsNo}
+                      onChange={(e) => setRsNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Zoning District
+                    </label>
+                    <select
+                      value={zoningDistrict}
+                      onChange={(e) => setZoningDistrict(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="R1-Village Planning Zone">R1-Village Planning Zone</option>
+                      <option value="R2-Medium Density Residential">R2-Medium Density Residential</option>
+                      <option value="C1-Commercial Zone">C1-Commercial Zone</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Land Use Zone
+                    </label>
+                    <select
+                      value={landUseZone}
+                      onChange={(e) => setLandUseZone(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Public & Semi-Public">Public & Semi-Public</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Activity
+                    </label>
+                    <select
+                      value={proposedActivity}
+                      onChange={(e) => setProposedActivity(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Bungalow/ Dwelling / Non Apartment">Bungalow/ Dwelling / Non Apartment</option>
+                      <option value="Apartment Building">Apartment Building</option>
+                      <option value="Commercial Complex">Commercial Complex</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Use
+                    </label>
+                    <select
+                      value={proposedUse}
+                      onChange={(e) => setProposedUse(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Mixed Use">Mixed Use</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Building Height
+                    </label>
+                    <input
+                      type="text"
+                      value={buildingHeight}
+                      onChange={(e) => setBuildingHeight(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      Road/Street
+                    </label>
+                    <input
+                      type="text"
+                      value={roadStreet}
+                      onChange={(e) => setRoadStreet(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* When LPS Layout is selected: Show exact fields matching user screenshot */}
+            {isLpsLayout === "LPS Layout" && (
+              <div className="space-y-6 pt-3">
+                <hr className="border-[#DCD5C8]" />
+
+                {/* Nature of Site Header with single LPS Layout Card */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900">Nature of Site</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Select the Nature of Site you want to apply for
+                    </p>
+                  </div>
+
+                  {/* Single LPS Layout selectable box matching image */}
+                  <div className="border-2 border-blue-400 bg-white rounded p-3 flex items-center gap-2 cursor-pointer shadow-2xs">
+                    <input
+                      type="radio"
+                      id="nature-lps"
+                      name="natureOfSiteLps"
+                      checked={true}
+                      readOnly
+                      className="size-4 text-blue-600 accent-blue-600 cursor-pointer"
+                    />
+                    <label htmlFor="nature-lps" className="text-xs font-bold text-slate-900 cursor-pointer">
+                      LPS Layout
+                    </label>
+                  </div>
+                </div>
+
+                {/* LPS Layout Fields Grid (matching user screenshot) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-xs pt-2">
+                  {/* Row 1: Left = Block No, Right = empty spacer */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Block No.
+                    </label>
+                    <input
+                      type="text"
+                      value={lpsBlockNo}
+                      onChange={(e) => setLpsBlockNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                  <div className="hidden md:block" />
+
+                  {/* Row 2: Left = Survey No, Right = Plot No */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Survey No/D.No/R.S.No
+                    </label>
+                    <input
+                      type="text"
+                      value={lpsSurveyNo}
+                      onChange={(e) => setLpsSurveyNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Plot No.
+                    </label>
+                    <input
+                      type="text"
+                      value={lpsPlotNo}
+                      onChange={(e) => setLpsPlotNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 3: Left = Land Use Zone, Right = Zoning District */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      Land Use Zone
+                    </label>
+                    <select
+                      value={lpsLandUseZone}
+                      onChange={(e) => setLpsLandUseZone(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Mixed Use">Mixed Use</option>
+                      <option value="Public & Semi-Public">Public & Semi-Public</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      Zoning District
+                    </label>
+                    <select
+                      value={lpsZoningDistrict}
+                      onChange={(e) => setLpsZoningDistrict(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="R3-Medium to High density">R3-Medium to High density</option>
+                      <option value="R1-Village Planning Zone">R1-Village Planning Zone</option>
+                      <option value="R2-Medium Density Residential">R2-Medium Density Residential</option>
+                      <option value="C1-Commercial Zone">C1-Commercial Zone</option>
+                    </select>
+                  </div>
+
+                  {/* Row 4: Left = Proposed Use, Right = Proposed Activity */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Use
+                    </label>
+                    <select
+                      value={lpsProposedUse}
+                      onChange={(e) => setLpsProposedUse(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Residential">Residential</option>
+                      <option value="Commercial">Commercial</option>
+                      <option value="Mixed Use">Mixed Use</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Activity
+                    </label>
+                    <select
+                      value={lpsProposedActivity}
+                      onChange={(e) => setLpsProposedActivity(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Residential Apartment Bldg">Residential Apartment Bldg</option>
+                      <option value="Bungalow/ Dwelling / Non Apartment">Bungalow/ Dwelling / Non Apartment</option>
+                      <option value="Commercial Complex">Commercial Complex</option>
+                    </select>
+                  </div>
+
+                  {/* Row 5: Left = Road/Street, Right = Building Height */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      Road/Street
+                    </label>
+                    <input
+                      type="text"
+                      value={lpsRoadStreet}
+                      onChange={(e) => setLpsRoadStreet(e.target.value)}
+                      placeholder="e.g. ROAD"
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Building Height
+                    </label>
+                    <input
+                      type="text"
+                      value={lpsBuildingHeight}
+                      onChange={(e) => setLpsBuildingHeight(e.target.value)}
+                      placeholder="e.g. 30"
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 2: APPLICANT INFORMATION (Image 1)                                */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "applicant" && (
+          <div className="max-w-6xl mx-auto space-y-4">
+            {/* 1. Licensed Technical Personnel's Information */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionLtpOpen(!sectionLtpOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionLtpOpen ? "▲" : "▼"}</span>
+                  Licensed Technical Personnel's Information
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Reg. LTP</span>
+              </button>
+
+              {sectionLtpOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+                  {/* Row 1 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Licensed Technical Personnel Type
+                    </label>
+                    <select
+                      value={ltpType}
+                      onChange={(e) => setLtpType(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Engineer">Engineer</option>
+                      <option value="Architect">Architect</option>
+                      <option value="Surveyor">Surveyor</option>
+                      <option value="Structural Engineer">Structural Engineer</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Address</label>
+                    <input
+                      type="text"
+                      value={ltpAddress}
+                      onChange={(e) => setLtpAddress(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Name</label>
+                    <select
+                      value={ltpName}
+                      onChange={(e) => setLtpName(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="SRINIVAS ALLU">SRINIVAS ALLU</option>
+                      <option value="RAMESH BABU K">RAMESH BABU K</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Validity</label>
+                    <input
+                      type="text"
+                      value={ltpValidity}
+                      onChange={(e) => setLtpValidity(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 3 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">License Number</label>
+                    <input
+                      type="text"
+                      value={ltpLicenseNo}
+                      onChange={(e) => setLtpLicenseNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">E-mail ID</label>
+                    <input
+                      type="email"
+                      value={ltpEmail}
+                      onChange={(e) => setLtpEmail(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 4 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Mobile Number</label>
+                    <input
+                      type="text"
+                      value={ltpMobile}
+                      onChange={(e) => setLtpMobile(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Aadhaar No</label>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type={showLtpAadhaar ? "text" : "password"}
+                        value={ltpAadhaar}
+                        onChange={(e) => setLtpAadhaar(e.target.value)}
+                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowLtpAadhaar(!showLtpAadhaar)}
+                        className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      >
+                        {showLtpAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Applicant's Information */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
+                  Applicant's Information
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Owner / Promoters</span>
+              </button>
+
+              {sectionApplicantOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+                  {/* Row 1 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2 border-b border-[#DCD5C8]/60 pb-2.5">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Application is for Self Use or Selling Purpose?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="appUseType"
+                          checked={applicantUseType === "Self Use"}
+                          onChange={() => setApplicantUseType("Self Use")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Self Use</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="appUseType"
+                          checked={applicantUseType === "Selling"}
+                          onChange={() => setApplicantUseType("Selling")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Selling</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Owner Name (In Full)
+                    </label>
+                    <input
+                      type="text"
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Road/Street</label>
+                    <input
+                      type="text"
+                      value={applicantRoadStreet}
+                      onChange={(e) => setApplicantRoadStreet(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 3 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Door No./Flat No.
+                    </label>
+                    <input
+                      type="text"
+                      value={doorNo}
+                      onChange={(e) => setDoorNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> District
+                    </label>
+                    <input
+                      type="text"
+                      value={applicantDistrict}
+                      onChange={(e) => setApplicantDistrict(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 4 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> City
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Email
+                    </label>
+                    <input
+                      type="email"
+                      value={applicantEmail}
+                      onChange={(e) => setApplicantEmail(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 5 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> PinCode
+                    </label>
+                    <input
+                      type="text"
+                      value={pinCode}
+                      onChange={(e) => setPinCode(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Mobile
+                    </label>
+                    <input
+                      type="text"
+                      value={applicantMobile}
+                      onChange={(e) => setApplicantMobile(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 6 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Landline Number</label>
+                    <input
+                      type="text"
+                      value={landlineNumber}
+                      onChange={(e) => setLandlineNumber(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Aadhaar No.
+                    </label>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type={showApplicantAadhaar ? "text" : "password"}
+                        value={applicantAadhaar}
+                        onChange={(e) => setApplicantAadhaar(e.target.value)}
+                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowApplicantAadhaar(!showApplicantAadhaar)}
+                        className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                      >
+                        {showApplicantAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Structural Engineer Information */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionStructuralOpen(!sectionStructuralOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
+                  Structural Engineer Information
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Structural Stability</span>
+              </button>
+
+              {sectionStructuralOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Structural Engineer Name
+                    </label>
+                    <select
+                      value={structuralName}
+                      onChange={(e) => setStructuralName(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Select">Select</option>
+                      <option value="Er. P. Ramachandra Rao">Er. P. Ramachandra Rao</option>
+                      <option value="Er. K. Suresh Kumar">Er. K. Suresh Kumar</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Validity</label>
+                    <input
+                      type="text"
+                      value={structuralValidity}
+                      onChange={(e) => setStructuralValidity(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Address</label>
+                    <input
+                      type="text"
+                      value={structuralAddress}
+                      onChange={(e) => setStructuralAddress(e.target.value)}
+                      className="w-full md:max-w-3xl h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 3: PLOT DETAILS (Image 2)                                         */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "plot" && (
+          <div className="max-w-6xl mx-auto space-y-4">
+            {/* 1. Proposed Construction */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionProposedOpen(!sectionProposedOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionProposedOpen ? "▲" : "▼"}</span>
+                  Proposed Construction
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Area Parameters</span>
+              </button>
+
+              {sectionProposedOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+                  {/* Row 1 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Plot Area (sq. mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={plotAreaProposed}
+                      onChange={(e) => setPlotAreaProposed(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Total Area As per Documents (sq. mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={plotAreaDocument}
+                      onChange={(e) => setPlotAreaDocument(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Total Area As On Grounds (sq. mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={plotAreaGround}
+                      onChange={(e) => setPlotAreaGround(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Plot Structure
+                    </label>
+                    <select
+                      value={plotStructure}
+                      onChange={(e) => setPlotStructure(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Below 200 sq m">Below 200 sq m</option>
+                      <option value="200 to 500 sq m">200 to 500 sq m</option>
+                      <option value="Above 500 sq m">Above 500 sq m</option>
+                    </select>
+                  </div>
+
+                  {/* Row 3 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Is site affecting road widening?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="affectingWidening"
+                          checked={isAffectingRoadWidening === "Yes"}
+                          onChange={() => setIsAffectingRoadWidening("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="affectingWidening"
+                          checked={isAffectingRoadWidening === "No"}
+                          onChange={() => setIsAffectingRoadWidening("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Built Up Area (sq. mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={proposedBuiltUpArea}
+                      onChange={(e) => setProposedBuiltUpArea(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 4 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Is Compound Wall proposed?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="compoundWall"
+                          checked={isCompoundWallProposed === "Yes"}
+                          onChange={() => setIsCompoundWallProposed("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="compoundWall"
+                          checked={isCompoundWallProposed === "No"}
+                          onChange={() => setIsCompoundWallProposed("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">Road Width</label>
+                    <input
+                      type="text"
+                      value={roadWidthInput}
+                      onChange={(e) => setRoadWidthInput(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Site Details */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionSiteDetailsOpen(!sectionSiteDetailsOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionSiteDetailsOpen ? "▲" : "▼"}</span>
+                  Site Details
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Surroundings & Valuation</span>
+              </button>
+
+              {sectionSiteDetailsOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
+                  {/* Row 1 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Whether site abuts any existing road?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="abutsRoad"
+                          checked={abutsExistingRoad === "Yes"}
+                          onChange={() => setAbutsExistingRoad("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="abutsRoad"
+                          checked={abutsExistingRoad === "No"}
+                          onChange={() => setAbutsExistingRoad("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Status of Road
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="statusRoad"
+                          checked={statusOfRoad === "Public"}
+                          onChange={() => setStatusOfRoad("Public")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Public</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="statusRoad"
+                          checked={statusOfRoad === "Private"}
+                          onChange={() => setStatusOfRoad("Private")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Private</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Nature of the Road
+                    </label>
+                    <select
+                      value={natureOfRoad}
+                      onChange={(e) => setNatureOfRoad(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="CC - Concrete">CC - Concrete</option>
+                      <option value="BT - Bitumen">BT - Bitumen</option>
+                      <option value="WBM">WBM</option>
+                      <option value="Katcha">Katcha</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Width of the Approach Road (Mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={widthOfApproachRoad}
+                      onChange={(e) => setWidthOfApproachRoad(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 3 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Plot Nearby Religious Structures
+                    </label>
+                    <select
+                      value={plotNearbyReligious}
+                      onChange={(e) => setPlotNearbyReligious(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="NA">NA</option>
+                      <option value="Temple">Temple</option>
+                      <option value="Mosque">Mosque</option>
+                      <option value="Church">Church</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Is the Plot in the vicinity of Aerodrome?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="vicinityAero"
+                          checked={vicinityAerodrome === "Yes"}
+                          onChange={() => setVicinityAerodrome("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="vicinityAero"
+                          checked={vicinityAerodrome === "No"}
+                          onChange={() => setVicinityAerodrome("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Row 4 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Is the buildings which are in the vicinity area of Water Bodies/Railways/High tension line?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="vicinityWater"
+                          checked={vicinityWaterBodies === "Yes"}
+                          onChange={() => setVicinityWaterBodies("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="vicinityWater"
+                          checked={vicinityWaterBodies === "No"}
+                          onChange={() => setVicinityWaterBodies("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Row 5 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Market Value (in Rs per Sq.Yard)
+                    </label>
+                    <input
+                      type="text"
+                      value={marketValue}
+                      onChange={(e) => setMarketValue(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Whether site is abutting from IRR?
+                    </label>
+                    <div className="flex items-center gap-6 sm:w-72">
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="abuttingIrr"
+                          checked={abuttingIrr === "Yes"}
+                          onChange={() => setAbuttingIrr("Yes")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
+                        <input
+                          type="radio"
+                          name="abuttingIrr"
+                          checked={abuttingIrr === "No"}
+                          onChange={() => setAbuttingIrr("No")}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Schedule of Boundaries */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionScheduleOpen(!sectionScheduleOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionScheduleOpen ? "▲" : "▼"}</span>
+                  Schedule of boundaries
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Cardinal Directions</span>
+              </button>
+
+              {sectionScheduleOpen && (
+                <div className="p-4 sm:p-5 space-y-3 text-xs">
+                  {/* North */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label className="w-24 font-bold text-slate-800">North</label>
+                    <select
+                      value={northBoundary}
+                      onChange={(e) => setNorthBoundary(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Others">Others</option>
+                      <option value="Road">Road</option>
+                      <option value="Neighbour Plot">Neighbour Plot</option>
+                    </select>
+                    <label className="font-semibold text-slate-700 sm:ml-4">No.</label>
+                    <input
+                      type="text"
+                      value={northNo}
+                      onChange={(e) => setNorthNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* South */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label className="w-24 font-bold text-slate-800">South</label>
+                    <select
+                      value={southBoundary}
+                      onChange={(e) => setSouthBoundary(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Others">Others</option>
+                      <option value="Road">Road</option>
+                      <option value="Neighbour Plot">Neighbour Plot</option>
+                    </select>
+                    <label className="font-semibold text-slate-700 sm:ml-4">No.</label>
+                    <input
+                      type="text"
+                      value={southNo}
+                      onChange={(e) => setSouthNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* West */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label className="w-24 font-bold text-slate-800">West</label>
+                    <select
+                      value={westBoundary}
+                      onChange={(e) => setWestBoundary(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Others">Others</option>
+                      <option value="Road">Road</option>
+                      <option value="Neighbour Plot">Neighbour Plot</option>
+                    </select>
+                    <label className="font-semibold text-slate-700 sm:ml-4">No.</label>
+                    <input
+                      type="text"
+                      value={westNo}
+                      onChange={(e) => setWestNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* East */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <label className="w-24 font-bold text-slate-800">East</label>
+                    <select
+                      value={eastBoundary}
+                      onChange={(e) => setEastBoundary(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    >
+                      <option value="Others">Others</option>
+                      <option value="Road">Road</option>
+                      <option value="Neighbour Plot">Neighbour Plot</option>
+                    </select>
+                    <label className="font-semibold text-slate-700 sm:ml-4">No.</label>
+                    <input
+                      type="text"
+                      value={eastNo}
+                      onChange={(e) => setEastNo(e.target.value)}
+                      className="w-full sm:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 4: APPLICATION CHECKLIST (Image 3)                                */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "app-checklist" && (
+          <div className="max-w-6xl mx-auto space-y-3">
+            {/* Top Bar with Save & Continue */}
+            <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] p-3 rounded-lg shadow-2xs">
+              <div>
+                <h3 className="font-black text-[#7A1316] text-xs uppercase tracking-wide">
+                  Application Statutory Checklist
+                </h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Mandatory regulatory confirmations for APCRDA BBAS scrutiny compliance.
+                </p>
+              </div>
+              <button
+                onClick={() => showToast("Checklist responses saved successfully")}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
+              >
+                Save & Continue
+              </button>
+            </div>
+
+            {/* Checklist Table */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
+                    <tr>
+                      <th className="px-3 py-2.5 w-10 text-center">#</th>
+                      <th className="px-4 py-2.5">Description</th>
+                      <th className="px-4 py-2.5 w-36 text-center">Value</th>
+                      <th className="px-4 py-2.5 w-64">Remark</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCD5C8] bg-white">
+                    {checklistItems.map((item) => (
+                      <tr key={item.id} className="hover:bg-[#FAF4EB] transition-colors">
+                        <td className="px-3 py-2.5 text-center font-bold text-slate-600">
+                          {item.id}
+                        </td>
+                        <td className="px-4 py-2.5 text-slate-800 leading-snug">
+                          {item.desc}
+                        </td>
+                        <td className="px-4 py-2.5 text-center">
+                          <div className="inline-flex items-center gap-3">
+                            <span className="text-amber-600 font-bold text-xs" title="Review Required">
+                              !
+                            </span>
+                            <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
+                              <input
+                                type="radio"
+                                name={`check-${item.id}`}
+                                checked={item.val === "Yes"}
+                                onChange={() => updateChecklistItem(item.id, "Yes")}
+                                className="accent-[#7A1316] cursor-pointer"
+                              />
+                              <span>Yes</span>
+                            </label>
+                            <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
+                              <input
+                                type="radio"
+                                name={`check-${item.id}`}
+                                checked={item.val === "No"}
+                                onChange={() => updateChecklistItem(item.id, "No")}
+                                className="accent-[#7A1316] cursor-pointer"
+                              />
+                              <span>No</span>
+                            </label>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <input
+                            type="text"
+                            value={item.remark}
+                            placeholder="Optional remark..."
+                            onChange={(e) => updateChecklistRemark(item.id, e.target.value)}
+                            className="w-full h-7 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 5: DOCUMENT CHECKLIST (Image 4)                                   */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "doc-checklist" && (
+          <div className="max-w-6xl mx-auto space-y-3">
+            {/* Top Bar with Primary/Additional Tabs & Red Instruction Note */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setDocTab("Primary")}
+                  className={cn(
+                    "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
+                    docTab === "Primary"
+                      ? "bg-[#7A1316] text-white"
+                      : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
+                  )}
+                >
+                  Primary
+                </button>
+                <button
+                  onClick={() => setDocTab("Additional")}
+                  className={cn(
+                    "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
+                    docTab === "Additional"
+                      ? "bg-[#7A1316] text-white"
+                      : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
+                  )}
+                >
+                  Additional
+                </button>
+              </div>
+
+              <div className="text-rose-700 font-semibold text-xs flex items-center gap-1">
+                <span>* Click on Document(s) to View attachment/Remarks</span>
+              </div>
+            </div>
+
+            {/* Document Checklist Items */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg p-4 space-y-3 shadow-xs">
+              {documentItems.map((doc, idx) => (
+                <div
+                  key={doc.id}
+                  className="bg-white border border-[#DCD5C8] rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs hover:border-[#7A1316]/60 transition-colors"
+                >
+                  {/* Left: Checkbox Icon + Document Title */}
+                  <div className="flex items-start gap-2.5 max-w-3xl">
+                    <div className="size-4 shrink-0 mt-0.5 rounded border border-[#7A1316] bg-[#7A1316] text-white flex items-center justify-center">
+                      <Check className="size-3" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-800 leading-snug">{doc.title}</p>
+                      {doc.files.length > 0 && (
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
+                          <Paperclip className="size-3" />
+                          <span>Attached: {doc.files.join(", ")}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right: Actions */}
+                  <div className="flex items-center gap-3 shrink-0 self-end md:self-center font-bold">
+                    <button
+                      onClick={() => setPreviewDoc({ title: doc.title, files: doc.files })}
+                      className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                    >
+                      View Files
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={() => setUploadDocModal({ id: doc.id, title: doc.title })}
+                      className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                    >
+                      Attach More
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 6: OTHERS (Image 5)                                               */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "others" && (
+          <div className="max-w-6xl mx-auto space-y-3">
+            {/* Top Bar with Mandatory Notice & Save & Continue */}
+            <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
+              <span className="text-xs text-slate-600 font-medium">
+                Fields marked with <span className="text-rose-600 font-bold">*</span> are mandatory
+              </span>
+              <button
+                onClick={() => showToast("Other details saved successfully")}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
+              >
+                Save & Continue
+              </button>
+            </div>
+
+            {/* Other Details Section */}
+            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+              <button
+                onClick={() => setSectionOthersOpen(!sectionOthersOpen)}
+                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-1.5 tracking-wide">
+                  <span className="text-sm font-mono">{sectionOthersOpen ? "▲" : "▼"}</span>
+                  Other Details
+                </span>
+                <span className="text-[10px] text-amber-200 uppercase font-mono">Contract & Mortgage</span>
+              </button>
+
+              {sectionOthersOpen && (
+                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
+                  {/* Row 1 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Contractor's all Risk policy No.
+                    </label>
+                    <input
+                      type="text"
+                      value={contractorRiskPolicyNo}
+                      onChange={(e) => setContractorRiskPolicyNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Contractor's Date
+                    </label>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="date"
+                        value={contractorDate}
+                        onChange={(e) => setContractorDate(e.target.value)}
+                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-semibold text-slate-800 shrink-0">
+                      Valid Upto
+                    </label>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="date"
+                        value={validUptoDate}
+                        onChange={(e) => setValidUptoDate(e.target.value)}
+                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    {/* Placeholder for layout alignment */}
+                  </div>
+
+                  {/* Row 3 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed No.
+                    </label>
+                    <input
+                      type="text"
+                      value={mortgageDeedNo}
+                      onChange={(e) => setMortgageDeedNo(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed Date
+                    </label>
+                    <div className="relative w-full sm:w-72">
+                      <input
+                        type="date"
+                        value={mortgageDeedDate}
+                        onChange={(e) => setMortgageDeedDate(e.target.value)}
+                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 4 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Floor handed Over
+                    </label>
+                    <input
+                      type="text"
+                      value={floorHandedOver}
+                      onChange={(e) => setFloorHandedOver(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Area (Sq. Mtr.)
+                    </label>
+                    <input
+                      type="text"
+                      value={mortgageArea}
+                      onChange={(e) => setMortgageArea(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+
+                  {/* Row 5 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label className="font-bold text-slate-800 shrink-0">
+                      <span className="text-rose-600 font-black mr-1">*</span> Sub Register Office
+                    </label>
+                    <input
+                      type="text"
+                      value={subRegisterOffice}
+                      onChange={(e) => setSubRegisterOffice(e.target.value)}
+                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* SUB-TAB 7: APPLY FOR NOCS                                                 */}
+        {/* ========================================================================= */}
+        {/* ========================================================================= */}
+        {/* SUB-TAB 7: APPLY FOR NOCS (Matching user image)                          */}
+        {/* ========================================================================= */}
+        {mainTab === "form" && subTab === "nocs" && (
+          <div className="max-w-6xl mx-auto space-y-3">
+            {/* Top Right: Save NOC's Button */}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => showToast("NOC's saved successfully!")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#DCD5C8] hover:border-[#7A1316] text-[#7A1316] hover:bg-[#FBF3E4] rounded text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+              >
+                <Save className="size-3.5 text-[#7A1316]" />
+                <span>Save NOC&apos;s</span>
+              </button>
+            </div>
+
+            {/* External Fire Banner */}
+            <div className="bg-[#7A1316] text-white px-4 py-2.5 flex items-center gap-2 rounded-t-md font-bold text-sm tracking-wide shadow-xs">
+              <Flame className="size-4 text-orange-400 fill-orange-400 shrink-0" />
+              <span>External Fire</span>
+            </div>
+
+            {/* External Fire Content Card */}
+            <div className="bg-[#FBF3E4] border border-[#DCD5C8] border-t-0 rounded-b-md p-5 space-y-4 shadow-xs">
+              {/* Italic Notes */}
+              <p className="text-[11px] text-slate-700 italic leading-relaxed">
+                <span className="font-bold not-italic text-slate-900">Notes:- External Fire Service : </span>
+                All Types of Residential buildings with height more than 18m or Group housing or Commercial buildings of height 15m and above. Buildings of public congregation like Educational Buildings, Cinema Theatres, Function Halls and other Assembly Buildings on plot area of 500sq.m and above or of height above 6m.
+              </p>
+
+              {/* Question & Radio Options */}
+              <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 px-4 bg-white/70 rounded border border-[#DCD5C8]">
+                <div className="text-xs font-semibold text-slate-800">
+                  Do you have Approved Fire NOC for this application?
+                </div>
+                <div className="flex items-center gap-6 text-xs font-medium text-slate-800">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fireNocApproved"
+                      value="NA"
+                      checked={hasFireNoc === "NA"}
+                      onChange={() => setHasFireNoc("NA")}
+                      className="accent-[#7A1316] cursor-pointer"
+                    />
+                    <span>NA</span>
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fireNocApproved"
+                      value="No"
+                      checked={hasFireNoc === "No"}
+                      onChange={() => setHasFireNoc("No")}
+                      className="accent-[#7A1316] cursor-pointer"
+                    />
+                    <span>No</span>
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="fireNocApproved"
+                      value="Yes"
+                      checked={hasFireNoc === "Yes"}
+                      onChange={() => setHasFireNoc("Yes")}
+                      className="accent-[#7A1316] cursor-pointer"
+                    />
+                    <span>Yes</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Conditional Input Fields if Yes */}
+              {hasFireNoc === "Yes" && (
+                <div className="p-4 bg-white rounded border border-[#DCD5C8] space-y-3 animate-in fade-in duration-200">
+                  <div className="font-bold text-[#7A1316] text-xs uppercase tracking-wide">
+                    Approved Fire NOC Document & Reference Details:
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <label className="block font-medium text-slate-700 mb-1">
+                        Fire NOC Certificate / Reference Number
+                      </label>
+                      <input
+                        type="text"
+                        value={fireNocRefNo}
+                        onChange={(e) => setFireNocRefNo(e.target.value)}
+                        placeholder="e.g. AP/FIRE/NOC/2026/0412"
+                        className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-medium text-slate-700 mb-1">
+                        NOC Issue Date
+                      </label>
+                      <input
+                        type="date"
+                        value={fireNocIssueDate}
+                        onChange={(e) => setFireNocIssueDate(e.target.value)}
+                        className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block font-medium text-slate-700 mb-1">
+                      Attach Approved Fire NOC (PDF)
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFireNocDocAttached(true);
+                          showToast("Approved Fire NOC document attached successfully");
+                        }}
+                        className="px-3.5 py-1.5 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                      >
+                        <Upload className="size-3.5" /> Attach Document
+                      </button>
+                      {fireNocDocAttached && (
+                        <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                          <CheckCircle2 className="size-3.5 text-emerald-600" /> Fire_NOC_Approval_Sanctioned.pdf attached
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MAIN TAB 2: DRAWING                                                       */}
+        {/* ========================================================================= */}
+        {mainTab === "drawing" && (
+          <div className="max-w-5xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-3">
+              <div>
+                <h3 className="font-black text-[#7A1316] text-sm uppercase">2D CAD Scrutiny & Building Plan Drawings</h3>
+                <p className="text-slate-500 text-[11px] mt-0.5">Automated Rule Checking Engine v4.2 — 100% compliant with APCRDA BBAS regulations</p>
+              </div>
+              <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-black px-3 py-1 rounded-full text-xs">
+                SCRUTINY PASSED
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
+                <div className="font-bold text-slate-800">Ground Floor Plan</div>
+                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_GF.dwg</div>
+                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
+                <div className="font-bold text-slate-800">First Floor & Section Plan</div>
+                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_FF.dwg</div>
+                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
+              </div>
+              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
+                <div className="font-bold text-slate-800">Site Plan & Service Layout</div>
+                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_Site.dwg</div>
+                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MAIN TAB 3: PAYMENTS                                                      */}
+        {/* ========================================================================= */}
+        {mainTab === "payments" && (
+          <div className="max-w-4xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4 text-xs">
+            <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
+              Fee Assessment & Payment History
+            </h3>
+            <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+                  <tr>
+                    <th className="px-3.5 py-2.5">Fee Head</th>
+                    <th className="px-3.5 py-2.5">Challan No.</th>
+                    <th className="px-3.5 py-2.5">Amount (₹)</th>
+                    <th className="px-3.5 py-2.5">Status</th>
+                    <th className="px-3.5 py-2.5 text-right">Receipt</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#DCD5C8]">
+                  <tr>
+                    <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
+                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
+                    <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
+                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
+                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
+                    <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
+                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
+                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
+                    <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
+                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── PROPOSAL FLOW MODAL ── */}
+      {proposalFlowOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-2xl p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2">
+              <h3 className="font-black text-[#7A1316] text-sm uppercase">Proposal Workflow Flowchart</h3>
+              <button
+                onClick={() => setProposalFlowOpen(false)}
+                className="text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center gap-3 p-2.5 bg-emerald-50 border border-emerald-200 rounded">
+                <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-emerald-900">Stage 1: Application Submission & Fee Payment</div>
+                  <div className="text-[11px] text-emerald-700">Completed on 23-07-2026 11:30 AM</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 bg-emerald-50 border border-emerald-200 rounded">
+                <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-emerald-900">Stage 2: Automated Scrutiny & Rule Validation</div>
+                  <div className="text-[11px] text-emerald-700">100% Passed — All setbacks, FAR & height verified</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 bg-blue-50 border border-blue-200 rounded">
+                <Clock className="size-4 text-blue-600 shrink-0" />
+                <div>
+                  <div className="font-bold text-blue-900">Stage 3: Proceeding Pending (Competent Authority)</div>
+                  <div className="text-[11px] text-blue-700">Assigned to: Planning Officer (Thullur Zone) — Pending Final Sanction</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-2.5 bg-slate-100 border border-slate-200 rounded text-slate-500">
+                <Clock className="size-4 shrink-0" />
+                <div>
+                  <div className="font-bold">Stage 4: Sanction Order & Permit Generation</div>
+                  <div className="text-[11px]">Subsequent step after Proceeding approval</div>
+                </div>
+              </div>
+            </div>
+            <div className="text-right pt-2 border-t border-[#DCD5C8]">
+              <button
+                onClick={() => setProposalFlowOpen(false)}
+                className="bg-[#7A1316] text-white font-bold text-xs px-4 py-1.5 rounded cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REPORTS MODAL ── */}
+      {reportsOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-lg p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2">
+              <h3 className="font-black text-[#7A1316] text-sm uppercase">Application Reports & Documents</h3>
+              <button
+                onClick={() => setReportsOpen(false)}
+                className="text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="space-y-2.5 text-xs">
+              <div className="p-2.5 bg-white rounded border border-[#DCD5C8] flex items-center justify-between">
+                <span className="font-medium text-slate-800">Auto Scrutiny Compliance Report</span>
+                <button
+                  onClick={() => showToast("Scrutiny Report downloaded")}
+                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Download className="size-3" /> PDF
+                </button>
+              </div>
+              <div className="p-2.5 bg-white rounded border border-[#DCD5C8] flex items-center justify-between">
+                <span className="font-medium text-slate-800">Site Inspection Summary</span>
+                <button
+                  onClick={() => showToast("Inspection Summary downloaded")}
+                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Download className="size-3" /> PDF
+                </button>
+              </div>
+              <div className="p-2.5 bg-white rounded border border-[#DCD5C8] flex items-center justify-between">
+                <span className="font-medium text-slate-800">Fee Assessment Statement & Challan</span>
+                <button
+                  onClick={() => showToast("Challan statement downloaded")}
+                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Download className="size-3" /> PDF
+                </button>
+              </div>
+            </div>
+            <div className="text-right pt-2 border-t border-[#DCD5C8]">
+              <button
+                onClick={() => setReportsOpen(false)}
+                className="bg-[#7A1316] text-white font-bold text-xs px-4 py-1.5 rounded cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DOCUMENT PREVIEW MODAL ── */}
+      {previewDoc && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-lg p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2">
+              <h3 className="font-black text-[#7A1316] text-xs uppercase line-clamp-1">
+                Attached Files: {previewDoc.title}
+              </h3>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="space-y-2 text-xs">
+              {previewDoc.files.map((f, i) => (
+                <div key={i} className="p-3 bg-white border border-[#DCD5C8] rounded flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="size-4 text-[#7A1316]" />
+                    <span className="font-mono text-slate-800">{f}</span>
+                  </div>
+                  <button
+                    onClick={() => showToast(`Downloading ${f}`)}
+                    className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Download className="size-3" /> Download
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="text-right pt-2 border-t border-[#DCD5C8]">
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="bg-[#7A1316] text-white font-bold text-xs px-4 py-1.5 rounded cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ATTACH FILES MODAL ── */}
+      {uploadDocModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-md p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2">
+              <h3 className="font-black text-[#7A1316] text-xs uppercase line-clamp-1">
+                Attach File: {uploadDocModal.title}
+              </h3>
+              <button
+                onClick={() => setUploadDocModal(null)}
+                className="text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="border-2 border-dashed border-[#7A1316]/50 bg-white/80 rounded-lg p-6 text-center space-y-2">
+              <Upload className="size-8 text-[#7A1316] mx-auto" />
+              <div className="text-xs font-bold text-slate-800">
+                Drag and drop PDF / DWG document here
+              </div>
+              <div className="text-[11px] text-slate-500">
+                Supports PDF, DWG, DXF up to 10 MB
+              </div>
+              <button
+                onClick={() => {
+                  showToast("File uploaded and linked successfully");
+                  setUploadDocModal(null);
+                }}
+                className="mt-2 bg-[#7A1316] text-white text-xs font-bold px-4 py-1.5 rounded cursor-pointer"
+              >
+                Browse Files
+              </button>
+            </div>
+            <div className="text-right pt-2 border-t border-[#DCD5C8]">
+              <button
+                onClick={() => setUploadDocModal(null)}
+                className="text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer mr-3"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

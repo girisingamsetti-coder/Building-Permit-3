@@ -265,76 +265,76 @@ export function WorkInitiatedView() {
       {/* Detail Dialog */}
       {selectedRecord && (
         <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
-          <DialogContent className="max-w-xl">
-            <DialogHeader>
+          <DialogContent className="max-w-xl bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <HardHat className="size-5 text-amber-500" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <HardHat className="size-5 text-[#7A1316]" />
                   Work Commencement: {selectedRecord.commencementNumber}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedRecord.status === "WORK_INITIATED"
-                      ? "bg-emerald-600 text-white"
-                      : "bg-blue-600 text-white"
+                      ? "bg-emerald-700 text-white"
+                      : "bg-[#7A1316] text-white"
                   )}
                 >
                   {selectedRecord.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-xs text-slate-600">
                 Under BPO #{selectedRecord.approvalOrderNumber} · Site: {selectedRecord.siteAddress}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1.5">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Owner:</span>
-                  <span className="font-semibold text-foreground">{selectedRecord.ownerName}</span>
+                  <span className="text-slate-500">Owner:</span>
+                  <span className="font-semibold text-slate-800">{selectedRecord.ownerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">LTP on Record:</span>
-                  <span className="text-foreground">{selectedRecord.ltpName}</span>
+                  <span className="text-slate-500">LTP on Record:</span>
+                  <span className="text-slate-800">{selectedRecord.ltpName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sanction Order Issued:</span>
-                  <span className="text-foreground">{selectedRecord.orderIssuedDate}</span>
+                  <span className="text-slate-500">Sanction Order Issued:</span>
+                  <span className="text-slate-800">{selectedRecord.orderIssuedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Commencement Start Date:</span>
-                  <span className="font-semibold text-foreground">{selectedRecord.commencementDate ?? "Pending"}</span>
+                  <span className="text-slate-500">Commencement Start Date:</span>
+                  <span className="font-semibold text-slate-800">{selectedRecord.commencementDate ?? "Pending"}</span>
                 </div>
               </div>
 
-              <Card className="p-3 border space-y-1.5 bg-card">
-                <h4 className="font-semibold text-xs flex items-center gap-1.5 text-foreground">
-                  <Hammer className="size-3.5 text-primary" /> Engaged Licensed Contractor:
+              <Card className="p-3 border border-[#DCD5C8] space-y-1.5 bg-[#FBF3E4]">
+                <h4 className="font-semibold text-xs flex items-center gap-1.5 text-[#7A1316]">
+                  <Hammer className="size-3.5 text-[#7A1316]" /> Engaged Licensed Contractor:
                 </h4>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Contractor Firm:</span>
-                  <span className="font-semibold text-foreground">{selectedRecord.contractor.name}</span>
+                  <span className="text-slate-500">Contractor Firm:</span>
+                  <span className="font-semibold text-slate-800">{selectedRecord.contractor.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Licence Registration #:</span>
-                  <span className="font-mono text-foreground">{selectedRecord.contractor.licenceNo}</span>
+                  <span className="text-slate-500">Licence Registration #:</span>
+                  <span className="font-mono text-slate-800 font-semibold">{selectedRecord.contractor.licenceNo}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Contractor Phone:</span>
-                  <span className="text-foreground">{selectedRecord.contractor.phone}</span>
+                  <span className="text-slate-500">Contractor Phone:</span>
+                  <span className="text-slate-800">{selectedRecord.contractor.phone}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Address:</span>
-                  <span className="text-foreground">{selectedRecord.contractor.address}</span>
+                  <span className="text-slate-500">Address:</span>
+                  <span className="text-slate-800">{selectedRecord.contractor.address}</span>
                 </div>
               </Card>
 
-              <div className="p-3 rounded-lg border bg-muted/30 text-[11px] space-y-1">
-                <strong>Progress & Remarks:</strong>
-                <p className="text-muted-foreground">{selectedRecord.remarks}</p>
-                <div className="pt-2 text-[10px] text-muted-foreground flex items-center gap-2">
-                  <Camera className="size-3" /> Attached Site Photos: {selectedRecord.sitePhotosCount} verified on record
+              <div className="p-3 rounded-lg border border-[#DCD5C8] bg-white/70 text-[11px] space-y-1">
+                <strong className="text-[#7A1316]">Progress & Remarks:</strong>
+                <p className="text-slate-600">{selectedRecord.remarks}</p>
+                <div className="pt-2 text-[10px] text-slate-500 flex items-center gap-2">
+                  <Camera className="size-3 text-[#7A1316]" /> Attached Site Photos: {selectedRecord.sitePhotosCount} verified on record
                 </div>
               </div>
             </div>

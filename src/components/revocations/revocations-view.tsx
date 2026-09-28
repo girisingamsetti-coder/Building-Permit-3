@@ -264,57 +264,57 @@ export function RevocationsView() {
       {/* Detail Dialog */}
       {selectedRevocation && (
         <Dialog open={!!selectedRevocation} onOpenChange={(open) => !open && setSelectedRevocation(null)}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <AlertOctagon className="size-5 text-red-500" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <AlertOctagon className="size-5 text-[#7A1316]" />
                   Revocation Proceeding: {selectedRevocation.proceedingNumber}
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
                     selectedRevocation.status === "REVOKED"
-                      ? "bg-red-600 text-white"
-                      : "bg-amber-500 text-white"
+                      ? "bg-[#7A1316] text-white"
+                      : "bg-amber-600 text-white"
                   )}
                 >
                   {selectedRevocation.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-xs text-slate-600">
                 Targeting Order #{selectedRevocation.approvalOrderNumber} (Granted {selectedRevocation.approvalDate})
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1.5">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Owner on Sanction:</span>
-                  <span className="font-semibold text-foreground">{selectedRevocation.ownerName}</span>
+                  <span className="text-slate-500">Owner on Sanction:</span>
+                  <span className="font-semibold text-slate-800">{selectedRevocation.ownerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Site Address:</span>
-                  <span className="text-foreground">{selectedRevocation.siteAddress}</span>
+                  <span className="text-slate-500">Site Address:</span>
+                  <span className="text-slate-800">{selectedRevocation.siteAddress}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Proposed By:</span>
-                  <span className="text-foreground">{selectedRevocation.proposedBy} on {selectedRevocation.proposedDate}</span>
+                  <span className="text-slate-500">Proposed By:</span>
+                  <span className="text-slate-800">{selectedRevocation.proposedBy} on {selectedRevocation.proposedDate}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Preceding Show Cause Ref:</span>
-                  <span className="font-mono text-primary">{selectedRevocation.showCauseNoticeRef}</span>
+                  <span className="text-slate-500">Preceding Show Cause Ref:</span>
+                  <span className="font-mono text-[#7A1316] font-semibold">{selectedRevocation.showCauseNoticeRef}</span>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-semibold text-xs flex items-center gap-1.5 text-red-600 dark:text-red-400">
-                  <AlertTriangle className="size-3.5" /> Specific Statutory Grounds for Revocation:
+                <h4 className="font-semibold text-xs flex items-center gap-1.5 text-[#7A1316]">
+                  <AlertTriangle className="size-3.5 text-[#7A1316]" /> Specific Statutory Grounds for Revocation:
                 </h4>
                 <div className="space-y-1.5">
                   {selectedRevocation.grounds.map((ground, idx) => (
-                    <div key={idx} className="p-2.5 rounded-lg border border-red-500/20 bg-red-500/5 text-foreground flex items-start gap-2">
-                      <span className="font-bold text-red-500 shrink-0">{idx + 1}.</span>
+                    <div key={idx} className="p-2.5 rounded-lg border border-[#7A1316]/20 bg-[#FBF3E4] text-slate-800 flex items-start gap-2">
+                      <span className="font-bold text-[#7A1316] shrink-0">{idx + 1}.</span>
                       <span>{ground}</span>
                     </div>
                   ))}
@@ -322,21 +322,21 @@ export function RevocationsView() {
               </div>
 
               {selectedRevocation.revocationOrderNumber && (
-                <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 space-y-2">
+                <div className="p-3 rounded-lg border border-[#7A1316]/30 bg-[#7A1316]/10 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-red-700 dark:text-red-300">Final Order Issued:</span>
-                    <span className="font-mono font-bold text-red-700 dark:text-red-300">
+                    <span className="font-bold text-[#7A1316]">Final Order Issued:</span>
+                    <span className="font-mono font-bold text-[#7A1316]">
                       {selectedRevocation.revocationOrderNumber}
                     </span>
                   </div>
-                  <div className="text-[11px] text-muted-foreground">
+                  <div className="text-[11px] text-slate-600">
                     Revocation Date: {selectedRevocation.decisionDate} · Forfeited Fees: ₹{selectedRevocation.forfeitedFeeAmount?.toLocaleString()}
                   </div>
                 </div>
               )}
 
-              <div className="p-3 rounded-lg bg-muted/40 border text-[11px]">
-                <strong>Case Notes:</strong> {selectedRevocation.remarks}
+              <div className="p-3 rounded-lg bg-white/70 border border-[#DCD5C8] text-[11px] text-slate-700">
+                <strong className="text-[#7A1316]">Case Notes:</strong> {selectedRevocation.remarks}
               </div>
             </div>
           </DialogContent>

@@ -17,8 +17,9 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // ============================================================
 
 export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "SUPER_ADMIN" {
-  if (role === "SUPER_ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER") return "SUPER_ADMIN";
+  if (role === "SUPER_ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER" || role === "ZDD" || role === "ZJD") return "SUPER_ADMIN";
   if (role === "LTP") return "LTP";
+  // TPA, ZONAL_HEAD, DIRECTOR land on the OFFICER portal
   return "OFFICER";
 }
 

@@ -193,7 +193,7 @@ export default function Home() {
   // Route guard — redirect unauthorized users to their default view
   React.useEffect(() => {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
-      const portal = user.role === "SUPER_ADMIN" ? "admin-dashboard"
+      const portal = (user.role === "SUPER_ADMIN" || user.role === "ZDD" || user.role === "ZJD" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") ? "admin-dashboard"
         : user.role === "LTP" ? "ltp-applications"
           : "officer-dashboard";
       navigate(portal);

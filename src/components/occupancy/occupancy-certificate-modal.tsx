@@ -27,32 +27,32 @@ export function OccupancyCertificateModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-slate-100 max-h-[95vh] flex flex-col">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-[#FAF7F2] border-2 border-[#7A1316] max-h-[95vh] flex flex-col">
         {/* Modal Toolbar */}
-        <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200 shrink-0 print:hidden">
+        <div className="flex items-center justify-between px-6 py-3 bg-[#FBF3E4] border-b border-[#DCD5C8] shrink-0 print:hidden">
           <div className="flex items-center gap-2">
-            <Award className="size-5 text-emerald-600" />
-            <span className="font-semibold text-slate-900">Official Occupancy Certificate</span>
-            <Badge className="bg-emerald-600 text-white ml-2">ISSUED</Badge>
+            <Award className="size-5 text-[#7A1316]" />
+            <span className="font-semibold text-[#7A1316]">Official Occupancy Certificate</span>
+            <Badge className="bg-emerald-700 text-white ml-2">ISSUED</Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5 text-xs">
+            <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1.5 text-xs border-[#DCD5C8] hover:bg-[#FAF7F2] text-slate-700">
               <Printer className="size-3.5" /> Print Certificate
             </Button>
-            <Button variant="default" size="sm" onClick={handlePrint} className="gap-1.5 text-xs bg-blue-600 hover:bg-blue-700">
+            <Button size="sm" onClick={handlePrint} className="gap-1.5 text-xs bg-[#7A1316] hover:bg-[#8F161A] text-white">
               <Download className="size-3.5" /> Download PDF
             </Button>
-            <Button variant="ghost" size="icon" onClick={onClose} className="size-8 text-slate-500">
+            <Button variant="ghost" size="icon" onClick={onClose} className="size-8 text-[#7A1316] hover:bg-[#7A1316]/10">
               <X className="size-4" />
             </Button>
           </div>
         </div>
 
         {/* Certificate Paper Sheet */}
-        <div className="overflow-y-auto p-4 md:p-8 flex justify-center bg-slate-100 print:p-0 print:bg-white">
-          <div className="w-full max-w-[800px] bg-white border border-slate-300 shadow-xl p-8 md:p-12 relative print:shadow-none print:border-none print:p-0">
+        <div className="overflow-y-auto p-4 md:p-8 flex justify-center bg-[#FAF7F2] print:p-0 print:bg-white">
+          <div className="w-full max-w-[800px] bg-white border border-[#DCD5C8] shadow-xl p-8 md:p-12 relative print:shadow-none print:border-none print:p-0">
             {/* Security Top Ribbon */}
-            <div className="h-2 w-full bg-gradient-to-r from-blue-700 via-indigo-600 to-emerald-600 mb-6" />
+            <div className="h-2 w-full bg-gradient-to-r from-[#7A1316] via-[#8F161A] to-[#C99E5C] mb-6" />
 
             {/* Authority Header */}
             <div className="text-center space-y-1 pb-6 border-b-2 border-slate-900">

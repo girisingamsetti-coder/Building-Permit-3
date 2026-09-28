@@ -321,48 +321,49 @@ export function TasksView() {
       {/* Task Dialog */}
       {selectedTask && (
         <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                <ListChecks className="size-5 text-primary" />
+          <DialogContent className="max-w-lg bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
+              <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                <ListChecks className="size-5 text-[#7A1316]" />
                 {selectedTask.title}
               </DialogTitle>
-              <DialogDescription className="text-xs">
+              <DialogDescription className="text-xs text-slate-600">
                 Task #{selectedTask.taskNumber} · Application #{selectedTask.applicationNumber}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-2">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Workflow Stage:</span>
-                  <span className="font-semibold text-foreground">{selectedTask.stage}</span>
+                  <span className="text-slate-500">Workflow Stage:</span>
+                  <span className="font-semibold text-slate-800">{selectedTask.stage}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Assigned Role:</span>
-                  <span className="text-foreground">{selectedTask.assignedRole}</span>
+                  <span className="text-slate-500">Assigned Role:</span>
+                  <span className="text-slate-800">{selectedTask.assignedRole}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Applicant Name:</span>
-                  <span className="font-medium text-foreground">{selectedTask.applicantName}</span>
+                  <span className="text-slate-500">Applicant Name:</span>
+                  <span className="font-medium text-slate-800">{selectedTask.applicantName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Site Address:</span>
-                  <span className="text-foreground">{selectedTask.siteAddress}</span>
+                  <span className="text-slate-500">Site Address:</span>
+                  <span className="text-slate-800">{selectedTask.siteAddress}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">SLA Deadline:</span>
-                  <span className="font-bold text-foreground">{selectedTask.dueDate}</span>
+                  <span className="text-slate-500">SLA Deadline:</span>
+                  <span className="font-bold text-[#7A1316]">{selectedTask.dueDate}</span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => setSelectedTask(null)}>
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#DCD5C8]">
+                <Button variant="outline" size="sm" onClick={() => setSelectedTask(null)} className="border-[#DCD5C8] text-slate-700 hover:bg-[#FBF3E4]">
                   Close
                 </Button>
                 {selectedTask.status !== "HELD_BY_ME" ? (
                   <Button
                     size="sm"
+                    className="bg-[#7A1316] text-white hover:bg-[#8F161A]"
                     onClick={(e) => {
                       handleClaim(selectedTask.id, e);
                       setSelectedTask(null);
@@ -371,7 +372,7 @@ export function TasksView() {
                     Claim Task & Open File
                   </Button>
                 ) : (
-                  <Button size="sm">Proceed to Review File</Button>
+                  <Button size="sm" className="bg-[#7A1316] text-white hover:bg-[#8F161A]">Proceed to Review File</Button>
                 )}
               </div>
             </div>

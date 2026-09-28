@@ -270,75 +270,75 @@ export function PaymentsView() {
       {/* Receipt Modal */}
       {selectedPayment && (
         <Dialog open={!!selectedPayment} onOpenChange={(open) => !open && setSelectedPayment(null)}>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
+          <DialogContent className="max-w-lg bg-[#FAF7F2] border-2 border-[#7A1316]">
+            <DialogHeader className="border-b border-[#DCD5C8] pb-3">
               <div className="flex items-center justify-between gap-3">
-                <DialogTitle className="text-lg font-bold flex items-center gap-2">
-                  <Receipt className="size-5 text-emerald-600" />
+                <DialogTitle className="text-lg font-bold flex items-center gap-2 text-[#7A1316]">
+                  <Receipt className="size-5 text-[#7A1316]" />
                   E-Receipt & Challan Breakup
                 </DialogTitle>
                 <Badge
                   className={cn(
                     "text-xs px-2.5 py-0.5",
-                    selectedPayment.status === "SUCCESS" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"
+                    selectedPayment.status === "SUCCESS" ? "bg-emerald-700 text-white" : "bg-amber-600 text-white"
                   )}
                 >
                   {selectedPayment.status}
                 </Badge>
               </div>
-              <DialogDescription className="text-xs font-mono">
+              <DialogDescription className="text-xs font-mono text-slate-600">
                 Challan #{selectedPayment.challanNumber} · Txn #{selectedPayment.transactionId}
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 text-xs mt-2">
-              <div className="p-3 rounded-lg bg-muted/50 border space-y-1.5">
+              <div className="p-3 rounded-lg bg-[#FBF3E4] border border-[#DCD5C8] space-y-1.5">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payer / Applicant:</span>
-                  <span className="font-semibold text-foreground">{selectedPayment.payerName}</span>
+                  <span className="text-slate-500">Payer / Applicant:</span>
+                  <span className="font-semibold text-slate-800">{selectedPayment.payerName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Application Number:</span>
-                  <span className="font-mono text-foreground">{selectedPayment.applicationNumber}</span>
+                  <span className="text-slate-500">Application Number:</span>
+                  <span className="font-mono text-slate-800 font-semibold">{selectedPayment.applicationNumber}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payment Mode:</span>
-                  <span className="font-medium text-foreground">{selectedPayment.paymentMode.replace(/_/g, " ")}</span>
+                  <span className="text-slate-500">Payment Mode:</span>
+                  <span className="font-medium text-slate-800">{selectedPayment.paymentMode.replace(/_/g, " ")}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Gateway Ref:</span>
-                  <span className="font-mono text-foreground">{selectedPayment.gatewayRef}</span>
+                  <span className="text-slate-500">Gateway Ref:</span>
+                  <span className="font-mono text-slate-800">{selectedPayment.gatewayRef}</span>
                 </div>
                 {selectedPayment.paidAt && (
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Paid Timestamp:</span>
-                    <span className="font-medium text-foreground">{selectedPayment.paidAt}</span>
+                    <span className="text-slate-500">Paid Timestamp:</span>
+                    <span className="font-medium text-slate-800">{selectedPayment.paidAt}</span>
                   </div>
                 )}
               </div>
 
               {/* Head-wise fee breakdown */}
               <div className="space-y-2">
-                <h4 className="font-semibold text-xs text-foreground">Statutory Fee Breakdown:</h4>
-                <div className="border rounded-lg divide-y">
+                <h4 className="font-semibold text-xs text-[#7A1316]">Statutory Fee Breakdown:</h4>
+                <div className="border border-[#DCD5C8] rounded-lg divide-y divide-[#DCD5C8] bg-[#FBF3E4]">
                   {selectedPayment.feeBreakdown.map((item, idx) => (
                     <div key={idx} className="p-2.5 flex items-center justify-between">
-                      <span className="text-muted-foreground">{item.head}</span>
-                      <span className="font-semibold text-foreground">₹{item.amount.toLocaleString()}</span>
+                      <span className="text-slate-600">{item.head}</span>
+                      <span className="font-semibold text-slate-800">₹{item.amount.toLocaleString()}</span>
                     </div>
                   ))}
-                  <div className="p-2.5 flex items-center justify-between bg-muted/30 font-bold text-sm">
-                    <span>Total Remitted</span>
-                    <span className="text-emerald-600">₹{selectedPayment.amount.toLocaleString()}</span>
+                  <div className="p-2.5 flex items-center justify-between bg-[#F5EBE1] font-bold text-sm">
+                    <span className="text-[#7A1316]">Total Remitted</span>
+                    <span className="text-[#7A1316]">₹{selectedPayment.amount.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => setSelectedPayment(null)}>
+              <div className="flex justify-end gap-2 pt-2 border-t border-[#DCD5C8]">
+                <Button variant="outline" size="sm" onClick={() => setSelectedPayment(null)} className="border-[#DCD5C8] text-slate-700 hover:bg-[#FBF3E4]">
                   Close
                 </Button>
-                <Button size="sm" className="gap-1.5">
+                <Button size="sm" className="gap-1.5 bg-[#7A1316] text-white hover:bg-[#8F161A]">
                   <Download className="size-3.5" /> Download Tax Invoice
                 </Button>
               </div>

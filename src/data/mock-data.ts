@@ -37,6 +37,33 @@ export const ROLES: Record<RoleKey, Role> = {
     color: "emerald",
     permissions: ["application:create", "application:view_own", "drawing:upload", "document:upload", "payment:initiate", "remarks:add"],
   },
+  TPA: {
+    key: "TPA",
+    title: "TPA",
+    fullName: "Town Planning Assistant",
+    description: "Assists in scrutiny of drawings, field inspections, and shortfall notices at zonal level.",
+    level: 1,
+    color: "teal",
+    permissions: ["application:view_all", "drawing:view", "drawing:scrutinize", "document:view", "document:verify", "document:reject", "shortfall:raise", "shortfall:resolve", "remarks:add"],
+  },
+  ZDD: {
+    key: "ZDD",
+    title: "ZDD",
+    fullName: "Zonal Deputy Director",
+    description: "Reviews and forwards applications at zonal level, oversees TPA scrutiny.",
+    level: 2,
+    color: "blue",
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "workflow:approve", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "shortfall:view", "document:verify", "document:reject", "document:view", "drawing:view", "drawing:scrutinize", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
+  },
+  ZJD: {
+    key: "ZJD",
+    title: "ZJD",
+    fullName: "Zonal Joint Director",
+    description: "Senior zonal authority that reviews, approves and forwards files to Director level.",
+    level: 3,
+    color: "indigo",
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "workflow:approve", "workflow:forward", "workflow:return", "shortfall:raise", "shortfall:resolve", "shortfall:view", "document:verify", "document:reject", "document:view", "drawing:view", "drawing:scrutinize", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
+  },
   ZONAL_HEAD: {
     key: "ZONAL_HEAD",
     title: "Zonal Head",
@@ -90,6 +117,9 @@ export const ROLES: Record<RoleKey, Role> = {
 export const USERS: User[] = [
   { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
   { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14500", employeeId: "LTP-0001", designation: "Licensed Architect", zone: "Pune", avatarColor: "emerald", department: "Private", active: true, status: "ACTIVE", lastLogin: "2026-01-21T09:00:00" },
+  { id: "u-tpa-01", name: "Shri. Suresh Kulkarni", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 94400 55120", employeeId: "TPA-0001", designation: "Town Planning Assistant", zone: "Zone-II", avatarColor: "teal", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T09:00:00" },
+  { id: "u-zdd-01", name: "Smt. Meena Kulkarni", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 94411 66230", employeeId: "ZDD-0001", designation: "Zonal Deputy Director", zone: "Zone-II", avatarColor: "blue", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T10:00:00" },
+  { id: "u-zjd-01", name: "Shri. Ramesh Babu", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 94422 77340", employeeId: "ZJD-0001", designation: "Zonal Joint Director", zone: "Zone-II", avatarColor: "indigo", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -102,6 +132,9 @@ export function getUserByRole(role: RoleKey): User {
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
   { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Super Admin" },
   { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP (Architect)" },
+  { role: "TPA", email: "tpa@demo.gov.in", password: "demo1234", label: "TPA (Town Planning Assistant)" },
+  { role: "ZDD", email: "zdd@demo.gov.in", password: "demo1234", label: "ZDD (Zonal Deputy Director)" },
+  { role: "ZJD", email: "zjd@demo.gov.in", password: "demo1234", label: "ZJD (Zonal Joint Director)" },
 ];
 
 // Re-export for compatibility

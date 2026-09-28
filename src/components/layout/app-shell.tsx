@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { mobileNavOpen, setMobileNavOpen, theme, user, ltpActiveMenu, view } = useAppStore();
 
-  const isLtpDashboard = (user?.role === "LTP" && (ltpActiveMenu === "dashboard" || (!ltpActiveMenu && view === "ltp-applications"))) || view === "ltp-dashboard";
+  const isLtpDashboard = (user?.role === "LTP" && (ltpActiveMenu === "dashboard" || ltpActiveMenu === "draft-application" || ltpActiveMenu === "submitted-applications" || (!ltpActiveMenu && view === "ltp-applications"))) || view === "ltp-dashboard";
 
   // Apply theme class to <html>
   React.useEffect(() => {

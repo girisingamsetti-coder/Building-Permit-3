@@ -5,6 +5,9 @@
 // ---------- Roles & Permissions (RBAC) ----------
 export type RoleKey =
   | "LTP"
+  | "TPA"
+  | "ZDD"
+  | "ZJD"
   | "ZONAL_HEAD"
   | "DIRECTOR"
   | "ADDITIONAL_COMMISSIONER"

@@ -6,14 +6,12 @@ import { useAppStore } from "@/store/app-store";
 import {
   useDashboardScope,
   computeScopedKpis,
-  applicationsByStatus,
   applicationsByStage,
 } from "@/components/dashboard/dashboard-scope";
-import { DonutChart, BarChart } from "@/components/dashboard/charts";
+import { BarChart, ColumnChart } from "@/components/dashboard/charts";
 import { StatusBadge } from "@/components/design-system/badges";
 import {
   FileStack,
-  Activity,
   CreditCard,
   FileWarning,
   Clock,
@@ -65,8 +63,12 @@ export function UnifiedDashboard() {
   const isLTP = user?.role === "LTP";
   const isAdmin = user?.role === "SUPER_ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
 
-  const statusData = applicationsByStatus(scope.applications);
-  const stageData = applicationsByStage(scope.applications);
+  const stageData = React.useMemo(() => {
+    return applicationsByStage(scope.applications).map((d) => ({
+      ...d,
+      color: "#7A1316",
+    }));
+  }, [scope.applications]);
 
   const applicationsView: ViewKey = isLTP ? "ltp-applications" : isAdmin ? "admin-applications" : "officer-applications";
 
@@ -81,6 +83,91 @@ export function UnifiedDashboard() {
   const approvedPct = totalApplications > 0 ? ((approvedCount / totalApplications) * 100).toFixed(1) : "76.3";
   const pendingPct = totalApplications > 0 ? ((pendingCount / totalApplications) * 100).toFixed(1) : "23.1";
   const rejectedPct = totalApplications > 0 ? ((rejectedCount / totalApplications) * 100).toFixed(1) : "0.6";
+
+  // ── Application Type Breakdown (Individual Residential, Apartment, Commercial, Multistory Building, Group Development, Other) ──
+  const applicationTypeData = React.useMemo(() => {
+    if (!hasApps) {
+      return [
+        { label: "Individual Residential", value: 1420, color: "#7A1316" },
+        { label: "Apartment", value: 745, color: "#7A1316" },
+        { label: "Commercial", value: 412, color: "#7A1316" },
+        { label: "Multistory Building", value: 268, color: "#7A1316" },
+        { label: "Group Development", value: 195, color: "#7A1316" },
+        { label: "Other", value: 118, color: "#7A1316" },
+      ];
+    }
+    const counts: Record<string, number> = {
+      "Individual Residential": 0,
+      "Apartment": 0,
+      "Commercial": 0,
+      "Multistory Building": 0,
+      "Group Development": 0,
+      "Other": 0,
+    };
+    scope.applications.forEach((a) => {
+      const name = (a.project?.name || "").toLowerCase();
+      const prop = (a.project?.propertyType || "").toLowerCase();
+      const type = (a.project?.type || "").toLowerCase();
+      if (
+        name.includes("bungalow") ||
+        name.includes("row house") ||
+        name.includes("individual") ||
+        name.includes("villa") ||
+        name.includes("residence") ||
+        (prop === "residential" && (a.project?.builtUpArea || 0) < 600)
+      ) {
+        counts["Individual Residential"]++;
+      } else if (
+        name.includes("apartment") ||
+        name.includes("residency") ||
+        (prop === "residential" && (a.project?.builtUpArea || 0) >= 600 && (a.project?.builtUpArea || 0) < 2500)
+      ) {
+        counts["Apartment"]++;
+      } else if (
+        prop === "commercial" ||
+        name.includes("commercial") ||
+        name.includes("mall") ||
+        name.includes("plaza")
+      ) {
+        counts["Commercial"]++;
+      } else if (
+        name.includes("multistory") ||
+        name.includes("tower") ||
+        (a.project?.builtUpArea || 0) >= 2500
+      ) {
+        counts["Multistory Building"]++;
+      } else if (
+        name.includes("group") ||
+        type.includes("layout") ||
+        type.includes("development")
+      ) {
+        counts["Group Development"]++;
+      } else {
+        counts["Other"]++;
+      }
+    });
+
+    const totalCalculated = Object.values(counts).reduce((sum, v) => sum + v, 0);
+    if (totalCalculated === 0) {
+      return [
+        { label: "Individual Residential", value: 1420, color: "#7A1316" },
+        { label: "Apartment", value: 745, color: "#7A1316" },
+        { label: "Commercial", value: 412, color: "#7A1316" },
+        { label: "Multistory Building", value: 268, color: "#7A1316" },
+        { label: "Group Development", value: 195, color: "#7A1316" },
+        { label: "Other", value: 118, color: "#7A1316" },
+      ];
+    }
+
+    return [
+      { label: "Individual Residential", value: counts["Individual Residential"], color: "#7A1316" },
+      { label: "Apartment", value: counts["Apartment"], color: "#7A1316" },
+      { label: "Commercial", value: counts["Commercial"], color: "#7A1316" },
+      { label: "Multistory Building", value: counts["Multistory Building"], color: "#7A1316" },
+      { label: "Group Development", value: counts["Group Development"], color: "#7A1316" },
+      { label: "Other", value: counts["Other"], color: "#7A1316" },
+    ];
+  }, [hasApps, scope.applications]);
 
   // ── 2. Top Stat Card 2: Pending (Breakdown: In Review, Payment, Drawing, Documentation, Shortfall) ──
   const inReviewCount = hasApps
@@ -174,7 +261,7 @@ export function UnifiedDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-2.5 shrink-0">
 
         {/* Card 1: Total Applications */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           {/* Top: Icon + Title */}
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
@@ -188,12 +275,12 @@ export function UnifiedDashboard() {
           </div>
 
           {/* Bottom: Columns (Approved, In Progress, Rejected) */}
-          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-2">
               <div className="text-sm sm:text-base font-bold text-emerald-700">
                 {approvedCount.toLocaleString()} ({approvedPct}%)
               </div>
-              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 mt-0.5">
+              <div className="text-[11px] sm:text-xs font-bold text-black mt-0.5">
                 Approved
               </div>
             </div>
@@ -201,7 +288,7 @@ export function UnifiedDashboard() {
               <div className="text-sm sm:text-base font-bold text-[#7A1316]">
                 {pendingCount.toLocaleString()} ({pendingPct}%)
               </div>
-              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 mt-0.5">
+              <div className="text-[11px] sm:text-xs font-bold text-black mt-0.5">
                 In Progress
               </div>
             </div>
@@ -209,7 +296,7 @@ export function UnifiedDashboard() {
               <div className="text-sm sm:text-base font-bold text-rose-700">
                 {rejectedCount.toLocaleString()} ({rejectedPct}%)
               </div>
-              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 mt-0.5">
+              <div className="text-[11px] sm:text-xs font-bold text-black mt-0.5">
                 Rejected
               </div>
             </div>
@@ -228,7 +315,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* Card 2: In Progress */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           {/* Top: Icon + Title */}
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
@@ -242,12 +329,12 @@ export function UnifiedDashboard() {
           </div>
 
           {/* Bottom: 5 Columns ("In Review", Payment, Drawing, Documentation, Shortfall) */}
-          <div className="grid grid-cols-5 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-5 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-0.5 sm:px-1">
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {inReviewCount.toLocaleString()} ({inReviewPct}%)
               </div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 mt-0.5 leading-tight">
+              <div className="text-[10px] sm:text-[11px] font-bold text-black mt-0.5 leading-tight">
                 In Review
               </div>
             </div>
@@ -255,7 +342,7 @@ export function UnifiedDashboard() {
               <div className="text-xs sm:text-sm font-bold text-[#7A1316]">
                 {paymentPendingCount.toLocaleString()} ({paymentPendingPct}%)
               </div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 mt-0.5 leading-tight">
+              <div className="text-[10px] sm:text-[11px] font-bold text-black mt-0.5 leading-tight">
                 Payment
               </div>
             </div>
@@ -263,7 +350,7 @@ export function UnifiedDashboard() {
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {drawingPendingCount.toLocaleString()} ({drawingPendingPct}%)
               </div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 mt-0.5 leading-tight">
+              <div className="text-[10px] sm:text-[11px] font-bold text-black mt-0.5 leading-tight">
                 Drawing
               </div>
             </div>
@@ -271,7 +358,7 @@ export function UnifiedDashboard() {
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {docPendingCount.toLocaleString()} ({docPendingPct}%)
               </div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 mt-0.5 leading-tight">
+              <div className="text-[10px] sm:text-[11px] font-bold text-black mt-0.5 leading-tight">
                 Documentation
               </div>
             </div>
@@ -279,7 +366,7 @@ export function UnifiedDashboard() {
               <div className="text-xs sm:text-sm font-bold text-amber-800">
                 {shortfallPendingCount.toLocaleString()} ({shortfallPendingPct}%)
               </div>
-              <div className="text-[10px] sm:text-[11px] font-semibold text-slate-700 mt-0.5 leading-tight">
+              <div className="text-[10px] sm:text-[11px] font-bold text-black mt-0.5 leading-tight">
                 Shortfall
               </div>
             </div>
@@ -303,7 +390,7 @@ export function UnifiedDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5 shrink-0">
 
         {/* 1. Drawing Scrutiny */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <Layers className="size-5" />
@@ -318,7 +405,7 @@ export function UnifiedDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-1 sm:px-1.5">
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {scrutinyPassed.toLocaleString()} ({scrutinyPassedPct}%)
@@ -357,7 +444,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 2. Payment Status */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <CreditCard className="size-5" />
@@ -372,7 +459,7 @@ export function UnifiedDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-1 sm:px-1.5">
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {paidCount.toLocaleString()} ({paidPct}%)
@@ -411,7 +498,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 3. Documents */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <FileStack className="size-5" />
@@ -426,7 +513,7 @@ export function UnifiedDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-1 sm:px-1.5">
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {docsVerified.toLocaleString()} ({docsVerifiedPct}%)
@@ -465,7 +552,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 4. Shortfalls */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[165px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <FileWarning className="size-5" />
@@ -480,7 +567,7 @@ export function UnifiedDashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-1.5 py-0.5">
+          <div className="grid grid-cols-3 divide-x divide-[#DCD5C8] text-center my-2 py-0.5">
             <div className="px-1 sm:px-1.5">
               <div className="text-xs sm:text-sm font-bold text-slate-900">
                 {sfClosed.toLocaleString()} ({sfClosedPct}%)
@@ -523,23 +610,21 @@ export function UnifiedDashboard() {
       {/* 3RD ROW: Application Status | Stage Breakdown | Recent Activity (Flex-1: expands to fill all remaining height) */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-2 sm:gap-2.5 flex-1 min-h-0">
 
-        {/* Application Status */}
+        {/* Application Type */}
         <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs p-3 sm:p-4 h-full min-h-0 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1 shrink-0">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg bg-[#7A1316] text-white">
-                <Activity className="size-3.5" />
+                <Building2 className="size-3.5" />
               </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#7A1316]">Application Status</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#7A1316]">Application Type</h3>
             </div>
             <span className="text-[11px] font-bold text-[#7A1316] bg-[#7A1316]/10 px-2 py-0.5 rounded-full">
-              {scope.applications.length} total
+              {totalApplications.toLocaleString()} total
             </span>
           </div>
           <div className="flex-1 min-h-0 flex items-center justify-center">
-            {statusData.length > 0
-              ? <DonutChart data={statusData} centerLabel="Status" centerValue={kpis.total} />
-              : <EmptyChartState label="No applications yet" />}
+            <ColumnChart data={applicationTypeData} color="#7A1316" />
           </div>
         </div>
 
@@ -555,7 +640,7 @@ export function UnifiedDashboard() {
           </div>
           <div className="flex-1 min-h-0 flex flex-col justify-center">
             {stageData.length > 0
-              ? <BarChart data={stageData} />
+              ? <BarChart data={stageData} color="#7A1316" trackClassName="bg-[#E0D2BE]/60" />
               : <EmptyChartState label="No stage data" />}
           </div>
         </div>
