@@ -261,7 +261,7 @@ export function UnifiedDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-2.5 shrink-0">
 
         {/* Card 1: Total Applications */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           {/* Top: Icon + Title */}
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
@@ -315,7 +315,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* Card 2: In Progress */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           {/* Top: Icon + Title */}
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
@@ -390,7 +390,7 @@ export function UnifiedDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-2.5 shrink-0">
 
         {/* 1. Drawing Scrutiny */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <Layers className="size-5" />
@@ -444,7 +444,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 2. Payment Status */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <CreditCard className="size-5" />
@@ -498,7 +498,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 3. Documents */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <FileStack className="size-5" />
@@ -552,7 +552,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* 4. Shortfalls */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white p-3.5 sm:p-4 shadow-xs flex flex-col justify-between h-[182px]">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#7A1316] text-white shadow-xs">
               <FileWarning className="size-5" />
@@ -611,7 +611,7 @@ export function UnifiedDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-2 sm:gap-2.5 flex-1 min-h-0">
 
         {/* Application Type */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs p-3 sm:p-4 h-full min-h-0 flex flex-col justify-between">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white shadow-xs p-3 sm:p-4 h-full min-h-0 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1 shrink-0">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg bg-[#7A1316] text-white">
@@ -629,7 +629,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* Stage Wise Breakdown */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs p-3 sm:p-4 h-full min-h-0 flex flex-col justify-between">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white shadow-xs p-3 sm:p-4 h-full min-h-0 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-1 shrink-0">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg bg-[#7A1316] text-white">
@@ -646,7 +646,7 @@ export function UnifiedDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="rounded-2xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs flex flex-col h-full min-h-0">
+        <div className="rounded-2xl border-2 border-[#7A1316] bg-white shadow-xs flex flex-col h-full min-h-0">
           <div className="flex items-center justify-between px-3.5 sm:px-4 py-2 border-b border-[#E0D2BE] shrink-0">
             <div className="flex items-center gap-2">
               <div className="flex size-7 items-center justify-center rounded-lg bg-[#7A1316] text-white">
