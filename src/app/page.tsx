@@ -193,8 +193,8 @@ export default function Home() {
   // Route guard — redirect unauthorized users to their default view
   React.useEffect(() => {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
-      const portal = (user.role === "SUPER_ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") ? "admin-dashboard"
-        : (user.role === "LTP" || user.role === "ZDD" || user.role === "ZJD" || user.role === "TPA") ? "ltp-applications"
+      const portal = (user.role === "SUPER_ADMIN") ? "admin-dashboard"
+        : (user.role === "LTP" || user.role === "ZDD" || user.role === "ZJD" || user.role === "TPA" || user.role === "ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") ? "ltp-applications"
           : "officer-dashboard";
       navigate(portal);
     }
@@ -204,7 +204,7 @@ export default function Home() {
     return <AuthScreen />;
   }
 
-  const isLtpStyledRole = user?.role === "LTP" || user?.role === "ZDD" || user?.role === "ZJD" || user?.role === "TPA";
+  const isLtpStyledRole = user?.role === "LTP" || user?.role === "ZDD" || user?.role === "ZJD" || user?.role === "TPA" || user?.role === "ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
   const ViewComponent = isLtpStyledRole ? (view === "ltp-application-details" ? LtpApplicationDetails : LtpPortalView) : (VIEW_REGISTRY[view] ?? UnifiedDashboard);
 
   return (

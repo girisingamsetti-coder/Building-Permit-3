@@ -89,7 +89,7 @@ export const ROLES: Record<RoleKey, Role> = {
     description: "Senior review and forwarding to Commissioner.",
     level: 5,
     color: "rose",
-    permissions: ["application:view_all", "workflow:approve", "workflow:forward", "remarks:add"],
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "reports:view", "officer_progress:view", "sla:view", "workflow:approve", "workflow:forward", "remarks:add"],
   },
   COMMISSIONER: {
     key: "COMMISSIONER",
@@ -98,11 +98,20 @@ export const ROLES: Record<RoleKey, Role> = {
     description: "Final authority — issues final approval or rejection.",
     level: 6,
     color: "rose",
-    permissions: ["application:view_all", "workflow:approve", "workflow:reject", "workflow:return", "remarks:add"],
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "reports:view", "officer_progress:view", "sla:view", "workflow:approve", "workflow:reject", "workflow:return", "remarks:add"],
+  },
+  ADMIN: {
+    key: "ADMIN",
+    title: "Admin",
+    fullName: "Administrator",
+    description: "Has administrative access to LTP, TPA, ZDD, ZJD modules and data.",
+    level: 90,
+    color: "purple",
+    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
   },
   SUPER_ADMIN: {
     key: "SUPER_ADMIN",
-    title: "Super Admin",
+    title: "Admin",
     fullName: "System Administrator",
     description: "Manages users, roles, configuration, fee structures and audit.",
     level: 99,
@@ -115,11 +124,14 @@ export const ROLES: Record<RoleKey, Role> = {
 // USERS — demo officers for every role (2026)
 // ============================================================
 export const USERS: User[] = [
+  { id: "u-sysadmin-01", name: "System Admin", role: "ADMIN", email: "admin2@demo.gov.in", phone: "+91 99000 11000", employeeId: "ADM-0001", designation: "Administrator", zone: "Head Office", avatarColor: "purple", department: "IT", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
   { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
   { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14500", employeeId: "LTP-0001", designation: "Licensed Architect", zone: "Pune", avatarColor: "emerald", department: "Private", active: true, status: "ACTIVE", lastLogin: "2026-01-21T09:00:00" },
   { id: "u-tpa-01", name: "Shri. Suresh Kulkarni", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 94400 55120", employeeId: "TPA-0001", designation: "Town Planning Assistant", zone: "Zone-II", avatarColor: "teal", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T09:00:00" },
   { id: "u-zdd-01", name: "Smt. Meena Kulkarni", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 94411 66230", employeeId: "ZDD-0001", designation: "Zonal Deputy Director", zone: "Zone-II", avatarColor: "blue", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T10:00:00" },
   { id: "u-zjd-01", name: "Shri. Ramesh Babu", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 94422 77340", employeeId: "ZJD-0001", designation: "Zonal Joint Director", zone: "Zone-II", avatarColor: "indigo", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
+  { id: "u-addl-comm-01", name: "Shri. Addl Comm", role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", phone: "+91 90000 11111", employeeId: "ADC-0001", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
+  { id: "u-comm-01", name: "Shri. Comm", role: "COMMISSIONER", email: "comm@demo.gov.in", phone: "+91 90000 22222", employeeId: "COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -130,11 +142,14 @@ export function getUserByRole(role: RoleKey): User {
 // DEMO CREDENTIALS
 // ============================================================
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
-  { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Super Admin" },
+  // { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Admin" }, // Hidden for now
+  { role: "ADMIN", email: "admin2@demo.gov.in", password: "demo1234", label: "Admin" },
   { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP (Architect)" },
   { role: "TPA", email: "tpa@demo.gov.in", password: "demo1234", label: "TPA (Town Planning Assistant)" },
   { role: "ZDD", email: "zdd@demo.gov.in", password: "demo1234", label: "ZDD (Zonal Deputy Director)" },
   { role: "ZJD", email: "zjd@demo.gov.in", password: "demo1234", label: "ZJD (Zonal Joint Director)" },
+  { role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", password: "demo1234", label: "Addl. Commissioner" },
+  { role: "COMMISSIONER", email: "comm@demo.gov.in", password: "demo1234", label: "Commissioner" },
 ];
 
 // Re-export for compatibility

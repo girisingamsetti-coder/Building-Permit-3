@@ -207,7 +207,7 @@ function LoginForm() {
     if (cred) {
       setEmail(cred.email);
       setPassword(cred.password);
-      
+
       // Auto-login
       setLoading(true);
       setTimeout(() => {
@@ -230,7 +230,7 @@ function LoginForm() {
       <div
         className={cn(
           "relative flex min-h-screen w-full flex-col justify-center font-sans overflow-hidden transition-all duration-700 shrink-0",
-          useAltBg ? "items-end pr-8 md:pr-24 lg:pr-32" : "items-start pl-8 md:pl-24 lg:pl-32",
+          version === "v4" ? "items-center px-4" : useAltBg ? "items-end pr-8 md:pr-24 lg:pr-32" : "items-start pl-8 md:pl-24 lg:pl-32",
           "bg-cover bg-center"
         )}
         style={{ backgroundImage: useAltBg ? "url('/BBBAS%202.png')" : "url('/bg-city.png')" }}
@@ -251,7 +251,7 @@ function LoginForm() {
           {/* Center: APCRDA & AP Govt */}
           <div className="flex items-center gap-6 md:gap-12">
             <img src="/APCRDA.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
-            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "BIM Bhavan" : version === "v1" ? "Amaravati Nirmaan" : "Bhavana Nirmaan"}</div>
+            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "Bhavan" : version === "v1" ? "Amaravati Nirmaan" : "Bhavana Nirmaan"}</div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
 
@@ -281,8 +281,8 @@ function LoginForm() {
         {/* Quick Action Cards */}
         <div className={cn(
           "absolute -translate-y-1/2 w-full flex flex-wrap lg:flex-nowrap gap-6 z-10 transition-all duration-700 pointer-events-none",
-          version === "v3" ? "top-[47.5%]" : "top-[40%]",
-          useAltBg ? "justify-end px-4 md:px-8 lg:px-12" : "justify-start px-8 md:px-24 lg:px-32",
+          version === "v4" ? "top-1/2 left-0" : version === "v3" ? "top-[47.5%]" : "top-[40%]",
+          version === "v4" ? "justify-center px-4" : useAltBg ? "justify-end px-4 md:px-8 lg:px-12" : "justify-start px-8 md:px-24 lg:px-32",
           version === "v3" ? "lg:pr-40" : "",
           showLoginBox ? "pointer-events-none" : ""
         )}>
@@ -293,43 +293,26 @@ function LoginForm() {
                 key={idx}
                 className={cn(
                   "w-full max-w-[320px] rounded-[24px] flex flex-col backdrop-blur-xl transition-all duration-700 shadow-xl pointer-events-auto",
-                  version === "v3" || version === "v4" ? "px-6 pb-6 pt-3 gap-3" : "p-6 gap-4",
+                  "px-6 pb-6 pt-3 gap-3",
                   "border border-[#d4af37]",
-                  useAltBg
-                    ? "bg-white/90 text-gray-900"
-                    : version === "v4"
-                      ? "bg-[#fdf8ef]/95 text-[#8c1c13]"
-                      : "bg-transparent text-white",
+                  version === "v4" || version === "v2"
+                    ? "bg-[#fdf8ef]/95 text-[#8c1c13]"
+                    : "bg-transparent text-white",
                   (!mounted || showLoginBox) ? "opacity-0 translate-y-12" : "opacity-100 translate-y-0"
                 )}
                 style={{ transitionDelay: showLoginBox ? "0ms" : (mounted ? `${idx * 250}ms` : `${600 + idx * 300}ms`) }}
               >
-                {version === "v3" || version === "v4" ? (
-                  <>
-                    <div className="flex items-center justify-between w-full gap-3">
-                      <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
-                      <div className={cn("size-10 rounded-full flex items-center justify-center border-[1.5px] shrink-0 bg-transparent", version === "v4" ? "border-[#8c1c13] text-[#8c1c13]" : "border-[#d4af37] text-[#d4af37]")}>
-                        <Icon className="size-5" strokeWidth={2.5} />
-                      </div>
+                <>
+                  <div className="flex items-center justify-between w-full gap-3">
+                    <h3 className="text-xl font-bold leading-tight">{card.title}</h3>
+                    <div className={cn("size-10 rounded-full flex items-center justify-center border-[1.5px] shrink-0 bg-transparent", version === "v4" || version === "v2" ? "border-[#8c1c13] text-[#8c1c13]" : "border-[#d4af37] text-[#d4af37]")}>
+                      <Icon className="size-5" strokeWidth={2.5} />
                     </div>
-                    <div className="-mt-2">
-                      <p className={cn("text-[13px] leading-relaxed", version === "v4" ? "text-[#8c1c13]/80" : useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className={cn(
-                      "size-12 rounded-full flex items-center justify-center mb-2",
-                      useAltBg ? "bg-red-50 text-[#8c1c13]" : "bg-white/10 text-white/80"
-                    )}>
-                      <Icon className="size-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold mb-1">{card.title}</h3>
-                      <p className={cn("text-[13px] leading-relaxed", useAltBg ? "text-gray-600" : "text-white/60")}>{card.desc}</p>
-                    </div>
-                  </>
-                )}
+                  </div>
+                  <div className="-mt-2">
+                    <p className={cn("text-[13px] leading-relaxed", version === "v4" || version === "v2" ? "text-[#8c1c13]/80" : "text-white/60")}>{card.desc}</p>
+                  </div>
+                </>
                 <div className="flex-1 mt-4 space-y-2">
                   {card.links.map((link, i) => (
                     <a
@@ -385,11 +368,9 @@ function LoginForm() {
                       }}
                       className={cn(
                         "flex items-center justify-between group text-[13px] font-medium transition-colors border-b pb-2.5 last:border-0 last:pb-0",
-                        version === "v4"
+                        version === "v4" || version === "v2"
                           ? "text-[#8c1c13]/80 hover:text-[#8c1c13] border-[#8c1c13]/20"
-                          : useAltBg
-                            ? "text-gray-700 hover:text-[#8c1c13] border-gray-200"
-                            : "text-white/80 hover:text-white border-white/10"
+                          : "text-white/80 hover:text-white border-white/10"
                       )}
                     >
                       <span>{link}</span>
@@ -405,7 +386,8 @@ function LoginForm() {
         {/* Main Glassmorphism Card */}
         {showLoginBox && (
           <div className={cn(
-            "relative z-10 w-full max-w-[420px] mb-24 rounded-[24px] p-8 backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500",
+            "relative z-10 w-full max-w-[420px] rounded-[24px] p-8 backdrop-blur-xl animate-in fade-in slide-in-from-right-8 duration-500",
+            version === "v4" ? "" : "mb-24",
             useAltBg ? "bg-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] border border-gray-300" : version === "v4" ? "bg-[#fdf8ef]/95 shadow-xl border border-[#d4af37]" : "bg-black/25 shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20"
           )}>
             {/* Close Button */}
@@ -425,13 +407,13 @@ function LoginForm() {
                 "font-serif text-[22px] tracking-[0.1em] uppercase drop-shadow-sm",
                 useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white drop-shadow-md"
               )}>
-                {version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "BIM Bhavan AMARAVATI" : version === "v1" ? "Amaravati Nirmaan AMARAVATI" : "Bhavana Nirmaan AMARAVATI"}
+                {version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "Bhavan AMARAVATI" : version === "v1" ? "Amaravati Nirmaan AMARAVATI" : "Bhavana Nirmaan AMARAVATI"}
               </h1>
             </div>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-              
+
               {/* Quick Login Role Selector */}
               <div className="space-y-1 mb-2">
                 <Select onValueChange={handleDemoRoleSelect}>
@@ -597,28 +579,28 @@ function LoginForm() {
                   Building Information Modelling (BIM) is the process of developing a virtual, three-dimensional, information-rich model to design, construct, and maintain a building project. BIM is much more than software used to produce a pretty 3D graphic. Because a variety of information can be embedded into the model, BIM can also be used to manage the project's Building Approval, construction schedule (4D), to track project costs (5D), and, once constructed, facility management (6D).
                 </p>
               </div>
-              <div 
+              <div
                 className="min-h-[400px] w-full bg-[url('/bim_sketch_shaded.png')] bg-cover bg-center border-l border-b border-[#d4af37]/30 bg-white"
               ></div>
             </div>
 
-          {/* What is Nirmaan Amaravati? Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1">
-              <div className="absolute inset-0 bg-[url('/bbas_blueprint.jpg')] bg-cover bg-center"></div>
-            </div>
-            <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">What is Nirmaan Amaravati?</h2>
-              <h3 className="text-xl font-semibold text-gray-700 mb-6">BIM Based building approval system</h3>
-              <p className="text-[13px] text-gray-600 leading-relaxed text-justify mb-4">
-                Nirmaan Amaravati is a 3D BIM consolidated Single Model (Architectural+Structural+MEP model) that can be scrutinized in the process flow and one can track the file through its tracking system.
-              </p>
-              <p className="text-[13px] text-gray-600 leading-relaxed text-justify">
-                Nirmaan Amaravati is a GIS based 3D model approval system and it is a core system that is responsible for providing permissions with various development permits at one platform. All NOC's (such as fire/ high-rise/environmental clearance and so on) are integrated in this Nirmaan Amaravati system.
-              </p>
+            {/* What is Nirmaan Amaravati? Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="min-h-[400px] w-full relative border-r border-b border-[#d4af37]/30 order-2 md:order-1">
+                <div className="absolute inset-0 bg-[url('/bbas_blueprint.jpg')] bg-cover bg-center"></div>
+              </div>
+              <div className="p-12 md:p-24 flex flex-col justify-center order-1 md:order-2">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">What is Nirmaan Amaravati?</h2>
+                <h3 className="text-xl font-semibold text-gray-700 mb-6">BIM Based building approval system</h3>
+                <p className="text-[13px] text-gray-600 leading-relaxed text-justify mb-4">
+                  Nirmaan Amaravati is a 3D BIM consolidated Single Model (Architectural+Structural+MEP model) that can be scrutinized in the process flow and one can track the file through its tracking system.
+                </p>
+                <p className="text-[13px] text-gray-600 leading-relaxed text-justify">
+                  Nirmaan Amaravati is a GIS based 3D model approval system and it is a core system that is responsible for providing permissions with various development permits at one platform. All NOC's (such as fire/ high-rise/environmental clearance and so on) are integrated in this Nirmaan Amaravati system.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
           {/* Footer */}
           <footer className="relative bg-[url('/bg-city.png')] bg-cover bg-center border-t border-slate-200 overflow-hidden">
             {/* glassmorphism overlay */}

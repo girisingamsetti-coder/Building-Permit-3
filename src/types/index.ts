@@ -12,6 +12,7 @@ export type RoleKey =
   | "DIRECTOR"
   | "ADDITIONAL_COMMISSIONER"
   | "COMMISSIONER"
+  | "ADMIN"
   | "SUPER_ADMIN";
 
 export interface Role {
