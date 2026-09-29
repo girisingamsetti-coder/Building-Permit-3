@@ -756,58 +756,6 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "general" && (
           <div className="max-w-6xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
-            {/* Scheme Type Selector: 2 Buttons "LPS" and "Non LPS" */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border-2 border-[#7A1316] bg-white shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-[#7A1316] text-white flex items-center justify-center font-black text-sm shadow-xs shrink-0">
-                  {isLpsLayout === "LPS Layout" ? "LPS" : "NL"}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-black text-[#7A1316] uppercase tracking-wider">Application Scheme</span>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20">
-                      {isLpsLayout === "LPS Layout" ? "Land Pooling Scheme Layout" : "Non-LPS / Revenue Layout"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-slate-600 mt-0.5">
-                    Clicking either button displays the respective application type and scrutiny parameters.
-                  </p>
-                </div>
-              </div>
-
-              {/* The 2 Buttons: LPS and Non LPS */}
-              <div className="flex items-center gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  id="scheme-btn-lps"
-                  onClick={() => setIsLpsLayout("LPS Layout")}
-                  className={cn(
-                    "px-6 py-2.5 rounded-lg font-black text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs",
-                    isLpsLayout === "LPS Layout"
-                      ? "bg-[#7A1316] text-white border-2 border-[#630E10] ring-2 ring-[#7A1316]/30 shadow-md scale-102"
-                      : "bg-[#FAF7F2] text-slate-700 border border-[#DCD5C8] hover:border-[#7A1316] hover:bg-[#F5EBE1]"
-                  )}
-                >
-                  {isLpsLayout === "LPS Layout" && <Check className="size-3.5 stroke-[3]" />}
-                  LPS
-                </button>
-                <button
-                  type="button"
-                  id="scheme-btn-non-lps"
-                  onClick={() => setIsLpsLayout("Non-LPS")}
-                  className={cn(
-                    "px-6 py-2.5 rounded-lg font-black text-xs transition-all cursor-pointer flex items-center gap-2 shadow-xs",
-                    isLpsLayout === "Non-LPS"
-                      ? "bg-[#7A1316] text-white border-2 border-[#630E10] ring-2 ring-[#7A1316]/30 shadow-md scale-102"
-                      : "bg-[#FAF7F2] text-slate-700 border border-[#DCD5C8] hover:border-[#7A1316] hover:bg-[#F5EBE1]"
-                  )}
-                >
-                  {isLpsLayout === "Non-LPS" && <Check className="size-3.5 stroke-[3]" />}
-                  Non LPS
-                </button>
-              </div>
-            </div>
-
             {/* Form Fields: Two Columns Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
               {/* Row 1 */}
@@ -881,19 +829,10 @@ export function LtpSubmissionDetails({
                 <label className="font-bold text-slate-800 shrink-0">
                   <span className="text-rose-600 font-black mr-1">*</span> Application is from LPS Layout?
                 </label>
-                <div className="flex items-center gap-4 w-full sm:w-64">
-                  {(["LPS Layout", "Non-LPS"] as const).map((opt) => (
-                    <label key={opt} className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
-                      <input
-                        type="radio"
-                        name="lpsLayout"
-                        checked={isLpsLayout === opt}
-                        onChange={() => setIsLpsLayout(opt)}
-                        className="accent-[#7A1316] cursor-pointer"
-                      />
-                      <span>{opt}</span>
-                    </label>
-                  ))}
+                <div className="flex items-center gap-2 w-full sm:w-64">
+                  <span className="text-xs font-bold text-[#7A1316]">
+                    {isLpsLayout}
+                  </span>
                 </div>
               </div>
 
