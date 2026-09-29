@@ -50,7 +50,8 @@ export function LtpSubmissionDetails({
   submissionDate?: string;
   isDraft?: boolean;
 }) {
-  const { applications, user, navigate } = useAppStore();
+  const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
+  const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
@@ -2366,13 +2367,15 @@ export function LtpSubmissionDetails({
                       <span>* Click on Document(s) to View attachment/Remarks</span>
                     </div>
                     <button
+                      type="button"
                       onClick={() => {
-                        showToast("Document checklist saved successfully");
-                        setDocSubTab("others");
+                        showToast(`Application BA No. ${baNo} submitted successfully!`);
+                        setSubmissionSuccessModal(true);
                       }}
-                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
                     >
-                      Save & Continue
+                      <CheckCircle2 className="size-3.5" />
+                      <span>Submit</span>
                     </button>
                   </div>
                 </div>
@@ -2418,6 +2421,34 @@ export function LtpSubmissionDetails({
                       </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Bottom Action Footer for Document Checklist */}
+                <div className="bg-[#FBF3E4] border border-[#DCD5C8] p-3.5 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                  <div className="text-xs text-slate-600">
+                    <span className="font-bold text-slate-800">Final Verification:</span> Ensure all mandatory document files are attached and verified before final submission.
+                  </div>
+                  <div className="flex items-center gap-2 self-end sm:self-center">
+                    <button
+                      type="button"
+                      onClick={() => setDocSubTab("app-checklist")}
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] text-xs font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <ArrowLeft className="size-3.5" />
+                      <span>Application Checklist</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast(`Application BA No. ${baNo} submitted successfully!`);
+                        setSubmissionSuccessModal(true);
+                      }}
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
+                    >
+                      <CheckCircle2 className="size-4" />
+                      <span>Submit Application</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -3596,6 +3627,91 @@ export function LtpSubmissionDetails({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── SUBMISSION SUCCESS CONFIRMATION MODAL ── */}
+      {submissionSuccessModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-lg shadow-2xl overflow-hidden font-sans">
+            {/* Modal Header */}
+            <div className="bg-[#7A1316] text-white px-5 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="size-5 text-emerald-400" />
+                <h3 className="font-black text-sm uppercase tracking-wide">
+                  Application Submitted Successfully
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSubmissionSuccessModal(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 sm:p-6 space-y-4 text-xs">
+              <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-3.5 flex items-start gap-3">
+                <ShieldCheck className="size-5 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-emerald-900 text-xs">
+                    Statutory Submission Completed
+                  </h4>
+                  <p className="text-emerald-800 text-[11px] mt-0.5 leading-relaxed">
+                    Your building permission proposal along with all mandatory documents and checklists has been transmitted to APCRDA Town Planning &amp; Scrutiny Department.
+                  </p>
+                </div>
+              </div>
+
+              {/* Application Details Summary */}
+              <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Proposal / BA Number:</span>
+                  <span className="font-mono font-bold text-slate-900">{baNo}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Current Status:</span>
+                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
+                    Submitted · Scrutiny in Progress
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Document Compliance:</span>
+                  <span className="font-bold text-emerald-700">100% Verified (0 Shortfalls)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Submission Timestamp:</span>
+                  <span className="font-mono text-slate-700">{new Date().toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => showToast(`Downloading official submission receipt for ${baNo}...`)}
+                  className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Download className="size-3.5 text-[#7A1316]" />
+                  <span>Download Receipt</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubmissionSuccessModal(false);
+                    setLtpActiveMenu("submitted-applications");
+                    onBack?.();
+                  }}
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <span>Go to Submitted Applications</span>
+                  <ArrowRight className="size-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
