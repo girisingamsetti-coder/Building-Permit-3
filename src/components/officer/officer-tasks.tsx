@@ -11,7 +11,7 @@ import { ClipboardList, Network, Users } from "lucide-react";
 export function OfficerTasks() {
   const user = useAppStore((s) => s.user);
   
-  const isManager = user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER" || user?.role === "SUPER_ADMIN";
+  const isManager = user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER" || user?.role === "ADMIN";
 
   if (!isManager) {
     return <OfficerApplications />;

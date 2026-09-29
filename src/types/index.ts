@@ -13,7 +13,7 @@ export type RoleKey =
   | "ADDITIONAL_COMMISSIONER"
   | "COMMISSIONER"
   | "ADMIN"
-  | "SUPER_ADMIN";
+  ;
 
 export interface Role {
   key: RoleKey;
@@ -648,4 +648,4 @@ export type ViewKey =
   | "pm-shortfalls"
   | "pm-help";
 
-export type Portal = "LTP" | "OFFICER" | "SUPER_ADMIN";
+export type Portal = "LTP" | "OFFICER";

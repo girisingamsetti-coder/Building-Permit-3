@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import {
   ArrowLeft,
+  ArrowRight,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -27,6 +28,12 @@ import {
   Upload,
   Save,
   Flame,
+  Search,
+  Filter,
+  Plus,
+  ShieldCheck,
+  FileCheck2,
+  FolderClosed,
 } from "lucide-react";
 import type { Application } from "@/types";
 
@@ -45,19 +52,180 @@ export function LtpSubmissionDetails({
 }) {
   const { applications, user, navigate } = useAppStore();
 
-  // Main Tabs: Application Form | Drawing | Payments
-  const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "payments">("form");
+  // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
+  const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
+
+  // ─────────────────────────────────────────────────────────────
+  // DOCUMENTATION REPOSITORY STATE
+  // ─────────────────────────────────────────────────────────────
+  interface DocumentationRecord {
+    id: string;
+    code: string;
+    name: string;
+    category: "Ownership" | "Technical" | "NOC & Clearances" | "Affidavits";
+    required: boolean;
+    status: "Verified" | "Under Scrutiny" | "Uploaded";
+    fileName: string;
+    fileSize: string;
+    uploadedDate: string;
+    uploadedBy: string;
+    docNo: string;
+    version: string;
+  }
+
+  const [documentationList, setDocumentationList] = React.useState<DocumentationRecord[]>([
+    {
+      id: "doc-1",
+      code: "DOC-OWN-01",
+      name: "Registered Sale Deed / Title Deed",
+      category: "Ownership",
+      required: true,
+      status: "Verified",
+      fileName: "Sale_Deed_Doc_4137_2026.pdf",
+      fileSize: "3.4 MB",
+      uploadedDate: "23-07-2026",
+      uploadedBy: "K. Ramamurthy (LTP)",
+      docNo: "SD/2026/GNT/84920",
+      version: "v1.0",
+    },
+    {
+      id: "doc-2",
+      code: "DOC-OWN-02",
+      name: "Encumbrance Certificate (13 Years EC)",
+      category: "Ownership",
+      required: true,
+      status: "Verified",
+      fileName: "Form_15_EC_2013_2026.pdf",
+      fileSize: "1.8 MB",
+      uploadedDate: "23-07-2026",
+      uploadedBy: "K. Ramamurthy (LTP)",
+      docNo: "EC-2026-901412",
+      version: "v1.0",
+    },
+    {
+      id: "doc-3",
+      code: "DOC-OWN-03",
+      name: "Latest Pattadar Passbook / Mutation Extract",
+      category: "Ownership",
+      required: true,
+      status: "Verified",
+      fileName: "Revenue_Mutation_Record.pdf",
+      fileSize: "2.1 MB",
+      uploadedDate: "23-07-2026",
+      uploadedBy: "K. Ramamurthy (LTP)",
+      docNo: "MUT/2025/11029",
+      version: "v1.0",
+    },
+    {
+      id: "doc-4",
+      code: "DOC-TEC-01",
+      name: "Structural Stability Certificate & Calculations (Form 3)",
+      category: "Technical",
+      required: true,
+      status: "Verified",
+      fileName: "Structural_Stability_Sign.pdf",
+      fileSize: "4.6 MB",
+      uploadedDate: "24-07-2026",
+      uploadedBy: "Er. B. Venkanna (SE-110)",
+      docNo: "STR-CERT-2026-44",
+      version: "v1.2",
+    },
+    {
+      id: "doc-5",
+      code: "DOC-TEC-02",
+      name: "Geo-Technical Soil Investigation Report",
+      category: "Technical",
+      required: true,
+      status: "Under Scrutiny",
+      fileName: "Soil_Test_Inavolu_Block4137.pdf",
+      fileSize: "6.2 MB",
+      uploadedDate: "24-07-2026",
+      uploadedBy: "Er. B. Venkanna (SE-110)",
+      docNo: "SOIL-RPT-2026-89",
+      version: "v1.0",
+    },
+    {
+      id: "doc-6",
+      code: "DOC-NOC-01",
+      name: "Fire Safety Provisional Clearance / NOC",
+      category: "NOC & Clearances",
+      required: true,
+      status: "Verified",
+      fileName: "AP_Fire_Provisional_NOC_882.pdf",
+      fileSize: "1.2 MB",
+      uploadedDate: "25-07-2026",
+      uploadedBy: "AP State Disaster & Fire",
+      docNo: "NOC/FIRE/APCRDA/882",
+      version: "v1.0",
+    },
+    {
+      id: "doc-7",
+      code: "DOC-NOC-02",
+      name: "AAI Airport Height Clearance NOC",
+      category: "NOC & Clearances",
+      required: false,
+      status: "Verified",
+      fileName: "AAI_NOC_VJA_2026_118.pdf",
+      fileSize: "980 KB",
+      uploadedDate: "25-07-2026",
+      uploadedBy: "Airports Authority of India",
+      docNo: "AAI/SR/2026/VJA/118",
+      version: "v1.0",
+    },
+    {
+      id: "doc-8",
+      code: "DOC-AFF-01",
+      name: "Joint Undertaking Affidavit by Owner & Licensed Personnel",
+      category: "Affidavits",
+      required: true,
+      status: "Verified",
+      fileName: "Joint_Undertaking_Affidavit_Notarized.pdf",
+      fileSize: "2.4 MB",
+      uploadedDate: "23-07-2026",
+      uploadedBy: "K. Ramamurthy (LTP)",
+      docNo: "AFF/NOTARY/2026/771",
+      version: "v1.0",
+    },
+    {
+      id: "doc-9",
+      code: "DOC-AFF-02",
+      name: "Rain Water Harvesting & Tree Plantation Undertaking",
+      category: "Affidavits",
+      required: true,
+      status: "Uploaded",
+      fileName: "RWH_Greenery_Pledge_Doc.pdf",
+      fileSize: "1.1 MB",
+      uploadedDate: "25-07-2026",
+      uploadedBy: "K. Ramamurthy (LTP)",
+      docNo: "AFF/RWH/2026/304",
+      version: "v1.0",
+    },
+  ]);
+
+  const [docCategoryFilter, setDocCategoryFilter] = React.useState<string>("ALL");
+  const [docSearchQuery, setDocSearchQuery] = React.useState<string>("");
+  const [activeDocPreview, setActiveDocPreview] = React.useState<DocumentationRecord | null>(null);
+  const [uploadNewDocModalOpen, setUploadNewDocModalOpen] = React.useState<boolean>(false);
+  const [newDocName, setNewDocName] = React.useState<string>("");
+  const [newDocCategory, setNewDocCategory] = React.useState<"Ownership" | "Technical" | "NOC & Clearances" | "Affidavits">("Ownership");
+  const [newDocNumber, setNewDocNumber] = React.useState<string>("");
+  const [newDocRequired, setNewDocRequired] = React.useState<boolean>(true);
+  const [newDocFileName, setNewDocFileName] = React.useState<string>("");
 
   // Sub Tabs under Application Form
   const [subTab, setSubTab] = React.useState<
     | "general"
     | "applicant"
     | "plot"
+  >("general");
+
+  // Sub Tabs under Documentation
+  const [docSubTab, setDocSubTab] = React.useState<
     | "app-checklist"
     | "doc-checklist"
     | "others"
-    | "nocs"
-  >("general");
+    | "repository"
+  >("app-checklist");
 
   // ─────────────────────────────────────────────────────────────
   // 1. GENERAL INFORMATION STATE
@@ -368,12 +536,16 @@ export function LtpSubmissionDetails({
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
 
   // ─────────────────────────────────────────────────────────────
-  // 7. APPLY FOR NOCS STATE (From Image)
+  // 7. APPLY FOR NOCS STATE
   // ─────────────────────────────────────────────────────────────
   const [hasFireNoc, setHasFireNoc] = React.useState<"NA" | "No" | "Yes">("No");
   const [fireNocRefNo, setFireNocRefNo] = React.useState("");
   const [fireNocIssueDate, setFireNocIssueDate] = React.useState("");
   const [fireNocDocAttached, setFireNocDocAttached] = React.useState(false);
+  const [hasAaiNoc, setHasAaiNoc] = React.useState<"NA" | "No" | "Yes">("NA");
+  const [aaiNocRefNo, setAaiNocRefNo] = React.useState("AAI/SR/2026/VJA/118");
+  const [aaiNocIssueDate, setAaiNocIssueDate] = React.useState("2026-06-15");
+  const [hasEnvNoc, setHasEnvNoc] = React.useState<"NA" | "No" | "Yes">("NA");
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -459,40 +631,67 @@ export function LtpSubmissionDetails({
         </div>
       )}
 
-      {/* ── MAIN TABS (Application Form | Drawing | Payments) ── */}
+      {/* ── MAIN TABS (Application Form | Drawings | Documentation | Payments) ── */}
       <div className="bg-[#FAF7F2] border-b border-[#DCD5C8] px-4 pt-2 flex items-center gap-1 shrink-0">
         <button
           onClick={() => setMainTab("form")}
           className={cn(
-            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
             mainTab === "form"
               ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
               : "text-slate-600 border-transparent hover:text-slate-900"
           )}
         >
-          Application Form
+          <FileText className="size-3.5" />
+          <span>Application Form</span>
         </button>
         <button
           onClick={() => setMainTab("drawing")}
           className={cn(
-            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
             mainTab === "drawing"
               ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
               : "text-slate-600 border-transparent hover:text-slate-900"
           )}
         >
-          Drawing
+          <Layers className="size-3.5" />
+          <span>Drawings</span>
+        </button>
+        <button
+          onClick={() => setMainTab("documentation")}
+          className={cn(
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
+            mainTab === "documentation"
+              ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
+              : "text-slate-600 border-transparent hover:text-slate-900"
+          )}
+        >
+          <Paperclip className="size-3.5" />
+          <span>Documentation</span>
         </button>
         <button
           onClick={() => setMainTab("payments")}
           className={cn(
-            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer",
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
             mainTab === "payments"
               ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
               : "text-slate-600 border-transparent hover:text-slate-900"
           )}
         >
-          Payments
+          <CreditCard className="size-3.5" />
+          <span>Payments</span>
+        </button>
+        <button
+          onClick={() => setMainTab("nocs")}
+          className={cn(
+            "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
+            mainTab === "nocs"
+              ? "text-[#7A1316] border-[#7A1316] font-black bg-[#FBF3E4] rounded-t-md border-t border-x border-[#DCD5C8] border-b-transparent -mb-[1px]"
+              : "text-slate-600 border-transparent hover:text-slate-900"
+          )}
+        >
+          <Flame className="size-3.5 text-orange-600" />
+          <span>Apply for NOCs</span>
         </button>
       </div>
 
@@ -503,10 +702,6 @@ export function LtpSubmissionDetails({
             { id: "general", label: "General Information" },
             { id: "applicant", label: "Applicant Information" },
             { id: "plot", label: "Plot Details" },
-            { id: "app-checklist", label: "Application Checklist" },
-            { id: "doc-checklist", label: "Document Checklist" },
-            { id: "others", label: "Others" },
-            { id: "nocs", label: "Apply for NOCs" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -514,6 +709,31 @@ export function LtpSubmissionDetails({
               className={cn(
                 "font-semibold transition-colors cursor-pointer relative py-0.5",
                 subTab === tab.id
+                  ? "text-[#7A1316] font-black underline underline-offset-4 decoration-2 decoration-[#7A1316]"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── SUB-TABS (When Documentation is active) ── */}
+      {mainTab === "documentation" && (
+        <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
+          {[
+            { id: "app-checklist", label: "Application Checklist" },
+            { id: "doc-checklist", label: "Document Checklist" },
+            { id: "others", label: "Others" },
+            { id: "repository", label: "Document Repository & Files" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setDocSubTab(tab.id as typeof docSubTab)}
+              className={cn(
+                "font-semibold transition-colors cursor-pointer relative py-0.5",
+                docSubTab === tab.id
                   ? "text-[#7A1316] font-black underline underline-offset-4 decoration-2 decoration-[#7A1316]"
                   : "text-slate-600 hover:text-slate-900"
               )}
@@ -1043,6 +1263,25 @@ export function LtpSubmissionDetails({
                 </div>
               </div>
             )}
+
+            {/* Bottom Action Footer / Next Button */}
+            <div className="pt-4 border-t border-[#DCD5C8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="text-xs text-slate-500">
+                Ensure all mandatory fields marked with <span className="text-rose-600 font-bold">*</span> are verified before proceeding.
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  showToast("General Information saved. Proceeding to Applicant Information...");
+                  setSubTab("applicant");
+                  (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-2 group shrink-0"
+              >
+                <span>Next: Applicant Information</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -1343,6 +1582,25 @@ export function LtpSubmissionDetails({
                       </button>
                     </div>
                   </div>
+
+                  {/* Card 2 Bottom Next Action */}
+                  <div className="md:col-span-2 pt-3 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <span className="text-xs text-slate-500 italic">
+                      Verify all applicant details before proceeding to plot details.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        showToast("Applicant Information saved. Proceeding to Plot Details...");
+                        setSubTab("plot");
+                        (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5 group shrink-0"
+                    >
+                      <span>Next: Plot Details</span>
+                      <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1398,6 +1656,38 @@ export function LtpSubmissionDetails({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Bottom Action Footer / Next Button */}
+            <div className="bg-[#FBF3E4] border-2 border-[#7A1316]/50 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    setSubTab("general");
+                    (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] text-xs font-bold px-4 py-2.5 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="size-3.5" />
+                  <span>Back: General Information</span>
+                </button>
+                <span className="text-xs text-slate-500 hidden sm:inline">
+                  Step 2 of 3: Applicant &amp; Technical Personnel
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={(e) => {
+                  showToast("Applicant Information saved. Proceeding to Plot Details...");
+                  setSubTab("plot");
+                  (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-2 group shrink-0"
+              >
+                <span>Next: Plot Details</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           </div>
         )}
@@ -1878,463 +2168,39 @@ export function LtpSubmissionDetails({
                 </div>
               )}
             </div>
-          </div>
-        )}
 
-        {/* ========================================================================= */}
-        {/* SUB-TAB 4: APPLICATION CHECKLIST (Image 3)                                */}
-        {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "app-checklist" && (
-          <div className="max-w-6xl mx-auto space-y-3">
-            {/* Top Bar with Save & Continue */}
-            <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] p-3 rounded-lg shadow-2xs">
-              <div>
-                <h3 className="font-black text-[#7A1316] text-xs uppercase tracking-wide">
-                  Application Statutory Checklist
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Mandatory regulatory confirmations for APCRDA BBAS scrutiny compliance.
-                </p>
-              </div>
-              <button
-                onClick={() => showToast("Checklist responses saved successfully")}
-                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
-              >
-                Save & Continue
-              </button>
-            </div>
-
-            {/* Checklist Table */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg overflow-hidden shadow-xs">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
-                    <tr>
-                      <th className="px-3 py-2.5 w-10 text-center">#</th>
-                      <th className="px-4 py-2.5">Description</th>
-                      <th className="px-4 py-2.5 w-36 text-center">Value</th>
-                      <th className="px-4 py-2.5 w-64">Remark</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DCD5C8] bg-white">
-                    {checklistItems.map((item) => (
-                      <tr key={item.id} className="hover:bg-[#FAF4EB] transition-colors">
-                        <td className="px-3 py-2.5 text-center font-bold text-slate-600">
-                          {item.id}
-                        </td>
-                        <td className="px-4 py-2.5 text-slate-800 leading-snug">
-                          {item.desc}
-                        </td>
-                        <td className="px-4 py-2.5 text-center">
-                          <div className="inline-flex items-center gap-3">
-                            <span className="text-amber-600 font-bold text-xs" title="Review Required">
-                              !
-                            </span>
-                            <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
-                              <input
-                                type="radio"
-                                name={`check-${item.id}`}
-                                checked={item.val === "Yes"}
-                                onChange={() => updateChecklistItem(item.id, "Yes")}
-                                className="accent-[#7A1316] cursor-pointer"
-                              />
-                              <span>Yes</span>
-                            </label>
-                            <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
-                              <input
-                                type="radio"
-                                name={`check-${item.id}`}
-                                checked={item.val === "No"}
-                                onChange={() => updateChecklistItem(item.id, "No")}
-                                className="accent-[#7A1316] cursor-pointer"
-                              />
-                              <span>No</span>
-                            </label>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <input
-                            type="text"
-                            value={item.remark}
-                            placeholder="Optional remark..."
-                            onChange={(e) => updateChecklistRemark(item.id, e.target.value)}
-                            className="w-full h-7 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* SUB-TAB 5: DOCUMENT CHECKLIST (Image 4)                                   */}
-        {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "doc-checklist" && (
-          <div className="max-w-6xl mx-auto space-y-3">
-            {/* Top Bar with Primary/Additional Tabs & Red Instruction Note */}
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDocTab("Primary")}
-                  className={cn(
-                    "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
-                    docTab === "Primary"
-                      ? "bg-[#7A1316] text-white"
-                      : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
-                  )}
-                >
-                  Primary
-                </button>
-                <button
-                  onClick={() => setDocTab("Additional")}
-                  className={cn(
-                    "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
-                    docTab === "Additional"
-                      ? "bg-[#7A1316] text-white"
-                      : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
-                  )}
-                >
-                  Additional
-                </button>
-              </div>
-
-              <div className="text-rose-700 font-semibold text-xs flex items-center gap-1">
-                <span>* Click on Document(s) to View attachment/Remarks</span>
-              </div>
-            </div>
-
-            {/* Document Checklist Items */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg p-4 space-y-3 shadow-xs">
-              {documentItems.map((doc, idx) => (
-                <div
-                  key={doc.id}
-                  className="bg-white border border-[#DCD5C8] rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs hover:border-[#7A1316]/60 transition-colors"
-                >
-                  {/* Left: Checkbox Icon + Document Title */}
-                  <div className="flex items-start gap-2.5 max-w-3xl">
-                    <div className="size-4 shrink-0 mt-0.5 rounded border border-[#7A1316] bg-[#7A1316] text-white flex items-center justify-center">
-                      <Check className="size-3" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-800 leading-snug">{doc.title}</p>
-                      {doc.files.length > 0 && (
-                        <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
-                          <Paperclip className="size-3" />
-                          <span>Attached: {doc.files.join(", ")}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right: Actions */}
-                  <div className="flex items-center gap-3 shrink-0 self-end md:self-center font-bold">
-                    <button
-                      onClick={() => setPreviewDoc({ title: doc.title, files: doc.files })}
-                      className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
-                    >
-                      View Files
-                    </button>
-                    <span className="text-slate-300">|</span>
-                    <button
-                      onClick={() => setUploadDocModal({ id: doc.id, title: doc.title })}
-                      className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
-                    >
-                      Attach More
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* SUB-TAB 6: OTHERS (Image 5)                                               */}
-        {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "others" && (
-          <div className="max-w-6xl mx-auto space-y-3">
-            {/* Top Bar with Mandatory Notice & Save & Continue */}
-            <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
-              <span className="text-xs text-slate-600 font-medium">
-                Fields marked with <span className="text-rose-600 font-bold">*</span> are mandatory
-              </span>
-              <button
-                onClick={() => showToast("Other details saved successfully")}
-                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
-              >
-                Save & Continue
-              </button>
-            </div>
-
-            {/* Other Details Section */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
-              <button
-                onClick={() => setSectionOthersOpen(!sectionOthersOpen)}
-                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5 tracking-wide">
-                  <span className="text-sm font-mono">{sectionOthersOpen ? "▲" : "▼"}</span>
-                  Other Details
-                </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Contract & Mortgage</span>
-              </button>
-
-              {sectionOthersOpen && (
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
-                  {/* Row 1 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">
-                      Contractor's all Risk policy No.
-                    </label>
-                    <input
-                      type="text"
-                      value={contractorRiskPolicyNo}
-                      onChange={(e) => setContractorRiskPolicyNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">
-                      Contractor's Date
-                    </label>
-                    <div className="relative w-full sm:w-72">
-                      <input
-                        type="date"
-                        value={contractorDate}
-                        onChange={(e) => setContractorDate(e.target.value)}
-                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 2 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">
-                      Valid Upto
-                    </label>
-                    <div className="relative w-full sm:w-72">
-                      <input
-                        type="date"
-                        value={validUptoDate}
-                        onChange={(e) => setValidUptoDate(e.target.value)}
-                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    {/* Placeholder for layout alignment */}
-                  </div>
-
-                  {/* Row 3 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed No.
-                    </label>
-                    <input
-                      type="text"
-                      value={mortgageDeedNo}
-                      onChange={(e) => setMortgageDeedNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed Date
-                    </label>
-                    <div className="relative w-full sm:w-72">
-                      <input
-                        type="date"
-                        value={mortgageDeedDate}
-                        onChange={(e) => setMortgageDeedDate(e.target.value)}
-                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 4 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Floor handed Over
-                    </label>
-                    <input
-                      type="text"
-                      value={floorHandedOver}
-                      onChange={(e) => setFloorHandedOver(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Area (Sq. Mtr.)
-                    </label>
-                    <input
-                      type="text"
-                      value={mortgageArea}
-                      onChange={(e) => setMortgageArea(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 5 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Sub Register Office
-                    </label>
-                    <input
-                      type="text"
-                      value={subRegisterOffice}
-                      onChange={(e) => setSubRegisterOffice(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* SUB-TAB 7: APPLY FOR NOCS                                                 */}
-        {/* ========================================================================= */}
-        {/* ========================================================================= */}
-        {/* SUB-TAB 7: APPLY FOR NOCS (Matching user image)                          */}
-        {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "nocs" && (
-          <div className="max-w-6xl mx-auto space-y-3">
-            {/* Top Right: Save NOC's Button */}
-            <div className="flex justify-end">
+            {/* Bottom Action Footer */}
+            <div className="bg-[#FBF3E4] border border-[#DCD5C8] p-3 rounded-lg flex items-center justify-between shadow-2xs">
               <button
                 type="button"
-                onClick={() => showToast("NOC's saved successfully!")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#DCD5C8] hover:border-[#7A1316] text-[#7A1316] hover:bg-[#FBF3E4] rounded text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+                onClick={(e) => {
+                  setSubTab("applicant");
+                  (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
               >
-                <Save className="size-3.5 text-[#7A1316]" />
-                <span>Save NOC&apos;s</span>
+                <ArrowLeft className="size-3.5" />
+                <span>Back: Applicant Information</span>
               </button>
-            </div>
-
-            {/* External Fire Banner */}
-            <div className="bg-[#7A1316] text-white px-4 py-2.5 flex items-center gap-2 rounded-t-md font-bold text-sm tracking-wide shadow-xs">
-              <Flame className="size-4 text-orange-400 fill-orange-400 shrink-0" />
-              <span>External Fire</span>
-            </div>
-
-            {/* External Fire Content Card */}
-            <div className="bg-[#FBF3E4] border border-[#DCD5C8] border-t-0 rounded-b-md p-5 space-y-4 shadow-xs">
-              {/* Italic Notes */}
-              <p className="text-[11px] text-slate-700 italic leading-relaxed">
-                <span className="font-bold not-italic text-slate-900">Notes:- External Fire Service : </span>
-                All Types of Residential buildings with height more than 18m or Group housing or Commercial buildings of height 15m and above. Buildings of public congregation like Educational Buildings, Cinema Theatres, Function Halls and other Assembly Buildings on plot area of 500sq.m and above or of height above 6m.
-              </p>
-
-              {/* Question & Radio Options */}
-              <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-3 px-4 bg-white/70 rounded border border-[#DCD5C8]">
-                <div className="text-xs font-semibold text-slate-800">
-                  Do you have Approved Fire NOC for this application?
-                </div>
-                <div className="flex items-center gap-6 text-xs font-medium text-slate-800">
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fireNocApproved"
-                      value="NA"
-                      checked={hasFireNoc === "NA"}
-                      onChange={() => setHasFireNoc("NA")}
-                      className="accent-[#7A1316] cursor-pointer"
-                    />
-                    <span>NA</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fireNocApproved"
-                      value="No"
-                      checked={hasFireNoc === "No"}
-                      onChange={() => setHasFireNoc("No")}
-                      className="accent-[#7A1316] cursor-pointer"
-                    />
-                    <span>No</span>
-                  </label>
-                  <label className="inline-flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="fireNocApproved"
-                      value="Yes"
-                      checked={hasFireNoc === "Yes"}
-                      onChange={() => setHasFireNoc("Yes")}
-                      className="accent-[#7A1316] cursor-pointer"
-                    />
-                    <span>Yes</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Conditional Input Fields if Yes */}
-              {hasFireNoc === "Yes" && (
-                <div className="p-4 bg-white rounded border border-[#DCD5C8] space-y-3 animate-in fade-in duration-200">
-                  <div className="font-bold text-[#7A1316] text-xs uppercase tracking-wide">
-                    Approved Fire NOC Document & Reference Details:
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                    <div>
-                      <label className="block font-medium text-slate-700 mb-1">
-                        Fire NOC Certificate / Reference Number
-                      </label>
-                      <input
-                        type="text"
-                        value={fireNocRefNo}
-                        onChange={(e) => setFireNocRefNo(e.target.value)}
-                        placeholder="e.g. AP/FIRE/NOC/2026/0412"
-                        className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block font-medium text-slate-700 mb-1">
-                        NOC Issue Date
-                      </label>
-                      <input
-                        type="date"
-                        value={fireNocIssueDate}
-                        onChange={(e) => setFireNocIssueDate(e.target.value)}
-                        className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block font-medium text-slate-700 mb-1">
-                      Attach Approved Fire NOC (PDF)
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFireNocDocAttached(true);
-                          showToast("Approved Fire NOC document attached successfully");
-                        }}
-                        className="px-3.5 py-1.5 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs"
-                      >
-                        <Upload className="size-3.5" /> Attach Document
-                      </button>
-                      {fireNocDocAttached && (
-                        <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="size-3.5 text-emerald-600" /> Fire_NOC_Approval_Sanctioned.pdf attached
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+              <button
+                type="button"
+                onClick={(e) => {
+                  showToast("Plot Details verified. Proceeding to Documentation...");
+                  setMainTab("documentation");
+                  setDocSubTab("app-checklist");
+                  (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
+              >
+                <span>Next: Documentation</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           </div>
         )}
+
+
+
 
         {/* ========================================================================= */}
         {/* MAIN TAB 2: DRAWING                                                       */}
@@ -2368,6 +2234,592 @@ export function LtpSubmissionDetails({
               </div>
             </div>
           </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MAIN TAB: DOCUMENTATION                                                   */}
+        {/* ========================================================================= */}
+        {mainTab === "documentation" && (
+          <>
+            {/* ── DOC SUB-TAB 1: APPLICATION CHECKLIST ── */}
+            {docSubTab === "app-checklist" && (
+              <div className="max-w-6xl mx-auto space-y-3">
+                {/* Top Bar with Save & Continue */}
+                <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] p-3 rounded-lg shadow-2xs">
+                  <div>
+                    <h3 className="font-black text-[#7A1316] text-xs uppercase tracking-wide">
+                      Application Statutory Checklist
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Mandatory regulatory confirmations for APCRDA BBAS scrutiny compliance.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      showToast("Checklist responses saved successfully");
+                      setDocSubTab("doc-checklist");
+                    }}
+                    className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Save & Continue
+                  </button>
+                </div>
+
+                {/* Checklist Table */}
+                <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg overflow-hidden shadow-xs">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
+                        <tr>
+                          <th className="px-3 py-2.5 w-10 text-center">#</th>
+                          <th className="px-4 py-2.5">Description</th>
+                          <th className="px-4 py-2.5 w-36 text-center">Value</th>
+                          <th className="px-4 py-2.5 w-64">Remark</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCD5C8] bg-white">
+                        {checklistItems.map((item) => (
+                          <tr key={item.id} className="hover:bg-[#FAF4EB] transition-colors">
+                            <td className="px-3 py-2.5 text-center font-bold text-slate-600">
+                              {item.id}
+                            </td>
+                            <td className="px-4 py-2.5 text-slate-800 leading-snug">
+                              {item.desc}
+                            </td>
+                            <td className="px-4 py-2.5 text-center">
+                              <div className="inline-flex items-center gap-3">
+                                <span className="text-amber-600 font-bold text-xs" title="Review Required">
+                                  !
+                                </span>
+                                <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
+                                  <input
+                                    type="radio"
+                                    name={`check-${item.id}`}
+                                    checked={item.val === "Yes"}
+                                    onChange={() => updateChecklistItem(item.id, "Yes")}
+                                    className="accent-[#7A1316] cursor-pointer"
+                                  />
+                                  <span>Yes</span>
+                                </label>
+                                <label className="inline-flex items-center gap-1 cursor-pointer font-medium text-slate-700">
+                                  <input
+                                    type="radio"
+                                    name={`check-${item.id}`}
+                                    checked={item.val === "No"}
+                                    onChange={() => updateChecklistItem(item.id, "No")}
+                                    className="accent-[#7A1316] cursor-pointer"
+                                  />
+                                  <span>No</span>
+                                </label>
+                              </div>
+                            </td>
+                            <td className="px-4 py-2.5">
+                              <input
+                                type="text"
+                                value={item.remark}
+                                placeholder="Optional remark..."
+                                onChange={(e) => updateChecklistRemark(item.id, e.target.value)}
+                                className="w-full h-7 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── DOC SUB-TAB 2: DOCUMENT CHECKLIST ── */}
+            {docSubTab === "doc-checklist" && (
+              <div className="max-w-6xl mx-auto space-y-3">
+                {/* Top Bar with Primary/Additional Tabs & Red Instruction Note */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setDocTab("Primary")}
+                      className={cn(
+                        "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
+                        docTab === "Primary"
+                          ? "bg-[#7A1316] text-white"
+                          : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
+                      )}
+                    >
+                      Primary
+                    </button>
+                    <button
+                      onClick={() => setDocTab("Additional")}
+                      className={cn(
+                        "text-xs font-bold px-3 py-1 rounded transition-colors cursor-pointer",
+                        docTab === "Additional"
+                          ? "bg-[#7A1316] text-white"
+                          : "bg-white border border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB]"
+                      )}
+                    >
+                      Additional
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-rose-700 font-semibold text-xs flex items-center gap-1">
+                      <span>* Click on Document(s) to View attachment/Remarks</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        showToast("Document checklist saved successfully");
+                        setDocSubTab("others");
+                      }}
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                    >
+                      Save & Continue
+                    </button>
+                  </div>
+                </div>
+
+                {/* Document Checklist Items */}
+                <div className="bg-[#FBF3E4] border border-[#7A1316]/40 rounded-lg p-4 space-y-3 shadow-xs">
+                  {documentItems.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="bg-white border border-[#DCD5C8] rounded-lg p-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs hover:border-[#7A1316]/60 transition-colors"
+                    >
+                      {/* Left: Checkbox Icon + Document Title */}
+                      <div className="flex items-start gap-2.5 max-w-3xl">
+                        <div className="size-4 shrink-0 mt-0.5 rounded border border-[#7A1316] bg-[#7A1316] text-white flex items-center justify-center">
+                          <Check className="size-3" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-800 leading-snug">{doc.title}</p>
+                          {doc.files.length > 0 && (
+                            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold">
+                              <Paperclip className="size-3" />
+                              <span>Attached: {doc.files.join(", ")}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Right: Actions */}
+                      <div className="flex items-center gap-3 shrink-0 self-end md:self-center font-bold">
+                        <button
+                          onClick={() => setPreviewDoc({ title: doc.title, files: doc.files })}
+                          className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                        >
+                          View Files
+                        </button>
+                        <span className="text-slate-300">|</span>
+                        <button
+                          onClick={() => setUploadDocModal({ id: doc.id, title: doc.title })}
+                          className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                        >
+                          Attach More
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── DOC SUB-TAB 3: OTHERS ── */}
+            {docSubTab === "others" && (
+              <div className="max-w-6xl mx-auto space-y-3">
+                {/* Top Bar with Mandatory Notice & Save & Continue */}
+                <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
+                  <span className="text-xs text-slate-600 font-medium">
+                    Fields marked with <span className="text-rose-600 font-bold">*</span> are mandatory
+                  </span>
+                  <button
+                    onClick={() => {
+                      showToast("Other details saved successfully");
+                      setDocSubTab("repository");
+                    }}
+                    className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer"
+                  >
+                    Save & Continue
+                  </button>
+                </div>
+
+                {/* Other Details Section */}
+                <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+                  <button
+                    onClick={() => setSectionOthersOpen(!sectionOthersOpen)}
+                    className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5 tracking-wide">
+                      <span className="text-sm font-mono">{sectionOthersOpen ? "▲" : "▼"}</span>
+                      Other Details
+                    </span>
+                    <span className="text-[10px] text-amber-200 uppercase font-mono">Contract & Mortgage</span>
+                  </button>
+
+                  {sectionOthersOpen && (
+                    <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
+                      {/* Row 1 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-semibold text-slate-800 shrink-0">
+                          Contractor's all Risk policy No.
+                        </label>
+                        <input
+                          type="text"
+                          value={contractorRiskPolicyNo}
+                          onChange={(e) => setContractorRiskPolicyNo(e.target.value)}
+                          className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-semibold text-slate-800 shrink-0">
+                          Contractor's Date
+                        </label>
+                        <div className="relative w-full sm:w-72">
+                          <input
+                            type="date"
+                            value={contractorDate}
+                            onChange={(e) => setContractorDate(e.target.value)}
+                            className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Row 2 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-semibold text-slate-800 shrink-0">
+                          Valid Upto
+                        </label>
+                        <div className="relative w-full sm:w-72">
+                          <input
+                            type="date"
+                            value={validUptoDate}
+                            onChange={(e) => setValidUptoDate(e.target.value)}
+                            className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        {/* Placeholder for layout alignment */}
+                      </div>
+
+                      {/* Row 3 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-bold text-slate-800 shrink-0">
+                          <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed No.
+                        </label>
+                        <input
+                          type="text"
+                          value={mortgageDeedNo}
+                          onChange={(e) => setMortgageDeedNo(e.target.value)}
+                          className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-bold text-slate-800 shrink-0">
+                          <span className="text-rose-600 font-black mr-1">*</span> Mortgage Deed Date
+                        </label>
+                        <div className="relative w-full sm:w-72">
+                          <input
+                            type="date"
+                            value={mortgageDeedDate}
+                            onChange={(e) => setMortgageDeedDate(e.target.value)}
+                            className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Row 4 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-bold text-slate-800 shrink-0">
+                          <span className="text-rose-600 font-black mr-1">*</span> Floor handed Over
+                        </label>
+                        <input
+                          type="text"
+                          value={floorHandedOver}
+                          onChange={(e) => setFloorHandedOver(e.target.value)}
+                          className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-bold text-slate-800 shrink-0">
+                          <span className="text-rose-600 font-black mr-1">*</span> Area (Sq. Mtr.)
+                        </label>
+                        <input
+                          type="text"
+                          value={mortgageArea}
+                          onChange={(e) => setMortgageArea(e.target.value)}
+                          className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+
+                      {/* Row 5 */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <label className="font-bold text-slate-800 shrink-0">
+                          <span className="text-rose-600 font-black mr-1">*</span> Sub Register Office
+                        </label>
+                        <input
+                          type="text"
+                          value={subRegisterOffice}
+                          onChange={(e) => setSubRegisterOffice(e.target.value)}
+                          className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── DOC SUB-TAB 4: REPOSITORY & CLEARANCES ── */}
+            {docSubTab === "repository" && (
+              <div className="max-w-6xl mx-auto space-y-4 text-xs font-sans">
+                {/* Top Documentation Header Card */}
+                <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-5">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DCD5C8] pb-3.5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wide">
+                          Application Documentation &amp; Statutory Clearances
+                        </h3>
+                        <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
+                          COMPLIANCE 100%
+                        </span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] mt-0.5">
+                        Official verified land title deeds, structural integrity certificates, NOCs and statutory affidavits for BA No. <strong className="font-mono text-slate-900">{baNo}</strong>
+                      </p>
+                    </div>
+
+                    {/* Header Action Buttons */}
+                    <div className="flex items-center flex-wrap gap-2 shrink-0">
+                      <button
+                        onClick={() => setUploadNewDocModalOpen(true)}
+                        className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5 border border-[#630E10]"
+                      >
+                        <Plus className="size-3.5" />
+                        <span>Upload Document</span>
+                      </button>
+                      <button
+                        onClick={() => showToast(`Archiving and downloading ${documentationList.length} application documents as ZIP...`)}
+                        className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Download className="size-3.5 text-[#7A1316]" />
+                        <span>Download All (ZIP)</span>
+                      </button>
+                      <button
+                        onClick={() => window.print()}
+                        className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Printer className="size-3.5 text-[#7A1316]" />
+                        <span>Print Manifest</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* KPI Badges Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3.5">
+                    <div className="bg-white p-2.5 rounded-lg border border-[#DCD5C8] flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Total Documents</div>
+                        <div className="text-base font-black text-slate-900">{documentationList.length}</div>
+                      </div>
+                      <FolderClosed className="size-5 text-[#7A1316]/70" />
+                    </div>
+                    <div className="bg-white p-2.5 rounded-lg border border-[#DCD5C8] flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Verified &amp; Accepted</div>
+                        <div className="text-base font-black text-emerald-700">
+                          {documentationList.filter((d) => d.status === "Verified").length}
+                        </div>
+                      </div>
+                      <ShieldCheck className="size-5 text-emerald-600" />
+                    </div>
+                    <div className="bg-white p-2.5 rounded-lg border border-[#DCD5C8] flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Under Scrutiny</div>
+                        <div className="text-base font-black text-amber-700">
+                          {documentationList.filter((d) => d.status === "Under Scrutiny").length}
+                        </div>
+                      </div>
+                      <Clock className="size-5 text-amber-600" />
+                    </div>
+                    <div className="bg-white p-2.5 rounded-lg border border-[#DCD5C8] flex items-center justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Mandatory Shortfalls</div>
+                        <div className="text-base font-black text-emerald-700">0</div>
+                      </div>
+                      <CheckCircle2 className="size-5 text-emerald-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter Pills & Search Bar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 bg-white p-2.5 rounded-lg border border-[#DCD5C8] shadow-2xs">
+                  {/* Category Pills */}
+                  <div className="flex items-center flex-wrap gap-1.5">
+                    {[
+                      { id: "ALL", label: `All (${documentationList.length})` },
+                      { id: "Ownership", label: `Ownership (${documentationList.filter((d) => d.category === "Ownership").length})` },
+                      { id: "Technical", label: `Technical (${documentationList.filter((d) => d.category === "Technical").length})` },
+                      { id: "NOC & Clearances", label: `NOCs (${documentationList.filter((d) => d.category === "NOC & Clearances").length})` },
+                      { id: "Affidavits", label: `Affidavits (${documentationList.filter((d) => d.category === "Affidavits").length})` },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setDocCategoryFilter(cat.id)}
+                        className={cn(
+                          "px-2.5 py-1 rounded text-xs font-bold transition-colors cursor-pointer",
+                          docCategoryFilter === cat.id
+                            ? "bg-[#7A1316] text-white shadow-2xs"
+                            : "bg-[#FAF7F2] text-slate-700 border border-[#DCD5C8] hover:bg-[#F5EBE1]"
+                        )}
+                      >
+                        {cat.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search Box */}
+                  <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded px-2.5 py-1 w-full sm:w-64 focus-within:border-[#7A1316] transition-colors">
+                    <Search className="size-3.5 text-slate-400 shrink-0" />
+                    <input
+                      type="text"
+                      placeholder="Search document name or code..."
+                      value={docSearchQuery}
+                      onChange={(e) => setDocSearchQuery(e.target.value)}
+                      className="w-full text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
+                    />
+                    {docSearchQuery && (
+                      <button onClick={() => setDocSearchQuery("")} className="text-slate-400 hover:text-slate-600">
+                        <X className="size-3" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Documentation Table */}
+                <div className="bg-white rounded-xl border border-[#DCD5C8] overflow-hidden shadow-xs">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10] text-[11px] uppercase tracking-wider">
+                        <tr>
+                          <th className="px-3.5 py-2.5 w-12 text-center">#</th>
+                          <th className="px-3.5 py-2.5">Document Details</th>
+                          <th className="px-3.5 py-2.5">Category</th>
+                          <th className="px-3.5 py-2.5">Reference No.</th>
+                          <th className="px-3.5 py-2.5">Uploaded File</th>
+                          <th className="px-3.5 py-2.5">Uploaded By &amp; Date</th>
+                          <th className="px-3.5 py-2.5 text-center">Status</th>
+                          <th className="px-3.5 py-2.5 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCD5C8]">
+                        {documentationList
+                          .filter((item) => {
+                            if (docCategoryFilter !== "ALL" && item.category !== docCategoryFilter) return false;
+                            if (docSearchQuery.trim()) {
+                              const q = docSearchQuery.toLowerCase();
+                              return (
+                                item.name.toLowerCase().includes(q) ||
+                                item.code.toLowerCase().includes(q) ||
+                                item.fileName.toLowerCase().includes(q) ||
+                                item.docNo.toLowerCase().includes(q)
+                              );
+                            }
+                            return true;
+                          })
+                          .map((doc, idx) => (
+                            <tr key={doc.id} className="hover:bg-[#FAF4EB] transition-colors">
+                              <td className="px-3.5 py-2.5 text-center font-bold text-slate-500 font-mono text-[11px]">
+                                {idx + 1}
+                              </td>
+                              <td className="px-3.5 py-2.5">
+                                <div className="font-bold text-slate-900 leading-tight">{doc.name}</div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="font-mono text-[10px] text-slate-500 bg-[#FAF7F2] border border-[#DCD5C8] px-1.5 py-0.5 rounded">
+                                    {doc.code}
+                                  </span>
+                                  {doc.required ? (
+                                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">
+                                      Mandatory
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                                      Optional
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="px-3.5 py-2.5">
+                                <span className="font-semibold text-slate-700 bg-[#FAF7F2] border border-[#DCD5C8] px-2 py-0.5 rounded text-[11px]">
+                                  {doc.category}
+                                </span>
+                              </td>
+                              <td className="px-3.5 py-2.5 font-mono text-[11px] text-slate-700">
+                                {doc.docNo}
+                              </td>
+                              <td className="px-3.5 py-2.5">
+                                <div className="flex items-center gap-1.5">
+                                  <FileText className="size-4 text-[#7A1316] shrink-0" />
+                                  <div className="min-w-0">
+                                    <div className="font-medium text-slate-900 truncate max-w-[180px]" title={doc.fileName}>
+                                      {doc.fileName}
+                                    </div>
+                                    <div className="text-[10px] text-slate-500">{doc.fileSize} · {doc.version}</div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-3.5 py-2.5 text-[11px]">
+                                <div className="text-slate-800 font-medium">{doc.uploadedBy}</div>
+                                <div className="text-slate-500 text-[10px]">{doc.uploadedDate}</div>
+                              </td>
+                              <td className="px-3.5 py-2.5 text-center">
+                                {doc.status === "Verified" && (
+                                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded-full text-[10px]">
+                                    <Check className="size-3" /> Verified
+                                  </span>
+                                )}
+                                {doc.status === "Under Scrutiny" && (
+                                  <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-300 font-bold px-2 py-0.5 rounded-full text-[10px]">
+                                    <Clock className="size-3" /> In Scrutiny
+                                  </span>
+                                )}
+                                {doc.status === "Uploaded" && (
+                                  <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 border border-blue-300 font-bold px-2 py-0.5 rounded-full text-[10px]">
+                                    <Upload className="size-3" /> Uploaded
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3.5 py-2.5 text-right">
+                                <div className="inline-flex items-center gap-1">
+                                  <button
+                                    onClick={() => setActiveDocPreview(doc)}
+                                    className="bg-[#FAF7F2] hover:bg-[#F5EBE1] text-[#7A1316] border border-[#DCD5C8] font-bold px-2 py-1 rounded text-[11px] transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                                    title="Preview Document"
+                                  >
+                                    <Eye className="size-3" />
+                                    <span>View</span>
+                                  </button>
+                                  <button
+                                    onClick={() => showToast(`Downloading ${doc.fileName}...`)}
+                                    className="bg-[#FAF7F2] hover:bg-[#F5EBE1] text-slate-700 border border-[#DCD5C8] font-bold p-1 rounded text-[11px] transition-colors cursor-pointer shadow-2xs"
+                                    title="Download Document"
+                                  >
+                                    <Download className="size-3" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* ========================================================================= */}
@@ -2413,6 +2865,278 @@ export function LtpSubmissionDetails({
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* MAIN TAB 5: APPLY FOR NOCS (Statutory Single-Desk Clearances)              */}
+        {/* ========================================================================= */}
+        {mainTab === "nocs" && (
+          <div className="max-w-6xl mx-auto space-y-4 text-xs font-sans">
+            {/* Top Header Card */}
+            <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCD5C8] pb-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Flame className="size-4 text-orange-600" />
+                    <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wide">
+                      Single Desk Clearances &amp; Statutory NOC Application
+                    </h3>
+                  </div>
+                  <p className="text-slate-600 text-[11px]">
+                    Departmental statutory clearances for Proposal BA No. <strong className="font-mono text-slate-900">{baNo}</strong>
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => showToast("All NOC statutory declarations saved successfully!")}
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+                  >
+                    <Save className="size-3.5" />
+                    <span>Save NOC Details</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Status Overview Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3.5">
+                <div className="bg-white p-3 rounded-lg border border-[#DCD5C8]">
+                  <div className="text-[10px] uppercase font-bold text-slate-500">Fire Services</div>
+                  <div className="text-xs font-bold text-slate-900 mt-1 flex items-center gap-1">
+                    {hasFireNoc === "Yes" ? (
+                      <span className="text-emerald-700 flex items-center gap-1"><Check className="size-3" /> Approved</span>
+                    ) : hasFireNoc === "NA" ? (
+                      <span className="text-slate-500">Not Applicable</span>
+                    ) : (
+                      <span className="text-amber-700">Clearance Pending</span>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-[#DCD5C8]">
+                  <div className="text-[10px] uppercase font-bold text-slate-500">Airport (AAI NOCAS)</div>
+                  <div className="text-xs font-bold text-slate-900 mt-1 flex items-center gap-1">
+                    {hasAaiNoc === "Yes" ? (
+                      <span className="text-emerald-700 flex items-center gap-1"><Check className="size-3" /> Approved</span>
+                    ) : (
+                      <span className="text-slate-500">Within Height Limit</span>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-[#DCD5C8]">
+                  <div className="text-[10px] uppercase font-bold text-slate-500">Pollution (APPCB)</div>
+                  <div className="text-xs font-bold text-slate-900 mt-1 flex items-center gap-1">
+                    {hasEnvNoc === "Yes" ? (
+                      <span className="text-emerald-700 flex items-center gap-1"><Check className="size-3" /> Consent Active</span>
+                    ) : (
+                      <span className="text-slate-500">Not Required (&lt;20k sqm)</span>
+                    )}
+                  </div>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-[#DCD5C8]">
+                  <div className="text-[10px] uppercase font-bold text-slate-500">Water Body Buffer</div>
+                  <div className="text-xs font-bold text-slate-900 mt-1 flex items-center gap-1">
+                    <span className="text-emerald-700 flex items-center gap-1"><Check className="size-3" /> Buffer Compliant</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Department 1: External Fire Service */}
+            <div className="bg-white border border-[#DCD5C8] rounded-xl shadow-xs overflow-hidden">
+              <div className="bg-[#7A1316] text-white px-4 py-2.5 flex items-center justify-between font-bold text-xs tracking-wide">
+                <div className="flex items-center gap-2">
+                  <Flame className="size-4 text-orange-400 fill-orange-400 shrink-0" />
+                  <span>1. External Fire Service (AP State Disaster Response &amp; Fire Services)</span>
+                </div>
+                <span className="text-[10px] bg-[#8F161A] border border-[#A22025] px-2 py-0.5 rounded text-amber-200 uppercase font-mono">
+                  Statutory Rule 18
+                </span>
+              </div>
+              <div className="p-4 sm:p-5 bg-[#FBF3E4] space-y-4">
+                <p className="text-[11px] text-slate-700 italic leading-relaxed">
+                  <span className="font-bold not-italic text-slate-900">Mandatory Applicability: </span>
+                  All Types of Residential buildings with height more than 18m or Group housing or Commercial buildings of height 15m and above. Buildings of public congregation like Educational Buildings, Cinema Theatres, Function Halls and other Assembly Buildings on plot area of 500 sq.m and above or height above 6m.
+                </p>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 px-3.5 bg-white rounded border border-[#DCD5C8]">
+                  <div className="text-xs font-bold text-slate-800">
+                    Do you have Approved Fire NOC for this application?
+                  </div>
+                  <div className="flex items-center gap-6 text-xs font-medium text-slate-800">
+                    {(["NA", "No", "Yes"] as const).map((opt) => (
+                      <label key={opt} className="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="fireNocApproved"
+                          value={opt}
+                          checked={hasFireNoc === opt}
+                          onChange={() => setHasFireNoc(opt)}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span className="font-bold">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {hasFireNoc === "Yes" && (
+                  <div className="p-4 bg-white rounded border border-[#DCD5C8] space-y-3 animate-in fade-in duration-200">
+                    <div className="font-bold text-[#7A1316] text-xs uppercase tracking-wide">
+                      Approved Fire NOC Document &amp; Reference Details:
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          Fire NOC Certificate / Reference Number
+                        </label>
+                        <input
+                          type="text"
+                          value={fireNocRefNo}
+                          onChange={(e) => setFireNocRefNo(e.target.value)}
+                          placeholder="e.g. AP/FIRE/NOC/2026/0412"
+                          className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          NOC Issue Date
+                        </label>
+                        <input
+                          type="date"
+                          value={fireNocIssueDate}
+                          onChange={(e) => setFireNocIssueDate(e.target.value)}
+                          className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">
+                        Attach Approved Fire NOC (PDF)
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFireNocDocAttached(true);
+                            showToast("Approved Fire NOC document attached successfully");
+                          }}
+                          className="px-3.5 py-1.5 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs border border-[#630E10]"
+                        >
+                          <Upload className="size-3.5" /> Attach Document
+                        </button>
+                        {fireNocDocAttached && (
+                          <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                            <CheckCircle2 className="size-3.5 text-emerald-600" /> Fire_NOC_Approval_Sanctioned.pdf attached
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Department 2: Airports Authority of India (AAI NOCAS) */}
+            <div className="bg-white border border-[#DCD5C8] rounded-xl shadow-xs overflow-hidden">
+              <div className="bg-[#7A1316] text-white px-4 py-2.5 flex items-center justify-between font-bold text-xs tracking-wide">
+                <div className="flex items-center gap-2">
+                  <Building2 className="size-4 text-cyan-300 shrink-0" />
+                  <span>2. Airport Authority of India (AAI NOCAS Clearance)</span>
+                </div>
+                <span className="text-[10px] bg-[#8F161A] border border-[#A22025] px-2 py-0.5 rounded text-amber-200 uppercase font-mono">
+                  Obstacle Limitation Surface
+                </span>
+              </div>
+              <div className="p-4 sm:p-5 bg-[#FBF3E4] space-y-4">
+                <p className="text-[11px] text-slate-700 italic leading-relaxed">
+                  <span className="font-bold not-italic text-slate-900">Mandatory Applicability: </span>
+                  All proposed structures within 20km radius of Vijayawada International Airport (Gannavaram) exceeding site CCZM (Colour Coded Zoning Map) elevation limits.
+                </p>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 px-3.5 bg-white rounded border border-[#DCD5C8]">
+                  <div className="text-xs font-bold text-slate-800">
+                    Do you have AAI Height Clearance NOC for this application?
+                  </div>
+                  <div className="flex items-center gap-6 text-xs font-medium text-slate-800">
+                    {(["NA", "No", "Yes"] as const).map((opt) => (
+                      <label key={opt} className="inline-flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="aaiNocApproved"
+                          value={opt}
+                          checked={hasAaiNoc === opt}
+                          onChange={() => setHasAaiNoc(opt)}
+                          className="accent-[#7A1316] cursor-pointer"
+                        />
+                        <span className="font-bold">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {hasAaiNoc === "Yes" && (
+                  <div className="p-4 bg-white rounded border border-[#DCD5C8] space-y-3 animate-in fade-in duration-200">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          AAI NOCAS Application / Clearance Number
+                        </label>
+                        <input
+                          type="text"
+                          value={aaiNocRefNo}
+                          onChange={(e) => setAaiNocRefNo(e.target.value)}
+                          placeholder="e.g. AAI/SR/2026/VJA/118"
+                          className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">
+                          NOC Issue Date
+                        </label>
+                        <input
+                          type="date"
+                          value={aaiNocIssueDate}
+                          onChange={(e) => setAaiNocIssueDate(e.target.value)}
+                          className="w-full h-8 px-2.5 border border-[#DCD5C8] rounded bg-[#FAF7F2] text-slate-800 outline-none focus:border-[#7A1316]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Department 3: Environmental & Water Resources Clearances */}
+            <div className="bg-white border border-[#DCD5C8] rounded-xl shadow-xs overflow-hidden">
+              <div className="bg-[#7A1316] text-white px-4 py-2.5 flex items-center justify-between font-bold text-xs tracking-wide">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-emerald-300 shrink-0" />
+                  <span>3. Environmental (APPCB / SEIAA) &amp; Irrigation Department Clearances</span>
+                </div>
+                <span className="text-[10px] bg-[#8F161A] border border-[#A22025] px-2 py-0.5 rounded text-amber-200 uppercase font-mono">
+                  State Clearances
+                </span>
+              </div>
+              <div className="p-4 sm:p-5 bg-[#FBF3E4] space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div className="bg-white p-3 rounded border border-[#DCD5C8] space-y-2">
+                    <div className="font-bold text-slate-800">State Environmental Impact Clearance (SEIAA)</div>
+                    <div className="text-[11px] text-slate-600">Built-up area &lt; 20,000 sq.m: Automatically exempted from EIA notification.</div>
+                    <div className="text-emerald-700 font-bold flex items-center gap-1 text-[11px]">
+                      <CheckCircle2 className="size-3.5" /> Exempted under Category B2
+                    </div>
+                  </div>
+                  <div className="bg-white p-3 rounded border border-[#DCD5C8] space-y-2">
+                    <div className="font-bold text-slate-800">Water Body Buffer &amp; Flood Inundation Clearance</div>
+                    <div className="text-[11px] text-slate-600">Site is beyond 30m buffer from Krishna river and major irrigation canals.</div>
+                    <div className="text-emerald-700 font-bold flex items-center gap-1 text-[11px]">
+                      <CheckCircle2 className="size-3.5" /> Certified compliant with APCRDA Zonal Regulations
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -2611,6 +3335,267 @@ export function LtpSubmissionDetails({
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DOCUMENTATION PREVIEW MODAL ── */}
+      {activeDocPreview && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden font-sans">
+            {/* Modal Header */}
+            <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2">
+                <FileText className="size-4 text-[#7A1316]" />
+                <div>
+                  <h3 className="font-black text-[#7A1316] text-xs sm:text-sm uppercase tracking-wide">
+                    Document Viewer — {activeDocPreview.code}
+                  </h3>
+                  <p className="text-[11px] text-slate-600 font-medium">{activeDocPreview.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveDocPreview(null)}
+                className="text-slate-500 hover:text-slate-800 p-1 rounded hover:bg-slate-200 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Document Content / Simulated Sheet */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 flex flex-col items-center">
+              <div className="w-full max-w-lg bg-white border border-slate-300 shadow-lg p-6 sm:p-8 space-y-5 rounded relative">
+                {/* Government Header Banner */}
+                <div className="text-center border-b-2 border-[#7A1316] pb-3 space-y-1">
+                  <div className="font-serif text-[10px] text-slate-600 uppercase tracking-widest font-bold">
+                    GOVERNMENT OF ANDHRA PRADESH
+                  </div>
+                  <h4 className="font-black text-[#7A1316] text-sm tracking-tight leading-tight">
+                    ANDHRA PRADESH CAPITAL REGION DEVELOPMENT AUTHORITY (APCRDA)
+                  </h4>
+                  <div className="text-[10px] text-slate-500 font-medium">
+                    Building Permission &amp; Town Planning Department · Vijayawada
+                  </div>
+                </div>
+
+                {/* Document Certificate Banner */}
+                <div className="bg-[#FBF3E4] border border-[#DCD5C8] rounded-md p-3 text-center space-y-1">
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                    Statutory Submission Record
+                  </div>
+                  <div className="font-black text-[#7A1316] text-sm">{activeDocPreview.name}</div>
+                  <div className="font-mono text-xs text-slate-700 font-semibold">Ref No: {activeDocPreview.docNo}</div>
+                </div>
+
+                {/* Metadata Table */}
+                <div className="border border-[#DCD5C8] rounded-md overflow-hidden text-xs">
+                  <table className="w-full text-left">
+                    <tbody className="divide-y divide-[#DCD5C8]">
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 w-36">Application BA No.</td>
+                        <td className="px-3 py-1.5 font-mono font-bold text-[#7A1316]">{baNo}</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50">Document Code</td>
+                        <td className="px-3 py-1.5 font-mono">{activeDocPreview.code}</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50">File Name</td>
+                        <td className="px-3 py-1.5 font-mono text-[11px]">{activeDocPreview.fileName}</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50">File Size &amp; Type</td>
+                        <td className="px-3 py-1.5">{activeDocPreview.fileSize} (Encrypted PDF / Validated)</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50">Uploaded By</td>
+                        <td className="px-3 py-1.5">{activeDocPreview.uploadedBy} on {activeDocPreview.uploadedDate}</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50">Scrutiny Status</td>
+                        <td className="px-3 py-1.5 font-bold text-emerald-700 flex items-center gap-1">
+                          <CheckCircle2 className="size-3.5" />
+                          <span>{activeDocPreview.status} &amp; Digitally Verified</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Official Stamp & QR Code */}
+                <div className="border-t border-slate-200 pt-3 flex items-center justify-between">
+                  <div className="border-2 border-emerald-700 text-emerald-800 rounded px-2.5 py-1 text-center rotate-[-3deg] inline-block shadow-2xs">
+                    <div className="text-[9px] font-black uppercase tracking-wider">APCRDA SCRUTINY WING</div>
+                    <div className="text-[11px] font-black">DIGITALLY VERIFIED</div>
+                    <div className="text-[8px] font-mono">HASH: 9A81-FE21-8B04</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] text-slate-500 font-mono">Scan for Official Verification</div>
+                    <div className="inline-block bg-slate-800 text-white font-mono text-[9px] px-2 py-1 rounded mt-0.5">
+                      QR: {baNo.slice(-6)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-[#FBF3E4] border-t border-[#DCD5C8] px-4 py-2.5 flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-slate-500">Status: <strong className="text-emerald-700">{activeDocPreview.status}</strong></span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => showToast(`Downloading ${activeDocPreview.fileName}...`)}
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-3 py-1.5 rounded text-xs transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                >
+                  <Download className="size-3.5" />
+                  <span>Download Document</span>
+                </button>
+                <button
+                  onClick={() => setActiveDocPreview(null)}
+                  className="bg-white hover:bg-slate-100 text-slate-700 border border-[#DCD5C8] font-bold px-3 py-1.5 rounded text-xs cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── UPLOAD NEW DOCUMENT MODAL ── */}
+      {uploadNewDocModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-md p-5 shadow-2xl space-y-4 font-sans text-xs">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2">
+              <h3 className="font-black text-[#7A1316] text-xs sm:text-sm uppercase">
+                Upload Application Document
+              </h3>
+              <button
+                onClick={() => setUploadNewDocModalOpen(false)}
+                className="text-slate-500 hover:text-slate-800 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newDocName.trim()) {
+                  showToast("Please enter document name");
+                  return;
+                }
+                const newDoc: DocumentationRecord = {
+                  id: `doc-${Date.now()}`,
+                  code: `DOC-${newDocCategory.slice(0, 3).toUpperCase()}-${String(documentationList.length + 1).padStart(2, "0")}`,
+                  name: newDocName.trim(),
+                  category: newDocCategory,
+                  required: newDocRequired,
+                  status: "Uploaded",
+                  fileName: newDocFileName.trim() || `${newDocName.trim().replace(/\s+/g, "_")}.pdf`,
+                  fileSize: "2.8 MB",
+                  uploadedDate: new Date().toLocaleDateString("en-GB").replace(/\//g, "-"),
+                  uploadedBy: user?.name ? `${user.name} (LTP)` : "K. Ramamurthy (LTP)",
+                  docNo: newDocNumber.trim() || `DOC/2026/${Math.floor(10000 + Math.random() * 90000)}`,
+                  version: "v1.0",
+                };
+                setDocumentationList((prev) => [newDoc, ...prev]);
+                setNewDocName("");
+                setNewDocNumber("");
+                setNewDocFileName("");
+                setUploadNewDocModalOpen(false);
+                showToast(`"${newDoc.name}" uploaded and attached successfully`);
+              }}
+              className="space-y-3"
+            >
+              <div>
+                <label className="font-bold text-slate-800 block mb-1">
+                  <span className="text-rose-600 mr-1">*</span> Document Category
+                </label>
+                <select
+                  value={newDocCategory}
+                  onChange={(e) => setNewDocCategory(e.target.value as typeof newDocCategory)}
+                  className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+                >
+                  <option value="Ownership">Ownership &amp; Title</option>
+                  <option value="Technical">Technical &amp; Structural</option>
+                  <option value="NOC & Clearances">NOC &amp; Statutory Clearances</option>
+                  <option value="Affidavits">Affidavits &amp; Declarations</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-800 block mb-1">
+                  <span className="text-rose-600 mr-1">*</span> Document Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Registered Partition Deed / Structural Calculation"
+                  value={newDocName}
+                  onChange={(e) => setNewDocName(e.target.value)}
+                  className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-800 block mb-1">
+                  Registration / Reference No. (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. DOC/GNT/2026/8912"
+                  value={newDocNumber}
+                  onChange={(e) => setNewDocNumber(e.target.value)}
+                  className="w-full h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-800 block mb-1">
+                  Select Document File (PDF / DWG / JPG)
+                </label>
+                <div
+                  onClick={() => setNewDocFileName(newDocName ? `${newDocName.replace(/\s+/g, "_")}_doc.pdf` : "New_Uploaded_Document.pdf")}
+                  className="border-2 border-dashed border-[#7A1316]/50 bg-white/80 rounded-lg p-4 text-center cursor-pointer hover:bg-white transition-colors"
+                >
+                  <Upload className="size-6 text-[#7A1316] mx-auto mb-1" />
+                  <div className="font-bold text-slate-800 text-xs">
+                    {newDocFileName ? newDocFileName : "Click to select or drag & drop file"}
+                  </div>
+                  <div className="text-[10px] text-slate-500">PDF, JPG, PNG up to 25 MB</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="reqCheck"
+                  checked={newDocRequired}
+                  onChange={(e) => setNewDocRequired(e.target.checked)}
+                  className="accent-[#7A1316] cursor-pointer"
+                />
+                <label htmlFor="reqCheck" className="font-semibold text-slate-700 cursor-pointer">
+                  Mark this document as Mandatory for permit sanction
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#DCD5C8]">
+                <button
+                  type="button"
+                  onClick={() => setUploadNewDocModalOpen(false)}
+                  className="text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer px-3 py-1.5"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
+                >
+                  Upload &amp; Attach
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

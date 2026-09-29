@@ -216,7 +216,7 @@ export function Drawings2DModule() {
     });
   };
 
-  const bimPortalView = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
+  const bimPortalView = portal === "ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
 
   return (
     <div className="space-y-6">

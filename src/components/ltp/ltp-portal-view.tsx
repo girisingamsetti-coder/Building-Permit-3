@@ -35,6 +35,7 @@ import type { Application } from "@/types";
 export function LtpPortalView() {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
+  const view = useAppStore((s) => s.view);
   const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
@@ -43,8 +44,18 @@ export function LtpPortalView() {
 
   const userApps = applications;
 
+  // Sync activeMenu to dashboard if view is explicitly ltp-dashboard
+  React.useEffect(() => {
+    if (view === "ltp-dashboard" && ltpActiveMenu !== "dashboard") {
+      setLtpActiveMenu("dashboard");
+    }
+  }, [view, ltpActiveMenu, setLtpActiveMenu]);
+
   // Dynamic content based on selected menu
   const renderContent = () => {
+    if (view === "ltp-dashboard") {
+      return <UnifiedDashboard />;
+    }
     switch (ltpActiveMenu) {
       case "dashboard": {
         return <UnifiedDashboard />;

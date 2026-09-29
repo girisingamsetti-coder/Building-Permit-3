@@ -1,0 +1,3131 @@
+STAKEHOLDER WORKFLOWS AND UX BLUEPRINT
+Amaravati Capital City: 2D drawing journey for every user
+Companion to the clickable prototype, the public submission standard and the implementation guide
+Version 1.3  |  Draft for review  |  28 September 2026
+1.  Purpose and how to use this document
+This document describes, for each stakeholder, what they need to do in the building permission portal, in what order, and what the screen should do to make that easy. Every workflow has a flowchart and a step table. The screens named here exist as artboards in the clickable prototype. Sections 13 and 14 list every screen with its fields, actions and next step.
+It is written for the product owner, the UX team and the developers building the 2D drawing scrutiny flow. It sits alongside three other documents: the public 2D submission standard (what applicants must follow), the implementation guide (how the ACadSharp validation engine is built) and the SOP.
+Note: Portal observations come from the public BBAS home page and public coverage of BuildNow. No logged-in screens were reviewed, so pain points below are hypotheses to test with real users. Anything shown as [in brackets] is a placeholder for a value CRDA must supply: thresholds, SLA days, department names.
+Scope of this version
+Amaravati Capital City area only, under the Zoning Regulations of February 2016 (with later amendments to be confirmed). The wider Capital Region is not covered.
+Permits are Development Permission Orders (DPO) issued by the Commissioner, with the 60-day decision limit, followed by commencement, completion and occupancy.
+R1 village plots have their own screens and rules: abutting road, road handover with TDR, and the exemption for small plots.
+Fees follow the regulations (basis, exemptions, impact fee, mortgage). Rates are placeholders until CRDA supplies the notified schedule.
+Section 15 gives the detail, with regulation numbers, and lists what CRDA must confirm.
+2.  What we looked at
+BBAS (current APCRDA portal)
+The home page is a set of link lists grouped by user type: Citizen Service (pay fees, search status), Developer and TPAs (registration, renewal, consent links), and LTP (registration, renewal, consent link, view).
+BBAS is built around a single 3D BIM model (architectural, structural and MEP) that is scrutinised and tracked; fire, high-rise and environmental NOCs are integrated in the same system.
+Help lives in downloads: manuals, a modelling guide video, do's and don'ts and Revit plugins. The helpdesk entry is marked as coming soon.
+The page offers screen-reader access and text-size controls, and the header is bilingual (English and Telugu).
+BuildNow (Telangana)
+The applicant's category depends on plot size and building details: registration only, instant approval, or single window. The portal shows which applies before the applicant starts.
+Small residential projects can be approved on self-certification, with an official follow-up check afterwards.
+Land ownership and survey details are verified automatically against land-records systems.
+Officials get an operational dashboard, and applicants get an AI policy assistant for rules questions.
+What this means for a 2D flow
+Your workflow is 2D DWG/DXF, not BIM, so BBAS's modelling guidance does not carry over directly. The transferable ideas are: choose the route first, show one tracker to everyone, check the file at upload time, pre-fill from official records, and let officials work on exceptions instead of re-checking everything.
+3.  Design principles
+Principle
+What it means on screen
+Route first
+Ask three questions, then show the route, documents, fees and timeline before the applicant uploads anything.
+One tracker for all
+Applicant, LTP, officer and commissioner see the same seven stages and the same clock.
+Fix it before it is filed
+The drawing check runs at upload. Problems appear on the drawing itself, not in a rejection letter.
+Exceptions only
+Officials see what needs a decision. Everything the system verified is collapsed.
+Never a dead end
+Every failed or returned step sits beside a next action, a deadline and a person to contact.
+Plain words
+Sentence case, verbs first, dates in full (Oct 3, 2026), Telugu and English side by side.
+Status is never colour alone
+Every status has an icon and a word. Works for colour-blind users and in print.
+Phone friendly
+Applicants track, pay and reply from a phone. Drawing upload stays on desktop.
+4.  Stakeholders at a glance
+Stakeholder
+Main goal
+Likely friction to validate today
+Key screens
+Applicant or owner
+Get a permit without visiting an office
+Unsure which route applies; status lives in a separate search
+Landing wizard, applicant workspace, mobile tracker
+LTP or architect
+Submit a clean drawing first time
+Errors found after submission; separate consent links
+Upload and live check, exception report
+Developer
+Manage many projects and give consents in one place
+Separate registration, renewal and consent links
+Project portfolio (next round)
+Scrutiny officer
+Decide only what needs judgement
+Re-checking items a system can verify
+Scrutiny workbench, drawing viewer
+NOC departments (fire services and others)
+Clear NOCs on one clock
+Files reach departments sequentially and without context
+NOC queue
+Commissioner
+Approve with full context
+Decisions without seeing NOC and officer advice together
+Approvals list, delay view
+Chief City Planner and Executive Committee
+Decide conditional uses, variances and appeals fairly and on time
+Hearings, notices and decisions tracked outside the file
+Case screens (E1 to E3)
+Accounts
+Reconcile fees without chasing files
+Fee status not visible to the file owner
+Fees screen (next round)
+System admin (CAD and GIS cell)
+Keep standards current without code changes
+Standards baked into software releases
+Rules and standards
+5.  Shared model used by every workflow
+Seven-stage journey
+Every application moves through the same seven stages. The tracker shows them to every stakeholder, with the stage owner and due date.
+No.
+Stage
+Owner
+Exit condition
+1
+Pick a category
+Applicant
+Route, documents and fees shown; application started
+2
+Upload and live check
+LTP
+Zero unresolved exceptions in the automatic check
+3
+Pay fees
+Applicant
+Scrutiny fee received (other charges may fall due later)
+4
+Scrutiny
+Officer
+All exceptions accepted, or sent back with a comment
+5
+NOCs
+Departments
+All required NOCs issued, in parallel
+6
+Approval
+Commissioner
+Approved, or sent back with reason and next step
+7
+Permit issued
+System
+Digital permit with QR code generated
+Status vocabulary
+Word shown
+Meaning
+Always paired with
+Done / Passed / Issued
+Success
+Check icon, green soft background
+In progress / In scrutiny / Waiting for you
+Pending
+Clock icon, amber soft background
+Returned / With LTP / Query
+Needs a fix
+Alert icon, red soft background, plus the next step
+After the permission order
+No.
+Stage
+Owner
+Exit condition
+8
+Commencement notice and line-out check
+Owner, Commissioner
+Line-out checked within 7 days; work starts within one year of the order
+9
+Construction and inspections
+Owner, officer
+Stage inspections recorded; any deviation sanctioned first
+10
+Completion and occupancy certificate
+Owner, Commissioner
+Certificate issued within 15 days (deemed if not decided); mortgage released
+Rules that apply everywhere
+One clock per stage. A query pauses the clock for that stage only and tells the applicant exactly what to send.
+Every action is written to an audit log with who, what, when and the file revision.
+A resubmitted drawing is a new revision (R0, R1, R2). The exception report keeps history across revisions.
+Notifications go by SMS, email and in-app, and always link to the exact screen where the action happens.
+Rule changes apply to new submissions only. Files in progress keep the standards version they started with.
+All objections are given in one go. After the applicant complies, new objections are not normally raised (Reg 212.3), so the officer step collects every exception in one decision.
+6.  End-to-end flow
+Read left to right. Lanes show who acts. Teal boxes are done automatically by the system.
+Figure 1. End-to-end journey across stakeholders
+7.  Workflow by stakeholder
+7.1  Applicant or owner
+The applicant should never need to understand the rules. The wizard decides the route, the workspace shows what to do next.
+Figure 2. Zone and route check at the start
+No.
+Step
+Screen
+Result
+1
+Enter survey number and ownership certificate number; the zone is looked up
+Landing page, zoning check
+Zone, use status, route, documents, fees and the 60-day limit shown
+2
+Start application; four steps: project details, people, documents, review; then zoning check and, for R1 plots, road handover and TDR
+New application (wizard), zoning check
+Draft created with a reference number
+3
+Appoint an LTP or upload through own LTP
+Applicant workspace
+LTP gets a consent request
+4
+Pay scrutiny fee
+Fees card, mobile Pay tab
+Receipt; stage 3 done
+5
+Reply to any officer query
+Messages card
+Clock resumes
+6
+Download the permission order
+Applicant workspace
+Digital order with QR code
+7
+Send commencement notice; later apply for the occupancy certificate
+After the permission order
+Line-out checked; certificate issued in 15 days
+Ease features: one tracker instead of a separate status search; a single 'Needs your reply' card at the top; full-word dates; reply from a phone.
+7.2  LTP or architect
+This is the workflow that carries your unclassified-area clause. The check runs while the LTP is still on the upload screen.
+Figure 3. Upload, live check and fixing unclassified areas
+No.
+Step
+Screen
+Result
+1
+Upload DWG or DXF and supporting documents
+Upload and live check
+Check starts immediately
+2
+Read the check result: file, layers, room classification
+Live check panel
+Each item shows Passed or a count to fix
+3
+Select an unclassified area
+Findings list and drawing
+Area highlighted with reason, size, layer and closest approved name
+4
+Fix using Option A (re-tag, re-layer) or Option B (delete, redraw, increase revision)
+Own CAD software
+Revised file ready
+5
+Upload the new revision
+Upload and live check
+Check re-runs; Continue unlocks at zero exceptions
+6
+Self-certify and submit
+Self-certification
+File enters stage 3
+Note: The system never changes the LTP's drawing. It draws flagged areas on a copy and lists them in an exception report. Corrections are always made by the LTP.
+7.3  Developer
+A developer runs several projects with several LTPs. The current portal has separate registration, renewal and consent links; the target is one project list.
+No.
+Step
+Screen
+Result
+1
+Register or renew once
+Developer profile
+Valid registration shown on every project
+2
+See all projects with stage and next action
+Project portfolio
+One row per project
+3
+Give or withdraw consent for an LTP or TPA
+Project detail
+Consent recorded in audit log
+4
+Pay fees for several projects together
+Fees
+One receipt, allocated per project
+Note: The developer portfolio is in the prototype as the Developer screen.
+7.4  Scrutiny officer
+Figure 4. Officer scrutiny on exceptions
+No.
+Step
+Screen
+Result
+1
+Open the workbench; queue is sorted by due date
+Scrutiny workbench
+Assigned, needs-decision and due-soon counts
+2
+Open a file; see only exceptions needing a decision
+File view
+Automatic checks collapsed as Passed
+3
+Inspect each exception on the drawing
+Officer drawing review
+Flagged line or area highlighted; layers can be toggled
+4
+Accept with condition, send back with comment, or escalate
+Decision buttons
+Applicant gets the comment and next step
+5
+Mark scrutiny complete
+File view
+Stage 4 done; NOC tasks open
+7.5  NOC departments and Commissioner
+Figure 5. Parallel NOCs, then commissioner decision
+No.
+Step
+Screen
+Result
+1
+Department opens its queue; files arrive in parallel
+NOC queue
+One row per file, own due date
+2
+Review documents; issue NOC or raise a query
+NOC review panel
+Comment required for a query
+3
+Commissioner sees officer advice and NOC status together
+Approvals list
+Approve, review or send back
+4
+Send back always carries reason and applicant's next step
+Approvals list
+No unexplained rejections
+7.6  Accounts
+No.
+Step
+Screen
+Result
+1
+Fee received through payment gateway
+Fees
+Status updated on the applicant's tracker
+2
+Reconcile daily; flag mismatches
+Fees ledger
+Exceptions list
+3
+Issue refunds or adjustments with a reason
+Fees ledger
+Audit entry and applicant notification
+Note: The fees ledger is in the prototype as the Accounts screen.
+7.7  System admin (CAD and GIS cell)
+Figure 6. Changing standards safely
+No.
+Step
+Screen
+Result
+1
+Edit draft layer table or room schedule
+Rules and standards
+Draft version created
+2
+Test against sample drawings
+Test panel
+Results compared with expected
+3
+Approver signs off
+Rules and standards
+Ready to publish
+4
+Publish; applies to new submissions
+Rules and standards
+Public standard and LTP self-check update
+7.8  After the permission order
+The regulations continue after the order is issued. The owner must start within one year, mark the line-out, and later ask for an occupancy certificate. No one may occupy the building without it.
+Figure 7. Commencement, inspection and occupancy
+No.
+Step
+Screen
+Result
+1
+Mark the line-out on site and send the commencement notice
+Commencement notice (A9)
+Commissioner checks within 7 days
+2
+Officer records the line-out result and later inspections
+Line-out check and inspection (O6)
+Deviations flagged for sanction
+3
+Licensed professional certifies completion and no deviation
+Completion and occupancy (A10)
+Application for the occupancy certificate
+4
+High-rise and special buildings get fire clearance first
+Completion and occupancy (A10)
+Clearance attached
+5
+Authority issues the certificate within 15 days
+Commissioner approvals
+Mortgage released; utility connections allowed
+7.9  Conditional use, variance and appeal
+Some cases need a hearing. The Chief City Planner prepares the case, notice goes to neighbours and is posted on the site, and the Commissioner or Executive Committee decides. An appeal must be filed within 10 working days.
+Figure 8. Case handling by the Chief City Planner and Executive Committee
+No.
+Step
+Screen
+Result
+1
+Open the case and check it is complete
+Open a case (E1)
+Case ready for hearing
+2
+Give hearing notice: mail to neighbours, notice on site
+Hearing notice (E2)
+Hearing date fixed
+3
+Decide and record reasons in writing
+Decision (E3)
+Applicant notified; file returns to the Commissioner
+8.  Advanced features that make it easy
+Feature
+What the user gets
+Where it appears
+Zone and route check
+Zone looked up from the map; route, documents, fees and the 60-day limit before any upload
+Landing page, zoning check
+Zoning table check
+Use status, FSI, coverage, height, setbacks and parking shown for the plot
+Zoning check
+R1 village support
+Road width, road handover, TDR and small-plot exemption in one place
+Zoning check, admin village settings
+Live drawing check
+Problems found while the LTP is still on the upload screen
+Upload and live check
+Highlight on the drawing
+Flagged areas outlined on the plan, with reason and closest approved name
+Live check, officer viewer
+Next best action
+One card per role: what needs you right now
+Every workspace
+Single tracker
+Same seven stages and clock for everyone
+Applicant, mobile, officer
+Exceptions only
+Officials skip what the system verified
+Scrutiny workbench, drawing review
+Parallel NOCs
+Departments work at the same time
+NOC queue
+Versioned standards
+Rules change without redeploying software
+Rules and standards
+Rules assistant
+Answers 'why was this flagged?' in plain language
+Help panel (proposed)
+Bilingual and accessible
+Telugu and English, screen-reader friendly, adjustable text
+All screens
+9.  Accessibility, language and mobile
+Buttons and links are at least 44px tall; keyboard focus is always visible.
+Text contrast meets 4.5:1; status never relies on colour alone.
+Telugu and English on every label; dates in full words.
+Track, pay and reply work on a phone. DWG upload is desktop only, with a clear message on mobile.
+Screen-reader access and text-size controls stay, as on the current portal.
+10.  How to measure success
+Measure
+Why it matters
+Target
+Share of files with zero exceptions on first upload
+Shows the standard and live check are working
+[target]
+Average revisions per application
+Fewer loops means less rework
+[target]
+Days per stage against SLA
+Finds where files wait
+[SLA days]
+Officer time per file
+Exceptions-only should reduce it
+[target]
+Applicant help requests per 100 files
+Confusion signal
+[target]
+Mobile task completion (track, pay, reply)
+Ease for citizens
+[target]
+11.  Open items and placeholders
+R1 zoning table values (FSI, coverage, height, setbacks, parking) from Appendix II and III, and the same for other zones.
+The notified fee rates: application fee, development charges, impact fee, compounding fee and revalidation fee, with the order numbers.
+SLA days per stage and per department.
+The authoritative layer table and room classification schedule.
+Whether land records and the LPOC register can be checked automatically.
+Amendments to the 2016 regulations, including the environment-clearance gazette amendment and the R5 affordable housing zone.
+Whether the Amaravati Government Complex is in scope; it has its own 2024 zoning regulations.
+What the 'TPA' role in the current portal covers; it is not modelled yet.
+Payment gateway and receipt rules for Accounts.
+Developer portfolio and Accounts screens to be added to the prototype.
+12.  Suggested rollout
+Phase
+Scope
+Exit test
+1. Foundation
+Landing wizard, applicant workspace, one tracker, LTP upload with live check
+Pilot LTPs reach zero exceptions on first upload
+2. Officials
+Scrutiny workbench, drawing viewer, NOC queue, commissioner approvals
+Officer time per file falls against baseline
+3. Complete
+Rules assistant, mobile polish, full data integration
+All stakeholders on one login
+13.  Screen map
+Every screen has an ID. The same IDs are used in the prototype board titles and in the specifications that follow. Screens marked 'Described here only' are specified but not yet drawn in the prototype.
+ID
+Screen
+Stakeholder
+Prototype board
+A1
+Find your zone and route
+Applicant or owner
+Landing with category wizard
+A2
+Project details
+Applicant or owner
+New application, four steps
+A2b
+Zoning check
+Applicant or owner
+ZoningCheck.dc.html
+A2c
+Road handover and TDR (R1)
+Applicant or owner
+ZoningCheck.dc.html
+A3
+People
+Applicant or owner
+New application, four steps
+A4
+Documents
+Applicant or owner
+New application, four steps
+A5
+Review and submit
+Applicant or owner
+New application, four steps
+A6
+Fee summary
+Applicant or owner
+Pay fees, 3 steps
+A6b
+Pay
+Applicant or owner
+Pay fees, 3 steps
+A6c
+Receipt
+Applicant or owner
+Pay fees, 3 steps
+A7
+Track and reply
+Applicant or owner
+Applicant workspace
+A8
+Download permission order
+Applicant or owner
+Applicant workspace
+A9
+Commencement notice
+Applicant or owner
+PostPermitSteps.dc.html
+A10
+Completion and occupancy
+Applicant or owner
+PostPermitSteps.dc.html
+L1
+Consent request
+LTP or architect
+Described here only
+L2
+Upload drawing
+LTP or architect
+LTP upload and live check
+L3
+Live check and fix
+LTP or architect
+LTP upload and live check
+L4
+Declarations
+LTP or architect
+LTP self-certify and submit
+L4b
+Sign
+LTP or architect
+LTP self-certify and submit
+L5
+Submit
+LTP or architect
+LTP self-certify and submit
+L6
+Answer an officer query
+LTP or architect
+Described here only
+D1
+Register or renew
+Developer
+Described here only
+D2
+Project portfolio
+Developer
+Developer project portfolio
+D3
+Consent management
+Developer
+Described here only
+D4
+Pay for several projects
+Developer
+Described here only
+O1
+Workbench queue
+Scrutiny officer
+Scrutiny workbench
+O2
+File summary
+Scrutiny officer
+Officer scrutiny, 4 steps
+O3
+Review exceptions
+Scrutiny officer
+Officer scrutiny, 4 steps; Officer drawing review
+O4
+Decide
+Scrutiny officer
+Officer scrutiny, 4 steps
+O5
+Forward
+Scrutiny officer
+Officer scrutiny, 4 steps
+O6
+Line-out check and inspection
+Scrutiny officer
+Described here only
+N1
+NOC queue
+NOC departments
+NOC department queue
+N2
+Check documents
+NOC departments
+NOC review and issue
+N3
+Assess
+NOC departments
+NOC review and issue
+N4
+Issue NOC
+NOC departments
+NOC review and issue
+C1
+Decision list
+Commissioner
+Commissioner approvals
+C2
+Review file
+Commissioner
+Commissioner decide and issue
+C3
+Decide
+Commissioner
+Commissioner decide and issue
+C4
+Sign and issue
+Commissioner
+Commissioner decide and issue
+E1
+Open a case
+Chief City Planner and Executive Committee
+VarianceSteps.dc.html
+E2
+Hearing notice
+Chief City Planner and Executive Committee
+VarianceSteps.dc.html
+E3
+Decision
+Chief City Planner and Executive Committee
+VarianceSteps.dc.html
+AC1
+Payments list
+Accounts
+Accounts fees ledger
+AC2
+Match payment
+Accounts
+Accounts resolve payment
+AC3
+Resolve
+Accounts
+Accounts resolve payment
+AC4
+Confirm
+Accounts
+Accounts resolve payment
+AC5
+Daily report
+Accounts
+Described here only
+AD1
+Users and roles
+System admin
+Admin users and roles
+AD1a
+Add user: person
+System admin
+Admin add user, 4 steps
+AD1b
+Add user: role and office
+System admin
+Admin add user, 4 steps
+AD1c
+Add user: access
+System admin
+Admin add user, 4 steps
+AD1d
+Add user: confirm
+System admin
+Admin add user, 4 steps
+AD2
+Offices and jurisdictions
+System admin
+Admin offices and jurisdictions
+AD3
+Workflow and SLA
+System admin
+Admin workflow and SLA
+AD4
+Route and trigger rules
+System admin
+Admin category rules
+AD5
+Fee schedule
+System admin
+Admin fee schedule
+AD5b
+Deposits and security
+System admin
+Admin fee schedule
+AD10
+Zoning table
+System admin
+AdminZoning.dc.html
+AD11
+Village (R1) settings
+System admin
+AdminVillage.dc.html
+AD12
+Zoning map and land records
+System admin
+AdminMap.dc.html
+AD6
+Layer table and room schedule
+System admin
+Admin: room schedule
+AD7
+Notification templates
+System admin
+Admin notification templates
+AD8
+Audit log and reports
+System admin
+Admin audit log
+AD9
+Publish a version
+System admin
+Admin: room schedule
+14.  Screen specifications by stakeholder
+Each screen starts with a simple page layout drawn from its field list, followed by the fields, the actions available and what happens next. In the layouts, a red star marks a required field and multi-page tasks show their steps across the top. Field types describe the control the user sees. 'Required' means the user cannot move on without it. Values in [brackets] are set by CRDA.
+Note: Rules such as file size limits, thresholds and SLA days are placeholders. Field lists are a starting point for review with each office, not a final data dictionary.
+14.1  Applicant or owner  (Citizen)
+Page sequence: A1  >  A2  >  A2b  >  A2c  >  A3  >  A4  >  A5  >  A6  >  A6b  >  A6c  >  A7  >  A8  >  A9  >  A10. Each page below starts with a simple layout, then lists its fields, actions and next step.
+A1  Find your zone and route
+Prototype: Landing with category wizard
+Enter the plot and the proposal. The portal looks up the zone from the Capital City zoning map and shows the route, documents, fees and the 60-day decision limit before anything is uploaded.
+Fields on this page
+Field
+Type
+Required
+Notes
+Survey number
+Text
+Yes
+Zone is looked up from the Capital City zoning map
+Land pooling ownership certificate (LPOC) number
+Text
+Yes
+Or an equivalent ownership document for land outside land pooling
+Village
+Choose one
+Yes
+Villages inside the Capital City area. Options: [Village]
+Proposed use
+Choose one
+Yes
+Options: Residential, Commercial, Institutional, Industrial, Mixed use
+Plot area (sq.m)
+Number
+Yes
+-
+Building height (m)
+Number
+Yes
+-
+Number of floors
+Number
+Yes
+-
+Actions
+Action
+What happens
+Check my zone and route
+Shows zone, whether the use is permitted, conditional or prohibited, route, documents, fees and timeline
+Start application
+Creates a draft with a reference number
+Next step: A2 Project details
+A2  Project details
+Prototype: New application, four steps
+Confirm the site facts. Zone and plot area come from records; you add the rest.
+Fields on this page
+Field
+Type
+Required
+Notes
+Survey number
+Shown, not editable
+Yes
+From the previous step
+Zone
+Shown, not editable
+Yes
+Looked up from the zoning map
+Site address
+Long text
+Yes
+-
+Plot area (sq.m)
+Number
+Yes
+Pre-filled from records where available
+Abutting road width (m)
+Number
+Yes
+R1 needs an abutting road of at least 9 m; apartments need access by a 12 m wide existing road (Reg 401.5)
+Proposed use
+Choose one
+Yes
+Options: Residential, Commercial, Institutional, Mixed use
+Number of floors
+Number
+Yes
+-
+Building height (m)
+Number
+Yes
+Measured as defined in the regulations, including stilt parking
+Existing built-up area on the plot (sq.m)
+Number
+No
+Existing buildings count toward gross floor area and coverage
+Actions
+Action
+What happens
+Save and continue
+Saves the draft and opens People
+Save draft
+Saves without moving on
+Next step: A2b Zoning check
+A2b  Zoning check
+Prototype: ZoningCheck.dc.html
+The system compares your proposal with the zoning table for your zone and shows the result before you go further.
+Fields on this page
+Field
+Type
+Required
+Notes
+Zone and district name
+Shown, not editable
+Yes
+From the zoning map
+Use status
+Shown, not editable
+Yes
+Permitted, conditional or prohibited
+Maximum FSI
+Shown, not editable
+Yes
+From the zoning table
+Maximum building coverage
+Shown, not editable
+Yes
+From the zoning table
+Minimum green coverage
+Shown, not editable
+Yes
+From the zoning table
+Height and floors limit
+Shown, not editable
+Yes
+From the zoning table
+Setbacks for your plot size
+Shown, not editable
+Yes
+Front, side and rear
+Parking required
+Shown, not editable
+Yes
+From the zoning table
+Extra requirements triggered
+Shown, not editable
+Yes
+For example NOCs or a design brief
+Actions
+Action
+What happens
+Continue
+Opens Road handover if the plot is in R1, otherwise People
+Apply for conditional use
+Opens a conditional-use case with the Chief City Planner
+Change details
+Returns to Project details
+Next step: A2c Road handover and TDR (R1 plots), or A3 People
+A2c  Road handover and TDR (R1)
+Prototype: ZoningCheck.dc.html
+In R1 villages, land needed for the approved village road width is handed over free of cost. In return you can take a transferable development right, an extra floor of equal built area, or a setback concession.
+Fields on this page
+Field
+Type
+Required
+Notes
+Area needed for village road width (sq.m)
+Number
+Yes
+As per the village circulation plan approved by the Commissioner
+What you choose in return
+Choose one
+Yes
+Regulation 215.1. Options: TDR certificate, Extra floor of equal built area, Setback concession
+Registered gift deed
+File upload
+Yes
+TDR is awarded only after the land is transferred by registered gift deed (Reg 215.2)
+Site plan showing the land handed over
+File upload
+Yes
+With dimensions and location
+Actions
+Action
+What happens
+Save and continue
+Opens People
+No road land affected
+Skips this step
+Next step: A3 People
+A3  People
+Prototype: New application, four steps
+Say who owns the plot and who will submit the drawing. The LTP receives a consent request.
+Fields on this page
+Field
+Type
+Required
+Notes
+Owner name
+Text
+Yes
+-
+Owner mobile number
+Text plus one-time code
+Yes
+Verified with a one-time code
+Owner email
+Text
+No
+-
+Identity proof
+File upload
+Yes
+PDF or image, up to [size] MB
+Licensed professional registration number
+Text
+Yes
+Looked up; architects must be registered with the Council of Architecture
+Licensed developer or builder number
+Text
+No
+Mandatory for apartments, group developments, high-rise and commercial complexes (Reg 215.6)
+Actions
+Action
+What happens
+Send consent request to LTP
+LTP is notified by SMS, email and in-app
+Save and continue
+Opens Documents
+Next step: A4 Documents
+A4  Documents
+Prototype: New application, four steps
+Upload the ownership and supporting documents the regulations ask for. The 2D drawing is uploaded by the licensed professional.
+Fields on this page
+Field
+Type
+Required
+Notes
+Land pooling ownership certificate (attested copy)
+File upload
+Yes
+Or equivalent ownership document outside land pooling (Reg 209.12)
+Statement of area by triangulation
+File upload
+Yes
+From the licensed professional, with the owner's affidavit
+Latest surveyed plan of the land
+File upload
+Yes
+With structures, trees and all side dimensions
+Appointment of licensed professional
+File upload
+Yes
+In the prescribed form
+Tax clearance from APCRDA
+File upload
+No
+Where tax arrears apply
+Fire clearance
+File upload
+No
+For buildings that need it
+Environmental clearance
+File upload
+No
+Where required under the EIA notification
+Other agency clearances
+File upload
+No
+For example Airports Authority, railways or electricity company
+Fee receipt
+Shown, not editable
+Yes
+Added automatically after payment
+Actions
+Action
+What happens
+Add a document
+Opens the file picker
+Remove
+Removes the file after confirmation
+Save and continue
+Opens Review and submit
+Next step: A5 Review and submit
+A5  Review and submit
+Prototype: New application, four steps
+Check the summary. Some items are only needed before the permission order is released; upload them now to avoid a delay.
+Fields on this page
+Field
+Type
+Required
+Notes
+Summary of details, zone check, people and documents
+Shown, not editable
+Yes
+Missing items are flagged
+Declaration that the information is correct
+Tick box
+Yes
+Must be ticked to submit
+Notarised affidavit that violations may be demolished
+File upload
+Yes
+Needed before the permission order (Reg 215.3)
+Declaration of floors permitted and extent of each floor
+File upload
+Yes
+Needed before the permission order
+Notarised affidavit handing over 10% of built-up area
+File upload
+No
+5% of units for row, detached or cluster housing. Not needed for an individual residential building on an R1 plot up to 200 sq.m and 7 m high
+Actions
+Action
+What happens
+Submit application
+Application enters stage 2; LTP is asked to upload the drawing
+Back to edit
+Returns to the step you choose
+Next step: L2 Upload drawing (by the licensed professional)
+A6  Fee summary
+Prototype: Pay fees, 3 steps
+Show every fee due and how it was worked out.
+Fields on this page
+Field
+Type
+Required
+Notes
+Application (scrutiny) fee
+Shown, not editable
+Yes
+Based on gross floor area, including basement and accessory buildings, excluding parking
+Development charges
+Shown, not editable
+Yes
+As notified by APCRDA
+Impact fee
+Shown, not editable
+Yes
+Only where FSI is above 1.75
+Fee exemption check
+Shown, not editable
+Yes
+No fee for EWS, LIG or slum redevelopment schemes with tenement carpet area up to 50 sq.m
+Total due
+Shown, not editable
+Yes
+Sum of items
+Actions
+Action
+What happens
+Continue to payment
+Opens Pay
+Next step: A6b Pay
+A6b  Pay
+Prototype: Pay fees, 3 steps
+Choose how to pay.
+Fields on this page
+Field
+Type
+Required
+Notes
+Payment mode
+Choose one
+Yes
+Options: UPI, Net banking, Card
+Payer name
+Text
+Yes
+Printed on the receipt
+Actions
+Action
+What happens
+Pay now
+Opens the payment gateway
+Back
+Returns to Fee summary
+Next step: A6c Receipt
+A6c  Receipt
+Prototype: Pay fees, 3 steps
+Confirm payment and keep the receipt. The scrutiny fee is forfeited if the proposal is rejected.
+Fields on this page
+Field
+Type
+Required
+Notes
+Receipt number
+Shown, not editable
+Yes
+-
+Amount paid
+Shown, not editable
+Yes
+-
+Payment date
+Shown, not editable
+Yes
+-
+Actions
+Action
+What happens
+Download receipt
+Downloads a PDF
+Go to my application
+Opens the tracker
+Next step: A7 Track and reply
+A7  Track and reply
+Prototype: Applicant workspace
+See the seven-stage tracker and answer any query.
+Fields on this page
+Field
+Type
+Required
+Notes
+Reply message
+Long text
+Yes
+Required to send a reply
+Attach file
+File upload
+No
+-
+Actions
+Action
+What happens
+Reply to officer
+Sends the reply and resumes the stage clock
+Pay fee
+Opens Fee summary
+Next step: Officer resumes scrutiny
+A8  Download permission order
+Prototype: Applicant workspace
+Get the Development Permission Order (DPO) once approved. It is issued only after all fees, deposits and charges are paid.
+Fields on this page
+Field
+Type
+Required
+Notes
+Permission order number
+Shown, not editable
+Yes
+-
+Issue date
+Shown, not editable
+Yes
+-
+Valid until
+Shown, not editable
+Yes
+Set under section 111 of the Act
+Mortgage of 10% of gross floor area
+Shown, not editable
+Yes
+Registered mortgage deed; released when the occupancy certificate is issued
+Actions
+Action
+What happens
+Download permission order
+PDF with QR code
+Share link
+Copies a verification link
+Next step: A9 Commencement notice (start work within one year)
+A9  Commencement notice
+Prototype: PostPermitSteps.dc.html
+Tell the Commissioner you are about to start work. Work must begin within one year of the permission order.
+Fields on this page
+Field
+Type
+Required
+Notes
+Line-out marked on site
+Tick box
+Yes
+Centre lines of all external walls and columns on the ground floor
+Notice date
+Date
+Yes
+-
+Certificate of supervision
+File upload
+Yes
+Signed by the licensed professional
+Site photographs of the line-out
+File upload
+No
+-
+Actions
+Action
+What happens
+Submit notice
+The Commissioner checks the line-out within 7 days; you may start after 7 days or earlier if permitted
+Next step: O6 Line-out check
+A10  Completion and occupancy
+Prototype: PostPermitSteps.dc.html
+Tell the authority the work is complete and ask for the occupancy certificate. No one may occupy the building without it.
+Fields on this page
+Field
+Type
+Required
+Notes
+Completion certificate
+File upload
+Yes
+Prescribed form, with completion plans
+Certificate of no deviation from the zoning regulations
+File upload
+Yes
+From the supervising licensed professional
+Fire clearance
+File upload
+No
+Required for high-rise and special buildings
+Request part occupancy
+Tick box
+No
+Needs an indemnity in the prescribed form
+Indemnity for part occupancy
+File upload
+No
+Required if part occupancy is requested
+Actions
+Action
+What happens
+Submit for occupancy certificate
+The authority decides within 15 days; if not decided, it is deemed approved for occupation when built as sanctioned
+Next step: Mortgage is released and utility connections can be given
+14.2  LTP or architect  (Licensed technical person)
+Page sequence: L1  >  L2  >  L3  >  L4  >  L4b  >  L5  >  L6. Each page below starts with a simple layout, then lists its fields, actions and next step.
+L1  Consent request
+Prototype: Described here only
+Accept or decline to act on an application.
+Fields on this page
+Field
+Type
+Required
+Notes
+Applicant and plot summary
+Shown, not editable
+Yes
+-
+Decision
+Choose one
+Yes
+Options: Accept, Decline
+Reason
+Long text
+No
+Required when declining
+Actions
+Action
+What happens
+Accept
+Opens Upload drawing
+Decline
+Applicant is told to choose another LTP
+Next step: L2 Upload drawing
+L2  Upload drawing
+Prototype: LTP upload and live check
+Upload each sheet as DWG or DXF. The check starts at once.
+Fields on this page
+Field
+Type
+Required
+Notes
+Drawing file
+File upload
+Yes
+DWG (2013 or later) or DXF, up to [size] MB
+Sheet type
+Choose one
+Yes
+Options: Key plan, Site plan, Floor plan, Elevation, Section, Terrace plan
+Sheet size
+Choose one
+Yes
+Sizes A0 to A5 (Reg 208.2, Table 1). Options: A0, A1, A2, A3, A4, A5
+Drawing scale
+Choose one
+Yes
+Key plan not less than 1:10000, site plan 1:500, building plans 1:100. Options: 1:10000, 1:500, 1:100
+Plan colours follow the regulations
+Tick box
+Yes
+Colour notation in Table 3 of the zoning regulations
+Revision
+Shown, not editable
+Yes
+R0 first time, increases on each re-upload
+Drawing units
+Shown, not editable
+Yes
+Metric, millimetres
+Actions
+Action
+What happens
+Upload
+Starts the live check
+Replace file
+Uploads a new revision
+Next step: L3 Live check and fix
+L3  Live check and fix
+Prototype: LTP upload and live check
+See what passed and what needs fixing, on the drawing itself.
+Fields on this page
+Field
+Type
+Required
+Notes
+File format and units
+Shown, not editable
+Yes
+Passed or a count to fix
+Layers and title block
+Shown, not editable
+Yes
+-
+Room classification
+Shown, not editable
+Yes
+Lists unclassified areas
+Selected area
+Choose one
+No
+Shows reason, size, layer and closest approved name
+Actions
+Action
+What happens
+Download exception report
+Gets the full list
+Upload revised drawing
+Runs the check again on the new revision
+Continue
+Enabled only at zero exceptions
+Next step: L4 Declarations
+L4  Declarations
+Prototype: LTP self-certify and submit
+Confirm the drawing meets the submission standard.
+Fields on this page
+Field
+Type
+Required
+Notes
+Drawing follows the submission standard
+Tick box
+Yes
+-
+Setbacks and areas are as drawn
+Tick box
+Yes
+-
+All rooms are classified
+Tick box
+Yes
+-
+LTP registration number
+Shown, not editable
+Yes
+Pre-filled
+Actions
+Action
+What happens
+Continue to sign
+Opens Sign
+Next step: L4b Sign
+L4b  Sign
+Prototype: LTP self-certify and submit
+Sign the declaration with a one-time code.
+Fields on this page
+Field
+Type
+Required
+Notes
+Mobile number
+Shown, not editable
+Yes
+Registered LTP number
+One-time code
+Text plus one-time code
+Yes
+Sent when you choose Send code
+Actions
+Action
+What happens
+Send code
+Sends the code
+Sign
+Records the signature with date and revision
+Next step: L5 Submit
+L5  Submit
+Prototype: LTP self-certify and submit
+Send the signed drawing to the authority.
+Fields on this page
+Field
+Type
+Required
+Notes
+Summary of sheets and revision
+Shown, not editable
+Yes
+-
+Fee status
+Shown, not editable
+Yes
+Shows if the applicant has paid
+Actions
+Action
+What happens
+Submit to authority
+File moves to scrutiny once fees are paid
+Next step: O1 Workbench queue (officer)
+L6  Answer an officer query
+Prototype: Described here only
+Reply to a query with a message or a revised drawing.
+Fields on this page
+Field
+Type
+Required
+Notes
+Message
+Long text
+Yes
+-
+Revised drawing
+File upload
+No
+Uploads as a new revision and re-runs the check
+Actions
+Action
+What happens
+Send reply
+Officer is notified; the stage clock resumes
+Next step: Officer resumes scrutiny
+14.3  Developer  (Developer)
+Page sequence: D1  >  D2  >  D3  >  D4. Each page below starts with a simple layout, then lists its fields, actions and next step.
+D1  Register or renew
+Prototype: Described here only
+Keep the developer registration valid.
+Fields on this page
+Field
+Type
+Required
+Notes
+Organisation name
+Text
+Yes
+-
+Registration number
+Text
+Yes
+Read-only when renewing
+Registered address
+Long text
+Yes
+-
+Authorised signatory
+Text
+Yes
+-
+Signatory mobile number
+Text plus one-time code
+Yes
+-
+Registration certificate
+File upload
+Yes
+-
+Renewal fee
+Shown, not editable
+Yes
+Shown when renewing
+Actions
+Action
+What happens
+Submit renewal
+Sent for approval
+Pay renewal fee
+Opens the payment gateway
+Next step: D2 Project portfolio
+D2  Project portfolio
+Prototype: Developer project portfolio
+See every project, its stage and the next action in one list.
+Fields on this page
+Field
+Type
+Required
+Notes
+Stage filter
+Choose one
+No
+Options: All, Upload, Scrutiny, NOCs, Approval, Permit
+Status filter
+Choose one
+No
+Options: All, Waiting for you, In progress, Returned, Issued
+Actions
+Action
+What happens
+Open
+Opens the project
+Start a new application
+Opens the wizard
+Next step: D3 Consent management
+D3  Consent management
+Prototype: Described here only
+Approve or withdraw consent for LTPs and TPAs.
+Fields on this page
+Field
+Type
+Required
+Notes
+Requester and project
+Shown, not editable
+Yes
+-
+Decision
+Choose one
+Yes
+Options: Approve, Decline, Withdraw
+Reason
+Long text
+No
+Required when withdrawing
+Actions
+Action
+What happens
+Save decision
+Recorded in the audit log; requester is notified
+Next step: D4 Pay for several projects
+D4  Pay for several projects
+Prototype: Described here only
+Pay fees for more than one project in one go.
+Fields on this page
+Field
+Type
+Required
+Notes
+Projects
+Choose several
+Yes
+At least one. Options: [Project A], [Project B], [Project C]
+Total due
+Shown, not editable
+Yes
+-
+Payment mode
+Choose one
+Yes
+Options: UPI, Net banking, Card
+Actions
+Action
+What happens
+Pay
+One payment; one receipt per project
+Next step: Receipts appear on each project
+14.4  Scrutiny officer  (Scrutiny office (town planning))
+Page sequence: O1  >  O2  >  O3  >  O4  >  O5  >  O6. Each page below starts with a simple layout, then lists its fields, actions and next step.
+O1  Workbench queue
+Prototype: Scrutiny workbench
+Pick the next file. Sorted by due date.
+Fields on this page
+Field
+Type
+Required
+Notes
+Stage
+Choose one
+No
+Options: All, Scrutiny, Waiting for LTP
+Category
+Choose one
+No
+Options: All, Self-certified, Standard, Single window
+Due date from
+Date
+No
+-
+Due date to
+Date
+No
+-
+LTP name
+Text
+No
+-
+Actions
+Action
+What happens
+Open
+Opens File summary
+Next step: O2 File summary
+O2  File summary
+Prototype: Officer scrutiny, 4 steps
+Confirm what the system already checked.
+Fields on this page
+Field
+Type
+Required
+Notes
+Application number
+Shown, not editable
+Yes
+-
+Applicant and survey number
+Shown, not editable
+Yes
+-
+Category and revision
+Shown, not editable
+Yes
+-
+Automatic checks
+Shown, not editable
+Yes
+File, layers, rooms, area statement, fee
+Actions
+Action
+What happens
+Continue
+Opens Review exceptions
+Next step: O3 Review exceptions
+O3  Review exceptions
+Prototype: Officer scrutiny, 4 steps; Officer drawing review
+Go through only the items that need judgement, on the drawing.
+Fields on this page
+Field
+Type
+Required
+Notes
+Exception 1: front setback
+Choose one
+Yes
+Your response. Options: Accept, Accept with condition, Query
+Exception 2: parking count
+Choose one
+Yes
+Your response. Options: Accept, Accept with condition, Query
+Layer toggles
+Choose several
+No
+Room classes, building line, flagged issues. Options: Room classes, Building line, Flagged issues
+Actions
+Action
+What happens
+Open drawing review
+Shows the plan with flagged items highlighted
+Continue
+Opens Decide
+Next step: O4 Decide
+O4  Decide
+Prototype: Officer scrutiny, 4 steps
+Record the decision for the whole file.
+Fields on this page
+Field
+Type
+Required
+Notes
+Decision
+Choose one
+Yes
+Options: Accept, Accept with condition, Send back, Escalate
+Condition
+Long text
+No
+Required for Accept with condition
+Comment to applicant
+Long text
+No
+Required for Send back; must state the next step
+Attachment
+File upload
+No
+-
+Actions
+Action
+What happens
+Save decision
+Stored; opens Forward
+Next step: O5 Forward
+O5  Forward
+Prototype: Officer scrutiny, 4 steps
+Send the file on or back.
+Fields on this page
+Field
+Type
+Required
+Notes
+Decision summary
+Shown, not editable
+Yes
+-
+NOC departments to notify
+Shown, not editable
+Yes
+Set by the category rules
+Actions
+Action
+What happens
+Mark scrutiny complete
+Opens NOC tasks in parallel, or goes to the Commissioner if none are needed
+Send back to applicant
+Applicant gets the comment and next step
+Next step: N1 NOC queue, or C1 Decision list
+O6  Line-out check and inspection
+Prototype: Described here only
+Check the line-out after the commencement notice and record inspections during construction.
+Fields on this page
+Field
+Type
+Required
+Notes
+Application number
+Shown, not editable
+Yes
+-
+Inspection stage
+Choose one
+Yes
+Options: Line-out, Plinth, Structure, Completion
+Result
+Choose one
+Yes
+Options: As sanctioned, Needs correction
+Deviation found
+Tick box
+No
+Any departure from the sanctioned plan needs the Commissioner's sanction
+Comments and photographs
+Long text
+No
+-
+Actions
+Action
+What happens
+Record inspection
+Applicant is told the result; deviations are flagged to the Commissioner
+Next step: Applicant continues work, or corrects and requests re-check
+14.5  NOC departments  (Fire, environment and other departments)
+Page sequence: N1  >  N2  >  N3  >  N4. Each page below starts with a simple layout, then lists its fields, actions and next step.
+N1  NOC queue
+Prototype: NOC department queue
+See the files waiting for your department.
+Fields on this page
+Field
+Type
+Required
+Notes
+Department
+Shown, not editable
+Yes
+Fixed to your office
+Status
+Choose one
+No
+Options: All, Waiting for you, Query with LTP, Issued
+Due date
+Date
+No
+-
+Actions
+Action
+What happens
+Open
+Opens Check documents
+Next step: N2 Check documents
+N2  Check documents
+Prototype: NOC review and issue
+Look at each document the department needs.
+Fields on this page
+Field
+Type
+Required
+Notes
+Building details
+Shown, not editable
+Yes
+-
+Fire safety plan reviewed
+Tick box
+Yes
+-
+Floor plans with exits reviewed
+Tick box
+Yes
+-
+Site plan with access roads reviewed
+Tick box
+Yes
+-
+Actions
+Action
+What happens
+View
+Opens the document
+Continue
+Opens Assess
+Next step: N3 Assess
+N3  Assess
+Prototype: NOC review and issue
+Decide the outcome.
+Fields on this page
+Field
+Type
+Required
+Notes
+Outcome
+Choose one
+Yes
+Options: Issue NOC, Issue with conditions, Raise query
+Conditions
+Long text
+No
+Required for Issue with conditions
+Query
+Long text
+No
+Required for Raise query; tells the applicant what to send
+Actions
+Action
+What happens
+Continue
+Opens Issue NOC, or sends the query
+Next step: N4 Issue NOC
+N4  Issue NOC
+Prototype: NOC review and issue
+Record the NOC.
+Fields on this page
+Field
+Type
+Required
+Notes
+NOC number
+Shown, not editable
+Yes
+Generated
+Valid until
+Date
+Yes
+-
+Signed NOC file
+File upload
+Yes
+PDF
+Remarks
+Long text
+No
+-
+Actions
+Action
+What happens
+Issue NOC
+Department status turns Issued; when all are issued the file goes to the Commissioner
+Next step: C1 Decision list
+14.6  Commissioner  (Commissioner's office)
+Page sequence: C1  >  C2  >  C3  >  C4. Each page below starts with a simple layout, then lists its fields, actions and next step.
+C1  Decision list
+Prototype: Commissioner approvals
+See files ready for decision, with advice and NOC status side by side.
+Fields on this page
+Field
+Type
+Required
+Notes
+Advice filter
+Choose one
+No
+Options: All, Approve, Approve with condition, Send back
+Due date
+Date
+No
+-
+Actions
+Action
+What happens
+Review
+Opens Review file
+Next step: C2 Review file
+C2  Review file
+Prototype: Commissioner decide and issue
+Read the summary, officer advice and NOC status.
+Fields on this page
+Field
+Type
+Required
+Notes
+Application summary
+Shown, not editable
+Yes
+-
+Officer advice and conditions
+Shown, not editable
+Yes
+-
+NOC status by department
+Shown, not editable
+Yes
+-
+Actions
+Action
+What happens
+Open drawing
+Opens the drawing review
+Continue
+Opens Decide
+Next step: C3 Decide
+C3  Decide
+Prototype: Commissioner decide and issue
+Record the decision.
+Fields on this page
+Field
+Type
+Required
+Notes
+Decision
+Choose one
+Yes
+Options: Approve, Approve with conditions, Send back
+Conditions
+Long text
+No
+Required for Approve with conditions
+Reason and next step
+Long text
+No
+Required for Send back
+Actions
+Action
+What happens
+Continue
+Opens Sign and issue, or sends the file back with the reason
+Next step: C4 Sign and issue
+C4  Sign and issue
+Prototype: Commissioner decide and issue
+Sign digitally and release the Development Permission Order (DPO).
+Fields on this page
+Field
+Type
+Required
+Notes
+Permit number
+Shown, not editable
+Yes
+Generated
+One-time code for digital signature
+Text plus one-time code
+Yes
+-
+Actions
+Action
+What happens
+Sign and issue permission order
+DPO with QR code appears on the applicant's tracker; issued only after fees, deposits and charges are paid
+Next step: A8 Download permission order
+14.7  Chief City Planner and Executive Committee  (Chief City Planner's office / Executive Committee)
+Page sequence: E1  >  E2  >  E3. Each page below starts with a simple layout, then lists its fields, actions and next step.
+E1  Open a case
+Prototype: VarianceSteps.dc.html
+Handle conditional uses, variances, appeals and interpretations. The Chief City Planner receives the case and prepares it for decision.
+Fields on this page
+Field
+Type
+Required
+Notes
+Case type
+Choose one
+Yes
+Options: Conditional use, Variance, Appeal, Interpretation, Amendment request
+Regulation affected
+Text
+Yes
+-
+Applicant's reason
+Long text
+Yes
+-
+Supporting documents
+File upload
+No
+-
+Appeal filed within 10 working days
+Tick box
+No
+Appeals after 10 working days are not considered (Reg 205.2)
+Actions
+Action
+What happens
+Prepare for hearing
+Opens Hearing notice
+Next step: E2 Hearing notice
+E2  Hearing notice
+Prototype: VarianceSteps.dc.html
+Give notice of the hearing to the applicant and neighbours.
+Fields on this page
+Field
+Type
+Required
+Notes
+Hearing date
+Date
+Yes
+-
+Place
+Text
+Yes
+-
+Neighbours notified by mail
+Tick box
+Yes
+Reasonable effort to notify surrounding owners
+Notice posted on the site
+Tick box
+Yes
+Posted in a conspicuous manner
+Extent of area notified
+Text
+Yes
+Set by the Chief City Planner
+Actions
+Action
+What happens
+Issue notice
+Applicant and neighbours are told; case waits for the hearing
+Next step: E3 Decision
+E3  Decision
+Prototype: VarianceSteps.dc.html
+Record the decision. The Executive Committee cannot allow a use that the zone prohibits.
+Fields on this page
+Field
+Type
+Required
+Notes
+Decision
+Choose one
+Yes
+Options: Approve, Approve with conditions, Deny
+Criteria met
+Choose several
+Yes
+Regulation 204.3. Options: Physical or geologic limits, No special privilege, No reasonable use without it, Not only for economic reasons, Not created by owner, Minimum variance needed, Not harmful to public, Unique property
+Conditions
+Long text
+No
+Required for Approve with conditions
+Reasons
+Long text
+Yes
+Recorded in writing
+Actions
+Action
+What happens
+Record decision
+Applicant is notified; the file returns to the Commissioner
+Next step: C1 Decision list, or applicant is told the reason
+14.8  Accounts  (Accounts office)
+Page sequence: AC1  >  AC2  >  AC3  >  AC4  >  AC5. Each page below starts with a simple layout, then lists its fields, actions and next step.
+AC1  Payments list
+Prototype: Accounts fees ledger
+See payments and their reconciliation status.
+Fields on this page
+Field
+Type
+Required
+Notes
+Date from
+Date
+No
+-
+Date to
+Date
+No
+-
+Status
+Choose one
+No
+Options: All, Reconciled, Awaiting bank file, Amount mismatch
+Fee type
+Choose one
+No
+Options: All, Scrutiny fee, Development charges
+Actions
+Action
+What happens
+Open
+Opens Match payment
+Next step: AC2 Match payment
+AC2  Match payment
+Prototype: Accounts resolve payment
+Compare what was due with what was paid.
+Fields on this page
+Field
+Type
+Required
+Notes
+Application number
+Shown, not editable
+Yes
+-
+Fee type
+Shown, not editable
+Yes
+-
+Amount due
+Shown, not editable
+Yes
+-
+Amount paid
+Shown, not editable
+Yes
+-
+Bank reference
+Shown, not editable
+Yes
+-
+Difference
+Shown, not editable
+Yes
+Calculated
+Actions
+Action
+What happens
+Continue
+Opens Resolve
+Next step: AC3 Resolve
+AC3  Resolve
+Prototype: Accounts resolve payment
+Choose how to close the item. Mortgage is tracked separately and is released only after the occupancy certificate.
+Fields on this page
+Field
+Type
+Required
+Notes
+Resolution
+Choose one
+Yes
+Options: Reconciled, Request difference, Record adjustment, Refund
+Amount
+Number
+No
+Required for adjustment or refund
+Reason
+Long text
+No
+Required except for Reconciled
+Actions
+Action
+What happens
+Continue
+Opens Confirm
+Next step: AC4 Confirm
+AC4  Confirm
+Prototype: Accounts resolve payment
+Check and record.
+Fields on this page
+Field
+Type
+Required
+Notes
+Summary
+Shown, not editable
+Yes
+-
+Approver
+Choose one
+No
+Required for adjustment or refund. Options: [Approver]
+Actions
+Action
+What happens
+Confirm
+Writes the audit entry; the applicant's tracker and notifications update
+Next step: Item leaves the mismatch list
+AC5  Daily report
+Prototype: Described here only
+Export the day's reconciliation.
+Fields on this page
+Field
+Type
+Required
+Notes
+Date
+Date
+Yes
+-
+Format
+Choose one
+Yes
+Options: PDF, Excel
+Include mortgage register
+Tick box
+No
+Lists mortgages held and those due for release
+Actions
+Action
+What happens
+Export
+Downloads the report
+Next step: End of day
+14.9  System admin  (CAD and GIS cell / IT)
+Page sequence: AD1  >  AD1a  >  AD1b  >  AD1c  >  AD1d  >  AD2  >  AD3  >  AD4  >  AD5  >  AD5b  >  AD10  >  AD11  >  AD12  >  AD6  >  AD7  >  AD8  >  AD9. Each page below starts with a simple layout, then lists its fields, actions and next step.
+AD1  Users and roles
+Prototype: Admin users and roles
+See and manage every official user.
+Fields on this page
+Field
+Type
+Required
+Notes
+Search name
+Text
+No
+-
+Role
+Choose one
+No
+Options: All, Scrutiny officer, Chief City Planner, Executive Committee member, NOC officer, Commissioner, Accounts, Admin
+Office
+Choose one
+No
+Options: All, [Office]
+Status
+Choose one
+No
+Options: All, Active, Suspended
+Actions
+Action
+What happens
+Add user
+Opens the four-step Add user flow
+Suspend
+Blocks sign-in; open files are offered for reassignment
+Reset access
+Sends a new sign-in link
+Reassign files
+Moves open files to another user
+Next step: AD1a Add user
+AD1a  Add user: person
+Prototype: Admin add user, 4 steps
+Enter who the user is.
+Fields on this page
+Field
+Type
+Required
+Notes
+Full name
+Text
+Yes
+-
+Employee ID
+Text
+Yes
+-
+Official email
+Text
+Yes
+-
+Mobile number
+Text plus one-time code
+Yes
+Verified with a one-time code
+Actions
+Action
+What happens
+Continue
+Opens Role and office
+Next step: AD1b Role and office
+AD1b  Add user: role and office
+Prototype: Admin add user, 4 steps
+Decide what the user can do and where.
+Fields on this page
+Field
+Type
+Required
+Notes
+Role
+Choose one
+Yes
+Options: Scrutiny officer, Chief City Planner, Executive Committee member, NOC officer, Commissioner, Accounts, Admin
+Office
+Choose one
+Yes
+Options: [Office]
+Jurisdiction
+Choose several
+Yes
+At least one. Options: Capital City area, [Village or zone]
+Reports to
+Choose one
+No
+Options: [Supervisor]
+Actions
+Action
+What happens
+Continue
+Opens Access
+Next step: AD1c Access
+AD1c  Add user: access
+Prototype: Admin add user, 4 steps
+Set access limits.
+Fields on this page
+Field
+Type
+Required
+Notes
+Valid from
+Date
+Yes
+-
+Valid until
+Date
+No
+Leave empty for no end date
+Two-step sign-in
+Tick box
+Yes
+Must be on
+Notification channels
+Choose several
+Yes
+Options: SMS, Email, In-app
+Actions
+Action
+What happens
+Continue
+Opens Confirm
+Next step: AD1d Confirm
+AD1d  Add user: confirm
+Prototype: Admin add user, 4 steps
+Check and send the invitation.
+Fields on this page
+Field
+Type
+Required
+Notes
+Summary of person, role, office and access
+Shown, not editable
+Yes
+-
+Actions
+Action
+What happens
+Send invitation
+User gets a sign-in link; an audit entry is written
+Next step: User appears in Users and roles
+AD2  Offices and jurisdictions
+Prototype: Admin offices and jurisdictions
+Manage offices, who heads them and what areas they cover.
+Fields on this page
+Field
+Type
+Required
+Notes
+Office name
+Text
+Yes
+-
+Office type
+Choose one
+Yes
+Options: Scrutiny, Planning (Chief City Planner), Executive Committee, NOC department, Commissioner, Accounts
+Jurisdiction areas
+Choose several
+Yes
+Options: Capital City area, [Village or zone]
+Office head
+Choose one
+Yes
+Options: [User]
+Working calendar
+Choose one
+Yes
+Holidays pause stage clocks. Options: [Calendar]
+Status
+Choose one
+Yes
+Options: Active, Inactive
+Actions
+Action
+What happens
+Add office
+Creates the office
+Edit
+Changes apply to new files
+Deactivate
+Open files are offered for reassignment
+Next step: Assign users to the office in Users and roles
+AD3  Workflow and SLA
+Prototype: Admin workflow and SLA
+Set the time limit, reminders and escalation for each stage. Regulatory limits are fixed and shown alongside.
+Fields on this page
+Field
+Type
+Required
+Notes
+Stage
+Shown, not editable
+Yes
+Permit journey plus commencement, completion and occupancy
+Owner office
+Choose one
+Yes
+Options: [Office]
+SLA (days)
+Number
+Yes
+Decision on application: 60 days from application or from the applicant's reply (Reg 212.2)
+Reminder on day
+Number
+Yes
+-
+Escalate after (days)
+Number
+Yes
+-
+Escalate to
+Choose one
+Yes
+Options: [Supervisor]
+Regulatory limits
+Shown, not editable
+Yes
+Line-out check 7 days (213.1). Occupancy certificate 15 days (213.6). Appeal 10 working days (205.2). Delay penalty of Rs 10,000 per responsible staff member (212.2)
+Actions
+Action
+What happens
+Save draft
+Keeps changes private
+Publish
+Applies to new files only
+Next step: AD9 Publish a version
+AD4  Route and trigger rules
+Prototype: Admin category rules
+Define what an application needs when it crosses a threshold: NOCs, a design brief, exemptions or a Chief City Planner review.
+Fields on this page
+Field
+Type
+Required
+Notes
+Trigger name
+Text
+Yes
+-
+Applies to zones
+Choose several
+Yes
+Options: R1, R2, R3, R4, C1 to C6, I1 to I3, P, S and U
+Condition
+Choose one
+Yes
+Options: Height above, Plot area above, Plot area up to, Use is, Building is public congregation
+Threshold
+Number
+Yes
+[threshold]
+Effect
+Choose one
+Yes
+Options: Needs fire and other NOCs, Needs a design brief, Exempt from 10% handover, Needs Chief City Planner review, Needs environmental clearance
+Regulation reference
+Text
+Yes
+For example 209.7, 209.8, 215.3(5)
+Status
+Choose one
+Yes
+Options: Draft, Active, Retired
+Actions
+Action
+What happens
+Add rule
+Creates a draft rule
+Test with sample inputs
+Shows which rules a sample project triggers
+Publish
+Applies to new files only
+Next step: AD9 Publish a version
+AD5  Fee schedule
+Prototype: Admin fee schedule
+Manage the fees, deposits and charges the regulations allow. Rates are taken from APCRDA notifications; enter the source order for each.
+Fields on this page
+Field
+Type
+Required
+Notes
+Fee name
+Choose one
+Yes
+Options: Application (scrutiny) fee, Development charges, Impact fee, Compounding fee, Revalidation fee, Temporary structure scrutiny fee
+Applies to zones
+Choose several
+Yes
+Options: R1, R2, R3, R4, C1 to C6, I1 to I3, P, S and U
+Basis
+Choose one
+Yes
+Options: Per sq.m of gross floor area (basement and accessory buildings included, parking excluded), Flat amount, Percent of land value, Percent of built-up value
+Rate
+Number
+Yes
+[rate]
+Condition
+Text
+No
+For example FSI above 1.75 for the impact fee
+Exemption
+Choose one
+No
+Options: None, EWS, LIG or slum scheme with tenement carpet area up to 50 sq.m
+Effective from
+Date
+Yes
+-
+Source order or notification
+Text
+Yes
+Government order or APCRDA notification number
+Status
+Choose one
+Yes
+Options: Draft, Active, Retired
+Actions
+Action
+What happens
+Add fee
+Creates a draft fee
+Edit
+Creates a new version; old versions stay on old files
+Retire
+Stops use for new files
+Next step: AD9 Publish a version
+AD5b  Deposits and security
+Prototype: Admin fee schedule
+Set the security and compounding rules that sit alongside fees.
+Fields on this page
+Field
+Type
+Required
+Notes
+Mortgage share of gross floor area (%)
+Number
+Yes
+Regulation 210.4 sets ten percent
+Release trigger
+Shown, not editable
+Yes
+Occupancy certificate for the entire development (Reg 213.9)
+Compounding limit for setback violations (%)
+Number
+Yes
+Other than front setback, non-high-rise only, up to 10% (Reg 215.4)
+Compounding rate basis
+Shown, not editable
+Yes
+100% of registered land value of the violated portion, as revised by Government
+Fee forfeited on rejection
+Tick box
+Yes
+Regulation 210.3
+Actions
+Action
+What happens
+Save draft
+Keeps changes private
+Publish
+Applies to new files only
+Next step: AD9 Publish a version
+AD10  Zoning table
+Prototype: AdminZoning.dc.html
+Keep the zoning rules the system checks against. One row per zone and plot-size band.
+Fields on this page
+Field
+Type
+Required
+Notes
+Zone code
+Choose one
+Yes
+Table 5 of the regulations. Options: R1 Village planning, R2 Low density, R3 Medium to high density, R4 High density, C1 Mixed use, C2 General commercial, C3 Neighbourhood centre, C4 Town centre, C5 Regional centre, C6 Central business district, I1 Business park, I2 Logistics, I3 Non-polluting industry, P1 Passive, P2 Active, P3 Protected, S1 Government, S2 Education, S3 Special, U1 Reserve, U2 Road reserve
+Plot-size band (sq.m)
+Text
+Yes
+From the zoning table
+Use status
+Choose one
+Yes
+Where Appendix II and III differ, Appendix II prevails (Reg 304.1). Options: Permitted, Conditional, Prohibited
+Maximum FSI
+Number
+Yes
+[from table]
+Maximum building coverage (%)
+Number
+Yes
+[from table]
+Minimum green coverage (%)
+Number
+Yes
+[from table]
+Maximum height (m)
+Number
+Yes
+[from table]
+Maximum floors
+Number
+Yes
+[from table]
+Front setback (m)
+Number
+Yes
+[from table]
+Side setback (m)
+Number
+Yes
+[from table]
+Rear setback (m)
+Number
+Yes
+[from table]
+Parking requirement
+Text
+Yes
+[from table]
+Actions
+Action
+What happens
+Add row
+Adds a draft row
+Import approved table
+Loads rows from a checked spreadsheet
+Test with a sample plot
+Shows what the applicant would see on the Zoning check screen
+Publish
+Applies to new files only
+Next step: AD9 Publish a version
+AD11  Village (R1) settings
+Prototype: AdminVillage.dc.html
+Set the rules that apply to villages inside the Capital City area.
+Fields on this page
+Field
+Type
+Required
+Notes
+Village
+Text
+Yes
+-
+Street or road name
+Text
+Yes
+-
+Approved road width (m)
+Number
+Yes
+From the village circulation plan approved by the Commissioner
+Circulation plan reference
+Text
+Yes
+-
+Minimum abutting road width (m)
+Number
+Yes
+Nine metres (Reg 401.5)
+Road width for apartments (m)
+Number
+Yes
+Twelve metres existing road (Reg 401.5)
+Exemption plot area (sq.m)
+Number
+Yes
+Up to 200 sq.m, with height up to 7 m, exempt from the 10% handover (Reg 215.3)
+Exemption height (m)
+Number
+Yes
+-
+TDR for road land (% of built-up area)
+Number
+Yes
+Up to 200% (Reg 215.2)
+Actions
+Action
+What happens
+Add road
+Adds a street with its approved width
+Save settings
+Applies to new files only
+Publish
+Applies to new files only
+Next step: AD9 Publish a version
+AD12  Zoning map and land records
+Prototype: AdminMap.dc.html
+Load the zoning map and the ownership records the portal checks against.
+Fields on this page
+Field
+Type
+Required
+Notes
+Zoning map version
+Text
+Yes
+Include amendments notified after February 2016
+Zoning map layer file
+File upload
+Yes
+-
+Village boundaries
+File upload
+Yes
+-
+LPOC register import
+File upload
+Yes
+For checking land pooling ownership certificates
+Effective from
+Date
+Yes
+-
+Actions
+Action
+What happens
+Load and check
+Validates files and lists errors
+Publish
+New map applies to new files only
+Next step: AD9 Publish a version
+AD6  Layer table and room schedule
+Prototype: Admin: room schedule
+Keep the standards the drawing check uses.
+Fields on this page
+Field
+Type
+Required
+Notes
+Code
+Text
+Yes
+-
+Approved room name
+Text
+Yes
+Spelled exactly as shown to applicants
+Mapped layer
+Text
+Yes
+-
+Accepted synonyms
+Text
+No
+Separated by commas
+Status
+Choose one
+Yes
+Options: Draft, Active, Retired
+Actions
+Action
+What happens
+Add room type
+Adds a draft row
+Test on a sample drawing
+Runs the check against sample files
+Publish
+Applies to new submissions only
+Next step: AD9 Publish a version
+AD7  Notification templates
+Prototype: Admin notification templates
+Control the messages people receive.
+Fields on this page
+Field
+Type
+Required
+Notes
+Event
+Choose one
+Yes
+Options: Application submitted, Query raised, Fee due, NOC issued, Permit issued
+Channels
+Choose several
+Yes
+Options: SMS, Email, In-app
+Language
+Choose one
+Yes
+Options: English, Telugu
+Message
+Long text
+Yes
+Variables: applicant, application number, stage, due date
+Status
+Choose one
+Yes
+Options: Draft, Active
+Actions
+Action
+What happens
+Preview
+Shows the message with sample values
+Save
+Saves a draft
+Publish
+Applies to new events
+Next step: Messages go out on the next event
+AD8  Audit log and reports
+Prototype: Admin audit log
+Find who did what, and when.
+Fields on this page
+Field
+Type
+Required
+Notes
+Date from
+Date
+No
+-
+Date to
+Date
+No
+-
+User
+Text
+No
+-
+Action
+Choose one
+No
+Options: All, Sign-in, Decision, Payment, Rule change
+Application number
+Text
+No
+-
+Actions
+Action
+What happens
+Search
+Lists matching entries
+Export
+Downloads the result
+Next step: Use results for reviews and audits
+AD9  Publish a version
+Prototype: Admin: room schedule
+Release a rule change safely.
+Fields on this page
+Field
+Type
+Required
+Notes
+Version
+Shown, not editable
+Yes
+Generated
+Change summary
+Long text
+Yes
+-
+Test results
+Shown, not editable
+Yes
+From the sample drawings
+Approver
+Choose one
+Yes
+Options: [Approver]
+Actions
+Action
+What happens
+Publish
+New version applies to new submissions only; files in progress keep the version they started with
+Next step: Public standard and LTP self-check update
+15.  Capital City scope, zoning, R1 and fees
+This section applies the Zoning Regulations of Amaravati Capital City (February 2016) to the portal design. Regulation numbers are given so each rule can be traced. Rates and table values that were not available in public sources are shown as placeholders.
+15.1  Scope
+Item
+Decision in this version
+In scope
+Buildings in the Amaravati Capital City area: Development Permission Order (DPO), commencement notice and line-out check, inspections, completion and occupancy certificate, conditional uses, variances and appeals.
+Out of scope
+The wider APCRDA jurisdiction outside the Capital City area, which is not covered by these zoning regulations. Layout and sub-division approval is a separate process.
+To confirm
+Whether the Amaravati Government Complex is in scope (it has its own 2024 zoning regulations and urban design guidelines). Whether later amendments apply, including the environment-clearance gazette amendment and the R5 affordable housing zone.
+Precedence
+Urban design guidelines approved by the Commissioner take precedence over the zoning regulations (Reg 305.2). Where Appendix II and III differ, Appendix II prevails (Reg 304.1). The more restrictive rule governs where sections differ (Reg 101.3).
+15.2  Zoning districts
+The portal looks up the zone from the zoning map and checks the proposal against that zone's table (Reg 301, Table 5). Territory annexed later is treated as R2 until classified (Reg 303).
+Code
+Zoning district
+Group
+R1
+Village planning zone
+Residential
+R2
+Low density zone
+Residential
+R3
+Medium to high density zone
+Residential
+R4
+High density zone
+Residential
+C1
+Mixed use zone
+Commercial
+C2
+General commercial zone
+Commercial
+C3
+Neighbourhood centre zone
+Commercial
+C4
+Town centre zone
+Commercial
+C5
+Regional centre zone
+Commercial
+C6
+Central business district zone
+Commercial
+I1
+Business park zone
+Industrial
+I2
+Logistics zone
+Industrial
+I3
+Non-polluting industry zone
+Industrial
+P1
+Passive zone
+Open space and protected
+P2
+Active zone
+Open space and protected
+P3
+Protected zone
+Open space and protected
+S1
+Government zone
+Institutional
+S2
+Education zone
+Institutional
+S3
+Special zone
+Institutional
+U1
+Reserve zone
+Infrastructure reserve
+U2
+Road reserve zone
+Infrastructure reserve
+15.3  R1 village planning zone
+Rule
+What the regulation says
+Where it appears
+Purpose
+Low-rise housing and complementary public facilities inside existing villages of the Capital City (Reg 401.5).
+Zoning check
+Abutting road
+A road at least 9 m wide must abut the building. The applicant shows road widths on the site plan (Reg 401.5).
+Project details, live check
+Apartments
+Allowed where the site is reached by a 12 m wide existing road (Reg 401.5).
+Zoning check
+Road handover
+Land needed for the road width in the village circulation plan approved by the Commissioner is handed over free of cost (Reg 401.5, 215.1).
+Road handover and TDR (A2c)
+In return
+A TDR certificate, an extra floor of equal built area, or setback concessions (Reg 215.1). TDR up to 200% of the built-up area for road land (Reg 215.2), only after a registered gift deed.
+Road handover and TDR (A2c)
+Small-plot exemption
+Individual residential buildings on plots up to 200 sq.m and up to 7 m high are exempt from the 10% built-up area handover (Reg 215.3).
+Review and submit (A5), route rules
+Table values
+FSI, coverage, height, floors, setbacks and parking come from the R1 zoning table (Appendix III).
+Admin zoning table (AD10)
+15.4  Timelines and authorities
+Item
+Rule
+Regulation
+Decision on application
+Commissioner decides within 60 days of the application or of the applicant's reply to a requisition, whichever is later.
+207.2, 212.2
+Delay penalty
+Rs 10,000 on each responsible staff member, paid to the applicant.
+212.2
+Objections
+Raised in one go; no new objections after compliance, generally.
+212.3
+Start of work
+Within one year of the permission order; line-out checked within 7 days of the notice.
+213.1
+Occupancy certificate
+Decided within 15 days of the completion certificate; deemed approved for occupation after that if built as sanctioned.
+213.6
+Appeal
+Within 10 working days; an appeal stays proceedings unless there is immediate danger.
+205.2
+Who decides
+Commissioner sanctions and decides conditional uses. Chief City Planner receives cases and interprets. Executive Committee decides variances and appeals, but cannot allow a prohibited use.
+202 to 205, 214
+15.5  Fees, deposits and charges
+Item
+Rule
+Reg
+Rate
+Application (scrutiny) fee
+Paid with the application. Based on gross floor area, including basement and accessory buildings, excluding parking. Forfeited if the proposal is rejected.
+210.1, 210.3
+[rate]
+Exemption
+No development permission fee for EWS, LIG and slum redevelopment schemes with tenement carpet area up to 50 sq.m.
+210.2
+None
+Development charges
+Fees and charges for development permission, as notified by APCRDA.
+210.5
+[rate]
+Impact fee
+Payable where FSI exceeds 1.75, as levied by APCRDA.
+210.5
+[rate]
+Mortgage
+Ten percent of gross floor area mortgaged by registered deed; released when the occupancy certificate is issued.
+210.4, 213.9
+10% of GFA
+Handover of built-up area
+Ten percent of built-up area (5% of units for row, detached or cluster housing) by notarised affidavit before sanction, unless exempt.
+215.3
+10% or 5%
+Compounding fee
+For setback violations other than front, non-high-rise only, up to 10%; rate equal to the registered land value of the violated portion.
+215.4
+Land value
+Orders to cite
+Impact fee for buildings on major roads was set by G.O.Ms.No.117 dated 11 August 2022. Confirm the current schedule before loading rates.
+-
+Confirm
+15.6  Drawings and documents
+Requirement
+Rule (Reg 208 and 209)
+Sheet sizes
+A0 to A5, metric dimensions only.
+Scales
+Key plan not less than 1:10000, site plan 1:500, building plans 1:100.
+Colour notation
+Table 3: plot lines thick black, proposed work red filled, existing street green, roads and setbacks burnt sienna, and so on.
+Computer-readable copy
+Required in addition to prints, as prescribed by the Commissioner.
+Ownership
+Attested LPOC, or an equivalent document outside land pooling. Originals are shown before sanction. Statement of area by triangulation with the owner's affidavit.
+Clearances
+Fire, environmental, and other agencies such as airports, railways and electricity where required.
+Special buildings
+Commercial above 15 m, residential 18 m and above, and public congregation buildings above 500 sq.m plot or 6 m need extra fire and services details and NOCs (Reg 209.7).
+Design brief
+Required for lands above 2000 sq.m in residential, commercial and industrial zones (Reg 209.8).
+15.7  What changes for admin users and placeholders
+Area
+Change
+Screen
+Roles
+Add Chief City Planner and Executive Committee member. Keep Commissioner, scrutiny officer, NOC officer, accounts and admin.
+AD1, AD1b
+Zoning table
+New: one row per zone and plot-size band with use status, FSI, coverage, green coverage, height, floors, setbacks and parking. Test with a sample plot before publishing.
+AD10
+Village (R1) settings
+New: village roads with approved widths, 9 m and 12 m road rules, 200 sq.m and 7 m exemption, 200% TDR limit.
+AD11
+Zoning map and land records
+New: map version, village boundaries and LPOC register import.
+AD12
+Route and trigger rules
+Replaces the BuildNow-style categories. Triggers such as height, plot area and public use decide NOCs, design brief and exemptions.
+AD4
+Fee schedule
+Fee names follow the regulations, each with basis, condition, exemption, effective date and source order. Mortgage and compounding are set separately.
+AD5, AD5b
+Workflow and SLA
+Fixed regulatory limits shown beside the editable ones: 60 days, 7 days, 15 days, 10 working days.
+AD3
+Notifications
+Add events: hearing notice, line-out check due, occupancy decision due, mortgage release.
+AD7
+Offices
+Add Planning (Chief City Planner) and Executive Committee as office types.
+AD2
+Remaining placeholders
+Zoning table values, fee rates and order numbers, SLA days for internal stages, file size limits, helpdesk number, office and village names.
+Various
+15.8  Points to confirm with CRDA
+The current zoning table values for every zone, including any amendments since February 2016.
+Public reporting says the state self-certification scheme for small residential buildings applies to local bodies except in CRDA's jurisdiction. The prototype no longer offers a self-certified route; confirm this is right.
+The regulation says the application is accompanied by the fee receipt. The portal takes payment after the drawing passes the live check and before final submission. Confirm this order is acceptable.
+Whether the printed sets and cloth-mounted completion plans are replaced by digital files.
+Who keeps the TDR register and whether it becomes an admin screen.
+Whether the impact fee schedule of 2022 applies inside the Capital City area.

@@ -367,7 +367,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const user = useAppStore((s) => s.user);
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
-  
+
   const modules = user?.role === "TPA" ? TPA_MODULES : (user?.role === "ZDD" || user?.role === "ZJD") ? ZONAL_MODULES : LTP_MODULES;
 
   // Single module expanded at a time
@@ -391,8 +391,14 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const handleSelectSubmenu = (menuId: string) => {
     setLtpActiveMenu(menuId);
-    if (view !== "ltp-applications") {
-      navigate("ltp-applications");
+    if (menuId === "dashboard") {
+      if (view !== "ltp-dashboard") {
+        navigate("ltp-dashboard");
+      }
+    } else {
+      if (view !== "ltp-applications") {
+        navigate("ltp-applications");
+      }
     }
   };
 
@@ -415,13 +421,13 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       isActive ? (theme.selectedHeaderIcon ?? "text-[#FDF6ED]") : theme.headerIcon
     );
     switch (mod.iconType) {
-      case "dashboard":    return <LayoutDashboard className={cls} />;
+      case "dashboard": return <LayoutDashboard className={cls} />;
       case "applications": return <FolderOpen className={cls} />;
       case "commencement": return <HardHat className={cls} />;
-      case "scrutiny":     return <ClipboardCheck className={cls} />;
-      case "compliance":   return <ShieldAlert className={cls} />;
-      case "occupancy":    return <Building2 className={cls} />;
-      case "ltp-change":   return <RefreshCw className={cls} />;
+      case "scrutiny": return <ClipboardCheck className={cls} />;
+      case "compliance": return <ShieldAlert className={cls} />;
+      case "occupancy": return <Building2 className={cls} />;
+      case "ltp-change": return <RefreshCw className={cls} />;
     }
   };
 

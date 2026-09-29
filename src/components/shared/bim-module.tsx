@@ -29,7 +29,7 @@ export function BimModule() {
   const [selectedAppId, setSelectedAppId] = React.useState<string>("MC/BP/2026/04/0001");
   const [searchQuery, setSearchQuery] = React.useState("");
 
-  const drawings2DPortalView = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
+  const drawings2DPortalView = portal === "ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
 
   const bimAppsList = React.useMemo(() => {
     return applications.map((app) => {

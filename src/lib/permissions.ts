@@ -16,8 +16,8 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // RBAC — Role-Based Access Control
 // ============================================================
 
-export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "SUPER_ADMIN" {
-  if (role === "SUPER_ADMIN") return "SUPER_ADMIN";
+export function portalForRole(role: RoleKey): "LTP" | "OFFICER" | "ADMIN" {
+  if (role === "ADMIN") return "ADMIN";
   if (role === "LTP" || role === "ZDD" || role === "ZJD" || role === "TPA" || role === "ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER") return "LTP";
   // TPA, ZONAL_HEAD, DIRECTOR land on the OFFICER portal
   return "OFFICER";
@@ -58,15 +58,15 @@ export function canAccessView(user: User, view: string, roles: Record<RoleKey, R
 
   const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
   const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim", "admin-2d-drawings"];
-  
+
   if (configViews.includes(view)) {
-    return user.role === "SUPER_ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
+    return user.role === "ADMIN" || hasPermission(user, "config:manage" as Permission, roles);
   }
-  
+
   if (generalAdminViews.includes(view)) {
-    return user.role === "SUPER_ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER" || hasPermission(user, "config:manage" as Permission, roles);
+    return user.role === "ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER" || hasPermission(user, "config:manage" as Permission, roles);
   }
-  
+
   return true;
 }
 
@@ -89,7 +89,7 @@ export function rolesForStage(stage: WorkflowStageKey): RoleKey[] {
 
 // Can this user view this application?
 export function canViewApplication(user: User, app: Application): boolean {
-  if (user.role === "SUPER_ADMIN" || user.role === "DIRECTOR") return true;
+  if (user.role === "ADMIN" || user.role === "DIRECTOR") return true;
   if (user.role === "ZONAL_HEAD" && app.project.zone !== user.zone) return false;
   if (user.role === "LTP") return app.ltpId === user.id;
   // Officers can view all applications assigned to their stage/role
@@ -101,8 +101,8 @@ export function canViewApplication(user: User, app: Application): boolean {
 
 // Which applications are visible to this user?
 export function getVisibleApplications(user: User, apps: Application[]): Application[] {
-  if (user.role === "SUPER_ADMIN" || user.role === "DIRECTOR") return apps;
-  
+  if (user.role === "ADMIN" || user.role === "DIRECTOR") return apps;
+
   if (user.role === "ZONAL_HEAD") {
     return apps.filter((a) => {
       if (a.project.zone !== user.zone) return false;
@@ -124,7 +124,7 @@ export function getVisibleApplications(user: User, apps: Application[]): Applica
 // Applications currently assigned to this officer for review
 export function getAssignedApplications(user: User, apps: Application[]): Application[] {
   if (user.role === "LTP") return [];
-  if (user.role === "SUPER_ADMIN") {
+  if (user.role === "ADMIN") {
     return apps.filter((a) => !["APPROVED", "REJECTED"].includes(a.status));
   }
   const stageRoles = rolesForStage;
@@ -138,7 +138,7 @@ export function getAssignedApplications(user: User, apps: Application[]): Applic
 
 // Get allowed actions for this user on this application
 export function getAllowedActions(user: User, app: Application): WorkflowAction[] {
-  if (user.role === "SUPER_ADMIN") return ["ADD_REMARKS"];
+  if (user.role === "ADMIN") return ["ADD_REMARKS"];
   if (user.role === "LTP") return [];
 
   const stage = getStage(app.currentStage);
@@ -262,9 +262,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "dashboard",
     requiredAny: [],   // always visible
     views: {
-      LTP:        "ltp-dashboard",
-      OFFICER:    "officer-dashboard",
-      SUPER_ADMIN: "admin-dashboard",
+      LTP: "ltp-dashboard",
+      OFFICER: "officer-dashboard",
+      ADMIN: "admin-dashboard",
     },
   },
   // 2 — Applications
@@ -273,9 +273,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "applications",
     requiredAny: ["application:view_own", "application:view_all"],
     views: {
-      LTP:        "ltp-applications",
-      OFFICER:    "officer-applications",
-      SUPER_ADMIN: "admin-applications",
+      LTP: "ltp-applications",
+      OFFICER: "officer-applications",
+      ADMIN: "admin-applications",
     },
   },
   // 3 — 3D (BIM)
@@ -284,9 +284,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "bim",
     requiredAny: [],
     views: {
-      LTP:        "ltp-bim",
-      OFFICER:    "officer-bim",
-      SUPER_ADMIN: "admin-bim",
+      LTP: "ltp-bim",
+      OFFICER: "officer-bim",
+      ADMIN: "admin-bim",
     },
   },
   // 3.5 — 2D
@@ -295,9 +295,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "2d-drawings",
     requiredAny: [],
     views: {
-      LTP:        "ltp-2d-drawings",
-      OFFICER:    "officer-2d-drawings",
-      SUPER_ADMIN: "admin-2d-drawings",
+      LTP: "ltp-2d-drawings",
+      OFFICER: "officer-2d-drawings",
+      ADMIN: "admin-2d-drawings",
     },
   },
   // 4 — Tasks
@@ -306,9 +306,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "tasks",
     requiredAny: [],
     views: {
-      LTP:        "ltp-tasks",
-      OFFICER:    "officer-tasks",
-      SUPER_ADMIN: "admin-tasks",
+      LTP: "ltp-tasks",
+      OFFICER: "officer-tasks",
+      ADMIN: "admin-tasks",
     },
   },
   // 5 — Shortfalls
@@ -317,9 +317,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "shortfalls",
     requiredAny: [],
     views: {
-      LTP:        "ltp-shortfalls",
-      OFFICER:    "officer-shortfalls",
-      SUPER_ADMIN: "admin-shortfalls",
+      LTP: "ltp-shortfalls",
+      OFFICER: "officer-shortfalls",
+      ADMIN: "admin-shortfalls",
     },
   },
   // 6 — Site Inspections
@@ -328,9 +328,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "inspections",
     requiredAny: [],
     views: {
-      LTP:        "ltp-inspections",
-      OFFICER:    "officer-inspections",
-      SUPER_ADMIN: "admin-inspections",
+      LTP: "ltp-inspections",
+      OFFICER: "officer-inspections",
+      ADMIN: "admin-inspections",
     },
   },
   // 7 — NOCs
@@ -339,9 +339,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "nocs",
     requiredAny: [],
     views: {
-      LTP:        "ltp-nocs",
-      OFFICER:    "officer-nocs",
-      SUPER_ADMIN: "admin-nocs",
+      LTP: "ltp-nocs",
+      OFFICER: "officer-nocs",
+      ADMIN: "admin-nocs",
     },
   },
   // 8 — Show Cause
@@ -350,9 +350,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "show-cause",
     requiredAny: [],
     views: {
-      LTP:        "ltp-show-cause",
-      OFFICER:    "officer-show-cause",
-      SUPER_ADMIN: "admin-show-cause",
+      LTP: "ltp-show-cause",
+      OFFICER: "officer-show-cause",
+      ADMIN: "admin-show-cause",
     },
   },
   // 9 — Revoke Proceedings
@@ -361,9 +361,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "revocations",
     requiredAny: [],
     views: {
-      LTP:        "ltp-revocations",
-      OFFICER:    "officer-revocations",
-      SUPER_ADMIN: "admin-revocations",
+      LTP: "ltp-revocations",
+      OFFICER: "officer-revocations",
+      ADMIN: "admin-revocations",
     },
   },
   // 10 — LTP Change
@@ -372,9 +372,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "ltp-changes",
     requiredAny: [],
     views: {
-      LTP:        "ltp-changes",
-      OFFICER:    "officer-ltp-changes",
-      SUPER_ADMIN: "admin-ltp-changes",
+      LTP: "ltp-changes",
+      OFFICER: "officer-ltp-changes",
+      ADMIN: "admin-ltp-changes",
     },
   },
   // 11 — Work Initiated
@@ -383,9 +383,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "work-initiated",
     requiredAny: [],
     views: {
-      LTP:        "ltp-work-initiated",
-      OFFICER:    "officer-work-initiated",
-      SUPER_ADMIN: "admin-work-initiated",
+      LTP: "ltp-work-initiated",
+      OFFICER: "officer-work-initiated",
+      ADMIN: "admin-work-initiated",
     },
   },
   // 12 — Occupancy
@@ -394,9 +394,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "occupancy",
     requiredAny: [],
     views: {
-      LTP:        "ltp-occupancy",
-      OFFICER:    "officer-occupancy",
-      SUPER_ADMIN: "admin-occupancy",
+      LTP: "ltp-occupancy",
+      OFFICER: "officer-occupancy",
+      ADMIN: "admin-occupancy",
     },
   },
   // 13 — Developers
@@ -405,9 +405,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "developers",
     requiredAny: [],
     views: {
-      LTP:        "ltp-developers",
-      OFFICER:    "officer-developers",
-      SUPER_ADMIN: "admin-developers",
+      LTP: "ltp-developers",
+      OFFICER: "officer-developers",
+      ADMIN: "admin-developers",
     },
   },
   // 14 — LTP (Licensed Technical Persons)
@@ -416,9 +416,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "professionals",
     requiredAny: [],
     views: {
-      LTP:        "ltp-professionals",
-      OFFICER:    "officer-professionals",
-      SUPER_ADMIN: "admin-professionals",
+      LTP: "ltp-professionals",
+      OFFICER: "officer-professionals",
+      ADMIN: "admin-professionals",
     },
   },
   // 15 — Outward
@@ -427,9 +427,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "outward",
     requiredAny: [],
     views: {
-      LTP:        "ltp-outward",
-      OFFICER:    "officer-outward",
-      SUPER_ADMIN: "admin-outward",
+      LTP: "ltp-outward",
+      OFFICER: "officer-outward",
+      ADMIN: "admin-outward",
     },
   },
   // 16 — Payments
@@ -438,9 +438,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "payments",
     requiredAny: [],
     views: {
-      LTP:        "ltp-payments",
-      OFFICER:    "officer-payments",
-      SUPER_ADMIN: "admin-payments",
+      LTP: "ltp-payments",
+      OFFICER: "officer-payments",
+      ADMIN: "admin-payments",
     },
   },
   // 17 — Documents
@@ -449,9 +449,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "documents",
     requiredAny: ["document:upload", "document:view", "document:verify", "document:reject"],
     views: {
-      LTP:        "ltp-documents",
-      OFFICER:    "officer-documents",
-      SUPER_ADMIN: "admin-documents",
+      LTP: "ltp-documents",
+      OFFICER: "officer-documents",
+      ADMIN: "admin-documents",
     },
   },
   // 18 — Reports
@@ -460,9 +460,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "reports",
     requiredAny: ["reports:view", "application:view_all", "sla:view", "officer_progress:view"],
     views: {
-      LTP:        "ltp-fees",
-      OFFICER:    "officer-reports",
-      SUPER_ADMIN: "admin-reports",
+      LTP: "ltp-fees",
+      OFFICER: "officer-reports",
+      ADMIN: "admin-reports",
     },
   },
   // 19 — Settings
@@ -471,9 +471,9 @@ const MODULE_DEFS: ModuleDef[] = [
     permKey: "settings",
     requiredAny: [],   // always visible — scope differs per portal
     views: {
-      LTP:        "ltp-profile",
-      OFFICER:    "officer-settings",
-      SUPER_ADMIN: "admin-settings",
+      LTP: "ltp-profile",
+      OFFICER: "officer-settings",
+      ADMIN: "admin-settings",
     },
   },
 ];
@@ -501,8 +501,8 @@ export function getDynamicNav(
     .filter((mod) => {
       // No permission requirement → always show
       if (mod.requiredAny.length === 0) return true;
-      // SUPER_ADMIN always sees everything
-      if (user.role === "SUPER_ADMIN") return true;
+      // ADMIN always sees everything
+      if (user.role === "ADMIN") return true;
       // Otherwise check if user has at least one required permission
       return mod.requiredAny.some((p) => effectivePerms.has(p));
     })

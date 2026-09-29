@@ -164,7 +164,7 @@ const ROLE_COLOR: Record<RoleKey, string> = {
   DIRECTOR: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-900",
   ADDITIONAL_COMMISSIONER: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900",
   COMMISSIONER: "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-900",
-  SUPER_ADMIN: "bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
+  ADMIN: "bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
 };
 
 export function RoleBadge({ role, label }: { role: RoleKey; label?: string }) {

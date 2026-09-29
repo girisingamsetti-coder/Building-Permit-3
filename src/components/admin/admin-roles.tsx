@@ -90,7 +90,7 @@ const ROLE_ORDER: RoleKey[] = [
   "DIRECTOR",
   "ADDITIONAL_COMMISSIONER",
   "COMMISSIONER",
-  "SUPER_ADMIN",
+  "ADMIN",
 ];
 
 const PERMISSION_CATEGORIES: { name: string; permissions: Permission[] }[] = [
@@ -501,7 +501,7 @@ export function AdminRoles() {
       >
         <Accordion type="single" collapsible className="w-full">
           {roleList
-            .filter((r) => r.key !== "SUPER_ADMIN")
+            .filter((r) => r.key !== "ADMIN")
             .map((r) => {
               const stages = WORKFLOW_STAGES.filter((s) => s.role === r.key);
               return (

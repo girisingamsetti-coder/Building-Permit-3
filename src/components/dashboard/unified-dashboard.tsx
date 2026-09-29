@@ -61,7 +61,7 @@ export function UnifiedDashboard() {
   const kpis = computeScopedKpis(scope.applications);
 
   const isLTP = user?.role === "LTP";
-  const isAdmin = user?.role === "SUPER_ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
+  const isAdmin = user?.role === "ADMIN" || user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER";
 
   const stageData = React.useMemo(() => {
     return applicationsByStage(scope.applications).map((d) => ({

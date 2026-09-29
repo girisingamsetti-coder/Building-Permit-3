@@ -50,35 +50,43 @@ export const NAV: Record<Portal, NavGroup[]> = {
     {
       label: "",
       items: [
-        { view: "officer-dashboard",    label: "Dashboard",    icon: LayoutDashboard },
+        { view: "officer-dashboard", label: "Dashboard", icon: LayoutDashboard },
         { view: "officer-applications", label: "Applications", icon: FileStack },
-        { view: "officer-occupancy",    label: "Occupancy",    icon: ClipboardList },
-        { view: "officer-tasks",        label: "Tasks",        icon: ClipboardList },
-        { view: "officer-shortfalls",   label: "Shortfalls",   icon: AlertTriangle },
-        { view: "officer-payments",     label: "Payments",     icon: CreditCard },
-        { view: "officer-documents",    label: "Documents",    icon: FolderClosed },
-        { view: "officer-reports",      label: "Reports",      icon: BarChart3 },
-        { view: "officer-settings",     label: "Settings",     icon: Settings },
+        { view: "officer-occupancy", label: "Occupancy", icon: ClipboardList },
+        { view: "officer-tasks", label: "Tasks", icon: ClipboardList },
+        { view: "officer-shortfalls", label: "Shortfalls", icon: AlertTriangle },
+        { view: "officer-payments", label: "Payments", icon: CreditCard },
+        { view: "officer-documents", label: "Documents", icon: FolderClosed },
+        { view: "officer-reports", label: "Reports", icon: BarChart3 },
+        { view: "officer-settings", label: "Settings", icon: Settings },
       ],
     },
   ],
 
   // ----------------------------------------------------------------
-  // SUPER_ADMIN — full system access including admin configuration
+  // ADMIN — full system access including admin configuration
   // ----------------------------------------------------------------
-  SUPER_ADMIN: [
-    {
-      label: "",
-      items: [
-        { view: "admin-dashboard",    label: "Dashboard",    icon: LayoutDashboard },
-        { view: "admin-applications", label: "Applications", icon: FileStack },
-        { view: "admin-tasks",        label: "Tasks",        icon: ClipboardList },
-        { view: "admin-shortfalls",   label: "Shortfalls",   icon: AlertTriangle },
-        { view: "admin-payments",     label: "Payments",     icon: CreditCard },
-        { view: "admin-documents",    label: "Documents",    icon: FolderClosed },
-        { view: "admin-reports",      label: "Reports",      icon: BarChart3 },
-        { view: "admin-settings",     label: "Settings",     icon: Settings },
-      ],
-    },
+
+},
   ],
 };
+// ADMIN — System administrator
+// ----------------------------------------------------------------
+ADMIN: [
+  {
+    label: "",
+    items: [
+      { view: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { view: "admin-applications", label: "Applications", icon: FileStack },
+      { view: "admin-occupancy", label: "Occupancy", icon: ClipboardList },
+      { view: "admin-tasks", label: "Tasks", icon: ClipboardList },
+      { view: "admin-shortfalls", label: "Shortfalls", icon: AlertTriangle },
+      { view: "admin-payments", label: "Payments", icon: CreditCard },
+      { view: "admin-documents", label: "Documents", icon: FolderClosed },
+      { view: "admin-reports", label: "Reports", icon: BarChart3 },
+      { view: "admin-settings", label: "Settings", icon: Settings },
+    ],
+  },
+],
+};
+

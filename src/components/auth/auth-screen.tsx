@@ -114,7 +114,7 @@ function BrandLogo({ compact = false }: { compact?: boolean }) {
 function LoginForm() {
   const { login, loginAsRole, setAuthStage, setPendingEmail } = useAppStore();
   const { toast } = useToast();
-  const [email, setEmail] = React.useState("admin@demo.gov.in");
+  const [email, setEmail] = React.useState("ltp@demo.gov.in");
   const [password, setPassword] = React.useState("demo1234");
   const [showPw, setShowPw] = React.useState(false);
   const [remember, setRemember] = React.useState(true);
@@ -122,7 +122,7 @@ function LoginForm() {
   const [emailError, setEmailError] = React.useState("");
   const [pwError, setPwError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [demoRole, setDemoRole] = React.useState<string>("");
+  const [demoRole, setDemoRole] = React.useState<string>("LTP");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
   const [version, setVersion] = React.useState<"v1" | "v2" | "v3" | "v4">("v4");
   const [mounted, setMounted] = React.useState(false);
@@ -416,7 +416,7 @@ function LoginForm() {
 
               {/* Quick Login Role Selector */}
               <div className="space-y-1 mb-2">
-                <Select onValueChange={handleDemoRoleSelect}>
+                <Select value={demoRole} onValueChange={handleDemoRoleSelect}>
                   <SelectTrigger className={cn(
                     "h-[50px] rounded-[12px] text-[15px] transition-all",
                     useAltBg ? "bg-white border-gray-300 text-gray-800 focus:ring-gray-300 focus:border-gray-400" : version === "v4" ? "bg-white/50 border-[#8c1c13]/20 text-[#8c1c13] focus:border-[#8c1c13]/40 focus:ring-1 focus:ring-[#8c1c13]/30" : "bg-white/10 border-white/20 text-white focus:border-white/40 focus:ring-1 focus:ring-white/30"

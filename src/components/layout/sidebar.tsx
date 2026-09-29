@@ -189,7 +189,7 @@ export function Sidebar() {
         {!collapsed ? (
           <div className="flex items-center gap-2.5">
             <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain" />
-            <h1 
+            <h1
               className="text-lg font-black tracking-widest text-[#801824]"
               style={{ fontFamily: "ui-rounded, 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif" }}
             >
@@ -212,8 +212,8 @@ export function Sidebar() {
             <ul className="space-y-0">
               {navItems.map((item) => {
                 if (item.permKey === "bim") {
-                  const view2D: ViewKey = portal === "SUPER_ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
-                  const view3D: ViewKey = portal === "SUPER_ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
+                  const view2D: ViewKey = portal === "ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";
+                  const view3D: ViewKey = portal === "ADMIN" ? "admin-bim" : portal === "OFFICER" ? "officer-bim" : "ltp-bim";
                   const is2DActive = view === view2D || view === "ltp-drawings";
                   const is3DActive = view === view3D;
 

@@ -109,15 +109,7 @@ export const ROLES: Record<RoleKey, Role> = {
     color: "purple",
     permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
   },
-  SUPER_ADMIN: {
-    key: "SUPER_ADMIN",
-    title: "Admin",
-    fullName: "System Administrator",
-    description: "Manages users, roles, configuration, fee structures and audit.",
-    level: 99,
-    color: "slate",
-    permissions: ["user:manage", "role:manage", "config:manage", "audit:view", "notifications:manage", "fee:manage", "application:view_all", "document:view", "drawing:view", "shortfall:view", "remarks:add", "reports:view", "officer_progress:view", "sla:view"],
-  },
+
 };
 
 // ============================================================
@@ -125,7 +117,6 @@ export const ROLES: Record<RoleKey, Role> = {
 // ============================================================
 export const USERS: User[] = [
   { id: "u-sysadmin-01", name: "System Admin", role: "ADMIN", email: "admin2@demo.gov.in", phone: "+91 99000 11000", employeeId: "ADM-0001", designation: "Administrator", zone: "Head Office", avatarColor: "purple", department: "IT", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
-  { id: "u-admin-01", name: "Shri. Kailash Patil", role: "SUPER_ADMIN", email: "admin@demo.gov.in", phone: "+91 99300 44881", employeeId: "MUN-ADM-0003", designation: "System Administrator", zone: "Head Office", avatarColor: "slate", department: "IT & e-Governance Cell", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
   { id: "u-ltp-01", name: "Ar. Vikram Deshpande", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14500", employeeId: "LTP-0001", designation: "Licensed Architect", zone: "Pune", avatarColor: "emerald", department: "Private", active: true, status: "ACTIVE", lastLogin: "2026-01-21T09:00:00" },
   { id: "u-tpa-01", name: "Shri. Suresh Kulkarni", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 94400 55120", employeeId: "TPA-0001", designation: "Town Planning Assistant", zone: "Zone-II", avatarColor: "teal", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T09:00:00" },
   { id: "u-zdd-01", name: "Smt. Meena Kulkarni", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 94411 66230", employeeId: "ZDD-0001", designation: "Zonal Deputy Director", zone: "Zone-II", avatarColor: "blue", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T10:00:00" },
@@ -142,7 +133,7 @@ export function getUserByRole(role: RoleKey): User {
 // DEMO CREDENTIALS
 // ============================================================
 export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string; label: string }[] = [
-  // { role: "SUPER_ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Admin" }, // Hidden for now
+  // { role: "ADMIN", email: "admin@demo.gov.in", password: "demo1234", label: "Admin" }, // Hidden for now
   { role: "ADMIN", email: "admin2@demo.gov.in", password: "demo1234", label: "Admin" },
   { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP (Architect)" },
   { role: "TPA", email: "tpa@demo.gov.in", password: "demo1234", label: "TPA (Town Planning Assistant)" },
@@ -340,9 +331,9 @@ function makeWorkflowHistory(
   const entries: WorkflowHistoryEntry[] = [];
   const actorMap: Record<string, { name: string; role: RoleKey }> = {
     APPLICATION_CREATED: { name: "Ar. Vikram Deshpande", role: "LTP" },
-    DRAWING_SCRUTINY: { name: "System (Auto-Scrutiny)", role: "SUPER_ADMIN" },
+    DRAWING_SCRUTINY: { name: "System (Auto-Scrutiny)", role: "ADMIN" },
     DOCUMENTS: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
-    FEE_GENERATED: { name: "System (Fee Engine)", role: "SUPER_ADMIN" },
+    FEE_GENERATED: { name: "System (Fee Engine)", role: "ADMIN" },
     PAYMENT: { name: "Ar. Vikram Deshpande", role: "LTP" },
     ZONAL_HEAD_REVIEW: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
     DIRECTOR_REVIEW: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
@@ -369,7 +360,7 @@ function makeWorkflowHistory(
       id: `wf-${appNo}-${idx}`,
       stage: s.key,
       stageLabel: s.label,
-      actor: actorMap[s.key] ?? { name: "System", role: "SUPER_ADMIN" },
+      actor: actorMap[s.key] ?? { name: "System", role: "ADMIN" },
       action: actionMap[s.key] ?? s.label,
       remarks: isCurrent && status === "SHORTFALL_RAISED" ? "Shortfall raised — response awaited." : undefined,
       timestamp: dates[idx] ?? "",
@@ -385,23 +376,23 @@ function makeAuditLog(appNo: string, stage: WorkflowStageKey, dates: string[]): 
   const actions = [
     { order: 0, user: "Ar. Vikram Deshpande", role: "LTP" as const, action: "Application created", old: undefined, new: "DRAFT" },
     { order: 0, user: "Ar. Vikram Deshpande", role: "LTP" as const, action: "Drawing v1 uploaded", old: "DRAFT", new: "DRAWING_UPLOADED" },
-    { order: 1, user: "System", role: "SUPER_ADMIN" as const, action: "Auto-scrutiny executed (v1)", old: "DRAWING_UPLOADED", new: "SCRUTINY_IN_PROGRESS" },
+    { order: 1, user: "System", role: "ADMIN" as const, action: "Auto-scrutiny executed (v1)", old: "DRAWING_UPLOADED", new: "SCRUTINY_IN_PROGRESS" },
   ];
   if (currentOrder >= 1) {
     entries.push({ id: "a1", user: "Ar. Vikram Deshpande", role: "LTP", action: "Application created", entity: "Application", entityId: appNo, timestamp: dates[0], newStatus: "DRAFT", ip: "103.21.58.10", device: "Chrome / Windows" });
     entries.push({ id: "a2", user: "Ar. Vikram Deshpande", role: "LTP", action: "Drawing v1 uploaded", entity: "Drawing", entityId: appNo, timestamp: dates[0], oldStatus: "DRAFT", newStatus: "DRAWING_UPLOADED", ip: "103.21.58.10", device: "Chrome / Windows" });
-    entries.push({ id: "a3", user: "System", role: "SUPER_ADMIN", action: "Auto-scrutiny executed (v1)", entity: "ScrutinyReport", entityId: appNo, timestamp: dates[0], oldStatus: "DRAWING_UPLOADED", newStatus: "SCRUTINY_PASSED", ip: "10.0.0.4", device: "System" });
+    entries.push({ id: "a3", user: "System", role: "ADMIN", action: "Auto-scrutiny executed (v1)", entity: "ScrutinyReport", entityId: appNo, timestamp: dates[0], oldStatus: "DRAWING_UPLOADED", newStatus: "SCRUTINY_PASSED", ip: "10.0.0.4", device: "System" });
   }
   if (currentOrder >= 2) {
     entries.push({ id: "a4", user: "Ar. Vikram Deshpande", role: "LTP", action: "Documents uploaded", entity: "Document", entityId: appNo, timestamp: dates[1], oldStatus: "SCRUTINY_PASSED", newStatus: "DOCUMENT_UPLOAD_PENDING", ip: "103.21.58.10", device: "Chrome / Windows" });
     entries.push({ id: "a5", user: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", action: "Documents verified", entity: "Document", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFICATION", newStatus: "DOCUMENT_VERIFIED", ip: "10.0.0.18", device: "Edge / Windows" });
   }
   if (currentOrder >= 3) {
-    entries.push({ id: "a6", user: "System", role: "SUPER_ADMIN", action: "Fee calculated", entity: "ApplicationFee", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFIED", newStatus: "FEE_GENERATED", ip: "10.0.0.4", device: "System" });
+    entries.push({ id: "a6", user: "System", role: "ADMIN", action: "Fee calculated", entity: "ApplicationFee", entityId: appNo, timestamp: dates[2], oldStatus: "DOCUMENT_VERIFIED", newStatus: "FEE_GENERATED", ip: "10.0.0.4", device: "System" });
   }
   if (currentOrder >= 4) {
     entries.push({ id: "a7", user: "Ar. Vikram Deshpande", role: "LTP", action: "Payment initiated", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "FEE_GENERATED", newStatus: "PAYMENT_PROCESSING", ip: "103.21.58.10", device: "Chrome / Windows" });
-    entries.push({ id: "a8", user: "Mock Payment Gateway", role: "SUPER_ADMIN", action: "Payment verified", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "PAYMENT_PROCESSING", newStatus: "PAYMENT_SUCCESS", ip: "10.0.0.4", device: "Webhook (Mock)" });
+    entries.push({ id: "a8", user: "Mock Payment Gateway", role: "ADMIN", action: "Payment verified", entity: "Payment", entityId: appNo, timestamp: dates[3], oldStatus: "PAYMENT_PROCESSING", newStatus: "PAYMENT_SUCCESS", ip: "10.0.0.4", device: "Webhook (Mock)" });
   }
   if (currentOrder >= 5) {
     entries.push({ id: "a9", user: "Smt. Meena Kulkarni", role: "ZONAL_HEAD", action: "Forwarded to TPA", entity: "Application", entityId: appNo, timestamp: dates[4], oldStatus: "ZONAL_HEAD_REVIEW", newStatus: "ZONAL_HEAD_REVIEW", ip: "10.0.0.18", device: "Edge / Windows", remarks: "Technical scrutiny complete. Drawings comply with DCR." });

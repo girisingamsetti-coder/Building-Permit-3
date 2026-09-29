@@ -729,7 +729,7 @@ export function Topbar() {
             <DropdownMenuItem onClick={() => navigate("ltp-profile")}>
               <User className="size-4" /> Profile
             </DropdownMenuItem>
-            {portal === "SUPER_ADMIN" && (
+            {portal === "ADMIN" && (
               <DropdownMenuItem onClick={() => navigate("admin-settings")}>
                 <Settings className="size-4" /> Settings
               </DropdownMenuItem>
@@ -842,7 +842,7 @@ function SwitchUserPanel() {
                       "bg-cyan-500": c.role === "DIRECTOR",
                       "bg-amber-500": c.role === "ADDITIONAL_COMMISSIONER",
                       "bg-rose-500": c.role === "COMMISSIONER",
-                      "bg-slate-600": c.role === "SUPER_ADMIN",
+                      "bg-slate-600": c.role === "ADMIN",
                     }
                   )}
                 >

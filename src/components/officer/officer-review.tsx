@@ -784,7 +784,7 @@ function RightPane({ app, user }: { app: Application; user: AppUser }) {
             <Badge variant="outline" className="text-[9px]">{app.drawings.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5">
-            <FolderClosed className="size-3.5" /> Documents
+            <FolderClosed className="size-3.5" /> Documentation
             <Badge variant="outline" className="text-[9px]">{app.documents.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="scrutiny" className="gap-1.5">

@@ -41,11 +41,11 @@ export function getDashboardScope(user: User | null, allApps: Application[], all
     return { user: {} as User, role: "LTP", applications: [], users: [], projectIds: [], isGlobal: false };
   }
 
-  // ---- SUPER_ADMIN: organization-wide ----
-  if (user.role === "SUPER_ADMIN") {
+  // ---- ADMIN: organization-wide ----
+  if (user.role === "ADMIN") {
     return {
       user,
-      role: "SUPER_ADMIN",
+      role: "ADMIN",
       applications: allApps,
       users: allUsers,
       projectIds: [],

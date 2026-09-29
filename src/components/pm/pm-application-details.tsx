@@ -48,6 +48,7 @@ import {
   FolderClosed,
   Upload,
   ReceiptIndianRupee,
+  Flame,
   AlertTriangle,
   History,
   MapPin,
@@ -133,11 +134,11 @@ export function PmApplicationDetails() {
           <TabsTrigger value="workflow" className="gap-1.5">
             <WorkflowIcon className="size-3.5" /> Workflow
           </TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5">
-            <FolderClosed className="size-3.5" /> Documents
-          </TabsTrigger>
           <TabsTrigger value="drawings" className="gap-1.5">
             <Upload className="size-3.5" /> Drawings
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5">
+            <FolderClosed className="size-3.5" /> Documentation
           </TabsTrigger>
           <TabsTrigger value="bim" className="gap-1.5">
             <Box className="size-3.5 text-cyan-600" /> BIM Module
@@ -145,6 +146,9 @@ export function PmApplicationDetails() {
           </TabsTrigger>
           <TabsTrigger value="fees" className="gap-1.5">
             <ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payments
+          </TabsTrigger>
+          <TabsTrigger value="nocs" className="gap-1.5">
+            <Flame className="size-3.5 text-orange-500" /> Apply for NOCs
           </TabsTrigger>
           <TabsTrigger value="shortfalls" className="gap-1.5">
             <AlertTriangle className="size-3.5" /> Shortfalls
@@ -179,6 +183,9 @@ export function PmApplicationDetails() {
         </TabsContent>
         <TabsContent value="fees" className="space-y-6">
           <FeesTab app={app} />
+        </TabsContent>
+        <TabsContent value="nocs" className="space-y-6">
+          <NocsTab app={app} />
         </TabsContent>
         <TabsContent value="shortfalls" className="space-y-6">
           <ShortfallsTab app={app} />
@@ -842,6 +849,59 @@ function FeesTab({ app }: { app: Application }) {
           </SectionCard>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---------- Apply for NOCs Tab ----------
+function NocsTab({ app }: { app: Application }) {
+  return (
+    <div className="space-y-6">
+      <SectionCard
+        title="Single Desk Statutory Clearances & NOCs"
+        description="Official inter-departmental clearances for building permission sanction"
+        icon={Flame}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-foreground">Fire Service NOC</span>
+              <Badge className="bg-emerald-500/10 text-emerald-700 text-[10px] font-bold">Approved</Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">AP State Disaster Response &amp; Fire Services (Rule 18)</p>
+            <p className="font-mono text-[10px] text-primary">AP/FIRE/NOC/2026/0412</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-foreground">Airport Clearance (AAI)</span>
+              <Badge variant="outline" className="text-[10px] font-bold">Exempted</Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Height &lt; 30m CCZM Obstacle Envelope</p>
+            <p className="font-mono text-[10px] text-muted-foreground">Within CCZM Zone</p>
+          </div>
+
+          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-foreground">Environmental (PCB/SEIAA)</span>
+              <Badge variant="outline" className="text-[10px] font-bold">Category B2</Badge>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Plot area &lt; 20,000 sq.m (Exempted)</p>
+            <p className="font-mono text-[10px] text-muted-foreground">SEIAA-AP-B2-EXEMPT</p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border p-4 bg-muted/20 space-y-3">
+          <h4 className="text-xs font-bold text-foreground">Water Bodies &amp; Irrigation Canals Buffer Clearance</h4>
+          <p className="text-xs text-muted-foreground">
+            The site boundaries have been checked against the APCRDA Master Plan GIS spatial layers. The parcel is certified to be located beyond 30m buffer from the Krishna river bank and irrigation channels.
+          </p>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="size-4 text-emerald-600" />
+            <span className="text-xs font-medium text-emerald-700">Canal buffer verification passed automatically by GIS Engine</span>
+          </div>
+        </div>
+      </SectionCard>
     </div>
   );
 }
