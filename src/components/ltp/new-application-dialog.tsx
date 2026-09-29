@@ -156,8 +156,15 @@ function ReviewCard({ title, step, onEdit, children }: { title: string; step: nu
   );
 }
 
-// ─── MAIN DIALOG ─────────────────────────────────────────────────────────────
-export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+export function NewApplicationDialog({
+  open,
+  onOpenChange,
+  onSelectScheme,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onSelectScheme?: (scheme: "LPS Layout" | "Non-LPS") => void;
+}) {
   const { user, createApplication, openApplication, navigate } = useAppStore();
   const { toast } = useToast();
 
@@ -326,74 +333,98 @@ export function NewApplicationDialog({ open, onOpenChange }: { open: boolean; on
     );
   }
 
-  // ── TYPE SELECTION SCREEN ─────────────────────────────────────────────────
+  // ── TYPE SELECTION SCREEN (LPS vs Non-LPS) ────────────────────────────────
   if (!typeSelected) {
     return (
       <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onOpenChange(false); } }}>
-        <DialogContent className="w-[95vw] max-w-5xl p-8 sm:p-10 gap-6 bg-[#FAF7F2] border-2 border-[#7A1316] rounded-2xl shadow-2xl">
-          <DialogTitle className="sr-only">Select application type</DialogTitle>
+        <DialogContent className="w-[95vw] max-w-4xl p-6 sm:p-8 gap-6 bg-[#FAF7F2] border-2 border-[#7A1316] rounded-2xl shadow-2xl">
+          <DialogTitle className="sr-only">Select application scheme</DialogTitle>
           
           {/* Header */}
           <div className="space-y-1.5 text-left border-b border-[#DCD5C8] pb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20">
+                APCRDA Capital City &amp; Zonal Region
+              </span>
+            </div>
             <h2 className="text-2xl font-black tracking-tight text-[#7A1316]">New application</h2>
-            <p className="text-xs text-slate-600 leading-relaxed max-w-4xl">
-              Choose what you are applying for. This decides the number series, the drawings required and the fees charged, and cannot be changed later.
+            <p className="text-xs text-slate-600 leading-relaxed max-w-2xl">
+              Choose the scheme for your application. Clicking on either option will immediately load the statutory form, drawings, and scrutiny rules for that application type.
             </p>
           </div>
 
-          {/* Content Options */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {APP_TYPES.map((t) => {
-              const Icon = t.icon;
-              const sel = selectedType === t.key;
-              const numberPrefix = t.key === "LAYOUT_APPROVAL" ? "Numbered LP/..." : "Numbered BP/...";
-              
-              return (
-                <button 
-                  key={t.key} 
-                  onClick={() => setSelectedType(t.key)}
-                  className={cn(
-                    "relative flex items-start gap-4 rounded-xl border-2 p-5 text-left transition-all duration-200 cursor-pointer", 
-                    sel ? "border-[#7A1316] bg-[#FBF3E4] shadow-sm ring-1 ring-[#7A1316]" : "border-[#DCD5C8] bg-white hover:border-[#7A1316]/60 hover:bg-[#FDF6ED]"
-                  )}
-                >
-                  <Icon className={cn("size-6 mt-0.5 shrink-0", sel ? "text-[#7A1316]" : "text-slate-500")} />
-                  <div className="flex flex-col gap-1 w-full">
-                    <p className={cn("text-base font-bold leading-snug", sel ? "text-[#7A1316]" : "text-slate-900")}>{t.label}</p>
-                    <p className="text-xs text-slate-500 mb-2">{t.desc}</p>
-                    
-                    <div className="flex flex-wrap items-center gap-2 mt-1">
-                      <span className="inline-flex items-center rounded-full border border-[#DCD5C8] bg-white px-3 py-0.5 text-xs font-semibold text-slate-700">
-                        {numberPrefix}
-                      </span>
-                      <span className="inline-flex items-center rounded-full border border-[#DCD5C8] bg-[#FAF4EB] px-3 py-0.5 text-xs font-bold text-[#7A1316]">
-                        Drawing scrutiny required
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
+          {/* 2 Buttons: LPS and Non LPS */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Button 1: LPS */}
+            <button 
+              id="dialog-btn-lps" 
+              onClick={() => {
+                if (onSelectScheme) {
+                  onSelectScheme("LPS Layout");
+                } else {
+                  setSelectedType("BUILDING_PERMISSION");
+                  setData((d) => ({
+                    ...d,
+                    general: { ...d.general, lpsLayout: "LPS Layout" },
+                  }));
+                  setTypeSelected(true);
+                }
+              }}
+              className="group relative flex flex-col p-6 rounded-2xl border-2 border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <span className="text-3xl font-black text-[#7A1316] group-hover:scale-105 transition-transform">LPS</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7A1316] text-white">LPS Layout</span>
+              </div>
+              <p className="text-sm font-bold text-slate-900 mb-1">Land Pooling Scheme Layout Application</p>
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                For plots situated inside the Amaravati Capital City Land Pooling Scheme. Includes LPS Block No, LPS Survey No, LPS Plot No, and APCRDA pre-approved zoning districts (R3).
+              </p>
+              <div className="mt-auto pt-4 border-t border-[#DCD5C8] flex items-center justify-between w-full">
+                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
+                  Open LPS Application <ArrowRight className="size-4" />
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">Fast-track Scrutiny</span>
+              </div>
+            </button>
+
+            {/* Button 2: Non LPS */}
+            <button 
+              id="dialog-btn-non-lps" 
+              onClick={() => {
+                if (onSelectScheme) {
+                  onSelectScheme("Non-LPS");
+                } else {
+                  setSelectedType("BUILDING_PERMISSION");
+                  setData((d) => ({
+                    ...d,
+                    general: { ...d.general, lpsLayout: "Non-LPS" },
+                  }));
+                  setTypeSelected(true);
+                }
+              }}
+              className="group relative flex flex-col p-6 rounded-2xl border-2 border-slate-300 hover:border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <span className="text-3xl font-black text-slate-800 group-hover:text-[#7A1316] group-hover:scale-105 transition-transform">Non LPS</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 group-hover:bg-[#7A1316] group-hover:text-white transition-colors">Non-LPS Layout</span>
+              </div>
+              <p className="text-sm font-bold text-slate-900 mb-1">Non-LPS / Revenue Village / Gramkantam</p>
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                For general revenue lands, Gramkantam, extended habitation, private layouts, and village settlement plots requiring Mandal, Village, and Survey verification.
+              </p>
+              <div className="mt-auto pt-4 border-t border-[#DCD5C8] flex items-center justify-between w-full">
+                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
+                  Open Non LPS Application <ArrowRight className="size-4" />
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">Standard Revenue Scrutiny</span>
+              </div>
+            </button>
           </div>
 
-          {/* Footer Info & Button */}
-          <div className="flex flex-col gap-4 mt-2">
-            <div className="rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] p-3 text-xs text-slate-700 leading-relaxed shadow-2xs">
-              An application number is issued as soon as you begin, and the file is saved as a draft. You can leave at any point and pick up where you left off — nothing is filed until you submit it.
-            </div>
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleStart} 
-                disabled={!selectedType} 
-                className={cn(
-                  "gap-2 rounded-lg px-6 py-2 text-xs font-bold transition-all shadow-xs cursor-pointer",
-                  selectedType ? "bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10]" : "bg-slate-200 text-slate-400"
-                )}
-              >
-                {!selectedType && <div className="size-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />}
-                Start application <ArrowRight className="size-4" />
-              </Button>
-            </div>
+          {/* Footer Info */}
+          <div className="rounded-lg border border-[#DCD5C8] bg-[#FBF3E4] p-3 text-xs text-slate-700 leading-relaxed shadow-2xs">
+            An application number is issued as soon as you begin, and the file is saved as a draft. You can leave at any point and pick up where you left off — nothing is filed until you submit it.
           </div>
         </DialogContent>
       </Dialog>

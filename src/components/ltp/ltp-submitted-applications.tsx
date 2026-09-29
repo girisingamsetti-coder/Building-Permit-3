@@ -10,6 +10,8 @@ import {
   FileSpreadsheet,
   Plus,
   RefreshCw,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
@@ -22,6 +24,7 @@ export interface SubmissionItem {
   status: string;
   owner: string;
   appId?: string;
+  lpsType?: "LPS Layout" | "Non-LPS";
 }
 
 const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
@@ -83,6 +86,7 @@ export function LtpSubmittedApplications({
   const [sortField, setSortField] = React.useState<keyof SubmissionItem>("submittedDate");
   const [sortAsc, setSortAsc] = React.useState(false);
   const [createDropdownOpen, setCreateDropdownOpen] = React.useState(false);
+  const [isSelectingScheme, setIsSelectingScheme] = React.useState(false);
   const [selectedSubmission, setSelectedSubmission] = React.useState<SubmissionItem | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
@@ -228,6 +232,22 @@ export function LtpSubmittedApplications({
     document.body.removeChild(link);
   };
 
+  const handleCreateNewApp = (scheme: "LPS Layout" | "Non-LPS") => {
+    setIsSelectingScheme(false);
+    const now = new Date();
+    const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
+    const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+    setSelectedSubmission({
+      id: `sub-new-${Date.now()}`,
+      baNo: newDraftNo,
+      permissionType: scheme === "LPS Layout" ? "LPS Building Permission" : "Building Permission",
+      submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
+      status: "Draft",
+      owner: "",
+      lpsType: scheme,
+    });
+  };
+
   // If user opened a specific submitted application, render the full details view
   if (selectedSubmission) {
     return (
@@ -236,8 +256,91 @@ export function LtpSubmittedApplications({
         proposalStatus={selectedSubmission.status}
         submissionDate={selectedSubmission.submittedDate}
         isDraft={false}
+        initialLpsType={selectedSubmission.lpsType || (selectedSubmission.baNo.includes("/LPS/") ? "LPS Layout" : "Non-LPS")}
         onBack={() => setSelectedSubmission(null)}
       />
+    );
+  }
+
+  // If user selected to create a new application, show the screen with 2 buttons: "LPS" and "Non LPS"
+  if (isSelectingScheme) {
+    return (
+      <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 flex flex-col font-sans text-slate-800 overflow-y-auto">
+        {/* Top Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-[#DCD5C8] shrink-0">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSelectingScheme(false)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#DCD5C8] bg-white text-xs font-bold text-slate-700 hover:bg-[#FBF3E4] hover:text-[#7A1316] transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="size-4" /> Back to Submissions
+            </button>
+            <div>
+              <h1 className="text-xl font-black text-[#7A1316] tracking-tight">New Application</h1>
+              <p className="text-xs text-slate-600">Select application scheme to open respective statutory form</p>
+            </div>
+          </div>
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20">
+            APCRDA Capital City &amp; Zonal Region
+          </span>
+        </div>
+
+        {/* Center Contents: 2 Buttons "LPS" and "Non LPS" */}
+        <div className="max-w-4xl w-full mx-auto my-auto py-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-black text-[#7A1316] tracking-tight">Select Application Scheme</h2>
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl mx-auto">
+              Please choose whether your site is part of the Amaravati Land Pooling Scheme (LPS) or a Non-LPS layout.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Button 1: LPS */}
+            <button
+              id="sub-new-app-btn-lps"
+              onClick={() => handleCreateNewApp("LPS Layout")}
+              className="group relative flex flex-col p-6 rounded-2xl border-2 border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <span className="text-3xl font-black text-[#7A1316] group-hover:scale-105 transition-transform">LPS</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7A1316] text-white">LPS Layout</span>
+              </div>
+              <p className="text-xs font-bold text-slate-900 mb-1">Land Pooling Scheme Layout Application</p>
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                For plots situated inside the Amaravati Capital City Land Pooling Scheme. Includes LPS Block No, LPS Survey No, LPS Plot No, and APCRDA pre-approved zoning districts (R3).
+              </p>
+              <div className="mt-auto pt-3 border-t border-[#DCD5C8] flex items-center justify-between w-full">
+                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
+                  Open LPS Application <ArrowRight className="size-4" />
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">Fast-track Scrutiny</span>
+              </div>
+            </button>
+
+            {/* Button 2: Non LPS */}
+            <button
+              id="sub-new-app-btn-non-lps"
+              onClick={() => handleCreateNewApp("Non-LPS")}
+              className="group relative flex flex-col p-6 rounded-2xl border-2 border-slate-300 hover:border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
+            >
+              <div className="flex items-center justify-between w-full mb-3">
+                <span className="text-3xl font-black text-slate-800 group-hover:text-[#7A1316] group-hover:scale-105 transition-transform">Non LPS</span>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 group-hover:bg-[#7A1316] group-hover:text-white transition-colors">Non-LPS Layout</span>
+              </div>
+              <p className="text-xs font-bold text-slate-900 mb-1">Non-LPS / Revenue Village / Gramkantam</p>
+              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                For general revenue lands, Gramkantam, extended habitation, private layouts, and village settlement plots requiring Mandal, Village, and Survey verification.
+              </p>
+              <div className="mt-auto pt-3 border-t border-[#DCD5C8] flex items-center justify-between w-full">
+                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
+                  Open Non LPS Application <ArrowRight className="size-4" />
+                </span>
+                <span className="text-[11px] text-slate-500 font-medium">Standard Revenue Scrutiny</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -326,61 +429,50 @@ export function LtpSubmittedApplications({
           )}
         </div>
 
-        {/* Create New Dropdown (Maroon & Beige Theme) */}
+        {/* Create New / New Application Button (Maroon & Beige Theme) */}
         <div className="relative shrink-0 self-start xl:self-auto" ref={dropdownRef}>
-          <button
-            onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded flex items-center justify-between gap-2.5 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-          >
-            <span>Create New</span>
-            <ChevronDown
-              className={cn("size-3.5 transition-transform duration-200", createDropdownOpen && "rotate-180")}
-            />
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => setIsSelectingScheme(true)}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded-l flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
+            >
+              <Plus className="size-3.5" />
+              <span>New Application</span>
+            </button>
+            <button
+              onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
+              title="Quick select scheme"
+              className="bg-[#630E10] hover:bg-[#7A1316] text-white font-bold text-xs h-[34px] px-2 rounded-r flex items-center justify-center shadow-xs transition-colors cursor-pointer border-t border-r border-b border-[#630E10]"
+            >
+              <ChevronDown className={cn("size-3.5 transition-transform duration-200", createDropdownOpen && "rotate-180")} />
+            </button>
+          </div>
 
           {/* Dropdown Menu */}
           {createDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 z-50 w-52 rounded border-2 border-[#7A1316] bg-[#FBF3E4] shadow-lg py-1 overflow-hidden animate-in fade-in-50 zoom-in-95">
+            <div className="absolute right-0 top-full mt-1 z-50 w-60 rounded border-2 border-[#7A1316] bg-[#FBF3E4] shadow-lg py-1 overflow-hidden animate-in fade-in-50 zoom-in-95">
               <div className="px-3 py-1.5 text-xs font-black text-[#7A1316] border-b border-[#E0D2BE] bg-[#F5EBE1]/80">
-                Create New
+                Select Scheme Type
               </div>
               <button
                 onClick={() => {
                   setCreateDropdownOpen(false);
-                  const now = new Date();
-                  const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/BP/${now.getFullYear()}`;
-                  setSelectedSubmission({
-                    id: `sub-new-${Date.now()}`,
-                    baNo: newDraftNo,
-                    permissionType: "Building Permission",
-                    submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
-                    status: "Draft",
-                    owner: "",
-                  });
+                  handleCreateNewApp("LPS Layout");
                 }}
                 className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
               >
-                <span>Building Permission</span>
-                <Plus className="size-3 text-slate-400 group-hover:text-white" />
+                <span>LPS Application</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 group-hover:bg-white group-hover:text-[#7A1316]">LPS</span>
               </button>
               <button
                 onClick={() => {
                   setCreateDropdownOpen(false);
-                  const now = new Date();
-                  const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/GD/${now.getFullYear()}`;
-                  setSelectedSubmission({
-                    id: `sub-new-${Date.now()}`,
-                    baNo: newDraftNo,
-                    permissionType: "Group Development",
-                    submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
-                    status: "Draft",
-                    owner: "",
-                  });
+                  handleCreateNewApp("Non-LPS");
                 }}
                 className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
               >
-                <span>Group Development</span>
-                <Plus className="size-3 text-slate-400 group-hover:text-white" />
+                <span>Non-LPS Application</span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 group-hover:bg-white group-hover:text-[#7A1316]">Non-LPS</span>
               </button>
             </div>
           )}

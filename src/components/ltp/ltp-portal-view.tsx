@@ -40,6 +40,10 @@ export function LtpPortalView() {
   const user = useAppStore((s) => s.user);
   const openApplication = useAppStore((s) => s.openApplication);
   const [newAppOpen, setNewAppOpen] = React.useState(false);
+  const [activeNewApp, setActiveNewApp] = React.useState<{
+    baNo: string;
+    scheme: "LPS Layout" | "Non-LPS";
+  } | null>(null);
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const userApps = applications;
@@ -372,12 +376,40 @@ export function LtpPortalView() {
     }
   };
 
+  if (activeNewApp) {
+    return (
+      <div className="h-full w-full overflow-hidden p-0 bg-[#FAF7F2]">
+        <LtpSubmissionDetails
+          baNo={activeNewApp.baNo}
+          proposalStatus="Draft"
+          submissionDate={`${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`}
+          isDraft={true}
+          initialLpsType={activeNewApp.scheme}
+          onBack={() => setActiveNewApp(null)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("h-full w-full", (ltpActiveMenu === "dashboard" || ltpActiveMenu === "draft-application" || ltpActiveMenu === "submitted-applications") ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-hidden p-4 bg-[#F8F9FA]")}>
       {renderContent()}
 
       {/* New Application Dialog */}
-      <NewApplicationDialog open={newAppOpen} onOpenChange={setNewAppOpen} />
+      <NewApplicationDialog
+        open={newAppOpen}
+        onOpenChange={setNewAppOpen}
+        onSelectScheme={(scheme) => {
+          setNewAppOpen(false);
+          const now = new Date();
+          const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
+          const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+          setActiveNewApp({
+            baNo: newDraftNo,
+            scheme,
+          });
+        }}
+      />
     </div>
   );
 }
