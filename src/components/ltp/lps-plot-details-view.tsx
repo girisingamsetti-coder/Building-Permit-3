@@ -425,17 +425,6 @@ export function LpsPlotDetailsView({
                   Enter or select the LPS Plot Code below. Statutory cadastral and GIS records will be fetched directly from APCRDA Geoportal.
                 </p>
               </div>
-              {plotData && (
-                <button
-                  onClick={() => {
-                    setPlotData(null);
-                    setSelectedPlotCode("");
-                  }}
-                  className="text-xs font-bold text-[#7A1316] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
-                >
-                  <RotateCcw className="size-3.5" /> Search Another Plot
-                </button>
-              )}
             </div>
 
             {/* Input & Dropdown Row */}
@@ -529,6 +518,20 @@ export function LpsPlotDetailsView({
                     <Search className="size-4" /> Fetch Plot Details
                   </>
                 )}
+              </button>
+
+              {/* Reload / Reset Search Button */}
+              <button
+                type="button"
+                id="reload-plot-btn"
+                onClick={() => {
+                  setPlotData(null);
+                  setSelectedPlotCode("");
+                }}
+                title="Reset / Reload plot search"
+                className="size-10 rounded-lg border-2 border-[#7A1316] bg-white hover:bg-[#FBF3E4] text-[#7A1316] flex items-center justify-center transition-all cursor-pointer shadow-xs shrink-0"
+              >
+                <RotateCcw className="size-4" />
               </button>
             </div>
           </div>
