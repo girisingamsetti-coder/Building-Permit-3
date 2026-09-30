@@ -398,11 +398,8 @@ export function LpsPlotDetailsView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-[#7A1316]">
-                APCRDA Geoportal LPS Plot Search
-              </span>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20">
-                Land Pooling Scheme
+              <span className="text-xs sm:text-sm font-bold text-[#7A1316]">
+                Enter plot code
               </span>
             </div>
             <p className="text-xs text-slate-600 mt-0.5">
