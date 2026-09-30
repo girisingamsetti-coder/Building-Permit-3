@@ -760,31 +760,6 @@ export function LtpSubmissionDetails({
             </div>
           </div>
 
-          {/* Card Bottom Next Action */}
-          <div
-            className="pt-2.5 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2"
-          >
-            <span className="text-[11px] sm:text-xs text-slate-500 italic">
-              Verify all applicant details before proceeding to plot details.
-            </span>
-            <button
-              type="button"
-              onClick={(e) => {
-                showToast("Applicant Information verified and saved.");
-                if (subTab === "applicant") {
-                  setSubTab("plot");
-                }
-                const el = document.getElementById("lps-plot-details-section") || document.getElementById("lps-plot-code-input");
-                if (el) {
-                  el.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5 group shrink-0"
-            >
-              <span>Next: Plot Details</span>
-              <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-          </div>
         </div>
       )}
     </div>
