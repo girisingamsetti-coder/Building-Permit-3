@@ -1009,8 +1009,6 @@ export function LtpSubmissionDetails({
         <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
           {[
             { id: "general", label: "General Information" },
-            { id: "applicant", label: "Applicant Information" },
-            { id: "plot", label: "Plot Details" },
           ].map((tab) => (
             <button
               key={tab.id}
