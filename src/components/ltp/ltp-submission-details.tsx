@@ -1063,7 +1063,7 @@ export function LtpSubmissionDetails({
                 initialPlotCode={initialPlotCode || ""}
                 onPlotLoaded={handleLpsPlotLoaded}
                 onSaveAndNext={() => {
-                  showToast("LPS Plot & Application details successfully verified and submitted.");
+                  showToast("Application saved successfully!");
                   setSubmissionSuccessModal(true);
                 }}
                 onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
@@ -3424,7 +3424,7 @@ export function LtpSubmissionDetails({
               <div className="flex items-center gap-2.5">
                 <CheckCircle2 className="size-5 text-emerald-400" />
                 <h3 className="font-black text-sm uppercase tracking-wide">
-                  Application Submitted Successfully
+                  Application Saved Successfully
                 </h3>
               </div>
               <button
@@ -3442,10 +3442,10 @@ export function LtpSubmissionDetails({
                 <ShieldCheck className="size-5 text-emerald-700 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-emerald-900 text-xs">
-                    Statutory Submission Completed
+                    Application Saved Successfully
                   </h4>
                   <p className="text-emerald-800 text-[11px] mt-0.5 leading-relaxed">
-                    Your building permission proposal along with all mandatory documents and checklists has been transmitted to APCRDA Town Planning &amp; Scrutiny Department.
+                    Your building permission proposal and plot details have been saved successfully. You can download the application form or proceed to drawing submission.
                   </p>
                 </div>
               </div>
@@ -3476,11 +3476,12 @@ export function LtpSubmissionDetails({
               <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
                 <button
                   type="button"
-                  onClick={() => showToast(`Downloading official submission receipt for ${baNo}...`)}
+                  id="download-form-btn"
+                  onClick={() => showToast(`Downloading official application form for ${baNo}...`)}
                   className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Download className="size-3.5 text-[#7A1316]" />
-                  <span>Download Receipt</span>
+                  <span>Download Form</span>
                 </button>
                 <button
                   type="button"
