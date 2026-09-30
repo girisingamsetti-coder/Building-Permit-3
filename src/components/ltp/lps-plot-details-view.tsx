@@ -95,6 +95,7 @@ export interface LpsPlotRecord {
   test: string;
   geoportalInsertedTs: string;
   geoportalUpdatedTs: string;
+  [key: string]: any;
 }
 
 export const LPS_SAMPLE_RECORDS: Record<string, LpsPlotRecord> = {
@@ -330,6 +331,7 @@ interface LpsPlotDetailsViewProps {
   onSaveAndNext?: () => void;
   onBack?: () => void;
   initialPlotCode?: string;
+  applicantSlot?: React.ReactNode;
   structuralEngineerSlot?: React.ReactNode;
 }
 
@@ -338,6 +340,7 @@ export function LpsPlotDetailsView({
   onSaveAndNext,
   onBack,
   initialPlotCode = "",
+  applicantSlot,
   structuralEngineerSlot,
 }: LpsPlotDetailsViewProps) {
   const [selectedPlotCode, setSelectedPlotCode] = React.useState<string>(initialPlotCode);
@@ -393,135 +396,144 @@ export function LpsPlotDetailsView({
 
   return (
     <div className="w-full space-y-6 font-sans text-slate-800">
-      {/* ── PLOT CODE INQUIRY & SEARCH BAR ── */}
-      <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-base sm:text-lg font-black text-[#7A1316] tracking-tight">
-                Enter plot code
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 mt-0.5">
-              Enter or select the LPS Plot Code below. Statutory cadastral and GIS records will be fetched directly from APCRDA Geoportal.
-            </p>
-          </div>
-          {plotData && (
-            <button
-              onClick={() => {
-                setPlotData(null);
-                setSelectedPlotCode("");
-              }}
-              className="text-xs font-bold text-[#7A1316] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
-            >
-              <RotateCcw className="size-3.5" /> Search Another Plot
-            </button>
-          )}
+      {/* ── TOP SECTION: 50% Applicant Info on Left | 50% Search & Structural on Right ── */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+        {/* Left Column: Applicant Information Card (50% width) */}
+        <div className="w-full min-w-0">
+          {applicantSlot}
         </div>
 
-        {/* Input & Dropdown Row */}
-        <div className="flex flex-wrap items-center gap-3 pt-1">
-          <div className="relative w-full sm:w-96 md:w-[440px]" ref={dropdownRef}>
-            <div className="relative flex items-center">
-              <input
-                type="text"
-                id="lps-plot-code-input"
-                value={selectedPlotCode}
-                onChange={(e) => setSelectedPlotCode(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && selectedPlotCode.trim()) {
-                    fetchPlotDetails(selectedPlotCode);
-                  }
-                }}
-                placeholder="Enter Plot Code (e.g. 23-723-3603-4-C20)"
-                className="w-full h-10 bg-white border-2 border-[#7A1316] rounded-lg pl-3 pr-9 text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7A1316]/20"
-              />
+        {/* Right Column: Enter plot code card & Structural Engineer Info Card (50% width) */}
+        <div className="w-full min-w-0 space-y-4">
+          {/* ── PLOT CODE INQUIRY & SEARCH BAR ── */}
+          <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-base sm:text-lg font-black text-[#7A1316] tracking-tight">
+                    Enter plot code
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Enter or select the LPS Plot Code below. Statutory cadastral and GIS records will be fetched directly from APCRDA Geoportal.
+                </p>
+              </div>
+              {plotData && (
+                <button
+                  onClick={() => {
+                    setPlotData(null);
+                    setSelectedPlotCode("");
+                  }}
+                  className="text-xs font-bold text-[#7A1316] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                >
+                  <RotateCcw className="size-3.5" /> Search Another Plot
+                </button>
+              )}
+            </div>
+
+            {/* Input & Dropdown Row */}
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <div className="relative w-full sm:w-96 md:w-[440px]" ref={dropdownRef}>
+                <div className="relative flex items-center">
+                  <input
+                    type="text"
+                    id="lps-plot-code-input"
+                    value={selectedPlotCode}
+                    onChange={(e) => setSelectedPlotCode(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && selectedPlotCode.trim()) {
+                        fetchPlotDetails(selectedPlotCode);
+                      }
+                    }}
+                    placeholder="Enter Plot Code (e.g. 23-723-3603-4-C20)"
+                    className="w-full h-10 bg-white border-2 border-[#7A1316] rounded-lg pl-3 pr-9 text-xs sm:text-sm font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#7A1316]/20"
+                  />
+                  <button
+                    type="button"
+                    id="lps-plot-code-dropdown-toggle"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="absolute right-2 p-1 text-slate-500 hover:text-[#7A1316] cursor-pointer"
+                    title="Select from sample plot codes"
+                  >
+                    <ChevronDown className={cn("size-4 transition-transform", isDropdownOpen && "rotate-180")} />
+                  </button>
+                </div>
+
+                {/* Dropdown Options */}
+                {isDropdownOpen && (
+                  <div
+                    id="lps-plot-code-dropdown-menu"
+                    className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border-2 border-[#7A1316] bg-white shadow-xl py-1 overflow-hidden animate-in fade-in-50 zoom-in-95"
+                  >
+                    <div className="px-3 py-1.5 text-[11px] font-black text-[#7A1316] bg-[#F5EBE1] border-b border-[#DCD5C8]">
+                      Select Sample LPS Plot Code
+                    </div>
+                    {Object.keys(LPS_SAMPLE_RECORDS).map((code) => {
+                      const rec = LPS_SAMPLE_RECORDS[code];
+                      return (
+                        <button
+                          key={code}
+                          type="button"
+                          onClick={() => handleSelectCode(code)}
+                          className={cn(
+                            "w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer flex flex-col gap-0.5 border-b border-slate-100 last:border-b-0",
+                            selectedPlotCode === code
+                              ? "bg-[#FDF6ED] text-[#7A1316] font-bold"
+                              : "hover:bg-[#FAF4EB] text-slate-800"
+                          )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900">{code}</span>
+                            {code === "23-723-3603-4-C20" && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
+                                Example from Blueprint
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[11px] text-slate-500">
+                            {rec.village} · Block {rec.block} · Plot {rec.plotNumber} · Owner: {rec.owners}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               <button
                 type="button"
-                id="lps-plot-code-dropdown-toggle"
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="absolute right-2 p-1 text-slate-500 hover:text-[#7A1316] cursor-pointer"
-                title="Select from sample plot codes"
+                id="fetch-plot-btn"
+                disabled={!selectedPlotCode || isLoading}
+                onClick={() => fetchPlotDetails(selectedPlotCode)}
+                className={cn(
+                  "h-10 px-5 rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0",
+                  selectedPlotCode && !isLoading
+                    ? "bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10]"
+                    : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300"
+                )}
               >
-                <ChevronDown className={cn("size-4 transition-transform", isDropdownOpen && "rotate-180")} />
+                {isLoading ? (
+                  <>
+                    <div className="size-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                    Fetching Geoportal...
+                  </>
+                ) : (
+                  <>
+                    <Search className="size-4" /> Fetch Plot Details
+                  </>
+                )}
               </button>
             </div>
-
-            {/* Dropdown Options */}
-            {isDropdownOpen && (
-              <div
-                id="lps-plot-code-dropdown-menu"
-                className="absolute left-0 right-0 top-full mt-1 z-50 rounded-lg border-2 border-[#7A1316] bg-white shadow-xl py-1 overflow-hidden animate-in fade-in-50 zoom-in-95"
-              >
-                <div className="px-3 py-1.5 text-[11px] font-black text-[#7A1316] bg-[#F5EBE1] border-b border-[#DCD5C8]">
-                  Select Sample LPS Plot Code
-                </div>
-                {Object.keys(LPS_SAMPLE_RECORDS).map((code) => {
-                  const rec = LPS_SAMPLE_RECORDS[code];
-                  return (
-                    <button
-                      key={code}
-                      type="button"
-                      onClick={() => handleSelectCode(code)}
-                      className={cn(
-                        "w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer flex flex-col gap-0.5 border-b border-slate-100 last:border-b-0",
-                        selectedPlotCode === code
-                          ? "bg-[#FDF6ED] text-[#7A1316] font-bold"
-                          : "hover:bg-[#FAF4EB] text-slate-800"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">{code}</span>
-                        {code === "23-723-3603-4-C20" && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
-                            Example from Blueprint
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[11px] text-slate-500">
-                        {rec.village} · Block {rec.block} · Plot {rec.plotNumber} · Owner: {rec.owners}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
           </div>
 
-          <button
-            type="button"
-            id="fetch-plot-btn"
-            disabled={!selectedPlotCode || isLoading}
-            onClick={() => fetchPlotDetails(selectedPlotCode)}
-            className={cn(
-              "h-10 px-5 rounded-lg text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer shrink-0",
-              selectedPlotCode && !isLoading
-                ? "bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10]"
-                : "bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300"
-            )}
-          >
-            {isLoading ? (
-              <>
-                <div className="size-3.5 rounded-full border-2 border-white border-t-transparent animate-spin" />
-                Fetching Geoportal...
-              </>
-            ) : (
-              <>
-                <Search className="size-4" /> Fetch Plot Details
-              </>
-            )}
-          </button>
+          {/* ── STRUCTURAL ENGINEER INFO CARD (Placed below Plot Search Card) ── */}
+          {structuralEngineerSlot}
         </div>
-
       </div>
 
-      {/* ── STRUCTURAL ENGINEER INFO CARD (Placed below Plot Search Card) ── */}
-      {structuralEngineerSlot}
-
-
-      {/* ── PLOT DETAILS REPORT (Separated into thematic cards using screen space) ── */}
+      {/* ── PLOT DETAILS REPORT (Arranged properly across the screen) ── */}
       {plotData && (
-        <div id="lps-plot-details-section" className="space-y-5">
+        <div id="lps-plot-details-section" className="space-y-5 pt-1">
           {/* Top Plot Summary Bar */}
           <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
@@ -550,8 +562,8 @@ export function LpsPlotDetailsView({
             </div>
           </div>
 
-          {/* 2-Column Responsive Grid of Individual Thematic Cards */}
-          <div className="grid grid-cols-1 2xl:grid-cols-2 gap-5 items-start">
+          {/* 2-Column Responsive Grid across the entire screen */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
             {/* ═══════════════════════════════════════════════════ */}
             {/* COLUMN 1                                            */}
             {/* ═══════════════════════════════════════════════════ */}

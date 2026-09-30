@@ -577,11 +577,11 @@ export function LtpSubmissionDetails({
   };
 
   const renderApplicantCard = (compact: boolean = false) => (
-    <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+    <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden">
       <button
         type="button"
         onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
-        className="w-full bg-[#7A1316] text-white px-3.5 py-1.5 text-xs font-bold flex items-center justify-between cursor-pointer"
+        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
       >
         <span className="flex items-center gap-1.5 tracking-wide">
           <span className="text-xs font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
@@ -1055,26 +1055,17 @@ export function LtpSubmissionDetails({
         {mainTab === "form" && subTab === "general" && (
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-                {/* Left Column: Applicant Information Card (50% width) */}
-                <div className="w-full min-w-0 space-y-4">
-                  {renderApplicantCard(true)}
-                </div>
-
-                {/* Right Column: Plot Search Card, Structural Engineer Info Card & Plot Details Report (50% width) */}
-                <div className="w-full min-w-0 space-y-5">
-                  <LpsPlotDetailsView
-                    initialPlotCode={initialPlotCode || ""}
-                    onPlotLoaded={handleLpsPlotLoaded}
-                    onSaveAndNext={() => {
-                      showToast("LPS Plot & Application details successfully verified and submitted.");
-                      setSubmissionSuccessModal(true);
-                    }}
-                    onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
-                    structuralEngineerSlot={renderStructuralEngineerCard(true, true)}
-                  />
-                </div>
-              </div>
+              <LpsPlotDetailsView
+                initialPlotCode={initialPlotCode || ""}
+                onPlotLoaded={handleLpsPlotLoaded}
+                onSaveAndNext={() => {
+                  showToast("LPS Plot & Application details successfully verified and submitted.");
+                  setSubmissionSuccessModal(true);
+                }}
+                onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
+                applicantSlot={renderApplicantCard(true)}
+                structuralEngineerSlot={renderStructuralEngineerCard(true, true)}
+              />
             </div>
           ) : (
             <div className="w-full bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
