@@ -1056,7 +1056,12 @@ export function LtpSubmissionDetails({
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
               <div className="flex flex-col xl:flex-row gap-6 items-start">
-                {/* Left Column: Plot Search Card, Structural Engineer Info Card & Plot Details Card (55% width) */}
+                {/* Left Column: Applicant Information Card */}
+                <div className="w-full xl:w-[calc(45%-12px)] min-w-0 space-y-4">
+                  {renderApplicantCard(true)}
+                </div>
+
+                {/* Right Column: Plot Search Card, Structural Engineer Info Card & Plot Details Report */}
                 <div className="w-full xl:w-[calc(55%-12px)] min-w-0 space-y-5">
                   <LpsPlotDetailsView
                     initialPlotCode={initialPlotCode || ""}
@@ -1068,11 +1073,6 @@ export function LtpSubmissionDetails({
                     onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
                     structuralEngineerSlot={renderStructuralEngineerCard(true, true)}
                   />
-                </div>
-
-                {/* Right Column: Applicant Information Card (increased width: 45%) */}
-                <div className="w-full xl:w-[calc(45%-12px)] min-w-0 space-y-4">
-                  {renderApplicantCard(true)}
                 </div>
               </div>
             </div>
