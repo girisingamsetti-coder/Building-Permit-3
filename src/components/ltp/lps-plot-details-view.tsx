@@ -398,7 +398,7 @@ export function LpsPlotDetailsView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-bold text-[#7A1316]">
+              <span className="text-base sm:text-lg font-black text-[#7A1316] tracking-tight">
                 Enter plot code
               </span>
             </div>
