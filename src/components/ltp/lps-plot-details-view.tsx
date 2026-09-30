@@ -997,7 +997,7 @@ export function LpsPlotDetailsView({
                   className="px-10 py-2.5 rounded-lg bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center gap-2 border border-[#630E10]"
                 >
                   <CheckCircle2 className="size-4" />
-                  <span>Submit</span>
+                  <span>Save &amp; Continue</span>
                 </button>
               )}
             </div>
