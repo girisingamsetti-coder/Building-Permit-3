@@ -187,14 +187,19 @@ export function Sidebar() {
       {/* Brand */}
       <div className={cn("flex h-16 items-center justify-center border-b px-4", currentTheme.brand)}>
         {!collapsed ? (
-          <div className="flex items-center gap-2.5">
-            <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain" />
-            <h1
-              className="text-lg font-black tracking-widest text-[#801824]"
-              style={{ fontFamily: "ui-rounded, 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif" }}
-            >
-              BHAVANA NIRMAAN
-            </h1>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain shrink-0" />
+            <div className="min-w-0">
+              <h1
+                className="text-[13px] font-black tracking-wide text-[#801824] leading-tight"
+                style={{ fontFamily: "ui-rounded, 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif" }}
+              >
+                Building Permission
+              </h1>
+              <p className="text-[11px] font-semibold text-[#801824]/70 tracking-wide leading-tight">
+                Approval System
+              </p>
+            </div>
           </div>
         ) : (
           <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain" />
