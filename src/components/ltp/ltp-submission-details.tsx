@@ -337,7 +337,7 @@ export function LtpSubmissionDetails({
 
   // Applicant's Information
   const [applicantUseType, setApplicantUseType] = React.useState<"Self Use" | "Selling">("Self Use");
-  const [ownerName, setOwnerName] = React.useState("Vadduri Veeraiah");
+  const [ownerName, setOwnerName] = React.useState("NANNAPANENI RAMBABU");
   const [applicantRoadStreet, setApplicantRoadStreet] = React.useState("");
   const [doorNo, setDoorNo] = React.useState("1-93");
   const [applicantDistrict, setApplicantDistrict] = React.useState("Guntur");
@@ -576,6 +576,427 @@ export function LtpSubmissionDetails({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  const renderApplicantCards = (compact: boolean = false) => (
+    <div className="w-full space-y-4">
+      {/* 1. Licensed Technical Personnel's Information */}
+      <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setSectionLtpOpen(!sectionLtpOpen)}
+          className="w-full bg-[#7A1316] text-white px-3.5 py-1.5 text-xs font-bold flex items-center justify-between cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 tracking-wide">
+            <span className="text-xs font-mono">{sectionLtpOpen ? "▲" : "▼"}</span>
+            Licensed Technical Personnel&apos;s Information
+          </span>
+          <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">Reg. LTP</span>
+        </button>
+
+        {sectionLtpOpen && (
+          <div
+            className={cn(
+              "p-3.5 sm:p-4 text-xs",
+              compact
+                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-x-5 gap-y-2.5"
+                : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
+            )}
+          >
+            {/* Field 1: Licensed Technical Personnel Type */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">
+                Licensed Technical Personnel Type
+              </label>
+              <select
+                value={ltpType}
+                onChange={(e) => setLtpType(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              >
+                <option value="Engineer">Engineer</option>
+                <option value="Architect">Architect</option>
+                <option value="Surveyor">Surveyor</option>
+                <option value="Structural Engineer">Structural Engineer</option>
+              </select>
+            </div>
+
+            {/* Field 2: Address */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Address</label>
+              <input
+                type="text"
+                value={ltpAddress}
+                onChange={(e) => setLtpAddress(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Field 3: Name */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Name</label>
+              <select
+                value={ltpName}
+                onChange={(e) => setLtpName(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+              >
+                <option value="SRINIVAS ALLU">SRINIVAS ALLU</option>
+                <option value="RAMESH BABU K">RAMESH BABU K</option>
+              </select>
+            </div>
+
+            {/* Field 4: Validity */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Validity</label>
+              <input
+                type="text"
+                value={ltpValidity}
+                onChange={(e) => setLtpValidity(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Field 5: License Number */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">License Number</label>
+              <input
+                type="text"
+                value={ltpLicenseNo}
+                onChange={(e) => setLtpLicenseNo(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Field 6: E-mail ID */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">E-mail ID</label>
+              <input
+                type="email"
+                value={ltpEmail}
+                onChange={(e) => setLtpEmail(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Field 7: Mobile Number */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Mobile Number</label>
+              <input
+                type="text"
+                value={ltpMobile}
+                onChange={(e) => setLtpMobile(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Field 8: Aadhaar No */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Aadhaar No</label>
+              <div className="relative w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48">
+                <input
+                  type={showLtpAadhaar ? "text" : "password"}
+                  value={ltpAadhaar}
+                  onChange={(e) => setLtpAadhaar(e.target.value)}
+                  className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLtpAadhaar(!showLtpAadhaar)}
+                  className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  {showLtpAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Applicant's Information */}
+      <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
+          className="w-full bg-[#7A1316] text-white px-3.5 py-1.5 text-xs font-bold flex items-center justify-between cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 tracking-wide">
+            <span className="text-xs font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
+            Applicant&apos;s Information
+          </span>
+          <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">Owner / Promoters</span>
+        </button>
+
+        {sectionApplicantOpen && (
+          <div
+            className={cn(
+              "p-3.5 sm:p-4 text-xs",
+              compact
+                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-x-5 gap-y-2.5"
+                : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
+            )}
+          >
+            {/* Row 1: Self Use or Selling */}
+            <div
+              className={cn(
+                "flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2",
+                compact
+                  ? "md:col-span-2 xl:col-span-1 2xl:col-span-2"
+                  : "md:col-span-2"
+              )}
+            >
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Application is for Self Use or Selling Purpose?
+              </label>
+              <div className="flex items-center gap-6 sm:w-48 md:w-52 xl:w-48 2xl:w-48">
+                <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800 text-xs">
+                  <input
+                    type="radio"
+                    name="appUseType"
+                    checked={applicantUseType === "Self Use"}
+                    onChange={() => setApplicantUseType("Self Use")}
+                    className="accent-[#7A1316] cursor-pointer"
+                  />
+                  <span>Self Use</span>
+                </label>
+                <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800 text-xs">
+                  <input
+                    type="radio"
+                    name="appUseType"
+                    checked={applicantUseType === "Selling"}
+                    onChange={() => setApplicantUseType("Selling")}
+                    className="accent-[#7A1316] cursor-pointer"
+                  />
+                  <span>Selling</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Row 2: Owner Name & Road/Street */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Owner Name (In Full)
+              </label>
+              <input
+                type="text"
+                value={ownerName}
+                onChange={(e) => setOwnerName(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Road/Street</label>
+              <input
+                type="text"
+                value={applicantRoadStreet}
+                onChange={(e) => setApplicantRoadStreet(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Row 3: Door No & District */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Door No./Flat No.
+              </label>
+              <input
+                type="text"
+                value={doorNo}
+                onChange={(e) => setDoorNo(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> District
+              </label>
+              <input
+                type="text"
+                value={applicantDistrict}
+                onChange={(e) => setApplicantDistrict(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Row 4: City & Email */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> City
+              </label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Email
+              </label>
+              <input
+                type="email"
+                value={applicantEmail}
+                onChange={(e) => setApplicantEmail(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Row 5: PinCode & Mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> PinCode
+              </label>
+              <input
+                type="text"
+                value={pinCode}
+                onChange={(e) => setPinCode(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Mobile
+              </label>
+              <input
+                type="text"
+                value={applicantMobile}
+                onChange={(e) => setApplicantMobile(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {/* Row 6: Landline & Aadhaar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Landline Number</label>
+              <input
+                type="text"
+                value={landlineNumber}
+                onChange={(e) => setLandlineNumber(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Aadhaar No.
+              </label>
+              <div className="relative w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48">
+                <input
+                  type={showApplicantAadhaar ? "text" : "password"}
+                  value={applicantAadhaar}
+                  onChange={(e) => setApplicantAadhaar(e.target.value)}
+                  className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApplicantAadhaar(!showApplicantAadhaar)}
+                  className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
+                >
+                  {showApplicantAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Card 2 Bottom Next Action */}
+            <div
+              className={cn(
+                "pt-2.5 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2",
+                compact
+                  ? "md:col-span-2 xl:col-span-1 2xl:col-span-2"
+                  : "md:col-span-2"
+              )}
+            >
+              <span className="text-[11px] sm:text-xs text-slate-500 italic">
+                Verify all applicant details before proceeding to plot details.
+              </span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  showToast("Applicant Information verified and saved.");
+                  if (subTab === "applicant") {
+                    setSubTab("plot");
+                  }
+                  const el = document.getElementById("lps-plot-details-section") || document.getElementById("lps-plot-code-input");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5 group shrink-0"
+              >
+                <span>Next: Plot Details</span>
+                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 3. Structural Engineer Information */}
+      <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setSectionStructuralOpen(!sectionStructuralOpen)}
+          className="w-full bg-[#7A1316] text-white px-3.5 py-1.5 text-xs font-bold flex items-center justify-between cursor-pointer"
+        >
+          <span className="flex items-center gap-1.5 tracking-wide">
+            <span className="text-xs font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
+            Structural Engineer Information
+          </span>
+          <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">Structural Stability</span>
+        </button>
+
+        {sectionStructuralOpen && (
+          <div
+            className={cn(
+              "p-3.5 sm:p-4 text-xs",
+              compact
+                ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-x-5 gap-y-2.5"
+                : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
+            )}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">
+                Structural Engineer Name
+              </label>
+              <select
+                value={structuralName}
+                onChange={(e) => setStructuralName(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              >
+                <option value="Select">Select</option>
+                <option value="Er. P. Ramachandra Rao">Er. P. Ramachandra Rao</option>
+                <option value="Er. K. Suresh Kumar">Er. K. Suresh Kumar</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-semibold text-slate-800 shrink-0 text-xs">Validity</label>
+              <input
+                type="text"
+                value={structuralValidity}
+                onChange={(e) => setStructuralValidity(e.target.value)}
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
+
+            {!compact && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2">
+                <label className="font-semibold text-slate-800 shrink-0 text-xs">Address</label>
+                <input
+                  type="text"
+                  value={structuralAddress}
+                  onChange={(e) => setStructuralAddress(e.target.value)}
+                  className="w-full md:max-w-3xl h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="w-full h-full bg-[#FAF7F2] flex flex-col font-sans text-slate-800 overflow-hidden select-none">
       {/* ── TOP HEADER BAR (Maroon & Beige Theme) ── */}
@@ -776,17 +1197,27 @@ export function LtpSubmissionDetails({
         {mainTab === "form" && subTab === "general" && (
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
-              <LpsPlotDetailsView
-                initialPlotCode={initialPlotCode || ""}
-                onPlotLoaded={handleLpsPlotLoaded}
-                onSaveAndNext={() => {
-                  showToast("Plot details saved. Proceeding to Applicant Information...");
-                  setSubTab("applicant");
-                  const scrollContainer = document.querySelector(".overflow-y-auto");
-                  if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
-              />
+              <div className="flex flex-col xl:flex-row gap-6 items-start">
+                {/* Left Column: Plot Search Card & Plot Details Card (reduced width ~65%, reduced by ~35%) */}
+                <div className="w-full xl:w-[calc(65%-12px)] min-w-0 space-y-5">
+                  <LpsPlotDetailsView
+                    initialPlotCode={initialPlotCode || ""}
+                    onPlotLoaded={handleLpsPlotLoaded}
+                    onSaveAndNext={() => {
+                      showToast("Plot details saved. Proceeding to Applicant Information...");
+                      setSubTab("applicant");
+                      const scrollContainer = document.querySelector(".overflow-y-auto");
+                      if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
+                  />
+                </div>
+
+                {/* Right Column: Cards from the user's image (Licensed Technical Personnel, Applicant Info, Structural Engineer Info) */}
+                <div className="w-full xl:w-[calc(35%-12px)] min-w-0 space-y-4">
+                  {renderApplicantCards(true)}
+                </div>
+              </div>
             </div>
           ) : (
             <div className="w-full bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
@@ -1158,373 +1589,7 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "applicant" && (
           <div className="w-full space-y-4 pb-8">
-            {/* 1. Licensed Technical Personnel's Information */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
-              <button
-                onClick={() => setSectionLtpOpen(!sectionLtpOpen)}
-                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5 tracking-wide">
-                  <span className="text-sm font-mono">{sectionLtpOpen ? "▲" : "▼"}</span>
-                  Licensed Technical Personnel's Information
-                </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Reg. LTP</span>
-              </button>
-
-              {sectionLtpOpen && (
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
-                  {/* Row 1 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">
-                      Licensed Technical Personnel Type
-                    </label>
-                    <select
-                      value={ltpType}
-                      onChange={(e) => setLtpType(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="Engineer">Engineer</option>
-                      <option value="Architect">Architect</option>
-                      <option value="Surveyor">Surveyor</option>
-                      <option value="Structural Engineer">Structural Engineer</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Address</label>
-                    <input
-                      type="text"
-                      value={ltpAddress}
-                      onChange={(e) => setLtpAddress(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 2 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Name</label>
-                    <select
-                      value={ltpName}
-                      onChange={(e) => setLtpName(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="SRINIVAS ALLU">SRINIVAS ALLU</option>
-                      <option value="RAMESH BABU K">RAMESH BABU K</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Validity</label>
-                    <input
-                      type="text"
-                      value={ltpValidity}
-                      onChange={(e) => setLtpValidity(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 3 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">License Number</label>
-                    <input
-                      type="text"
-                      value={ltpLicenseNo}
-                      onChange={(e) => setLtpLicenseNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">E-mail ID</label>
-                    <input
-                      type="email"
-                      value={ltpEmail}
-                      onChange={(e) => setLtpEmail(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 4 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Mobile Number</label>
-                    <input
-                      type="text"
-                      value={ltpMobile}
-                      onChange={(e) => setLtpMobile(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Aadhaar No</label>
-                    <div className="relative w-full sm:w-72">
-                      <input
-                        type={showLtpAadhaar ? "text" : "password"}
-                        value={ltpAadhaar}
-                        onChange={(e) => setLtpAadhaar(e.target.value)}
-                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowLtpAadhaar(!showLtpAadhaar)}
-                        className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      >
-                        {showLtpAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 2. Applicant's Information */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
-              <button
-                onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
-                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5 tracking-wide">
-                  <span className="text-sm font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
-                  Applicant's Information
-                </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Owner / Promoters</span>
-              </button>
-
-              {sectionApplicantOpen && (
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
-                  {/* Row 1 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2 border-b border-[#DCD5C8]/60 pb-2.5">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Application is for Self Use or Selling Purpose?
-                    </label>
-                    <div className="flex items-center gap-6 sm:w-72">
-                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
-                        <input
-                          type="radio"
-                          name="appUseType"
-                          checked={applicantUseType === "Self Use"}
-                          onChange={() => setApplicantUseType("Self Use")}
-                          className="accent-[#7A1316] cursor-pointer"
-                        />
-                        <span>Self Use</span>
-                      </label>
-                      <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800">
-                        <input
-                          type="radio"
-                          name="appUseType"
-                          checked={applicantUseType === "Selling"}
-                          onChange={() => setApplicantUseType("Selling")}
-                          className="accent-[#7A1316] cursor-pointer"
-                        />
-                        <span>Selling</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Row 2 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Owner Name (In Full)
-                    </label>
-                    <input
-                      type="text"
-                      value={ownerName}
-                      onChange={(e) => setOwnerName(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Road/Street</label>
-                    <input
-                      type="text"
-                      value={applicantRoadStreet}
-                      onChange={(e) => setApplicantRoadStreet(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 3 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Door No./Flat No.
-                    </label>
-                    <input
-                      type="text"
-                      value={doorNo}
-                      onChange={(e) => setDoorNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> District
-                    </label>
-                    <input
-                      type="text"
-                      value={applicantDistrict}
-                      onChange={(e) => setApplicantDistrict(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 4 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> City
-                    </label>
-                    <input
-                      type="text"
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Email
-                    </label>
-                    <input
-                      type="email"
-                      value={applicantEmail}
-                      onChange={(e) => setApplicantEmail(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 5 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> PinCode
-                    </label>
-                    <input
-                      type="text"
-                      value={pinCode}
-                      onChange={(e) => setPinCode(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Mobile
-                    </label>
-                    <input
-                      type="text"
-                      value={applicantMobile}
-                      onChange={(e) => setApplicantMobile(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 6 */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Landline Number</label>
-                    <input
-                      type="text"
-                      value={landlineNumber}
-                      onChange={(e) => setLandlineNumber(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Aadhaar No.
-                    </label>
-                    <div className="relative w-full sm:w-72">
-                      <input
-                        type={showApplicantAadhaar ? "text" : "password"}
-                        value={applicantAadhaar}
-                        onChange={(e) => setApplicantAadhaar(e.target.value)}
-                        className="w-full h-8 bg-white border border-[#DCD5C8] rounded pl-2.5 pr-8 text-slate-800 font-mono outline-none focus:border-[#7A1316]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowApplicantAadhaar(!showApplicantAadhaar)}
-                        className="absolute right-2 top-2 text-slate-400 hover:text-slate-700 cursor-pointer"
-                      >
-                        {showApplicantAadhaar ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Card 2 Bottom Next Action */}
-                  <div className="md:col-span-2 pt-3 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span className="text-xs text-slate-500 italic">
-                      Verify all applicant details before proceeding to plot details.
-                    </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        showToast("Applicant Information saved. Proceeding to Plot Details...");
-                        setSubTab("plot");
-                        (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
-                      }}
-                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5 group shrink-0"
-                    >
-                      <span>Next: Plot Details</span>
-                      <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 3. Structural Engineer Information */}
-            <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
-              <button
-                onClick={() => setSectionStructuralOpen(!sectionStructuralOpen)}
-                className="w-full bg-[#7A1316] text-white px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5 tracking-wide">
-                  <span className="text-sm font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
-                  Structural Engineer Information
-                </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Structural Stability</span>
-              </button>
-
-              {sectionStructuralOpen && (
-                <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">
-                      Structural Engineer Name
-                    </label>
-                    <select
-                      value={structuralName}
-                      onChange={(e) => setStructuralName(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="Select">Select</option>
-                      <option value="Er. P. Ramachandra Rao">Er. P. Ramachandra Rao</option>
-                      <option value="Er. K. Suresh Kumar">Er. K. Suresh Kumar</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Validity</label>
-                    <input
-                      type="text"
-                      value={structuralValidity}
-                      onChange={(e) => setStructuralValidity(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2">
-                    <label className="font-semibold text-slate-800 shrink-0">Address</label>
-                    <input
-                      type="text"
-                      value={structuralAddress}
-                      onChange={(e) => setStructuralAddress(e.target.value)}
-                      className="w-full md:max-w-3xl h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
+            {renderApplicantCards(false)}
 
             {/* Bottom Action Footer / Next Button */}
             <div className="bg-[#FBF3E4] border-2 border-[#7A1316]/50 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">

@@ -555,7 +555,7 @@ export function LpsPlotDetailsView({
 
       {/* ── PLOT DETAILS REPORT (Exact match to Screenshots 1, 2, 3) ── */}
       {plotData && (
-        <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden">
+        <div id="lps-plot-details-section" className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden">
           {/* Card Header */}
           <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-5 py-3.5 flex items-center justify-between">
             <h2 className="text-base font-bold text-slate-900 tracking-tight">Plot details</h2>
