@@ -728,13 +728,14 @@ export function LtpSubmissionDetails({
             />
           </div>
 
-          {/* Row 6: Landline & Aadhaar */}
+          {/* Row 6: Mobile Number & Aadhaar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-            <label className="font-semibold text-slate-800 shrink-0 text-xs">Landline Number</label>
+            <label className="font-semibold text-slate-800 shrink-0 text-xs">Mobile Number</label>
             <input
               type="text"
               value={landlineNumber}
               onChange={(e) => setLandlineNumber(e.target.value)}
+              placeholder="Enter Mobile Number"
               className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
             />
           </div>
