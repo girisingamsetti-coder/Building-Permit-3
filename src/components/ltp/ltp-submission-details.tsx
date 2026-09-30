@@ -22,6 +22,8 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  ZoomIn,
+  ZoomOut,
   Calendar,
   AlertCircle,
   Paperclip,
@@ -37,6 +39,42 @@ import {
 } from "lucide-react";
 import type { Application } from "@/types";
 import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
+
+const ZONE_OPTIONS = [
+  "C1 -Mixed use zone",
+  "C2- General commercial zone",
+  "C3-Neighbourhood centre zone",
+  "C4-Town centre zone",
+  "C5-Regional centre zone",
+  "C6-Central business district zone",
+  "I1-Business park zone",
+  "I2-Logistics zone",
+  "I3-Non polluting industry zone",
+  "P1-Passive zone",
+  "P2-Active zone",
+  "P3-Protected zone",
+  "R1-Village Planning zone",
+  "R2-Low density zone",
+  "R3-Medium to High density zone",
+  "R4-High density zone",
+  "S1-Government zone",
+  "S2-Education zone",
+  "S3-Special zone",
+];
+
+const TYPOLOGY_OPTIONS = [
+  "A-Attached",
+  "AL-Ancillary",
+  "AP1-Apartment",
+  "AP2-Apartment",
+  "AP3-Apartment",
+  "AP3-HR",
+  "AP4-Apartment",
+  "AP4-HR",
+  "D-Detached",
+  "GD-Group-Detatched",
+  "SD-Semi-Detached",
+];
 
 export function LtpSubmissionDetails({
   onBack,
@@ -571,6 +609,22 @@ export function LtpSubmissionDetails({
   const [aaiNocIssueDate, setAaiNocIssueDate] = React.useState("2026-06-15");
   const [hasEnvNoc, setHasEnvNoc] = React.useState<"NA" | "No" | "Yes">("NA");
 
+  const [draftAppNo, setDraftAppNo] = React.useState<string>(
+    baNo.startsWith("Temp/") ? baNo : ""
+  );
+  const [drawingBaNo, setDrawingBaNo] = React.useState<string>(
+    baNo.startsWith("Temp/") ? baNo : ""
+  );
+  const [drawingZone, setDrawingZone] = React.useState("");
+  const [drawingTypology, setDrawingTypology] = React.useState("");
+  const [drawingFileName, setDrawingFileName] = React.useState("");
+  const drawingFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [cadZoom, setCadZoom] = React.useState(1);
+  const [cadShowSetbacks, setCadShowSetbacks] = React.useState(true);
+  const [cadShowRooms, setCadShowRooms] = React.useState(true);
+  const [cadShowColumns, setCadShowColumns] = React.useState(true);
+  const [cadShowDimensions, setCadShowDimensions] = React.useState(true);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
@@ -866,7 +920,10 @@ export function LtpSubmissionDetails({
       {/* ── MAIN TABS (Application Form | Drawings | Documentation | Payments) ── */}
       <div className="bg-[#FAF7F2] border-b border-[#DCD5C8] px-4 pt-2 flex items-center gap-1 shrink-0">
         <button
-          onClick={() => setMainTab("form")}
+          onClick={() => {
+            setMainTab("form");
+            setSubTab("general");
+          }}
           className={cn(
             "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
             mainTab === "form"
@@ -878,7 +935,12 @@ export function LtpSubmissionDetails({
           <span>Application Form</span>
         </button>
         <button
-          onClick={() => setMainTab("drawing")}
+          onClick={() => {
+            if (draftAppNo && !drawingBaNo) {
+              setDrawingBaNo(draftAppNo);
+            }
+            setMainTab("drawing");
+          }}
           className={cn(
             "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
             mainTab === "drawing"
@@ -927,27 +989,6 @@ export function LtpSubmissionDetails({
         </button>
       </div>
 
-      {/* ── SUB-TABS (When Application Form is active) ── */}
-      {mainTab === "form" && (
-        <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
-          {[
-            { id: "general", label: "General Information" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setSubTab(tab.id as typeof subTab)}
-              className={cn(
-                "font-semibold transition-colors cursor-pointer relative py-0.5",
-                subTab === tab.id
-                  ? "text-[#7A1316] font-black underline underline-offset-4 decoration-2 decoration-[#7A1316]"
-                  : "text-slate-600 hover:text-slate-900"
-              )}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* ── SUB-TABS (When Documentation is active) ── */}
       {mainTab === "documentation" && (
@@ -986,7 +1027,14 @@ export function LtpSubmissionDetails({
                 initialPlotCode={initialPlotCode || ""}
                 onPlotLoaded={handleLpsPlotLoaded}
                 onSaveAndNext={() => {
-                  showToast("Application saved successfully!");
+                  const generatedDraft =
+                    draftAppNo ||
+                    (baNo.startsWith("Temp/")
+                      ? baNo
+                      : `Temp/1168/0189/${isLpsLayout === "LPS Layout" ? "LPS" : "BP"}/${new Date().getFullYear()}`);
+                  setDraftAppNo(generatedDraft);
+                  setDrawingBaNo(generatedDraft);
+                  showToast(`Application saved. Draft Application Number: ${generatedDraft}`);
                   setSubmissionSuccessModal(true);
                 }}
                 onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
@@ -1890,19 +1938,27 @@ export function LtpSubmissionDetails({
                 <ArrowLeft className="size-3.5" />
                 <span>Back: Applicant Information</span>
               </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  showToast("Plot Details verified. Proceeding to Documentation...");
-                  setMainTab("documentation");
-                  setDocSubTab("app-checklist");
-                  (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-                className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
-              >
-                <span>Next: Documentation</span>
-                <ArrowRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="non-lps-save-continue-btn"
+                  onClick={() => {
+                    const generatedDraft =
+                      draftAppNo ||
+                      (baNo.startsWith("Temp/")
+                        ? baNo
+                        : `Temp/1168/0189/BP/${new Date().getFullYear()}`);
+                    setDraftAppNo(generatedDraft);
+                    setDrawingBaNo(generatedDraft);
+                    showToast(`Application saved. Draft Application Number: ${generatedDraft}`);
+                    setSubmissionSuccessModal(true);
+                  }}
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
+                >
+                  <CheckCircle2 className="size-3.5" />
+                  <span>Save &amp; Continue</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1914,33 +1970,501 @@ export function LtpSubmissionDetails({
         {/* MAIN TAB 2: DRAWING                                                       */}
         {/* ========================================================================= */}
         {mainTab === "drawing" && (
-          <div className="max-w-5xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4 text-xs">
-            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-3">
-              <div>
-                <h3 className="font-black text-[#7A1316] text-sm uppercase">2D CAD Scrutiny & Building Plan Drawings</h3>
-                <p className="text-slate-500 text-[11px] mt-0.5">Automated Rule Checking Engine v4.2 — 100% compliant with APCRDA BBAS regulations</p>
+          <div className="w-full space-y-4">
+            <div className="w-full bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-5 sm:p-6 space-y-4 text-xs">
+              {/* Card Title & Subtitle with Maroon Header */}
+              <div className="border-b border-[#DCD5C8] pb-3">
+                <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wide">Drawing Details</h3>
+                <p className="text-slate-600 text-[11px] mt-0.5">
+                  Choose the scrutiny zone and typology, then upload the drawing for this plot.
+                </p>
               </div>
-              <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-black px-3 py-1 rounded-full text-xs">
-                SCRUTINY PASSED
-              </span>
+
+              {/* 4 Fields Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start pt-1">
+                {/* 1. Draft Application Number */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#7A1316] tracking-wide">
+                    Draft Application Number <span className="text-red-600 font-black">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={drawingBaNo}
+                    onChange={(e) => setDrawingBaNo(e.target.value)}
+                    placeholder="Temp/1168/0189/LPS/2026"
+                    className="w-full bg-white border border-[#DCD5C8] rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#7A1316] focus:border-[#7A1316] font-mono shadow-2xs"
+                  />
+                </div>
+
+                {/* 2. Zone */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#7A1316] tracking-wide">
+                    Zone <span className="text-red-600 font-black">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={drawingZone}
+                      onChange={(e) => setDrawingZone(e.target.value)}
+                      className="w-full appearance-none bg-white border border-[#DCD5C8] rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#7A1316] focus:border-[#7A1316] cursor-pointer pr-8 shadow-2xs"
+                    >
+                      <option value="">Select zone</option>
+                      {ZONE_OPTIONS.map((z) => (
+                        <option key={z} value={z}>
+                          {z}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="size-3.5 text-[#7A1316] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 3. Typology */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#7A1316] tracking-wide">
+                    Typology <span className="text-red-600 font-black">*</span>
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={drawingTypology}
+                      onChange={(e) => setDrawingTypology(e.target.value)}
+                      className="w-full appearance-none bg-white border border-[#DCD5C8] rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#7A1316] focus:border-[#7A1316] cursor-pointer pr-8 shadow-2xs"
+                    >
+                      <option value="">Select typology</option>
+                      {TYPOLOGY_OPTIONS.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="size-3.5 text-[#7A1316] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* 4. Drawing file */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#7A1316] tracking-wide">
+                    Drawing file <span className="text-red-600 font-black">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    ref={drawingFileInputRef}
+                    accept=".dwg,.dxf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setDrawingFileName(file.name);
+                        showToast(`Selected drawing file: ${file.name}`);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => drawingFileInputRef.current?.click()}
+                    className="w-full bg-white hover:bg-[#FAF3E4] border border-[#DCD5C8] hover:border-[#7A1316] rounded-lg px-3 py-2 text-xs text-slate-700 flex items-center justify-between cursor-pointer transition-colors shadow-2xs text-left"
+                  >
+                    <span className={drawingFileName ? "font-semibold text-slate-900 truncate" : "text-slate-500 truncate"}>
+                      {drawingFileName || "Choose DWG / DXF file"}
+                    </span>
+                    <Upload className="size-3.5 text-[#7A1316] shrink-0 ml-1.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Status / Selected file notice */}
+              {drawingFileName && (
+                <div className="pt-2 flex items-center justify-between border-t border-[#DCD5C8] text-xs">
+                  <div className="flex items-center gap-2 text-emerald-800 font-medium">
+                    <CheckCircle2 className="size-4 text-emerald-600" />
+                    <span>Selected: <strong className="font-mono text-slate-900">{drawingFileName}</strong></span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDrawingFileName("");
+                      if (drawingFileInputRef.current) drawingFileInputRef.current.value = "";
+                    }}
+                    className="text-xs text-red-600 hover:text-red-800 font-bold cursor-pointer"
+                  >
+                    Remove file
+                  </button>
+                </div>
+              )}
+
+              {/* Helper prompt when no file is uploaded yet */}
+              {!drawingFileName && (
+                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t border-[#DCD5C8]/70 text-[11px] text-slate-500">
+                  <span>Upload a <code className="text-slate-700 font-bold">.dwg</code> or <code className="text-slate-700 font-bold">.dxf</code> file to inspect the 2D CAD building plan.</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDrawingFileName("APCRDA_Building_Plan_GF_v2.dwg");
+                      if (!drawingZone) setDrawingZone("C1 -Mixed use zone");
+                      if (!drawingTypology) setDrawingTypology("D-Detached");
+                      showToast("Loaded sample 2D CAD drawing");
+                    }}
+                    className="text-[#7A1316] font-bold hover:underline cursor-pointer text-left shrink-0"
+                  >
+                    Preview with Sample DWG
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
-                <div className="font-bold text-slate-800">Ground Floor Plan</div>
-                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_GF.dwg</div>
-                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
+
+            {/* ── CARD 2: 2D CAD BUILDING PLAN VIEWER (Displayed when drawing file is uploaded) ── */}
+            {drawingFileName && (
+              <div className="w-full bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-5 sm:p-6 space-y-4 text-xs">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCD5C8] pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Layers className="size-4 text-[#7A1316]" />
+                      <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wide">
+                        2D Building Plan — DWG Scrutiny View
+                      </h3>
+                      <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
+                        DWG LOADED
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-[11px] mt-0.5">
+                      Source: <strong className="font-mono text-slate-800">{drawingFileName}</strong> · Draft App No: <span className="font-mono font-bold text-slate-900">{drawingBaNo || draftAppNo || "Temp/1168/0189/LPS/2026"}</span> · Scale 1:100 (Ground Floor Plan)
+                    </p>
+                  </div>
+
+                  {/* Actions & Layer Toggles */}
+                  <div className="flex items-center flex-wrap gap-1.5 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setCadZoom((z) => Math.max(0.7, Number((z - 0.15).toFixed(2))))}
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] rounded px-2 py-1 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                      title="Zoom Out"
+                    >
+                      <ZoomOut className="size-3.5 text-[#7A1316]" />
+                    </button>
+                    <span className="text-[11px] font-mono font-bold text-slate-700 px-1">
+                      {Math.round(cadZoom * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCadZoom((z) => Math.min(2.0, Number((z + 0.15).toFixed(2))))}
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] rounded px-2 py-1 text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                      title="Zoom In"
+                    >
+                      <ZoomIn className="size-3.5 text-[#7A1316]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCadZoom(1)}
+                      className="bg-white hover:bg-slate-50 text-slate-700 border border-[#DCD5C8] rounded px-2.5 py-1 text-xs font-semibold cursor-pointer transition-colors shadow-2xs"
+                      title="Reset View"
+                    >
+                      Reset
+                    </button>
+
+                    <div className="h-4 w-[1px] bg-[#DCD5C8] mx-1" />
+
+                    {/* Layer Toggles */}
+                    <button
+                      type="button"
+                      onClick={() => setCadShowSetbacks((v) => !v)}
+                      className={cn(
+                        "px-2 py-1 rounded text-xs font-bold border transition-colors cursor-pointer shadow-2xs",
+                        cadShowSetbacks
+                          ? "bg-[#7A1316] text-white border-[#7A1316]"
+                          : "bg-white text-slate-600 border-[#DCD5C8] hover:bg-slate-50"
+                      )}
+                    >
+                      Setbacks
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCadShowRooms((v) => !v)}
+                      className={cn(
+                        "px-2 py-1 rounded text-xs font-bold border transition-colors cursor-pointer shadow-2xs",
+                        cadShowRooms
+                          ? "bg-[#7A1316] text-white border-[#7A1316]"
+                          : "bg-white text-slate-600 border-[#DCD5C8] hover:bg-slate-50"
+                      )}
+                    >
+                      Rooms
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCadShowColumns((v) => !v)}
+                      className={cn(
+                        "px-2 py-1 rounded text-xs font-bold border transition-colors cursor-pointer shadow-2xs",
+                        cadShowColumns
+                          ? "bg-[#7A1316] text-white border-[#7A1316]"
+                          : "bg-white text-slate-600 border-[#DCD5C8] hover:bg-slate-50"
+                      )}
+                    >
+                      Columns
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCadShowDimensions((v) => !v)}
+                      className={cn(
+                        "px-2 py-1 rounded text-xs font-bold border transition-colors cursor-pointer shadow-2xs",
+                        cadShowDimensions
+                          ? "bg-[#7A1316] text-white border-[#7A1316]"
+                          : "bg-white text-slate-600 border-[#DCD5C8] hover:bg-slate-50"
+                      )}
+                    >
+                      Dimensions
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => showToast(`Exporting DWG CAD drawing for ${drawingFileName}...`)}
+                      className="bg-white hover:bg-slate-50 text-[#7A1316] border border-[#DCD5C8] rounded px-2.5 py-1 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs ml-1"
+                    >
+                      <Download className="size-3.5" />
+                      <span>Export DWG</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* CAD Canvas Viewport */}
+                <div className="relative w-full rounded-xl border border-[#334155] bg-[#0A1128] overflow-hidden shadow-inner flex items-center justify-center p-3 sm:p-6" style={{ minHeight: "480px" }}>
+                  {/* CAD Grid Background */}
+                  <div
+                    className="absolute inset-0 opacity-20 pointer-events-none"
+                    style={{
+                      backgroundImage: "linear-gradient(to right, #38bdf8 1px, transparent 1px), linear-gradient(to bottom, #38bdf8 1px, transparent 1px)",
+                      backgroundSize: "24px 24px"
+                    }}
+                  />
+
+                  {/* SVG Drawing Container with Zoom Transform */}
+                  <div
+                    className="relative w-full max-w-4xl transition-transform duration-200 select-none"
+                    style={{ transform: `scale(${cadZoom})` }}
+                  >
+                    <svg viewBox="0 0 850 560" className="w-full h-auto drop-shadow-2xl" preserveAspectRatio="xMidYMid meet">
+                      {/* Definitions */}
+                      <defs>
+                        <pattern id="cad-bath-hatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                          <line x1="0" y1="0" x2="0" y2="8" stroke="#475569" strokeWidth="1" />
+                        </pattern>
+                        <pattern id="cad-utility-hatch" width="10" height="10" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+                          <line x1="0" y1="0" x2="0" y2="10" stroke="#334155" strokeWidth="1" />
+                        </pattern>
+                      </defs>
+
+                      {/* 1. Plot Boundary (Statutory Property Line) */}
+                      <g>
+                        <rect x="40" y="40" width="770" height="450" fill="none" stroke="#22c55e" strokeWidth="2.5" />
+                        <circle cx="40" cy="40" r="4" fill="#22c55e" />
+                        <circle cx="810" cy="40" r="4" fill="#22c55e" />
+                        <circle cx="40" cy="490" r="4" fill="#22c55e" />
+                        <circle cx="810" cy="490" r="4" fill="#22c55e" />
+                        <text x="46" y="35" fontSize="10" fill="#22c55e" fontWeight="bold" fontFamily="monospace">CORNER-A (0.00, 0.00)</text>
+                        <text x="804" y="35" textAnchor="end" fontSize="10" fill="#22c55e" fontWeight="bold" fontFamily="monospace">CORNER-B (WIDTH: 24.50 m)</text>
+                        <text x="46" y="505" fontSize="10" fill="#22c55e" fontWeight="bold" fontFamily="monospace">CORNER-D (DEPTH: 18.00 m)</text>
+                        <text x="804" y="505" textAnchor="end" fontSize="10" fill="#22c55e" fontWeight="bold" fontFamily="monospace">CORNER-C</text>
+                      </g>
+
+                      {/* 2. Setback Lines & Annotations (APCRDA BBAS) */}
+                      {cadShowSetbacks && (
+                        <g>
+                          <rect x="110" y="100" width="630" height="330" fill="none" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="6 4" />
+                          <text x="425" y="455" textAnchor="middle" fontSize="10" fill="#38bdf8" fontWeight="bold" fontFamily="monospace">
+                            FRONT SETBACK: 6.00 m (APCRDA BBAS COMPLIANT) ✓
+                          </text>
+                          <text x="425" y="80" textAnchor="middle" fontSize="10" fill="#38bdf8" fontWeight="bold" fontFamily="monospace">
+                            REAR SETBACK: 4.00 m (REGULATORY CLEARANCE) ✓
+                          </text>
+                          <text x="75" y="270" textAnchor="middle" fontSize="9" fill="#38bdf8" fontWeight="bold" fontFamily="monospace" transform="rotate(-90 75 270)">
+                            SIDE 1 (EAST): 3.00 m CLEAR ✓
+                          </text>
+                          <text x="775" y="270" textAnchor="middle" fontSize="9" fill="#38bdf8" fontWeight="bold" fontFamily="monospace" transform="rotate(90 775 270)">
+                            SIDE 2 (WEST): 3.00 m CLEAR ✓
+                          </text>
+                        </g>
+                      )}
+
+                      {/* 3. Building Outer Walls & Masonry */}
+                      <g>
+                        {/* Outer Wall Mass */}
+                        <rect x="110" y="100" width="630" height="330" fill="#131e3a" stroke="#f8fafc" strokeWidth="3" />
+
+                        {/* Internal Masonry Walls */}
+                        <line x1="330" y1="100" x2="330" y2="430" stroke="#e2e8f0" strokeWidth="2" />
+                        <line x1="530" y1="100" x2="530" y2="430" stroke="#e2e8f0" strokeWidth="2" />
+                        <line x1="110" y1="260" x2="330" y2="260" stroke="#cbd5e1" strokeWidth="2" />
+                        <line x1="330" y1="270" x2="530" y2="270" stroke="#cbd5e1" strokeWidth="2" />
+                        <line x1="530" y1="250" x2="740" y2="250" stroke="#cbd5e1" strokeWidth="2" />
+                        
+                        {/* Attached Bathrooms & Utility */}
+                        <rect x="110" y="260" width="90" height="80" fill="url(#cad-bath-hatch)" stroke="#94a3b8" strokeWidth="1.5" />
+                        <rect x="650" y="250" width="90" height="80" fill="url(#cad-bath-hatch)" stroke="#94a3b8" strokeWidth="1.5" />
+                        <rect x="330" y="100" width="80" height="70" fill="url(#cad-utility-hatch)" stroke="#94a3b8" strokeWidth="1.5" />
+
+                        {/* Staircase Block */}
+                        <g>
+                          <rect x="330" y="270" width="200" height="110" fill="#0f172a" stroke="#818cf8" strokeWidth="2" />
+                          <line x1="340" y1="285" x2="520" y2="285" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="340" y1="300" x2="520" y2="300" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="340" y1="315" x2="520" y2="315" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="340" y1="330" x2="520" y2="330" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="340" y1="345" x2="520" y2="345" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="340" y1="360" x2="520" y2="360" stroke="#6366f1" strokeWidth="1.2" />
+                          <line x1="430" y1="270" x2="430" y2="380" stroke="#818cf8" strokeWidth="1.5" strokeDasharray="3 3" />
+                          <path d="M 370 365 L 370 280 L 365 287 M 370 280 L 375 287" stroke="#38bdf8" strokeWidth="2" fill="none" />
+                          <text x="430" y="325" textAnchor="middle" fontSize="10" fill="#a5b4fc" fontWeight="bold" fontFamily="monospace">
+                            STAIRCASE (1.50 m WIDTH · UP)
+                          </text>
+                        </g>
+
+                        {/* Lift Core */}
+                        <g>
+                          <rect x="445" y="115" width="75" height="75" fill="#1e293b" stroke="#38bdf8" strokeWidth="2" />
+                          <line x1="445" y1="115" x2="520" y2="190" stroke="#64748b" strokeWidth="1" />
+                          <line x1="520" y1="115" x2="445" y2="190" stroke="#64748b" strokeWidth="1" />
+                          <text x="482" y="157" textAnchor="middle" fontSize="10" fill="#38bdf8" fontWeight="bold">LIFT</text>
+                        </g>
+
+                        {/* Door Openings & Swings */}
+                        <g stroke="#f59e0b" strokeWidth="1.5" fill="none">
+                          <path d="M 430 430 A 40 40 0 0 0 390 390" strokeDasharray="3 2" />
+                          <line x1="430" y1="430" x2="390" y2="430" strokeWidth="2.5" />
+                          <path d="M 330 240 A 30 30 0 0 1 300 210" strokeDasharray="3 2" />
+                          <path d="M 530 240 A 30 30 0 0 0 560 210" strokeDasharray="3 2" />
+                        </g>
+
+                        {/* Windows */}
+                        <g stroke="#38bdf8" strokeWidth="3">
+                          <line x1="170" y1="100" x2="270" y2="100" />
+                          <line x1="580" y1="100" x2="680" y2="100" />
+                          <line x1="110" y1="150" x2="110" y2="220" />
+                          <line x1="740" y1="150" x2="740" y2="220" />
+                          <line x1="170" y1="430" x2="270" y2="430" />
+                          <line x1="580" y1="430" x2="680" y2="430" />
+                        </g>
+
+                        {/* Main Entry Steps */}
+                        <g>
+                          <rect x="360" y="430" width="130" height="30" fill="#1e293b" stroke="#38bdf8" strokeWidth="1.5" />
+                          <line x1="360" y1="440" x2="490" y2="440" stroke="#64748b" strokeWidth="1" />
+                          <line x1="360" y1="450" x2="490" y2="450" stroke="#64748b" strokeWidth="1" />
+                          <text x="425" y="450" textAnchor="middle" fontSize="9" fill="#f8fafc" fontWeight="bold">MAIN ENTRY (STEPS)</text>
+                        </g>
+                      </g>
+
+                      {/* 4. Room Tags & Areas */}
+                      {cadShowRooms && (
+                        <g fill="#f8fafc" fontFamily="sans-serif">
+                          <text x="220" y="170" textAnchor="middle" fontSize="12" fontWeight="black" fill="#ffffff">LIVING &amp; DINING</text>
+                          <text x="220" y="188" textAnchor="middle" fontSize="9.5" fill="#94a3b8" fontFamily="monospace">6.20 m × 4.80 m (29.76 m²)</text>
+                          <text x="220" y="202" textAnchor="middle" fontSize="8" fill="#22c55e">✓ Min. Light &amp; Vent: Pass</text>
+
+                          <text x="635" y="165" textAnchor="middle" fontSize="12" fontWeight="black" fill="#ffffff">MASTER BEDROOM</text>
+                          <text x="635" y="183" textAnchor="middle" fontSize="9.5" fill="#94a3b8" fontFamily="monospace">4.50 m × 4.20 m (18.90 m²)</text>
+                          <text x="635" y="197" textAnchor="middle" fontSize="8" fill="#22c55e">✓ Cross Vent: Compliant</text>
+
+                          <text x="220" y="340" textAnchor="middle" fontSize="12" fontWeight="black" fill="#ffffff">KITCHEN &amp; DINING</text>
+                          <text x="220" y="358" textAnchor="middle" fontSize="9.5" fill="#94a3b8" fontFamily="monospace">3.60 m × 3.00 m (10.80 m²)</text>
+
+                          <text x="635" y="340" textAnchor="middle" fontSize="12" fontWeight="black" fill="#ffffff">BEDROOM 2</text>
+                          <text x="635" y="358" textAnchor="middle" fontSize="9.5" fill="#94a3b8" fontFamily="monospace">4.20 m × 3.80 m (15.96 m²)</text>
+
+                          <text x="155" y="305" textAnchor="middle" fontSize="8" fill="#cbd5e1" fontWeight="bold">TOILET</text>
+                          <text x="695" y="295" textAnchor="middle" fontSize="8" fill="#cbd5e1" fontWeight="bold">ATT. BATH</text>
+                          <text x="370" y="140" textAnchor="middle" fontSize="8" fill="#cbd5e1" fontWeight="bold">UTILITY</text>
+                        </g>
+                      )}
+
+                      {/* 5. Structural Columns (Amber Rectangles) */}
+                      {cadShowColumns && (
+                        <g fill="#f59e0b" stroke="#78350f" strokeWidth="1">
+                          <rect x="105" y="95" width="12" height="12" />
+                          <rect x="325" y="95" width="12" height="12" />
+                          <rect x="525" y="95" width="12" height="12" />
+                          <rect x="735" y="95" width="12" height="12" />
+                          <rect x="105" y="255" width="12" height="12" />
+                          <rect x="325" y="255" width="12" height="12" />
+                          <rect x="525" y="255" width="12" height="12" />
+                          <rect x="735" y="255" width="12" height="12" />
+                          <rect x="105" y="425" width="12" height="12" />
+                          <rect x="325" y="425" width="12" height="12" />
+                          <rect x="525" y="425" width="12" height="12" />
+                          <rect x="735" y="425" width="12" height="12" />
+                        </g>
+                      )}
+
+                      {/* 6. Overall Dimensions */}
+                      {cadShowDimensions && (
+                        <g stroke="#94a3b8" strokeWidth="1" fill="#94a3b8" fontSize="9" fontFamily="monospace">
+                          <line x1="110" y1="65" x2="740" y2="65" />
+                          <line x1="110" y1="60" x2="110" y2="70" />
+                          <line x1="740" y1="60" x2="740" y2="70" />
+                          <text x="425" y="60" textAnchor="middle" fill="#38bdf8" fontWeight="bold">BUILDING PLINTH WIDTH: 15.75 m</text>
+
+                          <line x1="775" y1="100" x2="775" y2="430" />
+                          <line x1="770" y1="100" x2="780" y2="100" />
+                          <line x1="770" y1="430" x2="780" y2="430" />
+                          <text x="790" y="270" textAnchor="middle" fill="#38bdf8" fontWeight="bold" transform="rotate(90 790 270)">
+                            BUILDING LENGTH: 13.50 m
+                          </text>
+                        </g>
+                      )}
+
+                      {/* 7. North Compass Rose */}
+                      <g>
+                        <circle cx="780" cy="80" r="18" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
+                        <polygon points="780,68 775,90 780,86 785,90" fill="#ef4444" />
+                        <polygon points="780,68 785,90 780,86" fill="#b91c1c" />
+                        <text x="780" y="105" textAnchor="middle" fontSize="10" fill="#f8fafc" fontWeight="black" fontFamily="sans-serif">N</text>
+                      </g>
+
+                      {/* 8. Title Block Banner (Architectural DWG Style) */}
+                      <g>
+                        <rect x="40" y="505" width="770" height="38" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
+                        <text x="55" y="522" fontSize="10" fill="#38bdf8" fontWeight="bold" fontFamily="monospace">
+                          APCRDA BUILDING PERMISSION SYSTEM · 2D DWG SCRUTINY ENGINE
+                        </text>
+                        <text x="55" y="535" fontSize="8.5" fill="#94a3b8" fontFamily="monospace">
+                          PLAN: GROUND FLOOR · SCALE 1:100 · DWG: {drawingFileName || "Sanction_Plan.dwg"}
+                        </text>
+                        <text x="440" y="522" fontSize="9" fill="#e2e8f0" fontFamily="monospace">
+                          DRAFT APPL NO: {drawingBaNo || draftAppNo || "Temp/1168/0189/LPS/2026"}
+                        </text>
+                        <text x="440" y="535" fontSize="8.5" fill="#e2e8f0" fontFamily="monospace">
+                          ZONE: {drawingZone || "C1"} · TYPOLOGY: {drawingTypology || "Detached"}
+                        </text>
+                        <text x="795" y="528" textAnchor="end" fontSize="10" fill="#22c55e" fontWeight="bold" fontFamily="monospace">
+                          RULE SCRUTINY: PASS ✓
+                        </text>
+                      </g>
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Metric / Compliance Summary Pills below Canvas */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-2.5 text-center shadow-2xs">
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Plot Area</div>
+                    <div className="text-xs font-black text-slate-900 mt-0.5">441.00 m²</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">Verified vs Document</div>
+                  </div>
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-2.5 text-center shadow-2xs">
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Plinth Area</div>
+                    <div className="text-xs font-black text-slate-900 mt-0.5">212.62 m²</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">Within Permissible FSI</div>
+                  </div>
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-2.5 text-center shadow-2xs">
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Ground Coverage</div>
+                    <div className="text-xs font-black text-slate-900 mt-0.5">48.21% (Max 55%)</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">6.79% Margin Safe</div>
+                  </div>
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-2.5 text-center shadow-2xs">
+                    <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Setback Scrutiny</div>
+                    <div className="text-xs font-black text-emerald-700 mt-0.5">4 / 4 Passed (100%)</div>
+                    <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">0 Encroachments Detected</div>
+                  </div>
+                </div>
               </div>
-              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
-                <div className="font-bold text-slate-800">First Floor & Section Plan</div>
-                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_FF.dwg</div>
-                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
-              </div>
-              <div className="bg-white p-4 rounded-lg border border-[#DCD5C8] text-center">
-                <div className="font-bold text-slate-800">Site Plan & Service Layout</div>
-                <div className="text-slate-500 text-[11px] mt-0.5">Drawing_v2_Site.dwg</div>
-                <div className="mt-3 text-emerald-700 font-bold text-xs flex items-center justify-center gap-1"><Check className="size-3" /> Rule verified</div>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -3376,13 +3900,15 @@ export function LtpSubmissionDetails({
               {/* Application Details Summary */}
               <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
-                  <span className="text-slate-500 font-medium">Proposal / BA Number:</span>
-                  <span className="font-mono font-bold text-slate-900">{baNo}</span>
+                  <span className="text-slate-500 font-medium">Draft Application Number:</span>
+                  <span className="font-mono font-bold text-[#7A1316] text-xs bg-[#FAF7F2] border border-[#DCD5C8] px-2.5 py-0.5 rounded shadow-2xs">
+                    {draftAppNo || drawingBaNo || "Temp/1168/0189/LPS/2026"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
                   <span className="text-slate-500 font-medium">Current Status:</span>
                   <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
-                    Application Form Created
+                    Draft Application Form Created
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
@@ -3400,7 +3926,7 @@ export function LtpSubmissionDetails({
                 <button
                   type="button"
                   id="download-form-btn"
-                  onClick={() => showToast(`Downloading official application form for ${baNo}...`)}
+                  onClick={() => showToast(`Downloading official application form for ${draftAppNo || drawingBaNo || baNo}...`)}
                   className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Download className="size-3.5 text-[#7A1316]" />
@@ -3410,6 +3936,8 @@ export function LtpSubmissionDetails({
                   type="button"
                   id="proceed-to-drawing-submission-btn"
                   onClick={() => {
+                    const activeDraft = draftAppNo || drawingBaNo || "Temp/1168/0189/LPS/2026";
+                    setDrawingBaNo(activeDraft);
                     setSubmissionSuccessModal(false);
                     setMainTab("drawing");
                   }}
