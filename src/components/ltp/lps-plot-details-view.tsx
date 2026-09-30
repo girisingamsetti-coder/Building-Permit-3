@@ -541,28 +541,6 @@ export function LpsPlotDetailsView({
       {/* ── STRUCTURAL ENGINEER INFO CARD (Placed below Plot Search Card) ── */}
       {structuralEngineerSlot}
 
-      {/* Notice card before plot is fetched */}
-      {!plotData && (
-        <div className="border-2 border-dashed border-[#DCD5C8] bg-white/80 rounded-xl p-5 sm:p-6 text-left flex items-start gap-4">
-          <div className="size-11 rounded-lg bg-[#FAF4EB] border border-[#DCD5C8] flex items-center justify-center text-[#7A1316] shrink-0 mt-0.5">
-            <MapPin className="size-5" />
-          </div>
-          <div className="space-y-1 text-left">
-            <h3 className="text-sm font-bold text-slate-900">Plot Details Pending</h3>
-            <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-              Please enter the Plot Code above or select{" "}
-              <button
-                type="button"
-                onClick={() => handleSelectCode("23-723-3603-4-C20")}
-                className="font-bold text-[#7A1316] underline hover:text-[#8F161A] cursor-pointer"
-              >
-                23-723-3603-4-C20
-              </button>{" "}
-              from the dropdown to display the statutory cadastral details, ownership, zoning, and GIS coordinates.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* ── PLOT DETAILS REPORT (Separated into thematic cards using screen space) ── */}
       {plotData && (
