@@ -863,74 +863,7 @@ export function LtpSubmissionDetails({
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] flex flex-col font-sans text-slate-800 overflow-hidden select-none">
-      {/* ── TOP HEADER BAR (Maroon & Beige Theme) ── */}
-      <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs">
-        {/* Left: Application No & Proposal Status */}
-        <div className="flex flex-col gap-0.5 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-black text-slate-900 tracking-tight">
-              Application No.[BA No.] -{" "}
-              <span className="text-[#7A1316] font-mono">{baNo}</span>
-            </span>
-          </div>
-          <div className="text-xs font-bold text-[#1E3A8A] flex items-center gap-1.5">
-            <span>Proposal Status : </span>
-            <span className="text-[#7A1316] font-black">{proposalStatus}</span>
-          </div>
-        </div>
 
-        {/* Center: Submission Date */}
-        <div className="hidden md:flex items-center justify-center">
-          <div className="bg-[#FAF7F2] border border-[#DCD5C8] rounded-full px-3.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs">
-            {isDraft ? "Created Date: - " : "Submission Date: - "}<span className="font-bold text-slate-900">{submissionDate}</span>
-          </div>
-        </div>
-
-        {/* Right: Proposal Risk Category & Action Buttons */}
-        <div className="flex items-center flex-wrap gap-2">
-          {/* Proposal Risk Category */}
-          <div className="hidden lg:flex items-center gap-1 text-xs font-semibold text-slate-700 mr-2">
-            <span>Proposal Risk Category : </span>
-            <span className="font-black text-emerald-800">Low</span>
-            <span className="text-slate-500 font-mono">➜</span>
-          </div>
-
-          {/* Action Buttons (Maroon Theme) */}
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => showToast("Model configuration updated")}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
-            >
-              Change Model
-            </button>
-            <button
-              onClick={() => setProposalFlowOpen(true)}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
-            >
-              Proposal Flow
-            </button>
-            <button
-              onClick={() => showToast("Submission successfully verified and recorded")}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
-            >
-              Submit
-            </button>
-            <button
-              onClick={() => setReportsOpen(true)}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10]"
-            >
-              Reports
-            </button>
-            <button
-              onClick={onBack ? onBack : () => navigate("ltp-dashboard")}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1.5 rounded transition-colors shadow-2xs cursor-pointer border border-[#630E10] flex items-center gap-1"
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Back</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* Toast Notification */}
       {toastMessage && (
