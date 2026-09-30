@@ -36,6 +36,7 @@ import {
   FolderClosed,
 } from "lucide-react";
 import type { Application } from "@/types";
+import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
 
 export function LtpSubmissionDetails({
   onBack,
@@ -44,6 +45,7 @@ export function LtpSubmissionDetails({
   submissionDate = "23-07-2026",
   isDraft = false,
   initialLpsType,
+  initialPlotCode,
 }: {
   onBack?: () => void;
   baNo?: string;
@@ -51,6 +53,7 @@ export function LtpSubmissionDetails({
   submissionDate?: string;
   isDraft?: boolean;
   initialLpsType?: "LPS Layout" | "Non-LPS";
+  initialPlotCode?: string;
 }) {
   const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
   const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
@@ -256,6 +259,22 @@ export function LtpSubmissionDetails({
   const [lpsProposedActivity, setLpsProposedActivity] = React.useState("Residential Apartment Bldg");
   const [lpsRoadStreet, setLpsRoadStreet] = React.useState("ROAD");
   const [lpsBuildingHeight, setLpsBuildingHeight] = React.useState("30");
+
+  const handleLpsPlotLoaded = (rec: LpsPlotRecord) => {
+    setOwnerName(rec.owners);
+    setMandal(rec.mandal);
+    setDistrict(rec.district);
+    setRevenueVillage(rec.village);
+    setGramPanchayat(rec.village);
+    setLpsBlockNo(rec.block);
+    setLpsPlotNo(rec.plotCode);
+    setLpsSurveyNo(rec.rsNumber);
+    setLpsLandUseZone(rec.landUse);
+    setLpsZoningDistrict(rec.zoning);
+    setPlotAreaProposed(rec.netPlotAreaM2);
+    setPlotAreaDocument(rec.allottedExtent);
+    setPlotAreaGround(rec.netPlotAreaM2);
+  };
 
   // Nature of Site (5 Options)
   const siteNatureOptions = [
@@ -755,7 +774,22 @@ export function LtpSubmissionDetails({
         {/* SUB-TAB 1: GENERAL INFORMATION                                           */}
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "general" && (
-          <div className="max-w-6xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
+          isLpsLayout === "LPS Layout" ? (
+            <div className="max-w-6xl mx-auto pb-8">
+              <LpsPlotDetailsView
+                initialPlotCode={initialPlotCode || ""}
+                onPlotLoaded={handleLpsPlotLoaded}
+                onSaveAndNext={() => {
+                  showToast("Plot details saved. Proceeding to Applicant Information...");
+                  setSubTab("applicant");
+                  const scrollContainer = document.querySelector(".overflow-y-auto");
+                  if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+                onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
+              />
+            </div>
+          ) : (
+            <div className="max-w-6xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
             {/* Form Fields: Two Columns Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
               {/* Row 1 */}
@@ -1095,170 +1129,7 @@ export function LtpSubmissionDetails({
               </>
             )}
 
-            {/* When LPS Layout is selected: Show exact fields matching user screenshot */}
-            {isLpsLayout === "LPS Layout" && (
-              <div className="space-y-6 pt-3">
-                <hr className="border-[#DCD5C8]" />
 
-                {/* Nature of Site Header with single LPS Layout Card */}
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
-                  <div>
-                    <h4 className="text-xs font-black text-slate-900">Nature of Site</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
-                      Select the Nature of Site you want to apply for
-                    </p>
-                  </div>
-
-                  {/* Single LPS Layout selectable box matching image */}
-                  <div className="border-2 border-blue-400 bg-white rounded p-3 flex items-center gap-2 cursor-pointer shadow-2xs">
-                    <input
-                      type="radio"
-                      id="nature-lps"
-                      name="natureOfSiteLps"
-                      checked={true}
-                      readOnly
-                      className="size-4 text-blue-600 accent-blue-600 cursor-pointer"
-                    />
-                    <label htmlFor="nature-lps" className="text-xs font-bold text-slate-900 cursor-pointer">
-                      LPS Layout
-                    </label>
-                  </div>
-                </div>
-
-                {/* LPS Layout Fields Grid (matching user screenshot) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-xs pt-2">
-                  {/* Row 1: Left = Block No, Right = empty spacer */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Block No.
-                    </label>
-                    <input
-                      type="text"
-                      value={lpsBlockNo}
-                      onChange={(e) => setLpsBlockNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-                  <div className="hidden md:block" />
-
-                  {/* Row 2: Left = Survey No, Right = Plot No */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Survey No/D.No/R.S.No
-                    </label>
-                    <input
-                      type="text"
-                      value={lpsSurveyNo}
-                      onChange={(e) => setLpsSurveyNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Plot No.
-                    </label>
-                    <input
-                      type="text"
-                      value={lpsPlotNo}
-                      onChange={(e) => setLpsPlotNo(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-[#F1F3F5] border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  {/* Row 3: Left = Land Use Zone, Right = Zoning District */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      Land Use Zone
-                    </label>
-                    <select
-                      value={lpsLandUseZone}
-                      onChange={(e) => setLpsLandUseZone(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="Residential">Residential</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Mixed Use">Mixed Use</option>
-                      <option value="Public & Semi-Public">Public & Semi-Public</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      Zoning District
-                    </label>
-                    <select
-                      value={lpsZoningDistrict}
-                      onChange={(e) => setLpsZoningDistrict(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="R3-Medium to High density">R3-Medium to High density</option>
-                      <option value="R1-Village Planning Zone">R1-Village Planning Zone</option>
-                      <option value="R2-Medium Density Residential">R2-Medium Density Residential</option>
-                      <option value="C1-Commercial Zone">C1-Commercial Zone</option>
-                    </select>
-                  </div>
-
-                  {/* Row 4: Left = Proposed Use, Right = Proposed Activity */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Use
-                    </label>
-                    <select
-                      value={lpsProposedUse}
-                      onChange={(e) => setLpsProposedUse(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="Residential">Residential</option>
-                      <option value="Commercial">Commercial</option>
-                      <option value="Mixed Use">Mixed Use</option>
-                    </select>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Proposed Activity
-                    </label>
-                    <select
-                      value={lpsProposedActivity}
-                      onChange={(e) => setLpsProposedActivity(e.target.value)}
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    >
-                      <option value="Residential Apartment Bldg">Residential Apartment Bldg</option>
-                      <option value="Bungalow/ Dwelling / Non Apartment">Bungalow/ Dwelling / Non Apartment</option>
-                      <option value="Commercial Complex">Commercial Complex</option>
-                    </select>
-                  </div>
-
-                  {/* Row 5: Left = Road/Street, Right = Building Height */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      Road/Street
-                    </label>
-                    <input
-                      type="text"
-                      value={lpsRoadStreet}
-                      onChange={(e) => setLpsRoadStreet(e.target.value)}
-                      placeholder="e.g. ROAD"
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <label className="font-bold text-slate-800 shrink-0">
-                      <span className="text-rose-600 font-black mr-1">*</span> Building Height
-                    </label>
-                    <input
-                      type="text"
-                      value={lpsBuildingHeight}
-                      onChange={(e) => setLpsBuildingHeight(e.target.value)}
-                      placeholder="e.g. 30"
-                      className="w-full sm:w-72 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-slate-800 font-medium outline-none focus:border-[#7A1316]"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Bottom Action Footer / Next Button */}
             <div className="pt-4 border-t border-[#DCD5C8] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1279,7 +1150,8 @@ export function LtpSubmissionDetails({
               </button>
             </div>
           </div>
-        )}
+        )
+      )}
 
         {/* ========================================================================= */}
         {/* SUB-TAB 2: APPLICANT INFORMATION (Image 1)                                */}

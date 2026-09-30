@@ -66,13 +66,7 @@ export const NAV: Record<Portal, NavGroup[]> = {
   // ----------------------------------------------------------------
   // ADMIN — full system access including admin configuration
   // ----------------------------------------------------------------
-
-},
-  ],
-};
-// ADMIN — System administrator
-// ----------------------------------------------------------------
-ADMIN: [
+  ADMIN: [
   {
     label: "",
     items: [
