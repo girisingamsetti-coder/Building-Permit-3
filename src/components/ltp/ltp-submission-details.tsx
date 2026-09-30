@@ -578,17 +578,12 @@ export function LtpSubmissionDetails({
 
   const renderApplicantCard = (compact: boolean = false) => (
     <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
-      <button
-        type="button"
-        onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
-        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer shrink-0"
-      >
-        <span className="flex items-center gap-1.5 tracking-wide">
-          <span className="text-xs font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
+      <div className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between shrink-0">
+        <span className="tracking-wide">
           Applicant&apos;s Information
         </span>
         <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">Owner / Promoters</span>
-      </button>
+      </div>
 
       {sectionApplicantOpen && (
         <div
@@ -773,19 +768,14 @@ export function LtpSubmissionDetails({
         isBelowSearch ? "border-2 border-[#7A1316]" : "border border-[#7A1316]/50"
       )}
     >
-      <button
-        type="button"
-        onClick={() => setSectionStructuralOpen(!sectionStructuralOpen)}
-        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer shrink-0"
-      >
-        <span className="flex items-center gap-2 tracking-wide">
-          <span className="text-xs font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
+      <div className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between shrink-0">
+        <span className="tracking-wide">
           Structural Engineer
         </span>
         <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">
           Structural Stability
         </span>
-      </button>
+      </div>
 
       {sectionStructuralOpen && (
         <div className="p-3.5 sm:p-5 text-xs bg-[#FAF7F2] flex-1 flex flex-col justify-between">
