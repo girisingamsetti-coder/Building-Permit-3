@@ -397,16 +397,16 @@ export function LpsPlotDetailsView({
   return (
     <div className="w-full space-y-6 font-sans text-slate-800">
       {/* ── TOP SECTION: 50% Applicant Info on Left | 50% Search & Structural on Right ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
         {/* Left Column: Applicant Information Card (50% width) */}
-        <div className="w-full min-w-0">
+        <div className="w-full min-w-0 h-full flex flex-col">
           {applicantSlot}
         </div>
 
         {/* Right Column: Enter plot code card & Structural Engineer Info Card (50% width) */}
-        <div className="w-full min-w-0 space-y-4">
+        <div className="w-full min-w-0 h-full flex flex-col justify-between gap-4">
           {/* ── PLOT CODE INQUIRY & SEARCH BAR ── */}
-          <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl p-4 sm:p-5 shadow-xs space-y-3">
+          <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl p-4 sm:p-5 shadow-xs flex-1 min-h-[165px] flex flex-col justify-between">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
                 <div className="flex items-center gap-2">
@@ -432,7 +432,7 @@ export function LpsPlotDetailsView({
             </div>
 
             {/* Input & Dropdown Row */}
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+            <div className="flex flex-wrap items-center gap-3 pt-2">
               <div className="relative w-full sm:w-96 md:w-[440px]" ref={dropdownRef}>
                 <div className="relative flex items-center">
                   <input
@@ -526,8 +526,12 @@ export function LpsPlotDetailsView({
             </div>
           </div>
 
-          {/* ── STRUCTURAL ENGINEER INFO CARD (Only shown after entering plot code) ── */}
-          {plotData && structuralEngineerSlot}
+          {/* ── STRUCTURAL ENGINEER INFO CARD ── */}
+          {structuralEngineerSlot && (
+            <div className="flex-1 min-h-[165px] flex flex-col">
+              {structuralEngineerSlot}
+            </div>
+          )}
         </div>
       </div>
 

@@ -577,11 +577,11 @@ export function LtpSubmissionDetails({
   };
 
   const renderApplicantCard = (compact: boolean = false) => (
-    <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
       <button
         type="button"
         onClick={() => setSectionApplicantOpen(!sectionApplicantOpen)}
-        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer shrink-0"
       >
         <span className="flex items-center gap-1.5 tracking-wide">
           <span className="text-xs font-mono">{sectionApplicantOpen ? "▲" : "▼"}</span>
@@ -593,10 +593,10 @@ export function LtpSubmissionDetails({
       {sectionApplicantOpen && (
         <div
           className={cn(
-            "p-3.5 sm:p-5 text-xs",
+            "p-3.5 sm:p-5 text-xs flex-1 grid content-between",
             compact
-              ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5"
-              : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5"
+              ? "grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5"
+              : "grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5"
           )}
         >
           {/* Row 1: Self Use or Selling */}
@@ -768,14 +768,14 @@ export function LtpSubmissionDetails({
   const renderStructuralEngineerCard = (compact: boolean = false, isBelowSearch: boolean = false) => (
     <div
       className={cn(
-        "bg-[#FAF7F2] rounded-xl shadow-xs overflow-hidden",
+        "bg-[#FAF7F2] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between",
         isBelowSearch ? "border-2 border-[#7A1316]" : "border border-[#7A1316]/50"
       )}
     >
       <button
         type="button"
         onClick={() => setSectionStructuralOpen(!sectionStructuralOpen)}
-        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer"
+        className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between cursor-pointer shrink-0"
       >
         <span className="flex items-center gap-2 tracking-wide">
           <span className="text-xs font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
@@ -787,12 +787,12 @@ export function LtpSubmissionDetails({
       </button>
 
       {sectionStructuralOpen && (
-        <div className="p-3.5 sm:p-5 text-xs bg-[#FAF7F2]">
+        <div className="p-3.5 sm:p-5 text-xs bg-[#FAF7F2] flex-1 flex flex-col justify-between">
           <div
             className={cn(
               "grid gap-x-6 gap-y-3.5 items-center",
               isBelowSearch
-                ? "grid-cols-1 md:grid-cols-2 2xl:grid-cols-3"
+                ? "grid-cols-1 md:grid-cols-2"
                 : compact
                   ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-x-5 gap-y-2.5"
                   : "grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
@@ -806,7 +806,7 @@ export function LtpSubmissionDetails({
               <select
                 value={structuralName}
                 onChange={(e) => setStructuralName(e.target.value)}
-                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                className="w-full sm:w-52 md:w-56 xl:w-52 2xl:w-60 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
               >
                 <option value="Select">Select</option>
                 <option value="Er. P. Ramachandra Rao">Er. P. Ramachandra Rao</option>
@@ -822,7 +822,7 @@ export function LtpSubmissionDetails({
                 value={structuralValidity}
                 onChange={(e) => setStructuralValidity(e.target.value)}
                 placeholder="DD/MM/YYYY"
-                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                className="w-full sm:w-52 md:w-56 xl:w-52 2xl:w-60 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
               />
             </div>
 
@@ -830,7 +830,7 @@ export function LtpSubmissionDetails({
             <div
               className={cn(
                 "flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2",
-                isBelowSearch && "col-span-1 md:col-span-2 2xl:col-span-1"
+                isBelowSearch && "col-span-1 md:col-span-2"
               )}
             >
               <label className="font-bold text-slate-800 shrink-0 text-xs">Address</label>
@@ -839,7 +839,12 @@ export function LtpSubmissionDetails({
                 value={structuralAddress}
                 onChange={(e) => setStructuralAddress(e.target.value)}
                 placeholder="Enter Address"
-                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                className={cn(
+                  "h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]",
+                  isBelowSearch
+                    ? "w-full sm:flex-1 sm:ml-4"
+                    : "w-full sm:w-52 md:w-56 xl:w-52 2xl:w-60"
+                )}
               />
             </div>
           </div>
