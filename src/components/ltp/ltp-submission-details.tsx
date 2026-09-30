@@ -3459,7 +3459,7 @@ export function LtpSubmissionDetails({
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
                   <span className="text-slate-500 font-medium">Current Status:</span>
                   <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
-                    Submitted · Scrutiny in Progress
+                    Application Form Created
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
