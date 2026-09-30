@@ -516,26 +516,6 @@ export function LpsPlotDetailsView({
           </button>
         </div>
 
-        {/* Info notice when plot is not loaded */}
-        {!plotData && (
-          <div className="rounded-lg border border-[#DCD5C8] bg-white/80 p-3 text-xs text-slate-600 flex items-start gap-2.5">
-            <Sparkles className="size-4 text-[#7A1316] shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold text-slate-800">Quick selection: </span>
-              Click the dropdown arrow or select{" "}
-              <button
-                type="button"
-                id="quick-select-sample-plot-btn"
-                onClick={() => handleSelectCode("23-723-3603-4-C20")}
-                className="font-bold text-[#7A1316] bg-[#FAF4EB] hover:bg-[#F3E5D4] px-1.5 py-0.5 rounded border border-[#DCD5C8] cursor-pointer inline-flex items-center gap-1 transition-colors"
-              >
-                <span>23-723-3603-4-C20</span>
-                <span className="text-[10px] text-amber-800 underline font-normal">(Click to load)</span>
-              </button>{" "}
-              to automatically populate statutory GIS boundaries, ownership, zoning (R3), and area metrics.
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── STRUCTURAL ENGINEER INFO CARD (Placed below Plot Search Card) ── */}
