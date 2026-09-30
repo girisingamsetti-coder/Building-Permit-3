@@ -1055,14 +1055,14 @@ export function LtpSubmissionDetails({
         {mainTab === "form" && subTab === "general" && (
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
-              <div className="flex flex-col xl:flex-row gap-6 items-start">
-                {/* Left Column: Applicant Information Card */}
-                <div className="w-full xl:w-[calc(45%-12px)] min-w-0 space-y-4">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+                {/* Left Column: Applicant Information Card (50% width) */}
+                <div className="w-full min-w-0 space-y-4">
                   {renderApplicantCard(true)}
                 </div>
 
-                {/* Right Column: Plot Search Card, Structural Engineer Info Card & Plot Details Report */}
-                <div className="w-full xl:w-[calc(55%-12px)] min-w-0 space-y-5">
+                {/* Right Column: Plot Search Card, Structural Engineer Info Card & Plot Details Report (50% width) */}
+                <div className="w-full min-w-0 space-y-5">
                   <LpsPlotDetailsView
                     initialPlotCode={initialPlotCode || ""}
                     onPlotLoaded={handleLpsPlotLoaded}
