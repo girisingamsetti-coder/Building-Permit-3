@@ -147,22 +147,22 @@ function LoginForm() {
 
   const QUICK_CARDS = [
     {
-      title: "Citizen Service",
+      title: "Citizen Services",
       icon: Users,
-      desc: "Pay a fee or follow a file — no login needed.",
-      links: ["Pay your fees here", "Search your application status"]
+      desc: "Pay fees or check your building permit application status — no login required.",
+      links: ["Fee Payment", "Application Status"]
     },
     {
-      title: "Developer & TPAs",
+      title: "Developers & TPAs",
       icon: HardHat,
       desc: "Register, renew and check developers and Town Planning Assistants.",
-      links: ["Developer Registration", "Developer Registration Status", "Developer Renewal", "List of Registered Developer", "Developer Consent Link", "TPAs Consent Link", "List of Registered TPAs"]
+      links: ["Developer Registration", "Registration Status", "Developer Renewal", "Registered Developers", "Developer Consent", "TPA Consent", "Registered TPAs"]
     },
     {
-      title: "LTP",
+      title: "LTP Services",
       icon: Ruler,
-      desc: "Licensed Technical Persons register, renew and be found.",
-      links: ["New Registration", "List of Registered LTPs", "LTP Renewal", "Payment and Renewal", "LTP View", "LTP Consent Link"]
+      desc: "Licensed Technical Persons register, renew and manage their profile.",
+      links: ["New Registration", "Registered LTPs", "LTP Renewal", "Payment & Renewal", "LTP Details", "LTP Consent"]
     }
   ];
 
