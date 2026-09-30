@@ -775,7 +775,7 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "general" && (
           isLpsLayout === "LPS Layout" ? (
-            <div className="max-w-6xl mx-auto pb-8">
+            <div className="w-full pb-8">
               <LpsPlotDetailsView
                 initialPlotCode={initialPlotCode || ""}
                 onPlotLoaded={handleLpsPlotLoaded}
@@ -789,7 +789,7 @@ export function LtpSubmissionDetails({
               />
             </div>
           ) : (
-            <div className="max-w-6xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
+            <div className="w-full bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-6 space-y-6">
             {/* Form Fields: Two Columns Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5 text-xs">
               {/* Row 1 */}
@@ -1157,7 +1157,7 @@ export function LtpSubmissionDetails({
         {/* SUB-TAB 2: APPLICANT INFORMATION (Image 1)                                */}
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "applicant" && (
-          <div className="max-w-6xl mx-auto space-y-4">
+          <div className="w-full space-y-4 pb-8">
             {/* 1. Licensed Technical Personnel's Information */}
             <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
               <button
@@ -1564,7 +1564,7 @@ export function LtpSubmissionDetails({
         {/* SUB-TAB 3: PLOT DETAILS (Image 2)                                         */}
         {/* ========================================================================= */}
         {mainTab === "form" && subTab === "plot" && (
-          <div className="max-w-6xl mx-auto space-y-4">
+          <div className="w-full space-y-4 pb-8">
             {/* 1. Proposed Construction */}
             <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
               <button

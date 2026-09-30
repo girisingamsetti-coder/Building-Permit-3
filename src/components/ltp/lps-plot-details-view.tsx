@@ -415,8 +415,8 @@ export function LpsPlotDetailsView({
         </div>
 
         {/* Input & Dropdown Row */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
-          <div className="relative flex-1" ref={dropdownRef}>
+        <div className="flex flex-wrap items-center gap-3 pt-1">
+          <div className="relative w-full sm:w-96 md:w-[440px]" ref={dropdownRef}>
             <div className="relative flex items-center">
               <input
                 type="text"
@@ -532,14 +532,24 @@ export function LpsPlotDetailsView({
 
       {/* Notice card before plot is fetched */}
       {!plotData && (
-        <div className="border-2 border-dashed border-[#DCD5C8] bg-white/70 rounded-xl p-8 sm:p-12 text-center flex flex-col items-center justify-center gap-3">
-          <div className="size-14 rounded-full bg-[#FAF4EB] border border-[#DCD5C8] flex items-center justify-center text-[#7A1316]">
-            <MapPin className="size-7" />
+        <div className="border-2 border-dashed border-[#DCD5C8] bg-white/80 rounded-xl p-5 sm:p-6 text-left flex items-start gap-4">
+          <div className="size-11 rounded-lg bg-[#FAF4EB] border border-[#DCD5C8] flex items-center justify-center text-[#7A1316] shrink-0 mt-0.5">
+            <MapPin className="size-5" />
           </div>
-          <h3 className="text-base font-bold text-slate-800">Plot Details Pending</h3>
-          <p className="text-xs text-slate-500 max-w-md leading-relaxed">
-            Please enter the Plot Code above (or select <button type="button" onClick={() => handleSelectCode("23-723-3603-4-C20")} className="font-bold text-[#7A1316] underline hover:text-[#8F161A] cursor-pointer">23-723-3603-4-C20</button> from the dropdown) to display the statutory cadastral details, ownership, zoning, and GIS coordinates.
-          </p>
+          <div className="space-y-1 text-left">
+            <h3 className="text-sm font-bold text-slate-900">Plot Details Pending</h3>
+            <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+              Please enter the Plot Code above or select{" "}
+              <button
+                type="button"
+                onClick={() => handleSelectCode("23-723-3603-4-C20")}
+                className="font-bold text-[#7A1316] underline hover:text-[#8F161A] cursor-pointer"
+              >
+                23-723-3603-4-C20
+              </button>{" "}
+              from the dropdown to display the statutory cadastral details, ownership, zoning, and GIS coordinates.
+            </p>
+          </div>
         </div>
       )}
 
@@ -566,19 +576,19 @@ export function LpsPlotDetailsView({
                 PLOT
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">BA file number</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.baFileNumber}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotCode}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot number</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotNumber}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Gid</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.gid}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Global Id</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] break-all">{plotData.globalId}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Code Underscore</div>
@@ -595,49 +605,49 @@ export function LpsPlotDetailsView({
                 LOCATION
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Village</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.village}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">LPS village</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsVillage}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">RS village</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.rsVillage}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">District</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.district}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Mandal</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.mandal}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Township</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.township}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sector</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.sector}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Colony</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.colony}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Block</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.block}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">RS number</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.rsNumber}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">LPS / non-LPS</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsNonLps}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">GP code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.gpCode}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Dist Code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.distCode}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lps Vill Co</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsVillCo}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Mdl Code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.mdlCode}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Vill Code</div>
@@ -654,55 +664,55 @@ export function LpsPlotDetailsView({
                 LAND USE
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Zone</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.zone}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Infra zone</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.infraZone}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sector zone</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.sectorZone}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Land use</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.landUse}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Land distribution</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.landDistribution}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Land use description</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.landUseDescription}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Category</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.category}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot status</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotStatus}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Zoning</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.zoning}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Theme city</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.themeCity}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Symbology</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.symbology}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Layer</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.layer}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Usage</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.usage}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Detailed C</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.detailedC}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Infra Zo1</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.infraZo1}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Cat Desc</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.catDesc}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lu Code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.luCode}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Categ</div>
@@ -719,25 +729,25 @@ export function LpsPlotDetailsView({
                 AREA
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Area (acres)</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.areaAcres}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Area (sq yards)</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.areaSqYards}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Allotted extent</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.allottedExtent}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Net plot area (m²)</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.netPlotAreaM2}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Maximum FSI</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.maximumFsi}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Poly Length</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.polyLength}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Poly Width</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.polyWidth}</div>
                   <div className="p-2.5 bg-[#FDFBF7] md:col-span-2 hidden md:block"></div>
@@ -753,7 +763,7 @@ export function LpsPlotDetailsView({
                 OWNERSHIP
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Owners</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.owners}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lottery</div>
@@ -770,19 +780,19 @@ export function LpsPlotDetailsView({
                 ROADS AND REGISTRATION
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Registration code</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.registrationCode}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Rd Width M</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.rdWidthM}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Reg Code E</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.regCodeE}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Reg Code N</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.regCodeN}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Reg Code S</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.regCodeS}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Reg Code W</div>
@@ -799,7 +809,7 @@ export function LpsPlotDetailsView({
                 SOIL
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Soil</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.soil}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Soil type</div>
@@ -816,13 +826,13 @@ export function LpsPlotDetailsView({
                 BOUNDARY
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Boundary points</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.boundaryPoints}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Centroid</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.centroid}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Coord</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] md:col-span-3 font-mono text-[11px] leading-relaxed break-all">
                     {plotData.plotCoord}
@@ -839,13 +849,13 @@ export function LpsPlotDetailsView({
                 RECORD
               </h3>
               <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Join Count</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.joinCount}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Test</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.test}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
+                <div className="grid grid-cols-1 md:grid-cols-[190px_1fr_190px_1fr] lg:grid-cols-[210px_1fr_210px_1fr] divide-y md:divide-y-0 md:divide-x divide-[#DCD5C8]">
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Geoportal Inserted Ts</div>
                   <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.geoportalInsertedTs}</div>
                   <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Geoportal Updated Ts</div>
