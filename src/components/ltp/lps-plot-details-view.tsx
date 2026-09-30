@@ -330,6 +330,7 @@ interface LpsPlotDetailsViewProps {
   onSaveAndNext?: () => void;
   onBack?: () => void;
   initialPlotCode?: string;
+  structuralEngineerSlot?: React.ReactNode;
 }
 
 export function LpsPlotDetailsView({
@@ -337,6 +338,7 @@ export function LpsPlotDetailsView({
   onSaveAndNext,
   onBack,
   initialPlotCode = "",
+  structuralEngineerSlot,
 }: LpsPlotDetailsViewProps) {
   const [selectedPlotCode, setSelectedPlotCode] = React.useState<string>(initialPlotCode);
   const [plotData, setPlotData] = React.useState<LpsPlotRecord | null>(
@@ -535,6 +537,9 @@ export function LpsPlotDetailsView({
           </div>
         )}
       </div>
+
+      {/* ── STRUCTURAL ENGINEER INFO CARD (Placed below Plot Search Card) ── */}
+      {structuralEngineerSlot}
 
       {/* Notice card before plot is fetched */}
       {!plotData && (
