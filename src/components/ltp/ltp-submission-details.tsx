@@ -779,7 +779,7 @@ export function LtpSubmissionDetails({
       >
         <span className="flex items-center gap-2 tracking-wide">
           <span className="text-xs font-mono">{sectionStructuralOpen ? "▲" : "▼"}</span>
-          Structural Engineer Information
+          Structural Engineer
         </span>
         <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">
           Structural Stability
