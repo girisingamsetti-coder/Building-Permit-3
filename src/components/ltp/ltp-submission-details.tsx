@@ -3485,14 +3485,14 @@ export function LtpSubmissionDetails({
                 </button>
                 <button
                   type="button"
+                  id="proceed-to-drawing-submission-btn"
                   onClick={() => {
                     setSubmissionSuccessModal(false);
-                    setLtpActiveMenu("submitted-applications");
-                    onBack?.();
+                    setMainTab("drawing");
                   }}
                   className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <span>Go to Submitted Applications</span>
+                  <span>Proceed to Drawing Submission</span>
                   <ArrowRight className="size-3.5" />
                 </button>
               </div>
