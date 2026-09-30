@@ -12,8 +12,13 @@ import {
   RefreshCw,
   ArrowLeft,
   ArrowRight,
+  FileText,
+  Printer,
+  X,
+  Download,
 } from "lucide-react";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
+import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 
 export interface SubmissionItem {
@@ -24,7 +29,7 @@ export interface SubmissionItem {
   status: string;
   owner: string;
   appId?: string;
-  lpsType?: "LPS Layout" | "Non-LPS";
+  lpsType: "LPS" | "Non LPS";
 }
 
 const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
@@ -32,38 +37,43 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     id: "sub-1",
     baNo: "1168/0142/BP/10/015/2026",
     permissionType: "Building Permission",
+    lpsType: "LPS",
     submittedDate: "23/7/2026",
-    status: "Scrutiny Done/Proceeding Pending",
+    status: "In Review",
     owner: "Vadduri Veeraiah",
   },
   {
     id: "sub-2",
     baNo: "1168/0205/BP/10/018/2026",
     permissionType: "Building Permission",
+    lpsType: "Non LPS",
     submittedDate: "15/8/2026",
-    status: "Under Scrutiny",
+    status: "In Review",
     owner: "Smt. Meena Kulkarni",
   },
   {
     id: "sub-3",
     baNo: "1168/0089/GD/10/004/2026",
     permissionType: "Group Development",
+    lpsType: "LPS",
     submittedDate: "04/9/2026",
-    status: "Fee Generated",
+    status: "In Review",
     owner: "M. Lakshmi Narayana",
   },
   {
     id: "sub-4",
     baNo: "1168/0312/BP/10/022/2026",
     permissionType: "Building Permission",
+    lpsType: "Non LPS",
     submittedDate: "18/9/2026",
-    status: "Payment Pending",
+    status: "In Review",
     owner: "Shri. Suresh Reddy",
   },
   {
     id: "sub-5",
     baNo: "1168/0055/BP/10/002/2026",
     permissionType: "Building Permission",
+    lpsType: "LPS",
     submittedDate: "10/6/2026",
     status: "Approved",
     owner: "P. Srinivasa Rao",
@@ -89,6 +99,8 @@ export function LtpSubmittedApplications({
   const [isSelectingScheme, setIsSelectingScheme] = React.useState(false);
   const [selectedSubmission, setSelectedSubmission] = React.useState<SubmissionItem | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
+  const [viewReportModal, setViewReportModal] = React.useState(false);
+  const [reportModalTab, setReportModalTab] = React.useState<"scrutiny" | "registry">("scrutiny");
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
@@ -116,26 +128,33 @@ export function LtpSubmittedApplications({
             ? "Group Development"
             : "Building Permission";
 
-        const statusMap: Record<string, string> = {
-          SUBMITTED: "Under Scrutiny",
-          IN_SCRUTINY: "Under Scrutiny",
-          DOCUMENT_VERIFICATION: "Document Verification",
-          SITE_INSPECTION_SCHEDULED: "Site Inspection Scheduled",
-          FEE_GENERATED: "Fee Generated",
-          PAYMENT_PENDING: "Payment Pending",
-          APPROVED: "Approved",
-          REJECTED: "Rejected",
-          SHORTFALL_RAISED: "Shortfall Raised",
-          DRAWING_REUPLOAD_REQUIRED: "Drawing Reupload Required",
-        };
-
         const statusLabel =
-          statusMap[a.status] || a.currentStageLabel || "Under Scrutiny";
+          a.status === "APPROVED" || a.status === "Approved" ? "Approved" : "In Review";
+
+        // Determine LPS vs Non LPS status
+        let lpsStatus: "LPS" | "Non LPS" = "Non LPS";
+        if (
+          (a as any).data?.general?.lpsLayout === "LPS Layout" ||
+          (a as any).lpsType === "LPS" ||
+          (a as any).lpsType === "LPS Layout" ||
+          a.applicationNo?.includes("/LPS/")
+        ) {
+          lpsStatus = "LPS";
+        } else if (
+          (a as any).data?.general?.lpsLayout === "Non-LPS" ||
+          (a as any).lpsType === "Non-LPS" ||
+          (a as any).lpsType === "Non LPS"
+        ) {
+          lpsStatus = "Non LPS";
+        } else {
+          lpsStatus = idx % 2 === 0 ? "LPS" : "Non LPS";
+        }
 
         return {
           id: a.id || `sub-store-${idx}`,
           baNo: a.applicationNo || `1168/${String(100 + idx).padStart(4, "0")}/BP/10/015/2026`,
           permissionType: typeLabel,
+          lpsType: lpsStatus,
           submittedDate: dateStr,
           status: statusLabel,
           owner: a.applicant?.name || "Applicant",
@@ -165,6 +184,7 @@ export function LtpSubmittedApplications({
         const q = searchKeywords.toLowerCase();
         const matches =
           item.baNo.toLowerCase().includes(q) ||
+          item.lpsType.toLowerCase().includes(q) ||
           item.permissionType.toLowerCase().includes(q) ||
           item.owner.toLowerCase().includes(q) ||
           item.status.toLowerCase().includes(q);
@@ -172,7 +192,7 @@ export function LtpSubmittedApplications({
       }
 
       // Column filters
-      if (filterType !== "ALL" && item.permissionType !== filterType) return false;
+      if (filterType !== "ALL" && item.lpsType !== filterType) return false;
       if (filterStatus !== "ALL" && item.status !== filterStatus) return false;
       if (filterOwner !== "ALL" && item.owner !== filterOwner) return false;
 
@@ -208,11 +228,11 @@ export function LtpSubmittedApplications({
   };
 
   const exportCSV = () => {
-    const headers = ["#", "BA No.", "Permission Type", "Submitted Date", "Status", "Owner"];
+    const headers = ["#", "BA No.", "Type", "Submitted Date", "Status", "Owner"];
     const rows = sortedItems.map((item, idx) => [
       idx + 1,
       `"${item.baNo}"`,
-      `"${item.permissionType}"`,
+      `"${item.lpsType}"`,
       item.submittedDate,
       `"${item.status}"`,
       `"${item.owner}"`,
@@ -237,6 +257,7 @@ export function LtpSubmittedApplications({
     const now = new Date();
     const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
     const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+    const newLpsStatus: "LPS" | "Non LPS" = scheme === "LPS Layout" ? "LPS" : "Non LPS";
     setSelectedSubmission({
       id: `sub-new-${Date.now()}`,
       baNo: newDraftNo,
@@ -244,7 +265,7 @@ export function LtpSubmittedApplications({
       submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
       status: "Draft",
       owner: "",
-      lpsType: scheme,
+      lpsType: newLpsStatus,
     });
   };
 
@@ -256,7 +277,7 @@ export function LtpSubmittedApplications({
         proposalStatus={selectedSubmission.status}
         submissionDate={selectedSubmission.submittedDate}
         isDraft={false}
-        initialLpsType={selectedSubmission.lpsType || (selectedSubmission.baNo.includes("/LPS/") ? "LPS Layout" : "Non-LPS")}
+        initialLpsType={selectedSubmission.lpsType === "LPS" ? "LPS Layout" : "Non-LPS"}
         onBack={() => setSelectedSubmission(null)}
       />
     );
@@ -362,18 +383,18 @@ export function LtpSubmittedApplications({
             />
           </div>
 
-          {/* Filter: Permission Type */}
+          {/* Filter: Type (LPS or Non LPS) */}
           <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              aria-label="Filter by Permission Type"
+              aria-label="Filter by Type"
               className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
             >
               <option value="ALL">All Types</option>
-              <option value="Building Permission">Building Permission</option>
-              <option value="Group Development">Group Development</option>
+              <option value="LPS">LPS</option>
+              <option value="Non LPS">Non LPS</option>
             </select>
           </div>
 
@@ -387,10 +408,7 @@ export function LtpSubmittedApplications({
               className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
             >
               <option value="ALL">All Status</option>
-              <option value="Scrutiny Done/Proceeding Pending">Scrutiny Done/Proceeding Pending</option>
-              <option value="Under Scrutiny">Under Scrutiny</option>
-              <option value="Fee Generated">Fee Generated</option>
-              <option value="Payment Pending">Payment Pending</option>
+              <option value="In Review">In Review</option>
               <option value="Approved">Approved</option>
             </select>
           </div>
@@ -499,11 +517,11 @@ export function LtpSubmittedApplications({
                 </th>
 
                 <th
-                  onClick={() => handleSort("permissionType")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  onClick={() => handleSort("lpsType")}
+                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>Permission Type</span>
+                    <span>Type</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
@@ -555,19 +573,28 @@ export function LtpSubmittedApplications({
                       {idx + 1}
                     </td>
 
-                    {/* BA No. (Clickable blue link with hover underline, opening submission details) */}
+                    {/* BA No. (Clickable maroon link with hover underline, opening submission details) */}
                     <td className="px-3 py-2.5">
                       <button
                         onClick={() => setSelectedSubmission(item)}
-                        className="text-blue-700 hover:text-blue-900 font-mono font-medium hover:underline text-left cursor-pointer transition-colors"
+                        className="text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
                       >
                         {item.baNo}
                       </button>
                     </td>
 
-                    {/* Permission Type */}
-                    <td className="px-3 py-2.5 text-slate-700 font-medium">
-                      {item.permissionType}
+                    {/* Type: LPS or Non LPS Status */}
+                    <td className="px-3 py-2.5">
+                      <span
+                        className={cn(
+                          "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border",
+                          item.lpsType === "LPS"
+                            ? "bg-amber-100 text-[#7A1316] border-amber-300"
+                            : "bg-slate-100 text-slate-700 border-slate-300"
+                        )}
+                      >
+                        {item.lpsType}
+                      </span>
                     </td>
 
                     {/* Submitted Date */}
@@ -579,20 +606,19 @@ export function LtpSubmittedApplications({
                     <td className="px-3 py-2.5">
                       <span
                         className={cn(
-                          "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border",
-                          item.status.includes("Pending") &&
-                            "bg-amber-50 text-amber-900 border-amber-300",
-                          item.status === "Approved" &&
-                            "bg-emerald-50 text-emerald-900 border-emerald-300",
-                          item.status === "Under Scrutiny" &&
-                            "bg-blue-50 text-blue-900 border-blue-300",
-                          !item.status.includes("Pending") &&
-                            item.status !== "Approved" &&
-                            item.status !== "Under Scrutiny" &&
-                            "bg-[#FAF4EB] text-[#7A1316] border-[#E8DFD1]"
+                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold border",
+                          item.status === "Approved"
+                            ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                            : "bg-blue-50 text-blue-800 border-blue-300"
                         )}
                       >
-                        {item.status}
+                        <span
+                          className={cn(
+                            "size-1.5 rounded-full shrink-0",
+                            item.status === "Approved" ? "bg-emerald-600" : "bg-blue-600"
+                          )}
+                        />
+                        <span>{item.status}</span>
                       </span>
                     </td>
 
@@ -638,6 +664,17 @@ export function LtpSubmittedApplications({
                 className={cn("size-3.5", isRefreshing && "animate-spin text-[#7A1316]")}
               />
             </button>
+            {/* View report button before export button */}
+            <button
+              type="button"
+              id="submitted-view-report-btn"
+              onClick={() => setViewReportModal(true)}
+              title="View report"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs transition-colors cursor-pointer"
+            >
+              <FileText className="size-3.5 text-[#7A1316]" />
+              <span>View report</span>
+            </button>
             <button
               onClick={exportCSV}
               title="Export to Excel / CSV"
@@ -654,6 +691,174 @@ export function LtpSubmittedApplications({
           </div>
         </div>
       </div>
+
+      {/* ── VIEW REPORT MODAL ── */}
+      {viewReportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden font-sans flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="bg-[#7A1316] text-white px-5 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <FileText className="size-5 text-amber-300" />
+                <div>
+                  <h3 className="font-black text-sm uppercase tracking-wide">
+                    {reportModalTab === "scrutiny"
+                      ? "Detailed Scrutiny Report"
+                      : "Submitted Applications Summary Report"}
+                  </h3>
+                  <p className="text-[10px] text-amber-200/90 font-mono">
+                    APCRDA Building Permission Management System
+                  </p>
+                </div>
+              </div>
+
+              {/* View Switcher Tabs */}
+              <div className="flex items-center gap-2">
+                <div className="bg-black/25 rounded p-0.5 flex items-center text-[11px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setReportModalTab("scrutiny")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      reportModalTab === "scrutiny"
+                        ? "bg-white text-[#7A1316] shadow-2xs"
+                        : "text-white/80 hover:text-white"
+                    )}
+                  >
+                    Detailed Scrutiny Report
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportModalTab("registry")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      reportModalTab === "registry"
+                        ? "bg-white text-[#7A1316] shadow-2xs"
+                        : "text-white/80 hover:text-white"
+                    )}
+                  >
+                    Registry Summary
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                  title="Print Report"
+                >
+                  <Printer className="size-3.5" />
+                  <span className="hidden sm:inline">Print</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewReportModal(false)}
+                  className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 cursor-pointer ml-1"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-3 sm:p-5 overflow-y-auto space-y-4 text-xs">
+              {reportModalTab === "scrutiny" ? (
+                <DetailedScrutinyReport
+                  proposalNo={sortedItems[0]?.baNo || "N/A"}
+                  projectTitle={sortedItems[0]?.owner ? `${sortedItems[0].owner} (1)` : "VADDURI VEERAIAH GARU (1)"}
+                  zone="R3-Medium to High density zone"
+                  typology="AP1-Apartment"
+                  onClose={() => setViewReportModal(false)}
+                />
+              ) : (
+                <>
+                  {/* Report Metadata Strip */}
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700 shadow-2xs">
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Generated On</span>
+                      <span className="font-mono font-bold text-slate-900">{new Date().toLocaleDateString("en-IN")}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Generated By</span>
+                      <span className="font-bold text-slate-900">{user?.name || "Licensed Technical Personnel"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Report Scope</span>
+                      <span className="font-bold text-[#7A1316]">Submitted Applications</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Total Records</span>
+                      <span className="font-mono font-bold text-slate-900">{sortedItems.length} Applications</span>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="border border-[#DCD5C8] rounded-lg overflow-hidden bg-white shadow-2xs">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
+                        <tr>
+                          <th className="px-3 py-2 w-10 text-center">#</th>
+                          <th className="px-3 py-2">Proposal / BA No.</th>
+                          <th className="px-3 py-2">Type</th>
+                          <th className="px-3 py-2">Submitted Date</th>
+                          <th className="px-3 py-2">Status</th>
+                          <th className="px-3 py-2">Owner / Applicant</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCD5C8]">
+                        {sortedItems.map((item, idx) => (
+                          <tr key={item.id} className="hover:bg-[#FBF3E4]/50 transition-colors">
+                            <td className="px-3 py-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                            <td className="px-3 py-2 font-mono font-bold text-[#7A1316]">{item.baNo}</td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[10px] font-bold border",
+                                  item.lpsType === "LPS"
+                                    ? "bg-amber-100 text-[#7A1316] border-amber-300"
+                                    : "bg-slate-100 text-slate-700 border-slate-300"
+                                )}
+                              >
+                                {item.lpsType}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-slate-600 font-mono">{item.submittedDate}</td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={cn(
+                                  "px-2 py-0.5 rounded text-[10px] font-bold border",
+                                  item.status === "Approved"
+                                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                    : "bg-blue-100 text-blue-800 border-blue-300"
+                                )}
+                              >
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-slate-700">{item.owner}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-[#F5EBE1] border-t border-[#DCD5C8] px-5 py-2.5 flex items-center justify-between text-slate-600 text-xs shrink-0">
+              <span className="text-[11px] italic">Official APCRDA BBAS Submission Registry Report</span>
+              <button
+                type="button"
+                onClick={() => setViewReportModal(false)}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-4 py-1.5 rounded transition-colors cursor-pointer shadow-2xs"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

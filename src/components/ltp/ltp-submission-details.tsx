@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import type { Application } from "@/types";
 import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
+import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 
 const ZONE_OPTIONS = [
   "C1 -Mixed use zone",
@@ -79,7 +80,7 @@ const TYPOLOGY_OPTIONS = [
 export function LtpSubmissionDetails({
   onBack,
   baNo = "1168/0142/BP/10/015/2026",
-  proposalStatus = "Scrutiny Done/Proceeding Pending",
+  proposalStatus = "In Review",
   submissionDate = "23-07-2026",
   isDraft = false,
   initialLpsType,
@@ -624,6 +625,8 @@ export function LtpSubmissionDetails({
   const [cadShowRooms, setCadShowRooms] = React.useState(true);
   const [cadShowColumns, setCadShowColumns] = React.useState(true);
   const [cadShowDimensions, setCadShowDimensions] = React.useState(true);
+  const [showScrutinyReport, setShowScrutinyReport] = React.useState(false);
+  const reportSectionRef = React.useRef<HTMLDivElement>(null);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -2071,23 +2074,42 @@ export function LtpSubmissionDetails({
                 </div>
               </div>
 
-              {/* Status / Selected file notice */}
+              {/* Status / Selected file notice & View report */}
               {drawingFileName && (
                 <div className="pt-2 flex items-center justify-between border-t border-[#DCD5C8] text-xs">
                   <div className="flex items-center gap-2 text-emerald-800 font-medium">
                     <CheckCircle2 className="size-4 text-emerald-600" />
                     <span>Selected: <strong className="font-mono text-slate-900">{drawingFileName}</strong></span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setDrawingFileName("");
-                      if (drawingFileInputRef.current) drawingFileInputRef.current.value = "";
-                    }}
-                    className="text-xs text-red-600 hover:text-red-800 font-bold cursor-pointer"
-                  >
-                    Remove file
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !showScrutinyReport;
+                        setShowScrutinyReport(next);
+                        if (next) {
+                          showToast("Scrutiny report displayed below drawing");
+                          setTimeout(() => {
+                            reportSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                          }, 100);
+                        }
+                      }}
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-3 py-1 rounded shadow-2xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                    >
+                      <FileText className="size-3.5" />
+                      <span>{showScrutinyReport ? "Hide report" : "View report"}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDrawingFileName("");
+                        if (drawingFileInputRef.current) drawingFileInputRef.current.value = "";
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold cursor-pointer"
+                    >
+                      Remove file
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -2213,10 +2235,35 @@ export function LtpSubmissionDetails({
                       Dimensions
                     </button>
 
+                    {/* View report button before export button */}
+                    <button
+                      type="button"
+                      id="cad-view-report-btn"
+                      onClick={() => {
+                        const next = !showScrutinyReport;
+                        setShowScrutinyReport(next);
+                        if (next) {
+                          showToast("Scrutiny report displayed below drawing");
+                          setTimeout(() => {
+                            reportSectionRef.current?.scrollIntoView({ behavior: "smooth" });
+                          }, 100);
+                        }
+                      }}
+                      className={cn(
+                        "rounded px-2.5 py-1 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs border ml-1",
+                        showScrutinyReport
+                          ? "bg-[#7A1316] text-white border-[#630E10]"
+                          : "bg-white hover:bg-[#FBF3E4] text-[#7A1316] border-[#DCD5C8]"
+                      )}
+                    >
+                      <FileText className="size-3.5" />
+                      <span>{showScrutinyReport ? "Hide report" : "View report"}</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => showToast(`Exporting DWG CAD drawing for ${drawingFileName}...`)}
-                      className="bg-white hover:bg-slate-50 text-[#7A1316] border border-[#DCD5C8] rounded px-2.5 py-1 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs ml-1"
+                      className="bg-white hover:bg-slate-50 text-[#7A1316] border border-[#DCD5C8] rounded px-2.5 py-1 text-xs font-bold flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
                     >
                       <Download className="size-3.5" />
                       <span>Export DWG</span>
@@ -2465,6 +2512,81 @@ export function LtpSubmissionDetails({
                 </div>
               </div>
             )}
+
+            {/* ── CARD 3: DETAILED SCRUTINY REPORT (Displayed below drawing as requested) ── */}
+            {showScrutinyReport && (
+              <div ref={reportSectionRef} className="w-full pt-1 animate-in fade-in slide-in-from-top-3 duration-200">
+                <DetailedScrutinyReport
+                  proposalNo={drawingBaNo || draftAppNo || "Temp/1168/0801/LPS/2026"}
+                  projectTitle={ownerName ? `${ownerName} (1)` : "VADDURI VEERAIAH GARU (1)"}
+                  zone={drawingZone || "R3-Medium to High density zone"}
+                  typology={drawingTypology || "AP1-Apartment"}
+                  applicantName={ownerName || "Vadduri Veeraiah"}
+                  applicantAddress={`${revenueVillage || "Inavolu"}, ${mandal || "Thullur"} Mandal, ${district || "Guntur"} District`}
+                  applicantContact={applicantMobile || "+91 94401 28941"}
+                  architectName={structuralName || "Er. K. Ramamurthy (LTP)"}
+                  architectLicence="CA/2018/94120 / APCRDA-LTP-042"
+                  architectContact="architect.amv@apcrda.gov.in"
+                  plotNo={lpsPlotNo || "11-502-4137-9-D82"}
+                  surveyNo={lpsSurveyNo || "231229230"}
+                  siteAddress={`Plot ${lpsPlotNo || "11-502-4137-9-D82"}, Block ${lpsBlockNo || "4137"}, ${revenueVillage || "Inavolu"}, ${mandal || "Thullur"}, Amaravati`}
+                  plotArea={plotAreaProposed ? `${plotAreaProposed} m²` : "83.59 m²"}
+                  proposedFootprint={proposedBuiltUpArea ? `${proposedBuiltUpArea} m²` : "57.02 m²"}
+                  totalBuiltUpArea={proposedBuiltUpArea ? `${proposedBuiltUpArea} m²` : "57.02 m²"}
+                  roadWidth={widthOfApproachRoad ? `${widthOfApproachRoad}.00 m Wide ${natureOfRoad} Road` : "3.00 m Wide CC Road"}
+
+                  // Statutory Area Parameters
+                  proposedPlotArea={plotAreaProposed || "83.59"}
+                  totalAreaDocuments={plotAreaDocument || "83.61"}
+                  totalAreaGround={plotAreaGround || "83.59"}
+                  plotStructure={plotStructure || "Below 200 sq m"}
+                  isAffectingRoadWidening={isAffectingRoadWidening || "No"}
+                  proposedBuiltUpArea={proposedBuiltUpArea || "57.02"}
+                  isCompoundWallProposed={isCompoundWallProposed || "No"}
+                  roadWidthInput={roadWidthInput || "0"}
+
+                  // Site Details
+                  abutsExistingRoad={abutsExistingRoad || "Yes"}
+                  statusOfRoad={statusOfRoad || "Public"}
+                  natureOfRoad={natureOfRoad || "CC - Concrete"}
+                  widthOfApproachRoad={widthOfApproachRoad || "3"}
+                  plotNearbyReligious={plotNearbyReligious || "NA"}
+                  vicinityAerodrome={vicinityAerodrome || "No"}
+                  vicinityWaterBodies={vicinityWaterBodies || "No"}
+                  marketValue={marketValue || "5750"}
+                  abuttingIrr={abuttingIrr || "No"}
+
+                  // Schedule of Boundaries
+                  northBoundary={northBoundary || "Others"}
+                  northNo={northNo || "Plot 17"}
+                  southBoundary={southBoundary || "Others"}
+                  southNo={southNo || "Plot 19"}
+                  eastBoundary={eastBoundary || "Others"}
+                  eastNo={eastNo || "Plot 25"}
+                  westBoundary={westBoundary || "Road"}
+                  westNo={westNo || "3.00 m CC Road"}
+
+                  scrutinyStatus="PASSED"
+                  onProceedToDocumentation={() => {
+                    setShowScrutinyReport(false);
+                    setMainTab("documentation");
+                    setDocSubTab("app-checklist");
+                    showToast("Drawing scrutiny passed! Proceeding to Documentation...");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  onReuploadForScrutiny={() => {
+                    setShowScrutinyReport(false);
+                    if (drawingFileInputRef.current) {
+                      drawingFileInputRef.current.value = "";
+                    }
+                    drawingFileInputRef.current?.click();
+                    showToast("Please choose a corrected DWG/DXF CAD file to re-run scrutiny.");
+                  }}
+                  onRefresh={() => showToast("Scrutiny rules re-evaluated successfully")}
+                  onClose={() => setShowScrutinyReport(false)}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -2638,14 +2760,14 @@ export function LtpSubmissionDetails({
                       <div className="flex items-center gap-3 shrink-0 self-end md:self-center font-bold">
                         <button
                           onClick={() => setPreviewDoc({ title: doc.title, files: doc.files })}
-                          className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                          className="text-[#7A1316] hover:underline hover:text-[#8F161A] cursor-pointer"
                         >
                           View Files
                         </button>
                         <span className="text-slate-300">|</span>
                         <button
                           onClick={() => setUploadDocModal({ id: doc.id, title: doc.title })}
-                          className="text-blue-700 hover:underline hover:text-blue-900 cursor-pointer"
+                          className="text-[#7A1316] hover:underline hover:text-[#8F161A] cursor-pointer"
                         >
                           Attach More
                         </button>
@@ -3109,21 +3231,21 @@ export function LtpSubmissionDetails({
                     <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
                     <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
                     <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
                   </tr>
                   <tr>
                     <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
                     <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
                     <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
                     <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
                   </tr>
                   <tr>
                     <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
                     <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
                     <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
                     <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-blue-700 hover:underline cursor-pointer">Download</td>
+                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
                   </tr>
                 </tbody>
               </table>
@@ -3477,7 +3599,7 @@ export function LtpSubmissionDetails({
                 <span className="font-medium text-slate-800">Auto Scrutiny Compliance Report</span>
                 <button
                   onClick={() => showToast("Scrutiny Report downloaded")}
-                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Download className="size-3" /> PDF
                 </button>
@@ -3486,7 +3608,7 @@ export function LtpSubmissionDetails({
                 <span className="font-medium text-slate-800">Site Inspection Summary</span>
                 <button
                   onClick={() => showToast("Inspection Summary downloaded")}
-                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Download className="size-3" /> PDF
                 </button>
@@ -3495,7 +3617,7 @@ export function LtpSubmissionDetails({
                 <span className="font-medium text-slate-800">Fee Assessment Statement & Challan</span>
                 <button
                   onClick={() => showToast("Challan statement downloaded")}
-                  className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-xs font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Download className="size-3" /> PDF
                 </button>
@@ -3537,7 +3659,7 @@ export function LtpSubmissionDetails({
                   </div>
                   <button
                     onClick={() => showToast(`Downloading ${f}`)}
-                    className="text-xs font-bold text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Download className="size-3" /> Download
                   </button>

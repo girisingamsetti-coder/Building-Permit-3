@@ -251,7 +251,20 @@ function LoginForm() {
           {/* Center: APCRDA & AP Govt */}
           <div className="flex items-center gap-6 md:gap-12">
             <img src="/APCRDA.png" alt="APCRDA" className="h-12 md:h-16 w-auto object-contain" />
-            <div className="text-3xl md:text-5xl font-bold text-[#8c1c13] tracking-widest uppercase drop-shadow-sm">{version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "Bhavan" : version === "v1" ? "Amaravati Nirmaan" : "Bhavana Nirmaan"}</div>
+            <div className={cn(
+              "font-bold text-[#8c1c13] uppercase drop-shadow-sm text-center leading-tight",
+              version === "v4"
+                ? "text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-normal max-w-xl"
+                : "text-3xl md:text-5xl tracking-widest"
+            )}>
+              {version === "v3"
+                ? "Nirmaan Amaravati"
+                : version === "v2"
+                ? "Bhavan"
+                : version === "v1"
+                ? "Amaravati Nirmaan"
+                : "Building Permission Approval System"}
+            </div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
 
@@ -404,10 +417,17 @@ function LoginForm() {
             {/* Header */}
             <div className="flex flex-col items-center mb-8 text-center">
               <h1 className={cn(
-                "font-serif text-[22px] tracking-[0.1em] uppercase drop-shadow-sm",
+                "font-serif tracking-[0.05em] uppercase drop-shadow-sm text-center",
+                version === "v4" ? "text-lg sm:text-xl font-bold text-[#8c1c13]" : "text-[22px]",
                 useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white drop-shadow-md"
               )}>
-                {version === "v3" ? "Nirmaan Amaravati" : version === "v2" ? "Bhavan AMARAVATI" : version === "v1" ? "Amaravati Nirmaan AMARAVATI" : "Bhavana Nirmaan AMARAVATI"}
+                {version === "v3"
+                  ? "Nirmaan Amaravati"
+                  : version === "v2"
+                  ? "Bhavan AMARAVATI"
+                  : version === "v1"
+                  ? "Amaravati Nirmaan AMARAVATI"
+                  : "Building Permission Approval System"}
               </h1>
             </div>
 

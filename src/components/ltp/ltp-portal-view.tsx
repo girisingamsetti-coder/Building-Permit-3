@@ -120,7 +120,15 @@ export function LtpPortalView() {
                   ) : (
                     reviewApps.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
+                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
+                            title="Click to view application details"
+                          >
+                            {app.applicationNo}
+                          </button>
+                        </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
                         <td className="px-4 py-3 text-slate-700">{app.currentStageLabel}</td>
                         <td className="px-4 py-3 text-slate-600">{app.assignedOfficer?.name ?? "Under Scrutiny"}</td>
@@ -187,7 +195,15 @@ export function LtpPortalView() {
                   ) : (
                     approvedApps.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
+                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
+                            title="Click to view application details"
+                          >
+                            {app.applicationNo}
+                          </button>
+                        </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
                         <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
                         <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
@@ -273,7 +289,15 @@ export function LtpPortalView() {
                   ) : (
                     readyForCC.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
+                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
+                            title="Click to view application details"
+                          >
+                            {app.applicationNo}
+                          </button>
+                        </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
                         <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
                         <td className="px-4 py-3">
@@ -333,7 +357,15 @@ export function LtpPortalView() {
                   ) : (
                     approvedApps.map((app) => (
                       <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3 font-mono font-medium text-blue-700">{app.applicationNo}</td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
+                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
+                            title="Click to view application details"
+                          >
+                            {app.applicationNo}
+                          </button>
+                        </td>
                         <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
                         <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
                         <td className="px-4 py-3">

@@ -5,19 +5,20 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import {
   CheckCircle2,
-  ChevronDown,
   ChevronsUpDown,
   FileSpreadsheet,
   Table as TableIcon,
-  Plus,
   ExternalLink,
   RefreshCw,
-  ArrowLeft,
-  ArrowRight,
+  FileText,
+  Printer,
+  X,
+  Download,
 } from "lucide-react";
 import type { Application } from "@/types";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
+import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 
 interface DraftItem {
   id: string;
@@ -33,7 +34,7 @@ interface DraftItem {
 export function LtpDraftApplications({
   onNewApp,
 }: {
-  onNewApp: (appType?: string) => void;
+  onNewApp?: (appType?: string) => void;
 }) {
   const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
@@ -46,22 +47,9 @@ export function LtpDraftApplications({
   const [filterOwner, setFilterOwner] = React.useState("ALL");
   const [sortField, setSortField] = React.useState<keyof DraftItem>("createdDate");
   const [sortAsc, setSortAsc] = React.useState(false);
-  const [createDropdownOpen, setCreateDropdownOpen] = React.useState(false);
-  const [isSelectingScheme, setIsSelectingScheme] = React.useState(false);
   const [selectedDraft, setSelectedDraft] = React.useState<DraftItem | null>(null);
-
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  // Close dropdown on click outside
-  React.useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setCreateDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const [viewReportModal, setViewReportModal] = React.useState(false);
+  const [reportModalTab, setReportModalTab] = React.useState<"scrutiny" | "registry">("scrutiny");
 
   // Compute draft proposals from store or include the standard APCRDA demo draft
   const draftItems: DraftItem[] = React.useMemo(() => {
@@ -179,22 +167,6 @@ export function LtpDraftApplications({
     document.body.removeChild(link);
   };
 
-  const handleCreateNewApp = (scheme: "LPS Layout" | "Non-LPS") => {
-    setIsSelectingScheme(false);
-    const now = new Date();
-    const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
-    const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
-    setSelectedDraft({
-      id: `draft-new-${Date.now()}`,
-      baNo: newDraftNo,
-      permissionType: scheme === "LPS Layout" ? "LPS Building Permission" : "Building Permission",
-      createdDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
-      status: "Draft",
-      owner: "",
-      lpsType: scheme,
-    });
-  };
-
   // If user opened a specific draft, render the comprehensive details view
   if (selectedDraft) {
     return (
@@ -209,91 +181,9 @@ export function LtpDraftApplications({
     );
   }
 
-  // If user selected to create a new application, show the screen with 2 buttons: "LPS" and "Non LPS"
-  if (isSelectingScheme) {
-    return (
-      <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 flex flex-col font-sans text-slate-800 overflow-y-auto">
-        {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#DCD5C8] shrink-0">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsSelectingScheme(false)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#DCD5C8] bg-white text-xs font-bold text-slate-700 hover:bg-[#FBF3E4] hover:text-[#7A1316] transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="size-4" /> Back to Drafts
-            </button>
-            <div>
-              <h1 className="text-xl font-black text-[#7A1316] tracking-tight">New Application</h1>
-              <p className="text-xs text-slate-600">Select application scheme to open respective statutory form</p>
-            </div>
-          </div>
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20">
-            APCRDA Capital City &amp; Zonal Region
-          </span>
-        </div>
-
-        {/* Center Contents: 2 Buttons "LPS" and "Non LPS" */}
-        <div className="max-w-4xl w-full mx-auto my-auto py-8">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-black text-[#7A1316] tracking-tight">Select Application Scheme</h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl mx-auto">
-              Please choose whether your site is part of the Amaravati Land Pooling Scheme (LPS) or a Non-LPS layout.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Button 1: LPS */}
-            <button
-              id="new-app-btn-lps"
-              onClick={() => handleCreateNewApp("LPS Layout")}
-              className="group relative flex flex-col p-6 rounded-2xl border-2 border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
-            >
-              <div className="flex items-center justify-between w-full mb-3">
-                <span className="text-3xl font-black text-[#7A1316] group-hover:scale-105 transition-transform">LPS</span>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#7A1316] text-white">LPS Layout</span>
-              </div>
-              <p className="text-xs font-bold text-slate-900 mb-1">Land Pooling Scheme Layout Application</p>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                For plots situated inside the Amaravati Capital City Land Pooling Scheme. Includes LPS Block No, LPS Survey No, LPS Plot No, and APCRDA pre-approved zoning districts (R3).
-              </p>
-              <div className="mt-auto pt-3 border-t border-[#DCD5C8] flex items-center justify-between w-full">
-                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
-                  Open LPS Application <ArrowRight className="size-4" />
-                </span>
-                <span className="text-[11px] text-slate-500 font-medium">Fast-track Scrutiny</span>
-              </div>
-            </button>
-
-            {/* Button 2: Non LPS */}
-            <button
-              id="new-app-btn-non-lps"
-              onClick={() => handleCreateNewApp("Non-LPS")}
-              className="group relative flex flex-col p-6 rounded-2xl border-2 border-slate-300 hover:border-[#7A1316] bg-white hover:bg-[#FBF3E4] hover:shadow-xl transition-all duration-200 text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#7A1316]/20"
-            >
-              <div className="flex items-center justify-between w-full mb-3">
-                <span className="text-3xl font-black text-slate-800 group-hover:text-[#7A1316] group-hover:scale-105 transition-transform">Non LPS</span>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 group-hover:bg-[#7A1316] group-hover:text-white transition-colors">Non-LPS Layout</span>
-              </div>
-              <p className="text-xs font-bold text-slate-900 mb-1">Non-LPS / Revenue Village / Gramkantam</p>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                For general revenue lands, Gramkantam, extended habitation, private layouts, and village settlement plots requiring Mandal, Village, and Survey verification.
-              </p>
-              <div className="mt-auto pt-3 border-t border-[#DCD5C8] flex items-center justify-between w-full">
-                <span className="text-xs font-bold text-[#7A1316] group-hover:underline flex items-center gap-1.5">
-                  Open Non LPS Application <ArrowRight className="size-4" />
-                </span>
-                <span className="text-[11px] text-slate-500 font-medium">Standard Revenue Scrutiny</span>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── TOP CONTROLS: Search & Filters on Left | Create New Dropdown on Right ── */}
+      {/* ── TOP CONTROLS: Search & Filters ── */}
       <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 shrink-0">
         {/* Left: Search Bar & Filters */}
         <div className="flex flex-wrap items-center gap-2 flex-1">
@@ -367,55 +257,6 @@ export function LtpDraftApplications({
             </button>
           )}
         </div>
-
-        {/* Create New / New Application Button (Maroon & Beige Theme) */}
-        <div className="relative shrink-0 self-start xl:self-auto" ref={dropdownRef}>
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsSelectingScheme(true)}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded-l flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-            >
-              <Plus className="size-3.5" />
-              <span>New Application</span>
-            </button>
-            <button
-              onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-              title="Quick select scheme"
-              className="bg-[#630E10] hover:bg-[#7A1316] text-white font-bold text-xs h-[34px] px-2 rounded-r flex items-center justify-center shadow-xs transition-colors cursor-pointer border-t border-r border-b border-[#630E10]"
-            >
-              <ChevronDown className={cn("size-3.5 transition-transform duration-200", createDropdownOpen && "rotate-180")} />
-            </button>
-          </div>
-
-          {/* Dropdown Menu */}
-          {createDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 z-50 w-60 rounded border-2 border-[#7A1316] bg-[#FBF3E4] shadow-lg py-1 overflow-hidden animate-in fade-in-50 zoom-in-95">
-              <div className="px-3 py-1.5 text-xs font-black text-[#7A1316] border-b border-[#E0D2BE] bg-[#F5EBE1]/80">
-                Select Scheme Type
-              </div>
-              <button
-                onClick={() => {
-                  setCreateDropdownOpen(false);
-                  handleCreateNewApp("LPS Layout");
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
-              >
-                <span>LPS Application</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 group-hover:bg-white group-hover:text-[#7A1316]">LPS</span>
-              </button>
-              <button
-                onClick={() => {
-                  setCreateDropdownOpen(false);
-                  handleCreateNewApp("Non-LPS");
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
-              >
-                <span>Non-LPS Application</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 group-hover:bg-white group-hover:text-[#7A1316]">Non-LPS</span>
-              </button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}
@@ -486,15 +327,15 @@ export function LtpDraftApplications({
                     {/* Index */}
                     <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">{idx + 1}</td>
 
-                    {/* BA No. (Clickable blue link with hover underline, opening proposal) */}
+                    {/* BA No. (Clickable maroon link with hover underline, opening proposal) */}
                     <td className="px-3 py-2.5">
                       <button
                         onClick={() => handleOpenDraft(item)}
-                        className="inline-flex items-center gap-1.5 text-blue-700 hover:text-[#7A1316] font-medium underline cursor-pointer text-left font-mono"
+                        className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-bold hover:underline cursor-pointer text-left font-mono"
                         title="Click to view and continue this draft"
                       >
                         <span>{item.baNo}</span>
-                        <ExternalLink className="size-3 text-blue-500 opacity-60 hover:opacity-100" />
+                        <ExternalLink className="size-3 text-[#7A1316]/60 hover:text-[#7A1316]" />
                       </button>
                     </td>
 
@@ -512,13 +353,13 @@ export function LtpDraftApplications({
                     {/* Owner */}
                     <td className="px-3 py-2.5 text-slate-700 font-medium">{item.owner}</td>
 
-                    {/* Action: New */}
+                    {/* Action: Resume */}
                     <td className="px-2.5 py-2.5 text-center">
                       <button
                         onClick={() => handleOpenDraft(item)}
-                        className="text-xs font-semibold text-blue-700 hover:text-[#7A1316] hover:underline cursor-pointer"
+                        className="text-xs font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer"
                       >
-                        New
+                        Resume
                       </button>
                     </td>
                   </tr>
@@ -559,6 +400,17 @@ export function LtpDraftApplications({
               >
                 <RefreshCw className="size-4" />
               </button>
+              {/* View report button before export button */}
+              <button
+                type="button"
+                id="drafts-view-report-btn"
+                onClick={() => setViewReportModal(true)}
+                title="View report"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs transition-colors cursor-pointer"
+              >
+                <FileText className="size-3.5 text-[#7A1316]" />
+                <span>View report</span>
+              </button>
               <button
                 onClick={exportCSV}
                 title="Export to Excel"
@@ -583,6 +435,156 @@ export function LtpDraftApplications({
           </div>
         </div>
       </div>
+
+      {/* ── VIEW REPORT MODAL ── */}
+      {viewReportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-4xl shadow-2xl overflow-hidden font-sans flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="bg-[#7A1316] text-white px-5 py-3 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <FileText className="size-5 text-amber-300" />
+                <div>
+                  <h3 className="font-black text-sm uppercase tracking-wide">
+                    {reportModalTab === "scrutiny"
+                      ? "Detailed Scrutiny Report"
+                      : "Draft Proposals Summary Report"}
+                  </h3>
+                  <p className="text-[10px] text-amber-200/90 font-mono">
+                    APCRDA Building Permission Management System
+                  </p>
+                </div>
+              </div>
+
+              {/* View Switcher Tabs */}
+              <div className="flex items-center gap-2">
+                <div className="bg-black/25 rounded p-0.5 flex items-center text-[11px] font-bold">
+                  <button
+                    type="button"
+                    onClick={() => setReportModalTab("scrutiny")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      reportModalTab === "scrutiny"
+                        ? "bg-white text-[#7A1316] shadow-2xs"
+                        : "text-white/80 hover:text-white"
+                    )}
+                  >
+                    Detailed Scrutiny Report
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportModalTab("registry")}
+                    className={cn(
+                      "px-2.5 py-1 rounded transition-colors cursor-pointer",
+                      reportModalTab === "registry"
+                        ? "bg-white text-[#7A1316] shadow-2xs"
+                        : "text-white/80 hover:text-white"
+                    )}
+                  >
+                    Registry Summary
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                  title="Print Report"
+                >
+                  <Printer className="size-3.5" />
+                  <span className="hidden sm:inline">Print</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewReportModal(false)}
+                  className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 cursor-pointer ml-1"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-3 sm:p-5 overflow-y-auto space-y-4 text-xs">
+              {reportModalTab === "scrutiny" ? (
+                <DetailedScrutinyReport
+                  proposalNo={sortedItems[0]?.baNo || "N/A"}
+                  projectTitle={sortedItems[0]?.owner ? `${sortedItems[0].owner} (1)` : "VADDURI VEERAIAH GARU (1)"}
+                  zone="R3-Medium to High density zone"
+                  typology="AP1-Apartment"
+                  onClose={() => setViewReportModal(false)}
+                />
+              ) : (
+                <>
+                  {/* Report Metadata Strip */}
+                  <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-slate-700 shadow-2xs">
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Generated On</span>
+                      <span className="font-mono font-bold text-slate-900">{new Date().toLocaleDateString("en-IN")}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Generated By</span>
+                      <span className="font-bold text-slate-900">{user?.name || "Licensed Technical Personnel"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Report Scope</span>
+                      <span className="font-bold text-[#7A1316]">Draft Applications</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Total Records</span>
+                      <span className="font-mono font-bold text-slate-900">{sortedItems.length} Proposals</span>
+                    </div>
+                  </div>
+
+                  {/* Table */}
+                  <div className="border border-[#DCD5C8] rounded-lg overflow-hidden bg-white shadow-2xs">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
+                        <tr>
+                          <th className="px-3 py-2 w-10 text-center">#</th>
+                          <th className="px-3 py-2">Proposal / BA No.</th>
+                          <th className="px-3 py-2">Permission Type</th>
+                          <th className="px-3 py-2">Created Date</th>
+                          <th className="px-3 py-2">Status</th>
+                          <th className="px-3 py-2">Owner / Applicant</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCD5C8]">
+                        {sortedItems.map((item, idx) => (
+                          <tr key={item.id} className="hover:bg-[#FBF3E4]/50 transition-colors">
+                            <td className="px-3 py-2 text-center font-bold text-slate-500">{idx + 1}</td>
+                            <td className="px-3 py-2 font-mono font-bold text-[#7A1316]">{item.baNo}</td>
+                            <td className="px-3 py-2 text-slate-800">{item.permissionType}</td>
+                            <td className="px-3 py-2 text-slate-600 font-mono">{item.createdDate}</td>
+                            <td className="px-3 py-2">
+                              <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded text-[10px] font-bold">
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-slate-700">{item.owner}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="bg-[#F5EBE1] border-t border-[#DCD5C8] px-5 py-2.5 flex items-center justify-between text-slate-600 text-xs shrink-0">
+              <span className="text-[11px] italic">Official APCRDA BBAS Draft Proposal Registry Report</span>
+              <button
+                type="button"
+                onClick={() => setViewReportModal(false)}
+                className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-4 py-1.5 rounded transition-colors cursor-pointer shadow-2xs"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

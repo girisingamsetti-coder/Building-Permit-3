@@ -42,18 +42,9 @@ const LTP_MODULES: LtpModuleDef[] = [
     label: "Applications",
     iconType: "applications",
     submenus: [
-      { id: "draft-application", label: "Drafts" },
       { id: "submitted-applications", label: "Submissions" },
+      { id: "draft-application", label: "Drafts" },
       { id: "objected-files", label: "Objections" },
-    ],
-  },
-  {
-    id: "commencement",
-    label: "Work Commencement",
-    iconType: "commencement",
-    submenus: [
-      { id: "cc-issued", label: "Commencement Certificates" },
-      { id: "work-initiated", label: "Work Initiation" },
     ],
   },
   {
@@ -76,6 +67,15 @@ const LTP_MODULES: LtpModuleDef[] = [
       { id: "review-shortfall-submission", label: "Shortfall Compliance Submissions" },
       { id: "show-cause", label: "Show Cause Directives" },
       { id: "review-show-cause-submission", label: "Show Cause Explanations" },
+    ],
+  },
+  {
+    id: "commencement",
+    label: "Work Commencement",
+    iconType: "commencement",
+    submenus: [
+      { id: "cc-issued", label: "Commencement Certificates" },
+      { id: "work-initiated", label: "Work Initiation" },
     ],
   },
   {
