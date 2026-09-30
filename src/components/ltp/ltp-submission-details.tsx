@@ -1076,10 +1076,8 @@ export function LtpSubmissionDetails({
                     initialPlotCode={initialPlotCode || ""}
                     onPlotLoaded={handleLpsPlotLoaded}
                     onSaveAndNext={() => {
-                      showToast("Plot details saved. Proceeding to Applicant Information...");
-                      setSubTab("applicant");
-                      const scrollContainer = document.querySelector(".overflow-y-auto");
-                      if (scrollContainer) scrollContainer.scrollTo({ top: 0, behavior: "smooth" });
+                      showToast("LPS Plot & Application details successfully verified and submitted.");
+                      setSubmissionSuccessModal(true);
                     }}
                     onBack={onBack ? onBack : () => navigate("ltp-dashboard")}
                   />

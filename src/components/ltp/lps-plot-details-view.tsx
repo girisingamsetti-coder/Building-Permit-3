@@ -865,25 +865,17 @@ export function LpsPlotDetailsView({
             </div>
           </div>
 
-          {/* ── CARD FOOTER ACTIONS (Back and Save and Next matching Screenshot) ── */}
-          <div className="bg-[#FAF7F2] border-t border-[#DCD5C8] px-6 py-4 flex items-center justify-end gap-3">
-            {onBack && (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="px-5 py-2 rounded-md border border-[#DCD5C8] bg-white text-xs font-semibold text-slate-700 hover:bg-[#FBF3E4] hover:text-[#7A1316] transition-colors cursor-pointer"
-              >
-                Back
-              </button>
-            )}
+          {/* ── CARD FOOTER ACTIONS (Submit button placed in the middle) ── */}
+          <div className="bg-[#FAF7F2] border-t border-[#DCD5C8] px-6 py-4 flex items-center justify-center">
             {onSaveAndNext && (
               <button
                 type="button"
-                id="lps-save-and-next-btn"
+                id="lps-submit-btn"
                 onClick={onSaveAndNext}
-                className="px-6 py-2 rounded-md bg-[#C47D18] hover:bg-[#A96A13] text-white text-xs font-bold shadow-xs transition-colors cursor-pointer flex items-center gap-1.5"
+                className="px-8 py-2.5 rounded-lg bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center gap-2 border border-[#630E10]"
               >
-                Save and Next <ArrowRight className="size-4" />
+                <CheckCircle2 className="size-4" />
+                <span>Submit</span>
               </button>
             )}
           </div>
