@@ -403,8 +403,15 @@ export function LpsPlotDetailsView({
           {applicantSlot}
         </div>
 
-        {/* Right Column: Enter plot code card & Structural Engineer Info Card (50% width) */}
+        {/* Right Column: Structural Engineer Info Card & Enter plot code card (50% width) */}
         <div className="w-full min-w-0 h-full flex flex-col justify-between gap-4">
+          {/* ── STRUCTURAL ENGINEER INFO CARD ── */}
+          {structuralEngineerSlot && (
+            <div className="flex-1 min-h-[165px] flex flex-col">
+              {structuralEngineerSlot}
+            </div>
+          )}
+
           {/* ── PLOT CODE INQUIRY & SEARCH BAR ── */}
           <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl p-4 sm:p-5 shadow-xs flex-1 min-h-[165px] flex flex-col justify-between">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -525,13 +532,6 @@ export function LpsPlotDetailsView({
               </button>
             </div>
           </div>
-
-          {/* ── STRUCTURAL ENGINEER INFO CARD ── */}
-          {structuralEngineerSlot && (
-            <div className="flex-1 min-h-[165px] flex flex-col">
-              {structuralEngineerSlot}
-            </div>
-          )}
         </div>
       </div>
 
