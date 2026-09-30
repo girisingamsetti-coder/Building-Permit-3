@@ -824,14 +824,15 @@ export function LtpSubmissionDetails({
                 : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
             )}
           >
+            {/* Field 1: Structural Engineer Name */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <label className="font-semibold text-slate-800 shrink-0 text-xs">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
                 Structural Engineer Name
               </label>
               <select
                 value={structuralName}
                 onChange={(e) => setStructuralName(e.target.value)}
-                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
               >
                 <option value="Select">Select</option>
                 <option value="Er. P. Ramachandra Rao">Er. P. Ramachandra Rao</option>
@@ -839,27 +840,29 @@ export function LtpSubmissionDetails({
               </select>
             </div>
 
+            {/* Field 2: Validity */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <label className="font-semibold text-slate-800 shrink-0 text-xs">Validity</label>
+              <label className="font-bold text-slate-800 shrink-0 text-xs">Validity</label>
               <input
                 type="text"
                 value={structuralValidity}
                 onChange={(e) => setStructuralValidity(e.target.value)}
-                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+                placeholder="DD/MM/YYYY"
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
               />
             </div>
 
-            {!compact && (
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2">
-                <label className="font-semibold text-slate-800 shrink-0 text-xs">Address</label>
-                <input
-                  type="text"
-                  value={structuralAddress}
-                  onChange={(e) => setStructuralAddress(e.target.value)}
-                  className="w-full md:max-w-3xl h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
-                />
-              </div>
-            )}
+            {/* Field 3: Address */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">Address</label>
+              <input
+                type="text"
+                value={structuralAddress}
+                onChange={(e) => setStructuralAddress(e.target.value)}
+                placeholder="Enter Address"
+                className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              />
+            </div>
           </div>
         )}
       </div>
