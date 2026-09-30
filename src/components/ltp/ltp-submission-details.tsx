@@ -593,25 +593,20 @@ export function LtpSubmissionDetails({
       {sectionApplicantOpen && (
         <div
           className={cn(
-            "p-3.5 sm:p-4 text-xs",
+            "p-3.5 sm:p-5 text-xs",
             compact
-              ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2 gap-x-5 gap-y-2.5"
-              : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
+              ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5"
+              : "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5"
           )}
         >
           {/* Row 1: Self Use or Selling */}
           <div
-            className={cn(
-              "flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2",
-              compact
-                ? "md:col-span-2 xl:col-span-1 2xl:col-span-2"
-                : "md:col-span-2"
-            )}
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2 md:col-span-2"
           >
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Application is for Self Use or Selling Purpose?
             </label>
-            <div className="flex items-center gap-6 sm:w-48 md:w-52 xl:w-48 2xl:w-48">
+            <div className="flex items-center gap-6 sm:w-52 md:w-56 xl:w-60 2xl:w-64">
               <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800 text-xs">
                 <input
                   type="radio"
@@ -636,7 +631,7 @@ export function LtpSubmissionDetails({
           </div>
 
           {/* Row 2: Owner Name & Road/Street */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Owner Name (In Full)
             </label>
@@ -644,22 +639,22 @@ export function LtpSubmissionDetails({
               type="text"
               value={ownerName}
               onChange={(e) => setOwnerName(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316]"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-semibold text-slate-800 shrink-0 text-xs">Road/Street</label>
             <input
               type="text"
               value={applicantRoadStreet}
               onChange={(e) => setApplicantRoadStreet(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
             />
           </div>
 
           {/* Row 3: Door No & District */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Door No./Flat No.
             </label>
@@ -667,11 +662,11 @@ export function LtpSubmissionDetails({
               type="text"
               value={doorNo}
               onChange={(e) => setDoorNo(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> District
             </label>
@@ -679,12 +674,12 @@ export function LtpSubmissionDetails({
               type="text"
               value={applicantDistrict}
               onChange={(e) => setApplicantDistrict(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
             />
           </div>
 
           {/* Row 4: City & Email */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> City
             </label>
@@ -692,11 +687,11 @@ export function LtpSubmissionDetails({
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Email
             </label>
@@ -704,12 +699,12 @@ export function LtpSubmissionDetails({
               type="email"
               value={applicantEmail}
               onChange={(e) => setApplicantEmail(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 outline-none focus:border-[#7A1316]"
             />
           </div>
 
           {/* Row 5: PinCode & Mobile */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> PinCode
             </label>
@@ -717,11 +712,11 @@ export function LtpSubmissionDetails({
               type="text"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Mobile
             </label>
@@ -729,26 +724,26 @@ export function LtpSubmissionDetails({
               type="text"
               value={applicantMobile}
               onChange={(e) => setApplicantMobile(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
             />
           </div>
 
           {/* Row 6: Landline & Aadhaar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-semibold text-slate-800 shrink-0 text-xs">Landline Number</label>
             <input
               type="text"
               value={landlineNumber}
               onChange={(e) => setLandlineNumber(e.target.value)}
-              className="w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
+              className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-mono outline-none focus:border-[#7A1316]"
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
               <span className="text-rose-600 font-black mr-1">*</span> Aadhaar No.
             </label>
-            <div className="relative w-full sm:w-48 md:w-52 xl:w-48 2xl:w-48">
+            <div className="relative w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64">
               <input
                 type={showApplicantAadhaar ? "text" : "password"}
                 value={applicantAadhaar}
@@ -767,12 +762,7 @@ export function LtpSubmissionDetails({
 
           {/* Card Bottom Next Action */}
           <div
-            className={cn(
-              "pt-2.5 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2",
-              compact
-                ? "md:col-span-2 xl:col-span-1 2xl:col-span-2"
-                : "md:col-span-2"
-            )}
+            className="pt-2.5 border-t border-[#DCD5C8]/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2 md:col-span-2"
           >
             <span className="text-[11px] sm:text-xs text-slate-500 italic">
               Verify all applicant details before proceeding to plot details.
@@ -1091,8 +1081,8 @@ export function LtpSubmissionDetails({
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
               <div className="flex flex-col xl:flex-row gap-6 items-start">
-                {/* Left Column: Plot Search Card, Structural Engineer Info Card & Plot Details Card (reduced width ~65%, reduced by ~35%) */}
-                <div className="w-full xl:w-[calc(65%-12px)] min-w-0 space-y-5">
+                {/* Left Column: Plot Search Card, Structural Engineer Info Card & Plot Details Card (55% width) */}
+                <div className="w-full xl:w-[calc(55%-12px)] min-w-0 space-y-5">
                   <LpsPlotDetailsView
                     initialPlotCode={initialPlotCode || ""}
                     onPlotLoaded={handleLpsPlotLoaded}
@@ -1105,8 +1095,8 @@ export function LtpSubmissionDetails({
                   />
                 </div>
 
-                {/* Right Column: Applicant Information Card (reduced width ~35%) */}
-                <div className="w-full xl:w-[calc(35%-12px)] min-w-0 space-y-4">
+                {/* Right Column: Applicant Information Card (increased width: 45%) */}
+                <div className="w-full xl:w-[calc(45%-12px)] min-w-0 space-y-4">
                   {renderApplicantCard(true)}
                 </div>
               </div>
