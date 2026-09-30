@@ -648,4 +648,4 @@ export type ViewKey =
   | "pm-shortfalls"
   | "pm-help";
 
-export type Portal = "LTP" | "OFFICER";
+export type Portal = "LTP" | "OFFICER" | "ADMIN";

@@ -362,10 +362,10 @@ export function NewApplicationDialog({
                 if (onSelectScheme) {
                   onSelectScheme("LPS Layout");
                 } else {
-                  setSelectedType("BUILDING_PERMISSION");
+                  setSelectedType("RESIDENTIAL_BP");
                   setData((d) => ({
                     ...d,
-                    general: { ...d.general, lpsLayout: "LPS Layout" },
+                    survey: { ...d.survey, layoutName: "LPS Layout" },
                   }));
                   setTypeSelected(true);
                 }
@@ -395,10 +395,10 @@ export function NewApplicationDialog({
                 if (onSelectScheme) {
                   onSelectScheme("Non-LPS");
                 } else {
-                  setSelectedType("BUILDING_PERMISSION");
+                  setSelectedType("RESIDENTIAL_BP");
                   setData((d) => ({
                     ...d,
-                    general: { ...d.general, lpsLayout: "Non-LPS" },
+                    survey: { ...d.survey, layoutName: "Non-LPS" },
                   }));
                   setTypeSelected(true);
                 }

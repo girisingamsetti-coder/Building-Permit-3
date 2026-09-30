@@ -40,6 +40,7 @@ import {
 import type { Application } from "@/types";
 import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
+import { BuildingPermitOrder, buildPermitOrderFromBaNo } from "./building-permit-order";
 
 const ZONE_OPTIONS = [
   "C1 -Mixed use zone",
@@ -96,6 +97,8 @@ export function LtpSubmissionDetails({
 }) {
   const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
   const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
+  const [docSubmissionModal, setDocSubmissionModal] = React.useState(false);
+  const [showProceeding, setShowProceeding] = React.useState(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
@@ -2598,6 +2601,36 @@ export function LtpSubmissionDetails({
             {/* ── DOC SUB-TAB 1: APPLICATION CHECKLIST ── */}
             {docSubTab === "app-checklist" && (
               <div className="max-w-6xl mx-auto space-y-3">
+                {/* Drawing Compliance Summary Banner */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-3.5 text-xs shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="size-9 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <CheckCircle2 className="size-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-emerald-950 text-xs uppercase tracking-wide">
+                          Drawing Scrutiny Compliance: PASSED
+                        </span>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                          APCRDA BBAS PreDCR v2026.4
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-800 mt-0.5">
+                        Setbacks (Front/Rear/Sides), FAR, Ground Coverage, and Parking verified compliant. Complete the statutory checklists below.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMainTab("drawing")}
+                    className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 bg-white border border-emerald-300 rounded-lg px-3 py-1.5 hover:bg-emerald-50 transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Eye className="size-3.5" />
+                    <span>View CAD Report</span>
+                  </button>
+                </div>
+
                 {/* Top Bar with Save & Continue */}
                 <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] p-3 rounded-lg shadow-2xs">
                   <div>
@@ -2688,6 +2721,39 @@ export function LtpSubmissionDetails({
             {/* ── DOC SUB-TAB 2: DOCUMENT CHECKLIST ── */}
             {docSubTab === "doc-checklist" && (
               <div className="max-w-6xl mx-auto space-y-3">
+                {/* Drawing Compliance Document Checklist Banner */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-3.5 text-xs shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="size-9 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <FileCheck2 className="size-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-emerald-950 text-xs uppercase tracking-wide">
+                          Document Checklist Generated from Drawing Compliance
+                        </span>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                          5/5 Mandatory Verified
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-800 mt-0.5">
+                        Statutory documents required for {drawingTypology || "AP1-Apartment"} in {drawingZone || "R3 Zone"} have been generated and validated.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      showToast("Statutory documents verified. Proceeding to Payment...");
+                      setDocSubmissionModal(true);
+                    }}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>Proceed to Payment</span>
+                    <ArrowRight className="size-3.5" />
+                  </button>
+                </div>
+
                 {/* Top Bar with Primary/Additional Tabs & Red Instruction Note */}
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
                   <div className="flex items-center gap-2">
@@ -2722,13 +2788,24 @@ export function LtpSubmissionDetails({
                     <button
                       type="button"
                       onClick={() => {
-                        showToast(`Application BA No. ${baNo} submitted successfully!`);
-                        setSubmissionSuccessModal(true);
+                        showToast(`Application BA No. ${baNo} documents submitted successfully!`);
+                        setDocSubmissionModal(true);
                       }}
                       className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="size-3.5" />
-                      <span>Submit</span>
+                      <span>Submit Documents</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        showToast("Statutory documents verified. Proceeding to Payment...");
+                        setDocSubmissionModal(true);
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-1.5 rounded transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>Proceed to Payment</span>
+                      <ArrowRight className="size-3.5" />
                     </button>
                   </div>
                 </div>
@@ -2793,13 +2870,25 @@ export function LtpSubmissionDetails({
                     <button
                       type="button"
                       onClick={() => {
-                        showToast(`Application BA No. ${baNo} submitted successfully!`);
-                        setSubmissionSuccessModal(true);
+                        showToast(`Application BA No. ${baNo} documents submitted successfully!`);
+                        setDocSubmissionModal(true);
                       }}
-                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
                     >
                       <CheckCircle2 className="size-4" />
-                      <span>Submit Application</span>
+                      <span>Submit Documents</span>
+                    </button>
+                    <button
+                      type="button"
+                      id="doc-footer-proceed-to-payment-btn"
+                      onClick={() => {
+                        showToast("Statutory documents verified. Proceeding to Payment...");
+                        setDocSubmissionModal(true);
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
+                    >
+                      <span>Proceed to Payment</span>
+                      <ArrowRight className="size-4" />
                     </button>
                   </div>
                 </div>
@@ -3210,46 +3299,82 @@ export function LtpSubmissionDetails({
         {/* MAIN TAB 3: PAYMENTS                                                      */}
         {/* ========================================================================= */}
         {mainTab === "payments" && (
-          <div className="max-w-4xl mx-auto bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4 text-xs">
-            <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
-              Fee Assessment & Payment History
-            </h3>
-            <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                  <tr>
-                    <th className="px-3.5 py-2.5">Fee Head</th>
-                    <th className="px-3.5 py-2.5">Challan No.</th>
-                    <th className="px-3.5 py-2.5">Amount (₹)</th>
-                    <th className="px-3.5 py-2.5">Status</th>
-                    <th className="px-3.5 py-2.5 text-right">Receipt</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#DCD5C8]">
-                  <tr>
-                    <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
-                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
-                    <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
-                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
-                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
-                    <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
-                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
-                    <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
-                    <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
-                    <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                    <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+          <div className="max-w-4xl mx-auto space-y-4 text-xs">
+            {showProceeding ? (
+              /* ── Building Permit Order / Proceeding ── */
+              <BuildingPermitOrder
+                data={buildPermitOrderFromBaNo(baNo)}
+                onBack={() => setShowProceeding(false)}
+              />
+            ) : (
+              <>
+                {/* Payment success banner + Proceeding CTA */}
+                <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
+                      <CheckCircle2 className="size-5" />
+                    </div>
+                    <div>
+                      <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
+                      <p className="text-emerald-700 text-[11px] mt-0.5">
+                        Your building permit order has been generated. Click to view the official proceeding.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowProceeding(true)}
+                    className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+                  >
+                    <FileText className="size-3.5" />
+                    View Proceeding
+                  </button>
+                </div>
+
+                {/* Fee table */}
+                <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
+                  <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
+                    Fee Assessment &amp; Payment History
+                  </h3>
+                  <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+                        <tr>
+                          <th className="px-3.5 py-2.5">Fee Head</th>
+                          <th className="px-3.5 py-2.5">Challan No.</th>
+                          <th className="px-3.5 py-2.5">Amount (₹)</th>
+                          <th className="px-3.5 py-2.5">Status</th>
+                          <th className="px-3.5 py-2.5 text-right">Receipt</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DCD5C8]">
+                        <tr>
+                          <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
+                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
+                          <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
+                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                        </tr>
+                        <tr>
+                          <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
+                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
+                          <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
+                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                        </tr>
+                        <tr>
+                          <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
+                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
+                          <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
+                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -4067,6 +4192,98 @@ export function LtpSubmissionDetails({
                 >
                   <span>Proceed to Drawing Submission</span>
                   <ArrowRight className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── DOCUMENT SUBMISSION SUCCESS & PROCEED TO PAYMENT MODAL ── */}
+      {docSubmissionModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-150">
+          <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl w-full max-w-lg shadow-2xl overflow-hidden font-sans">
+            {/* Modal Header */}
+            <div className="bg-[#7A1316] text-white px-5 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="size-5 text-emerald-400" />
+                <h3 className="font-black text-sm uppercase tracking-wide">
+                  Documents Submitted Successfully
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDocSubmissionModal(false)}
+                className="text-white/80 hover:text-white p-1 rounded hover:bg-white/10 cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 sm:p-6 space-y-4 text-xs">
+              <div className="bg-emerald-50 border border-emerald-300 rounded-lg p-3.5 flex items-start gap-3">
+                <ShieldCheck className="size-5 text-emerald-700 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-emerald-900 text-xs">
+                    Document Checklist &amp; Scrutiny Verified
+                  </h4>
+                  <p className="text-emerald-800 text-[11px] mt-0.5 leading-relaxed">
+                    All mandatory statutory documents have been successfully verified against drawing compliance parameters. Fee assessment challans are ready for payment.
+                  </p>
+                </div>
+              </div>
+
+              {/* Application Details Summary */}
+              <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Application BA No.:</span>
+                  <span className="font-mono font-bold text-[#7A1316] text-xs bg-[#FAF7F2] border border-[#DCD5C8] px-2.5 py-0.5 rounded shadow-2xs">
+                    {baNo || draftAppNo || "BA/2026/0892/BP"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Drawing Scrutiny:</span>
+                  <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold px-2 py-0.5 rounded text-[10px]">
+                    PASSED (PreDCR 100% Compliant)
+                  </span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Document Compliance:</span>
+                  <span className="font-bold text-emerald-700">100% Verified (5/5 Mandatory Uploaded)</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                  <span className="text-slate-500 font-medium">Total Assessed Fee:</span>
+                  <span className="font-mono font-bold text-slate-900">₹ 22,000 (Scrutiny + Permit + Gramkantam)</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Submission Timestamp:</span>
+                  <span className="font-mono text-slate-700">{new Date().toLocaleString("en-IN")}</span>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setDocSubmissionModal(false)}
+                  className="bg-white hover:bg-slate-50 text-slate-800 border border-[#DCD5C8] font-bold px-3.5 py-2 rounded-lg transition-colors shadow-2xs cursor-pointer"
+                >
+                  Review Documents
+                </button>
+                <button
+                  type="button"
+                  id="proceed-to-payment-btn"
+                  onClick={() => {
+                    setDocSubmissionModal(false);
+                    setMainTab("payments");
+                    showToast("Statutory documents accepted! Proceeding to Payment...");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold px-5 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>Proceed to Payment</span>
+                  <ArrowRight className="size-4" />
                 </button>
               </div>
             </div>

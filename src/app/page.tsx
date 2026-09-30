@@ -194,7 +194,7 @@ export default function Home() {
   React.useEffect(() => {
     if (isAuthenticated && user && !canAccessView(user, view, roles)) {
       const portal = (user.role === "ADMIN") ? "admin-dashboard"
-        : (user.role === "LTP" || user.role === "ZDD" || user.role === "ZJD" || user.role === "TPA" || user.role === "ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") ? "ltp-dashboard"
+        : (user.role === "LTP" || user.role === "ZDD" || user.role === "ZJD" || user.role === "TPA" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") ? "ltp-dashboard"
           : "officer-dashboard";
       navigate(portal);
     }

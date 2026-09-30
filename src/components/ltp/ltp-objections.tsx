@@ -182,6 +182,12 @@ export function LtpObjections() {
   const [selectedObjection, setSelectedObjection] = React.useState<ObjectionItem | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [viewReportModal, setViewReportModal] = React.useState(false);
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -821,7 +827,7 @@ export function LtpObjections() {
                 projectTitle={sortedItems[0]?.owner ? `${sortedItems[0].owner} (1)` : "VADDURI VEERAIAH GARU (1)"}
                 zone="R3-Medium to High density zone"
                 typology="AP1-Apartment"
-                scrutinyStatus={tab === "scrutiny_failed" ? "FAILED" : "PASSED"}
+                scrutinyStatus={activeTab === "scrutiny-failed" ? "FAILED" : "PASSED"}
                 onProceedToDocumentation={() => {
                   setViewReportModal(false);
                   showToast("Proceeding to statutory documentation checklist...");
@@ -845,6 +851,14 @@ export function LtpObjections() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-xs font-semibold text-white shadow-lg animate-in fade-in duration-200">
+          <CheckCircle2 className="size-4 text-emerald-400" />
+          <span>{toastMessage}</span>
         </div>
       )}
     </div>

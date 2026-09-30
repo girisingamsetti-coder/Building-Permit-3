@@ -129,7 +129,7 @@ export function LtpSubmittedApplications({
             : "Building Permission";
 
         const statusLabel =
-          a.status === "APPROVED" || a.status === "Approved" ? "Approved" : "In Review";
+          a.status === "APPROVED" ? "Approved" : "In Review";
 
         // Determine LPS vs Non LPS status
         let lpsStatus: "LPS" | "Non LPS" = "Non LPS";
