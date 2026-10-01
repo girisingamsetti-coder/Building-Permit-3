@@ -93,7 +93,7 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">In-Review Proceedings</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">In Review</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Applications currently under departmental review and scrutiny chain.
               </p>
@@ -168,7 +168,7 @@ export function LtpPortalView() {
         return (
           <div className="space-y-4">
             <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Sanctioned &amp; Approved Files</h2>
+              <h2 className="text-xl font-bold tracking-tight text-slate-900">Approved Files</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Sanctioned building permits with approved Building Permit Orders (BPO) and proceedings.
               </p>

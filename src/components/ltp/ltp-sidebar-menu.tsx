@@ -52,8 +52,8 @@ const LTP_MODULES: LtpModuleDef[] = [
     label: "Application Status",
     iconType: "scrutiny",
     submenus: [
-      { id: "approved-files", label: "Sanctioned & Approved Files" },
-      { id: "proceeding-issued", label: "Sanction Orders Issued" },
+      { id: "approved-files", label: "Approved files" },
+      { id: "review-proceeding", label: "In Review" },
     ],
   },
   {
