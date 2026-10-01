@@ -98,7 +98,6 @@ export function LtpSubmissionDetails({
   const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
   const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
   const [docSubmissionModal, setDocSubmissionModal] = React.useState(false);
-  const [showProceeding, setShowProceeding] = React.useState(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
@@ -2600,7 +2599,7 @@ export function LtpSubmissionDetails({
           <>
             {/* ── DOC SUB-TAB 1: APPLICATION CHECKLIST ── */}
             {docSubTab === "app-checklist" && (
-              <div className="max-w-6xl mx-auto space-y-3">
+              <div className="w-full space-y-3">
                 {/* Drawing Compliance Summary Banner */}
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-3.5 text-xs shadow-xs">
                   <div className="flex items-center gap-3">
@@ -2720,7 +2719,7 @@ export function LtpSubmissionDetails({
 
             {/* ── DOC SUB-TAB 2: DOCUMENT CHECKLIST ── */}
             {docSubTab === "doc-checklist" && (
-              <div className="max-w-6xl mx-auto space-y-3">
+              <div className="w-full space-y-3">
                 {/* Drawing Compliance Document Checklist Banner */}
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-3.5 text-xs shadow-xs">
                   <div className="flex items-center gap-3">
@@ -2897,7 +2896,7 @@ export function LtpSubmissionDetails({
 
             {/* ── DOC SUB-TAB 3: OTHERS ── */}
             {docSubTab === "others" && (
-              <div className="max-w-6xl mx-auto space-y-3">
+              <div className="w-full space-y-3">
                 {/* Top Bar with Mandatory Notice & Save & Continue */}
                 <div className="flex items-center justify-between bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
                   <span className="text-xs text-slate-600 font-medium">
@@ -3047,7 +3046,7 @@ export function LtpSubmissionDetails({
 
             {/* ── DOC SUB-TAB 4: REPOSITORY & CLEARANCES ── */}
             {docSubTab === "repository" && (
-              <div className="max-w-6xl mx-auto space-y-4 text-xs font-sans">
+              <div className="w-full space-y-4 text-xs font-sans">
                 {/* Top Documentation Header Card */}
                 <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-5">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DCD5C8] pb-3.5">
@@ -3299,82 +3298,49 @@ export function LtpSubmissionDetails({
         {/* MAIN TAB 3: PAYMENTS                                                      */}
         {/* ========================================================================= */}
         {mainTab === "payments" && (
-          <div className="max-w-4xl mx-auto space-y-4 text-xs">
-            {showProceeding ? (
-              /* ── Building Permit Order / Proceeding ── */
-              <BuildingPermitOrder
-                data={buildPermitOrderFromBaNo(baNo)}
-                onBack={() => setShowProceeding(false)}
-              />
-            ) : (
-              <>
-                {/* Payment success banner + Proceeding CTA */}
-                <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
-                      <CheckCircle2 className="size-5" />
-                    </div>
-                    <div>
-                      <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
-                      <p className="text-emerald-700 text-[11px] mt-0.5">
-                        Your building permit order has been generated. Click to view the official proceeding.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowProceeding(true)}
-                    className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
-                  >
-                    <FileText className="size-3.5" />
-                    View Proceeding
-                  </button>
-                </div>
-
-                {/* Fee table */}
-                <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
-                  <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
-                    Fee Assessment &amp; Payment History
-                  </h3>
-                  <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
-                    <table className="w-full text-left">
-                      <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                        <tr>
-                          <th className="px-3.5 py-2.5">Fee Head</th>
-                          <th className="px-3.5 py-2.5">Challan No.</th>
-                          <th className="px-3.5 py-2.5">Amount (₹)</th>
-                          <th className="px-3.5 py-2.5">Status</th>
-                          <th className="px-3.5 py-2.5 text-right">Receipt</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#DCD5C8]">
-                        <tr>
-                          <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
-                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
-                          <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
-                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                        </tr>
-                        <tr>
-                          <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
-                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
-                          <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
-                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                        </tr>
-                        <tr>
-                          <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
-                          <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
-                          <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
-                          <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                          <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
+          <div className="w-full space-y-4 text-xs">
+            {/* Fee table */}
+            <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
+              <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
+                Fee Assessment &amp; Payment History
+              </h3>
+              <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
+                <table className="w-full text-left">
+                  <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+                    <tr>
+                      <th className="px-3.5 py-2.5">Fee Head</th>
+                      <th className="px-3.5 py-2.5">Challan No.</th>
+                      <th className="px-3.5 py-2.5">Amount (₹)</th>
+                      <th className="px-3.5 py-2.5">Status</th>
+                      <th className="px-3.5 py-2.5 text-right">Receipt</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#DCD5C8]">
+                    <tr>
+                      <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
+                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
+                      <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
+                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
+                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
+                      <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
+                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                    </tr>
+                    <tr>
+                      <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
+                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
+                      <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
+                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
+                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
 
@@ -3382,7 +3348,7 @@ export function LtpSubmissionDetails({
         {/* MAIN TAB 5: APPLY FOR NOCS (Statutory Single-Desk Clearances)              */}
         {/* ========================================================================= */}
         {mainTab === "nocs" && (
-          <div className="max-w-6xl mx-auto space-y-4 text-xs font-sans">
+          <div className="w-full space-y-4 text-xs font-sans">
             {/* Top Header Card */}
             <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-4 sm:p-5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#DCD5C8] pb-3">
