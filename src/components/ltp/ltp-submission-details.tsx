@@ -684,14 +684,15 @@ export function LtpSubmissionDetails({
             </div>
           </div>
 
-          {/* Row 2: Owner Name & Road/Street */}
+          {/* Row 2: Owner Name / Firm Name & Road/Street */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
             <label className="font-bold text-slate-800 shrink-0 text-xs">
-              <span className="text-rose-600 font-black mr-1">*</span> Owner Name (In Full)
+              <span className="text-rose-600 font-black mr-1">*</span> {applicantUseType === "Selling" ? "Firm Name" : "Owner Name (In Full)"}
             </label>
             <input
               type="text"
               value={ownerName}
+              placeholder={applicantUseType === "Selling" ? "Enter Firm Name" : "Enter Owner Name (In Full)"}
               onChange={(e) => setOwnerName(e.target.value)}
               className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316]"
             />

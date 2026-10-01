@@ -555,7 +555,13 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
                             <SelectContent><SelectItem value="Self Use">Self Use</SelectItem><SelectItem value="Selling">Selling</SelectItem></SelectContent>
                         </Select>
                     </Field>
-                    <Field label="Owner Name" required error={errors.ownerName}><Input value={data.applicant.ownerName} onChange={e => upd("applicant", {ownerName: e.target.value})} /></Field>
+                    <Field label={data.applicant.usagePurpose === "Selling" ? "Firm Name" : "Owner Name"} required error={errors.ownerName}>
+                      <Input
+                        value={data.applicant.ownerName}
+                        onChange={e => upd("applicant", {ownerName: e.target.value})}
+                        placeholder={data.applicant.usagePurpose === "Selling" ? "Enter Firm Name" : "Enter Owner Name"}
+                      />
+                    </Field>
                     <Field label="Door / Flat No."><Input value={data.applicant.doorFlatNo} onChange={e => upd("applicant", {doorFlatNo: e.target.value})} /></Field>
                     <Field label="Road/Street"><Input value={data.applicant.roadStreet} onChange={e => upd("applicant", {roadStreet: e.target.value})} /></Field>
                     <Field label="City"><Input value={data.applicant.city} onChange={e => upd("applicant", {city: e.target.value})} /></Field>
@@ -694,7 +700,7 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
                       <ReviewSection title="Application summary" onEdit={() => { setTypeSelected(false); setStep(1); }}>
                         <RV label="Type" value={appTypeLabelShort(data.appType as AppTypeKey)} />
                         <RV label="Draft number" value={draftNo} />
-                        <RV label="Owner Name" value={data.applicant.ownerName} />
+                        <RV label={data.applicant.usagePurpose === "Selling" ? "Firm Name" : "Owner Name"} value={data.applicant.ownerName} />
                         <RV label="Plot Area" value={data.plot.proposedPlotArea} />
                       </ReviewSection>
                   </div>

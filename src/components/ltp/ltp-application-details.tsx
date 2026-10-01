@@ -316,6 +316,7 @@ function OverviewTab({ app }: { app: Application }) {
 
   const [isBulkEdit, setIsBulkEdit] = React.useState(false);
   const [editingCard, setEditingCard] = React.useState<Record<string, boolean>>({});
+  const [applicantPurpose, setApplicantPurpose] = React.useState<"Self Use" | "Selling">("Self Use");
   const [applicantDraft, setApplicantDraft] = React.useState(app.applicant);
   const [ltpNameDraft, setLtpNameDraft] = React.useState(app.ltpName);
   const [projectDraft, setProjectDraft] = React.useState(app.project);
@@ -501,13 +502,42 @@ function OverviewTab({ app }: { app: Application }) {
         >
           {isEditing("applicant") ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+              <div className="sm:col-span-2 pb-2 border-b border-[#DCD5C8]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="font-bold text-slate-800 shrink-0 text-xs">
+                  <span className="text-rose-600 font-black mr-1">*</span> Application is for Self Use or Selling Purpose?
+                </label>
+                <div className="flex items-center gap-6">
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800 text-xs">
+                    <input
+                      type="radio"
+                      name="appOverviewPurpose"
+                      checked={applicantPurpose === "Self Use"}
+                      onChange={() => setApplicantPurpose("Self Use")}
+                      className="accent-[#7A1316] cursor-pointer"
+                    />
+                    <span>Self Use</span>
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-800 text-xs">
+                    <input
+                      type="radio"
+                      name="appOverviewPurpose"
+                      checked={applicantPurpose === "Selling"}
+                      onChange={() => setApplicantPurpose("Selling")}
+                      className="accent-[#7A1316] cursor-pointer"
+                    />
+                    <span>Selling</span>
+                  </label>
+                </div>
+              </div>
               <div className="space-y-1.5">
-                <label className="font-semibold text-slate-700">Applicant Name</label>
+                <label className="font-semibold text-slate-700">
+                  {applicantPurpose === "Selling" ? "Firm Name" : "Applicant Name"}
+                </label>
                 <Input
                   value={applicantDraft.name}
                   onChange={(e) => setApplicantDraft({ ...applicantDraft, name: e.target.value })}
-                  placeholder="e.g. Sri K. Venkateswara Rao"
-                  className="h-8 text-xs"
+                  placeholder={applicantPurpose === "Selling" ? "Enter Firm Name" : "e.g. Sri K. Venkateswara Rao"}
+                  className="h-8 text-xs font-medium"
                 />
               </div>
               <div className="space-y-1.5">
@@ -559,7 +589,8 @@ function OverviewTab({ app }: { app: Application }) {
           ) : (
             <InfoGrid
               items={[
-                { label: "Applicant Name", value: app.applicant.name },
+                { label: applicantPurpose === "Selling" ? "Firm Name" : "Applicant Name", value: app.applicant.name },
+                { label: "Purpose", value: applicantPurpose },
                 { label: "Contact", value: app.applicant.contact, mono: true },
                 { label: "Email", value: app.applicant.email },
                 { label: "Address", value: app.applicant.address },
