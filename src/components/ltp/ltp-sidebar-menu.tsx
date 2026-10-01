@@ -52,7 +52,6 @@ const LTP_MODULES: LtpModuleDef[] = [
     label: "Scrutiny & Sanction Tracking",
     iconType: "scrutiny",
     submenus: [
-      { id: "review-proceeding", label: "In-Review Proceedings" },
       { id: "approved-files", label: "Sanctioned & Approved Files" },
       { id: "proceeding-issued", label: "Sanction Orders Issued" },
     ],
