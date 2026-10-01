@@ -153,6 +153,16 @@ interface AppState {
     uploadedDocCodes?: string[];
   }) => string;
 
+  updateApplicationDetails: (
+    appId: string,
+    updates: {
+      applicant?: Partial<Applicant>;
+      ltpName?: string;
+      project?: Partial<ProjectInfo>;
+      priority?: Application["priority"];
+    }
+  ) => void;
+
   uploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
   runScrutiny: (appId: string) => void;
   reuploadDrawing: (appId: string, fileName: string, fileSize: string) => void;
@@ -565,6 +575,19 @@ export const useAppStore = create<AppState>()(
           smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs,
         }));
         return id;
+      },
+
+      updateApplicationDetails: (appId, updates) => {
+        set((s) => ({
+          applications: updateApp(s.applications, appId, (app) => ({
+            ...app,
+            lastUpdated: new Date().toISOString(),
+            applicant: updates.applicant ? { ...app.applicant, ...updates.applicant } : app.applicant,
+            ltpName: updates.ltpName !== undefined ? updates.ltpName : app.ltpName,
+            project: updates.project ? { ...app.project, ...updates.project } : app.project,
+            priority: updates.priority ?? app.priority,
+          })),
+        }));
       },
 
       uploadDrawing: (appId, fileName, fileSize) => {

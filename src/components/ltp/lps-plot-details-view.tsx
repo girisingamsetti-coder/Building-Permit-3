@@ -19,6 +19,10 @@ import {
   Landmark,
   Database,
   Map,
+  Pencil,
+  Check,
+  X,
+  Save,
 } from "lucide-react";
 
 export interface LpsPlotRecord {
@@ -353,6 +357,215 @@ export function LpsPlotDetailsView({
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
+  // Editable cards state
+  const [editingCard, setEditingCard] = React.useState<Record<string, boolean>>({});
+  const [isBulkEdit, setIsBulkEdit] = React.useState(false);
+  const [draftPlotData, setDraftPlotData] = React.useState<LpsPlotRecord>(
+    plotData ? { ...plotData } : ({} as LpsPlotRecord)
+  );
+  const [toastMessage, setToastMessage] = React.useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  // Sync draftPlotData when plotData changes
+  React.useEffect(() => {
+    if (plotData) {
+      setDraftPlotData({ ...plotData });
+    }
+  }, [plotData]);
+
+  const updateField = (field: string, value: string) => {
+    setDraftPlotData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const isCardEditing = (cardKey: string) => isBulkEdit || !!editingCard[cardKey];
+
+  const handleStartEdit = (cardKey: string) => {
+    if (plotData) {
+      setDraftPlotData({ ...plotData });
+    }
+    setEditingCard((prev) => ({ ...prev, [cardKey]: true }));
+  };
+
+  const handleCancelCard = (cardKey: string) => {
+    if (plotData) {
+      setDraftPlotData({ ...plotData });
+    }
+    setEditingCard((prev) => ({ ...prev, [cardKey]: false }));
+  };
+
+  const handleSaveCard = (cardKey: string, cardTitle: string) => {
+    if (!plotData) return;
+    const updated = { ...plotData, ...draftPlotData };
+    setPlotData(updated);
+    if (updated.plotCode && LPS_SAMPLE_RECORDS[updated.plotCode]) {
+      LPS_SAMPLE_RECORDS[updated.plotCode] = updated;
+    }
+    setEditingCard((prev) => ({ ...prev, [cardKey]: false }));
+    onPlotLoaded?.(updated);
+    showToast(`${cardTitle} updated successfully!`);
+  };
+
+  const handleToggleBulkEdit = () => {
+    if (isBulkEdit) {
+      if (plotData) setDraftPlotData({ ...plotData });
+      setIsBulkEdit(false);
+      setEditingCard({});
+    } else {
+      if (plotData) setDraftPlotData({ ...plotData });
+      setIsBulkEdit(true);
+    }
+  };
+
+  const handleSaveAllCards = () => {
+    if (!plotData) return;
+    const updated = { ...plotData, ...draftPlotData };
+    setPlotData(updated);
+    if (updated.plotCode && LPS_SAMPLE_RECORDS[updated.plotCode]) {
+      LPS_SAMPLE_RECORDS[updated.plotCode] = updated;
+    }
+    setIsBulkEdit(false);
+    setEditingCard({});
+    onPlotLoaded?.(updated);
+    showToast("All 9 Plot Cadastral Cards updated and saved successfully!");
+  };
+
+  const handleCancelAllCards = () => {
+    if (plotData) setDraftPlotData({ ...plotData });
+    setIsBulkEdit(false);
+    setEditingCard({});
+    showToast("Edits discarded.");
+  };
+
+  const renderCardHeader = (
+    title: string,
+    icon: React.ReactNode,
+    tag: string,
+    cardKey: string
+  ) => {
+    const isEditing = isCardEditing(cardKey);
+    return (
+      <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {icon}
+          <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
+            {title}
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
+            {tag}
+          </span>
+          {isEditing && !isBulkEdit ? (
+            <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+              <button
+                type="button"
+                onClick={() => handleCancelCard(cardKey)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold text-slate-600 bg-white border border-slate-300 hover:bg-slate-100 transition-colors cursor-pointer shadow-2xs"
+                title="Cancel changes"
+              >
+                <X className="size-3 text-slate-500" /> Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSaveCard(cardKey, title)}
+                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[11px] font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors shadow-2xs cursor-pointer"
+                title="Save changes to this card"
+              >
+                <Check className="size-3 text-white" /> Save
+              </button>
+            </div>
+          ) : !isBulkEdit ? (
+            <button
+              type="button"
+              onClick={() => handleStartEdit(cardKey)}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold text-[#7A1316] bg-white border border-[#7A1316]/50 hover:bg-[#7A1316] hover:text-white transition-all shadow-2xs cursor-pointer group"
+              title={`Edit ${title}`}
+            >
+              <Pencil className="size-3 text-[#7A1316] group-hover:text-white" /> Edit
+            </button>
+          ) : (
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded">
+              Editing
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderCell = (
+    label: string,
+    fieldKey: string,
+    cardKey: string,
+    options?: {
+      placeholder?: string;
+      mono?: boolean;
+      selectOptions?: string[];
+      colSpanFull?: boolean;
+      defaultValue?: string;
+    }
+  ) => {
+    const isEditing = isCardEditing(cardKey);
+    const resolvedValue = plotData?.[fieldKey] || options?.defaultValue || "";
+    const value = isEditing
+      ? (draftPlotData[fieldKey] !== undefined ? draftPlotData[fieldKey] : resolvedValue)
+      : (resolvedValue || "—");
+
+    return (
+      <React.Fragment key={fieldKey}>
+        <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1] flex items-center">
+          {label}
+        </div>
+        <div className={cn("p-2 bg-[#FDFBF7] flex items-center min-h-[38px]", options?.colSpanFull && "sm:col-span-3")}>
+          {isEditing ? (
+            options?.selectOptions ? (
+              <select
+                value={draftPlotData[fieldKey] !== undefined ? draftPlotData[fieldKey] : resolvedValue || options.selectOptions[0]}
+                onChange={(e) => updateField(fieldKey, e.target.value)}
+                className="w-full h-7 px-2 text-xs font-semibold text-slate-900 bg-white border border-[#7A1316] rounded shadow-inner outline-none focus:ring-1 focus:ring-[#7A1316]"
+              >
+                {options.selectOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                value={draftPlotData[fieldKey] !== undefined ? draftPlotData[fieldKey] : resolvedValue}
+                onChange={(e) => updateField(fieldKey, e.target.value)}
+                placeholder={options?.placeholder || `Enter ${label}`}
+                className={cn(
+                  "w-full h-7 px-2 text-xs font-semibold text-slate-900 bg-white border border-[#7A1316] rounded shadow-inner outline-none focus:ring-1 focus:ring-[#7A1316] transition-all",
+                  options?.mono && "font-mono"
+                )}
+              />
+            )
+          ) : (
+            <span
+              className={cn(
+                "font-semibold text-slate-900 break-all",
+                options?.mono && "font-mono",
+                fieldKey === "owners" && "text-[#7A1316] font-bold",
+                (fieldKey === "plotStatus" || fieldKey === "statutoryStatus" || fieldKey === "allotmentStatus") && "text-emerald-800 font-bold"
+              )}
+            >
+              {value || "—"}
+            </span>
+          )}
+        </div>
+      </React.Fragment>
+    );
+  };
+
   // Close dropdown on click outside
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -540,7 +753,15 @@ export function LpsPlotDetailsView({
 
       {/* ── PLOT DETAILS REPORT (Aligned row-by-row across the screen) ── */}
       {plotData && (
-        <div id="lps-plot-details-section" className="space-y-5 pt-1">
+        <div id="lps-plot-details-section" className="space-y-5 pt-1 relative">
+          {/* Toast Notification */}
+          {toastMessage && (
+            <div className="fixed top-14 right-6 z-50 bg-[#7A1316] text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 border border-[#9A181C] animate-in fade-in slide-in-from-top-2">
+              <CheckCircle2 className="size-4 text-emerald-400 shrink-0" />
+              <span>{toastMessage}</span>
+            </div>
+          )}
+
           {/* Top Plot Summary Bar */}
           <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-2.5">
@@ -556,7 +777,7 @@ export function LpsPlotDetailsView({
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center flex-wrap gap-2.5">
               <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-lg border border-[#DCD5C8]">
                 <span className="text-[11px] font-semibold text-slate-500">Plot Code:</span>
                 <span className="text-xs font-black text-[#7A1316] font-mono">
@@ -566,8 +787,65 @@ export function LpsPlotDetailsView({
               <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                 Verified Geoportal Record
               </span>
+
+              {/* Edit All Cards / Save All Controls */}
+              {isBulkEdit ? (
+                <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
+                  <button
+                    type="button"
+                    onClick={handleCancelAllCards}
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    <X className="size-3.5" /> Cancel All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveAllCards}
+                    className="inline-flex items-center gap-1 px-4 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                  >
+                    <Check className="size-3.5" /> Save All Cards
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleToggleBulkEdit}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                  title="Make all 9 cards editable at once"
+                >
+                  <Pencil className="size-3.5" /> Edit All Cards
+                </button>
+              )}
             </div>
           </div>
+
+          {/* Bulk Edit Notice Banner */}
+          {isBulkEdit && (
+            <div className="bg-amber-50 border-2 border-amber-400 rounded-xl px-4 py-2.5 flex items-center justify-between text-xs text-amber-900 shadow-xs animate-in fade-in duration-200">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4 text-amber-700 shrink-0" />
+                <span className="font-semibold">
+                  <strong>Bulk Edit Mode Active:</strong> All 9 cadastral cards are now editable. You can modify any value and click <strong>&quot;Save All Cards&quot;</strong> when done.
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCancelAllCards}
+                  className="px-2.5 py-1 text-xs font-bold text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-100 cursor-pointer"
+                >
+                  Discard
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveAllCards}
+                  className="px-3 py-1 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded shadow-xs cursor-pointer flex items-center gap-1"
+                >
+                  <Check className="size-3.5" /> Save All
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* 2-Column Responsive Grid across the entire screen, paired row-by-row for pixel-perfect alignment */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
@@ -578,36 +856,20 @@ export function LpsPlotDetailsView({
             {/* CARD 1: PLOT IDENTIFICATION */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Building2 className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Plot Identification
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Cadastral
-                  </span>
-                </div>
+                {renderCardHeader("Plot Identification", <Building2 className="size-4 text-[#7A1316]" />, "Cadastral", "plotId")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">BA file number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.baFileNumber || plotData.plotCode}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotCode}</div>
+                      {renderCell("BA file number", "baFileNumber", "plotId")}
+                      {renderCell("Plot code", "plotCode", "plotId", { mono: true })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotNumber}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Gid</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.gid || "19297"}</div>
+                      {renderCell("Plot number", "plotNumber", "plotId")}
+                      {renderCell("Gid", "gid", "plotId")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Global Id</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] break-all">{plotData.globalId || "e8be1032-5917-4bfe-a42f-7cd46c291bb2"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Code Underscore</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotCodeUnderscore || `${plotData.plotNumber}-723-3603-C20`}</div>
+                      {renderCell("Global Id", "globalId", "plotId")}
+                      {renderCell("Plot Code Underscore", "plotCodeUnderscore", "plotId")}
                     </div>
                   </div>
                 </div>
@@ -617,36 +879,20 @@ export function LpsPlotDetailsView({
             {/* CARD 2: EXTENT & DIMENSIONS */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Ruler className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Extent &amp; Dimensions
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Measurements
-                  </span>
-                </div>
+                {renderCardHeader("Extent & Dimensions", <Ruler className="size-4 text-[#7A1316]" />, "Measurements", "extent")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Allotted Extent</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.allottedExtent || "1050.0"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Shape Area</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.shapeArea || plotData.netPlotAreaM2 || "877.93 m²"}</div>
+                      {renderCell("Allotted Extent", "allottedExtent", "extent")}
+                      {renderCell("Shape Area", "shapeArea", "extent")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Net Plot Area (m²)</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.netPlotAreaM2 || "877.932250028"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Net Plot Area (sq.yds)</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.netPlotAreaSqYds || plotData.areaSqYards || "1049.99 sq.yds"}</div>
+                      {renderCell("Net Plot Area (m²)", "netPlotAreaM2", "extent")}
+                      {renderCell("Net Plot Area (sq.yds)", "netPlotAreaSqYds", "extent")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Dimension</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotDimension || `${plotData.polyLength || "106.61"} m × ${plotData.polyWidth || "88.61"} m`}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Road Facing</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotRoadFacing || "West Facing (17.0 mtr Road)"}</div>
+                      {renderCell("Plot Dimension", "plotDimension", "extent")}
+                      {renderCell("Plot Road Facing", "plotRoadFacing", "extent")}
                     </div>
                   </div>
                 </div>
@@ -660,36 +906,22 @@ export function LpsPlotDetailsView({
             {/* CARD 3: ZONING & MASTER PLAN */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Layers className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Zoning &amp; Land Use
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Master Plan
-                  </span>
-                </div>
+                {renderCardHeader("Zoning & Land Use", <Layers className="size-4 text-[#7A1316]" />, "Master Plan", "zoning")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Land use</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.landUse || "Residential"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Zone code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.zoneCode || plotData.luCode || "R3"}</div>
+                      {renderCell("Land use", "landUse", "zoning", {
+                        selectOptions: ["Residential", "Commercial", "Mixed Use", "Industrial", "Public & Semi-Public", "Open Space / Recreational"],
+                      })}
+                      {renderCell("Zone code", "zoneCode", "zoning")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sub category</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.subCategory || plotData.catDesc || "R3-Residential Returnable"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Zoning</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.zoning || "R3 Medium to high density zone"}</div>
+                      {renderCell("Sub category", "subCategory", "zoning")}
+                      {renderCell("Zoning", "zoning", "zoning")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Existing land use</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.existingLandUse || "Residential Vacant Plot"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sub zone code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.subZoneCode || plotData.plotCateg || "C20"}</div>
+                      {renderCell("Existing land use", "existingLandUse", "zoning")}
+                      {renderCell("Sub zone code", "subZoneCode", "zoning")}
                     </div>
                   </div>
                 </div>
@@ -699,40 +931,25 @@ export function LpsPlotDetailsView({
             {/* CARD 4: APPLICANT & ALLOTMENT */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Applicant &amp; Allotment
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Ownership
-                  </span>
-                </div>
+                {renderCardHeader("Applicant & Allotment", <FileText className="size-4 text-[#7A1316]" />, "Ownership", "allotment")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Owners</div>
-                      <div className="p-2.5 font-bold text-[#7A1316] bg-[#FDFBF7]">{plotData.owners || "NANNAPANENI RAMBABU"}</div>
+                      {renderCell("Owners", "owners", "allotment", { colSpanFull: true })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Application number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.applicationNumber || "APCRDA/LPS/2026/0962"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot status</div>
-                      <div className="p-2.5 font-semibold text-emerald-800 bg-[#FDFBF7]">{plotData.plotStatus || "Allotted Plots"}</div>
+                      {renderCell("Application number", "applicationNumber", "allotment")}
+                      {renderCell("Plot status", "plotStatus", "allotment", {
+                        selectOptions: ["Allotted Plots", "Possessed & Handed Over", "General Allotment", "In Process"],
+                      })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Return</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.return || plotData.landDistribution || "Residential Returnable"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sub Return</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.subReturn || "R3 Zone Returnable"}</div>
+                      {renderCell("Return", "return", "allotment")}
+                      {renderCell("Sub Return", "subReturn", "allotment")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Reserve Category</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.reserveCategory || plotData.category || "General Allotment"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Plot Type</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.plotType || plotData.plotCateg || "C20 - Regular"}</div>
+                      {renderCell("Reserve Category", "reserveCategory", "allotment")}
+                      {renderCell("Plot Type", "plotType", "allotment")}
                     </div>
                   </div>
                 </div>
@@ -746,42 +963,24 @@ export function LpsPlotDetailsView({
             {/* CARD 5: PHYSICAL BOUNDARIES & ROAD FACING */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Compass className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Physical Boundaries &amp; Roads
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Cadastral Limits
-                  </span>
-                </div>
+                {renderCardHeader("Physical Boundaries & Roads", <Compass className="size-4 text-[#7A1316]" />, "Cadastral Limits", "boundaries")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">North</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.north || plotData.regCodeN || "23-170-723-3603-3-C20"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">North Road Width</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.northRoadWidthM || "12.00 m"}</div>
+                      {renderCell("North", "north", "boundaries", { defaultValue: plotData.regCodeN || "23-170-723-3603-3-C20" })}
+                      {renderCell("North Road Width", "northRoadWidthM", "boundaries", { defaultValue: "12.00 m" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">South</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.south || plotData.regCodeS || "23-170-723-3603-5-C19"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">South Road Width</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.southRoadWidthM || "12.00 m"}</div>
+                      {renderCell("South", "south", "boundaries", { defaultValue: plotData.regCodeS || "23-170-723-3603-5-C19" })}
+                      {renderCell("South Road Width", "southRoadWidthM", "boundaries", { defaultValue: "12.00 m" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">East</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.east || plotData.regCodeE || "23-170-723-3603-12-C20"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">East Road Width</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.eastRoadWidthM || "18.00 m"}</div>
+                      {renderCell("East", "east", "boundaries", { defaultValue: plotData.regCodeE || "23-170-723-3603-12-C20" })}
+                      {renderCell("East Road Width", "eastRoadWidthM", "boundaries", { defaultValue: "18.00 m" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">West</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.west || plotData.regCodeW || "17.0 mtr Road"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">West Road Width</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.westRoadWidthM || (plotData.rdWidthM && plotData.rdWidthM !== "0.0" ? `${plotData.rdWidthM} m` : "17.00 m")}</div>
+                      {renderCell("West", "west", "boundaries", { defaultValue: plotData.regCodeW || "17.0 mtr Road" })}
+                      {renderCell("West Road Width", "westRoadWidthM", "boundaries", { defaultValue: (plotData.rdWidthM && plotData.rdWidthM !== "0.0" ? `${plotData.rdWidthM} m` : "17.00 m") })}
                     </div>
                   </div>
                 </div>
@@ -791,42 +990,24 @@ export function LpsPlotDetailsView({
             {/* CARD 6: GIS COORDINATES & CENTROIDS */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Map className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      GIS Coordinates &amp; Centroids
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Spatial GIS
-                  </span>
-                </div>
+                {renderCardHeader("GIS Coordinates & Centroids", <Map className="size-4 text-[#7A1316]" />, "Spatial GIS", "gis")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lat Long X</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.latLongX || "80.52914° E"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lat Long Y</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.latLongY || "16.51428° N"}</div>
+                      {renderCell("Lat Long X", "latLongX", "gis", { mono: true, defaultValue: "80.52914° E" })}
+                      {renderCell("Lat Long Y", "latLongY", "gis", { mono: true, defaultValue: "16.51428° N" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Centroid X</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.centroidX || (plotData.centroid ? plotData.centroid.split(",")[0] : "447663.97 m")}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Centroid Y</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.centroidY || (plotData.centroid ? plotData.centroid.split(",")[1] : "1820525.35 m")}</div>
+                      {renderCell("Centroid X", "centroidX", "gis", { mono: true, defaultValue: plotData.centroid ? plotData.centroid.split(",")[0] : "447663.97 m" })}
+                      {renderCell("Centroid Y", "centroidY", "gis", { mono: true, defaultValue: plotData.centroid ? plotData.centroid.split(",")[1] : "1820525.35 m" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Min X</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.minX || "447647.72 m"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Min Y</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.minY || "1820511.84 m"}</div>
+                      {renderCell("Min X", "minX", "gis", { mono: true, defaultValue: "447647.72 m" })}
+                      {renderCell("Min Y", "minY", "gis", { mono: true, defaultValue: "1820511.84 m" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Max X</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.maxX || "447680.22 m"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Max Y</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7] font-mono">{plotData.maxY || "1820538.85 m"}</div>
+                      {renderCell("Max X", "maxX", "gis", { mono: true, defaultValue: "447680.22 m" })}
+                      {renderCell("Max Y", "maxY", "gis", { mono: true, defaultValue: "1820538.85 m" })}
                     </div>
                   </div>
                 </div>
@@ -840,66 +1021,47 @@ export function LpsPlotDetailsView({
             {/* CARD 7: LOCATION & ADMINISTRATION */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Location &amp; Administration
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Geographical
-                  </span>
-                </div>
+                {renderCardHeader("Location & Administration", <MapPin className="size-4 text-[#7A1316]" />, "Geographical", "location")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Village</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.village}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">LPS village</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsVillage || plotData.village}</div>
+                      {renderCell("Village", "village", "location")}
+                      {renderCell("LPS village", "lpsVillage", "location", { defaultValue: plotData.village })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">RS village</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.rsVillage || plotData.village}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">District</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.district}</div>
+                      {renderCell("RS village", "rsVillage", "location", { defaultValue: plotData.village })}
+                      {renderCell("District", "district", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Mandal</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.mandal}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Township</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.township}</div>
+                      {renderCell("Mandal", "mandal", "location")}
+                      {renderCell("Township", "township", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Sector</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.sector}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Colony</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.colony}</div>
+                      {renderCell("Sector", "sector", "location")}
+                      {renderCell("Colony", "colony", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Block</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.block}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">RS number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.rsNumber}</div>
+                      {renderCell("Block", "block", "location")}
+                      {renderCell("RS number", "rsNumber", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">LPS / non-LPS</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsNonLps || "LPS"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">GP code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.gpCode}</div>
+                      {renderCell("LPS / non-LPS", "lpsNonLps", "location", {
+                        defaultValue: "LPS",
+                        selectOptions: ["LPS", "Non-LPS"],
+                      })}
+                      {renderCell("GP code", "gpCode", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Dist Code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.distCode}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lps Vill Co</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsVillCo}</div>
+                      {renderCell("Dist Code", "distCode", "location")}
+                      {renderCell("Lps Vill Co", "lpsVillCo", "location")}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Lps Blk Co</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsBlkCo || `${plotData.distCode || "07"}${plotData.block || "3603"}`}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Statutory Status</div>
-                      <div className="p-2.5 font-semibold text-emerald-800 bg-[#FDFBF7]">Cadastral Registered</div>
+                      {renderCell("Lps Blk Co", "lpsBlkCo", "location", {
+                        defaultValue: `${plotData.distCode || "07"}${plotData.block || "3603"}`,
+                      })}
+                      {renderCell("Statutory Status", "statutoryStatus", "location", {
+                        defaultValue: "Cadastral Registered",
+                      })}
                     </div>
                   </div>
                 </div>
@@ -909,48 +1071,31 @@ export function LpsPlotDetailsView({
             {/* CARD 8: STATUTORY & REVENUE */}
             <div className="bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden h-full flex flex-col justify-between">
               <div>
-                <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Landmark className="size-4 text-[#7A1316]" />
-                    <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                      Statutory &amp; Revenue Details
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                    Legal Records
-                  </span>
-                </div>
+                {renderCardHeader("Statutory & Revenue Details", <Landmark className="size-4 text-[#7A1316]" />, "Legal Records", "statutory")}
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Allotment date</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.allotmentDate || "14-03-2024"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Mutation date</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.mutationDate || "22-08-2024"}</div>
+                      {renderCell("Allotment date", "allotmentDate", "statutory", { defaultValue: "14-03-2024" })}
+                      {renderCell("Mutation date", "mutationDate", "statutory", { defaultValue: "22-08-2024" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Registration date</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.registrationDate || "18-06-2024"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Agreement date</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.agreementDate || "10-04-2024"}</div>
+                      {renderCell("Registration date", "registrationDate", "statutory", { defaultValue: "18-06-2024" })}
+                      {renderCell("Agreement date", "agreementDate", "statutory", { defaultValue: "10-04-2024" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Mutation number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.mutationNumber || "MUT/2024/77218"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Registration number</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.registrationNumber || "DOC/2024/GNT/84920"}</div>
+                      {renderCell("Mutation number", "mutationNumber", "statutory", { defaultValue: "MUT/2024/77218" })}
+                      {renderCell("Registration number", "registrationNumber", "statutory", { defaultValue: "DOC/2024/GNT/84920" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">LPS village code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.lpsVillageCode || plotData.lpsVillCo || "0712001"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Land use code</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.landUseCode || plotData.luCode || "R3"}</div>
+                      {renderCell("LPS village code", "lpsVillageCode", "statutory", { defaultValue: plotData.lpsVillCo || "0712001" })}
+                      {renderCell("Land use code", "landUseCode", "statutory", { defaultValue: plotData.luCode || "R3" })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Allotment status</div>
-                      <div className="p-2.5 font-semibold text-emerald-800 bg-[#FDFBF7]">{plotData.allotmentStatus || "Allotted & Possessed"}</div>
-                      <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Object ID</div>
-                      <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.objectId || plotData.gid || "19297"}</div>
+                      {renderCell("Allotment status", "allotmentStatus", "statutory", {
+                        defaultValue: "Allotted & Possessed",
+                        selectOptions: ["Allotted & Possessed", "Possessed & Handed Over", "Pending Possession", "Provisional"],
+                      })}
+                      {renderCell("Object ID", "objectId", "statutory", { defaultValue: plotData.gid || "19297" })}
                     </div>
                   </div>
                 </div>
@@ -961,30 +1106,18 @@ export function LpsPlotDetailsView({
             {/* ROW 5: CADASTRAL RECORD & AUDIT (Full Width)        */}
             {/* ═══════════════════════════════════════════════════ */}
             <div className="col-span-1 lg:col-span-2 bg-[#FAF7F2] border-2 border-[#7A1316] rounded-xl shadow-xs overflow-hidden">
-              <div className="bg-[#FBF3E4] border-b-2 border-[#7A1316] px-4 py-2.5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Database className="size-4 text-[#7A1316]" />
-                  <h3 className="text-xs font-black text-[#801824] uppercase tracking-wider">
-                    Cadastral Record &amp; System Audit
-                  </h3>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-                  System Audit
-                </span>
-              </div>
-              <div className="p-3 sm:p-4">
-                <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
-                  <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                    <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Join Count</div>
-                    <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.joinCount || "1"}</div>
-                    <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Test</div>
-                    <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.test || "Kuragallu Cadastral Verified"}</div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
-                    <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Geoportal Inserted</div>
-                    <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.geoportalInsertedTs || "2026-09-10 22:43"}</div>
-                    <div className="p-2.5 font-medium text-slate-600 bg-[#F5EBE1]">Geoportal Updated</div>
-                    <div className="p-2.5 font-semibold text-slate-900 bg-[#FDFBF7]">{plotData.geoportalUpdatedTs || "2026-09-10 23:08"}</div>
+              <div>
+                {renderCardHeader("Cadastral Record & System Audit", <Database className="size-4 text-[#7A1316]" />, "System Audit", "audit")}
+                <div className="p-3 sm:p-4">
+                  <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
+                    <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
+                      {renderCell("Join Count", "joinCount", "audit", { defaultValue: "1" })}
+                      {renderCell("Test", "test", "audit", { defaultValue: "Kuragallu Cadastral Verified" })}
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8]">
+                      {renderCell("Geoportal Inserted", "geoportalInsertedTs", "audit", { defaultValue: "2026-09-10 22:43" })}
+                      {renderCell("Geoportal Updated", "geoportalUpdatedTs", "audit", { defaultValue: "2026-09-10 23:08" })}
+                    </div>
                   </div>
                 </div>
               </div>

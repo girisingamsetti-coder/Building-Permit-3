@@ -35,6 +35,7 @@ import {
   type UploadedFile,
 } from "@/components/design-system/files";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -70,6 +71,10 @@ import {
   ChevronRight,
   Flag,
   Box,
+  Pencil,
+  Check,
+  X,
+  Save,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PageBackButton } from "@/components/design-system/back-button";
@@ -306,51 +311,434 @@ function StatusBanner({ app }: { app: Application }) {
 
 // ---------- Overview Tab ----------
 function OverviewTab({ app }: { app: Application }) {
+  const { updateApplicationDetails } = useAppStore();
+  const { toast } = useToast();
+
+  const [isBulkEdit, setIsBulkEdit] = React.useState(false);
+  const [editingCard, setEditingCard] = React.useState<Record<string, boolean>>({});
+  const [applicantDraft, setApplicantDraft] = React.useState(app.applicant);
+  const [ltpNameDraft, setLtpNameDraft] = React.useState(app.ltpName);
+  const [projectDraft, setProjectDraft] = React.useState(app.project);
+  const [priorityDraft, setPriorityDraft] = React.useState(app.priority);
+
+  React.useEffect(() => {
+    setApplicantDraft(app.applicant);
+    setLtpNameDraft(app.ltpName);
+    setProjectDraft(app.project);
+    setPriorityDraft(app.priority);
+  }, [app]);
+
+  const isEditing = (cardKey: string) => isBulkEdit || !!editingCard[cardKey];
+
+  const handleSaveApplicant = () => {
+    updateApplicationDetails(app.id, {
+      applicant: applicantDraft,
+      ltpName: ltpNameDraft,
+    });
+    setEditingCard((prev) => ({ ...prev, applicant: false }));
+    toast({
+      title: "Applicant Updated",
+      description: "Applicant information saved successfully.",
+    });
+  };
+
+  const handleCancelApplicant = () => {
+    setApplicantDraft(app.applicant);
+    setLtpNameDraft(app.ltpName);
+    setEditingCard((prev) => ({ ...prev, applicant: false }));
+  };
+
+  const handleSaveProject = () => {
+    updateApplicationDetails(app.id, {
+      project: projectDraft,
+      priority: priorityDraft,
+    });
+    setEditingCard((prev) => ({ ...prev, project: false }));
+    toast({
+      title: "Project Details Updated",
+      description: "Project information and priority saved successfully.",
+    });
+  };
+
+  const handleCancelProject = () => {
+    setProjectDraft(app.project);
+    setPriorityDraft(app.priority);
+    setEditingCard((prev) => ({ ...prev, project: false }));
+  };
+
+  const handleSaveLocation = () => {
+    updateApplicationDetails(app.id, {
+      project: projectDraft,
+    });
+    setEditingCard((prev) => ({ ...prev, location: false }));
+    toast({
+      title: "Location Updated",
+      description: "Property location details saved successfully.",
+    });
+  };
+
+  const handleCancelLocation = () => {
+    setProjectDraft(app.project);
+    setEditingCard((prev) => ({ ...prev, location: false }));
+  };
+
+  const handleSaveAll = () => {
+    updateApplicationDetails(app.id, {
+      applicant: applicantDraft,
+      ltpName: ltpNameDraft,
+      project: projectDraft,
+      priority: priorityDraft,
+    });
+    setIsBulkEdit(false);
+    setEditingCard({});
+    toast({
+      title: "All Cards Updated",
+      description: "All application overview cards saved successfully.",
+    });
+  };
+
+  const handleCancelAll = () => {
+    setApplicantDraft(app.applicant);
+    setLtpNameDraft(app.ltpName);
+    setProjectDraft(app.project);
+    setPriorityDraft(app.priority);
+    setIsBulkEdit(false);
+    setEditingCard({});
+    toast({
+      title: "Changes Discarded",
+      description: "All edits have been discarded.",
+    });
+  };
+
+  const renderCardAction = (cardKey: string, onSave: () => void, onCancel: () => void) => {
+    if (isBulkEdit) return null;
+    if (editingCard[cardKey]) {
+      return (
+        <div className="flex items-center gap-1.5">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onCancel}
+            className="h-7 px-2.5 text-xs font-semibold cursor-pointer"
+          >
+            <X className="size-3 mr-1" /> Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={onSave}
+            className="h-7 px-3 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer shadow-xs"
+          >
+            <Check className="size-3 mr-1" /> Save
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        onClick={() => setEditingCard((prev) => ({ ...prev, [cardKey]: true }))}
+        className="h-7 px-2.5 text-xs font-semibold text-[#7A1316] border-[#7A1316]/30 hover:bg-[#FAF7F2] cursor-pointer shadow-2xs"
+      >
+        <Pencil className="size-3 mr-1" /> Edit
+      </Button>
+    );
+  };
+
   const docsVerified = app.documents.filter((d) => d.status === "VERIFIED").length;
   const docsTotal = app.documents.filter((d) => d.required).length;
+
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <SectionCard title="Applicant Information" icon={User}>
-          <InfoGrid
-            items={[
-              { label: "Applicant Name", value: app.applicant.name },
-              { label: "Contact", value: app.applicant.contact, mono: true },
-              { label: "Email", value: app.applicant.email },
-              { label: "Address", value: app.applicant.address },
-              { label: "Submitted on behalf of", value: app.ltpName },
-              { label: "LTP License No.", value: "LTP-MC-2019-0457", mono: true },
-            ]}
-            columns={2}
-          />
+        {/* Top Action Toolbar for Overview Cards */}
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] px-4 py-2.5 shadow-2xs">
+          <div className="flex items-center gap-2 text-xs text-slate-700">
+            <span className="font-bold text-[#7A1316]">Card Edit Controls:</span>
+            <span>Click <strong>Edit</strong> on any card or use bulk edit for all cards.</span>
+          </div>
+          {isBulkEdit ? (
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleCancelAll}
+                className="h-7 px-3 text-xs font-semibold cursor-pointer bg-white"
+              >
+                <X className="size-3 mr-1" /> Discard All
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSaveAll}
+                className="h-7 px-3 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer shadow-xs"
+              >
+                <Check className="size-3 mr-1" /> Save All Cards
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setIsBulkEdit(true)}
+              className="h-7 px-3 text-xs font-bold text-[#7A1316] border-[#7A1316]/40 hover:bg-[#F5EBE1] cursor-pointer"
+            >
+              <Pencil className="size-3 mr-1" /> Edit All Cards
+            </Button>
+          )}
+        </div>
+
+        {/* Card 1: Applicant Information */}
+        <SectionCard
+          title="Applicant Information"
+          icon={User}
+          action={renderCardAction("applicant", handleSaveApplicant, handleCancelApplicant)}
+        >
+          {isEditing("applicant") ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Applicant Name</label>
+                <Input
+                  value={applicantDraft.name}
+                  onChange={(e) => setApplicantDraft({ ...applicantDraft, name: e.target.value })}
+                  placeholder="e.g. Sri K. Venkateswara Rao"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Contact Number</label>
+                <Input
+                  value={applicantDraft.contact}
+                  onChange={(e) => setApplicantDraft({ ...applicantDraft, contact: e.target.value })}
+                  placeholder="e.g. +91 98480 12345"
+                  className="h-8 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Email Address</label>
+                <Input
+                  type="email"
+                  value={applicantDraft.email}
+                  onChange={(e) => setApplicantDraft({ ...applicantDraft, email: e.target.value })}
+                  placeholder="e.g. applicant@example.com"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Address</label>
+                <Input
+                  value={applicantDraft.address}
+                  onChange={(e) => setApplicantDraft({ ...applicantDraft, address: e.target.value })}
+                  placeholder="e.g. Plot 42, Sector 8, Amaravati"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Submitted on behalf of (LTP)</label>
+                <Input
+                  value={ltpNameDraft}
+                  onChange={(e) => setLtpNameDraft(e.target.value)}
+                  placeholder="e.g. Ar. Venkata Ramanujam"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">LTP License No.</label>
+                <Input
+                  disabled
+                  value="LTP-MC-2019-0457"
+                  className="h-8 text-xs font-mono bg-muted/50 cursor-not-allowed text-slate-500"
+                />
+              </div>
+            </div>
+          ) : (
+            <InfoGrid
+              items={[
+                { label: "Applicant Name", value: app.applicant.name },
+                { label: "Contact", value: app.applicant.contact, mono: true },
+                { label: "Email", value: app.applicant.email },
+                { label: "Address", value: app.applicant.address },
+                { label: "Submitted on behalf of", value: app.ltpName },
+                { label: "LTP License No.", value: "LTP-MC-2019-0457", mono: true },
+              ]}
+              columns={2}
+            />
+          )}
         </SectionCard>
 
-        <SectionCard title="Project Information" icon={Building2}>
-          <InfoGrid
-            items={[
-              { label: "Project Name", value: app.project.name },
-              { label: "Application Type", value: app.project.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) },
-              { label: "Property Type", value: app.project.propertyType.replace("_", " ").toLowerCase() },
-              { label: "Land Use", value: app.project.landUse },
-              { label: "Plot Area", value: `${app.project.plotArea.toLocaleString("en-IN")} sq.m` },
-              { label: "Built-up Area", value: `${app.project.builtUpArea.toLocaleString("en-IN")} sq.m` },
-              { label: "FAR Utilisation", value: `${(app.project.builtUpArea / app.project.plotArea).toFixed(2)} (permissible 1.50)` },
-              { label: "Priority", value: <PriorityBadge priority={app.priority} /> },
-            ]}
-            columns={2}
-          />
+        {/* Card 2: Project Information */}
+        <SectionCard
+          title="Project Information"
+          icon={Building2}
+          action={renderCardAction("project", handleSaveProject, handleCancelProject)}
+        >
+          {isEditing("project") ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Project Name</label>
+                <Input
+                  value={projectDraft.name}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, name: e.target.value })}
+                  placeholder="Project name"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Application Type</label>
+                <select
+                  value={projectDraft.type}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, type: e.target.value as any })}
+                  className="h-8 w-full rounded-md border border-[#DCD5C8] bg-white px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7A1316]"
+                >
+                  <option value="NEW_CONSTRUCTION">New Construction</option>
+                  <option value="ALTERATION">Alteration</option>
+                  <option value="ADDITION">Addition</option>
+                  <option value="REGULARISATION">Regularisation</option>
+                  <option value="DEMOLITION">Demolition</option>
+                  <option value="OCCUPANCY_CERTIFICATE">Occupancy Certificate</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Property Type</label>
+                <select
+                  value={projectDraft.propertyType}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, propertyType: e.target.value as any })}
+                  className="h-8 w-full rounded-md border border-[#DCD5C8] bg-white px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7A1316]"
+                >
+                  <option value="RESIDENTIAL_INDIVIDUAL">Residential Individual</option>
+                  <option value="RESIDENTIAL_APARTMENT">Residential Apartment</option>
+                  <option value="COMMERCIAL">Commercial</option>
+                  <option value="INDUSTRIAL">Industrial</option>
+                  <option value="INSTITUTIONAL">Institutional</option>
+                  <option value="MIXED_USE">Mixed Use</option>
+                </select>
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Land Use</label>
+                <Input
+                  value={projectDraft.landUse}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, landUse: e.target.value })}
+                  placeholder="e.g. Residential R-3"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Plot Area (sq.m)</label>
+                <Input
+                  type="number"
+                  value={projectDraft.plotArea}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, plotArea: Number(e.target.value) || 0 })}
+                  placeholder="sq.m"
+                  className="h-8 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Built-up Area (sq.m)</label>
+                <Input
+                  type="number"
+                  value={projectDraft.builtUpArea}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, builtUpArea: Number(e.target.value) || 0 })}
+                  placeholder="sq.m"
+                  className="h-8 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">FAR Utilisation (Live)</label>
+                <div className="h-8 rounded-md bg-muted/40 border border-border px-3 flex items-center text-xs font-mono font-medium text-slate-800">
+                  {projectDraft.plotArea > 0 ? (projectDraft.builtUpArea / projectDraft.plotArea).toFixed(2) : "0.00"} (permissible 1.50)
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Priority</label>
+                <select
+                  value={priorityDraft}
+                  onChange={(e) => setPriorityDraft(e.target.value as any)}
+                  className="h-8 w-full rounded-md border border-[#DCD5C8] bg-white px-2.5 py-1 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7A1316]"
+                >
+                  <option value="NORMAL">Normal</option>
+                  <option value="HIGH">High</option>
+                  <option value="URGENT">Urgent</option>
+                </select>
+              </div>
+            </div>
+          ) : (
+            <InfoGrid
+              items={[
+                { label: "Project Name", value: app.project.name },
+                { label: "Application Type", value: app.project.type.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) },
+                { label: "Property Type", value: app.project.propertyType.replace("_", " ").toLowerCase() },
+                { label: "Land Use", value: app.project.landUse },
+                { label: "Plot Area", value: `${app.project.plotArea.toLocaleString("en-IN")} sq.m` },
+                { label: "Built-up Area", value: `${app.project.builtUpArea.toLocaleString("en-IN")} sq.m` },
+                { label: "FAR Utilisation", value: `${(app.project.builtUpArea / app.project.plotArea).toFixed(2)} (permissible 1.50)` },
+                { label: "Priority", value: <PriorityBadge priority={app.priority} /> },
+              ]}
+              columns={2}
+            />
+          )}
         </SectionCard>
 
-        <SectionCard title="Property Location" icon={MapPin}>
-          <InfoGrid
-            items={[
-              { label: "Ward", value: app.project.ward },
-              { label: "Zone", value: app.project.zone },
-              { label: "Survey No.", value: app.project.surveyNo, mono: true },
-              { label: "Site Address", value: app.project.address },
-            ]}
-            columns={2}
-          />
+        {/* Card 3: Property Location */}
+        <SectionCard
+          title="Property Location"
+          icon={MapPin}
+          action={renderCardAction("location", handleSaveLocation, handleCancelLocation)}
+        >
+          {isEditing("location") ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs pt-1">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Ward</label>
+                <Input
+                  value={projectDraft.ward}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, ward: e.target.value })}
+                  placeholder="e.g. Ward 12"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Zone</label>
+                <Input
+                  value={projectDraft.zone}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, zone: e.target.value })}
+                  placeholder="e.g. Zone 4 (North)"
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Survey No.</label>
+                <Input
+                  value={projectDraft.surveyNo}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, surveyNo: e.target.value })}
+                  placeholder="e.g. Sy. No. 142/2B"
+                  className="h-8 text-xs font-mono"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="font-semibold text-slate-700">Site Address</label>
+                <Input
+                  value={projectDraft.address}
+                  onChange={(e) => setProjectDraft({ ...projectDraft, address: e.target.value })}
+                  placeholder="Full site address"
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+          ) : (
+            <InfoGrid
+              items={[
+                { label: "Ward", value: app.project.ward },
+                { label: "Zone", value: app.project.zone },
+                { label: "Survey No.", value: app.project.surveyNo, mono: true },
+                { label: "Site Address", value: app.project.address },
+              ]}
+              columns={2}
+            />
+          )}
         </SectionCard>
       </div>
 
@@ -821,13 +1209,13 @@ function RemarksTab({ app }: { app: Application }) {
             <li key={r.id} className="relative flex gap-3 pb-5">
               {!isLast && <div className="absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border" />}
               <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
-                {r.author.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
+                {(r.author?.name || "Officer").split(" ").map((p) => p[0]).slice(0, 2).join("")}
               </div>
               <div className="flex-1 space-y-1">
                 <div className="flex flex-wrap items-center justify-between gap-x-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{r.author.name}</span>
-                    <RoleBadge role={r.author.role} />
+                    <span className="text-sm font-medium">{r.author?.name || "Official"}</span>
+                    {r.author?.role && <RoleBadge role={r.author.role} />}
                     <Badge className={cn("text-[9px]", typeCls)}>{r.type}</Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">{formatDateTime(r.timestamp)}</span>
