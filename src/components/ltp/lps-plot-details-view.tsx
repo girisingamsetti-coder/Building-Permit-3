@@ -459,9 +459,6 @@ export function LpsPlotDetailsView({
           </h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-white text-[#7A1316] border border-[#DCD5C8]">
-            {tag}
-          </span>
           {isEditing && !isBulkEdit ? (
             <div className="flex items-center gap-1.5 animate-in fade-in duration-200">
               <button

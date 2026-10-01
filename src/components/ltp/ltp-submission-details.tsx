@@ -641,7 +641,6 @@ export function LtpSubmissionDetails({
         <span className="tracking-wide">
           Applicant&apos;s Information
         </span>
-        <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">Owner / Promoters</span>
       </div>
 
       {sectionApplicantOpen && (
@@ -831,9 +830,6 @@ export function LtpSubmissionDetails({
       <div className="w-full bg-[#7A1316] text-white px-3.5 sm:px-4 py-2 text-xs font-bold flex items-center justify-between shrink-0">
         <span className="tracking-wide">
           Structural Engineer
-        </span>
-        <span className="text-[10px] text-amber-200 uppercase font-mono tracking-wider">
-          Structural Stability
         </span>
       </div>
 
@@ -1469,7 +1465,6 @@ export function LtpSubmissionDetails({
                   <span className="text-sm font-mono">{sectionProposedOpen ? "▲" : "▼"}</span>
                   Proposed Construction
                 </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Area Parameters</span>
               </button>
 
               {sectionProposedOpen && (
@@ -1620,7 +1615,6 @@ export function LtpSubmissionDetails({
                   <span className="text-sm font-mono">{sectionSiteDetailsOpen ? "▲" : "▼"}</span>
                   Site Details
                 </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Surroundings & Valuation</span>
               </button>
 
               {sectionSiteDetailsOpen && (
@@ -1839,7 +1833,6 @@ export function LtpSubmissionDetails({
                   <span className="text-sm font-mono">{sectionScheduleOpen ? "▲" : "▼"}</span>
                   Schedule of boundaries
                 </span>
-                <span className="text-[10px] text-amber-200 uppercase font-mono">Cardinal Directions</span>
               </button>
 
               {sectionScheduleOpen && (
@@ -2924,7 +2917,6 @@ export function LtpSubmissionDetails({
                       <span className="text-sm font-mono">{sectionOthersOpen ? "▲" : "▼"}</span>
                       Other Details
                     </span>
-                    <span className="text-[10px] text-amber-200 uppercase font-mono">Contract & Mortgage</span>
                   </button>
 
                   {sectionOthersOpen && (
