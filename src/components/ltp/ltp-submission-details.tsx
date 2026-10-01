@@ -41,6 +41,10 @@ import type { Application } from "@/types";
 import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 import { BuildingPermitOrder, buildPermitOrderFromBaNo } from "./building-permit-order";
+import {
+  ApcrdaPaymentReceiptModal,
+  type ApcrdaPaymentReceiptData,
+} from "@/components/common/apcrda-payment-receipt";
 
 const ZONE_OPTIONS = [
   "C1 -Mixed use zone",
@@ -98,6 +102,8 @@ export function LtpSubmissionDetails({
   const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
   const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
   const [docSubmissionModal, setDocSubmissionModal] = React.useState(false);
+  const [activeReceiptData, setActiveReceiptData] = React.useState<ApcrdaPaymentReceiptData | null>(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = React.useState<boolean>(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
@@ -3294,9 +3300,40 @@ export function LtpSubmissionDetails({
           <div className="w-full space-y-4 text-xs">
             {/* Fee table */}
             <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
-              <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider border-b border-[#DCD5C8] pb-2">
-                Fee Assessment &amp; Payment History
-              </h3>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2">
+                <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider">
+                  Fee Assessment &amp; Payment History
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rawChallan = "98105";
+                    const commAddress = doorNo
+                      ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
+                      : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
+
+                    setActiveReceiptData({
+                      receiptNo: `1168/CH/0107/2026`,
+                      receiptDate: submissionDate || "23 July, 2026",
+                      demandNoteNo: `1168/CH/0107/2026`,
+                      baNo: baNo,
+                      applicantName: ownerName || "NANNAPANENI RAMBABU",
+                      communicationAddress: commAddress,
+                      amount: 22000,
+                      transactionType: "Net Banking / Credit Card / Debit Card",
+                      paymentMadeAt: "Online",
+                      transactionId: "786612820",
+                      paymentDate: submissionDate || "23 July, 2026",
+                      paymentGateway: "TP",
+                    });
+                    setIsReceiptModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#7A1316] hover:bg-[#8F161A] rounded-lg shadow-xs cursor-pointer transition-colors"
+                >
+                  <Download className="size-3.5" /> Consolidated Receipt (₹ 22,000)
+                </button>
+              </div>
+
               <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
                 <table className="w-full text-left">
                   <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
@@ -3314,26 +3351,114 @@ export function LtpSubmissionDetails({
                       <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
                       <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
                       <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                      <td className="px-3.5 py-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const commAddress = doorNo
+                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
+                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
+                            setActiveReceiptData({
+                              receiptNo: "1168/CH/8102/2026",
+                              receiptDate: submissionDate || "23 July, 2026",
+                              demandNoteNo: "1168/CH/8102/2026",
+                              baNo: baNo,
+                              applicantName: ownerName || "NANNAPANENI RAMBABU",
+                              communicationAddress: commAddress,
+                              amount: 5800,
+                              transactionType: "Net Banking / Credit Card / Debit Card",
+                              paymentMadeAt: "Online",
+                              transactionId: "786612802",
+                              paymentDate: submissionDate || "23 July, 2026",
+                              paymentGateway: "TP",
+                            });
+                            setIsReceiptModalOpen(true);
+                          }}
+                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Download className="size-3" /> Official Receipt
+                        </button>
+                      </td>
                     </tr>
                     <tr>
                       <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
                       <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
                       <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
                       <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                      <td className="px-3.5 py-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const commAddress = doorNo
+                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
+                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
+                            setActiveReceiptData({
+                              receiptNo: "1168/CH/8105/2026",
+                              receiptDate: submissionDate || "23 July, 2026",
+                              demandNoteNo: "1168/CH/8105/2026",
+                              baNo: baNo,
+                              applicantName: ownerName || "NANNAPANENI RAMBABU",
+                              communicationAddress: commAddress,
+                              amount: 14200,
+                              transactionType: "Net Banking / Credit Card / Debit Card",
+                              paymentMadeAt: "Online",
+                              transactionId: "786612805",
+                              paymentDate: submissionDate || "23 July, 2026",
+                              paymentGateway: "TP",
+                            });
+                            setIsReceiptModalOpen(true);
+                          }}
+                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Download className="size-3" /> Official Receipt
+                        </button>
+                      </td>
                     </tr>
                     <tr>
                       <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
                       <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
                       <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
                       <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer">Download</td>
+                      <td className="px-3.5 py-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const commAddress = doorNo
+                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
+                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
+                            setActiveReceiptData({
+                              receiptNo: "1168/CH/8109/2026",
+                              receiptDate: submissionDate || "23 July, 2026",
+                              demandNoteNo: "1168/CH/8109/2026",
+                              baNo: baNo,
+                              applicantName: ownerName || "NANNAPANENI RAMBABU",
+                              communicationAddress: commAddress,
+                              amount: 2000,
+                              transactionType: "Net Banking / Credit Card / Debit Card",
+                              paymentMadeAt: "Online",
+                              transactionId: "786612809",
+                              paymentDate: submissionDate || "23 July, 2026",
+                              paymentGateway: "TP",
+                            });
+                            setIsReceiptModalOpen(true);
+                          }}
+                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Download className="size-3" /> Official Receipt
+                        </button>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
+
+            {/* Official Modal Receipt */}
+            <ApcrdaPaymentReceiptModal
+              isOpen={isReceiptModalOpen}
+              onClose={() => setIsReceiptModalOpen(false)}
+              data={activeReceiptData}
+            />
           </div>
         )}
 

@@ -79,6 +79,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
+import {
+  ApcrdaPaymentReceiptModal,
+  buildReceiptFromApplication,
+} from "@/components/common/apcrda-payment-receipt";
 
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
@@ -1063,6 +1067,9 @@ function DocumentsTab({ app }: { app: Application }) {
 
 // ---------- Fees Tab ----------
 function FeesTab({ app }: { app: Application }) {
+  const { openApplication } = useAppStore();
+  const [showReceiptModal, setShowReceiptModal] = React.useState(false);
+
   if (!app.fee) {
     return <EmptyState icon={ReceiptIndianRupee} title="Fees not generated" description="Fees will be generated automatically once documents are verified." />;
   }
@@ -1127,11 +1134,30 @@ function FeesTab({ app }: { app: Application }) {
                 <p className="font-mono text-[11px]">{app.payment.transactionId || "—"}</p>
                 <p className="text-[10px] text-muted-foreground">{app.payment.gateway} · {app.payment.method}</p>
                 {app.payment.receiptNo && (
-                  <Button size="sm" variant="outline" className="w-full"><Download className="size-3.5" /> Receipt {app.payment.receiptNo}</Button>
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full cursor-pointer hover:bg-white"
+                      onClick={() => setShowReceiptModal(true)}
+                    >
+                      <Download className="size-3.5" /> Official Receipt {app.payment.receiptNo}
+                    </Button>
+                    <ApcrdaPaymentReceiptModal
+                      isOpen={showReceiptModal}
+                      onClose={() => setShowReceiptModal(false)}
+                      data={buildReceiptFromApplication(app)}
+                    />
+                  </>
                 )}
               </div>
             ) : (
-              <Button className="w-full"><ReceiptIndianRupee className="size-4" /> Pay Now</Button>
+              <Button
+                className="w-full cursor-pointer"
+                onClick={() => openApplication(app.id, "ltp-payment")}
+              >
+                <ReceiptIndianRupee className="size-4" /> Pay Now
+              </Button>
             )}
           </div>
         </SectionCard>

@@ -51,6 +51,11 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Application, ApplicationFee, Payment, ViewKey } from "@/types";
+import {
+  ApcrdaPaymentReceipt,
+  buildReceiptFromApplication,
+  ApcrdaPaymentReceiptModal,
+} from "@/components/common/apcrda-payment-receipt";
 
 // ============================================================
 // HELPERS
@@ -684,6 +689,7 @@ function PaymentFlow({
   const isProcessing = processingAppIds.includes(app.id);
   const isAlreadyPaid = app.payment?.status === "SUCCESS";
   const [stage, setStage] = React.useState<PayStage>(isAlreadyPaid ? "success" : "pending");
+  const [showReceiptModal, setShowReceiptModal] = React.useState(false);
 
   React.useEffect(() => {
     if (app.payment?.status === "SUCCESS") setStage("success");
@@ -871,9 +877,22 @@ function PaymentFlow({
                   <div className="flex justify-between"><span className="text-muted-foreground">Outstanding</span><span className="font-mono font-medium text-success">₹0</span></div>
                 </div>
                 <div className="flex flex-wrap justify-center gap-2">
-                  <Button variant="outline" onClick={() => navigate("ltp-receipt")}><Download className="size-4" /> View Receipt</Button>
-                  <Button onClick={() => navigate("ltp-application-details")}>Track Application <ArrowRight className="size-4" /></Button>
+                  <Button variant="outline" onClick={() => setShowReceiptModal(true)} className="cursor-pointer">
+                    <Printer className="size-4" /> View / Print Receipt
+                  </Button>
+                  <Button variant="secondary" onClick={() => navigate("ltp-receipt")} className="cursor-pointer">
+                    <Download className="size-4" /> Dedicated Receipt Page
+                  </Button>
+                  <Button onClick={() => navigate("ltp-application-details")} className="cursor-pointer">
+                    Track Application <ArrowRight className="size-4" />
+                  </Button>
                 </div>
+
+                <ApcrdaPaymentReceiptModal
+                  isOpen={showReceiptModal}
+                  onClose={() => setShowReceiptModal(false)}
+                  data={buildReceiptFromApplication(app)}
+                />
               </div>
             </SectionCard>
           )}
@@ -947,129 +966,32 @@ export function LtpReceipt() {
       </div>
     );
   }
-  const p = app.payment;
-  const f = app.fee;
+
+  const receiptData = buildReceiptFromApplication(app);
 
   return (
     <div className="space-y-6">
-      <PageBackButton fallbackView="ltp-payment" />
-      <PageHeader
-        title="Payment Receipt"
-        description="Official receipt for your payment transaction."
-        icon={ScrollText}
-        breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]}
-        actions={
-          <>
+      <div className="print:hidden space-y-4">
+        <PageBackButton fallbackView="ltp-payment" />
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <PageHeader
+            title="Statutory Payment Receipt"
+            description="Official APCRDA Development Promotion Department Payment Receipt"
+            icon={ScrollText}
+            breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Receipt" }]}
+          />
+          <div className="flex items-center gap-2">
             <AppSelect apps={visibleApps} current={app} view="ltp-receipt" />
-            <Button variant="outline" size="sm"><Printer className="size-4" /> Print</Button>
-            <Button size="sm"><Download className="size-4" /> Download PDF</Button>
-          </>
-        }
-      />
-
-      <div className="mx-auto max-w-3xl">
-        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-gov-lg">
-          {/* Receipt header */}
-          <div className="flex flex-col gap-4 border-b border-border bg-sidebar p-6 text-sidebar-foreground sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex size-12 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-                <Building2 className="size-6" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold">LTP Approval</p>
-                <p className="text-[11px] text-sidebar-foreground/60">Building Permit Management System</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-[11px] text-sidebar-foreground/60">Receipt No.</p>
-              <p className="font-mono text-sm font-semibold">{p.receiptNo}</p>
-            </div>
-          </div>
-
-          {/* Receipt body */}
-          <div className="p-6 space-y-5">
-            <div className="flex items-center justify-center">
-              <div className="flex items-center gap-2 rounded-full border border-success/30 bg-success/5 px-4 py-1.5 text-success">
-                <CheckCircle2 className="size-4" />
-                <span className="text-sm font-medium">Payment Successful &amp; Verified</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <InfoGrid items={[
-                { label: "Application No.", value: <span className="font-mono text-primary">{app.applicationNo}</span> },
-                { label: "Applicant", value: app.applicant.name },
-                { label: "Project", value: app.project.name },
-              ]} columns={1} />
-              <InfoGrid items={[
-                { label: "Transaction ID", value: <span className="font-mono">{p.transactionId}</span> },
-                { label: "Reference No.", value: <span className="font-mono">{p.referenceNo}</span> },
-                { label: "Date", value: formatDateTime(p.completedAt ?? "") },
-              ]} columns={1} />
-            </div>
-
-            <Separator />
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Fee Breakup</p>
-              <table className="w-full text-sm">
-                <tbody className="divide-y divide-border">
-                  {f?.lineItems.map((li) => (
-                    <tr key={li.componentCode}>
-                      <td className="py-2">
-                        <p className="text-xs font-medium">{li.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{li.description}</p>
-                      </td>
-                      <td className="py-2 text-right font-mono text-xs tabular-nums">₹{li.amount.toLocaleString("en-IN")}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="mt-3 flex justify-end">
-                <div className="w-full max-w-xs space-y-1.5">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-mono tabular-nums">{formatRupee(f?.subtotal ?? 0)}</span></div>
-                  {/* Tax breakdown on receipt */}
-                  {f?.taxApplicable && f.taxType === "CGST_SGST" && (
-                    <>
-                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">CGST @ {f.taxConfig?.cgstRate ?? 0}%</span><span className="font-mono tabular-nums">{formatRupee(f.cgst)}</span></div>
-                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">AP SGST @ {f.taxConfig?.sgstRate ?? 0}%</span><span className="font-mono tabular-nums">{formatRupee(f.sgst)}</span></div>
-                    </>
-                  )}
-                  {f?.taxApplicable && f.taxType === "IGST" && (
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">IGST @ {f.taxConfig?.igstRate ?? 0}%</span><span className="font-mono tabular-nums">{formatRupee(f.igst)}</span></div>
-                  )}
-                  {!f?.taxApplicable && (
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">GST</span><span className="font-mono tabular-nums text-muted-foreground">Not Applicable</span></div>
-                  )}
-                  <Separator />
-                  <div className="flex justify-between"><span className="font-semibold">Total Paid</span><span className="font-mono text-lg font-bold text-success">{formatRupee(p.amount)}</span></div>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div>
-                <p className="text-muted-foreground">Payment Method</p>
-                <p className="font-medium">{p.method} · {p.gateway}</p>
-              </div>
-              <div>
-                <p className="text-muted-foreground">Verified</p>
-                <p className="font-medium text-success">{p.verified ? "Yes — backend verified" : "Pending"}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Receipt footer */}
-          <div className="border-t border-border bg-muted/30 p-4 text-center">
-            <p className="text-[10px] text-muted-foreground">
-              This is a computer-generated receipt and does not require a physical signature. Please retain for your records.
-            </p>
-            <p className="mt-1 text-[10px] text-muted-foreground">Generated on {formatDateTime(p.completedAt ?? "")}</p>
           </div>
         </div>
       </div>
+
+      {/* Official Government Form matching Payment receipt.pdf */}
+      <ApcrdaPaymentReceipt
+        data={receiptData}
+        showActions={true}
+        onClose={() => navigate("ltp-payment")}
+      />
     </div>
   );
 }
