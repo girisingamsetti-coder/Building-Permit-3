@@ -104,6 +104,7 @@ export function LtpSubmissionDetails({
   const [docSubmissionModal, setDocSubmissionModal] = React.useState(false);
   const [activeReceiptData, setActiveReceiptData] = React.useState<ApcrdaPaymentReceiptData | null>(null);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = React.useState<boolean>(false);
+  const [showProceeding, setShowProceeding] = React.useState<boolean>(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
@@ -3298,9 +3299,39 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {mainTab === "payments" && (
           <div className="w-full space-y-4 text-xs">
-            {/* Fee table */}
-            <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2">
+            {showProceeding ? (
+              <BuildingPermitOrder
+                data={buildPermitOrderFromBaNo(baNo, ownerName, revenueVillage, district)}
+                onBack={() => setShowProceeding(false)}
+              />
+            ) : (
+              <>
+                {/* Payment success banner + Proceeding CTA */}
+                <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
+                      <CheckCircle2 className="size-5" />
+                    </div>
+                    <div>
+                      <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
+                      <p className="text-emerald-700 text-[11px] mt-0.5">
+                        Your building permit order has been generated. Click to view the official proceeding.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowProceeding(true)}
+                    className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+                  >
+                    <FileText className="size-3.5" />
+                    View Proceeding
+                  </button>
+                </div>
+
+                {/* Fee table */}
+                <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2">
                 <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider">
                   Fee Assessment &amp; Payment History
                 </h3>
@@ -3459,8 +3490,10 @@ export function LtpSubmissionDetails({
               onClose={() => setIsReceiptModalOpen(false)}
               data={activeReceiptData}
             />
-          </div>
+          </>
         )}
+      </div>
+    )}
 
         {/* ========================================================================= */}
         {/* MAIN TAB 5: APPLY FOR NOCS (Statutory Single-Desk Clearances)              */}
