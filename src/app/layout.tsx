@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LTP Approval — Building Permit Management System",
+  title: "Building Permission System",
   description:
     "Online Building Permit Application & Approval Portal for Licensed Technical Persons (LTP) and approval officers.",
   keywords: [

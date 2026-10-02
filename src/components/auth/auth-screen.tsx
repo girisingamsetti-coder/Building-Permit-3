@@ -263,7 +263,7 @@ function LoginForm() {
                 ? "Bhavan"
                 : version === "v1"
                 ? "Amaravati Nirmaan"
-                : "Building Permission Approval System"}
+                : "Building Permission System"}
             </div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
@@ -427,7 +427,7 @@ function LoginForm() {
                   ? "Bhavan AMARAVATI"
                   : version === "v1"
                   ? "Amaravati Nirmaan AMARAVATI"
-                  : "Building Permission Approval System"}
+                  : "Building Permission System"}
               </h1>
             </div>
 

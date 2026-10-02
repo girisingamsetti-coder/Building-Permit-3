@@ -197,7 +197,7 @@ export function Sidebar() {
                 Building Permission
               </h1>
               <p className="text-[11px] font-semibold text-[#801824]/70 tracking-wide leading-tight">
-                Approval System
+                System
               </p>
             </div>
           </div>
