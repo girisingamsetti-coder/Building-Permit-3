@@ -43,7 +43,6 @@ export function LtpDraftApplications({
   // Search & Filter State
   const [searchKeywords, setSearchKeywords] = React.useState("");
   const [filterType, setFilterType] = React.useState("ALL");
-  const [filterStatus, setFilterStatus] = React.useState("ALL");
   const [filterOwner, setFilterOwner] = React.useState("ALL");
   const [sortField, setSortField] = React.useState<keyof DraftItem>("createdDate");
   const [sortAsc, setSortAsc] = React.useState(false);
@@ -116,12 +115,11 @@ export function LtpDraftApplications({
 
       // Column filters
       if (filterType !== "ALL" && item.permissionType !== filterType) return false;
-      if (filterStatus !== "ALL" && item.status !== filterStatus) return false;
       if (filterOwner !== "ALL" && item.owner !== filterOwner) return false;
 
       return true;
     });
-  }, [draftItems, searchKeywords, filterType, filterStatus, filterOwner]);
+  }, [draftItems, searchKeywords, filterType, filterOwner]);
 
   // Sorting
   const sortedItems = React.useMemo(() => {
@@ -148,13 +146,12 @@ export function LtpDraftApplications({
   };
 
   const exportCSV = () => {
-    const headers = ["#", "BA No.", "Permission Type", "Created Date", "Status", "Owner"];
+    const headers = ["#", "BA No.", "Permission Type", "Created Date", "Owner"];
     const rows = sortedItems.map((item, idx) => [
       idx + 1,
       `"${item.baNo}"`,
       `"${item.permissionType}"`,
       item.createdDate,
-      item.status,
       `"${item.owner}"`,
     ]);
     const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
@@ -214,20 +211,6 @@ export function LtpDraftApplications({
             </select>
           </div>
 
-          {/* Filter: Status */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Status:</span>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              aria-label="Filter by Status"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
-            >
-              <option value="ALL">All Status</option>
-              <option value="Draft">Draft</option>
-            </select>
-          </div>
-
           {/* Filter: Owner */}
           <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
@@ -243,12 +226,11 @@ export function LtpDraftApplications({
           </div>
 
           {/* Clear Filters Button (shown when any filter is active) */}
-          {(searchKeywords || filterType !== "ALL" || filterStatus !== "ALL" || filterOwner !== "ALL") && (
+          {(searchKeywords || filterType !== "ALL" || filterOwner !== "ALL") && (
             <button
               onClick={() => {
                 setSearchKeywords("");
                 setFilterType("ALL");
-                setFilterStatus("ALL");
                 setFilterOwner("ALL");
               }}
               className="text-xs font-semibold text-[#7A1316] hover:text-[#8F161A] hover:underline px-2 py-1 cursor-pointer transition-colors"
@@ -295,15 +277,6 @@ export function LtpDraftApplications({
                   </div>
                 </th>
                 <th
-                  onClick={() => handleSort("status")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span>Status</span>
-                    <ChevronsUpDown className="size-3 text-slate-400" />
-                  </div>
-                </th>
-                <th
                   onClick={() => handleSort("owner")}
                   className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
                 >
@@ -345,11 +318,6 @@ export function LtpDraftApplications({
                     {/* Created Date */}
                     <td className="px-3 py-2.5 text-slate-700 tabular-nums">{item.createdDate}</td>
 
-                    {/* Status */}
-                    <td className="px-3 py-2.5">
-                      <span className="font-semibold text-slate-800">{item.status}</span>
-                    </td>
-
                     {/* Owner */}
                     <td className="px-3 py-2.5 text-slate-700 font-medium">{item.owner}</td>
 
@@ -366,7 +334,7 @@ export function LtpDraftApplications({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={6} className="p-8 text-center text-slate-500">
                     No proposals found matching the search criteria.
                   </td>
                 </tr>
@@ -392,7 +360,6 @@ export function LtpDraftApplications({
                 onClick={() => {
                   setSearchKeywords("");
                   setFilterType("ALL");
-                  setFilterStatus("ALL");
                   setFilterOwner("ALL");
                 }}
                 title="Refresh Table"

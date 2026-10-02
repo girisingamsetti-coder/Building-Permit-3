@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import {
   CheckCircle2,
-  ChevronDown,
   ChevronsUpDown,
   FileSpreadsheet,
   Plus,
@@ -95,25 +94,11 @@ export function LtpSubmittedApplications({
   const [filterOwner, setFilterOwner] = React.useState("ALL");
   const [sortField, setSortField] = React.useState<keyof SubmissionItem>("submittedDate");
   const [sortAsc, setSortAsc] = React.useState(false);
-  const [createDropdownOpen, setCreateDropdownOpen] = React.useState(false);
   const [isSelectingScheme, setIsSelectingScheme] = React.useState(false);
   const [selectedSubmission, setSelectedSubmission] = React.useState<SubmissionItem | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [viewReportModal, setViewReportModal] = React.useState(false);
   const [reportModalTab, setReportModalTab] = React.useState<"scrutiny" | "registry">("scrutiny");
-
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  // Close dropdown on click outside
-  React.useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setCreateDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   // Compute submitted proposals from store combined with default authentic APCRDA submissions
   const submissionItems: SubmissionItem[] = React.useMemo(() => {
@@ -448,52 +433,15 @@ export function LtpSubmittedApplications({
         </div>
 
         {/* Create New / New Application Button (Maroon & Beige Theme) */}
-        <div className="relative shrink-0 self-start xl:self-auto" ref={dropdownRef}>
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsSelectingScheme(true)}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded-l flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-            >
-              <Plus className="size-3.5" />
-              <span>New Application</span>
-            </button>
-            <button
-              onClick={() => setCreateDropdownOpen(!createDropdownOpen)}
-              title="Quick select scheme"
-              className="bg-[#630E10] hover:bg-[#7A1316] text-white font-bold text-xs h-[34px] px-2 rounded-r flex items-center justify-center shadow-xs transition-colors cursor-pointer border-t border-r border-b border-[#630E10]"
-            >
-              <ChevronDown className={cn("size-3.5 transition-transform duration-200", createDropdownOpen && "rotate-180")} />
-            </button>
-          </div>
-
-          {/* Dropdown Menu */}
-          {createDropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 z-50 w-60 rounded border-2 border-[#7A1316] bg-[#FBF3E4] shadow-lg py-1 overflow-hidden animate-in fade-in-50 zoom-in-95">
-              <div className="px-3 py-1.5 text-xs font-black text-[#7A1316] border-b border-[#E0D2BE] bg-[#F5EBE1]/80">
-                Select Scheme Type
-              </div>
-              <button
-                onClick={() => {
-                  setCreateDropdownOpen(false);
-                  handleCreateNewApp("LPS Layout");
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
-              >
-                <span>LPS Application</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 group-hover:bg-white group-hover:text-[#7A1316]">LPS</span>
-              </button>
-              <button
-                onClick={() => {
-                  setCreateDropdownOpen(false);
-                  handleCreateNewApp("Non-LPS");
-                }}
-                className="w-full text-left px-3 py-2 text-xs font-semibold text-slate-800 hover:bg-[#7A1316] hover:text-white transition-colors cursor-pointer flex items-center justify-between group"
-              >
-                <span>Non-LPS Application</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 group-hover:bg-white group-hover:text-[#7A1316]">Non-LPS</span>
-              </button>
-            </div>
-          )}
+        <div className="relative shrink-0 self-start xl:self-auto">
+          <button
+            id="sub-new-app-btn"
+            onClick={() => setIsSelectingScheme(true)}
+            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
+          >
+            <Plus className="size-3.5" />
+            <span>New Application</span>
+          </button>
         </div>
       </div>
 

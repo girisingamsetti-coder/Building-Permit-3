@@ -13,6 +13,7 @@ import { LtpSubmittedApplications } from "@/components/ltp/ltp-submitted-applica
 import { LtpSubmissionDetails } from "@/components/ltp/ltp-submission-details";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpObjections } from "@/components/ltp/ltp-objections";
+import { LtpComplianceView } from "@/components/ltp/ltp-compliance-view";
 import {
   FilePlus2,
   Search,
@@ -153,13 +154,17 @@ export function LtpPortalView() {
         );
       }
 
-      case "objected-files":
-      case "shortfall":
-      case "verified":
-      case "show-cause":
-      case "review-shortfall-submission":
-      case "review-show-cause-submission": {
+      case "objected-files": {
         return <LtpObjections />;
+      }
+
+      case "proceeding-status":
+      case "verified":
+      case "shortfall":
+      case "review-shortfall-submission":
+      case "show-cause":
+      case "review-show-cause-submission": {
+        return <LtpComplianceView initialTab={ltpActiveMenu} />;
       }
 
       case "approved-files":
@@ -423,8 +428,19 @@ export function LtpPortalView() {
     );
   }
 
+  const isEdgeToEdge =
+    ltpActiveMenu === "dashboard" ||
+    ltpActiveMenu === "draft-application" ||
+    ltpActiveMenu === "submitted-applications" ||
+    ltpActiveMenu === "proceeding-status" ||
+    ltpActiveMenu === "verified" ||
+    ltpActiveMenu === "shortfall" ||
+    ltpActiveMenu === "review-shortfall-submission" ||
+    ltpActiveMenu === "show-cause" ||
+    ltpActiveMenu === "review-show-cause-submission";
+
   return (
-    <div className={cn("h-full w-full", (ltpActiveMenu === "dashboard" || ltpActiveMenu === "draft-application" || ltpActiveMenu === "submitted-applications") ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-hidden p-4 bg-[#F8F9FA]")}>
+    <div className={cn("h-full w-full", isEdgeToEdge ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-y-auto p-4 bg-[#F8F9FA]")}>
       {renderContent()}
 
       {/* New Application Dialog */}

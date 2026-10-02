@@ -381,7 +381,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   // Keep parent module expanded if active menu changes
   React.useEffect(() => {
     const parentMod = modules.find(
-      (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
+      (m) =>
+        m.id === ltpActiveMenu ||
+        m.directMenuId === ltpActiveMenu ||
+        m.submenus.some((s) => s.id === ltpActiveMenu)
     );
     if (parentMod) {
       setOpenModuleId(parentMod.id);
@@ -402,12 +405,22 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
+    const isCurrentlyActiveModule =
+      mod.id === ltpActiveMenu ||
+      mod.directMenuId === ltpActiveMenu ||
+      mod.submenus.some((s) => s.id === ltpActiveMenu);
+
     if (openModuleId === mod.id && !collapsed && mod.submenus.length > 0) {
-      setOpenModuleId(null);
+      if (!isCurrentlyActiveModule) {
+        handleSelectSubmenu(mod.submenus[0].id);
+      } else {
+        setOpenModuleId(null);
+      }
     } else {
       setOpenModuleId(mod.id);
       if (mod.submenus.length > 0) {
-        handleSelectSubmenu(mod.submenus[0].id);
+        const activeSub = mod.submenus.find((s) => s.id === ltpActiveMenu);
+        handleSelectSubmenu(activeSub ? activeSub.id : mod.submenus[0].id);
       } else if (mod.directMenuId) {
         handleSelectSubmenu(mod.directMenuId);
       }

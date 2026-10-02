@@ -32,7 +32,7 @@ export interface ObjectionItem {
   baNo: string;
   permissionType: string;
   createdDate: string;
-  status: "Scrutiny Failed" | "Payment Incomplete";
+  status: "Scrutiny Failed" | "Payment Failed" | "Payment Incomplete";
   category: "scrutiny-failed" | "payment-incomplete";
   owner: string;
   caseType: string;
@@ -102,13 +102,13 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
     hearingDate: "08/10/2026",
   },
 
-  // ── 2. Payment Incomplete Proposals ──
+  // ── 2. Payment Incomplete / Failed Proposals ──
   {
     id: "obj-5",
     baNo: "BA/2026/0312/BP",
     permissionType: "Building Permission",
     createdDate: "18/9/2026",
-    status: "Payment Incomplete",
+    status: "Payment Failed",
     category: "payment-incomplete",
     owner: "Shri. Suresh Reddy",
     caseType: "Fresh",
@@ -123,7 +123,7 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
     baNo: "BA/2026/0154/GD",
     permissionType: "Group Development",
     createdDate: "05/3/2026",
-    status: "Payment Incomplete",
+    status: "Payment Failed",
     category: "payment-incomplete",
     owner: "M. Lakshmi Narayana",
     caseType: "Fresh",
@@ -138,7 +138,7 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
     baNo: "BA/2026/0678/BP",
     permissionType: "Building Permission",
     createdDate: "29/8/2026",
-    status: "Payment Incomplete",
+    status: "Payment Failed",
     category: "payment-incomplete",
     owner: "Ch. Venkatadri Naidu",
     caseType: "Revision",
@@ -153,7 +153,7 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
     baNo: "BA/2026/0844/BP",
     permissionType: "Building Permission",
     createdDate: "14/9/2026",
-    status: "Payment Incomplete",
+    status: "Payment Failed",
     category: "payment-incomplete",
     owner: "K. Rama Rao",
     caseType: "Fresh",
@@ -169,14 +169,11 @@ export function LtpObjections() {
   const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
 
-  // Tabs: Scrutiny Failed | Payment Incomplete (Only these two tabs exist as requested)
-  const [activeTab, setActiveTab] = React.useState<"scrutiny-failed" | "payment-incomplete">("scrutiny-failed");
-
-  // Search & Filter State
+  // Filter State (Unified Single Table)
+  const [filterCategory, setFilterCategory] = React.useState<"ALL" | "scrutiny-failed" | "payment-incomplete">("ALL");
   const [searchKeywords, setSearchKeywords] = React.useState("");
   const [filterType, setFilterType] = React.useState("ALL");
   const [filterCaseType, setFilterCaseType] = React.useState("ALL");
-  const [showSubheaderFilters, setShowSubheaderFilters] = React.useState(true);
   const [sortField, setSortField] = React.useState<keyof ObjectionItem>("createdDate");
   const [sortAsc, setSortAsc] = React.useState(false);
   const [selectedObjection, setSelectedObjection] = React.useState<ObjectionItem | null>(null);
@@ -233,7 +230,7 @@ export function LtpObjections() {
           baNo: a.applicationNo || `BA/2026/${2000 + idx}/BP`,
           permissionType: typeLabel,
           createdDate: dateStr,
-          status: "Payment Incomplete",
+          status: "Payment Failed",
           category: "payment-incomplete",
           owner: a.applicant?.name || "Applicant",
           caseType: idx % 2 === 0 ? "Fresh" : "Resubmission",
@@ -269,11 +266,11 @@ export function LtpObjections() {
     return objectionItems.filter((i) => i.category === "payment-incomplete").length;
   }, [objectionItems]);
 
-  // Filtering by active tab and search/filters
+  // Filtering by category and search/filters (unified single table)
   const filteredItems = React.useMemo(() => {
     return objectionItems.filter((item) => {
-      // 1. Must match active tab
-      if (item.category !== activeTab) return false;
+      // 1. Filter by category / objection type
+      if (filterCategory !== "ALL" && item.category !== filterCategory) return false;
 
       // 2. Keyword search
       if (searchKeywords.trim()) {
@@ -294,7 +291,7 @@ export function LtpObjections() {
 
       return true;
     });
-  }, [objectionItems, activeTab, searchKeywords, filterType, filterCaseType]);
+  }, [objectionItems, filterCategory, searchKeywords, filterType, filterCaseType]);
 
   // Sorting
   const sortedItems = React.useMemo(() => {
@@ -325,6 +322,7 @@ export function LtpObjections() {
 
   const handleClear = () => {
     setSearchKeywords("");
+    setFilterCategory("ALL");
     setFilterType("ALL");
     setFilterCaseType("ALL");
     if (searchInputRef.current) {
@@ -361,7 +359,7 @@ export function LtpObjections() {
     link.setAttribute("href", encodedUri);
     link.setAttribute(
       "download",
-      `${activeTab === "scrutiny-failed" ? "Scrutiny_Failed" : "Payment_Incomplete"}_Proposals_${new Date().toISOString().slice(0, 10)}.csv`
+      `Objected_Proposals_${new Date().toISOString().slice(0, 10)}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -425,106 +423,80 @@ export function LtpObjections() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── TOP TABS: Scrutiny Failed | Payment Incomplete (Strictly only these two tabs) ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2.5 shrink-0">
-        <div className="flex items-center gap-2">
-          {/* Tab 1: Scrutiny Failed */}
-          <button
-            type="button"
-            id="tab-scrutiny-failed"
-            onClick={() => setActiveTab("scrutiny-failed")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-2 border",
-              activeTab === "scrutiny-failed"
-                ? "bg-[#7A1316] text-white border-[#630E10] shadow-xs"
-                : "bg-white hover:bg-[#FBF3E4] text-slate-700 border-[#DCD5C8]"
-            )}
-          >
-            <AlertTriangle
-              className={cn(
-                "size-3.5",
-                activeTab === "scrutiny-failed" ? "text-amber-300" : "text-rose-600"
-              )}
-            />
-            <span>Scrutiny Failed</span>
-            <span
-              className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] font-black",
-                activeTab === "scrutiny-failed"
-                  ? "bg-white/20 text-white"
-                  : "bg-rose-100 text-rose-800"
-              )}
-            >
-              {scrutinyFailedCount}
-            </span>
-          </button>
-
-          {/* Tab 2: Payment Incomplete */}
-          <button
-            type="button"
-            id="tab-payment-incomplete"
-            onClick={() => setActiveTab("payment-incomplete")}
-            className={cn(
-              "px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-2 border",
-              activeTab === "payment-incomplete"
-                ? "bg-[#7A1316] text-white border-[#630E10] shadow-xs"
-                : "bg-white hover:bg-[#FBF3E4] text-slate-700 border-[#DCD5C8]"
-            )}
-          >
-            <CreditCard
-              className={cn(
-                "size-3.5",
-                activeTab === "payment-incomplete" ? "text-amber-300" : "text-amber-600"
-              )}
-            />
-            <span>Payment Incomplete</span>
-            <span
-              className={cn(
-                "px-2 py-0.5 rounded-full text-[10px] font-black",
-                activeTab === "payment-incomplete"
-                  ? "bg-white/20 text-white"
-                  : "bg-amber-100 text-amber-800"
-              )}
-            >
-              {paymentIncompleteCount}
-            </span>
-          </button>
+      {/* ── SEARCH & FILTERS ROW (Outside Table) ── */}
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        {/* Search Input Box */}
+        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded px-2.5 py-1.5 w-full sm:w-64 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchKeywords}
+            onChange={(e) => setSearchKeywords(e.target.value)}
+            placeholder="Search proposals by BA No., owner, reason..."
+            className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
+          />
         </div>
 
-        {/* Action Links on Right: Filter | Find | Clear */}
-        <div className="flex items-center justify-end gap-3 text-xs font-semibold px-1">
-          <button
-            onClick={() => setShowSubheaderFilters(!showSubheaderFilters)}
-            className="text-slate-700 hover:text-[#7A1316] hover:underline cursor-pointer transition-colors"
+        {/* Filter: Objection Type / Status */}
+        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          <span className="text-[11px] font-bold text-slate-600 shrink-0">Objection:</span>
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value as any)}
+            aria-label="Filter Objection Type"
+            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
           >
-            {showSubheaderFilters ? "Hide Filters" : "Filter"}
-          </button>
-          <button
-            onClick={handleFind}
-            className="text-slate-700 hover:text-[#7A1316] hover:underline cursor-pointer transition-colors"
+            <option value="ALL">All Objections</option>
+            <option value="scrutiny-failed">Scrutiny Failed</option>
+            <option value="payment-incomplete">Payment Failed</option>
+          </select>
+        </div>
+
+        {/* Filter: Permission Type */}
+        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            aria-label="Filter Permission Type"
+            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
           >
-            Find
-          </button>
+            <option value="ALL">All Types</option>
+            <option value="Building Permission">Building Permission</option>
+            <option value="Group Development">Group Development</option>
+          </select>
+        </div>
+
+        {/* Filter: Case Type */}
+        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          <span className="text-[11px] font-bold text-slate-600 shrink-0">Case Type:</span>
+          <select
+            value={filterCaseType}
+            onChange={(e) => setFilterCaseType(e.target.value)}
+            aria-label="Filter Case Type"
+            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
+          >
+            <option value="ALL">All Case Types</option>
+            <option value="Fresh">Fresh</option>
+            <option value="Revision">Revision</option>
+            <option value="Resubmission">Resubmission</option>
+            <option value="Regularization">Regularization</option>
+          </select>
+        </div>
+
+        {/* Clear Filters Button */}
+        {(searchKeywords ||
+          filterCategory !== "ALL" ||
+          filterType !== "ALL" ||
+          filterCaseType !== "ALL") && (
           <button
             onClick={handleClear}
-            className="text-slate-700 hover:text-[#7A1316] hover:underline cursor-pointer transition-colors"
+            className="text-xs font-semibold text-[#7A1316] hover:text-[#8F161A] hover:underline px-2 py-1 cursor-pointer transition-colors"
           >
-            Clear
+            Clear filters
           </button>
-        </div>
-      </div>
-
-      {/* ── SEARCH BAR ── */}
-      <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded px-2.5 py-1.5 w-full sm:w-80 shadow-2xs focus-within:border-[#7A1316] transition-colors shrink-0">
-        <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-        <input
-          ref={searchInputRef}
-          type="text"
-          value={searchKeywords}
-          onChange={(e) => setSearchKeywords(e.target.value)}
-          placeholder={`Search ${activeTab === "scrutiny-failed" ? "scrutiny failed" : "payment incomplete"} proposals...`}
-          className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
-        />
+        )}
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}
@@ -598,57 +570,6 @@ export function LtpObjections() {
 
                 <th className="w-24 px-2.5 py-2 font-bold text-center">Action</th>
               </tr>
-
-              {/* Sub-header Filter Row */}
-              {showSubheaderFilters && (
-                <tr className="bg-[#FAF4EB] divide-x divide-[#DCD5C8] border-t border-[#E8DFD1]">
-                  <th className="px-2 py-1 text-center font-normal text-slate-400">-</th>
-                  <th className="px-2 py-1"></th>
-
-                  {/* Filter: Permission Type */}
-                  <th className="px-2 py-1">
-                    <select
-                      value={filterType}
-                      onChange={(e) => setFilterType(e.target.value)}
-                      aria-label="Filter Permission Type"
-                      className="w-full h-6 text-[11px] bg-white border border-[#DCD5C8] rounded-xs px-1.5 text-slate-700 outline-none focus:border-[#7A1316] font-normal cursor-pointer"
-                    >
-                      <option value="ALL">All Types</option>
-                      <option value="Building Permission">Building Permission</option>
-                      <option value="Group Development">Group Development</option>
-                    </select>
-                  </th>
-
-                  <th className="px-2 py-1"></th>
-
-                  {/* Status column in subheader (fixed for this tab) */}
-                  <th className="px-2 py-1">
-                    <span className="text-[10px] text-slate-500 font-normal px-1">
-                      {activeTab === "scrutiny-failed" ? "Scrutiny Failed" : "Payment Incomplete"}
-                    </span>
-                  </th>
-
-                  <th className="px-2 py-1"></th>
-
-                  {/* Filter: Case Type */}
-                  <th className="px-2 py-1">
-                    <select
-                      value={filterCaseType}
-                      onChange={(e) => setFilterCaseType(e.target.value)}
-                      aria-label="Filter Case Type"
-                      className="w-full h-6 text-[11px] bg-white border border-[#DCD5C8] rounded-xs px-1.5 text-slate-700 outline-none focus:border-[#7A1316] font-normal cursor-pointer"
-                    >
-                      <option value="ALL">All Case Types</option>
-                      <option value="Fresh">Fresh</option>
-                      <option value="Revision">Revision</option>
-                      <option value="Resubmission">Resubmission</option>
-                      <option value="Regularization">Regularization</option>
-                    </select>
-                  </th>
-
-                  <th className="px-2 py-1"></th>
-                </tr>
-              )}
             </thead>
 
             {/* Table Body */}
@@ -684,7 +605,7 @@ export function LtpObjections() {
                       {item.createdDate}
                     </td>
 
-                    {/* Status Badge */}
+                    {/* Status Badge: Type of Objection */}
                     <td className="px-3 py-2.5">
                       {item.category === "scrutiny-failed" ? (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold border bg-rose-50 text-rose-800 border-rose-300">
@@ -694,7 +615,7 @@ export function LtpObjections() {
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold border bg-amber-50 text-amber-900 border-amber-300">
                           <span className="size-1.5 rounded-full bg-amber-600 inline-block" />
-                          <span>Payment Incomplete</span>
+                          <span>Payment Failed</span>
                         </span>
                       )}
                     </td>
@@ -730,9 +651,7 @@ export function LtpObjections() {
               ) : (
                 <tr>
                   <td colSpan={8} className="py-12 text-center text-slate-400 italic">
-                    {activeTab === "scrutiny-failed"
-                      ? "No scrutiny failed proposals found."
-                      : "No payment incomplete proposals found."}
+                    No objected proposals found matching the search criteria.
                   </td>
                 </tr>
               )}
@@ -827,7 +746,7 @@ export function LtpObjections() {
                 projectTitle={sortedItems[0]?.owner ? `${sortedItems[0].owner} (1)` : "VADDURI VEERAIAH GARU (1)"}
                 zone="R3-Medium to High density zone"
                 typology="AP1-Apartment"
-                scrutinyStatus={activeTab === "scrutiny-failed" ? "FAILED" : "PASSED"}
+                scrutinyStatus={sortedItems[0]?.category === "payment-incomplete" ? "PASSED" : "FAILED"}
                 onProceedToDocumentation={() => {
                   setViewReportModal(false);
                   showToast("Proceeding to statutory documentation checklist...");
