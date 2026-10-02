@@ -129,15 +129,15 @@ export function LtpShortfalls() {
       </div>
 
       <SectionCard noPadding>
-        {/* Filter bar */}
+        {/* Filter bar (Pillow-shaped) */}
         <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by shortfall ID or title…" className="h-9 pl-9" />
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by shortfall ID or title…" className="h-9 pl-9.5 rounded-full border-muted-foreground/30" />
           </div>
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-9 w-36"><Filter className="mr-1.5 size-3.5 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30"><Filter className="mr-1.5 size-3.5 text-muted-foreground" /><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All types</SelectItem>
                 <SelectItem value="DOCUMENT">Document</SelectItem>
@@ -146,7 +146,7 @@ export function LtpShortfalls() {
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 w-36"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="ALL">All statuses</SelectItem>
                 <SelectItem value="OPEN">Open</SelectItem>

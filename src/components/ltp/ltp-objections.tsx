@@ -423,80 +423,116 @@ export function LtpObjections() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── SEARCH & FILTERS ROW (Outside Table) ── */}
-      <div className="flex flex-wrap items-center gap-2 shrink-0">
-        {/* Search Input Box */}
-        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded px-2.5 py-1.5 w-full sm:w-64 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchKeywords}
-            onChange={(e) => setSearchKeywords(e.target.value)}
-            placeholder="Search proposals by BA No., owner, reason..."
-            className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
-          />
+      {/* ── SEARCH & FILTERS ROW (Outside Table - Pillow Shaped) ── */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
+        {/* Left: Search Bar & Filters */}
+        <div className="flex flex-wrap items-center gap-2.5 flex-1">
+          {/* Search Input Box (Pillow-shaped) */}
+          <div className="flex items-center gap-2.5 border border-[#DCD5C8] bg-white rounded-full px-4 py-2 w-full sm:w-72 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <Search className="size-3.5 text-slate-400 shrink-0" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
+              placeholder="Search proposals by BA No., owner, reason..."
+              className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
+            />
+            {searchKeywords && (
+              <button
+                type="button"
+                onClick={() => setSearchKeywords("")}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="size-3" />
+              </button>
+            )}
+          </div>
+
+          {/* Filter: Objection Type / Status (Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Objection:</span>
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value as any)}
+              aria-label="Filter Objection Type"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Objections ({objectionItems.length})</option>
+              <option value="scrutiny-failed">Scrutiny Failed ({scrutinyFailedCount})</option>
+              <option value="payment-incomplete">Payment Failed ({paymentIncompleteCount})</option>
+            </select>
+          </div>
+
+          {/* Filter: Permission Type (Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              aria-label="Filter Permission Type"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Types</option>
+              <option value="Building Permission">Building Permission</option>
+              <option value="Group Development">Group Development</option>
+            </select>
+          </div>
+
+          {/* Filter: Case Type (Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Case Type:</span>
+            <select
+              value={filterCaseType}
+              onChange={(e) => setFilterCaseType(e.target.value)}
+              aria-label="Filter Case Type"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Case Types</option>
+              <option value="Fresh">Fresh</option>
+              <option value="Revision">Revision</option>
+              <option value="Resubmission">Resubmission</option>
+              <option value="Regularization">Regularization</option>
+            </select>
+          </div>
+
+          {/* Clear Filters Button (Pillow-shaped) */}
+          {(searchKeywords ||
+            filterCategory !== "ALL" ||
+            filterType !== "ALL" ||
+            filterCaseType !== "ALL") && (
+            <button
+              onClick={handleClear}
+              className="rounded-full px-3.5 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+            >
+              <X className="size-3" />
+              <span>Clear filters</span>
+            </button>
+          )}
         </div>
 
-        {/* Filter: Objection Type / Status */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-          <span className="text-[11px] font-bold text-slate-600 shrink-0">Objection:</span>
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value as any)}
-            aria-label="Filter Objection Type"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
-          >
-            <option value="ALL">All Objections</option>
-            <option value="scrutiny-failed">Scrutiny Failed</option>
-            <option value="payment-incomplete">Payment Failed</option>
-          </select>
-        </div>
-
-        {/* Filter: Permission Type */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-          <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            aria-label="Filter Permission Type"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
-          >
-            <option value="ALL">All Types</option>
-            <option value="Building Permission">Building Permission</option>
-            <option value="Group Development">Group Development</option>
-          </select>
-        </div>
-
-        {/* Filter: Case Type */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-          <span className="text-[11px] font-bold text-slate-600 shrink-0">Case Type:</span>
-          <select
-            value={filterCaseType}
-            onChange={(e) => setFilterCaseType(e.target.value)}
-            aria-label="Filter Case Type"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
-          >
-            <option value="ALL">All Case Types</option>
-            <option value="Fresh">Fresh</option>
-            <option value="Revision">Revision</option>
-            <option value="Resubmission">Resubmission</option>
-            <option value="Regularization">Regularization</option>
-          </select>
-        </div>
-
-        {/* Clear Filters Button */}
-        {(searchKeywords ||
-          filterCategory !== "ALL" ||
-          filterType !== "ALL" ||
-          filterCaseType !== "ALL") && (
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={handleClear}
-            className="text-xs font-semibold text-[#7A1316] hover:text-[#8F161A] hover:underline px-2 py-1 cursor-pointer transition-colors"
+            type="button"
+            id="objections-view-report-btn"
+            onClick={() => setViewReportModal(true)}
+            title="View Scrutiny Report"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
           >
-            Clear filters
+            <FileText className="size-3.5 text-[#7A1316]" />
+            <span>Scrutiny Report</span>
           </button>
-        )}
+          <button
+            onClick={exportCSV}
+            title="Export to Excel / CSV"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-900 border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+          >
+            <FileSpreadsheet className="size-3.5" />
+            <span>Export</span>
+          </button>
+        </div>
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}
@@ -506,11 +542,11 @@ export function LtpObjections() {
             {/* Table Header Row */}
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
               <tr className="divide-x divide-[#DCD5C8]">
-                <th className="w-12 px-2.5 py-2 text-center font-bold">#</th>
+                <th className="w-12 px-2.5 py-2.5 text-center font-bold">#</th>
 
                 <th
                   onClick={() => handleSort("baNo")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-44"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>BA No.</span>
@@ -520,7 +556,7 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("permissionType")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Permission Type</span>
@@ -529,28 +565,28 @@ export function LtpObjections() {
                 </th>
 
                 <th
-                  onClick={() => handleSort("createdDate")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-32"
+                  onClick={() => handleSort("status")}
+                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>Created Date</span>
+                    <span>Objection Status</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
                 <th
-                  onClick={() => handleSort("status")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-44"
+                  onClick={() => handleSort("shortfallReason")}
+                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none min-w-[280px]"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>Status</span>
+                    <span>Objection / Shortfall Details</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort("owner")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Owner</span>
@@ -560,7 +596,7 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("caseType")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-32"
+                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Case Type</span>
@@ -568,7 +604,17 @@ export function LtpObjections() {
                   </div>
                 </th>
 
-                <th className="w-24 px-2.5 py-2 font-bold text-center">Action</th>
+                <th
+                  onClick={() => handleSort("createdDate")}
+                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span>Date</span>
+                    <ChevronsUpDown className="size-3 text-slate-400" />
+                  </div>
+                </th>
+
+                <th className="w-24 px-2.5 py-2.5 font-bold text-center">Action</th>
               </tr>
             </thead>
 
@@ -586,58 +632,83 @@ export function LtpObjections() {
                     </td>
 
                     {/* BA No. */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <button
                         onClick={() => setSelectedObjection(item)}
-                        className="text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
+                        className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
+                        title="Click to view proposal objection details"
                       >
-                        {item.baNo}
+                        <span>{item.baNo}</span>
+                        <ExternalLink className="size-3 text-[#7A1316]/50 hover:text-[#7A1316]" />
                       </button>
+                      {item.hearingDate && (
+                        <div className="text-[10px] text-amber-800 font-medium flex items-center gap-1 mt-0.5">
+                          <Clock className="size-2.5 shrink-0" />
+                          <span>Hearing: {item.hearingDate}</span>
+                        </div>
+                      )}
+                      {item.amount && (
+                        <div className="text-[10px] text-emerald-800 font-bold mt-0.5">
+                          Pending: {item.amount}
+                        </div>
+                      )}
                     </td>
 
                     {/* Permission Type */}
-                    <td className="px-3 py-2.5 text-slate-700 font-medium">
+                    <td className="px-3 py-2.5 text-slate-700 font-medium whitespace-nowrap">
                       {item.permissionType}
                     </td>
 
-                    {/* Created Date */}
-                    <td className="px-3 py-2.5 text-slate-600 font-mono">
-                      {item.createdDate}
-                    </td>
-
                     {/* Status Badge: Type of Objection */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-2.5 whitespace-nowrap">
                       {item.category === "scrutiny-failed" ? (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold border bg-rose-50 text-rose-800 border-rose-300">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-rose-50 text-rose-800 border-rose-300">
                           <span className="size-1.5 rounded-full bg-rose-600 inline-block" />
                           <span>Scrutiny Failed</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold border bg-amber-50 text-amber-900 border-amber-300">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-amber-50 text-amber-900 border-amber-300">
                           <span className="size-1.5 rounded-full bg-amber-600 inline-block" />
                           <span>Payment Failed</span>
                         </span>
                       )}
                     </td>
 
+                    {/* Objection / Shortfall Details */}
+                    <td className="px-3.5 py-2.5">
+                      <p className="text-[11.5px] text-slate-800 leading-snug line-clamp-2" title={item.shortfallReason}>
+                        {item.shortfallReason || "No specific shortfall recorded."}
+                      </p>
+                      {item.raisedBy && (
+                        <span className="text-[10.5px] text-slate-500 block mt-0.5">
+                          Officer: {item.raisedBy}
+                        </span>
+                      )}
+                    </td>
+
                     {/* Owner */}
-                    <td className="px-3 py-2.5 text-slate-800 font-medium">
+                    <td className="px-3 py-2.5 text-slate-800 font-medium whitespace-nowrap">
                       {item.owner || "-"}
                     </td>
 
                     {/* Case Type */}
-                    <td className="px-3 py-2.5 text-slate-700 font-medium">
+                    <td className="px-3 py-2.5 text-slate-700 font-medium whitespace-nowrap">
                       <span className="inline-block bg-[#F5EBE1] text-[#7A1316] border border-[#E0D2BE] px-2 py-0.5 rounded text-[11px] font-bold">
                         {item.caseType}
                       </span>
                     </td>
 
+                    {/* Date */}
+                    <td className="px-3 py-2.5 text-slate-600 font-mono text-[11px] whitespace-nowrap">
+                      {item.createdDate}
+                    </td>
+
                     {/* Action Button */}
-                    <td className="px-2.5 py-2.5 text-center">
+                    <td className="px-2.5 py-2.5 text-center whitespace-nowrap">
                       <button
                         onClick={() => setSelectedObjection(item)}
                         className={cn(
-                          "text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-2xs transition-colors cursor-pointer",
+                          "text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-2xs transition-colors cursor-pointer",
                           item.category === "scrutiny-failed"
                             ? "bg-[#7A1316] hover:bg-[#8F161A]"
                             : "bg-amber-700 hover:bg-amber-800"
@@ -650,7 +721,7 @@ export function LtpObjections() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 italic">
+                  <td colSpan={9} className="py-12 text-center text-slate-400 italic">
                     No objected proposals found matching the search criteria.
                   </td>
                 </tr>
@@ -659,47 +730,37 @@ export function LtpObjections() {
           </table>
         </div>
 
-        {/* ── TABLE FOOTER: Pagination | Refresh & Excel | Total Proposals ── */}
-        <div className="bg-[#FAF4EB] border-t border-[#DCD5C8] px-3 py-2 flex items-center justify-between text-xs text-slate-700 shrink-0 select-none">
+        {/* ── TABLE FOOTER: Pagination | Refresh | Category Breakdown & Total Proposals ── */}
+        <div className="bg-[#FAF4EB] border-t border-[#DCD5C8] px-3.5 py-2.5 flex items-center justify-between text-xs text-slate-700 shrink-0">
           {/* Left: Pagination & Controls */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="font-mono text-slate-700 text-xs">[1]</span>
             <div className="h-3 w-px bg-[#DCD5C8]" />
             <button
               onClick={handleRefresh}
               title="Refresh Table"
-              className="text-slate-600 hover:text-[#7A1316] p-1 rounded hover:bg-[#EFE3D5] transition-colors cursor-pointer"
+              className="text-slate-600 hover:text-[#7A1316] px-2 py-1 rounded-full hover:bg-[#EFE3D5] transition-colors cursor-pointer flex items-center gap-1.5"
             >
               <RefreshCw
                 className={cn("size-3.5", isRefreshing && "animate-spin text-[#7A1316]")}
               />
-            </button>
-
-            {/* View report button before export button */}
-            <button
-              type="button"
-              id="objections-view-report-btn"
-              onClick={() => setViewReportModal(true)}
-              title="View report"
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs transition-colors cursor-pointer"
-            >
-              <FileText className="size-3.5 text-[#7A1316]" />
-              <span>View report</span>
-            </button>
-
-            <button
-              onClick={exportCSV}
-              title="Export to Excel / CSV"
-              className="text-emerald-700 hover:text-emerald-900 p-1 rounded hover:bg-[#EFE3D5] transition-colors cursor-pointer"
-            >
-              <FileSpreadsheet className="size-3.5" />
+              <span className="text-[11px]">Refresh</span>
             </button>
           </div>
 
-          {/* Right: Total Proposals Count */}
-          <div className="font-medium text-slate-600 text-xs">
-            <span>Total Objection(s) : </span>
-            <span className="font-bold text-[#7A1316]">{sortedItems.length}</span>
+          {/* Right: Category Breakdown & Total Proposals Count */}
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-slate-600">
+              Scrutiny Failed: <strong className="text-rose-700 font-bold">{scrutinyFailedCount}</strong>
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="text-slate-600">
+              Payment Failed: <strong className="text-amber-800 font-bold">{paymentIncompleteCount}</strong>
+            </span>
+            <span className="text-slate-300">|</span>
+            <span className="font-medium text-slate-700">
+              Total Objection(s): <span className="font-bold text-[#7A1316]">{sortedItems.length}</span>
+            </span>
           </div>
         </div>
       </div>

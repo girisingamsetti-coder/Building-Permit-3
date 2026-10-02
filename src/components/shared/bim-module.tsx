@@ -26,7 +26,7 @@ import { MOCK_BIM_MODELS } from "@/data/mock-bim-data";
 
 export function BimModule() {
   const { applications, user, navigate, portal } = useAppStore();
-  const [selectedAppId, setSelectedAppId] = React.useState<string>("MC/BP/2026/04/0001");
+  const [selectedAppId, setSelectedAppId] = React.useState<string>("AP/BP/2026/04/0001");
   const [searchQuery, setSearchQuery] = React.useState("");
 
   const drawings2DPortalView = portal === "ADMIN" ? "admin-2d-drawings" : portal === "OFFICER" ? "officer-2d-drawings" : "ltp-2d-drawings";

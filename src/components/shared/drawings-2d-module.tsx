@@ -193,7 +193,7 @@ const MOCK_2D_RULES: ScrutinyRule2D[] = [
 
 export function Drawings2DModule() {
   const { applications, user, navigate, portal } = useAppStore();
-  const [selectedAppId, setSelectedAppId] = React.useState<string>("MC/BP/2026/04/0001");
+  const [selectedAppId, setSelectedAppId] = React.useState<string>("AP/BP/2026/04/0001");
   const [activeTab, setActiveTab] = React.useState<string>("viewer");
   const [activeFloor, setActiveFloor] = React.useState<string>("GROUND_FLOOR");
   const [highlightedRule, setHighlightedRule] = React.useState<ScrutinyRule2D | null>(null);
@@ -541,7 +541,7 @@ export function Drawings2DModule() {
                       PROJECT: GREENFIELD RESIDENCY (G+7 RESIDENTIAL)
                     </text>
                     <text x="420" y="458" fontSize="9" fill="#94a3b8" fontFamily="monospace">
-                      APP: MC/BP/2026/04/0001 · DWG: AR-101 (REV 2)
+                      APP: AP/BP/2026/04/0001 · DWG: AR-101 (REV 2)
                     </text>
                     <text x="700" y="458" textAnchor="end" fontSize="9" fill="#22c55e" fontFamily="monospace" fontWeight="bold">
                       SCALE 1:100

@@ -432,6 +432,7 @@ export function LtpPortalView() {
     ltpActiveMenu === "dashboard" ||
     ltpActiveMenu === "draft-application" ||
     ltpActiveMenu === "submitted-applications" ||
+    ltpActiveMenu === "objected-files" ||
     ltpActiveMenu === "proceeding-status" ||
     ltpActiveMenu === "verified" ||
     ltpActiveMenu === "shortfall" ||
@@ -451,7 +452,7 @@ export function LtpPortalView() {
           setNewAppOpen(false);
           const now = new Date();
           const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
-          const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+          const newDraftNo = `D/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
           setActiveNewApp({
             baNo: newDraftNo,
             scheme,

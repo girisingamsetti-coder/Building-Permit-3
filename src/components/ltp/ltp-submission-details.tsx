@@ -620,10 +620,10 @@ export function LtpSubmissionDetails({
   const [hasEnvNoc, setHasEnvNoc] = React.useState<"NA" | "No" | "Yes">("NA");
 
   const [draftAppNo, setDraftAppNo] = React.useState<string>(
-    baNo.startsWith("Temp/") ? baNo : ""
+    baNo.startsWith("D/") || baNo.startsWith("Temp/") ? baNo : ""
   );
   const [drawingBaNo, setDrawingBaNo] = React.useState<string>(
-    baNo.startsWith("Temp/") ? baNo : ""
+    baNo.startsWith("D/") || baNo.startsWith("Temp/") ? baNo : ""
   );
   const [drawingZone, setDrawingZone] = React.useState("");
   const [drawingTypology, setDrawingTypology] = React.useState("");
@@ -915,7 +915,7 @@ export function LtpSubmissionDetails({
   );
 
   return (
-    <div className="w-full h-full bg-[#FAF7F2] flex flex-col font-sans text-slate-800 overflow-hidden select-none">
+    <div className="w-full h-full bg-[#FAF7F2] flex flex-col font-sans text-slate-800 overflow-hidden">
 
 
       {/* Toast Notification */}
@@ -1038,9 +1038,9 @@ export function LtpSubmissionDetails({
                 onSaveAndNext={() => {
                   const generatedDraft =
                     draftAppNo ||
-                    (baNo.startsWith("Temp/")
+                    (baNo.startsWith("D/") || baNo.startsWith("Temp/")
                       ? baNo
-                      : `Temp/1168/0189/${isLpsLayout === "LPS Layout" ? "LPS" : "BP"}/${new Date().getFullYear()}`);
+                      : `D/1168/0189/${isLpsLayout === "LPS Layout" ? "LPS" : "BP"}/${new Date().getFullYear()}`);
                   setDraftAppNo(generatedDraft);
                   setDrawingBaNo(generatedDraft);
                   showToast(`Application saved. Draft Application Number: ${generatedDraft}`);
@@ -1951,9 +1951,9 @@ export function LtpSubmissionDetails({
                   onClick={() => {
                     const generatedDraft =
                       draftAppNo ||
-                      (baNo.startsWith("Temp/")
+                      (baNo.startsWith("D/") || baNo.startsWith("Temp/")
                         ? baNo
-                        : `Temp/1168/0189/BP/${new Date().getFullYear()}`);
+                        : `D/1168/0189/BP/${new Date().getFullYear()}`);
                     setDraftAppNo(generatedDraft);
                     setDrawingBaNo(generatedDraft);
                     showToast(`Application saved. Draft Application Number: ${generatedDraft}`);
@@ -1997,7 +1997,7 @@ export function LtpSubmissionDetails({
                     type="text"
                     value={drawingBaNo}
                     onChange={(e) => setDrawingBaNo(e.target.value)}
-                    placeholder="Temp/1168/0189/LPS/2026"
+                    placeholder="D/1168/0189/LPS/2026"
                     className="w-full bg-white border border-[#DCD5C8] rounded-lg px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#7A1316] focus:border-[#7A1316] font-mono shadow-2xs"
                   />
                 </div>
@@ -2152,7 +2152,7 @@ export function LtpSubmissionDetails({
                       </span>
                     </div>
                     <p className="text-slate-600 text-[11px] mt-0.5">
-                      Source: <strong className="font-mono text-slate-800">{drawingFileName}</strong> · Draft App No: <span className="font-mono font-bold text-slate-900">{drawingBaNo || draftAppNo || "Temp/1168/0189/LPS/2026"}</span> · Scale 1:100 (Ground Floor Plan)
+                      Source: <strong className="font-mono text-slate-800">{drawingFileName}</strong> · Draft App No: <span className="font-mono font-bold text-slate-900">{drawingBaNo || draftAppNo || "D/1168/0189/LPS/2026"}</span> · Scale 1:100 (Ground Floor Plan)
                     </p>
                   </div>
 
@@ -2477,7 +2477,7 @@ export function LtpSubmissionDetails({
                           PLAN: GROUND FLOOR · SCALE 1:100 · DWG: {drawingFileName || "Sanction_Plan.dwg"}
                         </text>
                         <text x="440" y="522" fontSize="9" fill="#e2e8f0" fontFamily="monospace">
-                          DRAFT APPL NO: {drawingBaNo || draftAppNo || "Temp/1168/0189/LPS/2026"}
+                          DRAFT APPL NO: {drawingBaNo || draftAppNo || "D/1168/0189/LPS/2026"}
                         </text>
                         <text x="440" y="535" fontSize="8.5" fill="#e2e8f0" fontFamily="monospace">
                           ZONE: {drawingZone || "C1"} · TYPOLOGY: {drawingTypology || "Detached"}
@@ -2520,7 +2520,7 @@ export function LtpSubmissionDetails({
             {showScrutinyReport && (
               <div ref={reportSectionRef} className="w-full pt-1 animate-in fade-in slide-in-from-top-3 duration-200">
                 <DetailedScrutinyReport
-                  proposalNo={drawingBaNo || draftAppNo || "Temp/1168/0801/LPS/2026"}
+                  proposalNo={drawingBaNo || draftAppNo || "D/1168/0801/LPS/2026"}
                   projectTitle={ownerName ? `${ownerName} (1)` : "VADDURI VEERAIAH GARU (1)"}
                   zone={drawingZone || "R3-Medium to High density zone"}
                   typology={drawingTypology || "AP1-Apartment"}
@@ -2721,39 +2721,6 @@ export function LtpSubmissionDetails({
             {/* ── DOC SUB-TAB 2: DOCUMENT CHECKLIST ── */}
             {docSubTab === "doc-checklist" && (
               <div className="w-full space-y-3">
-                {/* Drawing Compliance Document Checklist Banner */}
-                <div className="flex flex-wrap items-center justify-between gap-3 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-3.5 text-xs shadow-xs">
-                  <div className="flex items-center gap-3">
-                    <div className="size-9 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <FileCheck2 className="size-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-emerald-950 text-xs uppercase tracking-wide">
-                          Document Checklist Generated from Drawing Compliance
-                        </span>
-                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
-                          5/5 Mandatory Verified
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-emerald-800 mt-0.5">
-                        Statutory documents required for {drawingTypology || "AP1-Apartment"} in {drawingZone || "R3 Zone"} have been generated and validated.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      showToast("Statutory documents verified. Proceeding to Payment...");
-                      setDocSubmissionModal(true);
-                    }}
-                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
-                  >
-                    <span>Proceed to Payment</span>
-                    <ArrowRight className="size-3.5" />
-                  </button>
-                </div>
-
                 {/* Top Bar with Primary/Additional Tabs & Red Instruction Note */}
                 <div className="flex flex-wrap items-center justify-between gap-3 bg-[#FBF3E4] border border-[#DCD5C8] px-4 py-2 rounded-lg shadow-2xs">
                   <div className="flex items-center gap-2">
@@ -2795,17 +2762,6 @@ export function LtpSubmissionDetails({
                     >
                       <CheckCircle2 className="size-3.5" />
                       <span>Submit Documents</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        showToast("Statutory documents verified. Proceeding to Payment...");
-                        setDocSubmissionModal(true);
-                      }}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-1.5 rounded transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                      <span>Proceed to Payment</span>
-                      <ArrowRight className="size-3.5" />
                     </button>
                   </div>
                 </div>
@@ -2878,19 +2834,41 @@ export function LtpSubmissionDetails({
                       <CheckCircle2 className="size-4" />
                       <span>Submit Documents</span>
                     </button>
-                    <button
-                      type="button"
-                      id="doc-footer-proceed-to-payment-btn"
-                      onClick={() => {
-                        showToast("Statutory documents verified. Proceeding to Payment...");
-                        setDocSubmissionModal(true);
-                      }}
-                      className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
-                    >
-                      <span>Proceed to Payment</span>
-                      <ArrowRight className="size-4" />
-                    </button>
                   </div>
+                </div>
+
+                {/* Drawing Compliance Document Checklist Banner */}
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-emerald-50/90 border-2 border-emerald-400 rounded-xl p-4 text-xs shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <FileCheck2 className="size-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-emerald-950 text-xs uppercase tracking-wide">
+                          Document Checklist Generated from Drawing Compliance
+                        </span>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                          5/5 Mandatory Verified
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-emerald-800 mt-0.5">
+                        Statutory documents required for {drawingTypology || "A-Attached"} in {drawingZone || "C1 -Mixed use zone"} have been generated and validated.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    id="doc-footer-proceed-to-payment-btn"
+                    onClick={() => {
+                      showToast("Statutory documents verified. Proceeding to Payment...");
+                      setDocSubmissionModal(true);
+                    }}
+                    className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-5 py-2.5 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2"
+                  >
+                    <span>Proceed to Payment</span>
+                    <ArrowRight className="size-4" />
+                  </button>
                 </div>
               </div>
             )}
@@ -3306,29 +3284,6 @@ export function LtpSubmissionDetails({
               />
             ) : (
               <>
-                {/* Payment success banner + Proceeding CTA */}
-                <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
-                      <CheckCircle2 className="size-5" />
-                    </div>
-                    <div>
-                      <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
-                      <p className="text-emerald-700 text-[11px] mt-0.5">
-                        Your building permit order has been generated. Click to view the official proceeding.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowProceeding(true)}
-                    className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
-                  >
-                    <FileText className="size-3.5" />
-                    View Proceeding
-                  </button>
-                </div>
-
                 {/* Fee table */}
                 <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
                   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2">
@@ -3482,6 +3437,29 @@ export function LtpSubmissionDetails({
                   </tbody>
                 </table>
               </div>
+            </div>
+
+            {/* Payment success banner + Proceeding CTA */}
+            <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
+                  <CheckCircle2 className="size-5" />
+                </div>
+                <div>
+                  <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
+                  <p className="text-emerald-700 text-[11px] mt-0.5">
+                    Your building permit order has been generated. Click to view the official proceeding.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowProceeding(true)}
+                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+              >
+                <FileText className="size-3.5" />
+                View Proceeding
+              </button>
             </div>
 
             {/* Official Modal Receipt */}
@@ -4266,7 +4244,7 @@ export function LtpSubmissionDetails({
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
                   <span className="text-slate-500 font-medium">Draft Application Number:</span>
                   <span className="font-mono font-bold text-[#7A1316] text-xs bg-[#FAF7F2] border border-[#DCD5C8] px-2.5 py-0.5 rounded shadow-2xs">
-                    {draftAppNo || drawingBaNo || "Temp/1168/0189/LPS/2026"}
+                    {draftAppNo || drawingBaNo || "D/1168/0189/LPS/2026"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
@@ -4300,7 +4278,7 @@ export function LtpSubmissionDetails({
                   type="button"
                   id="proceed-to-drawing-submission-btn"
                   onClick={() => {
-                    const activeDraft = draftAppNo || drawingBaNo || "Temp/1168/0189/LPS/2026";
+                    const activeDraft = draftAppNo || drawingBaNo || "D/1168/0189/LPS/2026";
                     setDrawingBaNo(activeDraft);
                     setSubmissionSuccessModal(false);
                     setMainTab("drawing");

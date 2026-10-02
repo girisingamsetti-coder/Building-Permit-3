@@ -490,24 +490,24 @@ function buildApp(
 
 export const SEED_APPLICATIONS: Application[] = [
   // 1. DRAFT — just created, no drawings
-  buildApp("app-1", "MC/BP/2026/04/0001", "Greenfield Residency — Draft", "RESIDENTIAL", 1780, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-01-20T09:00:00"], "Shri. Rakesh Kulkarni", "+91 98220 14501", "rakesh.kulkarni@email.com", "Baner, Pune — 411045", { documents: makeDocuments("early") }),
+  buildApp("app-1", "D/1168/0001/BP/2026", "Greenfield Residency — Draft", "RESIDENTIAL", 1780, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-01-20T09:00:00"], "Shri. Rakesh Kulkarni", "+91 98220 14501", "rakesh.kulkarni@email.com", "Baner, Pune — 411045", { documents: makeDocuments("early") }),
 
   // 2. SCRUTINY FAILED — drawing failed, re-upload needed
-  buildApp("app-2", "MC/BP/2026/04/0002", "Tamhane Row Houses", "RESIDENTIAL", 1240, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-18T13:20:00", "2026-01-18T13:22:00"], "Smt. Priya Tamhane", "+91 98220 14502", "priya.tamhane@email.com", "Kothrud, Pune — 411038", {
+  buildApp("app-2", "AP/BP/2026/04/0002", "Tamhane Row Houses", "RESIDENTIAL", 1240, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-18T13:20:00", "2026-01-18T13:22:00"], "Smt. Priya Tamhane", "+91 98220 14502", "priya.tamhane@email.com", "Kothrud, Pune — 411038", {
     drawings: [{ id: "dw-2-1", fileName: "RowHouse_v1.dwg", fileType: "DWG", fileSize: "6.2 MB", version: 1, uploadedAt: "2026-01-18T13:20:00", uploadedBy: "Ar. Vikram Deshpande", status: "SCRUTINY_FAILED", notes: "Failed — front setback non-compliant." }],
     scrutiny: makeScrutinyReport(1, "front_setback", "2026-01-18T13:22:00", "SCR/2026/0001"),
     documents: makeDocuments("early"),
   }),
 
   // 3. SCRUTINY PASSED → DOCUMENT_UPLOAD_PENDING
-  buildApp("app-3", "MC/BP/2026/04/0003", "Shahane Bungalow — G+1", "RESIDENTIAL", 560, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-15T09:00:00", "2026-01-15T09:05:00", "2026-01-15T11:00:00"], "Shri. Deepak Shahane", "+91 98220 14503", "deepak.shahane@email.com", "Kothrud, Pune — 411038", {
+  buildApp("app-3", "AP/BP/2026/04/0003", "Shahane Bungalow — G+1", "RESIDENTIAL", 560, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-15T09:00:00", "2026-01-15T09:05:00", "2026-01-15T11:00:00"], "Shri. Deepak Shahane", "+91 98220 14503", "deepak.shahane@email.com", "Kothrud, Pune — 411038", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-15T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-15T11:00:00", "SCR/2026/0003"),
     documents: makeDocuments("early"),
   }),
 
   // 4. PAYMENT_PENDING — fee generated, awaiting payment
-  buildApp("app-4", "MC/BP/2026/04/0004", "Kulkarni Residence — Redevelopment", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-12T10:00:00", "2026-01-12T10:05:00", "2026-01-13T14:00:00", "2026-01-14T18:00:00"], "Smt. Sunita Kulkarni", "+91 98220 14504", "sunita.kulkarni@email.com", "Kalyani Nagar, Pune — 411006", {
+  buildApp("app-4", "AP/BP/2026/04/0004", "Kulkarni Residence — Redevelopment", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-01-12T10:00:00", "2026-01-12T10:05:00", "2026-01-13T14:00:00", "2026-01-14T18:00:00"], "Smt. Sunita Kulkarni", "+91 98220 14504", "sunita.kulkarni@email.com", "Kalyani Nagar, Pune — 411006", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-12T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-12T11:00:00", "SCR/2026/0004"),
     documents: makeDocuments("verified"),
@@ -516,7 +516,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 5. TPS_TECHNICAL_SCRUTINY — payment done, at TPS
-  buildApp("app-5", "MC/BP/2026/04/0005", "Greenfield Residency — Apartment", "RESIDENTIAL", 1780, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:28:00", "2026-01-05T09:30:00", "2026-01-05T09:31:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T12:00:00", "2026-01-09T16:00:00"], "Shri. Nikhil Patil", "+91 98220 14505", "nikhil.patil@email.com", "Baner, Pune — 411045", {
+  buildApp("app-5", "AP/BP/2026/04/0005", "Greenfield Residency — Apartment", "RESIDENTIAL", 1780, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:28:00", "2026-01-05T09:30:00", "2026-01-05T09:31:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T12:00:00", "2026-01-09T16:00:00"], "Shri. Nikhil Patil", "+91 98220 14505", "nikhil.patil@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:30:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-05T09:31:00", "SCR/2026/0005"),
     documents: makeDocuments("verified"),
@@ -526,7 +526,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 6. TPA_REVIEW — TPS forwarded, at TPA
-  buildApp("app-6", "MC/BP/2026/04/0006", "Crescent Plaza — Commercial", "COMMERCIAL", 6400, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-04T10:00:00", "2026-01-04T10:05:00", "2026-01-04T10:06:00", "2026-01-05T11:00:00", "2026-01-06T09:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Smt. Meena Joshi", "+91 98220 14506", "meena.joshi@email.com", "Aundh, Pune — 411007", {
+  buildApp("app-6", "AP/BP/2026/04/0006", "Crescent Plaza — Commercial", "COMMERCIAL", 6400, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-04T10:00:00", "2026-01-04T10:05:00", "2026-01-04T10:06:00", "2026-01-05T11:00:00", "2026-01-06T09:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Smt. Meena Joshi", "+91 98220 14506", "meena.joshi@email.com", "Aundh, Pune — 411007", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-04T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-04T10:06:00", "SCR/2026/0006"),
     documents: makeDocuments("verified"),
@@ -536,7 +536,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 7. ZAD_ZDD_REVIEW
-  buildApp("app-7", "MC/BP/2026/04/0007", "Hillview Heights — Group Housing", "RESIDENTIAL", 12200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-03T10:00:00", "2026-01-03T10:05:00", "2026-01-03T10:06:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Shri. Ramesh Iyer", "+91 98220 14507", "ramesh.iyer@email.com", "Bavdhan, Pune — 411021", {
+  buildApp("app-7", "AP/BP/2026/04/0007", "Hillview Heights — Group Housing", "RESIDENTIAL", 12200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-03T10:00:00", "2026-01-03T10:05:00", "2026-01-03T10:06:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00"], "Shri. Ramesh Iyer", "+91 98220 14507", "ramesh.iyer@email.com", "Bavdhan, Pune — 411021", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-03T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "ground_coverage", "2026-01-03T10:06:00", "SCR/2026/0007"),
     documents: makeDocuments("verified"),
@@ -546,7 +546,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 8. ZJD_REVIEW
-  buildApp("app-8", "MC/BP/2026/04/0008", "Sunrise Apartments — G+4", "RESIDENTIAL", 3200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-02T09:00:00", "2026-01-02T09:05:00", "2026-01-02T09:06:00", "2026-01-03T11:00:00", "2026-01-04T10:00:00", "2026-01-05T14:00:00", "2026-01-06T09:00:00", "2026-01-07T11:00:00", "2026-01-08T15:00:00"], "Smt. Anjali Deshmukh", "+91 98220 14508", "anjali.deshmukh@email.com", "Wakad, Pune — 411057", {
+  buildApp("app-8", "AP/BP/2026/04/0008", "Sunrise Apartments — G+4", "RESIDENTIAL", 3200, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-02T09:00:00", "2026-01-02T09:05:00", "2026-01-02T09:06:00", "2026-01-03T11:00:00", "2026-01-04T10:00:00", "2026-01-05T14:00:00", "2026-01-06T09:00:00", "2026-01-07T11:00:00", "2026-01-08T15:00:00"], "Smt. Anjali Deshmukh", "+91 98220 14508", "anjali.deshmukh@email.com", "Wakad, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T09:06:00", "SCR/2026/0008"),
     documents: makeDocuments("verified"),
@@ -556,7 +556,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 9. DIRECTOR_DP_REVIEW
-  buildApp("app-9", "MC/BP/2026/04/0009", "Riverside Towers — Commercial", "COMMERCIAL", 8900, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-02T08:00:00", "2026-01-02T08:05:00", "2026-01-02T08:06:00", "2026-01-03T10:00:00", "2026-01-04T09:00:00", "2026-01-05T13:00:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T09:00:00", "2026-01-09T11:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-9", "AP/BP/2026/04/0009", "Riverside Towers — Commercial", "COMMERCIAL", 8900, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-02T08:00:00", "2026-01-02T08:05:00", "2026-01-02T08:06:00", "2026-01-03T10:00:00", "2026-01-04T09:00:00", "2026-01-05T13:00:00", "2026-01-06T10:00:00", "2026-01-07T14:00:00", "2026-01-08T09:00:00", "2026-01-09T11:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-02T08:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-02T08:06:00", "SCR/2026/0009"),
     documents: makeDocuments("verified"),
@@ -566,7 +566,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 10. ADDITIONAL_COMMISSIONER_REVIEW
-  buildApp("app-10", "MC/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
+  buildApp("app-10", "AP/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-01T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-01T09:06:00", "SCR/2026/0010"),
     documents: makeDocuments("verified"),
@@ -576,7 +576,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 11. COMMISSIONER_REVIEW
-  buildApp("app-11", "MC/BP/2026/04/0011", "Metro Business Centre", "COMMERCIAL", 11200, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-28T09:00:00", "2025-12-28T09:05:00", "2025-12-28T09:06:00", "2025-12-29T11:00:00", "2025-12-30T10:00:00", "2026-01-01T14:00:00", "2026-01-02T09:00:00", "2026-01-03T11:00:00", "2026-01-04T15:00:00", "2026-01-05T10:00:00", "2026-01-06T14:00:00"], "Shri. Amit Verma", "+91 98220 14511", "amit.verma@email.com", "Aundh, Pune — 411007", {
+  buildApp("app-11", "AP/BP/2026/04/0011", "Metro Business Centre", "COMMERCIAL", 11200, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-28T09:00:00", "2025-12-28T09:05:00", "2025-12-28T09:06:00", "2025-12-29T11:00:00", "2025-12-30T10:00:00", "2026-01-01T14:00:00", "2026-01-02T09:00:00", "2026-01-03T11:00:00", "2026-01-04T15:00:00", "2026-01-05T10:00:00", "2026-01-06T14:00:00"], "Shri. Amit Verma", "+91 98220 14511", "amit.verma@email.com", "Aundh, Pune — 411007", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-28T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2025-12-28T09:06:00", "SCR/2026/0011"),
     documents: makeDocuments("verified"),
@@ -586,7 +586,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 12. APPROVED
-  buildApp("app-12", "MC/BP/2026/04/0012", "Sai Nagar Row Houses", "RESIDENTIAL", 1800, "APPROVED", "FINAL_DECISION", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-20T09:00:00", "2025-12-20T09:05:00", "2025-12-20T09:06:00", "2025-12-21T11:00:00", "2025-12-22T10:00:00", "2025-12-23T14:00:00", "2025-12-24T09:00:00", "2025-12-25T11:00:00", "2025-12-26T15:00:00", "2025-12-27T10:00:00", "2025-12-28T14:00:00", "2025-12-29T16:30:00"], "Smt. Neha Rao", "+91 98220 14512", "neha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
+  buildApp("app-12", "AP/BP/2026/04/0012", "Sai Nagar Row Houses", "RESIDENTIAL", 1800, "APPROVED", "FINAL_DECISION", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-20T09:00:00", "2025-12-20T09:05:00", "2025-12-20T09:06:00", "2025-12-21T11:00:00", "2025-12-22T10:00:00", "2025-12-23T14:00:00", "2025-12-24T09:00:00", "2025-12-25T11:00:00", "2025-12-26T15:00:00", "2025-12-27T10:00:00", "2025-12-28T14:00:00", "2025-12-29T16:30:00"], "Smt. Neha Rao", "+91 98220 14512", "neha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-20T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2025-12-20T09:06:00", "SCR/2026/0012"),
     documents: makeDocuments("verified"),
@@ -600,7 +600,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 13. SHORTFALL_RAISED — active shortfall at TPA review
-  buildApp("app-13", "MC/BP/2026/04/0013", "Orchid Greens — Group Housing", "RESIDENTIAL", 6800, "SHORTFALL_RAISED", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-11T14:00:00", "2026-01-12T09:00:00", "2026-01-13T15:00:00", "2026-01-14T11:00:00"], "Shri. Suresh Reddy", "+91 98220 14513", "suresh.reddy@email.com", "Bavdhan, Pune — 411021", {
+  buildApp("app-13", "AP/BP/2026/04/0013", "Orchid Greens — Group Housing", "RESIDENTIAL", 6800, "SHORTFALL_RAISED", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-11T14:00:00", "2026-01-12T09:00:00", "2026-01-13T15:00:00", "2026-01-14T11:00:00"], "Shri. Suresh Reddy", "+91 98220 14513", "suresh.reddy@email.com", "Bavdhan, Pune — 411021", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-10T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-10T10:06:00", "SCR/2026/0013"),
     documents: makeDocuments("shortfall"),
@@ -617,14 +617,14 @@ export const SEED_APPLICATIONS: Application[] = [
       dueDate: "2026-01-21",
       status: "OPEN",
       applicationId: "app-13",
-      applicationNo: "MC/BP/2026/04/0013",
+      applicationNo: "AP/BP/2026/04/0013",
       stageRaisedAt: "ZONAL_HEAD_REVIEW",
     }],
     remarks: [{ id: "r-13-1", author: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, text: "Structural certificate requires licensed SE stamp. Shortfall SF/2026/0042 raised.", timestamp: "2026-01-14T11:00:00", type: "INSTRUCTION" }],
   }),
 
   // 14. Shortfall resolved, back in workflow (ZAD_ZDD_REVIEW with resolved shortfall)
-  buildApp("app-14", "MC/BP/2026/04/0014", "Pinnacle Corporate Park", "COMMERCIAL", 7600, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:00:00", "2026-01-05T09:05:00", "2026-01-05T09:06:00", "2026-01-06T11:00:00", "2026-01-07T10:00:00", "2026-01-08T14:00:00", "2026-01-09T09:00:00", "2026-01-12T15:00:00"], "Smt. Pooja Mehta", "+91 98220 14514", "pooja.mehta@email.com", "Wakad, Pune — 411057", {
+  buildApp("app-14", "AP/BP/2026/04/0014", "Pinnacle Corporate Park", "COMMERCIAL", 7600, "ZONAL_HEAD_REVIEW", "ZONAL_HEAD_REVIEW", { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" }, ["2026-01-05T09:00:00", "2026-01-05T09:05:00", "2026-01-05T09:06:00", "2026-01-06T11:00:00", "2026-01-07T10:00:00", "2026-01-08T14:00:00", "2026-01-09T09:00:00", "2026-01-12T15:00:00"], "Smt. Pooja Mehta", "+91 98220 14514", "pooja.mehta@email.com", "Wakad, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-05T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-05T09:06:00", "SCR/2026/0014"),
     documents: makeDocuments("verified"),
@@ -641,7 +641,7 @@ export const SEED_APPLICATIONS: Application[] = [
       dueDate: "2026-01-15",
       status: "RESOLVED",
       applicationId: "app-14",
-      applicationNo: "MC/BP/2026/04/0014",
+      applicationNo: "AP/BP/2026/04/0014",
       stageRaisedAt: "ZONAL_HEAD_REVIEW",
       response: { text: "Renewed Fire NOC uploaded. Valid until 31-Dec-2027.", respondedAt: "2026-01-11T10:00:00", supportingDocument: "Fire_NOC_Renewed_2026.pdf" },
       reviewedBy: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
@@ -657,7 +657,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 15. DIRECTOR_REVIEW
-  buildApp("app-15", "MC/BP/2026/04/0015", "Silver Oaks IT Park", "COMMERCIAL", 24000, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-12T11:00:00", "2026-01-15T09:00:00", "2026-01-18T14:00:00"], "Shri. Alok Singh", "+91 98220 14515", "alok.singh@email.com", "Hinjewadi, Pune — 411057", {
+  buildApp("app-15", "AP/BP/2026/04/0015", "Silver Oaks IT Park", "COMMERCIAL", 24000, "DIRECTOR_REVIEW", "DIRECTOR_REVIEW", { name: "Shri. Suresh Nair", role: "DIRECTOR" }, ["2026-01-10T10:00:00", "2026-01-10T10:05:00", "2026-01-10T10:06:00", "2026-01-12T11:00:00", "2026-01-15T09:00:00", "2026-01-18T14:00:00"], "Shri. Alok Singh", "+91 98220 14515", "alok.singh@email.com", "Hinjewadi, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-10T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-10T10:06:00", "SCR/2026/0015"),
     documents: makeDocuments("verified"),
@@ -667,7 +667,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 16. ADDITIONAL_COMMISSIONER_REVIEW
-  buildApp("app-16", "MC/BP/2026/04/0016", "Lumina Residential Complex", "RESIDENTIAL", 18500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-08T09:00:00", "2026-01-08T09:05:00", "2026-01-08T09:06:00", "2026-01-10T11:00:00", "2026-01-13T10:00:00", "2026-01-16T14:00:00", "2026-01-19T11:00:00"], "Smt. Reena Patel", "+91 98220 14516", "reena.patel@email.com", "Viman Nagar, Pune — 411014", {
+  buildApp("app-16", "AP/BP/2026/04/0016", "Lumina Residential Complex", "RESIDENTIAL", 18500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-08T09:00:00", "2026-01-08T09:05:00", "2026-01-08T09:06:00", "2026-01-10T11:00:00", "2026-01-13T10:00:00", "2026-01-16T14:00:00", "2026-01-19T11:00:00"], "Smt. Reena Patel", "+91 98220 14516", "reena.patel@email.com", "Viman Nagar, Pune — 411014", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-08T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-08T09:06:00", "SCR/2026/0016"),
     documents: makeDocuments("verified"),
@@ -677,7 +677,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 17. COMMISSIONER_REVIEW (using 17A to avoid conflict with the existing app-17)
-  buildApp("app-17a", "MC/BP/2026/04/0017A", "Grand Mall & Multiplex", "COMMERCIAL", 35000, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-15T09:00:00", "2025-12-15T09:05:00", "2025-12-15T09:06:00", "2025-12-17T11:00:00", "2025-12-20T10:00:00", "2025-12-25T14:00:00", "2025-12-30T11:00:00", "2026-01-05T15:00:00"], "Shri. Karan Johar", "+91 98220 14517", "karan.johar@email.com", "Magarpatta, Pune — 411028", {
+  buildApp("app-17a", "AP/BP/2026/04/0017A", "Grand Mall & Multiplex", "COMMERCIAL", 35000, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-15T09:00:00", "2025-12-15T09:05:00", "2025-12-15T09:06:00", "2025-12-17T11:00:00", "2025-12-20T10:00:00", "2025-12-25T14:00:00", "2025-12-30T11:00:00", "2026-01-05T15:00:00"], "Shri. Karan Johar", "+91 98220 14517", "karan.johar@email.com", "Magarpatta, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-15T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2025-12-15T09:06:00", "SCR/2026/0017"),
     documents: makeDocuments("verified"),
@@ -689,7 +689,7 @@ export const SEED_APPLICATIONS: Application[] = [
   // ============================================================
   // ADDITIONAL PENDING PAYMENT APPLICATIONS
   // ============================================================
-  buildApp("app-17", "MC/BP/2026/04/0017", "Riverstone Commercial Complex", "COMMERCIAL", 2850, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-15T10:00:00", "2026-08-15T10:05:00", "2026-08-16T14:00:00", "2026-08-20T18:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-17", "AP/BP/2026/04/0017", "Riverstone Commercial Complex", "COMMERCIAL", 2850, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-15T10:00:00", "2026-08-15T10:05:00", "2026-08-16T14:00:00", "2026-08-20T18:00:00"], "Shri. Prakash More", "+91 98220 14509", "prakash.more@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-15T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-16T14:00:00", "SCR/2026/0017"),
     documents: makeDocuments("verified"),
@@ -697,7 +697,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-17", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-18", "MC/BP/2026/04/0018", "Maple Residency", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-14T09:00:00", "2026-08-14T09:05:00", "2026-08-15T11:00:00", "2026-08-19T18:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
+  buildApp("app-18", "AP/BP/2026/04/0018", "Maple Residency", "RESIDENTIAL", 980, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-14T09:00:00", "2026-08-14T09:05:00", "2026-08-15T11:00:00", "2026-08-19T18:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-14T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-15T11:00:00", "SCR/2026/0018"),
     documents: makeDocuments("verified"),
@@ -705,7 +705,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-18", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-19", "MC/BP/2026/04/0019", "Sai Heights Apartments", "RESIDENTIAL", 2100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-13T10:00:00", "2026-08-13T10:05:00", "2026-08-14T14:00:00", "2026-08-18T18:00:00"], "Shri. Arjun Reddy", "+91 98220 14511", "arjun.reddy@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-19", "AP/BP/2026/04/0019", "Sai Heights Apartments", "RESIDENTIAL", 2100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-13T10:00:00", "2026-08-13T10:05:00", "2026-08-14T14:00:00", "2026-08-18T18:00:00"], "Shri. Arjun Reddy", "+91 98220 14511", "arjun.reddy@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-13T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-14T14:00:00", "SCR/2026/0019"),
     documents: makeDocuments("verified"),
@@ -713,7 +713,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-19", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-20", "MC/BP/2026/04/0020", "Green Valley Villas", "RESIDENTIAL", 3200, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-12T09:00:00", "2026-08-12T09:05:00", "2026-08-13T11:00:00", "2026-08-17T18:00:00"], "Smt. Nisha Menon", "+91 98220 14512", "nisha.menon@email.com", "Kothrud, Pune — 411038", {
+  buildApp("app-20", "AP/BP/2026/04/0020", "Green Valley Villas", "RESIDENTIAL", 3200, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-12T09:00:00", "2026-08-12T09:05:00", "2026-08-13T11:00:00", "2026-08-17T18:00:00"], "Smt. Nisha Menon", "+91 98220 14512", "nisha.menon@email.com", "Kothrud, Pune — 411038", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-12T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-13T11:00:00", "SCR/2026/0020"),
     documents: makeDocuments("verified"),
@@ -721,7 +721,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-20", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-21", "MC/BP/2026/04/0021", "Metro Business Centre", "COMMERCIAL", 3750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-11T10:00:00", "2026-08-11T10:05:00", "2026-08-12T14:00:00", "2026-08-16T18:00:00"], "Shri. Amit Verma", "+91 98220 14513", "amit.verma@email.com", "Aundh, Pune — 411007", {
+  buildApp("app-21", "AP/BP/2026/04/0021", "Metro Business Centre", "COMMERCIAL", 3750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-11T10:00:00", "2026-08-11T10:05:00", "2026-08-12T14:00:00", "2026-08-16T18:00:00"], "Shri. Amit Verma", "+91 98220 14513", "amit.verma@email.com", "Aundh, Pune — 411007", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-11T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-12T14:00:00", "SCR/2026/0021"),
     documents: makeDocuments("verified"),
@@ -729,7 +729,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-21", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-22", "MC/BP/2026/04/0022", "Lakeview Enclave", "RESIDENTIAL", 1280, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-10T09:00:00", "2026-08-10T09:05:00", "2026-08-11T11:00:00", "2026-08-15T18:00:00"], "Smt. Asha Rao", "+91 98220 14514", "asha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
+  buildApp("app-22", "AP/BP/2026/04/0022", "Lakeview Enclave", "RESIDENTIAL", 1280, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-10T09:00:00", "2026-08-10T09:05:00", "2026-08-11T11:00:00", "2026-08-15T18:00:00"], "Smt. Asha Rao", "+91 98220 14514", "asha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-10T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-11T11:00:00", "SCR/2026/0022"),
     documents: makeDocuments("verified"),
@@ -737,7 +737,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-22", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-23", "MC/BP/2026/04/0023", "Pinnacle Industrial Park", "INDUSTRIAL", 4400, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-09T10:00:00", "2026-08-09T10:05:00", "2026-08-10T14:00:00", "2026-08-14T18:00:00"], "Shri. Suresh Reddy", "+91 98220 14515", "suresh.reddy@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-23", "AP/BP/2026/04/0023", "Pinnacle Industrial Park", "INDUSTRIAL", 4400, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-09T10:00:00", "2026-08-09T10:05:00", "2026-08-10T14:00:00", "2026-08-14T18:00:00"], "Shri. Suresh Reddy", "+91 98220 14515", "suresh.reddy@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-09T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-10T14:00:00", "SCR/2026/0023"),
     documents: makeDocuments("verified"),
@@ -745,7 +745,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-23", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-24", "MC/BP/2026/04/0024", "Sunrise Layout Extension", "RESIDENTIAL", 2750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-08T09:00:00", "2026-08-08T09:05:00", "2026-08-09T11:00:00", "2026-08-13T18:00:00"], "Smt. Pooja Deshmukh", "+91 98220 14516", "pooja.deshmukh@email.com", "Wakad, Pune — 411057", {
+  buildApp("app-24", "AP/BP/2026/04/0024", "Sunrise Layout Extension", "RESIDENTIAL", 2750, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-08T09:00:00", "2026-08-08T09:05:00", "2026-08-09T11:00:00", "2026-08-13T18:00:00"], "Smt. Pooja Deshmukh", "+91 98220 14516", "pooja.deshmukh@email.com", "Wakad, Pune — 411057", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-08T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-09T11:00:00", "SCR/2026/0024"),
     documents: makeDocuments("verified"),
@@ -753,7 +753,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-24", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-25", "MC/BP/2026/04/0025", "Heritage Commercial Plaza", "COMMERCIAL", 4100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-07T10:00:00", "2026-08-07T10:05:00", "2026-08-08T14:00:00", "2026-08-12T18:00:00"], "Shri. Vivek Nair", "+91 98220 14517", "vivek.nair@email.com", "Baner, Pune — 411045", {
+  buildApp("app-25", "AP/BP/2026/04/0025", "Heritage Commercial Plaza", "COMMERCIAL", 4100, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-07T10:00:00", "2026-08-07T10:05:00", "2026-08-08T14:00:00", "2026-08-12T18:00:00"], "Shri. Vivek Nair", "+91 98220 14517", "vivek.nair@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-07T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-08T14:00:00", "SCR/2026/0025"),
     documents: makeDocuments("verified"),
@@ -761,7 +761,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-25", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-26", "MC/BP/2026/04/0026", "Silver Oak Residency", "RESIDENTIAL", 1180, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-06T09:00:00", "2026-08-06T09:05:00", "2026-08-07T11:00:00", "2026-08-11T18:00:00"], "Smt. Neha Rao", "+91 98220 14518", "neha.rao@email.com", "Kothrud, Pune — 411038", {
+  buildApp("app-26", "AP/BP/2026/04/0026", "Silver Oak Residency", "RESIDENTIAL", 1180, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-06T09:00:00", "2026-08-06T09:05:00", "2026-08-07T11:00:00", "2026-08-11T18:00:00"], "Smt. Neha Rao", "+91 98220 14518", "neha.rao@email.com", "Kothrud, Pune — 411038", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-06T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-08-07T11:00:00", "SCR/2026/0026"),
     documents: makeDocuments("verified"),
@@ -769,7 +769,7 @@ export const SEED_APPLICATIONS: Application[] = [
     payment: { id: "pay-26", transactionId: "", referenceNo: "", status: "PENDING", amount: 0, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
 
-  buildApp("app-27", "MC/BP/2026/04/0027", "Eastern Trade Hub", "COMMERCIAL", 2950, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-05T10:00:00", "2026-08-05T10:05:00", "2026-08-06T14:00:00", "2026-08-10T18:00:00"], "Shri. Rohit Iyer", "+91 98220 14519", "rohit.iyer@email.com", "Hadapsar, Pune — 411028", {
+  buildApp("app-27", "AP/BP/2026/04/0027", "Eastern Trade Hub", "COMMERCIAL", 2950, "PAYMENT_PENDING", "PAYMENT", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-08-05T10:00:00", "2026-08-05T10:05:00", "2026-08-06T14:00:00", "2026-08-10T18:00:00"], "Shri. Rohit Iyer", "+91 98220 14519", "rohit.iyer@email.com", "Hadapsar, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-08-05T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-08-06T14:00:00", "SCR/2026/0027"),
     documents: makeDocuments("verified"),
@@ -778,39 +778,39 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // Mock apps for specific tabs
-  buildApp("app-28", "MC/BP/2026/04/0028", "Draft Project 1", "RESIDENTIAL", 1200, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-01T10:00:00"], "Smt. Sunitha Varma", "+91 94295 41671", "sunitha@email.com", "Plot 79, Sy. 116/A, Vidya N...", {
+  buildApp("app-28", "D/1168/0028/BP/2026", "Draft Project 1", "RESIDENTIAL", 1200, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-01T10:00:00"], "Smt. Sunitha Varma", "+91 94295 41671", "sunitha@email.com", "Plot 79, Sy. 116/A, Vidya N...", {
     drawings: [],
     documents: [],
   }),
-  buildApp("app-29", "MC/BP/2026/04/0029", "Draft Project 2", "COMMERCIAL", 2500, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-02T11:00:00"], "Shri. Bhavani Bhat", "+91 93668 82517", "bhavani@email.com", "Plot 142, Sy. 275/C, Nalapa...", {
+  buildApp("app-29", "D/1168/0029/BP/2026", "Draft Project 2", "COMMERCIAL", 2500, "DRAFT", "APPLICATION_CREATED", undefined, ["2026-09-02T11:00:00"], "Shri. Bhavani Bhat", "+91 93668 82517", "bhavani@email.com", "Plot 142, Sy. 275/C, Nalapa...", {
     drawings: [],
     documents: [],
   }),
-  buildApp("app-30", "MC/BP/2026/04/0030", "Scrutiny Failed Proj", "COMMERCIAL", 3100, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", undefined, ["2026-09-03T09:00:00", "2026-09-03T09:05:00"], "Shri. Bhavani Acharya", "+91 99491 61748", "bhavania@email.com", "Plot 152, Sy. 83/C, Malkapu...", {
+  buildApp("app-30", "AP/BP/2026/04/0030", "Scrutiny Failed Proj", "COMMERCIAL", 3100, "SCRUTINY_FAILED", "DRAWING_SCRUTINY", undefined, ["2026-09-03T09:00:00", "2026-09-03T09:05:00"], "Shri. Bhavani Acharya", "+91 99491 61748", "bhavania@email.com", "Plot 152, Sy. 83/C, Malkapu...", {
     drawings: makeDrawings([{ v: 1, passed: false, date: "2026-09-03T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "front_setback", "2026-09-03T09:06:00", "SCR/2026/0030"),
     documents: [],
   }),
-  buildApp("app-31", "MC/BP/2026/04/0031", "Docs Pending Proj", "RESIDENTIAL", 1400, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-09-04T10:00:00", "2026-09-04T10:05:00", "2026-09-04T10:10:00"], "Shri. Anil Sastry", "+91 99870 71539", "anils@email.com", "Plot 161, Sy. 52/B2, Sakha...", {
+  buildApp("app-31", "AP/BP/2026/04/0031", "Docs Pending Proj", "RESIDENTIAL", 1400, "DOCUMENT_UPLOAD_PENDING", "DOCUMENTS", { name: "Ar. Vikram Deshpande", role: "LTP" }, ["2026-09-04T10:00:00", "2026-09-04T10:05:00", "2026-09-04T10:10:00"], "Shri. Anil Sastry", "+91 99870 71539", "anils@email.com", "Plot 161, Sy. 52/B2, Sakha...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-04T10:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-09-04T10:06:00", "SCR/2026/0031"),
     documents: makeDocuments("early"),
   }),
-  buildApp("app-32", "MC/BP/2026/04/0032", "Payment Failed Proj", "COMMERCIAL", 4100, "PAYMENT_FAILED", "PAYMENT", undefined, ["2026-09-05T09:00:00"], "Shri. Suresh Singh", "+91 99733 22239", "suresh@email.com", "Plot 120, Sy. 205/A1, Inavol...", {
+  buildApp("app-32", "AP/BP/2026/04/0032", "Payment Failed Proj", "COMMERCIAL", 4100, "PAYMENT_FAILED", "PAYMENT", undefined, ["2026-09-05T09:00:00"], "Shri. Suresh Singh", "+91 99733 22239", "suresh@email.com", "Plot 120, Sy. 205/A1, Inavol...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T09:00:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T09:01:00", "SCR/2026/0032"),
     documents: makeDocuments("verified"),
     fee: makeFee(4100, 8, false, 412000),
     payment: { id: "pay-32", transactionId: "TXN123", referenceNo: "REF123", status: "FAILED", amount: 412000, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
-  buildApp("app-33", "MC/BP/2026/04/0033", "Payment Pending Proj", "COMMERCIAL", 2200, "PAYMENT_PENDING", "PAYMENT", undefined, ["2026-09-05T10:00:00"], "Smt. Indira Murthy", "+91 98296 94910", "indira@email.com", "Plot 219, Sy. 325/B2, Neer...", {
+  buildApp("app-33", "AP/BP/2026/04/0033", "Payment Pending Proj", "COMMERCIAL", 2200, "PAYMENT_PENDING", "PAYMENT", undefined, ["2026-09-05T10:00:00"], "Smt. Indira Murthy", "+91 98296 94910", "indira@email.com", "Plot 219, Sy. 325/B2, Neer...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T10:00:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T10:01:00", "SCR/2026/0033"),
     documents: makeDocuments("verified"),
     fee: makeFee(2200, 8, false, 221000),
     payment: { id: "pay-33", transactionId: "", referenceNo: "", status: "PENDING", amount: 221000, method: "NETBANKING", gateway: "Mock Payment Gateway (Demo)", verified: false, isMock: true },
   }),
-  buildApp("app-34", "MC/BP/2026/04/0034", "Fee Gen Proj", "RESIDENTIAL", 1800, "FEE_GENERATED", "PAYMENT", undefined, ["2026-09-05T11:00:00"], "Shri. Harish Sharma", "+91 93752 94059", "harish@email.com", "Plot 111, Sy. 148/C, Neeruk...", {
+  buildApp("app-34", "AP/BP/2026/04/0034", "Fee Gen Proj", "RESIDENTIAL", 1800, "FEE_GENERATED", "PAYMENT", undefined, ["2026-09-05T11:00:00"], "Shri. Harish Sharma", "+91 93752 94059", "harish@email.com", "Plot 111, Sy. 148/C, Neeruk...", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-09-05T11:00:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-09-05T11:01:00", "SCR/2026/0034"),
     documents: makeDocuments("verified"),
@@ -832,7 +832,7 @@ export const SEED_APPLICATIONS: Application[] = [
     for (const st of statuses) {
       for (let i = 0; i < 12; i++) {
         const id = counter++;
-        const appNo = `MC/BP/2026/04/${String(id).padStart(4, '0')}`;
+        const appNo = `AP/BP/2026/04/${String(id).padStart(4, '0')}`;
         generated.push(buildApp(`app-${id}`, appNo, `Generated Project ${id}`, "RESIDENTIAL", 1500 + i * 100, st.status, st.stage, undefined, ["2026-09-06T10:00:00"], `Generated Applicant ${id}`, "+91 99999 99999", "gen@email.com", "Pune, MH", {
           drawings: st.status !== "DRAFT" ? makeDrawings([{ v: 1, passed: st.status !== "SCRUTINY_FAILED", date: "2026-09-06T10:00:00" }]) : [],
           documents: st.stage === "ZONAL_HEAD_REVIEW" || st.stage === "FINAL_DECISION" ? makeDocuments("verified") : [],
@@ -862,12 +862,12 @@ SEED_APPLICATIONS.forEach((app) => {
 
 // Seed notifications
 export const SEED_NOTIFICATIONS: NotificationRecord[] = [
-  { id: "n-1", type: "APPLICATION_FORWARDED", title: "Application forwarded to ZAD/ZDD", message: "MC/BP/2026/04/0007 has been forwarded to Shri. Ramesh Iyer (ZDD) for review.", timestamp: "2026-01-08T10:00:00", read: false, applicationId: "app-7", applicationNo: "MC/BP/2026/04/0007", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
-  { id: "n-2", type: "SHORTFALL_RAISED", title: "Shortfall raised — action required", message: "Shortfall SF/2026/0042 raised on MC/BP/2026/04/0013. Structural certificate needs SE stamp.", timestamp: "2026-01-14T11:00:00", read: false, applicationId: "app-13", applicationNo: "MC/BP/2026/04/0013", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
-  { id: "n-3", type: "PAYMENT_SUCCESSFUL", title: "Payment successful", message: "Payment of ₹2,67,850 received for MC/BP/2026/04/0005. Approval workflow initiated.", timestamp: "2026-01-08T12:09:00", read: true, applicationId: "app-5", applicationNo: "MC/BP/2026/04/0005", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
-  { id: "n-4", type: "SCRUTINY_FAILED", title: "Scrutiny failed — re-upload required", message: "MC/BP/2026/04/0002 failed scrutiny: front setback non-compliant.", timestamp: "2026-01-18T13:22:00", read: false, applicationId: "app-2", applicationNo: "MC/BP/2026/04/0002", smsSent: true, smsStatus: "FAILED", channel: "IN_APP", recipientRole: "LTP" },
-  { id: "n-5", type: "APPLICATION_APPROVED", title: "Application approved", message: "MC/BP/2026/04/0012 has been approved by the Commissioner.", timestamp: "2025-12-29T16:30:00", read: true, applicationId: "app-12", applicationNo: "MC/BP/2026/04/0012", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
-  { id: "n-6", type: "SHORTFALL_RESOLVED", title: "Shortfall resolved", message: "Shortfall SF/2026/0038 on MC/BP/2026/04/0014 has been resolved.", timestamp: "2026-01-11T14:00:00", read: true, applicationId: "app-14", applicationNo: "MC/BP/2026/04/0014", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-1", type: "APPLICATION_FORWARDED", title: "Application forwarded to ZAD/ZDD", message: "AP/BP/2026/04/0007 has been forwarded to Shri. Ramesh Iyer (ZDD) for review.", timestamp: "2026-01-08T10:00:00", read: false, applicationId: "app-7", applicationNo: "AP/BP/2026/04/0007", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-2", type: "SHORTFALL_RAISED", title: "Shortfall raised — action required", message: "Shortfall SF/2026/0042 raised on AP/BP/2026/04/0013. Structural certificate needs SE stamp.", timestamp: "2026-01-14T11:00:00", read: false, applicationId: "app-13", applicationNo: "AP/BP/2026/04/0013", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-3", type: "PAYMENT_SUCCESSFUL", title: "Payment successful", message: "Payment of ₹2,67,850 received for AP/BP/2026/04/0005. Approval workflow initiated.", timestamp: "2026-01-08T12:09:00", read: true, applicationId: "app-5", applicationNo: "AP/BP/2026/04/0005", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-4", type: "SCRUTINY_FAILED", title: "Scrutiny failed — re-upload required", message: "AP/BP/2026/04/0002 failed scrutiny: front setback non-compliant.", timestamp: "2026-01-18T13:22:00", read: false, applicationId: "app-2", applicationNo: "AP/BP/2026/04/0002", smsSent: true, smsStatus: "FAILED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-5", type: "APPLICATION_APPROVED", title: "Application approved", message: "AP/BP/2026/04/0012 has been approved by the Commissioner.", timestamp: "2025-12-29T16:30:00", read: true, applicationId: "app-12", applicationNo: "AP/BP/2026/04/0012", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
+  { id: "n-6", type: "SHORTFALL_RESOLVED", title: "Shortfall resolved", message: "Shortfall SF/2026/0038 on AP/BP/2026/04/0014 has been resolved.", timestamp: "2026-01-11T14:00:00", read: true, applicationId: "app-14", applicationNo: "AP/BP/2026/04/0014", smsSent: true, smsStatus: "DELIVERED", channel: "IN_APP", recipientRole: "LTP" },
 ];
 
 // Seed SMS logs

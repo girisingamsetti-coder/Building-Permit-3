@@ -230,7 +230,7 @@ function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch { } }
 function genDraftNo(): string {
   const year = new Date().getFullYear();
   const seq = String(Math.floor(Math.random() * 900) + 100);
-  return `Temp/1168/0014/BP/${year}/${seq}`;
+  return `D/1168/0014/BP/${year}/${seq}`;
 }
 
 function Field({ label, required, hint, error, children, className }: {

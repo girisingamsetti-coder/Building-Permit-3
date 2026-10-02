@@ -94,8 +94,8 @@ export interface BimModelData {
 
 export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
   // 1. Greenfield Residency (Draft / Initial upload)
-  "MC/BP/2026/04/0001": {
-    applicationId: "MC/BP/2026/04/0001",
+  "AP/BP/2026/04/0001": {
+    applicationId: "AP/BP/2026/04/0001",
     projectName: "Greenfield Residency — Baner",
     currentVersion: 1,
     status: "BIM_SCRUTINY_FAILED",
@@ -289,8 +289,8 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
   },
 
   // 2. Tamhane Row Houses (Scrutiny Failed)
-  "MC/BP/2026/04/0002": {
-    applicationId: "MC/BP/2026/04/0002",
+  "AP/BP/2026/04/0002": {
+    applicationId: "AP/BP/2026/04/0002",
     projectName: "Tamhane Row Houses",
     currentVersion: 1,
     status: "BIM_SCRUTINY_FAILED",
@@ -380,8 +380,8 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
   },
 
   // 3. Greenfield Residency — Apartment (Resolved in v2, Under Zonal Head Review)
-  "MC/BP/2026/04/0005": {
-    applicationId: "MC/BP/2026/04/0005",
+  "AP/BP/2026/04/0005": {
+    applicationId: "AP/BP/2026/04/0005",
     projectName: "Greenfield Residency — Apartment",
     currentVersion: 2,
     status: "BIM_SCRUTINY_PASSED",
@@ -548,6 +548,8 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
     ],
   },
 };
+
+MOCK_BIM_MODELS["D/1168/0001/BP/2026"] = MOCK_BIM_MODELS["AP/BP/2026/04/0001"];
 
 export function getBimModelByAppId(applicationId: string): BimModelData | null {
   if (MOCK_BIM_MODELS[applicationId]) {

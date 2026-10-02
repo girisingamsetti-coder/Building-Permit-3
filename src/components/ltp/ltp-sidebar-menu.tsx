@@ -473,7 +473,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   // ── Expanded: full accordion menu ───────────────────────────────────────
   return (
-    <div className="flex flex-col w-full text-sm font-sans select-none px-2 pt-2 space-y-1 pb-6">
+    <div className="flex flex-col w-full text-sm font-sans px-2 pt-2 space-y-1 pb-6">
       {modules.map((mod) => {
         const isOpen = openModuleId === mod.id;
         const hasSubmenus = mod.submenus.length > 0;

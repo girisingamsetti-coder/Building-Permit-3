@@ -42,6 +42,7 @@ import {
   CalendarClock,
   FileSearch,
   ListFilter,
+  X,
 } from "lucide-react";
 import type { ApplicationStatus } from "@/types";
 
@@ -162,20 +163,29 @@ export function OfficerApplications() {
       </div>
 
       <SectionCard noPadding>
-        {/* Filter bar */}
+        {/* Filter bar (Pillow-shaped) */}
         <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by application no, project, applicant or LTP…"
-              className="h-9 pl-9"
+              className="h-9 pl-9.5 pr-8 rounded-full border-muted-foreground/30"
             />
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X className="size-3.5" />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="h-9 w-[160px]">
+              <SelectTrigger className="h-9 w-[160px] rounded-full border-muted-foreground/30">
                 <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
                 <SelectValue />
               </SelectTrigger>
@@ -186,7 +196,7 @@ export function OfficerApplications() {
               </SelectContent>
             </Select>
             <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger className="h-9 w-[150px]">
+              <SelectTrigger className="h-9 w-[150px] rounded-full border-muted-foreground/30">
                 <ListFilter className="mr-1.5 size-3.5 text-muted-foreground" />
                 <SelectValue />
               </SelectTrigger>

@@ -245,25 +245,25 @@ export function PmApplications() {
       </div>
 
       <SectionCard noPadding>
-        {/* ===== Filter toolbar ===== */}
+        {/* ===== Filter toolbar (Pillow-shaped) ===== */}
         <div className="flex flex-col gap-3 border-b border-border p-3 lg:flex-row lg:items-center">
           {/* Search */}
           <div className="relative flex-1">
             <Search
-              className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by application no, project, applicant, officer…"
-              className="h-9 pl-9"
+              className="h-9 pl-9.5 pr-8 rounded-full border-muted-foreground/30 focus-visible:ring-primary/20"
               aria-label="Search applications"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label="Clear search"
               >
                 <X className="size-3.5" />
@@ -274,7 +274,7 @@ export function PmApplications() {
           {/* Status filter */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[200px]"
+              className="h-9 w-full lg:w-[200px] rounded-full border-muted-foreground/30"
               aria-label="Filter by status"
             >
               <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
@@ -292,7 +292,7 @@ export function PmApplications() {
           {/* Stage filter */}
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[200px]"
+              className="h-9 w-full lg:w-[200px] rounded-full border-muted-foreground/30"
               aria-label="Filter by workflow stage"
             >
               <SlidersHorizontal className="mr-1.5 size-3.5 text-muted-foreground" />
@@ -310,7 +310,7 @@ export function PmApplications() {
           {/* SLA filter */}
           <Select value={slaFilter} onValueChange={setSlaFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[180px]"
+              className="h-9 w-full lg:w-[180px] rounded-full border-muted-foreground/30"
               aria-label="Filter by SLA status"
             >
               <Clock className="mr-1.5 size-3.5 text-muted-foreground" />
@@ -337,10 +337,10 @@ export function PmApplications() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-xs"
+                className="h-6 px-2.5 text-xs rounded-full bg-red-50 text-destructive hover:bg-red-100 border border-destructive/20"
                 onClick={handleClearFilters}
               >
-                <X className="size-3" /> Clear filters
+                <X className="size-3 mr-1" /> Clear filters
               </Button>
             )}
           </div>

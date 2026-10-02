@@ -257,20 +257,20 @@ export function LtpApplications() {
       <SectionCard noPadding>
         {/* ===== Filter / sort / view toolbar ===== */}
         <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center">
-          {/* Search */}
+          {/* Search (Pillow-shaped) */}
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by application no, project, applicant, ward, zone…"
-              className="h-9 pl-9"
+              className="h-9 pl-9.5 pr-8 rounded-full border-muted-foreground/30 focus-visible:ring-[#7A1316]/20 focus-visible:border-[#7A1316]"
               aria-label="Search applications"
             />
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label="Clear search"
               >
                 <X className="size-3.5" />
@@ -278,9 +278,9 @@ export function LtpApplications() {
             )}
           </div>
 
-          {/* Status filter */}
+          {/* Status filter (Pillow-shaped) */}
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="h-9 w-full sm:w-[180px]" aria-label="Filter by status">
+            <SelectTrigger className="h-9 w-full sm:w-[180px] rounded-full border-muted-foreground/30" aria-label="Filter by status">
               <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
@@ -293,12 +293,12 @@ export function LtpApplications() {
             </SelectContent>
           </Select>
 
-          {/* Sort */}
+          {/* Sort (Pillow-shaped) */}
           <Select
             value={`${sortKey}-${sortDir}`}
             onValueChange={handleSortChange}
           >
-            <SelectTrigger className="h-9 w-full sm:w-[230px]" aria-label="Sort applications">
+            <SelectTrigger className="h-9 w-full sm:w-[230px] rounded-full border-muted-foreground/30" aria-label="Sort applications">
               <ChevronsUpDown className="mr-1.5 size-3.5 text-muted-foreground" />
               <SelectValue />
             </SelectTrigger>
@@ -311,12 +311,12 @@ export function LtpApplications() {
             </SelectContent>
           </Select>
 
-          {/* View toggle */}
-          <div className="flex items-center rounded-md border border-border" role="group" aria-label="View toggle">
+          {/* View toggle (Pillow-shaped) */}
+          <div className="flex items-center rounded-full border border-border p-0.5 bg-muted/40" role="group" aria-label="View toggle">
             <Button
               variant={view === "table" ? "secondary" : "ghost"}
               size="icon"
-              className="h-9 w-9 rounded-r-none"
+              className="h-8 w-8 rounded-full"
               onClick={() => setView("table")}
               aria-label="List view"
               aria-pressed={view === "table"}
@@ -326,7 +326,7 @@ export function LtpApplications() {
             <Button
               variant={view === "grid" ? "secondary" : "ghost"}
               size="icon"
-              className="h-9 w-9 rounded-l-none"
+              className="h-8 w-8 rounded-full"
               onClick={() => setView("grid")}
               aria-label="Grid view"
               aria-pressed={view === "grid"}

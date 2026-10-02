@@ -73,7 +73,7 @@ export interface DetailedScrutinyReportProps {
 }
 
 export function DetailedScrutinyReport({
-  proposalNo = "Temp/1168/0801/LPS/2026",
+  proposalNo = "D/1168/0801/LPS/2026",
   projectTitle = "VADDURI VEERAIAH GARU (1)",
   zone = "R3-Medium to High density zone",
   typology = "AP1-Apartment",

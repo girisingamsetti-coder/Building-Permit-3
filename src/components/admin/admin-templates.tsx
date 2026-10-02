@@ -117,7 +117,7 @@ const SMS_TEMPLATE_EVENT_MAP: Record<string, NotificationType> = {
 // Sample data for rendering template previews (mock — no real data is sent).
 const SAMPLE_DATA: Record<string, string> = {
   "{name}": "Ar. Vikram Deshpande",
-  "{appNo}": "MC/BP/2026/04/0184",
+  "{appNo}": "AP/BP/2026/04/0184",
   "{amount}": "2,67,850",
   "{receiptNo}": "RCP/2026/04/00921",
   "{reportNo}": "SCR/2026/4827",

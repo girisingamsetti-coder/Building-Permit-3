@@ -455,7 +455,7 @@ export const useAppStore = create<AppState>()(
         const user = get().user!;
         const id = genId("app");
         const seq = String(get().applications.length + 1).padStart(4, "0");
-        const applicationNo = `MC/BP/2026/04/${seq}`;
+        const applicationNo = `AP/BP/2026/04/${seq}`;
         const now = nowISO();
 
         // Build drawings array if a drawing was uploaded in the wizard

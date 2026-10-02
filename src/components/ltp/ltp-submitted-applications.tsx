@@ -15,6 +15,7 @@ import {
   Printer,
   X,
   Download,
+  Search,
 } from "lucide-react";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
@@ -241,7 +242,7 @@ export function LtpSubmittedApplications({
     setIsSelectingScheme(false);
     const now = new Date();
     const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
-    const newDraftNo = `Temp/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+    const newDraftNo = `D/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
     const newLpsStatus: "LPS" | "Non LPS" = scheme === "LPS Layout" ? "LPS" : "Non LPS";
     setSelectedSubmission({
       id: `sub-new-${Date.now()}`,
@@ -352,13 +353,25 @@ export function LtpSubmittedApplications({
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── TOP CONTROLS: Search & Filters on Left | Create New Dropdown on Right (like Drafts) ── */}
-      <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-2.5 shrink-0">
-        {/* Left: Search Bar & Filters */}
-        <div className="flex flex-wrap items-center gap-2 flex-1">
-          {/* Search Input Box */}
-          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded px-2.5 py-1.5 w-full sm:w-64 shadow-2xs focus-within:border-[#7A1316] transition-colors">
-            <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+      {/* ── TOP CONTROLS: New Application on Left | Search & Filters on Right ── */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 shrink-0">
+        {/* Left: Create New / New Application Button (Pillow-shaped Maroon & Beige Theme) */}
+        <div className="relative shrink-0 self-start lg:self-auto">
+          <button
+            id="sub-new-app-btn"
+            onClick={() => setIsSelectingScheme(true)}
+            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-4 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
+          >
+            <Plus className="size-3.5" />
+            <span>New Application</span>
+          </button>
+        </div>
+
+        {/* Right: Search Bar & Filters */}
+        <div className="flex flex-wrap items-center justify-start lg:justify-end gap-2.5 flex-1">
+          {/* Search Input Box (Pillow-shaped) */}
+          <div className="flex items-center gap-2.5 border border-[#DCD5C8] bg-white rounded-full px-4 py-2 w-full sm:w-72 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
               value={searchKeywords}
@@ -366,16 +379,26 @@ export function LtpSubmittedApplications({
               placeholder="Enter keywords to search for"
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
+            {searchKeywords && (
+              <button
+                type="button"
+                onClick={() => setSearchKeywords("")}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="size-3" />
+              </button>
+            )}
           </div>
 
-          {/* Filter: Type (LPS or Non LPS) */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          {/* Filter: Type (LPS or Non LPS - Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               aria-label="Filter by Type"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
             >
               <option value="ALL">All Types</option>
               <option value="LPS">LPS</option>
@@ -383,14 +406,14 @@ export function LtpSubmittedApplications({
             </select>
           </div>
 
-          {/* Filter: Status */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          {/* Filter: Status (Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Status:</span>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               aria-label="Filter by Status"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
             >
               <option value="ALL">All Status</option>
               <option value="In Review">In Review</option>
@@ -398,14 +421,14 @@ export function LtpSubmittedApplications({
             </select>
           </div>
 
-          {/* Filter: Owner */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded px-2.5 py-1.5 shadow-2xs focus-within:border-[#7A1316] transition-colors">
+          {/* Filter: Owner (Pillow-shaped) */}
+          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
             <select
               value={filterOwner}
               onChange={(e) => setFilterOwner(e.target.value)}
               aria-label="Filter by Owner"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
             >
               <option value="ALL">All Owners</option>
               <option value="Vadduri Veeraiah">Vadduri Veeraiah</option>
@@ -416,7 +439,7 @@ export function LtpSubmittedApplications({
             </select>
           </div>
 
-          {/* Clear Filters Button (shown when any filter is active) */}
+          {/* Clear Filters Button (Pillow-shaped) */}
           {(searchKeywords || filterType !== "ALL" || filterStatus !== "ALL" || filterOwner !== "ALL") && (
             <button
               onClick={() => {
@@ -425,23 +448,12 @@ export function LtpSubmittedApplications({
                 setFilterStatus("ALL");
                 setFilterOwner("ALL");
               }}
-              className="text-xs font-semibold text-[#7A1316] hover:text-[#8F161A] hover:underline px-2 py-1 cursor-pointer transition-colors"
+              className="rounded-full px-3.5 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
             >
-              Clear filters
+              <X className="size-3" />
+              <span>Clear filters</span>
             </button>
           )}
-        </div>
-
-        {/* Create New / New Application Button (Maroon & Beige Theme) */}
-        <div className="relative shrink-0 self-start xl:self-auto">
-          <button
-            id="sub-new-app-btn"
-            onClick={() => setIsSelectingScheme(true)}
-            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-3.5 rounded flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-          >
-            <Plus className="size-3.5" />
-            <span>New Application</span>
-          </button>
         </div>
       </div>
 
@@ -598,7 +610,7 @@ export function LtpSubmittedApplications({
         </div>
 
         {/* ── TABLE FOOTER: Pagination | Refresh & Excel | Total Proposal(s) (matches Drafts) ── */}
-        <div className="bg-[#FAF4EB] border-t border-[#DCD5C8] px-3 py-2 flex items-center justify-between text-xs text-slate-700 shrink-0 select-none">
+        <div className="bg-[#FAF4EB] border-t border-[#DCD5C8] px-3 py-2 flex items-center justify-between text-xs text-slate-700 shrink-0">
           {/* Left: Pagination & Controls */}
           <div className="flex items-center gap-2">
             <span className="font-mono text-slate-700 text-xs">[1]</span>

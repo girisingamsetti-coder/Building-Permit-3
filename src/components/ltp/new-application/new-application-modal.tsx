@@ -208,7 +208,7 @@ export function NewApplicationModal({
     });
     // Get the app number from the store
     const app = useAppStore.getState().applications.find((a) => a.id === id);
-    setSubmittedAppNo(app?.applicationNo ?? "MC/BP/2026/04/XXXX");
+    setSubmittedAppNo(app?.applicationNo ?? "AP/BP/2026/04/XXXX");
     setSubmittedAppId(id);
     setSubmitted(true);
     toast({
