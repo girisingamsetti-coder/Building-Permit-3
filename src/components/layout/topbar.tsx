@@ -529,13 +529,14 @@ export function Topbar() {
   const { toast } = useToast();
   const unread = notifications.filter((n) => !n.read).length;
 
+  const viewStr = view as string;
   const isDashboard =
     ltpActiveMenu === "dashboard" ||
-    view === "ltp-dashboard" ||
-    view === "dashboard" ||
-    view === "officer-dashboard" ||
-    view === "admin-dashboard" ||
-    (!ltpActiveMenu && (view === "ltp-applications" || view === "applications"));
+    viewStr === "ltp-dashboard" ||
+    viewStr === "dashboard" ||
+    viewStr === "officer-dashboard" ||
+    viewStr === "admin-dashboard" ||
+    (!ltpActiveMenu && (viewStr === "ltp-applications" || viewStr === "applications"));
 
   const menuHeader = getMenuHeader(ltpActiveMenu, view, portal);
 

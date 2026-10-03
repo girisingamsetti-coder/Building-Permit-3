@@ -157,7 +157,7 @@ export function LtpDashboard() {
             {(user?.name ?? "LTP").split(" ").map((p) => p[0]).slice(0, 2).join("")}
           </div>
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Welcome back, {user?.name?.split(" ").slice(-1)[0] === "Deshpande" ? "Ar. Deshpande" : user?.name}</h1>
+            <h1 className="text-lg font-semibold tracking-tight">Welcome back, {user?.name || "Venu Kotte"}</h1>
             <p className="text-xs text-muted-foreground">LTP (Applicant) · {today}</p>
           </div>
         </div>

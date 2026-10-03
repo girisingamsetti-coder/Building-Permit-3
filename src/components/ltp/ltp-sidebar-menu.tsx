@@ -83,6 +83,13 @@ const LTP_MODULES: LtpModuleDef[] = [
     ],
   },
   {
+    id: "change-of-ltp",
+    label: "LTP Change",
+    iconType: "ltp-change",
+    directMenuId: "change-ltp",
+    submenus: [],
+  },
+  {
     id: "reports",
     label: "Reports",
     iconType: "reports",
@@ -93,13 +100,6 @@ const LTP_MODULES: LtpModuleDef[] = [
       { id: "reports-scrutiny", label: "Scrutiny & Shortfalls" },
       { id: "reports-mis", label: "MIS Registry & Export" },
     ],
-  },
-  {
-    id: "change-of-ltp",
-    label: "LTP Change",
-    iconType: "ltp-change",
-    directMenuId: "change-ltp",
-    submenus: [],
   },
 ];
 

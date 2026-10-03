@@ -362,7 +362,6 @@ export function LtpSubmittedApplications({
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder="Search BA no., owner, status..."
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -659,7 +658,7 @@ export function LtpSubmittedApplications({
                   <h3 className="font-black text-sm uppercase tracking-wide">
                     {reportModalTab === "scrutiny"
                       ? "Detailed Scrutiny Report"
-                      : "Submitted Applications Summary Report"}
+                      : "Submissions Summary Report"}
                   </h3>
                   <p className="text-[10px] text-amber-200/90 font-mono">
                     APCRDA Building Permission Management System
@@ -739,7 +738,7 @@ export function LtpSubmittedApplications({
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-500 font-bold uppercase block">Report Scope</span>
-                      <span className="font-bold text-[#7A1316]">Submitted Applications</span>
+                      <span className="font-bold text-[#7A1316]">Submissions</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-slate-500 font-bold uppercase block">Total Records</span>

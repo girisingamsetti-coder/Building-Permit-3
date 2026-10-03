@@ -276,7 +276,7 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
       {
         version: 1,
         uploadedAt: "2026-01-20T09:15:00",
-        uploadedBy: "Ar. Vikram Deshpande",
+        uploadedBy: "Venu Kotte",
         fileName: "Greenfield_Residency_v1.ifc",
         fileSizeBytes: 25794500,
         schemaVersion: "IFC4",
@@ -367,7 +367,7 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
       {
         version: 1,
         uploadedAt: "2026-01-18T13:20:00",
-        uploadedBy: "Ar. Vikram Deshpande",
+        uploadedBy: "Venu Kotte",
         fileName: "RowHouse_v1.ifc",
         fileSizeBytes: 19084000,
         schemaVersion: "IFC2X3",
@@ -523,7 +523,7 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
       {
         version: 1,
         uploadedAt: "2026-01-05T09:30:00",
-        uploadedBy: "Ar. Vikram Deshpande",
+        uploadedBy: "Venu Kotte",
         fileName: "Greenfield_Apartment_v1.ifc",
         fileSizeBytes: 24680000,
         schemaVersion: "IFC4",
@@ -535,7 +535,7 @@ export const MOCK_BIM_MODELS: Record<string, BimModelData> = {
       {
         version: 2,
         uploadedAt: "2026-01-08T12:00:00",
-        uploadedBy: "Ar. Vikram Deshpande",
+        uploadedBy: "Venu Kotte",
         fileName: "Greenfield_Apartment_v2_Compliant.ifc",
         fileSizeBytes: 25210000,
         schemaVersion: "IFC4",

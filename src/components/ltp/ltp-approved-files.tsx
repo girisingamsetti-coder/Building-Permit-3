@@ -127,15 +127,16 @@ export function LtpApprovedFiles() {
 
   // Combine store applications with default authentic APCRDA approved files
   const approvedItems: ApprovedFileItem[] = React.useMemo(() => {
-    const storeApproved = applications
+    const storeApproved: ApprovedFileItem[] = applications
       .filter((a) => a.status === "APPROVED")
       .map((a, idx) => {
         const d = new Date(a.lastUpdated || a.submissionDate || Date.now());
         const dateStr = `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+        const pType = a.project?.type as string | undefined;
         const typeLabel =
-          a.project?.type === "LAYOUT_APPROVAL" || a.project?.type === "DEVELOPMENT_PERMIT"
+          pType === "LAYOUT_APPROVAL" || pType === "DEVELOPMENT_PERMIT"
             ? "Group Development"
-            : a.project?.type === "COMMERCIAL"
+            : pType === "COMMERCIAL"
             ? "Commercial"
             : "Building Permission";
 
@@ -152,16 +153,16 @@ export function LtpApprovedFiles() {
           permissionType: typeLabel,
           applicantName: a.applicant?.name || "Sanctioned Applicant",
           sanctionDate: dateStr,
-          lpsType: isLps ? "LPS" : "Non LPS",
-          village: a.project?.village || "Borupalem",
-          district: a.project?.district || "Guntur",
+          lpsType: (isLps ? "LPS" : "Non LPS") as "LPS" | "Non LPS",
+          village: (a.project as any)?.village || "Borupalem",
+          district: (a.project as any)?.district || "Guntur",
           totalArea: a.project?.plotArea ? `${a.project.plotArea} Sq.m` : "500.00 Sq.m",
           appId: a.id,
         };
       });
 
     const existingBaNos = new Set(storeApproved.map((s) => s.baNo));
-    const merged = [...storeApproved];
+    const merged: ApprovedFileItem[] = [...storeApproved];
 
     for (const def of DEFAULT_APPROVED_FILES) {
       if (!existingBaNos.has(def.baNo)) {

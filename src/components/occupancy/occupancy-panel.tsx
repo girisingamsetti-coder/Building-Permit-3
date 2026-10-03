@@ -942,7 +942,7 @@ function ScheduleDialog({
   onSuccess: (up: OccupancyApplicationRecord) => void;
 }) {
   const [date, setDate] = React.useState("2026-03-28");
-  const [inspector, setInspector] = React.useState("Shri. Suresh Kulkarni — Town Planning Assistant");
+  const [inspector, setInspector] = React.useState("Soumith — Town Planning Assistant");
   const [remarks, setRemarks] = React.useState("Final on-site measurement inspection scheduled.");
 
   const handleSubmit = () => {
@@ -954,7 +954,7 @@ function ScheduleDialog({
         scheduledFor: new Date(date).toISOString(),
         inspectorName: inspector.split("—")[0].trim(),
         inspectorDesignation: inspector.split("—")[1]?.trim() || "TPA",
-        scheduledByName: "Shri. Suresh Kulkarni",
+        scheduledByName: "Soumith",
         inspectedAt: null,
         siteCondition: "Awaiting inspection",
         actualConstruction: "Pending field measurement",
@@ -1013,7 +1013,7 @@ function ScheduleDialog({
               value={inspector}
               onChange={(e) => setInspector(e.target.value)}
             >
-              <option value="Shri. Suresh Kulkarni — Town Planning Assistant">Shri. Suresh Kulkarni (Town Planning Assistant)</option>
+              <option value="Soumith — Town Planning Assistant">Soumith (Town Planning Assistant)</option>
               <option value="Smt. Anita Sharma — Town Planning Assistant">Smt. Anita Sharma (Town Planning Assistant)</option>
               <option value="Shri. Rahul Gupta — Town Planning Assistant">Shri. Rahul Gupta (Town Planning Assistant)</option>
             </select>
@@ -1079,7 +1079,7 @@ function InspectDialog({
             action: "INSPECTED",
             fromStatus: prev.status,
             toStatus: nextStatus,
-            actorName: "Shri. Suresh Kulkarni",
+            actorName: "Soumith",
             actorRoleKey: "TPA",
             stageName: "Field Inspection",
             remarks: `Inspection recorded with finding: ${recommendation}. ${remarks}`,

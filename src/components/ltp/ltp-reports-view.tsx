@@ -85,7 +85,7 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
           (app.applicationNo || "").toLowerCase().includes(q) ||
           (app.project?.name || "").toLowerCase().includes(q) ||
           (app.applicant?.name || "").toLowerCase().includes(q) ||
-          (app.payment?.challanNo || "").toLowerCase().includes(q) ||
+          (app.payment?.receiptNo || app.payment?.referenceNo || "").toLowerCase().includes(q) ||
           (app.scrutinyReport?.reportNo || "").toLowerCase().includes(q);
         if (!matches) return false;
       }
@@ -151,10 +151,10 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
         `"${a.applicationNo}"`,
         `"${a.project?.name || "N/A"}"`,
         `"${a.applicant?.name || "N/A"}"`,
-        `"${a.payment?.challanNo || "CHL/2026/0" + (100 + i)}"`,
+        `"${a.payment?.receiptNo || a.payment?.referenceNo || "CHL/2026/0" + (100 + i)}"`,
         a.payment?.amount || 24500,
         `"${a.payment?.status || (a.status === "APPROVED" ? "SUCCESS" : "PENDING")}"`,
-        a.payment?.paidAt ? new Date(a.payment.paidAt).toLocaleDateString("en-IN") : "09/08/2026",
+        a.payment?.completedAt ? new Date(a.payment.completedAt).toLocaleDateString("en-IN") : "09/08/2026",
       ]);
     } else if (activeTab === "reports-scrutiny") {
       filename = `APCRDA_Scrutiny_Report_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -563,7 +563,7 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
               </thead>
               <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
                 {filteredApps.map((app, idx) => {
-                  const challanNo = app.payment?.challanNo || `CHL/1168/2026/${String(idx + 101).padStart(4, "0")}`;
+                  const challanNo = app.payment?.receiptNo || app.payment?.referenceNo || `CHL/1168/2026/${String(idx + 101).padStart(4, "0")}`;
                   const isPaid = app.status === "APPROVED" || app.payment?.status === "SUCCESS";
                   const amount = app.payment?.amount || (idx % 2 === 0 ? 18500 : 36200);
                   return (
@@ -589,7 +589,7 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                         </span>
                       </td>
                       <td className="px-3.5 py-3 text-slate-600 font-mono text-[11px]">
-                        {new Date(app.payment?.paidAt || app.submissionDate || Date.now()).toLocaleDateString("en-IN")}
+                        {new Date(app.payment?.completedAt || app.payment?.initiatedAt || app.submissionDate || Date.now()).toLocaleDateString("en-IN")}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button

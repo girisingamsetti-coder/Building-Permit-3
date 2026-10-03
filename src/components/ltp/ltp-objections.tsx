@@ -56,7 +56,7 @@ const DEFAULT_OBJECTIONS: ObjectionItem[] = [
     caseType: "Fresh",
     shortfallReason:
       "Front setback shortfall of 1.2m against Master Plan 12m road requirement. Revised architectural drawing required.",
-    raisedBy: "TPS Technical Scrutiny (Shri. Suresh Kulkarni)",
+    raisedBy: "TPS Technical Scrutiny (Soumith)",
     hearingDate: "05/10/2026",
   },
   {

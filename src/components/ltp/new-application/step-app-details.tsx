@@ -103,7 +103,7 @@ export function ApplicationDetailsStep({
       {/* Applicant fields — strict 2-column grid */}
       <div className="grid grid-cols-2 gap-x-6 gap-y-4">
         <Field label="Applicant Name" error={errors.applicantName}>
-          <Input className="h-11 w-full" value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Ar. Vikram Deshpande" />
+          <Input className="h-11 w-full" value={data.applicantName} onChange={(e) => update("applicantName", e.target.value)} placeholder="e.g. Venu Kotte" />
         </Field>
         <Field label="Mobile Number" error={errors.applicantContact}>
           <Input className="h-11 w-full" value={data.applicantContact} onChange={(e) => update("applicantContact", e.target.value)} placeholder="+91 98XXX XXXXX" />
