@@ -112,6 +112,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("ALL");
 
+  // ── Verified Tab Filters ──
+  const [verifiedSearch, setVerifiedSearch] = React.useState("");
+  const [verifiedStageFilter, setVerifiedStageFilter] = React.useState("ALL");
+  const [verifiedTypeFilter, setVerifiedTypeFilter] = React.useState("ALL");
+
   // ── Shortfalls data & state ──
   const storeShortfalls = useAllShortfalls();
   const [selectedShortfall, setSelectedShortfall] = React.useState<(Shortfall & { application?: Application }) | null>(null);
@@ -375,21 +380,102 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
         {activeTab === "verified" && (
           <div className="space-y-4">
             {/* Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#EADBCE] shadow-2xs">
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder=""
-                  className="h-9 pl-9 text-xs border-[#EADBCE] focus-visible:ring-[#801824]"
-                />
+            <div className="flex flex-col gap-3 bg-white p-3.5 rounded-xl border border-[#EADBCE] shadow-2xs">
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                {/* Search */}
+                <div className="relative w-full sm:flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                  <Input
+                    value={verifiedSearch}
+                    onChange={(e) => setVerifiedSearch(e.target.value)}
+                    placeholder="Search by application no., project or applicant…"
+                    className="h-9 pl-9 text-xs border-[#EADBCE] focus-visible:ring-[#801824]"
+                  />
+                  {verifiedSearch && (
+                    <button
+                      onClick={() => setVerifiedSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Stage Filter */}
+                <Select value={verifiedStageFilter} onValueChange={setVerifiedStageFilter}>
+                  <SelectTrigger className="h-9 text-xs w-full sm:w-44 border-[#EADBCE] shrink-0">
+                    <Filter className="size-3.5 mr-1.5 text-slate-400" />
+                    <SelectValue placeholder="All Stages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All Stages</SelectItem>
+                    <SelectItem value="DOCUMENT_VERIFICATION">Document Verification</SelectItem>
+                    <SelectItem value="FEE_GENERATED">Fee Generated</SelectItem>
+                    <SelectItem value="PAYMENT_PENDING">Payment Pending</SelectItem>
+                    <SelectItem value="PAYMENT_SUCCESS">Payment Success</SelectItem>
+                    <SelectItem value="ZONAL_HEAD_REVIEW">Zonal Head Review</SelectItem>
+                    <SelectItem value="DIRECTOR_REVIEW">Director Review</SelectItem>
+                    <SelectItem value="APPROVED">Approved</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Property Type Filter */}
+                <Select value={verifiedTypeFilter} onValueChange={setVerifiedTypeFilter}>
+                  <SelectTrigger className="h-9 text-xs w-full sm:w-44 border-[#EADBCE] shrink-0">
+                    <Layers className="size-3.5 mr-1.5 text-slate-400" />
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All Property Types</SelectItem>
+                    <SelectItem value="Residential">Residential</SelectItem>
+                    <SelectItem value="Commercial">Commercial</SelectItem>
+                    <SelectItem value="Industrial">Industrial</SelectItem>
+                    <SelectItem value="Mixed Use">Mixed Use</SelectItem>
+                    <SelectItem value="Institutional">Institutional</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Clear filters */}
+                {(verifiedSearch || verifiedStageFilter !== "ALL" || verifiedTypeFilter !== "ALL") && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setVerifiedSearch("");
+                      setVerifiedStageFilter("ALL");
+                      setVerifiedTypeFilter("ALL");
+                    }}
+                    className="h-9 text-xs text-slate-500 hover:text-[#801824] shrink-0 gap-1"
+                  >
+                    <X className="size-3" /> Clear
+                  </Button>
+                )}
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs font-medium text-slate-500">
-                  Showing {verifiedApps.length} verified applications
-                </span>
-              </div>
+
+              {/* Active filter chips */}
+              {(verifiedSearch || verifiedStageFilter !== "ALL" || verifiedTypeFilter !== "ALL") && (
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  <span className="text-[11px] text-slate-400 font-medium">Active filters:</span>
+                  {verifiedSearch && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#801824]/10 text-[#801824] text-[11px] font-medium">
+                      Search: "{verifiedSearch}"
+                      <button onClick={() => setVerifiedSearch("")} className="hover:text-[#941C2B]"><X className="size-2.5" /></button>
+                    </span>
+                  )}
+                  {verifiedStageFilter !== "ALL" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#801824]/10 text-[#801824] text-[11px] font-medium">
+                      Stage: {verifiedStageFilter.replace(/_/g, " ")}
+                      <button onClick={() => setVerifiedStageFilter("ALL")} className="hover:text-[#941C2B]"><X className="size-2.5" /></button>
+                    </span>
+                  )}
+                  {verifiedTypeFilter !== "ALL" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#801824]/10 text-[#801824] text-[11px] font-medium">
+                      Type: {verifiedTypeFilter}
+                      <button onClick={() => setVerifiedTypeFilter("ALL")} className="hover:text-[#941C2B]"><X className="size-2.5" /></button>
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Table */}
@@ -408,15 +494,35 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {verifiedApps.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="text-center py-12 text-slate-400">
-                          <FolderOpen className="size-8 mx-auto mb-2 text-slate-300" />
-                          No verified files found matching criteria.
-                        </td>
-                      </tr>
-                    ) : (
-                      verifiedApps.map((app) => (
+                    {(() => {
+                      const filtered = verifiedApps.filter((app) => {
+                        const q = verifiedSearch.toLowerCase();
+                        const matchSearch =
+                          !verifiedSearch ||
+                          app.applicationNo.toLowerCase().includes(q) ||
+                          app.project.name.toLowerCase().includes(q) ||
+                          app.applicant.name.toLowerCase().includes(q);
+                        const matchStage =
+                          verifiedStageFilter === "ALL" || app.status === verifiedStageFilter;
+                        const matchType =
+                          verifiedTypeFilter === "ALL" ||
+                          (app.project.propertyType ?? "").toLowerCase() === verifiedTypeFilter.toLowerCase();
+                        return matchSearch && matchStage && matchType;
+                      });
+
+                      if (filtered.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={7} className="text-center py-12 text-slate-400">
+                              <FolderOpen className="size-8 mx-auto mb-2 text-slate-300" />
+                              <p className="font-medium text-slate-500">No verified files match your filters.</p>
+                              <p className="text-[11px] mt-1">Try adjusting the search or filter criteria.</p>
+                            </td>
+                          </tr>
+                        );
+                      }
+
+                      return filtered.map((app) => (
                         <tr key={app.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
                           <td className="px-4 py-3.5">
                             <button
@@ -487,8 +593,8 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                             </Button>
                           </td>
                         </tr>
-                      ))
-                    )}
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
