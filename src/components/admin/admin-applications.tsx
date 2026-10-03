@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useMemo } from "react";
 import { PageHeader } from "@/components/design-system/layout";
@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/select";
 import { StatusBadge, RoleBadge } from "@/components/design-system/badges";
 import { formatDate } from "@/components/design-system/workflow";
-import { Search, Filter, MoreHorizontal, Clock, ArrowRight, FilePlus2 } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Clock, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { NewApplicationDialog } from "@/components/ltp/new-application-dialog";
+// NewApplicationDialog intentionally not imported — only LTP login can create applications
 
 const TABS = [
   "Total applications",
@@ -58,7 +58,6 @@ function slaBadgeProps(days: number | null): { cls: string; label: string } {
 
 export function AdminApplications() {
   const [activeTab, setActiveTab] = useState(TABS[0]);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const { applications, openApplication } = useAppStore();
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("ALL");
@@ -129,14 +128,7 @@ export function AdminApplications() {
             </Button>
           ))}
         </div>
-        <Button
-          variant="default"
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full gap-1.5 whitespace-nowrap"
-          onClick={() => setDialogOpen(true)}
-        >
-          <FilePlus2 className="size-4" /> New application
-        </Button>
-      </div>
+        </div>
 
       <div className="flex flex-col gap-0 rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         {/* Filters */}
@@ -378,7 +370,6 @@ export function AdminApplications() {
             </div>
           )}
         </div>
-      <NewApplicationDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }

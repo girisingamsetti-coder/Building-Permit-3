@@ -40,7 +40,7 @@ import {
 import type { Application } from "@/types";
 import { LpsPlotDetailsView, type LpsPlotRecord } from "./lps-plot-details-view";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
-import { BuildingPermitOrder, buildPermitOrderFromBaNo } from "./building-permit-order";
+// BuildingPermitOrder is shown in Approved Files, NOT after payment. Payment shows PaymentProceeding instead.
 import {
   ApcrdaPaymentReceiptModal,
   type ApcrdaPaymentReceiptData,
@@ -3406,8 +3406,9 @@ export function LtpSubmissionDetails({
         {mainTab === "payments" && (
           <div className="w-full space-y-4 text-xs">
             {showProceeding ? (
-              <BuildingPermitOrder
-                data={buildPermitOrderFromBaNo(baNo, ownerName, revenueVillage, district)}
+              <PaymentProceeding
+                baNo={baNo}
+                submissionDate={submissionDate}
                 onBack={() => setShowProceeding(false)}
               />
             ) : (
@@ -3574,9 +3575,9 @@ export function LtpSubmissionDetails({
                   <CheckCircle2 className="size-5" />
                 </div>
                 <div>
-                  <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Permit Issued</p>
+                  <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Payment Proceeding Issued</p>
                   <p className="text-emerald-700 text-[11px] mt-0.5">
-                    Your building permit order has been generated. Click to view the official proceeding.
+                    Your payment has been acknowledged. A proceeding has been issued. The Building Permit Order will be issued after authority approval.
                   </p>
                 </div>
               </div>
@@ -4513,6 +4514,153 @@ export function LtpSubmissionDetails({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PAYMENT PROCEEDING COMPONENT
+// Shown after payment is successful. NOT the Building Permit Order.
+// The Permit Order is only issued after final authority (Director) approval.
+// ─────────────────────────────────────────────────────────────────────────────
+function PaymentProceeding({
+  baNo,
+  submissionDate,
+  onBack,
+}: {
+  baNo: string;
+  submissionDate?: string;
+  onBack: () => void;
+}) {
+  const today = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const proceedingNo = `APCRDA/BP/PROC/${baNo.replace(/\//g, "-")}/2026`;
+
+  return (
+    <div className="w-full space-y-4 text-xs font-sans">
+      {/* Back Button */}
+      <button
+        type="button"
+        onClick={onBack}
+        className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-semibold text-xs cursor-pointer"
+      >
+        <ArrowLeft className="size-3.5" /> Back to Payment Details
+      </button>
+
+      {/* Proceeding Document */}
+      <div className="bg-white border-2 border-[#7A1316] rounded-xl shadow-sm overflow-hidden">
+        {/* Header */}
+        <div className="bg-[#7A1316] text-white px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-white/70 mb-0.5">Andhra Pradesh Capital Region Development Authority</p>
+            <h2 className="text-base font-black tracking-wide">PAYMENT ACKNOWLEDGEMENT PROCEEDING</h2>
+            <p className="text-[11px] text-white/80 mt-0.5">Ref: {proceedingNo}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/30 rounded text-[11px] font-bold text-white transition-colors cursor-pointer"
+            >
+              <Printer className="size-3.5" /> Print
+            </button>
+            <button
+              type="button"
+              onClick={() => {}}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/30 rounded text-[11px] font-bold text-white transition-colors cursor-pointer"
+            >
+              <Download className="size-3.5" /> Download
+            </button>
+          </div>
+        </div>
+
+        {/* Status Banner */}
+        <div className="bg-emerald-50 border-b border-emerald-200 px-6 py-3 flex items-center gap-3">
+          <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+          <div>
+            <p className="font-bold text-emerald-800 text-[13px]">Payment Successfully Received</p>
+            <p className="text-[11px] text-emerald-700">Your application has been forwarded for authority review. Building Permit Order will be issued upon final approval.</p>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-5">
+          {/* Reference details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <Row label="Proceeding Number" value={proceedingNo} mono />
+              <Row label="Proposal / BA Number" value={baNo} mono />
+              <Row label="Date of Issue" value={today} />
+              <Row label="Payment Date" value={submissionDate || today} />
+            </div>
+            <div className="space-y-3">
+              <Row label="Issuing Authority" value="Commissioner, APCRDA" />
+              <Row label="Application Stage" value="Payment Verified — Pending Review" />
+              <Row label="Next Stage" value="Zonal Head / Director Review" />
+              <Row label="Expected TAT" value="15 Working Days" />
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-dashed border-slate-200" />
+
+          {/* Formal proceeding body */}
+          <div className="bg-[#FBF3E4] border border-[#DCD5C8] rounded-lg p-4 space-y-3 text-[12px] text-slate-800 leading-relaxed">
+            <p>
+              This is to acknowledge that the development application bearing Proposal BA No.{" "}
+              <span className="font-bold font-mono">{baNo}</span> has been received and the prescribed development fees and scrutiny charges have been duly paid to the Andhra Pradesh Capital Region Development Authority (APCRDA).
+            </p>
+            <p>
+              The application has been forwarded to the competent reviewing authority for technical and statutory verification. The <strong>Building Permit Order</strong> will be issued separately upon successful completion of the review proceeding by the Zonal Head / Director and sign-off by the Commissioner.
+            </p>
+            <p className="text-rose-800 font-semibold">
+              ⚠ This proceeding does NOT constitute a Building Permit Order. Construction must NOT commence until the official Building Permit Order is issued.
+            </p>
+          </div>
+
+          {/* Conditions */}
+          <div>
+            <p className="font-bold text-slate-700 mb-2 uppercase text-[11px] tracking-wide">Important Conditions</p>
+            <ul className="space-y-1.5 list-none">
+              {[
+                "This proceeding is valid only as a payment acknowledgement and does not grant development rights.",
+                "Any commencement of construction prior to the issue of Building Permit Order is a punishable offence under AP Building Rules.",
+                "The applicant shall be notified via SMS and Email upon issuance of the Building Permit Order.",
+                "Any shortfall or discrepancy identified during review may result in additional notice to the LTP / Applicant.",
+              ].map((c, i) => (
+                <li key={i} className="flex items-start gap-2 text-[11px] text-slate-600">
+                  <span className="mt-0.5 size-4 rounded-full bg-[#7A1316]/10 text-[#7A1316] font-bold text-[10px] flex items-center justify-center shrink-0">{i + 1}</span>
+                  {c}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Signature area */}
+          <div className="border-t border-slate-200 pt-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+            <div>
+              <p className="text-[11px] text-slate-500">Issued electronically. No physical signature required.</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Verify authenticity at apcrda.gov.in/verify</p>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-bold text-[#7A1316]">Commissioner / Competent Authority</div>
+              <div className="text-[11px] text-slate-500">APCRDA, Amaravati</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wide">{label}</span>
+      <span className={`text-[12px] font-semibold text-slate-800 ${mono ? "font-mono" : ""}`}>{value}</span>
     </div>
   );
 }
