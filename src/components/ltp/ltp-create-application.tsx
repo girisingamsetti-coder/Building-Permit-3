@@ -341,6 +341,16 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
     setErrors({});
   };
 
+  // ── LPS: hide Applicant Info (step 2) and Plot Details (step 3) ──
+  const isLPS = data.general.lpsLayout === "LPS Layout";
+  const visibleSteps = WIZARD_STEPS.filter((s) => {
+    if (isLPS && (s.id === 2 || s.id === 3)) return false;
+    return true;
+  });
+  const visibleStepIds: number[] = visibleSteps.map((s) => s.id);
+  const currentVisibleIndex = visibleStepIds.indexOf(step);
+  const isLastVisibleStep = currentVisibleIndex === visibleSteps.length - 1;
+
   const handleNext = () => {
     const errs = validateStep(step, data);
     if (Object.keys(errs).length > 0) {
@@ -349,10 +359,22 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
       return;
     }
     setCompletedSteps((prev) => new Set(prev).add(step));
-    if (step < WIZARD_STEPS.length) { setStep((s) => s + 1); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    // Find next visible step
+    const currentIdx = visibleStepIds.indexOf(step);
+    if (currentIdx < visibleStepIds.length - 1) {
+      setStep(visibleStepIds[currentIdx + 1]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  const handleBack = () => { if (step > 1) { setStep((s) => s - 1); setErrors({}); window.scrollTo({ top: 0, behavior: "smooth" }); } };
+  const handleBack = () => {
+    const currentIdx = visibleStepIds.indexOf(step);
+    if (currentIdx > 0) {
+      setStep(visibleStepIds[currentIdx - 1]);
+      setErrors({});
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   
   const handleEditStep = (s: number) => { setStep(s); window.scrollTo({ top: 0, behavior: "smooth" }); };
 
@@ -462,19 +484,19 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
           </div>
           <div className="flex-1 p-3">
             <ol className="space-y-1">
-              {WIZARD_STEPS.map((s, idx) => {
+              {visibleSteps.map((s, idx) => {
                 const isCurrent = s.id === step;
                 const isDone = completedSteps.has(s.id);
                 const isClickable = isDone || s.id === step || s.id === Math.max(0, ...Array.from(completedSteps)) + 1;
                 const Icon = s.icon;
                 return (
                   <li key={s.id} className="relative">
-                    {idx < WIZARD_STEPS.length - 1 && (
+                    {idx < visibleSteps.length - 1 && (
                       <div className={cn("absolute left-5 top-8 h-full w-[2px] -ml-px", completedSteps.has(s.id) ? "bg-[#7A1316]" : "bg-[#DCD5C8]")} />
                     )}
                     <button onClick={() => isClickable && setStep(s.id)} disabled={!isClickable} className={cn("group flex w-full items-center gap-3 rounded-lg p-2 text-left transition-all", isCurrent ? "bg-[#F5EBE1] border-l-4 border-[#7A1316]" : isClickable ? "hover:bg-[#FAF4EB]" : "opacity-50 cursor-not-allowed")}>
                       <div className={cn("relative flex size-6 shrink-0 items-center justify-center rounded-full border-[1.5px] text-[10px] font-bold z-10 bg-white transition-colors", isDone ? "border-emerald-600 bg-emerald-600 text-white" : isCurrent ? "border-[#7A1316] border-2 bg-[#7A1316] text-white" : "border-[#DCD5C8] text-slate-400")}>
-                        {isDone ? <Check className="size-3" strokeWidth={3} /> : s.id}
+                        {isDone ? <Check className="size-3" strokeWidth={3} /> : idx + 1}
                       </div>
                       <span className={cn("text-xs font-semibold transition-colors", isCurrent ? "text-[#7A1316] font-bold" : isDone ? "text-slate-900" : "text-slate-500")}>{s.label}</span>
                     </button>
@@ -700,8 +722,12 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
                       <ReviewSection title="Application summary" onEdit={() => { setTypeSelected(false); setStep(1); }}>
                         <RV label="Type" value={appTypeLabelShort(data.appType as AppTypeKey)} />
                         <RV label="Draft number" value={draftNo} />
-                        <RV label={data.applicant.usagePurpose === "Selling" ? "Firm Name" : "Owner Name"} value={data.applicant.ownerName} />
-                        <RV label="Plot Area" value={data.plot.proposedPlotArea} />
+                        {!isLPS && (
+                          <>
+                            <RV label={data.applicant.usagePurpose === "Selling" ? "Firm Name" : "Owner Name"} value={data.applicant.ownerName} />
+                            <RV label="Plot Area" value={data.plot.proposedPlotArea} />
+                          </>
+                        )}
                       </ReviewSection>
                   </div>
                 )}
@@ -711,10 +737,10 @@ export function LtpCreateApplication({ onClose }: { onClose?: () => void } = {})
 
             {/* Bottom Actions */}
             <div className="sticky bottom-0 flex items-center justify-between border-t border-[#DCD5C8] bg-[#FBF3E4] p-4 shadow-sm rounded-t-xl border-x">
-              <Button variant="outline" onClick={handleBack} disabled={step === 1 || submitting} className="w-24 border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB] font-bold text-xs">
+              <Button variant="outline" onClick={handleBack} disabled={currentVisibleIndex <= 0 || submitting} className="w-24 border-[#DCD5C8] text-slate-700 hover:bg-[#FAF4EB] font-bold text-xs">
                 <ArrowLeft className="mr-1.5 size-4" />Back
               </Button>
-              {step < WIZARD_STEPS.length ? (
+              {!isLastVisibleStep ? (
                 <Button onClick={handleNext} className="w-32 bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs shadow-2xs border border-[#630E10] cursor-pointer">
                   Continue<ArrowRight className="ml-1.5 size-4" />
                 </Button>

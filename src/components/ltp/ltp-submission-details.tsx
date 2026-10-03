@@ -307,6 +307,18 @@ export function LtpSubmissionDetails({
   const [isLpsLayout, setIsLpsLayout] = React.useState<"LPS Layout" | "Non-LPS">(
     initialLpsType ?? (baNo.includes("/LPS/") ? "LPS Layout" : "Non-LPS")
   );
+
+  React.useEffect(() => {
+    if (initialLpsType) {
+      setIsLpsLayout(initialLpsType);
+    }
+  }, [initialLpsType]);
+
+  React.useEffect(() => {
+    if (isLpsLayout === "LPS Layout" && (subTab === "applicant" || subTab === "plot")) {
+      setSubTab("general");
+    }
+  }, [isLpsLayout, subTab]);
   const [district, setDistrict] = React.useState("Guntur");
   const [mandal, setMandal] = React.useState("Thullur");
   const [revenueVillage, setRevenueVillage] = React.useState("INAVOLU");
@@ -675,6 +687,26 @@ export function LtpSubmissionDetails({
               : "grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3.5"
           )}
         >
+          {/* Row: Case Type (In LPS Applicant Information) */}
+          {(isLpsLayout === "LPS Layout" || compact) && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2 md:col-span-2">
+              <label className="font-bold text-slate-800 shrink-0 text-xs">
+                <span className="text-rose-600 font-black mr-1">*</span> Case Type
+              </label>
+              <select
+                id="lps-applicant-case-type"
+                value={caseType}
+                onChange={(e) => setCaseType(e.target.value)}
+                className="w-full sm:w-52 md:w-56 xl:w-60 2xl:w-64 h-8 bg-white border border-[#DCD5C8] rounded px-2.5 text-xs text-slate-800 font-medium outline-none focus:border-[#7A1316] cursor-pointer"
+              >
+                <option value="New">New</option>
+                <option value="Renewal">Renewal</option>
+                <option value="Revision">Revision</option>
+                <option value="Demolish & Build">Demolish & Build</option>
+              </select>
+            </div>
+          )}
+
           {/* Row 1: Self Use or Selling */}
           <div
             className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2 md:col-span-2"
@@ -1055,8 +1087,8 @@ export function LtpSubmissionDetails({
       </div>
 
 
-      {/* ── SUB-TABS (When Application Form is active) ── */}
-      {mainTab === "form" && (
+      {/* ── SUB-TABS (When Application Form is active — only shown for Non-LPS) ── */}
+      {mainTab === "form" && isLpsLayout !== "LPS Layout" && (
         <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
           {[
             { id: "general", label: "General Information" },
@@ -1155,9 +1187,9 @@ export function LtpSubmissionDetails({
           </div>
         )}
         {/* ========================================================================= */}
-        {/* SUB-TAB 1: GENERAL INFORMATION                                           */}
+        {/* SUB-TAB 1: GENERAL INFORMATION / APPLICATION FORM                         */}
         {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "general" && (
+        {mainTab === "form" && (isLpsLayout === "LPS Layout" || subTab === "general") && (
           isLpsLayout === "LPS Layout" ? (
             <div className="w-full pb-8">
               <LpsPlotDetailsView
@@ -1547,7 +1579,7 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {/* SUB-TAB 2: APPLICANT INFORMATION (Image 1)                                */}
         {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "applicant" && (
+        {mainTab === "form" && isLpsLayout !== "LPS Layout" && subTab === "applicant" && (
           <div className="w-full space-y-4 pb-8">
             {renderApplicantCards(false)}
 
@@ -1588,7 +1620,7 @@ export function LtpSubmissionDetails({
         {/* ========================================================================= */}
         {/* SUB-TAB 3: PLOT DETAILS (Image 2)                                         */}
         {/* ========================================================================= */}
-        {mainTab === "form" && subTab === "plot" && (
+        {mainTab === "form" && isLpsLayout !== "LPS Layout" && subTab === "plot" && (
           <div className="w-full space-y-4 pb-8">
             {/* 1. Proposed Construction */}
             <div className="bg-[#FBF3E4] border border-[#7A1316]/50 rounded-lg shadow-xs overflow-hidden">
