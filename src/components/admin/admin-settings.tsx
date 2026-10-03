@@ -39,9 +39,12 @@ import {
   CircleDot,
   CircleCheck,
   CircleAlert,
+  ShieldCheck,
+  Eye,
+  Lock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { SystemSettings } from "@/types";
+import type { SystemSettings, ModuleAccessLevel } from "@/types";
 import { AdminWorkflow } from "./admin-workflow";
 import { ClipboardList } from "lucide-react";
 import { OfficerSettings } from "../officer/officer-settings";
@@ -74,6 +77,10 @@ function settingsEqual(a: SystemSettings, b: SystemSettings): boolean {
   if (!a.allowedDrawingFormats.every((v) => b.allowedDrawingFormats.includes(v))) return false;
   if (a.allowedDocumentFormats.length !== b.allowedDocumentFormats.length) return false;
   if (!a.allowedDocumentFormats.every((v) => b.allowedDocumentFormats.includes(v))) return false;
+  // Compare roleAccessConfig
+  try {
+    if (JSON.stringify(a.roleAccessConfig) !== JSON.stringify(b.roleAccessConfig)) return false;
+  } catch { return false; }
   return true;
 }
 
@@ -249,6 +256,9 @@ export function AdminSettings() {
             <TabsTrigger value="tasks">
               <ClipboardList className="size-3.5" /> Tasks
             </TabsTrigger>
+            <TabsTrigger value="access">
+              <ShieldCheck className="size-3.5" /> Access Control
+            </TabsTrigger>
           </TabsList>
 
           {/* ---------- General ---------- */}
@@ -394,6 +404,14 @@ export function AdminSettings() {
           {/* ---------- Tasks / Workflow ---------- */}
           <TabsContent value="tasks" className="space-y-4">
             <AdminWorkflow />
+          </TabsContent>
+
+          {/* ---------- Access Control ---------- */}
+          <TabsContent value="access" className="space-y-4">
+            <AccessControlMatrix
+              config={form.roleAccessConfig ?? {}}
+              onChange={(cfg) => setField("roleAccessConfig", cfg)}
+            />
           </TabsContent>
         </Tabs>
       </SectionCard>
@@ -621,6 +639,184 @@ function FormatToggleGroup({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// Access Control Matrix
+// ============================================================
+const ROLES_FOR_ACCESS = [
+  { key: "LTP",                  label: "LTP" },
+  { key: "TPA",                  label: "TPA" },
+  { key: "ZDD",                  label: "ZDD" },
+  { key: "ZJD",                  label: "ZJD" },
+  { key: "ADDITIONAL_COMMISSIONER", label: "Addl. Commissioner" },
+  { key: "COMMISSIONER",         label: "Commissioner" },
+  { key: "ADMIN",                label: "Admin" },
+] as const;
+
+const MODULES_FOR_ACCESS = [
+  { id: "dashboard",             label: "Dashboard" },
+  { id: "application-submission",label: "Applications" },
+  { id: "application-status",    label: "Application Status" },
+  { id: "proceeding-status",     label: "Compliance & Regulations" },
+  { id: "commencement",          label: "Work Commencement" },
+  { id: "occupancy",             label: "Occupancy (OC)" },
+  { id: "change-of-ltp",         label: "LTP Change" },
+  { id: "reports",               label: "Reports" },
+] as const;
+
+const ACCESS_OPTIONS: { value: ModuleAccessLevel; label: string; color: string }[] = [
+  { value: "full",  label: "Full",  color: "bg-emerald-500" },
+  { value: "read",  label: "Read",  color: "bg-blue-400" },
+  { value: "none",  label: "None",  color: "bg-slate-300" },
+];
+
+function AccessControlMatrix({
+  config,
+  onChange,
+}: {
+  config: Record<string, Record<string, ModuleAccessLevel>>;
+  onChange: (cfg: Record<string, Record<string, ModuleAccessLevel>>) => void;
+}) {
+  function getLevel(role: string, moduleId: string): ModuleAccessLevel {
+    return config[role]?.[moduleId] ?? "full";
+  }
+
+  function setLevel(role: string, moduleId: string, level: ModuleAccessLevel) {
+    const next = {
+      ...config,
+      [role]: { ...(config[role] ?? {}), [moduleId]: level },
+    };
+    onChange(next);
+  }
+
+  function setRowAll(role: string, level: ModuleAccessLevel) {
+    const next = { ...config, [role]: {} as Record<string, ModuleAccessLevel> };
+    MODULES_FOR_ACCESS.forEach((m) => { next[role][m.id] = level; });
+    onChange(next);
+  }
+
+  function setColAll(moduleId: string, level: ModuleAccessLevel) {
+    const next = { ...config };
+    ROLES_FOR_ACCESS.forEach((r) => {
+      next[r.key] = { ...(next[r.key] ?? {}), [moduleId]: level };
+    });
+    onChange(next);
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
+        <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <ShieldCheck className="size-4" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-bold text-foreground">Module Access Control</p>
+          <p className="text-xs text-muted-foreground">
+            Configure what each role can do in every module.
+            All users see all modules — access level controls their capabilities within each module.
+          </p>
+          <div className="flex items-center gap-3 mt-2 text-[11px]">
+            {ACCESS_OPTIONS.map((o) => (
+              <span key={o.value} className="flex items-center gap-1.5 font-medium text-foreground">
+                <span className={`inline-block size-2.5 rounded-full ${o.color}`} />
+                {o.label === "Full" ? "Full Access" : o.label === "Read" ? "Read Only" : "No Access"}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Matrix Table */}
+      <div className="overflow-x-auto rounded-lg border border-border">
+        <table className="w-full text-xs border-collapse">
+          <thead>
+            <tr className="bg-muted/60 border-b border-border">
+              <th className="px-3 py-2.5 text-left font-bold text-foreground w-40 min-w-[140px]">Role</th>
+              {MODULES_FOR_ACCESS.map((m) => (
+                <th key={m.id} className="px-2 py-2.5 text-center font-bold text-foreground min-w-[90px]">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] leading-tight">{m.label}</span>
+                    {/* Column quick-set buttons */}
+                    <div className="flex gap-0.5">
+                      {ACCESS_OPTIONS.map((o) => (
+                        <button
+                          key={o.value}
+                          type="button"
+                          title={`Set all to ${o.label}`}
+                          onClick={() => setColAll(m.id, o.value)}
+                          className={`size-2.5 rounded-full ${o.color} opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </th>
+              ))}
+              <th className="px-2 py-2.5 text-center font-bold text-muted-foreground min-w-[80px] text-[10px]">Set Row</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border bg-card">
+            {ROLES_FOR_ACCESS.map((role) => (
+              <tr key={role.key} className="hover:bg-muted/20 transition-colors">
+                <td className="px-3 py-2.5 font-bold text-foreground whitespace-nowrap">
+                  {role.label}
+                </td>
+                {MODULES_FOR_ACCESS.map((m) => {
+                  const current = getLevel(role.key, m.id);
+                  return (
+                    <td key={m.id} className="px-2 py-2.5 text-center">
+                      <div className="flex items-center justify-center gap-0.5">
+                        {ACCESS_OPTIONS.map((o) => (
+                          <button
+                            key={o.value}
+                            type="button"
+                            title={o.value === "full" ? "Full Access" : o.value === "read" ? "Read Only" : "No Access"}
+                            onClick={() => setLevel(role.key, m.id, o.value)}
+                            className={cn(
+                              "rounded px-1.5 py-0.5 text-[10px] font-bold border cursor-pointer transition-all",
+                              current === o.value
+                                ? o.value === "full"
+                                  ? "bg-emerald-100 text-emerald-800 border-emerald-400 shadow-sm"
+                                  : o.value === "read"
+                                  ? "bg-blue-100 text-blue-800 border-blue-400 shadow-sm"
+                                  : "bg-slate-200 text-slate-600 border-slate-400 shadow-sm"
+                                : "bg-transparent text-muted-foreground border-border hover:border-muted-foreground/50 opacity-40 hover:opacity-70"
+                            )}
+                          >
+                            {o.label}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                  );
+                })}
+                {/* Row quick-set */}
+                <td className="px-2 py-2.5 text-center">
+                  <div className="flex items-center justify-center gap-1">
+                    {ACCESS_OPTIONS.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        title={`Set entire row to ${o.label}`}
+                        onClick={() => setRowAll(role.key, o.value)}
+                        className={`size-3 rounded-full ${o.color} opacity-60 hover:opacity-100 transition-opacity cursor-pointer`}
+                      />
+                    ))}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground rounded-lg border border-border bg-muted/20 px-3 py-2">
+        <strong>Note:</strong> Changes take effect after clicking &quot;Save Changes&quot;. The access configuration controls module-level capabilities — 
+        &quot;Full&quot; allows all actions, &quot;Read&quot; allows viewing only, &quot;None&quot; hides action buttons but still shows the module.
+      </p>
     </div>
   );
 }

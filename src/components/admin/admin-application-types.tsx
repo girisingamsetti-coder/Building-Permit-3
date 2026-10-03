@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -323,7 +323,7 @@ export function AdminApplicationTypes() {
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search name, key, description…"
+                  placeholder=""
                   className="h-8 w-56 pl-8 text-xs"
                   aria-label="Search application types"
                 />

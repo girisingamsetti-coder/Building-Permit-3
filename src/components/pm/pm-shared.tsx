@@ -39,7 +39,7 @@ export function PmSearchInput({
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder ?? "Search…"}
+        placeholder={placeholder ?? ""}
         aria-label={placeholder ?? "Search"}
         className="h-9 pl-8 pr-7 text-xs"
       />

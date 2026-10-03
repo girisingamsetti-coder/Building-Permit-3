@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -170,7 +170,7 @@ export function OfficerApplications() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by application no, project, applicant or LTP…"
+              placeholder=""
               className="h-9 pl-9.5 pr-8 rounded-full border-muted-foreground/30"
             />
             {query && (

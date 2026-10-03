@@ -119,10 +119,10 @@ export const USERS: User[] = [
   { id: "u-sysadmin-01", name: "System Admin", role: "ADMIN", email: "admin2@demo.gov.in", phone: "+91 99000 11000", employeeId: "ADM-0001", designation: "Administrator", zone: "Head Office", avatarColor: "purple", department: "IT", active: true, status: "ACTIVE", lastLogin: "2026-01-20T09:00:00" },
   { id: "u-ltp-01", name: "Venu Kotte", role: "LTP", email: "ltp@demo.gov.in", phone: "+91 98220 14500", employeeId: "LTP-0001", designation: "Licensed Architect", zone: "Amaravati", avatarColor: "emerald", department: "Private", active: true, status: "ACTIVE", lastLogin: "2026-01-21T09:00:00" },
   { id: "u-tpa-01", name: "Soumith", role: "TPA", email: "tpa@demo.gov.in", phone: "+91 94400 55120", employeeId: "TPA-0001", designation: "Town Planning Assistant", zone: "Zone-II", avatarColor: "teal", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T09:00:00" },
-  { id: "u-zdd-01", name: "Smt. Meena Kulkarni", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 94411 66230", employeeId: "ZDD-0001", designation: "Zonal Deputy Director", zone: "Zone-II", avatarColor: "blue", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T10:00:00" },
-  { id: "u-zjd-01", name: "Shri. Ramesh Babu", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 94422 77340", employeeId: "ZJD-0001", designation: "Zonal Joint Director", zone: "Zone-II", avatarColor: "indigo", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
-  { id: "u-addl-comm-01", name: "Shri. Addl Comm", role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", phone: "+91 90000 11111", employeeId: "ADC-0001", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
-  { id: "u-comm-01", name: "Shri. Comm", role: "COMMISSIONER", email: "comm@demo.gov.in", phone: "+91 90000 22222", employeeId: "COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
+  { id: "u-zdd-01", name: "Sri Harsha", role: "ZDD", email: "zdd@demo.gov.in", phone: "+91 94411 66230", employeeId: "ZDD-0001", designation: "Zonal Deputy Director", zone: "Zone-II", avatarColor: "blue", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T10:00:00" },
+  { id: "u-zjd-01", name: "Sateesh M", role: "ZJD", email: "zjd@demo.gov.in", phone: "+91 94422 77340", employeeId: "ZJD-0001", designation: "Zonal Joint Director", zone: "Zone-II", avatarColor: "indigo", department: "Town Planning Wing", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
+  { id: "u-addl-comm-01", name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", phone: "+91 90000 11111", employeeId: "ADC-0001", designation: "Additional Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
+  { id: "u-comm-01", name: "A Jyotheeswar Reddy", role: "COMMISSIONER", email: "comm@demo.gov.in", phone: "+91 90000 22222", employeeId: "COM-0001", designation: "Commissioner", zone: "Head Office", avatarColor: "rose", department: "Commissioner Office", active: true, status: "ACTIVE", lastLogin: "2026-01-22T11:00:00" },
 ];
 
 export function getUserByRole(role: RoleKey): User {
@@ -137,10 +137,10 @@ export const DEMO_CREDENTIALS: { role: RoleKey; email: string; password: string;
   { role: "ADMIN", email: "admin2@demo.gov.in", password: "demo1234", label: "Admin" },
   { role: "LTP", email: "ltp@demo.gov.in", password: "demo1234", label: "LTP (Venu Kotte)" },
   { role: "TPA", email: "tpa@demo.gov.in", password: "demo1234", label: "TPA (Soumith)" },
-  { role: "ZDD", email: "zdd@demo.gov.in", password: "demo1234", label: "ZDD (Zonal Deputy Director)" },
-  { role: "ZJD", email: "zjd@demo.gov.in", password: "demo1234", label: "ZJD (Zonal Joint Director)" },
-  { role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", password: "demo1234", label: "Addl. Commissioner" },
-  { role: "COMMISSIONER", email: "comm@demo.gov.in", password: "demo1234", label: "Commissioner" },
+  { role: "ZDD", email: "zdd@demo.gov.in", password: "demo1234", label: "ZDD (Sri Harsha)" },
+  { role: "ZJD", email: "zjd@demo.gov.in", password: "demo1234", label: "ZJD (Sateesh M)" },
+  { role: "ADDITIONAL_COMMISSIONER", email: "addl@demo.gov.in", password: "demo1234", label: "Addl. Commissioner (Hemanthsai)" },
+  { role: "COMMISSIONER", email: "comm@demo.gov.in", password: "demo1234", label: "Commissioner (A Jyotheeswar Reddy)" },
 ];
 
 // Re-export for compatibility
@@ -337,9 +337,9 @@ function makeWorkflowHistory(
     PAYMENT: { name: "Venu Kotte", role: "LTP" },
     ZONAL_HEAD_REVIEW: { name: "Smt. Meena Kulkarni", role: "ZONAL_HEAD" },
     DIRECTOR_REVIEW: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
-    ADDITIONAL_COMMISSIONER_REVIEW: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" },
-    COMMISSIONER_REVIEW: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
-    FINAL_DECISION: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" },
+    ADDITIONAL_COMMISSIONER_REVIEW: { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" },
+    COMMISSIONER_REVIEW: { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" },
+    FINAL_DECISION: { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" },
   };
   const actionMap: Record<string, string> = {
     APPLICATION_CREATED: "Application created",
@@ -410,10 +410,10 @@ function makeAuditLog(appNo: string, stage: WorkflowStageKey, dates: string[]): 
     entries.push({ id: "a13", user: "Shri. Suresh Nair", role: "DIRECTOR", action: "Forwarded to Addl. Commissioner", entity: "Application", entityId: appNo, timestamp: dates[8], oldStatus: "DIRECTOR_REVIEW", newStatus: "ADDITIONAL_COMMISSIONER_REVIEW", ip: "10.0.0.30", device: "Edge / Windows" });
   }
   if (currentOrder >= 10) {
-    entries.push({ id: "a14", user: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER", action: "Forwarded to Commissioner", entity: "Application", entityId: appNo, timestamp: dates[9], oldStatus: "ADDITIONAL_COMMISSIONER_REVIEW", newStatus: "COMMISSIONER_REVIEW", ip: "10.0.0.35", device: "Chrome / Windows" });
+    entries.push({ id: "a14", user: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER", action: "Forwarded to Commissioner", entity: "Application", entityId: appNo, timestamp: dates[9], oldStatus: "ADDITIONAL_COMMISSIONER_REVIEW", newStatus: "COMMISSIONER_REVIEW", ip: "10.0.0.35", device: "Chrome / Windows" });
   }
   if (currentOrder >= 11) {
-    entries.push({ id: "a15", user: "Dr. Pratap Reddy", role: "COMMISSIONER", action: "Final decision: approved", entity: "Application", entityId: appNo, timestamp: dates[10], oldStatus: "COMMISSIONER_REVIEW", newStatus: "APPROVED", ip: "10.0.0.40", device: "Chrome / macOS", remarks: "Approved with conditions." });
+    entries.push({ id: "a15", user: "A Jyotheeswar Reddy", role: "COMMISSIONER", action: "Final decision: approved", entity: "Application", entityId: appNo, timestamp: dates[10], oldStatus: "COMMISSIONER_REVIEW", newStatus: "APPROVED", ip: "10.0.0.40", device: "Chrome / macOS", remarks: "Approved with conditions." });
   }
   return entries;
 }
@@ -566,7 +566,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 10. ADDITIONAL_COMMISSIONER_REVIEW
-  buildApp("app-10", "AP/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
+  buildApp("app-10", "AP/BP/2026/04/0010", "Heritage Residency — Premium", "RESIDENTIAL", 4500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-01T09:00:00", "2026-01-01T09:05:00", "2026-01-01T09:06:00", "2026-01-02T11:00:00", "2026-01-03T10:00:00", "2026-01-04T14:00:00", "2026-01-05T09:00:00", "2026-01-06T11:00:00", "2026-01-07T15:00:00", "2026-01-08T10:00:00", "2026-01-09T14:00:00"], "Smt. Kavita Sharma", "+91 98220 14510", "kavita.sharma@email.com", "Baner, Pune — 411045", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-01T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2026-01-01T09:06:00", "SCR/2026/0010"),
     documents: makeDocuments("verified"),
@@ -576,25 +576,25 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 11. COMMISSIONER_REVIEW
-  buildApp("app-11", "AP/BP/2026/04/0011", "Metro Business Centre", "COMMERCIAL", 11200, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-28T09:00:00", "2025-12-28T09:05:00", "2025-12-28T09:06:00", "2025-12-29T11:00:00", "2025-12-30T10:00:00", "2026-01-01T14:00:00", "2026-01-02T09:00:00", "2026-01-03T11:00:00", "2026-01-04T15:00:00", "2026-01-05T10:00:00", "2026-01-06T14:00:00"], "Shri. Amit Verma", "+91 98220 14511", "amit.verma@email.com", "Aundh, Pune — 411007", {
+  buildApp("app-11", "AP/BP/2026/04/0011", "Metro Business Centre", "COMMERCIAL", 11200, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" }, ["2025-12-28T09:00:00", "2025-12-28T09:05:00", "2025-12-28T09:06:00", "2025-12-29T11:00:00", "2025-12-30T10:00:00", "2026-01-01T14:00:00", "2026-01-02T09:00:00", "2026-01-03T11:00:00", "2026-01-04T15:00:00", "2026-01-05T10:00:00", "2026-01-06T14:00:00"], "Shri. Amit Verma", "+91 98220 14511", "amit.verma@email.com", "Aundh, Pune — 411007", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-28T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2025-12-28T09:06:00", "SCR/2026/0011"),
     documents: makeDocuments("verified"),
     fee: makeFee(11200, 8, true),
     payment: makePayment(1486300, true, "2025-12-30"),
-    remarks: [{ id: "r-11-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and forwarding to Commissioner for final decision.", timestamp: "2026-01-06T14:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-11-1", author: { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and forwarding to Commissioner for final decision.", timestamp: "2026-01-06T14:00:00", type: "DECISION" }],
   }),
 
   // 12. APPROVED
-  buildApp("app-12", "AP/BP/2026/04/0012", "Sai Nagar Row Houses", "RESIDENTIAL", 1800, "APPROVED", "FINAL_DECISION", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-20T09:00:00", "2025-12-20T09:05:00", "2025-12-20T09:06:00", "2025-12-21T11:00:00", "2025-12-22T10:00:00", "2025-12-23T14:00:00", "2025-12-24T09:00:00", "2025-12-25T11:00:00", "2025-12-26T15:00:00", "2025-12-27T10:00:00", "2025-12-28T14:00:00", "2025-12-29T16:30:00"], "Smt. Neha Rao", "+91 98220 14512", "neha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
+  buildApp("app-12", "AP/BP/2026/04/0012", "Sai Nagar Row Houses", "RESIDENTIAL", 1800, "APPROVED", "FINAL_DECISION", { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" }, ["2025-12-20T09:00:00", "2025-12-20T09:05:00", "2025-12-20T09:06:00", "2025-12-21T11:00:00", "2025-12-22T10:00:00", "2025-12-23T14:00:00", "2025-12-24T09:00:00", "2025-12-25T11:00:00", "2025-12-26T15:00:00", "2025-12-27T10:00:00", "2025-12-28T14:00:00", "2025-12-29T16:30:00"], "Smt. Neha Rao", "+91 98220 14512", "neha.rao@email.com", "Kalyani Nagar, Pune — 411006", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-20T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2025-12-20T09:06:00", "SCR/2026/0012"),
     documents: makeDocuments("verified"),
     fee: makeFee(1800, 8, true),
     payment: makePayment(271300, true, "2025-12-22"),
     remarks: [
-      { id: "r-12-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Forwarded to Commissioner.", timestamp: "2025-12-28T14:00:00", type: "DECISION" },
-      { id: "r-12-2", author: { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, text: "Approved. Conditions: STP operational before occupancy; 10% area reserved for EWS.", timestamp: "2025-12-29T16:30:00", type: "DECISION" },
+      { id: "r-12-1", author: { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" }, text: "Forwarded to Commissioner.", timestamp: "2025-12-28T14:00:00", type: "DECISION" },
+      { id: "r-12-2", author: { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" }, text: "Approved. Conditions: STP operational before occupancy; 10% area reserved for EWS.", timestamp: "2025-12-29T16:30:00", type: "DECISION" },
     ],
     progress: 100,
   }),
@@ -667,7 +667,7 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 16. ADDITIONAL_COMMISSIONER_REVIEW
-  buildApp("app-16", "AP/BP/2026/04/0016", "Lumina Residential Complex", "RESIDENTIAL", 18500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-08T09:00:00", "2026-01-08T09:05:00", "2026-01-08T09:06:00", "2026-01-10T11:00:00", "2026-01-13T10:00:00", "2026-01-16T14:00:00", "2026-01-19T11:00:00"], "Smt. Reena Patel", "+91 98220 14516", "reena.patel@email.com", "Viman Nagar, Pune — 411014", {
+  buildApp("app-16", "AP/BP/2026/04/0016", "Lumina Residential Complex", "RESIDENTIAL", 18500, "ADDITIONAL_COMMISSIONER_REVIEW", "ADDITIONAL_COMMISSIONER_REVIEW", { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" }, ["2026-01-08T09:00:00", "2026-01-08T09:05:00", "2026-01-08T09:06:00", "2026-01-10T11:00:00", "2026-01-13T10:00:00", "2026-01-16T14:00:00", "2026-01-19T11:00:00"], "Smt. Reena Patel", "+91 98220 14516", "reena.patel@email.com", "Viman Nagar, Pune — 411014", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2026-01-08T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed", "2026-01-08T09:06:00", "SCR/2026/0016"),
     documents: makeDocuments("verified"),
@@ -677,13 +677,13 @@ export const SEED_APPLICATIONS: Application[] = [
   }),
 
   // 17. COMMISSIONER_REVIEW (using 17A to avoid conflict with the existing app-17)
-  buildApp("app-17a", "AP/BP/2026/04/0017A", "Grand Mall & Multiplex", "COMMERCIAL", 35000, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "Dr. Pratap Reddy", role: "COMMISSIONER" }, ["2025-12-15T09:00:00", "2025-12-15T09:05:00", "2025-12-15T09:06:00", "2025-12-17T11:00:00", "2025-12-20T10:00:00", "2025-12-25T14:00:00", "2025-12-30T11:00:00", "2026-01-05T15:00:00"], "Shri. Karan Johar", "+91 98220 14517", "karan.johar@email.com", "Magarpatta, Pune — 411028", {
+  buildApp("app-17a", "AP/BP/2026/04/0017A", "Grand Mall & Multiplex", "COMMERCIAL", 35000, "COMMISSIONER_REVIEW", "COMMISSIONER_REVIEW", { name: "A Jyotheeswar Reddy", role: "COMMISSIONER" }, ["2025-12-15T09:00:00", "2025-12-15T09:05:00", "2025-12-15T09:06:00", "2025-12-17T11:00:00", "2025-12-20T10:00:00", "2025-12-25T14:00:00", "2025-12-30T11:00:00", "2026-01-05T15:00:00"], "Shri. Karan Johar", "+91 98220 14517", "karan.johar@email.com", "Magarpatta, Pune — 411028", {
     drawings: makeDrawings([{ v: 1, passed: true, date: "2025-12-15T09:05:00" }]),
     scrutiny: makeScrutinyReport(1, "passed_warnings", "2025-12-15T09:06:00", "SCR/2026/0017"),
     documents: makeDocuments("verified"),
     fee: makeFee(35000, 8, true),
     payment: makePayment(4586300, true, "2025-12-17"),
-    remarks: [{ id: "r-17-1", author: { name: "Smt. Lakshmi Menon", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and recommended for Commissioner's final approval.", timestamp: "2026-01-05T15:00:00", type: "DECISION" }],
+    remarks: [{ id: "r-17-1", author: { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" }, text: "Reviewed and recommended for Commissioner's final approval.", timestamp: "2026-01-05T15:00:00", type: "DECISION" }],
   }),
 
   // ============================================================
@@ -910,6 +910,17 @@ export const SEED_SYSTEM_SETTINGS: SystemSettings = {
   allowedDocumentFormats: ["PDF", "JPG", "PNG"],
   sessionTimeoutMinutes: 30,
   demoMode: true,
+  // All roles have full access to all modules by default.
+  // Administrator can restrict these in Settings → Access Control.
+  roleAccessConfig: {
+    LTP:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    TPA:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    ZDD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    ZJD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    ADDITIONAL_COMMISSIONER: { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    COMMISSIONER:         { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    ADMIN:                { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+  },
 };
 
 // Backward-compatible exports

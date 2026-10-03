@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -133,7 +133,7 @@ export function LtpShortfalls() {
         <div className="flex flex-col gap-3 border-b border-border p-3 sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by shortfall ID or title…" className="h-9 pl-9.5 rounded-full border-muted-foreground/30" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="" className="h-9 pl-9.5 rounded-full border-muted-foreground/30" />
           </div>
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>

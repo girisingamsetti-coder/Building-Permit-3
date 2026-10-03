@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -127,7 +127,7 @@ export function OfficerDocuments() {
         action={
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search by application, project, applicant, document…" className="h-8 w-64 pl-8 text-xs" aria-label="Search documents" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="" className="h-8 w-64 pl-8 text-xs" aria-label="Search documents" />
           </div>
         }
       >

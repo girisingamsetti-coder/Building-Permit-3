@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import * as React from "react";
 import { useAppStore } from "@/store/app-store";
 import { PageHeader, SectionCard, EmptyState } from "@/components/design-system/layout";
@@ -33,7 +33,7 @@ export function OfficerPayments() {
         <div className="mb-4 relative">
           <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
           <Input
-            placeholder="Search applications…"
+            placeholder=""
             className="pl-8 h-8 text-xs"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

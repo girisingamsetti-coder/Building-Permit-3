@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -490,7 +490,7 @@ function ApplicationProgressSection({
         subtitle="Latest applications across the approval workflow"
         controls={
           <div className="flex items-center gap-2 flex-wrap">
-            <PmSearchInput value={query} onChange={setQuery} placeholder="Search applications…" className="w-full sm:w-48" />
+            <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-48" />
             <PmFilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} ariaLabel="Filter by status" className="w-full sm:w-36" />
             <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
             <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
@@ -642,7 +642,7 @@ function LiveWorkflowSection({
         subtitle="Applications currently moving through the approval pipeline"
         controls={
           <div className="flex items-center gap-2 flex-wrap">
-            <PmSearchInput value={query} onChange={setQuery} placeholder="Search app / project / officer…" className="w-full sm:w-52" />
+            <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-52" />
             <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
             <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
             <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-32" />
@@ -828,7 +828,7 @@ function OfficerWorkloadSection({
         subtitle="Current active assignments across all officers"
         controls={
           <div className="flex items-center gap-2 flex-wrap">
-            <PmSearchInput value={query} onChange={setQuery} placeholder="Search officer…" className="w-full sm:w-40" />
+            <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-40" />
             <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
             <PmFilterSelect value={sortBy} onChange={setSortBy} options={sortOptions} ariaLabel="Sort by" className="w-full sm:w-36" />
           </div>
@@ -962,7 +962,7 @@ function PendingActionsSection({
         subtitle="Applications awaiting action across all stages"
         controls={
           <div className="flex items-center gap-2 flex-wrap">
-            <PmSearchInput value={query} onChange={setQuery} placeholder="Search pending actions…" className="w-full sm:w-44" />
+            <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-44" />
             <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-28" />
             <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-32" />
             <PmFilterSelect value={priorityFilter} onChange={setPriorityFilter} options={PRIORITY_OPTIONS} ariaLabel="Filter by priority" className="w-full sm:w-28" />
@@ -1088,7 +1088,7 @@ function RecentActivitySection({
           <History className="size-3.5" /> Recent Activity
         </h2>
         <div className="flex items-center gap-1.5 w-full sm:w-auto">
-          <PmSearchInput value={query} onChange={setQuery} placeholder="Search…" className="w-full sm:w-28 h-7 text-[10px]" />
+          <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-28 h-7 text-[10px]" />
           <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} ariaLabel="Filter" className="w-full sm:w-24 h-7 text-[10px]" />
         </div>
       </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -246,7 +246,7 @@ export function OccupancyView() {
               <div className="relative w-64">
                 <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
-                  placeholder="Search application or owner..."
+                  placeholder=""
                   className="pl-8 text-xs h-8"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

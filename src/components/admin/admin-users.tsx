@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -525,7 +525,7 @@ export function AdminUsers() {
               id="user-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, email, employee ID, license, designation or zone…"
+              placeholder=""
               className="pl-9"
             />
           </div>

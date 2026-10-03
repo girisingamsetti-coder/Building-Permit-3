@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -142,7 +142,7 @@ export function AdminDashboard() {
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <Search className="absolute left-2 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
-                    <input type="text" placeholder="Search..." className="!h-6 w-28 pl-6 pr-2 !py-0 text-[10px] font-bold placeholder:text-slate-400 text-slate-600 rounded-full border border-slate-200 bg-slate-50 focus:outline-none focus:border-blue-400 transition-colors" />
+                    <input type="text" placeholder="" className="!h-6 w-28 pl-6 pr-2 !py-0 text-[10px] font-bold placeholder:text-slate-400 text-slate-600 rounded-full border border-slate-200 bg-slate-50 focus:outline-none focus:border-blue-400 transition-colors" />
                   </div>
                   <Select defaultValue="all">
                     <SelectTrigger className="!h-6 w-28 px-2 !py-0 text-[10px] font-bold text-slate-400 rounded-full border border-slate-200 bg-slate-50 focus:ring-0 focus:border-blue-400">

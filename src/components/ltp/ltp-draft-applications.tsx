@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -30,6 +30,7 @@ interface DraftItem {
   owner: string;
   appId?: string;
   lpsType?: "LPS Layout" | "Non-LPS";
+  type: "LPS" | "Non LPS";
 }
 
 export function LtpDraftApplications({
@@ -51,6 +52,10 @@ export function LtpDraftApplications({
   const [selectedDraft, setSelectedDraft] = React.useState<DraftItem | null>(null);
   const [viewReportModal, setViewReportModal] = React.useState(false);
   const [reportModalTab, setReportModalTab] = React.useState<"scrutiny" | "registry">("scrutiny");
+  // Per-row type overrides (LPS / Non LPS)
+  const [typeOverrides, setTypeOverrides] = React.useState<Record<string, "LPS" | "Non LPS">>({}); 
+  const getItemType = (item: DraftItem): "LPS" | "Non LPS" =>
+    typeOverrides[item.id] ?? item.type;
 
   // Compute draft proposals from store or include the standard APCRDA demo draft
   const draftItems: DraftItem[] = React.useMemo(() => {
@@ -75,6 +80,7 @@ export function LtpDraftApplications({
           ? "Group Development"
           : "Building Permission";
 
+      const isLps = a.applicationNo.includes("/LPS/") || a.project?.type === "LAYOUT_APPROVAL";
       return {
         id: a.id || `draft-${idx}`,
         baNo: ba,
@@ -83,6 +89,7 @@ export function LtpDraftApplications({
         status: "Draft",
         owner: a.applicant?.name || "",
         appId: a.id,
+        type: isLps ? "LPS" : "Non LPS",
       };
     });
 
@@ -97,6 +104,7 @@ export function LtpDraftApplications({
         status: "Draft",
         owner: "",
         appId: userDrafts[0]?.id || applications[0]?.id,
+        type: "Non LPS",
       });
     }
 
@@ -218,7 +226,7 @@ export function LtpDraftApplications({
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder="Search draft no., owner..."
+              placeholder=""
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -325,7 +333,7 @@ export function LtpDraftApplications({
 
                 <th
                   onClick={() => handleSort("permissionType")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-56 min-w-[180px]"
+                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-48 min-w-[160px]"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Permission Type</span>
@@ -333,9 +341,14 @@ export function LtpDraftApplications({
                   </div>
                 </th>
 
+                {/* NEW: Type column */}
+                <th className="px-4 py-2.5 font-bold select-none w-32 min-w-[110px] text-center">
+                  Type
+                </th>
+
                 <th
                   onClick={() => handleSort("owner")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none flex-1 min-w-[240px]"
+                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none flex-1 min-w-[200px]"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Owner / Applicant</span>
@@ -345,7 +358,7 @@ export function LtpDraftApplications({
 
                 <th
                   onClick={() => handleSort("createdDate")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-44 min-w-[140px]"
+                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-40 min-w-[130px]"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Created Date</span>
@@ -360,49 +373,76 @@ export function LtpDraftApplications({
             {/* Table Body */}
             <tbody className="divide-y divide-[#DCD5C8] bg-white">
               {sortedItems.length > 0 ? (
-                sortedItems.map((item, idx) => (
-                  <tr
-                    key={item.id}
-                    className="divide-x divide-[#EFE7DC] hover:bg-[#FAF4EB] transition-colors"
-                  >
-                    {/* Index */}
-                    <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">{idx + 1}</td>
+                sortedItems.map((item, idx) => {
+                  const currentType = getItemType(item);
+                  return (
+                    <tr
+                      key={item.id}
+                      className="divide-x divide-[#EFE7DC] hover:bg-[#FAF4EB] transition-colors"
+                    >
+                      {/* Index */}
+                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">{idx + 1}</td>
 
-                    {/* Draft No. */}
-                    <td className="px-4 py-2.5 whitespace-nowrap">
-                      <button
-                        onClick={() => handleOpenDraft(item)}
-                        className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-bold hover:underline cursor-pointer text-left font-mono"
-                        title="Click to view and continue this draft"
-                      >
-                        <span>{item.baNo}</span>
-                        <ExternalLink className="size-3 text-[#7A1316]/60 hover:text-[#7A1316]" />
-                      </button>
-                    </td>
+                      {/* Draft No. */}
+                      <td className="px-4 py-2.5 whitespace-nowrap">
+                        <button
+                          onClick={() => handleOpenDraft(item)}
+                          className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-bold hover:underline cursor-pointer text-left font-mono"
+                          title="Click to view and continue this draft"
+                        >
+                          <span>{item.baNo}</span>
+                          <ExternalLink className="size-3 text-[#7A1316]/60 hover:text-[#7A1316]" />
+                        </button>
+                      </td>
 
-                    {/* Permission Type */}
-                    <td className="px-4 py-2.5 text-slate-800 font-medium whitespace-nowrap">{item.permissionType}</td>
+                      {/* Permission Type */}
+                      <td className="px-4 py-2.5 text-slate-800 font-medium whitespace-nowrap">{item.permissionType}</td>
 
-                    {/* Owner / Applicant */}
-                    <td className="px-4 py-2.5 text-slate-700 font-medium">{item.owner || "New Proposal"}</td>
+                      {/* Type: LPS / Non LPS — inline selectable badge */}
+                      <td className="px-4 py-2.5 text-center">
+                        <select
+                          value={currentType}
+                          onChange={(e) =>
+                            setTypeOverrides((prev) => ({
+                              ...prev,
+                              [item.id]: e.target.value as "LPS" | "Non LPS",
+                            }))
+                          }
+                          aria-label="Select type"
+                          onClick={(e) => e.stopPropagation()}
+                          className={cn(
+                            "rounded-full px-2.5 py-0.5 text-[11px] font-bold border cursor-pointer outline-none appearance-none text-center",
+                            currentType === "LPS"
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                              : "bg-blue-50 text-blue-800 border-blue-300 hover:bg-blue-100"
+                          )}
+                        >
+                          <option value="LPS">LPS</option>
+                          <option value="Non LPS">Non LPS</option>
+                        </select>
+                      </td>
 
-                    {/* Created Date */}
-                    <td className="px-4 py-2.5 text-slate-700 tabular-nums whitespace-nowrap">{item.createdDate}</td>
+                      {/* Owner / Applicant */}
+                      <td className="px-4 py-2.5 text-slate-700 font-medium">{item.owner || "New Proposal"}</td>
 
-                    {/* Action: Resume */}
-                    <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
-                      <button
-                        onClick={() => handleOpenDraft(item)}
-                        className="rounded-full px-4 py-1.5 bg-[#7A1316]/10 hover:bg-[#7A1316] text-[#7A1316] hover:text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs"
-                      >
-                        Resume
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      {/* Created Date */}
+                      <td className="px-4 py-2.5 text-slate-700 tabular-nums whitespace-nowrap">{item.createdDate}</td>
+
+                      {/* Action: Resume */}
+                      <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
+                        <button
+                          onClick={() => handleOpenDraft(item)}
+                          className="rounded-full px-4 py-1.5 bg-[#7A1316]/10 hover:bg-[#7A1316] text-[#7A1316] hover:text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                        >
+                          Resume
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
                     No draft proposals found matching the search criteria.
                   </td>
                 </tr>
@@ -575,6 +615,7 @@ export function LtpDraftApplications({
                           <th className="px-3 py-2 w-10 text-center">#</th>
                           <th className="px-3 py-2">Proposal / BA No.</th>
                           <th className="px-3 py-2">Permission Type</th>
+                          <th className="px-3 py-2 text-center">Type</th>
                           <th className="px-3 py-2">Created Date</th>
                           <th className="px-3 py-2">Status</th>
                           <th className="px-3 py-2">Owner / Applicant</th>
@@ -586,6 +627,16 @@ export function LtpDraftApplications({
                             <td className="px-3 py-2 text-center font-bold text-slate-500">{idx + 1}</td>
                             <td className="px-3 py-2 font-mono font-bold text-[#7A1316]">{item.baNo}</td>
                             <td className="px-3 py-2 text-slate-800">{item.permissionType}</td>
+                            <td className="px-3 py-2 text-center">
+                              <span className={cn(
+                                "px-2 py-0.5 rounded text-[10px] font-bold border",
+                                getItemType(item) === "LPS"
+                                  ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                  : "bg-blue-100 text-blue-800 border-blue-300"
+                              )}>
+                                {getItemType(item)}
+                              </span>
+                            </td>
                             <td className="px-3 py-2 text-slate-600 font-mono">{item.createdDate}</td>
                             <td className="px-3 py-2">
                               <span className="bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded text-[10px] font-bold">

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -178,7 +178,7 @@ export function LtpDocuments() {
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                      <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search…" className="h-8 w-36 pl-8 text-xs" aria-label="Search documents" />
+                      <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="" className="h-8 w-36 pl-8 text-xs" aria-label="Search documents" />
                     </div>
                     <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="h-8 rounded-md border border-input bg-background px-2 text-xs" aria-label="Filter by status">
                       <option value="ALL">All</option>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useMemo } from "react";
 import { PageHeader } from "@/components/design-system/layout";
@@ -146,7 +146,7 @@ export function AdminApplications() {
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search number, applicant, survey no. or locality"
+                placeholder=""
                 className="h-9 pl-9 rounded-full bg-slate-50 border-slate-200"
               />
             </div>

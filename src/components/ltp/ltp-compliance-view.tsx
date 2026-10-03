@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -409,7 +409,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by BA number, project or applicant…"
+                  placeholder=""
                   className="h-9 pl-9 text-xs border-[#EADBCE] focus-visible:ring-[#801824]"
                 />
               </div>
@@ -534,7 +534,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <Input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search shortfall ID, title or proposal no…"
+                  placeholder=""
                   className="h-9 pl-9 text-xs border-[#EADBCE] focus-visible:ring-[#801824]"
                 />
               </div>

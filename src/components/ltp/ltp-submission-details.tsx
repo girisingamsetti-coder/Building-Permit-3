@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -3136,7 +3136,7 @@ export function LtpSubmissionDetails({
                     <Search className="size-3.5 text-slate-400 shrink-0" />
                     <input
                       type="text"
-                      placeholder="Search document name or code..."
+                      placeholder=""
                       value={docSearchQuery}
                       onChange={(e) => setDocSearchQuery(e.target.value)}
                       className="w-full text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   AsBuiltFigures,
   ComparisonRow,
   OccupancyDocument,
@@ -510,13 +510,13 @@ export const SEED_OCCUPANCY_RECORDS: OccupancyApplicationRecord[] = [
     decision: {
       decision: "APPROVED",
       remarks: "Occupancy Certificate granted subject to standard maintenance conditions. Sent to Outward for dispatch.",
-      decidedByName: "Dr. Pratap Reddy (Commissioner)",
+      decidedByName: "A Jyotheeswar Reddy (Commissioner)",
       decidedAt: "2026-03-20T16:00:00Z",
     },
     certificate: {
       certificateNumber: "OCC-CERT-2026-012",
       issuedAt: "2026-03-22T10:00:00Z",
-      issuedByName: "Dr. Pratap Reddy (Commissioner)",
+      issuedByName: "A Jyotheeswar Reddy (Commissioner)",
       approvedAreaSqm: 1800.0,
       completedAreaSqm: 1792.5,
       conditions: [
@@ -531,8 +531,8 @@ export const SEED_OCCUPANCY_RECORDS: OccupancyApplicationRecord[] = [
       verificationCode: "OCC-9821-X4K9",
     },
     events: [
-      { id: "ev-1", action: "CERTIFICATE_ISSUED", fromStatus: "APPROVED", toStatus: "CERTIFICATE_ISSUED", actorName: "Dr. Pratap Reddy", actorRoleKey: "COMMISSIONER", stageName: "Dispatch", remarks: "Occupancy certificate generated and outwarded as OUT/2026/03/0488.", occurredAt: "2026-03-22T10:00:00Z" },
-      { id: "ev-2", action: "APPROVED", fromStatus: "RECOMMENDED", toStatus: "APPROVED", actorName: "Dr. Pratap Reddy", actorRoleKey: "COMMISSIONER", stageName: "Decision Desk", remarks: "Occupancy approved after final scrutiny.", occurredAt: "2026-03-20T16:00:00Z" },
+      { id: "ev-1", action: "CERTIFICATE_ISSUED", fromStatus: "APPROVED", toStatus: "CERTIFICATE_ISSUED", actorName: "A Jyotheeswar Reddy", actorRoleKey: "COMMISSIONER", stageName: "Dispatch", remarks: "Occupancy certificate generated and outwarded as OUT/2026/03/0488.", occurredAt: "2026-03-22T10:00:00Z" },
+      { id: "ev-2", action: "APPROVED", fromStatus: "RECOMMENDED", toStatus: "APPROVED", actorName: "A Jyotheeswar Reddy", actorRoleKey: "COMMISSIONER", stageName: "Decision Desk", remarks: "Occupancy approved after final scrutiny.", occurredAt: "2026-03-20T16:00:00Z" },
       { id: "ev-3", action: "RECOMMENDED", fromStatus: "INSPECTION_COMPLETED", toStatus: "RECOMMENDED", actorName: "Smt. Meena Kulkarni", actorRoleKey: "ZDD", stageName: "Technical Review", remarks: "As-built drawings verified. Recommended for approval.", occurredAt: "2026-03-18T11:00:00Z" },
       { id: "ev-4", action: "INSPECTED", fromStatus: "INSPECTION_PENDING", toStatus: "INSPECTION_COMPLETED", actorName: "Soumith", actorRoleKey: "TPA", stageName: "Field Inspection", remarks: "Round 2 inspection completed. Site cleared and compliant.", occurredAt: "2026-03-15T15:00:00Z" },
       { id: "ev-5", action: "INSPECTION_SCHEDULED", fromStatus: "SUBMITTED", toStatus: "INSPECTION_PENDING", actorName: "Soumith", actorRoleKey: "TPA", stageName: "Inspection Scheduling", remarks: "Re-inspection booked for 15 March.", occurredAt: "2026-03-13T10:00:00Z" },
@@ -661,11 +661,11 @@ export const SEED_OCCUPANCY_RECORDS: OccupancyApplicationRecord[] = [
       recommendation: "APPROVE",
       label: "Recommended for Approval",
       notes: "Commercial development inspected and found fully compliant. Fire safety, lifts, and sewage treatment plant certificates verified. Forwarded to Commissioner for approval.",
-      reviewedByName: "Smt. Lakshmi Menon (Addl. Commissioner)",
+      reviewedByName: "Hemanthsai (Addl. Commissioner)",
       reviewedAt: "2026-03-01T15:00:00Z",
     },
     events: [
-      { id: "ev-21", action: "RECOMMENDED", fromStatus: "INSPECTION_COMPLETED", toStatus: "RECOMMENDED", actorName: "Smt. Lakshmi Menon", actorRoleKey: "ADDITIONAL_COMMISSIONER", stageName: "Review", remarks: "Recommended for approval.", occurredAt: "2026-03-01T15:00:00Z" },
+      { id: "ev-21", action: "RECOMMENDED", fromStatus: "INSPECTION_COMPLETED", toStatus: "RECOMMENDED", actorName: "Hemanthsai", actorRoleKey: "ADDITIONAL_COMMISSIONER", stageName: "Review", remarks: "Recommended for approval.", occurredAt: "2026-03-01T15:00:00Z" },
       { id: "ev-22", action: "INSPECTED", fromStatus: "INSPECTION_PENDING", toStatus: "INSPECTION_COMPLETED", actorName: "Smt. Anita Sharma", actorRoleKey: "TPA", stageName: "Field Inspection", remarks: "Site inspection completed.", occurredAt: "2026-02-25T14:00:00Z" },
       { id: "ev-23", action: "INSPECTION_SCHEDULED", fromStatus: "SUBMITTED", toStatus: "INSPECTION_PENDING", actorName: "Smt. Anita Sharma", actorRoleKey: "TPA", stageName: "Inspection Scheduling", remarks: "Inspection scheduled.", occurredAt: "2026-02-22T09:30:00Z" },
       { id: "ev-24", action: "SUBMITTED", toStatus: "SUBMITTED", actorName: "Venu Kotte", actorRoleKey: "LTP", stageName: "Applicant", remarks: "Applied for commercial occupancy.", occurredAt: "2026-02-20T11:00:00Z" },
@@ -1079,11 +1079,11 @@ export const SEED_OCCUPANCY_RECORDS: OccupancyApplicationRecord[] = [
     decision: {
       decision: "REJECTED",
       remarks: "Occupancy application rejected due to unauthorized extra floor (G+5 vs sanctioned G+4) and 620 sq m built-up area deviation. Enforcement action recommended.",
-      decidedByName: "Dr. Pratap Reddy (Commissioner)",
+      decidedByName: "A Jyotheeswar Reddy (Commissioner)",
       decidedAt: "2026-02-05T15:00:00Z",
     },
     events: [
-      { id: "ev-61", action: "REJECTED", fromStatus: "INSPECTION_COMPLETED", toStatus: "REJECTED", actorName: "Dr. Pratap Reddy", actorRoleKey: "COMMISSIONER", stageName: "Decision Desk", remarks: "Occupancy rejected due to major violations.", occurredAt: "2026-02-05T15:00:00Z" },
+      { id: "ev-61", action: "REJECTED", fromStatus: "INSPECTION_COMPLETED", toStatus: "REJECTED", actorName: "A Jyotheeswar Reddy", actorRoleKey: "COMMISSIONER", stageName: "Decision Desk", remarks: "Occupancy rejected due to major violations.", occurredAt: "2026-02-05T15:00:00Z" },
       { id: "ev-62", action: "INSPECTED", fromStatus: "INSPECTION_PENDING", toStatus: "INSPECTION_COMPLETED", actorName: "Soumith", actorRoleKey: "TPA", stageName: "Field Inspection", remarks: "Inspection completed — critical deviations found.", occurredAt: "2026-01-28T10:00:00Z" },
       { id: "ev-63", action: "SUBMITTED", toStatus: "SUBMITTED", actorName: "Venu Kotte", actorRoleKey: "LTP", stageName: "Applicant", remarks: "Occupancy applied.", occurredAt: "2026-01-25T11:00:00Z" },
     ],

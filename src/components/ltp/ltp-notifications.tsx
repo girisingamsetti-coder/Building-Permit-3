@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -119,7 +119,7 @@ export function LtpNotifications() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search notifications…"
+              placeholder=""
               className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm sm:w-64"
             />
           </div>

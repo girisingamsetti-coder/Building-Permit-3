@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -233,7 +233,7 @@ export function ApplicationSelector({
               ref={searchRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search applications…"
+              placeholder=""
               aria-label="Search applications"
               className="h-8 border-0 bg-muted/40 pl-8 text-xs shadow-none focus-visible:bg-background"
             />

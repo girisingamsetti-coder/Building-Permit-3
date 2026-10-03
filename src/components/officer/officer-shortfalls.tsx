@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import * as React from "react";
 import { useAppStore, useAllShortfalls } from "@/store/app-store";
 import { PageHeader, SectionCard, EmptyState } from "@/components/design-system/layout";
@@ -38,7 +38,7 @@ export function OfficerShortfalls() {
           <div className="relative flex-1 min-w-[180px]">
             <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
             <Input
-              placeholder="Search shortfalls…"
+              placeholder=""
               className="pl-8 h-8 text-xs"
               value={search}
               onChange={(e) => setSearch(e.target.value)}

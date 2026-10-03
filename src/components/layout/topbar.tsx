@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -644,7 +644,7 @@ export function Topbar() {
                 searchInputRef.current?.blur();
               }
             }}
-            placeholder="Search here..."
+            placeholder=""
             className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
           />
           {searchQuery && (

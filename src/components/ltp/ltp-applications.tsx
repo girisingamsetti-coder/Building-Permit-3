@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -263,7 +263,7 @@ export function LtpApplications() {
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by application no, project, applicant, ward, zone…"
+              placeholder=""
               className="h-9 pl-9.5 pr-8 rounded-full border-muted-foreground/30 focus-visible:ring-[#7A1316]/20 focus-visible:border-[#7A1316]"
               aria-label="Search applications"
             />

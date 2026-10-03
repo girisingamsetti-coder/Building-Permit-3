@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import type { Application } from "@/types";
@@ -121,7 +121,7 @@ export function ApplicationOccupancyTab({ app }: { app: Application }) {
         id: "ev-init",
         action: "APPROVED",
         toStatus: "APPROVED",
-        actorName: "Dr. Pratap Reddy",
+        actorName: "A Jyotheeswar Reddy",
         actorRoleKey: "COMMISSIONER",
         stageName: "Decision",
         remarks: "Building permission order issued.",

@@ -532,6 +532,14 @@ export interface ApplicationTypeConfig {
 }
 
 // ---------- System Settings ----------
+export type ModuleAccessLevel = "full" | "read" | "none";
+
+export type RoleAccessConfig = {
+  [role: string]: {
+    [moduleId: string]: ModuleAccessLevel;
+  };
+};
+
 export interface SystemSettings {
   portalName: string;
   portalSubtitle: string;
@@ -542,7 +550,10 @@ export interface SystemSettings {
   allowedDocumentFormats: string[];
   sessionTimeoutMinutes: number;
   demoMode: boolean;
+  /** Per-role, per-module access level configured by Admin */
+  roleAccessConfig: RoleAccessConfig;
 }
+
 
 export interface Remark {
   id: string;

@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // BBAS Extended Modules Data Store
 // Site Inspections, NOCs, Show Cause, Revocations, LTP Changes,
 // Work Initiated, Developers, Professionals, Outward, Tasks, Shortfalls, Payments
@@ -1217,7 +1217,7 @@ export const MOCK_TASKS: WorkflowTaskRecord[] = [
     taskType: "COMMISSIONER_REVIEW",
     title: "Final Orders on Revocation Proceeding Under Sec 53",
     assignedRole: "COMMISSIONER",
-    assigneeName: "Municipal Commissioner",
+    assigneeName: "A Jyotheeswar Reddy",
     priority: "CRITICAL",
     stage: "Commissioner Review",
     dueDate: "2026-09-27",

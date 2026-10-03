@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -1434,7 +1434,7 @@ function DecideDialog({
       decision: {
         decision,
         remarks,
-        decidedByName: "Dr. Pratap Reddy (Commissioner)",
+        decidedByName: "A Jyotheeswar Reddy (Commissioner)",
         decidedAt: new Date().toISOString(),
       },
       events: [
@@ -1443,7 +1443,7 @@ function DecideDialog({
           action: decision === "APPROVED" ? "APPROVED" : "REJECTED",
           fromStatus: prev.status,
           toStatus: decision,
-          actorName: "Dr. Pratap Reddy",
+          actorName: "A Jyotheeswar Reddy",
           actorRoleKey: "COMMISSIONER",
           stageName: "Decision Desk",
           remarks,
@@ -1539,7 +1539,7 @@ function IssueDialog({
       certificate: {
         certificateNumber: certNo,
         issuedAt: new Date().toISOString(),
-        issuedByName: "Dr. Pratap Reddy (Commissioner)",
+        issuedByName: "A Jyotheeswar Reddy (Commissioner)",
         approvedAreaSqm: prev.project.approvedAreaSqm,
         completedAreaSqm: prev.project.completedAreaSqm,
         conditions: [
@@ -1559,7 +1559,7 @@ function IssueDialog({
           action: "CERTIFICATE_ISSUED",
           fromStatus: "APPROVED",
           toStatus: "CERTIFICATE_ISSUED",
-          actorName: "Dr. Pratap Reddy",
+          actorName: "A Jyotheeswar Reddy",
           actorRoleKey: "COMMISSIONER",
           stageName: "Dispatch",
           remarks: `Occupancy certificate ${certNo} issued and placed in Outward register (${outwardNumber}).`,
