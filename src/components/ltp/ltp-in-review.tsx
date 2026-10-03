@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
+import { useAppStore } from "@/store/app-store";
 import {
   Clock,
   Search,
@@ -20,7 +21,6 @@ import {
   AlertCircle,
   Printer,
 } from "lucide-react";
-import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 
 export type ReviewStageKey =
@@ -50,6 +50,7 @@ export interface InReviewItem {
   lpsType?: "LPS" | "Non LPS";
   village?: string;
   district?: string;
+  appId?: string;
 }
 
 const DEFAULT_IN_REVIEW_ITEMS: InReviewItem[] = [
@@ -201,6 +202,7 @@ const DEFAULT_IN_REVIEW_ITEMS: InReviewItem[] = [
 
 export function LtpInReview() {
   const { applications } = useDashboardScope();
+  const openApplication = useAppStore((s) => s.openApplication);
 
   // Search & Filter State
   const [searchKeywords, setSearchKeywords] = React.useState("");
@@ -209,7 +211,6 @@ export function LtpInReview() {
   const [filterCaseType, setFilterCaseType] = React.useState<string>("ALL");
   const [sortField, setSortField] = React.useState<keyof InReviewItem>("submissionDate");
   const [sortAsc, setSortAsc] = React.useState(false);
-  const [selectedProposal, setSelectedProposal] = React.useState<InReviewItem | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [viewReportModal, setViewReportModal] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState<string | null>(null);
@@ -278,21 +279,13 @@ export function LtpInReview() {
           caseType: idx % 2 === 0 ? "Fresh" : "Revision",
           submissionDate: dateStr,
           lpsType: a.applicationNo?.includes("/LPS/") ? "LPS" : "Non LPS",
+          village: (a.project as any)?.village || "Borupalem",
+          district: (a.project as any)?.district || "Guntur",
+          appId: a.id,
         });
       });
 
-    // Merge store items with default authentic review items
-    const existingBaNos = new Set(storeItems.map((s) => s.baNo));
-    const merged: InReviewItem[] = [...storeItems];
-
-    for (const d of DEFAULT_IN_REVIEW_ITEMS) {
-      if (!existingBaNos.has(d.baNo)) {
-        merged.push(d);
-        existingBaNos.add(d.baNo);
-      }
-    }
-
-    return merged;
+    return storeItems;
   }, [applications]);
 
   // Stage breakdown counts
@@ -496,25 +489,16 @@ export function LtpInReview() {
     }
   };
 
-  // If a proposal is selected, render LtpSubmissionDetails directly in Beige & Maroon
-  if (selectedProposal) {
-    return (
-      <div className="w-full h-full flex flex-col font-sans text-slate-800 overflow-hidden">
-        <div className="flex-1 min-h-0">
-          <LtpSubmissionDetails
-            key={selectedProposal.id}
-            baNo={selectedProposal.baNo}
-            proposalStatus="In Review"
-            submissionDate={selectedProposal.submissionDate}
-            isDraft={false}
-            initialTab="form"
-            initialLpsType={selectedProposal.lpsType === "LPS" ? "LPS Layout" : "Non-LPS"}
-            onBack={() => setSelectedProposal(null)}
-          />
-        </div>
-      </div>
-    );
-  }
+  const handleOpenApplication = (item: InReviewItem) => {
+    const targetApp =
+      (item.appId ? applications.find((a) => a.id === item.appId) : null) ||
+      applications.find((a) => a.applicationNo === item.baNo || a.id === item.id) ||
+      applications[0];
+
+    if (targetApp) {
+      openApplication(targetApp.id, "ltp-application-details");
+    }
+  };
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
@@ -753,9 +737,9 @@ export function LtpInReview() {
                     {/* Application / BA No. */}
                     <td className="px-3.5 py-2.5 whitespace-nowrap">
                       <button
-                        onClick={() => setSelectedProposal(item)}
+                        onClick={() => handleOpenApplication(item)}
                         className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
-                        title="Click to inspect proposal review details"
+                        title="Click to view application details"
                       >
                         <span>{item.baNo}</span>
                         <ExternalLink className="size-3 text-[#7A1316]/50 hover:text-[#7A1316]" />
@@ -822,8 +806,8 @@ export function LtpInReview() {
                     {/* Action Button: View proposal in Beige and Maroon */}
                     <td className="px-2.5 py-2.5 text-center whitespace-nowrap">
                       <button
-                        onClick={() => setSelectedProposal(item)}
-                        title="Open proposal in Beige and Maroon review mode"
+                        onClick={() => handleOpenApplication(item)}
+                        title="View application details"
                         className="text-white text-[11px] font-bold px-3 py-1.5 rounded-full shadow-2xs hover:shadow-xs transition-all cursor-pointer inline-flex items-center gap-1.5 bg-[#7A1316] hover:bg-[#8F161A]"
                       >
                         <span>View</span>

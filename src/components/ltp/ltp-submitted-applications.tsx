@@ -148,18 +148,7 @@ export function LtpSubmittedApplications({
         };
       });
 
-    // Merge store items with defaults (avoid duplicate BA numbers)
-    const existingBaNos = new Set(storeSubmitted.map((s) => s.baNo));
-    const merged: SubmissionItem[] = [...storeSubmitted];
-
-    for (const d of DEFAULT_SUBMISSIONS) {
-      if (!existingBaNos.has(d.baNo)) {
-        merged.push(d);
-        existingBaNos.add(d.baNo);
-      }
-    }
-
-    return merged;
+    return storeSubmitted;
   }, [applications]);
 
   // Filtering
@@ -293,8 +282,8 @@ export function LtpSubmittedApplications({
         </div>
 
         {/* Center Contents: 2 Buttons "LPS" and "Non LPS" */}
-        <div className="max-w-4xl w-full mx-auto my-auto py-8">
-          <div className="text-center mb-8">
+        <div className="max-w-4xl w-full mx-auto mt-2 sm:mt-6 mb-auto py-2">
+          <div className="text-center mb-6">
             <h2 className="text-2xl font-black text-[#7A1316] tracking-tight">Select Application Scheme</h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl mx-auto">
               Please choose whether your site is part of the Amaravati Land Pooling Scheme (LPS) or a Non-LPS layout.

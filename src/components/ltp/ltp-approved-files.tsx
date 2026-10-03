@@ -159,17 +159,7 @@ export function LtpApprovedFiles() {
         };
       });
 
-    const existingBaNos = new Set(storeApproved.map((s) => s.baNo));
-    const merged: ApprovedFileItem[] = [...storeApproved];
-
-    for (const def of DEFAULT_APPROVED_FILES) {
-      if (!existingBaNos.has(def.baNo)) {
-        merged.push(def);
-        existingBaNos.add(def.baNo);
-      }
-    }
-
-    return merged;
+    return storeApproved;
   }, [applications]);
 
   // Filtering

@@ -11,6 +11,7 @@ import type {
   WorkflowStageKey,
 } from "@/types";
 import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
+import { normalizeZone, getDashboardScope } from "@/lib/scope";
 
 // ============================================================
 // RBAC — Role-Based Access Control
@@ -92,9 +93,22 @@ export function rolesForStage(stage: WorkflowStageKey): RoleKey[] {
 
 // Can this user view this application?
 export function canViewApplication(user: User, app: Application): boolean {
-  if (user.role === "ADMIN" || user.role === "DIRECTOR") return true;
-  if (user.role === "ZONAL_HEAD" && app.project.zone !== user.zone) return false;
-  if (user.role === "LTP") return app.ltpId === user.id;
+  if (user.role === "ADMIN" || user.role === "COMMISSIONER" || user.role === "ADDITIONAL_COMMISSIONER") return true;
+  if (user.role === "ZDD" || user.role === "ZJD" || user.role === "ZONAL_HEAD" || user.role === "DIRECTOR") {
+    const userZone = normalizeZone(user.zone || "Zone 1");
+    const appZone = normalizeZone(app.zone || app.project?.zone);
+    return appZone === userZone;
+  }
+  if (user.role === "TPA") {
+    if (app.tpaId && (app.tpaId === user.id || app.tpaId === user.employeeId)) return true;
+    if (app.tpaName && user.name && app.tpaName.toLowerCase() === user.name.toLowerCase()) return true;
+    return false;
+  }
+  if (user.role === "LTP") {
+    if (app.ltpId && (app.ltpId === user.id || app.ltpId === user.employeeId)) return true;
+    if (app.ltpName && user.name && app.ltpName.toLowerCase() === user.name.toLowerCase()) return true;
+    return false;
+  }
   // Officers can view all applications assigned to their stage/role
   const stageRoles = rolesForStage(app.currentStage);
   if (stageRoles.includes(user.role)) return true;
@@ -104,24 +118,7 @@ export function canViewApplication(user: User, app: Application): boolean {
 
 // Which applications are visible to this user?
 export function getVisibleApplications(user: User, apps: Application[]): Application[] {
-  if (user.role === "ADMIN" || user.role === "DIRECTOR") return apps;
-
-  if (user.role === "ZONAL_HEAD") {
-    return apps.filter((a) => {
-      if (a.project.zone !== user.zone) return false;
-      const stageRoles = rolesForStage(a.currentStage);
-      if (stageRoles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
-      return a.workflowHistory.some((w) => w.actor.role === user.role);
-    });
-  }
-
-  if (user.role === "LTP") return [];
-  // Officers see apps at their stage + apps they've acted on
-  return apps.filter((a) => {
-    const stageRoles = rolesForStage(a.currentStage);
-    if (stageRoles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
-    return a.workflowHistory.some((w) => w.actor.role === user.role);
-  });
+  return getDashboardScope(user, apps).applications;
 }
 
 // Applications currently assigned to this officer for review

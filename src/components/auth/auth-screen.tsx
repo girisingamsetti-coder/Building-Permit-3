@@ -205,8 +205,7 @@ function LoginForm() {
 
   function handleDemoRoleSelect(value: string) {
     setDemoRole(value);
-    const role = value as RoleKey;
-    const cred = DEMO_CREDENTIALS.find((c) => c.role === role);
+    const cred = DEMO_CREDENTIALS.find((c) => c.email.toLowerCase() === value.toLowerCase()) ?? DEMO_CREDENTIALS.find((c) => c.role === value);
     if (cred) {
       setEmail(cred.email);
       setPassword(cred.password);
@@ -219,7 +218,7 @@ function LoginForm() {
         if (res.ok) {
           toast({
             title: "Welcome",
-            description: `Signed in as ${ROLES[role].fullName}.`,
+            description: `Signed in as ${cred.label}.`,
           });
         } else {
           setError(res.error ?? "Login failed.");
@@ -436,9 +435,8 @@ function LoginForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {DEMO_CREDENTIALS.map(c => (
-                      <SelectItem key={c.role} value={c.role}>
-                        {/* Show role designation only — name is shown after login */}
-                        {c.label.replace(/\s*\(.*\)$/, "")}
+                      <SelectItem key={c.email} value={c.email}>
+                        {c.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -20,73 +20,9 @@ import { rolesForStage } from "@/lib/permissions";
 //     applications where they acted in workflow history
 // ============================================================
 
-export interface DashboardScope {
-  user: User;
-  role: RoleKey;
-  applications: Application[];      // scoped applications
-  users: User[];                     // scoped users (officers relevant to the scope)
-  projectIds: string[];              // project identifiers in scope (empty = all)
-  isGlobal: boolean;                 // true for ADMIN (org-wide)
-}
-
-/**
- * Resolve the dashboard data scope for a given user.
- * Returns the scoped applications + users that the user is authorized to see.
- *
- * This is the SINGLE source of truth for dashboard data scoping.
- * All KPIs, charts, tables, and search must derive from this scoped dataset.
- */
-export function getDashboardScope(user: User | null, allApps: Application[], allUsers: User[]): DashboardScope {
-  if (!user) {
-    return { user: {} as User, role: "LTP", applications: [], users: [], projectIds: [], isGlobal: false };
-  }
-
-  // ---- ADMIN: organization-wide ----
-  if (user.role === "ADMIN") {
-    return {
-      user,
-      role: "ADMIN",
-      applications: allApps,
-      users: allUsers,
-      projectIds: [],
-      isGlobal: true,
-    };
-  }
-
-  // ---- LTP: own applications only ----
-  if (user.role === "LTP") {
-    const scopedApps = allApps.filter((a) => a.ltpId === user.id);
-    return {
-      user,
-      role: "LTP",
-      applications: scopedApps,
-      users: [user],
-      projectIds: [],
-      isGlobal: false,
-    };
-  }
-
-  // ---- Officers (TPS/TPA/ZAD/ZDD/ZJD/Director/AddlComm/Commissioner) ----
-  const scopedApps = allApps.filter((a) => {
-    const roles = rolesForStage(a.currentStage);
-    if (roles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
-    if (a.assignedOfficer?.name === user.name && a.assignedOfficer?.role === user.role) return true;
-    return a.workflowHistory.some((w) => w.actor.role === user.role && w.actor.name === user.name);
-  });
-
-  const scopedUsers = allUsers.filter(
-    (u) => u.role === user.role || u.role === "LTP"
-  );
-
-  return {
-    user,
-    role: user.role,
-    applications: scopedApps,
-    users: scopedUsers,
-    projectIds: [],
-    isGlobal: false,
-  };
-}
+import { type DashboardScope, normalizeZone, getDashboardScope } from "@/lib/scope";
+export type { DashboardScope };
+export { normalizeZone, getDashboardScope };
 
 /**
  * Hook: useDashboardScope

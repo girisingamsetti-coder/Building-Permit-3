@@ -145,6 +145,9 @@ export interface Application {
   applicant: Applicant;
   ltpId: string;
   ltpName: string;
+  tpaId?: string;
+  tpaName?: string;
+  zone?: string;
   project: ProjectInfo;
   status: ApplicationStatus;
   currentStage: WorkflowStageKey;

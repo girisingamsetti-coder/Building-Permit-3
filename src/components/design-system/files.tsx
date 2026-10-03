@@ -53,6 +53,7 @@ export function FileUploader({
   onUpload,
   uploadedFiles = [],
   onRemove,
+  variant,
 }: {
   accept?: string;
   maxSize?: string;
@@ -62,6 +63,7 @@ export function FileUploader({
   onUpload?: (files: UploadedFile[]) => void;
   uploadedFiles?: UploadedFile[];
   onRemove?: (id: string) => void;
+  variant?: "default" | "maroon";
 }) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -113,21 +115,23 @@ export function FileUploader({
         className={cn(
           "flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer",
           isDragging
-            ? "border-primary bg-primary/5 scale-[1.01]"
-            : "border-border bg-muted/30 hover:border-primary/40 hover:bg-muted/50"
+            ? (variant === "maroon" ? "border-[#7A1316] bg-[#7A1316]/5 scale-[1.01]" : "border-primary bg-primary/5 scale-[1.01]")
+            : (variant === "maroon" ? "border-[#DCD5C8] bg-[#FAF7F2] hover:border-[#7A1316]/60 hover:bg-[#F5EBE1]" : "border-border bg-muted/30 hover:border-primary/40 hover:bg-muted/50")
         )}
       >
         <div
           className={cn(
             "flex size-12 items-center justify-center rounded-full transition-colors",
-            isDragging ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary"
+            isDragging
+              ? (variant === "maroon" ? "bg-[#7A1316] text-white" : "bg-primary text-primary-foreground")
+              : (variant === "maroon" ? "bg-[#7A1316]/10 text-[#7A1316]" : "bg-primary/10 text-primary")
           )}
         >
           <UploadCloud className="size-6" />
         </div>
         <div className="space-y-0.5">
-          <p className="text-sm font-medium text-foreground">{label}</p>
-          <p className="text-xs text-muted-foreground">{hint}</p>
+          <p className={cn("text-sm font-semibold", variant === "maroon" ? "text-slate-800" : "text-foreground font-medium")}>{label}</p>
+          <p className={cn("text-xs", variant === "maroon" ? "text-slate-500" : "text-muted-foreground")}>{hint}</p>
         </div>
         <input
           ref={inputRef}

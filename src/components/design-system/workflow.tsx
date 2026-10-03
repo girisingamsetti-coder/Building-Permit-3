@@ -26,10 +26,12 @@ export function WorkflowStepper({
   currentStage,
   status,
   className,
+  variant,
 }: {
   currentStage: WorkflowStageKey;
   status: "COMPLETED" | "CURRENT" | "FAILED" | "RETURNED" | "SHORTFALL";
   className?: string;
+  variant?: "default" | "maroon";
 }) {
   const currentOrder = WORKFLOW_STAGES.find((s) => s.key === currentStage)?.order ?? 0;
   const isFinished = status === "COMPLETED";
@@ -48,23 +50,29 @@ export function WorkflowStepper({
           let labelCls = "";
           let Icon = CircleDot;
           if (isPast) {
-            dotCls = "bg-success text-success-foreground border-success";
-            labelCls = "text-foreground font-medium";
+            dotCls = variant === "maroon"
+              ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
+              : "bg-success text-success-foreground border-success";
+            labelCls = variant === "maroon" ? "text-slate-800 font-semibold" : "text-foreground font-medium";
             Icon = Check;
           } else if (isCurrent) {
             if (isFailed) {
-              dotCls = "bg-destructive text-white border-destructive ring-4 ring-destructive/15";
+              dotCls = "bg-rose-700 text-white border-rose-700 ring-4 ring-rose-700/15";
               Icon = X;
             } else if (isShortfall) {
-              dotCls = "bg-warning text-warning-foreground border-warning ring-4 ring-warning/15";
+              dotCls = "bg-amber-600 text-white border-amber-600 ring-4 ring-amber-600/15";
               Icon = AlertTriangle;
             } else {
-              dotCls = "bg-primary text-primary-foreground border-primary ring-4 ring-primary/15";
+              dotCls = variant === "maroon"
+                ? "bg-[#7A1316] text-white border-[#7A1316] ring-4 ring-[#7A1316]/20 shadow-xs"
+                : "bg-primary text-primary-foreground border-primary ring-4 ring-primary/15";
               Icon = Clock;
             }
-            labelCls = "text-foreground font-semibold";
+            labelCls = variant === "maroon" ? "text-[#7A1316] font-bold" : "text-foreground font-semibold";
           } else {
-            dotCls = "bg-background text-muted-foreground border-border";
+            dotCls = variant === "maroon"
+              ? "bg-white text-slate-400 border-[#DCD5C8]"
+              : "bg-background text-muted-foreground border-border";
             labelCls = "text-muted-foreground";
             Icon = CircleDot;
           }
@@ -82,7 +90,7 @@ export function WorkflowStepper({
                 </div>
                 <div className="text-center space-y-0.5">
                   <p className={cn("text-[11px] leading-tight", labelCls)}>{stage.label}</p>
-                  <p className="text-[10px] text-muted-foreground">{stage.role}</p>
+                  <p className={cn("text-[10px]", variant === "maroon" ? "text-slate-500 font-medium" : "text-muted-foreground")}>{stage.role}</p>
                 </div>
               </div>
               {idx < WORKFLOW_STAGES.length - 1 && (
@@ -90,7 +98,9 @@ export function WorkflowStepper({
                   <div
                     className={cn(
                       "h-full w-full rounded-full",
-                      isPast || isCurrent ? "bg-success" : "bg-border"
+                      variant === "maroon"
+                        ? (isPast ? "bg-emerald-600" : isCurrent ? "bg-[#7A1316]" : "bg-[#DCD5C8]")
+                        : (isPast || isCurrent ? "bg-success" : "bg-border")
                     )}
                   />
                 </div>
@@ -107,33 +117,35 @@ export function WorkflowStepper({
 export function WorkflowTimeline({
   entries,
   className,
+  variant,
 }: {
   entries: WorkflowHistoryEntry[];
   className?: string;
+  variant?: "default" | "maroon";
 }) {
   return (
     <ol className={cn("relative space-y-0", className)}>
       {entries.map((e, idx) => {
         const isLast = idx === entries.length - 1;
-        let dotCls = "bg-muted text-muted-foreground border-border";
+        let dotCls = variant === "maroon" ? "bg-white text-slate-400 border-[#DCD5C8]" : "bg-muted text-muted-foreground border-border";
         let Icon = Clock;
         if (e.status === "COMPLETED") {
-          dotCls = "bg-success text-success-foreground border-success";
+          dotCls = variant === "maroon" ? "bg-emerald-700 text-white border-emerald-700" : "bg-success text-success-foreground border-success";
           Icon = Check;
         } else if (e.status === "CURRENT") {
-          dotCls = "bg-primary text-primary-foreground border-primary ring-4 ring-primary/10";
+          dotCls = variant === "maroon" ? "bg-[#7A1316] text-white border-[#7A1316] ring-4 ring-[#7A1316]/20 shadow-xs" : "bg-primary text-primary-foreground border-primary ring-4 ring-primary/10";
           Icon = Clock;
         } else if (e.status === "FAILED") {
-          dotCls = "bg-destructive text-white border-destructive";
+          dotCls = "bg-rose-700 text-white border-rose-700";
           Icon = X;
         } else if (e.status === "RETURNED") {
-          dotCls = "bg-warning text-warning-foreground border-warning";
+          dotCls = "bg-amber-600 text-white border-amber-600";
           Icon = CornerDownRight;
         } else if (e.status === "SHORTFALL") {
-          dotCls = "bg-warning text-warning-foreground border-warning";
+          dotCls = "bg-amber-600 text-white border-amber-600";
           Icon = FileWarning;
         } else {
-          dotCls = "bg-background text-muted-foreground border-dashed border-border";
+          dotCls = variant === "maroon" ? "bg-[#FAF7F2] text-slate-400 border-dashed border-[#DCD5C8]" : "bg-background text-muted-foreground border-dashed border-border";
           Icon = CircleDot;
         }
 
@@ -143,7 +155,9 @@ export function WorkflowTimeline({
               <div
                 className={cn(
                   "absolute left-[15px] top-8 h-[calc(100%-1rem)] w-0.5",
-                  e.status === "COMPLETED" ? "bg-success/40" : "bg-border"
+                  variant === "maroon"
+                    ? (e.status === "COMPLETED" ? "bg-emerald-600/50" : "bg-[#DCD5C8]")
+                    : (e.status === "COMPLETED" ? "bg-success/40" : "bg-border")
                 )}
               />
             )}
@@ -158,30 +172,33 @@ export function WorkflowTimeline({
             <div className="flex-1 space-y-1 pt-0.5 min-w-0">
               <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-foreground">{e.stageLabel}</span>
+                  <span className={cn("text-sm font-bold", variant === "maroon" ? "text-slate-900" : "text-foreground")}>{e.stageLabel}</span>
                   {e.status === "CURRENT" && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-                      <span className="size-1.5 animate-pulse rounded-full bg-primary" /> Current
+                    <span className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+                      variant === "maroon" ? "bg-[#7A1316]/10 text-[#7A1316] border border-[#7A1316]/20" : "bg-primary/10 text-primary"
+                    )}>
+                      <span className={cn("size-1.5 animate-pulse rounded-full", variant === "maroon" ? "bg-[#7A1316]" : "bg-primary")} /> Current
                     </span>
                   )}
                   {e.status === "PENDING" && (
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Pending</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Pending</span>
                   )}
                 </div>
                 {e.timestamp && (
-                  <span className="text-xs text-muted-foreground tabular-nums">{formatDateTime(e.timestamp)}</span>
+                  <span className="text-xs text-slate-500 font-mono tabular-nums">{formatDateTime(e.timestamp)}</span>
                 )}
               </div>
-              <p className="text-sm text-foreground/90">{e.action}</p>
-              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+              <p className={cn("text-sm", variant === "maroon" ? "text-slate-800" : "text-foreground/90")}>{e.action}</p>
+              <div className="flex items-center gap-2 flex-wrap text-xs text-slate-500">
                 <span>by</span>
-                <span className="font-medium text-foreground/80">{e.actor.name}</span>
+                <span className="font-semibold text-slate-800">{e.actor.name}</span>
                 <RoleBadge role={e.actor.role} />
                 {e.duration && <span>· {e.duration}</span>}
               </div>
               {e.remarks && (
-                <p className="mt-1.5 rounded-md border border-warning/30 bg-warning/5 px-2.5 py-1.5 text-xs text-warning-foreground">
-                  <span className="font-medium">Note:</span> {e.remarks}
+                <p className="mt-1.5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 font-medium">
+                  <span className="font-bold">Note:</span> {e.remarks}
                 </p>
               )}
             </div>
@@ -195,8 +212,10 @@ export function WorkflowTimeline({
 // ---------- Audit Timeline (chronological) ----------
 export function AuditTimeline({
   entries,
+  variant,
 }: {
   entries: import("@/types").AuditEntry[];
+  variant?: "default" | "maroon";
 }) {
   return (
     <ol className="relative space-y-0">
@@ -204,31 +223,31 @@ export function AuditTimeline({
         const isLast = idx === entries.length - 1;
         return (
           <li key={e.id} className="relative flex gap-3 pb-5">
-            {!isLast && <div className="absolute left-[7px] top-5 h-[calc(100%-0.5rem)] w-px bg-border" />}
-            <div className="relative z-10 mt-1.5 size-3.5 shrink-0 rounded-full border-2 border-primary/60 bg-background">
-              <div className="absolute inset-0.5 rounded-full bg-primary/60" />
+            {!isLast && <div className={cn("absolute left-[7px] top-5 h-[calc(100%-0.5rem)] w-px", variant === "maroon" ? "bg-[#DCD5C8]" : "bg-border")} />}
+            <div className={cn("relative z-10 mt-1.5 size-3.5 shrink-0 rounded-full border-2 bg-white", variant === "maroon" ? "border-[#7A1316]" : "border-primary/60 bg-background")}>
+              <div className={cn("absolute inset-0.5 rounded-full", variant === "maroon" ? "bg-[#7A1316]" : "bg-primary/60")} />
             </div>
             <div className="flex-1 space-y-1 min-w-0">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                <p className="text-sm font-medium text-foreground">{e.action}</p>
-                <span className="text-xs text-muted-foreground tabular-nums">{formatDateTime(e.timestamp)}</span>
+                <p className={cn("text-sm font-bold", variant === "maroon" ? "text-slate-900" : "text-foreground")}>{e.action}</p>
+                <span className="text-xs text-slate-500 font-mono tabular-nums">{formatDateTime(e.timestamp)}</span>
               </div>
-              <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                <span className="font-medium text-foreground/80">{e.user}</span>
+              <div className="flex items-center gap-2 flex-wrap text-xs text-slate-500">
+                <span className="font-semibold text-slate-800">{e.user}</span>
                 <RoleBadge role={e.role} />
-                <span className="text-muted-foreground/60">·</span>
+                <span className="text-slate-400">·</span>
                 <span className="font-mono">{e.ip}</span>
-                <span className="text-muted-foreground/60">·</span>
+                <span className="text-slate-400">·</span>
                 <span>{e.device}</span>
               </div>
               {(e.oldStatus || e.newStatus) && (
-                <div className="mt-1 inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-0.5 text-[11px]">
-                  {e.oldStatus && <span className="text-muted-foreground">{e.oldStatus}</span>}
-                  {e.oldStatus && e.newStatus && <ChevronRight className="size-3 text-muted-foreground" />}
-                  {e.newStatus && <span className="font-medium text-foreground">{e.newStatus}</span>}
+                <div className={cn("mt-1 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-[11px]", variant === "maroon" ? "border-[#DCD5C8] bg-[#FAF7F2]" : "border-border bg-muted/40")}>
+                  {e.oldStatus && <span className="text-slate-500 font-medium">{e.oldStatus}</span>}
+                  {e.oldStatus && e.newStatus && <ChevronRight className="size-3 text-slate-400" />}
+                  {e.newStatus && <span className="font-bold text-[#7A1316]">{e.newStatus}</span>}
                 </div>
               )}
-              {e.remarks && <p className="text-xs text-muted-foreground italic">{e.remarks}</p>}
+              {e.remarks && <p className="text-xs text-slate-600 italic bg-[#FAF7F2] p-2 rounded border border-[#EADBCE] mt-1">{e.remarks}</p>}
             </div>
           </li>
         );

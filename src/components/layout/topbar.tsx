@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useAppStore, DEMO_CREDENTIALS, useVisibleApplications } from "@/store/app-store";
+import { useAppStore, DEMO_CREDENTIALS, useVisibleApplications, useSelectedApplication } from "@/store/app-store";
 import { ROLES, USERS } from "@/data/mock-data";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import {
@@ -29,6 +29,7 @@ import {
   CreditCard,
   Building2,
   FileWarning,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -525,12 +526,14 @@ export function Topbar() {
     toggleTheme,
     theme,
     navigate,
+    goBack,
     markAllNotificationsRead,
     markNotificationRead,
     openApplication,
     loginAsRole,
     logout,
   } = useAppStore();
+  const selectedApp = useSelectedApplication();
   const portalName = useAppStore((s) => s.systemSettings?.portalName) || "Building Permission System";
   const { toast } = useToast();
   const unread = notifications.filter((n) => !n.read).length;
@@ -607,26 +610,46 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Welcome on Dashboard | Menu Header on other screens */}
-      <div className="flex flex-col justify-center ml-2">
-        {isDashboard ? (
-          <>
+      {/* Welcome on Dashboard | Application No in Top Header | Menu Header on other screens */}
+      <div className="flex items-center gap-2.5 ml-2">
+        {view === "ltp-application-details" && selectedApp ? (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (useAppStore.getState().viewHistory.length > 0) {
+                  goBack();
+                } else {
+                  navigate("ltp-applications");
+                }
+              }}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
+              title="Back to Application Status"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+            <span className="font-mono text-base font-black text-[#801824] dark:text-[#E89BA2] tracking-tight leading-none">
+              {selectedApp.applicationNo}
+            </span>
+          </div>
+        ) : isDashboard ? (
+          <div className="flex flex-col justify-center">
             <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
               Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
             </span>
             <span className="text-[11px] text-slate-400 leading-tight">
               {user?.role ? (ROLES[user.role as keyof typeof ROLES]?.fullName ?? user.role) : ""}
             </span>
-          </>
+          </div>
         ) : (
-          <>
+          <div className="flex flex-col justify-center">
             <span className="text-sm font-bold text-[#801824] dark:text-[#E89BA2] leading-tight tracking-tight">
               {menuHeader.title}
             </span>
             <span className="text-[11px] text-slate-400 leading-tight font-medium">
               {menuHeader.category ? `${menuHeader.category} · APCRDA` : `APCRDA ${portalName}`}
             </span>
-          </>
+          </div>
         )}
       </div>
 
@@ -956,7 +979,7 @@ function UserAvatar({ color, name }: { color?: string; name?: string }) {
 // Lists all demo accounts; clicking one logs in as that user.
 // ============================================================
 function SwitchUserPanel() {
-  const { loginAsRole, user } = useAppStore();
+  const { login, user } = useAppStore();
   const { toast } = useToast();
   const [open, setOpen] = React.useState(false);
 
@@ -985,24 +1008,26 @@ function SwitchUserPanel() {
 
       {/* Expandable list */}
       {open && (
-        <div className="mx-1 mb-1 overflow-hidden rounded-md border border-border bg-muted/30">
+        <div className="mx-1 mb-1 max-h-64 overflow-y-auto rounded-md border border-border bg-muted/30">
           {DEMO_CREDENTIALS.map((c) => {
-            const isCurrent = user?.role === c.role;
+            const isCurrent = user?.email?.toLowerCase() === c.email.toLowerCase();
             return (
               <button
-                key={c.role}
+                key={c.email}
                 disabled={isCurrent}
                 onClick={() => {
-                  loginAsRole(c.role);
-                  toast({
-                    title: `Switched to ${ROLES[c.role].fullName}`,
-                    description: c.email,
-                  });
+                  const res = login(c.email, c.password);
+                  if (res.ok) {
+                    toast({
+                      title: `Switched to ${c.label}`,
+                      description: c.email,
+                    });
+                  }
                 }}
                 className={cn(
                   "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors",
                   isCurrent
-                    ? "cursor-default opacity-50"
+                    ? "cursor-default opacity-50 bg-primary/10"
                     : "hover:bg-sidebar-accent/60 cursor-pointer"
                 )}
               >
@@ -1012,18 +1037,19 @@ function SwitchUserPanel() {
                     "flex size-6 shrink-0 items-center justify-center rounded-full text-[9px] font-bold text-white",
                     {
                       "bg-emerald-500": c.role === "LTP",
-                      "bg-teal-500": c.role === "ZONAL_HEAD",
-                      "bg-cyan-500": c.role === "DIRECTOR",
+                      "bg-blue-500": c.role === "TPA",
+                      "bg-teal-500": c.role === "ZDD" || c.role === "ZONAL_HEAD",
+                      "bg-cyan-500": c.role === "ZJD" || c.role === "DIRECTOR",
                       "bg-amber-500": c.role === "ADDITIONAL_COMMISSIONER",
                       "bg-rose-500": c.role === "COMMISSIONER",
                       "bg-slate-600": c.role === "ADMIN",
                     }
                   )}
                 >
-                  {ROLES[c.role].title.slice(0, 2).toUpperCase()}
+                  {(ROLES[c.role]?.title || c.role).slice(0, 2).toUpperCase()}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block font-medium truncate">{ROLES[c.role].fullName}</span>
+                  <span className="block font-medium truncate">{c.label}</span>
                   <span className="block text-[10px] text-muted-foreground truncate">{c.email}</span>
                 </span>
                 {isCurrent && (

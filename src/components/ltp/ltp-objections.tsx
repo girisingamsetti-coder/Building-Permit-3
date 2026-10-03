@@ -586,18 +586,7 @@ export function LtpObjections() {
       }
     });
 
-    // Merge store items with standard defaults (avoid duplicate BA numbers)
-    const existingBaNos = new Set(storeShortfalls.map((s) => s.baNo));
-    const merged: ObjectionItem[] = [...storeShortfalls];
-
-    for (const d of DEFAULT_OBJECTIONS) {
-      if (!existingBaNos.has(d.baNo)) {
-        merged.push(d);
-        existingBaNos.add(d.baNo);
-      }
-    }
-
-    return merged;
+    return storeShortfalls;
   }, [applications]);
 
   // Stage breakdown counts

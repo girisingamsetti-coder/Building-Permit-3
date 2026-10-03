@@ -4,13 +4,6 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore, useSelectedApplication, ROLES } from "@/store/app-store";
 import {
-  PageHeader,
-  SectionCard,
-  InfoGrid,
-  InfoRow,
-  EmptyState,
-} from "@/components/design-system/layout";
-import {
   StatusBadge,
   PriorityBadge,
   RoleBadge,
@@ -59,6 +52,7 @@ import {
   XCircle,
   AlertCircle,
   ArrowRight,
+  ArrowLeft,
   Download,
   Eye,
   FileWarning,
@@ -77,31 +71,148 @@ import {
   Save,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { PageBackButton } from "@/components/design-system/back-button";
 import type { Application } from "@/types";
 import {
   ApcrdaPaymentReceiptModal,
   buildReceiptFromApplication,
 } from "@/components/common/apcrda-payment-receipt";
 
+// ─────────────────────────────────────────────────────────────
+// APCRDA BEIGE & MAROON LOCAL DESIGN SYSTEM COMPONENTS
+// ─────────────────────────────────────────────────────────────
+function SectionCard({
+  title,
+  description,
+  icon: Icon,
+  action,
+  children,
+  className,
+  noPadding,
+}: {
+  title?: string;
+  description?: string;
+  icon?: any;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  noPadding?: boolean;
+}) {
+  return (
+    <div className={cn("rounded-xl border border-[#DCD5C8] bg-white shadow-2xs overflow-hidden", className)}>
+      {(title || action) && (
+        <div className="flex items-center justify-between gap-3 bg-[#F5EBE1] border-b border-[#DCD5C8] px-4 py-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {Icon && (
+              <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#7A1316]/10 text-[#7A1316]">
+                <Icon className="size-4" />
+              </div>
+            )}
+            <div className="min-w-0">
+              {title && <h3 className="text-sm font-bold text-[#7A1316] leading-tight">{title}</h3>}
+              {description && <p className="text-[11px] text-slate-500 leading-tight mt-0.5">{description}</p>}
+            </div>
+          </div>
+          {action && <div className="shrink-0">{action}</div>}
+        </div>
+      )}
+      <div className={cn(noPadding ? "" : "p-4 sm:p-5")}>{children}</div>
+    </div>
+  );
+}
+
+function InfoGrid({
+  items,
+  columns = 2,
+  className,
+}: {
+  items: { label: string; value?: React.ReactNode; mono?: boolean }[];
+  columns?: 1 | 2 | 3 | 4;
+  className?: string;
+}) {
+  const colMap = { 1: "sm:grid-cols-1", 2: "sm:grid-cols-2", 3: "sm:grid-cols-3", 4: "sm:grid-cols-4" };
+  return (
+    <div className={cn("grid grid-cols-1 gap-3", colMap[columns], className)}>
+      {items.map((it, i) => (
+        <div key={i} className="rounded-lg border border-[#EADBCE] bg-[#FAF7F2]/75 p-2.5">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-[#7A1316]/80 mb-0.5">{it.label}</div>
+          <div className={cn("text-xs font-semibold text-slate-800", it.mono && "font-mono")}>
+            {it.value ?? <span className="text-slate-400">—</span>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function InfoRow({ label, value, mono }: { label: string; value?: React.ReactNode; mono?: boolean }) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2 border-b border-[#EADBCE]/70 last:border-0 text-xs">
+      <span className="text-slate-500 font-medium">{label}</span>
+      <span className={cn("font-bold text-slate-800", mono && "font-mono")}>{value ?? "—"}</span>
+    </div>
+  );
+}
+
+function EmptyState({
+  icon: Icon = FileWarning,
+  title,
+  description,
+  action,
+}: {
+  icon?: any;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-[#DCD5C8] bg-[#FAF7F2] p-10 text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-[#F5EBE1] text-[#7A1316]">
+        <Icon className="size-6" />
+      </div>
+      <div className="space-y-1">
+        <p className="font-bold text-slate-900 text-sm">{title}</p>
+        {description && <p className="text-xs text-slate-500 max-w-sm">{description}</p>}
+      </div>
+      {action}
+    </div>
+  );
+}
+
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
-  const { navigate, openApplication } = useAppStore();
+  const { navigate, openApplication, goBack } = useAppStore();
+  const { toast } = useToast();
+
+  const handleBack = () => {
+    if (useAppStore.getState().viewHistory.length > 0) {
+      goBack();
+    } else {
+      navigate("ltp-applications");
+    }
+  };
 
   if (!app) {
     return (
-      <div className="space-y-6">
-        <PageBackButton fallbackView="ltp-applications" />
-        <PageHeader
-          title="Application Details"
-          icon={FileText}
-          breadcrumbs={[{ label: "Application Submission", onClick: () => navigate("ltp-applications") }, { label: "Details" }]}
-        />
+      <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800">
+        <button
+          onClick={handleBack}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#DCD5C8] bg-white text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
+        >
+          <ArrowLeft className="size-4" /> Back to Application Status
+        </button>
         <EmptyState
           icon={FileWarning}
           title="No application selected"
-          description="Select an application from the list to view its details."
-          action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Browse applications</Button>}
+          description="Select an application from Application Status to view its details."
+          action={
+            <Button
+              size="sm"
+              onClick={() => navigate("ltp-applications")}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer"
+            >
+              Browse applications
+            </Button>
+          }
         />
       </div>
     );
@@ -109,24 +220,6 @@ export function LtpApplicationDetails() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800 overflow-y-auto">
-      <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
-      <PageHeader
-        title={app.applicationNo}
-        description={app.project.name}
-        icon={FileText}
-        breadcrumbs={[
-          { label: "Application Submission", onClick: () => navigate("ltp-applications") },
-          { label: app.applicationNo },
-        ]}
-        badge={<StatusBadge status={app.status} />}
-        actions={
-          <>
-            <Button variant="outline" size="sm" className="border-[#DCD5C8] text-[#7A1316] hover:bg-[#F3EADF]"><Printer className="size-4" /> Print</Button>
-            <Button variant="outline" size="sm" className="border-[#DCD5C8] text-[#7A1316] hover:bg-[#F3EADF]"><Share2 className="size-4" /> Share</Button>
-          </>
-        }
-      />
-
       {/* Status banner */}
       <StatusBanner app={app} />
 
@@ -140,7 +233,7 @@ export function LtpApplicationDetails() {
           <span className="text-xs text-slate-500 font-medium">Multi-level approval pipeline</span>
         </div>
         <div className="space-y-4">
-          <WorkflowStepper currentStage={app.currentStage} status={app.status === "APPROVED" ? "COMPLETED" : app.status === "SCRUTINY_FAILED" ? "FAILED" : app.status === "SHORTFALL_RAISED" ? "SHORTFALL" : "CURRENT"} />
+          <WorkflowStepper currentStage={app.currentStage} status={app.status === "APPROVED" ? "COMPLETED" : app.status === "SCRUTINY_FAILED" ? "FAILED" : app.status === "SHORTFALL_RAISED" ? "SHORTFALL" : "CURRENT"} variant="maroon" />
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#DCD5C8] bg-white px-4 py-2.5 text-xs">
             <div className="flex items-center gap-2">
               <Clock className="size-3.5 text-[#7A1316]" />
@@ -798,18 +891,18 @@ function OverviewTab({ app }: { app: Application }) {
               <StatusBadge status={app.status} showIcon={false} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Current Stage</span>
-              <span className="text-xs font-medium">{app.currentStageLabel}</span>
+              <span className="text-xs text-slate-500 font-medium">Current Stage</span>
+              <span className="text-xs font-bold text-slate-800">{app.currentStageLabel}</span>
             </div>
-            <Separator />
+            <Separator className="bg-[#DCD5C8]" />
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Progress</span>
-                <span className="font-medium tabular-nums">{app.progress}%</span>
+                <span className="text-slate-500 font-medium">Progress</span>
+                <span className="font-bold text-[#7A1316] tabular-nums">{app.progress}%</span>
               </div>
-              <Progress value={app.progress} className="h-1.5" />
+              <Progress value={app.progress} className="h-2 bg-[#EADBCE] [&>div]:bg-[#7A1316]" />
             </div>
-            <Separator />
+            <Separator className="bg-[#DCD5C8]" />
             <InfoRow label="Submission Date" value={formatDate(app.submissionDate)} />
             <InfoRow label="Last Updated" value={timeAgo(app.lastUpdated)} />
             <InfoRow label="Expected SLA" value={formatDate(app.expectedSLA ?? "")} />
@@ -831,10 +924,10 @@ function OverviewTab({ app }: { app: Application }) {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
-      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="text-lg font-semibold tabular-nums">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+    <div className="rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] p-3 shadow-2xs">
+      <p className="text-[10px] font-bold uppercase tracking-wide text-[#7A1316]">{label}</p>
+      <p className="text-lg font-bold text-slate-900 tabular-nums">{value}</p>
+      {sub && <p className="text-[10px] text-slate-500 font-medium">{sub}</p>}
     </div>
   );
 }
@@ -845,15 +938,15 @@ function WorkflowTab({ app }: { app: Application }) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <SectionCard title="Workflow Timeline" description="Chronological record of all stage transitions" icon={Workflow}>
-          <WorkflowTimeline entries={app.workflowHistory} />
+          <WorkflowTimeline entries={app.workflowHistory} variant="maroon" />
         </SectionCard>
       </div>
       <div className="space-y-6">
         <SectionCard title="Stage Status" icon={Flag}>
           <ul className="space-y-2">
             {app.workflowHistory.map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-2">
-                <span className="text-xs text-foreground/80">{e.stageLabel}</span>
+              <li key={e.id} className="flex items-center justify-between gap-2 p-1 border-b border-[#EADBCE]/50 last:border-0">
+                <span className="text-xs font-semibold text-slate-800">{e.stageLabel}</span>
                 <StageStatusPill status={e.status} />
               </li>
             ))}
@@ -864,13 +957,13 @@ function WorkflowTab({ app }: { app: Application }) {
             {Array.from(new Set(app.workflowHistory.filter((w) => w.timestamp).map((w) => w.actor.name))).map((name) => {
               const entry = app.workflowHistory.find((w) => w.actor.name === name)!;
               return (
-                <li key={name} className="flex items-center gap-2.5">
-                  <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary text-[11px] font-semibold">
+                <li key={name} className="flex items-center gap-2.5 p-2 rounded-lg bg-[#FAF7F2] border border-[#EADBCE]">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-[#7A1316]/10 text-[#7A1316] text-[11px] font-bold">
                     {name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium">{name}</p>
-                    <p className="text-[10px] text-muted-foreground">{ROLES[entry.actor.role].fullName}</p>
+                    <p className="truncate text-xs font-bold text-slate-900">{name}</p>
+                    <p className="text-[10px] text-slate-500 font-medium">{ROLES[entry.actor.role].fullName}</p>
                   </div>
                   <RoleBadge role={entry.actor.role} />
                 </li>
@@ -903,40 +996,40 @@ function DrawingsTab({ app }: { app: Application }) {
               title="Scrutiny Report"
               description={`${app.scrutinyReport.reportNo} · v${app.scrutinyReport.drawingVersion}`}
               icon={ScrollText}
-              action={app.scrutinyReport.status === "PASSED" ? <Badge className="bg-success text-success-foreground">Passed</Badge> : <Badge className="bg-destructive text-white">Failed</Badge>}
+              action={app.scrutinyReport.status === "PASSED" ? <Badge className="bg-emerald-600 text-white font-bold">Passed</Badge> : <Badge className="bg-rose-700 text-white font-bold">Failed</Badge>}
             >
               <div className="space-y-4">
-                <div className={cn("rounded-lg border p-3 text-sm", app.scrutinyReport.status === "PASSED" ? "border-success/30 bg-success/5 text-success" : "border-destructive/30 bg-destructive/5 text-destructive")}>
-                  <p className="font-medium">{app.scrutinyReport.summary}</p>
+                <div className={cn("rounded-lg border p-3.5 text-sm", app.scrutinyReport.status === "PASSED" ? "border-emerald-300 bg-emerald-50 text-emerald-800" : "border-rose-300 bg-rose-50 text-rose-800")}>
+                  <p className="font-semibold">{app.scrutinyReport.summary}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <ScrutinyStat label="Total Checks" value={app.scrutinyReport.totalChecks} cls="bg-muted text-muted-foreground" />
-                  <ScrutinyStat label="Passed" value={app.scrutinyReport.passed} cls="bg-success/10 text-success" />
-                  <ScrutinyStat label="Failed / Warnings" value={`${app.scrutinyReport.failed} / ${app.scrutinyReport.warnings}`} cls="bg-warning/15 text-warning-foreground" />
+                  <ScrutinyStat label="Total Checks" value={app.scrutinyReport.totalChecks} cls="border-[#DCD5C8] bg-[#FAF7F2]" />
+                  <ScrutinyStat label="Passed" value={app.scrutinyReport.passed} cls="border-emerald-200 bg-emerald-50 text-emerald-800" />
+                  <ScrutinyStat label="Failed / Warnings" value={`${app.scrutinyReport.failed} / ${app.scrutinyReport.warnings}`} cls="border-amber-200 bg-amber-50 text-amber-900" />
                 </div>
-                <div className="overflow-hidden rounded-lg border border-border">
+                <div className="overflow-hidden rounded-xl border border-[#DCD5C8]">
                   <table className="w-full text-sm">
-                    <thead className="bg-muted/40">
-                      <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                        <th className="px-3 py-2 font-medium">Rule</th>
-                        <th className="px-3 py-2 font-medium">Category</th>
-                        <th className="px-3 py-2 font-medium">Severity</th>
-                        <th className="px-3 py-2 font-medium">Result</th>
+                    <thead className="bg-[#F5EBE1] text-[#7A1316]">
+                      <tr className="text-left text-[11px] font-bold uppercase tracking-wide text-[#7A1316]">
+                        <th className="px-3.5 py-2.5 font-bold">Rule</th>
+                        <th className="px-3.5 py-2.5 font-bold">Category</th>
+                        <th className="px-3.5 py-2.5 font-bold">Severity</th>
+                        <th className="px-3.5 py-2.5 font-bold">Result</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border">
+                    <tbody className="divide-y divide-[#EADBCE] bg-white">
                       {app.scrutinyReport.checks.map((c) => (
-                        <tr key={c.id} className="hover:bg-muted/30">
-                          <td className="px-3 py-2">
-                            <p className="text-xs font-medium">{c.rule}</p>
-                            <p className="text-[10px] text-muted-foreground">{c.message}</p>
+                        <tr key={c.id} className="hover:bg-[#FAF4EB] transition-colors">
+                          <td className="px-3.5 py-2.5">
+                            <p className="text-xs font-semibold text-slate-900">{c.rule}</p>
+                            <p className="text-[10px] text-slate-500">{c.message}</p>
                           </td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">{c.category}</td>
-                          <td className="px-3 py-2"><SeverityBadge severity={c.severity} /></td>
-                          <td className="px-3 py-2">
-                            {c.status === "PASS" && <Badge className="bg-success/15 text-success">Pass</Badge>}
-                            {c.status === "FAIL" && <Badge className="bg-destructive text-white">Fail</Badge>}
-                            {c.status === "WARNING" && <Badge className="bg-warning text-warning-foreground">Warning</Badge>}
+                          <td className="px-3.5 py-2.5 text-xs text-slate-600 font-medium">{c.category}</td>
+                          <td className="px-3.5 py-2.5"><SeverityBadge severity={c.severity} /></td>
+                          <td className="px-3.5 py-2.5">
+                            {c.status === "PASS" && <Badge className="bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">Pass</Badge>}
+                            {c.status === "FAIL" && <Badge className="bg-rose-100 text-rose-800 font-bold border border-rose-300">Fail</Badge>}
+                            {c.status === "WARNING" && <Badge className="bg-amber-100 text-amber-800 font-bold border border-amber-300">Warning</Badge>}
                           </td>
                         </tr>
                       ))}
@@ -951,6 +1044,7 @@ function DrawingsTab({ app }: { app: Application }) {
         <div className="space-y-6">
           <SectionCard title="Upload New Drawing" description="Re-upload corrected drawings after a failed scrutiny" icon={Upload}>
             <FileUploader
+              variant="maroon"
               label="Drop drawing here"
               hint="DWG, DXF or PDF · max 50 MB"
               accept=".dwg,.dxf,.pdf"
@@ -967,23 +1061,23 @@ function DrawingsTab({ app }: { app: Application }) {
           </SectionCard>
 
           <SectionCard title="Version History" icon={History} noPadding>
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-[#EADBCE]">
               {app.drawings.map((d) => (
-                <li key={d.id} className="p-3">
+                <li key={d.id} className="p-3.5 hover:bg-[#FAF4EB] transition-colors">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-[#7A1316]/10 text-[#7A1316]">
                       <FileText className="size-4" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium">{d.fileName}</p>
-                      <p className="text-[10px] text-muted-foreground">{d.fileSize} · v{d.version} · {formatDateTime(d.uploadedAt)}</p>
+                      <p className="truncate text-xs font-bold text-slate-900">{d.fileName}</p>
+                      <p className="text-[10px] text-slate-500 font-medium">{d.fileSize} · v{d.version} · {formatDateTime(d.uploadedAt)}</p>
                     </div>
-                    {d.status === "SCRUTINY_PASSED" && <Badge className="bg-success/10 text-success text-[9px]">Passed</Badge>}
-                    {d.status === "SCRUTINY_FAILED" && <Badge className="bg-destructive/10 text-destructive text-[9px]">Failed</Badge>}
-                    {d.status === "SUPERSEDED" && <Badge className="bg-muted text-muted-foreground text-[9px]">Superseded</Badge>}
-                    {d.status === "PENDING_SCRUTINY" && <Badge className="bg-info/10 text-info text-[9px]">Pending</Badge>}
+                    {d.status === "SCRUTINY_PASSED" && <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-bold">Passed</Badge>}
+                    {d.status === "SCRUTINY_FAILED" && <Badge className="bg-rose-100 text-rose-800 border border-rose-300 text-[10px] font-bold">Failed</Badge>}
+                    {d.status === "SUPERSEDED" && <Badge className="bg-slate-100 text-slate-600 border border-slate-300 text-[10px] font-medium">Superseded</Badge>}
+                    {d.status === "PENDING_SCRUTINY" && <Badge className="bg-blue-100 text-blue-800 border border-blue-300 text-[10px] font-medium">Pending</Badge>}
                   </div>
-                  {d.notes && <p className="mt-1.5 text-[10px] text-muted-foreground italic">{d.notes}</p>}
+                  {d.notes && <p className="mt-1.5 text-[10px] text-slate-500 italic pl-10.5">{d.notes}</p>}
                 </li>
               ))}
             </ul>
@@ -996,9 +1090,9 @@ function DrawingsTab({ app }: { app: Application }) {
 
 function ScrutinyStat({ label, value, cls }: { label: string; value: string | number; cls: string }) {
   return (
-    <div className={cn("rounded-lg p-3 text-center", cls)}>
-      <p className="text-xl font-semibold tabular-nums">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide opacity-80">{label}</p>
+    <div className={cn("rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] p-3 text-center shadow-2xs", cls)}>
+      <p className="text-xl font-black tabular-nums text-slate-900">{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wide text-[#7A1316] mt-0.5">{label}</p>
     </div>
   );
 }
@@ -1013,12 +1107,12 @@ function DocumentsTab({ app }: { app: Application }) {
       <SectionCard title="Document Compliance" icon={FolderClosed}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium">{verified} of {required} required documents verified</p>
-            <p className="text-xs text-muted-foreground">{app.documents.filter((d) => d.status === "SHORTFALL").length} shortfalls · {app.documents.filter((d) => d.status === "REQUIRED").length} pending upload</p>
+            <p className="text-sm font-bold text-slate-800">{verified} of {required} required documents verified</p>
+            <p className="text-xs text-slate-500">{app.documents.filter((d) => d.status === "SHORTFALL").length} shortfalls · {app.documents.filter((d) => d.status === "REQUIRED").length} pending upload</p>
           </div>
           <div className="flex items-center gap-3">
-            <Progress value={pct} className="h-2 w-32" />
-            <span className="text-sm font-semibold tabular-nums">{pct}%</span>
+            <Progress value={pct} className="h-2.5 w-36 bg-[#EADBCE] [&>div]:bg-[#7A1316]" />
+            <span className="text-sm font-bold text-[#7A1316] tabular-nums">{pct}%</span>
           </div>
         </div>
       </SectionCard>
@@ -1026,40 +1120,40 @@ function DocumentsTab({ app }: { app: Application }) {
       <SectionCard title="Required Documents" description="Upload, preview and track verification status" icon={FileText} noPadding>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40">
-              <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Document</th>
-                <th className="px-4 py-2.5 font-medium">Required</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5 font-medium">Version</th>
-                <th className="px-4 py-2.5 font-medium">Verified By</th>
-                <th className="px-4 py-2.5 font-medium">Date</th>
-                <th className="px-4 py-2.5 font-medium text-right">Actions</th>
+            <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8]">
+              <tr className="text-left text-[11px] font-bold uppercase tracking-wide text-[#7A1316]">
+                <th className="px-4 py-2.5 font-bold">Document</th>
+                <th className="px-4 py-2.5 font-bold">Required</th>
+                <th className="px-4 py-2.5 font-bold">Status</th>
+                <th className="px-4 py-2.5 font-bold">Version</th>
+                <th className="px-4 py-2.5 font-bold">Verified By</th>
+                <th className="px-4 py-2.5 font-bold">Date</th>
+                <th className="px-4 py-2.5 font-bold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-[#EADBCE] bg-white">
               {app.documents.map((d) => (
-                <tr key={d.id} className="hover:bg-muted/30">
+                <tr key={d.id} className="hover:bg-[#FAF4EB] transition-colors">
                   <td className="px-4 py-3">
-                    <p className="text-xs font-medium">{d.name}</p>
-                    <p className="font-mono text-[10px] text-muted-foreground">{d.code}</p>
-                    {d.remarks && <p className="mt-0.5 text-[10px] text-destructive">{d.remarks}</p>}
+                    <p className="text-xs font-bold text-slate-900">{d.name}</p>
+                    <p className="font-mono text-[10px] text-slate-500">{d.code}</p>
+                    {d.remarks && <p className="mt-0.5 text-[10px] text-rose-700 font-medium">{d.remarks}</p>}
                   </td>
                   <td className="px-4 py-3">
-                    {d.required ? <Badge className="bg-destructive/10 text-destructive text-[9px]">Required</Badge> : <Badge variant="outline" className="text-[9px]">Optional</Badge>}
+                    {d.required ? <Badge className="bg-rose-100 text-rose-800 border border-rose-300 text-[9px] font-bold">Required</Badge> : <Badge variant="outline" className="text-[9px] border-[#DCD5C8]">Optional</Badge>}
                   </td>
                   <td className="px-4 py-3"><DocumentStatusBadge status={d.status} /></td>
-                  <td className="px-4 py-3 text-xs">{d.version ? `v${d.version}` : "—"}</td>
-                  <td className="px-4 py-3 text-xs">{d.verifiedBy ?? "—"}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{d.verifiedAt ? formatDate(d.verifiedAt) : "—"}</td>
+                  <td className="px-4 py-3 text-xs font-medium text-slate-700">{d.version ? `v${d.version}` : "—"}</td>
+                  <td className="px-4 py-3 text-xs font-medium text-slate-700">{d.verifiedBy ?? "—"}</td>
+                  <td className="px-4 py-3 text-xs text-slate-500">{d.verifiedAt ? formatDate(d.verifiedAt) : "—"}</td>
                   <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-1.5">
                       {d.status === "REQUIRED" || d.status === "SHORTFALL" ? (
-                        <Button size="sm" variant="outline" className="h-7 text-xs"><Upload className="size-3" /> Upload</Button>
+                        <Button size="sm" variant="outline" className="h-7 text-xs border border-[#DCD5C8] text-[#7A1316] hover:bg-[#F3EADF] font-bold"><Upload className="size-3 mr-1" /> Upload</Button>
                       ) : (
                         <>
-                          <Button size="icon" variant="ghost" className="size-7"><Eye className="size-3.5" /></Button>
-                          <Button size="icon" variant="ghost" className="size-7"><Download className="size-3.5" /></Button>
+                          <Button size="icon" variant="ghost" className="size-7 text-[#7A1316] hover:bg-[#F3EADF]"><Eye className="size-3.5" /></Button>
+                          <Button size="icon" variant="ghost" className="size-7 text-[#7A1316] hover:bg-[#F3EADF]"><Download className="size-3.5" /></Button>
                         </>
                       )}
                     </div>
@@ -1088,32 +1182,32 @@ function FeesTab({ app }: { app: Application }) {
       <div className="lg:col-span-2">
         <SectionCard title="Fee Breakdown" description={`${f.feeStructureName} · generated ${formatDate(f.generatedAt)}`} icon={ReceiptIndianRupee}>
           <div className="space-y-1">
-            <div className="flex items-center justify-between border-b border-border pb-2 text-xs uppercase tracking-wide text-muted-foreground">
+            <div className="flex items-center justify-between border-b border-[#DCD5C8] pb-2 text-xs font-bold uppercase tracking-wide text-[#7A1316]">
               <span>Component</span>
               <span>Amount (₹)</span>
             </div>
             {f.lineItems.map((li) => (
-              <div key={li.componentCode} className="flex items-center justify-between py-2.5 border-b border-dashed border-border/60 last:border-0">
+              <div key={li.componentCode} className="flex items-center justify-between py-2.5 border-b border-dashed border-[#EADBCE] last:border-0">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">{li.name}</p>
-                  <p className="text-[11px] text-muted-foreground">{li.description}</p>
-                  <p className="text-[10px] text-muted-foreground">{li.basis} · ₹{li.rate.toLocaleString("en-IN")} × {li.quantity.toLocaleString("en-IN")}</p>
+                  <p className="text-sm font-bold text-slate-900">{li.name}</p>
+                  <p className="text-[11px] text-slate-500">{li.description}</p>
+                  <p className="text-[10px] text-slate-400">{li.basis} · ₹{li.rate.toLocaleString("en-IN")} × {li.quantity.toLocaleString("en-IN")}</p>
                 </div>
-                <span className="font-mono text-sm font-medium tabular-nums">{li.amount.toLocaleString("en-IN")}</span>
+                <span className="font-mono text-sm font-bold text-slate-800 tabular-nums">{li.amount.toLocaleString("en-IN")}</span>
               </div>
             ))}
             <div className="flex items-center justify-between pt-3 text-sm">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-mono tabular-nums">{formatINR(f.subtotal)}</span>
+              <span className="text-slate-600 font-medium">Subtotal</span>
+              <span className="font-mono font-bold tabular-nums text-slate-800">{formatINR(f.subtotal)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">GST</span>
-              <span className="font-mono tabular-nums">{formatINR(f.gst)}</span>
+              <span className="text-slate-600 font-medium">GST</span>
+              <span className="font-mono font-bold tabular-nums text-slate-800">{formatINR(f.gst)}</span>
             </div>
-            <Separator className="my-2" />
+            <Separator className="my-2 bg-[#DCD5C8]" />
             <div className="flex items-center justify-between">
-              <span className="text-base font-semibold">Total Payable</span>
-              <span className="font-mono text-lg font-bold text-primary">{formatINR(f.total)}</span>
+              <span className="text-base font-bold text-slate-900">Total Payable</span>
+              <span className="font-mono text-xl font-black text-[#7A1316]">{formatINR(f.total)}</span>
             </div>
           </div>
         </SectionCard>
@@ -1122,35 +1216,35 @@ function FeesTab({ app }: { app: Application }) {
         <SectionCard title="Payment Status" icon={CheckCircle2}>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Total Fee</span>
-              <span className="font-mono text-sm font-medium">{formatINR(f.total)}</span>
+              <span className="text-xs text-slate-600 font-medium">Total Fee</span>
+              <span className="font-mono text-sm font-bold text-slate-800">{formatINR(f.total)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Paid</span>
-              <span className="font-mono text-sm text-success">{formatINR(f.paidAmount)}</span>
+              <span className="text-xs text-slate-600 font-medium">Paid</span>
+              <span className="font-mono text-sm font-bold text-emerald-700">{formatINR(f.paidAmount)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Outstanding</span>
-              <span className="font-mono text-sm font-semibold text-destructive">{formatINR(f.outstanding)}</span>
+              <span className="text-xs text-slate-600 font-medium">Outstanding</span>
+              <span className="font-mono text-sm font-bold text-rose-700">{formatINR(f.outstanding)}</span>
             </div>
-            <Separator />
+            <Separator className="bg-[#DCD5C8]" />
             {app.payment ? (
-              <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+              <div className="space-y-2 rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] p-3 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">Transaction</span>
+                  <span className="text-xs text-slate-600 font-medium">Transaction</span>
                   <PaymentStatusBadge status={app.payment.status} />
                 </div>
-                <p className="font-mono text-[11px]">{app.payment.transactionId || "—"}</p>
-                <p className="text-[10px] text-muted-foreground">{app.payment.gateway} · {app.payment.method}</p>
+                <p className="font-mono text-[11px] font-bold text-[#7A1316]">{app.payment.transactionId || "—"}</p>
+                <p className="text-[10px] text-slate-500 font-medium">{app.payment.gateway} · {app.payment.method}</p>
                 {app.payment.receiptNo && (
                   <>
                     <Button
                       size="sm"
                       variant="outline"
-                      className="w-full cursor-pointer hover:bg-white"
+                      className="w-full cursor-pointer bg-white border border-[#7A1316] text-[#7A1316] hover:bg-[#F3EADF] font-bold shadow-2xs mt-2"
                       onClick={() => setShowReceiptModal(true)}
                     >
-                      <Download className="size-3.5" /> Official Receipt {app.payment.receiptNo}
+                      <Download className="size-3.5 mr-1.5" /> Official Receipt {app.payment.receiptNo}
                     </Button>
                     <ApcrdaPaymentReceiptModal
                       isOpen={showReceiptModal}
@@ -1162,10 +1256,10 @@ function FeesTab({ app }: { app: Application }) {
               </div>
             ) : (
               <Button
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold shadow-2xs"
                 onClick={() => openApplication(app.id, "ltp-payment")}
               >
-                <ReceiptIndianRupee className="size-4" /> Pay Now
+                <ReceiptIndianRupee className="size-4 mr-1.5" /> Pay Now
               </Button>
             )}
           </div>
@@ -1185,42 +1279,42 @@ function NocsTab({ app }: { app: Application }) {
         icon={Flame}
       >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+          <div className="p-4 rounded-xl border border-[#DCD5C8] bg-[#FAF7F2] space-y-2 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">Fire Service NOC</span>
-              <Badge className="bg-emerald-500/10 text-emerald-700 text-[10px] font-bold">Approved</Badge>
+              <span className="text-xs font-bold text-[#7A1316]">Fire Service NOC</span>
+              <Badge className="bg-emerald-500/10 text-emerald-800 text-[10px] font-bold border border-emerald-300">Approved</Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">AP State Disaster Response &amp; Fire Services (Rule 18)</p>
-            <p className="font-mono text-[10px] text-primary">AP/FIRE/NOC/2026/0412</p>
+            <p className="text-[11px] text-slate-600 font-medium">AP State Disaster Response &amp; Fire Services (Rule 18)</p>
+            <p className="font-mono text-xs font-bold text-[#7A1316]">AP/FIRE/NOC/2026/0412</p>
           </div>
 
-          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+          <div className="p-4 rounded-xl border border-[#DCD5C8] bg-[#FAF7F2] space-y-2 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">Airport Clearance (AAI)</span>
-              <Badge variant="outline" className="text-[10px] font-bold">Exempted</Badge>
+              <span className="text-xs font-bold text-[#7A1316]">Airport Clearance (AAI)</span>
+              <Badge variant="outline" className="text-[10px] font-bold border-[#DCD5C8] bg-white">Exempted</Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">Height &lt; 30m CCZM Obstacle Envelope</p>
-            <p className="font-mono text-[10px] text-muted-foreground">Within CCZM Zone</p>
+            <p className="text-[11px] text-slate-600 font-medium">Height &lt; 30m CCZM Obstacle Envelope</p>
+            <p className="font-mono text-xs font-bold text-slate-500">Within CCZM Zone</p>
           </div>
 
-          <div className="p-4 rounded-lg border border-border bg-card space-y-2">
+          <div className="p-4 rounded-xl border border-[#DCD5C8] bg-[#FAF7F2] space-y-2 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">Environmental (PCB/SEIAA)</span>
-              <Badge variant="outline" className="text-[10px] font-bold">Category B2</Badge>
+              <span className="text-xs font-bold text-[#7A1316]">Environmental (PCB/SEIAA)</span>
+              <Badge variant="outline" className="text-[10px] font-bold border-[#DCD5C8] bg-white">Category B2</Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">Plot area &lt; 20,000 sq.m (Exempted)</p>
-            <p className="font-mono text-[10px] text-muted-foreground">SEIAA-AP-B2-EXEMPT</p>
+            <p className="text-[11px] text-slate-600 font-medium">Plot area &lt; 20,000 sq.m (Exempted)</p>
+            <p className="font-mono text-xs font-bold text-slate-500">SEIAA-AP-B2-EXEMPT</p>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border p-4 bg-muted/20 space-y-3">
-          <h4 className="text-xs font-bold text-foreground">Water Bodies &amp; Irrigation Canals Buffer Clearance</h4>
-          <p className="text-xs text-muted-foreground">
+        <div className="rounded-xl border border-[#DCD5C8] p-4 bg-[#FBF3E4] space-y-2 shadow-2xs">
+          <h4 className="text-xs font-bold text-[#7A1316]">Water Bodies &amp; Irrigation Canals Buffer Clearance</h4>
+          <p className="text-xs text-slate-700 leading-relaxed">
             The site boundaries have been checked against the APCRDA Master Plan GIS spatial layers. The parcel is certified to be located beyond 30m buffer from the Krishna river bank and irrigation channels.
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pt-1">
             <CheckCircle2 className="size-4 text-emerald-600" />
-            <span className="text-xs font-medium text-emerald-700">Canal buffer verification passed automatically by GIS Engine</span>
+            <span className="text-xs font-semibold text-emerald-800">Canal buffer verification passed automatically by GIS Engine</span>
           </div>
         </div>
       </SectionCard>
@@ -1238,16 +1332,18 @@ function ShortfallsTab({ app }: { app: Application }) {
     <div className="space-y-4">
       {app.shortfalls.map((s) => (
         <SectionCard key={s.id} title={s.title} icon={AlertTriangle}
-          action={<Badge className="bg-warning text-warning-foreground">{s.shortfallId}</Badge>}>
+          action={<Badge className="bg-amber-100 text-amber-900 border border-amber-300 font-bold">{s.shortfallId}</Badge>}>
           <div className="space-y-3">
-            <p className="text-sm text-foreground/90">{s.description}</p>
-            <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4">
-              <div><p className="text-muted-foreground">Type</p><p className="font-medium">{s.type}</p></div>
-              <div><p className="text-muted-foreground">Raised By</p><p className="font-medium">{s.raisedBy.name}</p></div>
-              <div><p className="text-muted-foreground">Raised On</p><p className="font-medium">{formatDate(s.raisedAt)}</p></div>
-              <div><p className="text-muted-foreground">Due Date</p><p className="font-medium text-destructive">{formatDate(s.dueDate)}</p></div>
+            <p className="text-sm text-slate-800 leading-relaxed">{s.description}</p>
+            <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4 p-3 rounded-lg bg-[#FAF7F2] border border-[#EADBCE]">
+              <div><p className="text-slate-500 font-medium">Type</p><p className="font-bold text-slate-800">{s.type}</p></div>
+              <div><p className="text-slate-500 font-medium">Raised By</p><p className="font-bold text-slate-800">{s.raisedBy.name}</p></div>
+              <div><p className="text-slate-500 font-medium">Raised On</p><p className="font-bold text-slate-800">{formatDate(s.raisedAt)}</p></div>
+              <div><p className="text-slate-500 font-medium">Due Date</p><p className="font-bold text-rose-700">{formatDate(s.dueDate)}</p></div>
             </div>
-            <Button size="sm" onClick={() => navigate("ltp-shortfalls")}><MessageSquare className="size-4" /> Respond to shortfall</Button>
+            <Button size="sm" className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer shadow-2xs" onClick={() => navigate("ltp-shortfalls")}>
+              <MessageSquare className="size-4 mr-1.5" /> Respond to shortfall
+            </Button>
           </div>
         </SectionCard>
       ))}
@@ -1266,27 +1362,27 @@ function RemarksTab({ app }: { app: Application }) {
         {app.remarks.map((r, idx) => {
           const isLast = idx === app.remarks.length - 1;
           const typeCls = {
-            INFO: "bg-info/10 text-info",
-            OBSERVATION: "bg-muted text-muted-foreground",
-            INSTRUCTION: "bg-warning/15 text-warning-foreground",
-            DECISION: "bg-success/10 text-success",
+            INFO: "bg-blue-100 text-blue-800 border-blue-300",
+            OBSERVATION: "bg-slate-100 text-slate-800 border-slate-300",
+            INSTRUCTION: "bg-amber-100 text-amber-800 border-amber-300",
+            DECISION: "bg-emerald-100 text-emerald-800 border-emerald-300",
           }[r.type];
           return (
             <li key={r.id} className="relative flex gap-3 pb-5">
-              {!isLast && <div className="absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-border" />}
-              <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold">
+              {!isLast && <div className="absolute left-[15px] top-8 h-[calc(100%-1rem)] w-px bg-[#DCD5C8]" />}
+              <div className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full bg-[#7A1316]/10 text-[#7A1316] text-[10px] font-bold">
                 {(r.author?.name || "Officer").split(" ").map((p) => p[0]).slice(0, 2).join("")}
               </div>
-              <div className="flex-1 space-y-1">
+              <div className="flex-1 space-y-1.5">
                 <div className="flex flex-wrap items-center justify-between gap-x-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">{r.author?.name || "Official"}</span>
+                    <span className="text-sm font-bold text-slate-900">{r.author?.name || "Official"}</span>
                     {r.author?.role && <RoleBadge role={r.author.role} />}
-                    <Badge className={cn("text-[9px]", typeCls)}>{r.type}</Badge>
+                    <Badge className={cn("text-[9px] font-bold border", typeCls)}>{r.type}</Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">{formatDateTime(r.timestamp)}</span>
+                  <span className="text-xs text-slate-500 font-mono">{formatDateTime(r.timestamp)}</span>
                 </div>
-                <p className="text-sm text-foreground/90 rounded-md bg-muted/40 px-3 py-2">{r.text}</p>
+                <p className="text-xs text-slate-800 rounded-lg bg-[#FAF7F2] border border-[#EADBCE] px-3.5 py-2.5 font-medium leading-relaxed">{r.text}</p>
               </div>
             </li>
           );
@@ -1302,7 +1398,7 @@ function AuditTab({ app }: { app: Application }) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <SectionCard title="Audit Trail" description="Complete chronological record of all actions" icon={History}>
-          <AuditTimeline entries={app.auditLog} />
+          <AuditTimeline entries={app.auditLog} variant="maroon" />
         </SectionCard>
       </div>
       <div className="space-y-6">
@@ -1311,10 +1407,10 @@ function AuditTab({ app }: { app: Application }) {
             <InfoRow label="Total Events" value={app.auditLog.length} />
             <InfoRow label="First Event" value={formatDateTime(app.auditLog[0]?.timestamp ?? "")} />
             <InfoRow label="Last Event" value={formatDateTime(app.auditLog[app.auditLog.length - 1]?.timestamp ?? "")} />
-            <Separator />
+            <Separator className="bg-[#DCD5C8]" />
             <InfoRow label="Data Retention" value="7 years" />
             <InfoRow label="Audit Standard" value="NIC eGov" />
-            <InfoRow label="Integrity" value={<Badge className="bg-success/10 text-success">Verified</Badge>} />
+            <InfoRow label="Integrity" value={<Badge className="bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">Verified</Badge>} />
           </div>
         </SectionCard>
       </div>

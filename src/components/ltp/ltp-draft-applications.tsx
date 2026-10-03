@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -93,23 +93,8 @@ export function LtpDraftApplications({
       };
     });
 
-    // Ensure the proposal shown in the screenshot is present if no matching draft exists
-    const hasDefaultProposal = items.some((i) => i.baNo === "D/1168/0267/BP/2026");
-    if (!hasDefaultProposal) {
-      items.unshift({
-        id: "draft-sample-1",
-        baNo: "D/1168/0267/BP/2026",
-        permissionType: "Building Permission",
-        createdDate: "26/9/2026",
-        status: "Draft",
-        owner: "",
-        appId: userDrafts[0]?.id || applications[0]?.id,
-        type: "Non LPS",
-      });
-    }
-
     return items;
-  }, [applications, user]);
+  }, [applications]);
 
   const uniqueOwners = React.useMemo(() => {
     const set = new Set<string>();

@@ -72,30 +72,18 @@ export function UnifiedDashboard() {
 
   const applicationsView: ViewKey = isLTP ? "ltp-applications" : isAdmin ? "admin-applications" : "officer-applications";
 
-  const hasApps = scope.applications.length > 0;
-
   // ── 1. Top Stat Card 1: Total Applications ──────────────────────────────────
-  const totalApplications = hasApps ? kpis.total : 3158;
-  const approvedCount = hasApps ? kpis.approved : 2410;
-  const rejectedCount = hasApps ? kpis.rejected : 20;
-  const pendingCount = hasApps ? Math.max(0, totalApplications - approvedCount - rejectedCount) : 728;
+  const totalApplications = kpis.total;
+  const approvedCount = kpis.approved;
+  const rejectedCount = kpis.rejected;
+  const pendingCount = Math.max(0, totalApplications - approvedCount - rejectedCount);
 
-  const approvedPct = totalApplications > 0 ? ((approvedCount / totalApplications) * 100).toFixed(1) : "76.3";
-  const pendingPct = totalApplications > 0 ? ((pendingCount / totalApplications) * 100).toFixed(1) : "23.1";
-  const rejectedPct = totalApplications > 0 ? ((rejectedCount / totalApplications) * 100).toFixed(1) : "0.6";
+  const approvedPct = totalApplications > 0 ? ((approvedCount / totalApplications) * 100).toFixed(1) : "0.0";
+  const pendingPct = totalApplications > 0 ? ((pendingCount / totalApplications) * 100).toFixed(1) : "0.0";
+  const rejectedPct = totalApplications > 0 ? ((rejectedCount / totalApplications) * 100).toFixed(1) : "0.0";
 
-  // ── Application Type Breakdown (Individual Residential, Apartment, Commercial, Multistory Building, Group Development, Other) ──
+  // ── Application Type Breakdown ──
   const applicationTypeData = React.useMemo(() => {
-    if (!hasApps) {
-      return [
-        { label: "Individual Residential", value: 1420, color: "#7A1316" },
-        { label: "Apartment", value: 745, color: "#7A1316" },
-        { label: "Commercial", value: 412, color: "#7A1316" },
-        { label: "Multistory Building", value: 268, color: "#7A1316" },
-        { label: "Group Development", value: 195, color: "#7A1316" },
-        { label: "Other", value: 118, color: "#7A1316" },
-      ];
-    }
     const counts: Record<string, number> = {
       "Individual Residential": 0,
       "Apartment": 0,
@@ -147,18 +135,6 @@ export function UnifiedDashboard() {
       }
     });
 
-    const totalCalculated = Object.values(counts).reduce((sum, v) => sum + v, 0);
-    if (totalCalculated === 0) {
-      return [
-        { label: "Individual Residential", value: 1420, color: "#7A1316" },
-        { label: "Apartment", value: 745, color: "#7A1316" },
-        { label: "Commercial", value: 412, color: "#7A1316" },
-        { label: "Multistory Building", value: 268, color: "#7A1316" },
-        { label: "Group Development", value: 195, color: "#7A1316" },
-        { label: "Other", value: 118, color: "#7A1316" },
-      ];
-    }
-
     return [
       { label: "Individual Residential", value: counts["Individual Residential"], color: "#7A1316" },
       { label: "Apartment", value: counts["Apartment"], color: "#7A1316" },
@@ -167,92 +143,94 @@ export function UnifiedDashboard() {
       { label: "Group Development", value: counts["Group Development"], color: "#7A1316" },
       { label: "Other", value: counts["Other"], color: "#7A1316" },
     ];
-  }, [hasApps, scope.applications]);
+  }, [scope.applications]);
 
   // ── 2. Top Stat Card 2: Pending (Breakdown: In Review, Payment, Drawing, Documentation, Shortfall) ──
-  const inReviewCount = hasApps
-    ? scope.applications.filter((a) =>
-        !["APPROVED", "REJECTED", "DRAFT"].includes(a.status) &&
-        (a.status === "SCRUTINY_PASSED" ||
-         a.currentStage === "ZONAL_HEAD_REVIEW" ||
-         a.currentStage === "DIRECTOR_REVIEW" ||
-         a.currentStage === "ADDITIONAL_COMMISSIONER_REVIEW" ||
-         a.currentStage === "COMMISSIONER_REVIEW" ||
-         a.currentStage === "FINAL_DECISION")
-      ).length
-    : 310;
+  const pendingApps = React.useMemo(() => {
+    return scope.applications.filter((a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status));
+  }, [scope.applications]);
 
-  const paymentPendingCount = hasApps
-    ? scope.applications.filter((a) =>
-        a.status === "PAYMENT_PENDING" ||
-        a.status === "FEE_GENERATED" ||
-        a.currentStage === "PAYMENT" ||
-        a.currentStage === "FEE_GENERATED"
-      ).length
-    : 142;
+  const shortfallPendingCount = React.useMemo(() => {
+    return pendingApps.filter((a) =>
+      a.status === "SHORTFALL_RAISED" ||
+      a.shortfalls.some((sf) => sf.status === "OPEN" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONDED" || sf.status === "REOPENED")
+    ).length;
+  }, [pendingApps]);
 
-  const drawingPendingCount = hasApps
-    ? scope.applications.filter((a) =>
-        a.status === "DRAWING_UPLOADED" ||
-        a.status === "SCRUTINY_IN_PROGRESS" ||
-        a.status === "SCRUTINY_FAILED" ||
-        a.status === "DRAWING_REUPLOAD_REQUIRED" ||
-        a.currentStage === "DRAWING_SCRUTINY"
-      ).length
-    : 120;
+  const paymentPendingCount = React.useMemo(() => {
+    return pendingApps.filter((a) =>
+      (a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED" || a.currentStage === "PAYMENT" || a.currentStage === "FEE_GENERATED") &&
+      !(a.status === "SHORTFALL_RAISED" || a.shortfalls.some((sf) => sf.status === "OPEN" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONDED"))
+    ).length;
+  }, [pendingApps]);
 
-  const shortfallPendingCount = hasApps
-    ? scope.applications.filter((a) =>
-        a.status === "SHORTFALL_RAISED" ||
-        a.shortfalls.some((sf) => sf.status === "OPEN" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONDED")
-      ).length || (kpis.openShortfalls > 0 ? kpis.openShortfalls : 1)
-    : 62;
+  const drawingPendingCount = React.useMemo(() => {
+    return pendingApps.filter((a) =>
+      (a.status === "DRAWING_UPLOADED" || a.status === "SCRUTINY_IN_PROGRESS" || a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED" || a.currentStage === "DRAWING_SCRUTINY") &&
+      !(a.status === "SHORTFALL_RAISED" || a.shortfalls.some((sf) => sf.status === "OPEN" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONDED")) &&
+      !(a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED")
+    ).length;
+  }, [pendingApps]);
 
-  const docPendingCount = hasApps
-    ? Math.max(0, pendingCount - inReviewCount - paymentPendingCount - drawingPendingCount - shortfallPendingCount)
-    : 94;
+  const inReviewCount = React.useMemo(() => {
+    return pendingApps.filter((a) =>
+      (a.status === "SCRUTINY_PASSED" ||
+       a.currentStage === "ZONAL_HEAD_REVIEW" ||
+       a.currentStage === "DIRECTOR_REVIEW" ||
+       a.currentStage === "ADDITIONAL_COMMISSIONER_REVIEW" ||
+       a.currentStage === "COMMISSIONER_REVIEW" ||
+       a.currentStage === "FINAL_DECISION") &&
+      !(a.status === "SHORTFALL_RAISED" || a.shortfalls.some((sf) => sf.status === "OPEN" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONDED"))
+    ).length;
+  }, [pendingApps]);
 
-  const inReviewPct = pendingCount > 0 ? ((inReviewCount / pendingCount) * 100).toFixed(1) : "42.6";
-  const paymentPendingPct = pendingCount > 0 ? ((paymentPendingCount / pendingCount) * 100).toFixed(1) : "19.5";
-  const drawingPendingPct = pendingCount > 0 ? ((drawingPendingCount / pendingCount) * 100).toFixed(1) : "16.5";
-  const docPendingPct = pendingCount > 0 ? ((docPendingCount / pendingCount) * 100).toFixed(1) : "12.9";
-  const shortfallPendingPct = pendingCount > 0 ? ((shortfallPendingCount / pendingCount) * 100).toFixed(1) : "8.5";
+  const docPendingCount = Math.max(0, pendingCount - inReviewCount - paymentPendingCount - drawingPendingCount - shortfallPendingCount);
+
+  const inReviewPct = pendingCount > 0 ? ((inReviewCount / pendingCount) * 100).toFixed(1) : "0.0";
+  const paymentPendingPct = pendingCount > 0 ? ((paymentPendingCount / pendingCount) * 100).toFixed(1) : "0.0";
+  const drawingPendingPct = pendingCount > 0 ? ((drawingPendingCount / pendingCount) * 100).toFixed(1) : "0.0";
+  const docPendingPct = pendingCount > 0 ? ((docPendingCount / pendingCount) * 100).toFixed(1) : "0.0";
+  const shortfallPendingPct = pendingCount > 0 ? ((shortfallPendingCount / pendingCount) * 100).toFixed(1) : "0.0";
 
   // ── 3. Bottom Card: Drawing Scrutiny ────────────────────────────────────────
-  const totalScrutiny = hasApps ? scope.applications.length : 124;
-  const scrutinyPassed = hasApps ? scope.applications.filter((a) => a.status === "APPROVED" || a.status === "SCRUTINY_PASSED").length : 86;
-  const scrutinyReview = hasApps ? scope.applications.filter((a) => a.status === "DRAWING_UPLOADED" || a.status === "SCRUTINY_IN_PROGRESS").length : 26;
-  const scrutinyFailed = Math.max(0, totalScrutiny - scrutinyPassed - scrutinyReview);
-  const scrutinyPassedPct = totalScrutiny > 0 ? ((scrutinyPassed / totalScrutiny) * 100).toFixed(1) : "69.4";
-  const scrutinyReviewPct = totalScrutiny > 0 ? ((scrutinyReview / totalScrutiny) * 100).toFixed(1) : "21.0";
-  const scrutinyFailedPct = totalScrutiny > 0 ? ((scrutinyFailed / totalScrutiny) * 100).toFixed(1) : "9.6";
+  const totalScrutiny = scope.applications.length;
+  const scrutinyPassed = scope.applications.filter((a) => a.status === "APPROVED" || a.status === "SCRUTINY_PASSED" || a.scrutinyReport?.status === "PASSED").length;
+  const scrutinyFailed = scope.applications.filter((a) => a.status === "SCRUTINY_FAILED" || a.status === "DRAWING_REUPLOAD_REQUIRED" || a.scrutinyReport?.status === "FAILED").length;
+  const scrutinyReview = Math.max(0, totalScrutiny - scrutinyPassed - scrutinyFailed);
+  const scrutinyPassedPct = totalScrutiny > 0 ? ((scrutinyPassed / totalScrutiny) * 100).toFixed(1) : "0.0";
+  const scrutinyReviewPct = totalScrutiny > 0 ? ((scrutinyReview / totalScrutiny) * 100).toFixed(1) : "0.0";
+  const scrutinyFailedPct = totalScrutiny > 0 ? ((scrutinyFailed / totalScrutiny) * 100).toFixed(1) : "0.0";
 
   // ── 4. Bottom Card: Payment Status ──────────────────────────────────────────
-  const totalPayments = hasApps ? scope.applications.length : 124;
-  const paidCount = hasApps ? scope.applications.filter((a) => a.status === "APPROVED" || a.status === "PAYMENT_SUCCESS").length : 94;
-  const pendingPayCount = hasApps ? (kpis.pendingPayments || 1) : 22;
+  const totalPayments = scope.applications.length;
+  const paidCount = scope.applications.filter((a) => a.payment?.status === "SUCCESS" || a.status === "APPROVED" || a.status === "PAYMENT_SUCCESS").length;
+  const pendingPayCount = scope.applications.filter((a) =>
+    a.status === "PAYMENT_PENDING" || a.status === "FEE_GENERATED" || a.payment?.status === "PENDING" || a.payment?.status === "PROCESSING"
+  ).length;
   const exemptCount = Math.max(0, totalPayments - paidCount - pendingPayCount);
-  const paidPct = totalPayments > 0 ? ((paidCount / totalPayments) * 100).toFixed(1) : "75.8";
-  const pendingPayPct = totalPayments > 0 ? ((pendingPayCount / totalPayments) * 100).toFixed(1) : "17.7";
-  const exemptPct = totalPayments > 0 ? ((exemptCount / totalPayments) * 100).toFixed(1) : "6.5";
+  const paidPct = totalPayments > 0 ? ((paidCount / totalPayments) * 100).toFixed(1) : "0.0";
+  const pendingPayPct = totalPayments > 0 ? ((pendingPayCount / totalPayments) * 100).toFixed(1) : "0.0";
+  const exemptPct = totalPayments > 0 ? ((exemptCount / totalPayments) * 100).toFixed(1) : "0.0";
 
   // ── 5. Bottom Card: Documents ───────────────────────────────────────────────
-  const totalDocs = hasApps ? (scope.applications.length * 4) : 496;
-  const docsVerified = hasApps ? Math.round(totalDocs * 0.72) : 357;
-  const docsPending = hasApps ? (kpis.pendingDocuments || Math.round(totalDocs * 0.20)) : 99;
+  const allDocs = scope.applications.flatMap((a) => a.documents);
+  const totalDocs = allDocs.length;
+  const docsVerified = allDocs.filter((d) => d.status === "VERIFIED").length;
+  const docsPending = allDocs.filter((d) => d.status === "REQUIRED" || d.status === "PENDING_VERIFICATION").length;
   const docsRejected = Math.max(0, totalDocs - docsVerified - docsPending);
-  const docsVerifiedPct = totalDocs > 0 ? ((docsVerified / totalDocs) * 100).toFixed(1) : "72.0";
-  const docsPendingPct = totalDocs > 0 ? ((docsPending / totalDocs) * 100).toFixed(1) : "20.0";
-  const docsRejectedPct = totalDocs > 0 ? ((docsRejected / totalDocs) * 100).toFixed(1) : "8.0";
+  const docsVerifiedPct = totalDocs > 0 ? ((docsVerified / totalDocs) * 100).toFixed(1) : "0.0";
+  const docsPendingPct = totalDocs > 0 ? ((docsPending / totalDocs) * 100).toFixed(1) : "0.0";
+  const docsRejectedPct = totalDocs > 0 ? ((docsRejected / totalDocs) * 100).toFixed(1) : "0.0";
 
   // ── 6. Bottom Card: Shortfalls ──────────────────────────────────────────────
-  const totalShortfalls = hasApps ? (kpis.openShortfalls + 8) : 38;
-  const sfClosed = hasApps ? 8 : 22;
-  const sfOpen = hasApps ? (kpis.openShortfalls || 3) : 11;
+  const allShortfalls = scope.applications.flatMap((a) => a.shortfalls);
+  const totalShortfalls = allShortfalls.length;
+  const sfClosed = allShortfalls.filter((sf) => sf.status === "RESOLVED").length;
+  const sfOpen = allShortfalls.filter((sf) => sf.status === "OPEN" || sf.status === "REOPENED").length;
   const sfUnderReview = Math.max(0, totalShortfalls - sfClosed - sfOpen);
-  const sfClosedPct = totalShortfalls > 0 ? ((sfClosed / totalShortfalls) * 100).toFixed(1) : "57.9";
-  const sfOpenPct = totalShortfalls > 0 ? ((sfOpen / totalShortfalls) * 100).toFixed(1) : "28.9";
-  const sfUnderReviewPct = totalShortfalls > 0 ? ((sfUnderReview / totalShortfalls) * 100).toFixed(1) : "13.2";
+  const sfClosedPct = totalShortfalls > 0 ? ((sfClosed / totalShortfalls) * 100).toFixed(1) : "0.0";
+  const sfOpenPct = totalShortfalls > 0 ? ((sfOpen / totalShortfalls) * 100).toFixed(1) : "0.0";
+  const sfUnderReviewPct = totalShortfalls > 0 ? ((sfUnderReview / totalShortfalls) * 100).toFixed(1) : "0.0";
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] text-slate-800 font-sans p-2 sm:p-2.5 flex flex-col gap-2 sm:gap-2.5 overflow-hidden">

@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { useMemo } from "react";
 import type {
   Application,
@@ -56,6 +56,45 @@ import { feeService } from "@/services/fee-service";
 import { paymentService } from "@/services/payment-service";
 import { NotificationFactory, createNotification } from "@/services/notification-service";
 import { fileStore, readFileAsArrayBuffer, validateFile, genFileReference, extensionToMime } from "@/lib/file-store";
+import { getDashboardScope } from "@/lib/scope";
+
+// Clean up bloated legacy localStorage entries that caused QuotaExceededError
+if (typeof window !== "undefined") {
+  try {
+    window.localStorage.removeItem("building-permit-store-v3");
+    window.localStorage.removeItem("building-permit-store-v2");
+    window.localStorage.removeItem("building-permit-store");
+  } catch {
+    // ignore
+  }
+}
+
+const safeStorage = createJSONStorage(() => ({
+  getItem: (name: string) => {
+    try {
+      if (typeof window === "undefined") return null;
+      return window.localStorage.getItem(name);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (name: string, value: string) => {
+    try {
+      if (typeof window === "undefined") return;
+      window.localStorage.setItem(name, value);
+    } catch (e) {
+      console.warn(`[Storage] Failed to set ${name} (quota exceeded):`, e);
+    }
+  },
+  removeItem: (name: string) => {
+    try {
+      if (typeof window === "undefined") return;
+      window.localStorage.removeItem(name);
+    } catch {
+      // ignore
+    }
+  },
+}));
 
 // Re-export for views
 export { DEMO_CREDENTIALS, ROLES };
@@ -354,21 +393,20 @@ export const useAppStore = create<AppState>()(
 
       // ---- AUTH ----
       login: (email, password) => {
-        const cred = DEMO_CREDENTIALS.find((c) => c.email === email.trim().toLowerCase());
+        const cleanEmail = email.trim().toLowerCase();
+        const cred = DEMO_CREDENTIALS.find((c) => c.email.toLowerCase() === cleanEmail);
         if (!cred) return { ok: false, error: "No account found with this email." };
         if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
         const storeUsers = get().users;
-        let user = storeUsers.find((u) => u.role === cred.role) ?? storeUsers.find((u) => u.email === cred.email);
-        // Always overlay with latest seed data so stale persisted names are corrected
-        const seedUser = USERS.find((u) => u.role === cred.role) ?? USERS.find((u) => u.email === cred.email);
+        const seedUser = USERS.find((u) => u.email.toLowerCase() === cleanEmail) ?? USERS.find((u) => u.role === cred.role);
+        let user = storeUsers.find((u) => u.email?.toLowerCase() === cleanEmail) ?? storeUsers.find((u) => u.role === cred.role);
         if (!user) {
           if (seedUser) {
             set((s) => ({ users: [...s.users, seedUser] }));
             user = seedUser;
           }
         } else if (seedUser) {
-          // Patch persisted user's name/designation from the latest seed
-          user = { ...user, name: seedUser.name, designation: seedUser.designation };
+          user = { ...user, ...seedUser };
         }
         if (!user) return { ok: false, error: "User account not found. Contact the administrator." };
         if (!user.active || user.status === "INACTIVE") return { ok: false, error: "Your account has been deactivated. Contact the administrator." };
@@ -391,20 +429,14 @@ export const useAppStore = create<AppState>()(
       },
 
       loginAsRole: (role) => {
-        let user = get().users.find((u) => u.role === role);
         const seedUser = USERS.find((u) => u.role === role);
-        // Always overlay with latest seed data so stale persisted names are corrected
-        if (!user) {
-          if (seedUser) {
-            set((s) => ({ users: [...s.users, seedUser] }));
-            user = seedUser;
-          }
-        } else if (seedUser) {
-          user = { ...user, name: seedUser.name, designation: seedUser.designation };
-        }
+        let user = get().users.find((u) => u.role === role) ?? seedUser;
         if (!user) return;
+        if (seedUser) {
+          user = { ...user, ...seedUser };
+        }
         const portal = portalForRole(role);
-        set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
+        set((s) => ({ users: s.users.map((u) => u.id === user!.id ? { ...u, lastLogin: nowISO() } : u) }));
         set({
           user: { ...user, lastLogin: nowISO() },
           isAuthenticated: true,
@@ -1555,8 +1587,63 @@ export const useAppStore = create<AppState>()(
       },
     }),
     {
-      name: "building-permit-store-v3",
-      version: 4,
+      name: "building-permit-store-v4",
+      version: 6,
+      storage: safeStorage,
+      partialize: (state: any) => {
+        // Do NOT serialize the entire static 410-application seed database into localStorage.
+        // Instead, only persist applications created by the user or seed applications modified during the session.
+        const seedMap = new Map(SEED_APPLICATIONS.map((s) => [s.id, s]));
+        const createdApplications = (state.applications || []).filter((a: any) => !seedMap.has(a.id));
+        const modifiedSeedApplications = (state.applications || []).filter((a: any) => {
+          const s = seedMap.get(a.id);
+          if (!s) return false;
+          return a.status !== s.status || a.currentStage !== s.currentStage || a.lastUpdated !== s.lastUpdated;
+        });
+
+        return {
+          user: state.user,
+          isAuthenticated: state.isAuthenticated,
+          authStage: state.authStage,
+          pendingEmail: state.pendingEmail,
+          view: state.view,
+          portal: state.portal,
+          selectedApplicationId: state.selectedApplicationId,
+          theme: state.theme,
+          dashboardVersion: state.dashboardVersion,
+          recentActivityVersion: state.recentActivityVersion,
+          cVersion: state.cVersion,
+          sidebarCollapsed: state.sidebarCollapsed,
+          ltpActiveMenu: state.ltpActiveMenu,
+          ltpTheme: state.ltpTheme,
+          systemSettings: state.systemSettings,
+          workflowStageOverrides: state.workflowStageOverrides,
+          pendingRegistrations: state.pendingRegistrations,
+          notifications: state.notifications,
+          smsLogs: state.smsLogs,
+          createdApplications,
+          modifiedSeedApplications,
+        };
+      },
+      merge: (persistedState: any, currentState: AppState) => {
+        if (!persistedState) return currentState;
+        const createdApps: Application[] = Array.isArray(persistedState.createdApplications)
+          ? persistedState.createdApplications
+          : [];
+        const modifiedMap = new Map<string, Application>(
+          (Array.isArray(persistedState.modifiedSeedApplications) ? persistedState.modifiedSeedApplications : []).map(
+            (a: Application) => [a.id, a]
+          )
+        );
+        const baseApps = SEED_APPLICATIONS.map((s) => modifiedMap.get(s.id) || s);
+
+        return {
+          ...currentState,
+          ...persistedState,
+          applications: [...createdApps, ...baseApps],
+          users: USERS,
+        };
+      },
       migrate: (persistedState: any) => {
         if (persistedState) {
           if (persistedState.ltpTheme === "apcrda-blue" || !persistedState.ltpTheme) {
@@ -1573,6 +1660,7 @@ export const useAppStore = create<AppState>()(
               { id: "step-4", role: "COMMISSIONER", label: "Commissioner Review", order: 4, canApprove: true, canReturn: true, canRaiseShortfall: false, nextRoleId: null },
             ];
           }
+          persistedState.users = USERS;
         }
         return persistedState;
       },
@@ -1589,17 +1677,11 @@ export function useSelectedApplication() {
 
 export function useVisibleApplications() {
   const applications = useAppStore((s) => s.applications);
+  const users = useAppStore((s) => s.users);
   const user = useAppStore((s) => s.user);
   return useMemo(() => {
-    if (!user) return [];
-    if (user.role === "ADMIN") return applications;
-    if (user.role === "LTP") return [];
-    return applications.filter((a) => {
-      const roles = rolesForStage(a.currentStage);
-      if (roles.includes(user.role) && !["APPROVED", "REJECTED"].includes(a.status)) return true;
-      return a.workflowHistory.some((w) => w.actor.role === user.role);
-    });
-  }, [applications, user]);
+    return getDashboardScope(user, applications, users).applications;
+  }, [applications, users, user]);
 }
 
 export function useAssignedApplications() {
