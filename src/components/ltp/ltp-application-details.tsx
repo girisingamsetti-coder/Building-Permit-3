@@ -108,7 +108,7 @@ export function LtpApplicationDetails() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800 overflow-y-auto">
       <PageBackButton fallbackView="ltp-applications" fallbackLabel="Applications" />
       <PageHeader
         title={app.applicationNo}
@@ -121,8 +121,8 @@ export function LtpApplicationDetails() {
         badge={<StatusBadge status={app.status} />}
         actions={
           <>
-            <Button variant="outline" size="sm"><Printer className="size-4" /> Print</Button>
-            <Button variant="outline" size="sm"><Share2 className="size-4" /> Share</Button>
+            <Button variant="outline" size="sm" className="border-[#DCD5C8] text-[#7A1316] hover:bg-[#F3EADF]"><Printer className="size-4" /> Print</Button>
+            <Button variant="outline" size="sm" className="border-[#DCD5C8] text-[#7A1316] hover:bg-[#F3EADF]"><Share2 className="size-4" /> Share</Button>
           </>
         }
       />
@@ -131,44 +131,51 @@ export function LtpApplicationDetails() {
       <StatusBanner app={app} />
 
       {/* Workflow stepper */}
-      <SectionCard title="Approval Workflow" description="Multi-level approval pipeline" icon={Workflow}>
+      <div className="rounded-xl border-2 border-[#7A1316] bg-[#FBF3E4] p-4 sm:p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-[#DCD5C8]">
+          <div className="flex items-center gap-2">
+            <Workflow className="size-4 text-[#7A1316]" />
+            <h3 className="font-bold text-sm text-[#7A1316]">Approval Workflow</h3>
+          </div>
+          <span className="text-xs text-slate-500 font-medium">Multi-level approval pipeline</span>
+        </div>
         <div className="space-y-4">
           <WorkflowStepper currentStage={app.currentStage} status={app.status === "APPROVED" ? "COMPLETED" : app.status === "SCRUTINY_FAILED" ? "FAILED" : app.status === "SHORTFALL_RAISED" ? "SHORTFALL" : "CURRENT"} />
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#DCD5C8] bg-white px-4 py-2.5 text-xs">
             <div className="flex items-center gap-2">
-              <Clock className="size-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Submitted:</span>
-              <span className="font-medium">{formatDate(app.submissionDate)}</span>
+              <Clock className="size-3.5 text-[#7A1316]" />
+              <span className="text-slate-500">Submitted:</span>
+              <span className="font-medium text-slate-800">{formatDate(app.submissionDate)}</span>
             </div>
             <div className="flex items-center gap-2">
-              <Calendar className="size-3.5 text-muted-foreground" />
-              <span className="text-muted-foreground">Expected SLA:</span>
-              <span className="font-medium">{formatDate(app.expectedSLA ?? "")}</span>
+              <Calendar className="size-3.5 text-[#7A1316]" />
+              <span className="text-slate-500">Expected SLA:</span>
+              <span className="font-medium text-slate-800">{formatDate(app.expectedSLA ?? "")}</span>
             </div>
             {app.assignedOfficer && (
               <div className="flex items-center gap-2">
-                <ShieldCheck className="size-3.5 text-muted-foreground" />
-                <span className="text-muted-foreground">Assigned:</span>
-                <span className="font-medium">{app.assignedOfficer.name}</span>
+                <ShieldCheck className="size-3.5 text-[#7A1316]" />
+                <span className="text-slate-500">Assigned:</span>
+                <span className="font-medium text-slate-800">{app.assignedOfficer.name}</span>
                 <RoleBadge role={app.assignedOfficer.role} />
               </div>
             )}
           </div>
         </div>
-      </SectionCard>
+      </div>
 
       {/* Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted/40 p-1">
-          <TabsTrigger value="overview" className="gap-1.5"><Info className="size-3.5" /> Overview</TabsTrigger>
-          <TabsTrigger value="workflow" className="gap-1.5"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
-          <TabsTrigger value="drawings" className="gap-1.5"><Upload className="size-3.5" /> Drawings &amp; Scrutiny</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5"><FolderClosed className="size-3.5" /> Documentation</TabsTrigger>
-          <TabsTrigger value="fees" className="gap-1.5"><ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payment</TabsTrigger>
-          <TabsTrigger value="nocs" className="gap-1.5"><Flame className="size-3.5 text-orange-500" /> Apply for NOCs</TabsTrigger>
-          <TabsTrigger value="shortfalls" className="gap-1.5"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
-          <TabsTrigger value="remarks" className="gap-1.5"><MessageSquare className="size-3.5" /> Remarks {app.remarks.length > 0 && <Badge className="ml-1 bg-muted text-muted-foreground text-[9px]">{app.remarks.length}</Badge>}</TabsTrigger>
-          <TabsTrigger value="audit" className="gap-1.5"><History className="size-3.5" /> Audit Log</TabsTrigger>
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-[#F5EBE1] border border-[#DCD5C8] p-1.5 rounded-xl">
+          <TabsTrigger value="overview" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Info className="size-3.5" /> Overview</TabsTrigger>
+          <TabsTrigger value="workflow" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
+          <TabsTrigger value="drawings" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Upload className="size-3.5" /> Drawings &amp; Scrutiny</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><FolderClosed className="size-3.5" /> Documentation</TabsTrigger>
+          <TabsTrigger value="fees" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><ReceiptIndianRupee className="size-3.5" /> Fees &amp; Payment</TabsTrigger>
+          <TabsTrigger value="nocs" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Flame className="size-3.5 text-orange-500" /> Apply for NOCs</TabsTrigger>
+          <TabsTrigger value="shortfalls" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><AlertTriangle className="size-3.5" /> Shortfalls {app.shortfalls.length > 0 && <Badge className="ml-1 bg-warning text-warning-foreground text-[9px]">{app.shortfalls.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="remarks" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><MessageSquare className="size-3.5" /> Remarks {app.remarks.length > 0 && <Badge className="ml-1 bg-muted text-muted-foreground text-[9px]">{app.remarks.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="audit" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><History className="size-3.5" /> Audit Log</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -326,12 +333,14 @@ function OverviewTab({ app }: { app: Application }) {
   const [projectDraft, setProjectDraft] = React.useState(app.project);
   const [priorityDraft, setPriorityDraft] = React.useState(app.priority);
 
-  React.useEffect(() => {
+  const [prevAppId, setPrevAppId] = React.useState(app.id);
+  if (prevAppId !== app.id) {
+    setPrevAppId(app.id);
     setApplicantDraft(app.applicant);
     setLtpNameDraft(app.ltpName);
     setProjectDraft(app.project);
     setPriorityDraft(app.priority);
-  }, [app]);
+  }
 
   const isEditing = (cardKey: string) => isBulkEdit || !!editingCard[cardKey];
 

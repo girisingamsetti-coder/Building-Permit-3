@@ -13,7 +13,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isLtpDashboard =
     user?.role === "LTP" ||
     view === "ltp-dashboard" ||
-    view === "ltp-applications";
+    view === "ltp-applications" ||
+    view === "admin-settings";
 
   // Apply theme class to <html>
   React.useEffect(() => {

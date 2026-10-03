@@ -901,7 +901,7 @@ export const SEED_APPLICATION_TYPES: ApplicationTypeConfig[] = [
 // SYSTEM SETTINGS (admin-configurable, single source of truth)
 // ============================================================
 export const SEED_SYSTEM_SETTINGS: SystemSettings = {
-  portalName: "LTP Approval",
+  portalName: "Building Permission System",
   portalSubtitle: "Building Permit Management System",
   dateFormat: "DD MMM YYYY",
   currency: "INR",
@@ -921,6 +921,12 @@ export const SEED_SYSTEM_SETTINGS: SystemSettings = {
     COMMISSIONER:         { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
     ADMIN:                { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
   },
+  approvalSequence: [
+    { id: "step-1", role: "ZONAL_HEAD", label: "Zonal Head Review", order: 1, canApprove: false, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-2" },
+    { id: "step-2", role: "DIRECTOR", label: "Director Review", order: 2, canApprove: true, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-3" },
+    { id: "step-3", role: "ADDITIONAL_COMMISSIONER", label: "Addl. Commissioner Review", order: 3, canApprove: true, canReturn: true, canRaiseShortfall: false, nextRoleId: "step-4" },
+    { id: "step-4", role: "COMMISSIONER", label: "Commissioner Review", order: 4, canApprove: true, canReturn: true, canRaiseShortfall: false, nextRoleId: null },
+  ],
 };
 
 // Backward-compatible exports

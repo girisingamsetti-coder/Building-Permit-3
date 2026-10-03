@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -6,7 +6,6 @@ import { useAppStore, useAllShortfalls } from "@/store/app-store";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import {
   ShieldAlert,
-  FileCheck2,
   AlertTriangle,
   FileWarning,
   Clock,
@@ -367,33 +366,6 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
               {stats.submittedShowCauses}
             </span>
           </button>
-        </div>
-
-        {/* Quick Metrics */}
-        <div className="flex items-center gap-2 overflow-x-auto shrink-0 pb-1 md:pb-0">
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-50/80 border border-emerald-200/80 px-3 py-1.5 text-xs text-emerald-800 shadow-2xs">
-            <FileCheck2 className="size-4 text-emerald-600 shrink-0" />
-            <div>
-              <span className="font-bold text-xs block leading-none">{stats.totalVerified}</span>
-              <span className="text-[10px] text-emerald-700">Verified</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-lg bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 text-xs text-amber-900 shadow-2xs">
-            <AlertTriangle className="size-4 text-amber-600 shrink-0" />
-            <div>
-              <span className="font-bold text-xs block leading-none">{stats.openShortfalls}</span>
-              <span className="text-[10px] text-amber-700">Shortfalls</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-lg bg-rose-50/80 border border-rose-200/80 px-3 py-1.5 text-xs text-rose-900 shadow-2xs">
-            <Gavel className="size-4 text-rose-600 shrink-0" />
-            <div>
-              <span className="font-bold text-xs block leading-none">{stats.activeShowCauses}</span>
-              <span className="text-[10px] text-rose-700">Show Causes</span>
-            </div>
-          </div>
         </div>
       </div>
 

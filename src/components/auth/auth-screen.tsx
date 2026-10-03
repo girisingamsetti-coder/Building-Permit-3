@@ -86,6 +86,8 @@ export function AuthScreen() {
 // SHARED BRANDING
 // ============================================================
 function BrandLogo({ compact = false }: { compact?: boolean }) {
+  const portalName = useAppStore((s) => s.systemSettings?.portalName) || "Building Permission System";
+  const portalSubtitle = useAppStore((s) => s.systemSettings?.portalSubtitle) || "Building Permit Management System";
   return (
     <div className="flex items-center gap-2.5">
       <div
@@ -98,10 +100,10 @@ function BrandLogo({ compact = false }: { compact?: boolean }) {
       </div>
       <div className="leading-tight">
         <p className={cn("font-semibold tracking-tight", compact ? "text-sm" : "text-base")}>
-          LTP Approval
+          {portalName}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          Building Permit Management System
+          {portalSubtitle}
         </p>
       </div>
     </div>
@@ -113,6 +115,7 @@ function BrandLogo({ compact = false }: { compact?: boolean }) {
 // ============================================================
 function LoginForm() {
   const { login, loginAsRole, setAuthStage, setPendingEmail } = useAppStore();
+  const portalName = useAppStore((s) => s.systemSettings?.portalName) || "Building Permission System";
   const { toast } = useToast();
   const [email, setEmail] = React.useState("ltp@demo.gov.in");
   const [password, setPassword] = React.useState("demo1234");
@@ -195,7 +198,7 @@ function LoginForm() {
       }
       toast({
         title: "Welcome back",
-        description: "You have signed in to LTP Approval.",
+        description: `You have signed in to ${portalName}.`,
       });
     }, 600);
   }
@@ -257,13 +260,7 @@ function LoginForm() {
                 ? "text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-normal max-w-xl"
                 : "text-3xl md:text-5xl tracking-widest"
             )}>
-              {version === "v3"
-                ? "Nirmaan Amaravati"
-                : version === "v2"
-                ? "Bhavan"
-                : version === "v1"
-                ? "Amaravati Nirmaan"
-                : "Building Permission System"}
+              {portalName}
             </div>
             <img src="/apgovt.png" alt="AP Govt" className="h-16 md:h-20 w-auto object-contain" />
           </div>
@@ -421,13 +418,7 @@ function LoginForm() {
                 version === "v4" ? "text-lg sm:text-xl font-bold text-[#8c1c13]" : "text-[22px]",
                 useAltBg ? "text-[#5e1914]" : version === "v4" ? "text-[#8c1c13]" : "text-white drop-shadow-md"
               )}>
-                {version === "v3"
-                  ? "Nirmaan Amaravati"
-                  : version === "v2"
-                  ? "Bhavan AMARAVATI"
-                  : version === "v1"
-                  ? "Amaravati Nirmaan AMARAVATI"
-                  : "Building Permission System"}
+                {portalName}
               </h1>
             </div>
 
@@ -445,7 +436,10 @@ function LoginForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {DEMO_CREDENTIALS.map(c => (
-                      <SelectItem key={c.role} value={c.role}>{c.label}</SelectItem>
+                      <SelectItem key={c.role} value={c.role}>
+                        {/* Show role designation only — name is shown after login */}
+                        {c.label.replace(/\s*\(.*\)$/, "")}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

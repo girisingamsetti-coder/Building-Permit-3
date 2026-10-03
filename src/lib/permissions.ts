@@ -17,8 +17,8 @@ import { WORKFLOW_STAGES, getStage } from "@/data/workflow-config";
 // ============================================================
 
 export function portalForRole(role: RoleKey): Portal {
-  if (role === "ADMIN") return "ADMIN";
-  if (role === "LTP" || role === "ZDD" || role === "ZJD" || role === "TPA" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER") return "LTP";
+  // ADMIN shares the same LTP portal as Commissioner — module access configured via Settings
+  if (role === "LTP" || role === "ZDD" || role === "ZJD" || role === "TPA" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER" || role === "ADMIN") return "LTP";
   // ZONAL_HEAD, DIRECTOR land on the OFFICER portal
   return "OFFICER";
 }

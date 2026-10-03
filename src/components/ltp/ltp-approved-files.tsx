@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -14,14 +14,12 @@ import {
   ArrowLeft,
   CheckCircle2,
   Calendar,
-  Building2,
   RefreshCw,
   FileSpreadsheet,
   Printer,
   X,
   ChevronsUpDown,
   Sparkles,
-  MapPin,
   ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -286,13 +284,10 @@ export function LtpApprovedFiles() {
     );
   }
 
-  const lpsCount = approvedItems.filter((i) => i.lpsType === "LPS").length;
-  const nonLpsCount = approvedItems.filter((i) => i.lpsType === "Non LPS").length;
-
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
-      {/* ── Controls: Title on Left | Stats, Filters & Export on Right ── */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-3 shrink-0">
+      {/* ── Controls: Title on Left | Filters & Export on Right ── */}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 shrink-0">
         {/* Left: Section Title */}
         <div className="flex flex-col gap-0.5">
           <h2 className="text-base font-black text-[#801824] tracking-tight flex items-center gap-2">
@@ -302,118 +297,94 @@ export function LtpApprovedFiles() {
           <p className="text-[11px] text-slate-500 font-medium">APCRDA Capital City &amp; Zonal Region — Sanctioned Building Permits</p>
         </div>
 
-        {/* Right: Stats + Search + Filters + Export stacked */}
-        <div className="flex flex-col items-end gap-2">
-          {/* Stats row */}
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3 py-1 text-xs text-[#5C1A20] shadow-2xs">
-              <CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" />
-              <span className="text-[11px] text-slate-500 font-medium">Sanctioned:</span>
-              <span className="font-bold text-xs text-[#801824]">{approvedItems.length}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3 py-1 text-xs text-[#5C1A20] shadow-2xs">
-              <Building2 className="size-3.5 text-[#801824] shrink-0" />
-              <span className="text-[11px] text-slate-500 font-medium">LPS:</span>
-              <span className="font-bold text-xs text-[#801824]">{lpsCount}</span>
-            </div>
-
-            <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3 py-1 text-xs text-[#5C1A20] shadow-2xs">
-              <MapPin className="size-3.5 text-amber-700 shrink-0" />
-              <span className="text-[11px] text-slate-500 font-medium">Non-LPS:</span>
-              <span className="font-bold text-xs text-[#801824]">{nonLpsCount}</span>
-            </div>
-          </div>
-
-          {/* Filters + Export row */}
-          <div className="flex flex-wrap items-center gap-2 justify-end">
-            {/* Search Box */}
-            <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-64 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
-              <Search className="size-3.5 text-slate-400 shrink-0" />
-              <input
-                type="text"
-                value={searchKeywords}
-                onChange={(e) => setSearchKeywords(e.target.value)}
-                placeholder=""
-                className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
-              />
-              {searchKeywords && (
-                <button
-                  type="button"
-                  onClick={() => setSearchKeywords("")}
-                  className="text-slate-400 hover:text-slate-600 cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="size-3" />
-                </button>
-              )}
-            </div>
-
-            {/* Scheme Filter */}
-            <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
-              <span className="text-[11px] font-bold text-slate-600 shrink-0">Scheme:</span>
-              <select
-                value={filterScheme}
-                onChange={(e) => setFilterScheme(e.target.value)}
-                aria-label="Filter by Scheme"
-                className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-              >
-                <option value="ALL">All Schemes</option>
-                <option value="LPS">LPS Layout</option>
-                <option value="Non LPS">Non LPS</option>
-              </select>
-            </div>
-
-            {/* Type Filter */}
-            <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
-              <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                aria-label="Filter by Type"
-                className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-              >
-                <option value="ALL">All Types</option>
-                <option value="Building Permission">Building Permission</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Group Development">Group Development</option>
-              </select>
-            </div>
-
-            {/* Clear Filters */}
-            {(searchKeywords || filterScheme !== "ALL" || filterType !== "ALL") && (
+        {/* Right: Search + Filters + Export */}
+        <div className="flex flex-wrap items-center gap-2 justify-end">
+          {/* Search Box */}
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-64 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
+            <Search className="size-3.5 text-slate-400 shrink-0" />
+            <input
+              type="text"
+              value={searchKeywords}
+              onChange={(e) => setSearchKeywords(e.target.value)}
+              placeholder=""
+              className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
+            />
+            {searchKeywords && (
               <button
-                onClick={() => {
-                  setSearchKeywords("");
-                  setFilterScheme("ALL");
-                  setFilterType("ALL");
-                }}
-                className="rounded-full px-3 py-1.5 bg-rose-50 text-[#801824] border border-[#801824]/20 hover:bg-rose-100 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+                type="button"
+                onClick={() => setSearchKeywords("")}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+                title="Clear search"
               >
                 <X className="size-3" />
-                <span>Clear</span>
               </button>
             )}
-
-            {/* Export CSV */}
-            <button
-              onClick={exportCSV}
-              title="Export CSV"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-            >
-              <FileSpreadsheet className="size-3.5" />
-              <span className="hidden sm:inline">Export</span>
-            </button>
-
-            {/* Refresh */}
-            <button
-              onClick={handleRefresh}
-              title="Refresh Registry"
-              className="flex size-8 items-center justify-center rounded-full border border-[#DCD5C8] bg-white text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-            >
-              <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin text-[#801824]")} />
-            </button>
           </div>
+
+          {/* Scheme Filter */}
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Scheme:</span>
+            <select
+              value={filterScheme}
+              onChange={(e) => setFilterScheme(e.target.value)}
+              aria-label="Filter by Scheme"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Schemes</option>
+              <option value="LPS">LPS Layout</option>
+              <option value="Non LPS">Non LPS</option>
+            </select>
+          </div>
+
+          {/* Type Filter */}
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              aria-label="Filter by Type"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Types</option>
+              <option value="Building Permission">Building Permission</option>
+              <option value="Commercial">Commercial</option>
+              <option value="Group Development">Group Development</option>
+            </select>
+          </div>
+
+          {/* Clear Filters */}
+          {(searchKeywords || filterScheme !== "ALL" || filterType !== "ALL") && (
+            <button
+              onClick={() => {
+                setSearchKeywords("");
+                setFilterScheme("ALL");
+                setFilterType("ALL");
+              }}
+              className="rounded-full px-3 py-1.5 bg-rose-50 text-[#801824] border border-[#801824]/20 hover:bg-rose-100 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+            >
+              <X className="size-3" />
+              <span>Clear</span>
+            </button>
+          )}
+
+          {/* Export CSV */}
+          <button
+            onClick={exportCSV}
+            title="Export CSV"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
+          >
+            <FileSpreadsheet className="size-3.5" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+
+          {/* Refresh */}
+          <button
+            onClick={handleRefresh}
+            title="Refresh Registry"
+            className="flex size-8 items-center justify-center rounded-full border border-[#DCD5C8] bg-white text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
+          >
+            <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin text-[#801824]")} />
+          </button>
         </div>
       </div>
 

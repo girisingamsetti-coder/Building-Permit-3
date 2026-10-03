@@ -46,6 +46,8 @@ export function Sidebar() {
   const view = useAppStore((s) => s.view);
   const user = useAppStore((s) => s.user);
   const roles = useAppStore((s) => s.roles);           // ← live mutable
+  const portalName = useAppStore((s) => s.systemSettings?.portalName) || "Building Permission System";
+  const portalSubtitle = useAppStore((s) => s.systemSettings?.portalSubtitle);
   const navigate = useAppStore((s) => s.navigate);
   const collapsed = useAppStore((s) => s.sidebarCollapsed);
   const setSidebarCollapsed = useAppStore((s) => s.setSidebarCollapsed);
@@ -191,14 +193,17 @@ export function Sidebar() {
             <img src="/bn-icon.png" alt="Logo" className="h-10 w-auto object-contain shrink-0" />
             <div className="min-w-0">
               <h1
-                className="text-[13px] font-black tracking-wide text-[#801824] leading-tight"
+                className="text-[13px] font-black tracking-wide text-[#801824] leading-tight line-clamp-2"
                 style={{ fontFamily: "ui-rounded, 'Arial Rounded MT Bold', 'Nunito', 'Varela Round', system-ui, sans-serif" }}
+                title={portalName}
               >
-                Building Permission
+                {portalName}
               </h1>
-              <p className="text-[11px] font-semibold text-[#801824]/70 tracking-wide leading-tight">
-                System
-              </p>
+              {portalSubtitle && (
+                <p className="text-[10px] font-semibold text-[#801824]/70 tracking-wide leading-tight truncate" title={portalSubtitle}>
+                  {portalSubtitle}
+                </p>
+              )}
             </div>
           </div>
         ) : (

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
+import type { ModuleAccessLevel } from "@/types";
 import {
   LayoutDashboard,
   FolderOpen,
@@ -13,6 +14,7 @@ import {
   RefreshCw,
   ChevronDown,
   BarChart3,
+  Settings,
 } from "lucide-react";
 
 export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
@@ -25,7 +27,7 @@ interface SubmenuItem {
 interface LtpModuleDef {
   id: string;
   label: string;
-  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change" | "reports";
+  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change" | "reports" | "settings";
   directMenuId?: string;
   submenus: SubmenuItem[];
 }
@@ -100,6 +102,17 @@ const LTP_MODULES: LtpModuleDef[] = [
       { id: "reports-scrutiny", label: "Scrutiny & Shortfalls" },
       { id: "reports-mis", label: "MIS Registry & Export" },
     ],
+  },
+];
+
+const ADMIN_MODULES: LtpModuleDef[] = [
+  ...LTP_MODULES,
+  {
+    id: "settings",
+    label: "Settings",
+    iconType: "settings",
+    directMenuId: "settings",
+    submenus: [],
   },
 ];
 
@@ -385,7 +398,12 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
 
-  const modules = user?.role === "TPA" ? TPA_MODULES : (user?.role === "ZDD" || user?.role === "ZJD") ? ZONAL_MODULES : LTP_MODULES;
+  // All roles see the full module list — access level per module is configured by Admin in Settings.
+  // ONLY Admin has access to the Settings module in the left menu bar.
+  const modules = user?.role === "ADMIN" ? ADMIN_MODULES : LTP_MODULES;
+  const roleAccessConfig = useAppStore((s) => s.systemSettings?.roleAccessConfig);
+  const getAccessLevel = (moduleId: string): ModuleAccessLevel =>
+    roleAccessConfig?.[user?.role ?? ""]?.[moduleId] ?? "full";
 
   // Single module expanded at a time
   const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {
@@ -449,6 +467,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       case "occupancy": return <Building2 className={cls} />;
       case "reports": return <BarChart3 className={cls} />;
       case "ltp-change": return <RefreshCw className={cls} />;
+      case "settings": return <Settings className={cls} />;
     }
   };
 
@@ -496,7 +515,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
                 isHeaderActive ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]") : theme.headerHoverBg
               )}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
                 {getModuleIcon(mod, isHeaderActive)}
                 <span
                   className={cn(
@@ -506,6 +525,21 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
                 >
                   {mod.label}
                 </span>
+                {/* Access level badge — shown when not Full */}
+                {(() => {
+                  const lvl = getAccessLevel(mod.id);
+                  if (lvl === "full") return null;
+                  return (
+                    <span className={cn(
+                      "ml-auto shrink-0 rounded-full px-1.5 py-0 text-[9px] font-bold leading-4 border",
+                      lvl === "read"
+                        ? "bg-blue-100 text-blue-700 border-blue-300"
+                        : "bg-red-100 text-red-700 border-red-300"
+                    )}>
+                      {lvl === "read" ? "Read" : "None"}
+                    </span>
+                  );
+                })()}
               </div>
               {hasSubmenus && isOpen && (
                 <ChevronDown className={cn("size-4 shrink-0", theme.selectedHeaderChevron ?? "text-[#FDF6ED]")} />

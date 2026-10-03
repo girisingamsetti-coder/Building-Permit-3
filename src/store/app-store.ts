@@ -359,13 +359,16 @@ export const useAppStore = create<AppState>()(
         if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
         const storeUsers = get().users;
         let user = storeUsers.find((u) => u.role === cred.role) ?? storeUsers.find((u) => u.email === cred.email);
-        // Fallback: if user was removed from store during session, re-seed from USERS constant
+        // Always overlay with latest seed data so stale persisted names are corrected
+        const seedUser = USERS.find((u) => u.role === cred.role) ?? USERS.find((u) => u.email === cred.email);
         if (!user) {
-          const seedUser = USERS.find((u) => u.role === cred.role) ?? USERS.find((u) => u.email === cred.email);
           if (seedUser) {
             set((s) => ({ users: [...s.users, seedUser] }));
             user = seedUser;
           }
+        } else if (seedUser) {
+          // Patch persisted user's name/designation from the latest seed
+          user = { ...user, name: seedUser.name, designation: seedUser.designation };
         }
         if (!user) return { ok: false, error: "User account not found. Contact the administrator." };
         if (!user.active || user.status === "INACTIVE") return { ok: false, error: "Your account has been deactivated. Contact the administrator." };
@@ -389,13 +392,15 @@ export const useAppStore = create<AppState>()(
 
       loginAsRole: (role) => {
         let user = get().users.find((u) => u.role === role);
-        // Fallback: re-seed from USERS constant if not found in store
+        const seedUser = USERS.find((u) => u.role === role);
+        // Always overlay with latest seed data so stale persisted names are corrected
         if (!user) {
-          const seedUser = USERS.find((u) => u.role === role);
           if (seedUser) {
             set((s) => ({ users: [...s.users, seedUser] }));
             user = seedUser;
           }
+        } else if (seedUser) {
+          user = { ...user, name: seedUser.name, designation: seedUser.designation };
         }
         if (!user) return;
         const portal = portalForRole(role);
@@ -934,17 +939,30 @@ export const useAppStore = create<AppState>()(
             const nextStageKey = currentStage?.nextStage;
             if (!nextStageKey) return app;
             const nextStage = getStage(nextStageKey)!;
+
+            // Check dynamic approval sequence if configured
+            const seq = s.systemSettings?.approvalSequence;
+            const currentStepIdx = seq ? seq.findIndex((st) => st.role === user.role) : -1;
+            const nextStep = seq && currentStepIdx !== -1 && currentStepIdx < seq.length - 1 ? seq[currentStepIdx + 1] : null;
+
             // Mark current as completed
             let updated: Application = { ...app, workflowHistory: app.workflowHistory.map((w) => w.stage === app.currentStage && w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
-            // Assign to next officer
-            const nextOfficer = getAssignedOfficerForStage(nextStageKey, USERS);
+            
+            // Assign to next officer (preferring dynamic role if configured)
+            const targetRole = nextStep ? nextStep.role : undefined;
+            const nextOfficer = targetRole
+              ? (s.users.find((u) => u.role === targetRole && u.active) ?? USERS.find((u) => u.role === targetRole && u.active) ?? getAssignedOfficerForStage(nextStageKey, USERS))
+              : getAssignedOfficerForStage(nextStageKey, USERS);
+
+            const targetLabel = nextStep?.label ?? nextStage.label;
+
             updated = { ...updated, assignedOfficer: nextOfficer, assignedAt: nowISO() };
-            updated = addAudit(updated, { user: user.name, role: user.role, action: `Forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
-            updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Forwarded to ${nextStage.label}`, remarks, "COMPLETED");
+            updated = addAudit(updated, { user: user.name, role: user.role, action: `Forwarded to ${targetLabel}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
+            updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Forwarded to ${targetLabel}`, remarks, "COMPLETED");
             // Set new status
             const newStatus = statusForStage(nextStageKey);
             updated = setAppStatus(updated, newStatus, nextStageKey);
-            updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+            updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: (targetRole ?? "ZONAL_HEAD") }, `Assigned to ${targetLabel}`, undefined, "CURRENT");
             return updated;
           }),
         }));
@@ -959,27 +977,38 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => {
             const currentStage = getStage(app.currentStage);
-            // If at commissioner level â†’ final approval
-            if (app.currentStage === "COMMISSIONER_REVIEW") {
+            const seq = s.systemSettings?.approvalSequence;
+            const currentStepIdx = seq ? seq.findIndex((st) => st.role === user.role) : -1;
+            const isFinalInSeq = seq && currentStepIdx !== -1 && currentStepIdx === seq.length - 1;
+
+            // If at commissioner level or final level in sequence -> final approval
+            if (app.currentStage === "COMMISSIONER_REVIEW" || isFinalInSeq) {
               let updated: Application = { ...app, workflowHistory: app.workflowHistory.map((w) => w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
               updated = addAudit(updated, { user: user.name, role: user.role, action: "Application approved", oldStatus: app.status, newStatus: "APPROVED", remarks });
-              updated = addWorkflowHistory(updated, "COMMISSIONER_REVIEW", { name: user.name, role: user.role }, "Application approved", remarks, "COMPLETED");
+              updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, "Application approved", remarks, "COMPLETED");
               updated = addWorkflowHistory(updated, "FINAL_DECISION", { name: user.name, role: user.role }, "Final approval granted", remarks, "COMPLETED");
               updated = setAppStatus(updated, "APPROVED", "FINAL_DECISION");
               updated = { ...updated, assignedOfficer: undefined, progress: 100 };
               return updated;
             }
-            // Otherwise, forward to next stage
+            // Otherwise, forward to next stage / role
             const nextStageKey = currentStage?.nextStage;
             if (!nextStageKey) return app;
             const nextStage = getStage(nextStageKey)!;
+            const nextStep = seq && currentStepIdx !== -1 && currentStepIdx < seq.length - 1 ? seq[currentStepIdx + 1] : null;
+            const targetRole = nextStep ? nextStep.role : undefined;
+            const nextOfficer = targetRole
+              ? (s.users.find((u) => u.role === targetRole && u.active) ?? USERS.find((u) => u.role === targetRole && u.active) ?? getAssignedOfficerForStage(nextStageKey, USERS))
+              : getAssignedOfficerForStage(nextStageKey, USERS);
+
+            const targetLabel = nextStep?.label ?? nextStage.label;
+
             let updated: Application = { ...app, workflowHistory: app.workflowHistory.map((w) => w.stage === app.currentStage && w.status === "CURRENT" ? { ...w, status: "COMPLETED" as const } : w) };
-            const nextOfficer = getAssignedOfficerForStage(nextStageKey, USERS);
             updated = { ...updated, assignedOfficer: nextOfficer, assignedAt: nowISO() };
-            updated = addAudit(updated, { user: user.name, role: user.role, action: `Approved & forwarded to ${nextStage.label}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
-            updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved â€” forwarded to ${nextStage.label}`, remarks, "COMPLETED");
+            updated = addAudit(updated, { user: user.name, role: user.role, action: `Approved & forwarded to ${targetLabel}`, oldStatus: app.status, newStatus: statusForStage(nextStageKey), remarks });
+            updated = addWorkflowHistory(updated, app.currentStage, { name: user.name, role: user.role }, `Approved — forwarded to ${targetLabel}`, remarks, "COMPLETED");
             updated = setAppStatus(updated, statusForStage(nextStageKey), nextStageKey);
-            updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: "ZONAL_HEAD" }, `Assigned to ${nextStage.label}`, undefined, "CURRENT");
+            updated = addWorkflowHistory(updated, nextStageKey, nextOfficer ? { name: nextOfficer.name, role: nextOfficer.role } : { name: "System", role: (targetRole ?? "ZONAL_HEAD") }, `Assigned to ${targetLabel}`, undefined, "CURRENT");
             return updated;
           }),
         }));
@@ -1532,6 +1561,17 @@ export const useAppStore = create<AppState>()(
         if (persistedState) {
           if (persistedState.ltpTheme === "apcrda-blue" || !persistedState.ltpTheme) {
             persistedState.ltpTheme = "maroon-cream";
+          }
+          if (persistedState.systemSettings?.portalName === "LTP Approval") {
+            persistedState.systemSettings.portalName = "Building Permission System";
+          }
+          if (persistedState.systemSettings && !persistedState.systemSettings.approvalSequence) {
+            persistedState.systemSettings.approvalSequence = [
+              { id: "step-1", role: "ZONAL_HEAD", label: "Zonal Head Review", order: 1, canApprove: false, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-2" },
+              { id: "step-2", role: "DIRECTOR", label: "Director Review", order: 2, canApprove: true, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-3" },
+              { id: "step-3", role: "ADDITIONAL_COMMISSIONER", label: "Addl. Commissioner Review", order: 3, canApprove: true, canReturn: true, canRaiseShortfall: false, nextRoleId: "step-4" },
+              { id: "step-4", role: "COMMISSIONER", label: "Commissioner Review", order: 4, canApprove: true, canReturn: true, canRaiseShortfall: false, nextRoleId: null },
+            ];
           }
         }
         return persistedState;

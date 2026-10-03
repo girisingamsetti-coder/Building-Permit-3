@@ -540,6 +540,17 @@ export type RoleAccessConfig = {
   };
 };
 
+export interface ApprovalStepConfig {
+  id: string;
+  role: RoleKey;
+  label: string;
+  order: number;
+  canApprove: boolean;
+  canReturn: boolean;
+  canRaiseShortfall: boolean;
+  nextRoleId?: string | null;
+}
+
 export interface SystemSettings {
   portalName: string;
   portalSubtitle: string;
@@ -552,6 +563,8 @@ export interface SystemSettings {
   demoMode: boolean;
   /** Per-role, per-module access level configured by Admin */
   roleAccessConfig: RoleAccessConfig;
+  /** Hierarchical approval sequence configuring which role comes after which role */
+  approvalSequence?: ApprovalStepConfig[];
 }
 
 

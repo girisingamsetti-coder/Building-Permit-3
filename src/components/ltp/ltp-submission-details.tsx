@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -90,6 +90,10 @@ export function LtpSubmissionDetails({
   isDraft = false,
   initialLpsType,
   initialPlotCode,
+  initialTab,
+  initialSubTab,
+  initialDocSubTab,
+  objectionNotice,
 }: {
   onBack?: () => void;
   baNo?: string;
@@ -98,6 +102,17 @@ export function LtpSubmissionDetails({
   isDraft?: boolean;
   initialLpsType?: "LPS Layout" | "Non-LPS";
   initialPlotCode?: string;
+  initialTab?: "form" | "drawing" | "documentation" | "payments" | "nocs";
+  initialSubTab?: "general" | "applicant" | "plot";
+  initialDocSubTab?: "app-checklist" | "doc-checklist" | "others" | "repository";
+  objectionNotice?: {
+    stageName: string;
+    reason: string;
+    status: string;
+    amount?: string;
+    hearingDate?: string;
+    raisedBy?: string;
+  };
 }) {
   const { applications, user, navigate, setLtpActiveMenu } = useAppStore();
   const [submissionSuccessModal, setSubmissionSuccessModal] = React.useState(false);
@@ -107,7 +122,7 @@ export function LtpSubmissionDetails({
   const [showProceeding, setShowProceeding] = React.useState<boolean>(false);
 
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
-  const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">("form");
+  const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">(initialTab ?? "form");
 
   // ─────────────────────────────────────────────────────────────
   // DOCUMENTATION REPOSITORY STATE
@@ -271,7 +286,7 @@ export function LtpSubmissionDetails({
     | "general"
     | "applicant"
     | "plot"
-  >("general");
+  >(initialSubTab ?? "general");
 
   // Sub Tabs under Documentation
   const [docSubTab, setDocSubTab] = React.useState<
@@ -279,7 +294,8 @@ export function LtpSubmissionDetails({
     | "doc-checklist"
     | "others"
     | "repository"
-  >("app-checklist");
+  >(initialDocSubTab ?? "app-checklist");
+
 
   // ─────────────────────────────────────────────────────────────
   // 1. GENERAL INFORMATION STATE
@@ -926,12 +942,52 @@ export function LtpSubmissionDetails({
         </div>
       )}
 
-      {/* ── MAIN TABS (Application Form | Drawings | Documentation | Payments) ── */}
+      {/* ── TOP HEADER: Back button, BA Number, Status & Resumed Stage ── */}
+      <div className="bg-[#F5EBE1] border-b border-[#DCD5C8] px-4 py-2 flex items-center justify-between gap-3 shrink-0">
+        <div className="flex items-center gap-3 flex-wrap">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF4EB] text-[#7A1316] font-bold text-xs border border-[#DCD5C8] transition-colors shadow-2xs cursor-pointer"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Back</span>
+            </button>
+          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-mono font-bold text-xs text-[#7A1316] bg-white px-2.5 py-1 rounded border border-[#DCD5C8]">
+              {baNo}
+            </span>
+            <span className={cn(
+              "px-2.5 py-0.5 rounded-full text-[11px] font-bold border",
+              proposalStatus.includes("Fail") || proposalStatus.includes("Shortfall") || proposalStatus.includes("Discrepancy")
+                ? "bg-rose-50 text-rose-800 border-rose-300"
+                : proposalStatus.includes("Payment")
+                  ? "bg-amber-50 text-amber-800 border-amber-300"
+                  : "bg-blue-50 text-blue-800 border-blue-300"
+            )}>
+              {proposalStatus}
+            </span>
+            {objectionNotice && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#7A1316] text-[#FDF6ED] shadow-2xs">
+                <AlertCircle className="size-3" />
+                <span>Resumed at: {objectionNotice.stageName}</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="text-xs text-slate-500 hidden md:flex items-center gap-2">
+          <span>Submission Date: <strong className="text-slate-700">{submissionDate}</strong></span>
+        </div>
+      </div>
+
+      {/* ── MAIN TABS (Application Form | Drawings | Documentation | Payments | NOCs) ── */}
       <div className="bg-[#FAF7F2] border-b border-[#DCD5C8] px-4 pt-2 flex items-center gap-1 shrink-0">
         <button
           onClick={() => {
             setMainTab("form");
-            setSubTab("general");
           }}
           className={cn(
             "px-4 py-2 text-xs font-bold transition-all relative border-b-2 cursor-pointer flex items-center gap-1.5",
@@ -999,6 +1055,30 @@ export function LtpSubmissionDetails({
       </div>
 
 
+      {/* ── SUB-TABS (When Application Form is active) ── */}
+      {mainTab === "form" && (
+        <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
+          {[
+            { id: "general", label: "General Information" },
+            { id: "applicant", label: "Applicant Information" },
+            { id: "plot", label: "Plot Details" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSubTab(tab.id as typeof subTab)}
+              className={cn(
+                "font-semibold transition-colors cursor-pointer relative py-0.5",
+                subTab === tab.id
+                  ? "text-[#7A1316] font-black underline underline-offset-4 decoration-2 decoration-[#7A1316]"
+                  : "text-slate-600 hover:text-slate-900"
+              )}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* ── SUB-TABS (When Documentation is active) ── */}
       {mainTab === "documentation" && (
         <div className="bg-[#FBF3E4] border-b border-[#DCD5C8] px-4 py-1.5 flex items-center flex-wrap gap-x-6 gap-y-1 text-xs shrink-0 shadow-2xs">
@@ -1026,6 +1106,54 @@ export function LtpSubmissionDetails({
 
       {/* ── CONTENT BODY AREA (Scrollable) ── */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 bg-[#FAF7F2]">
+        {/* Objection Stage Resume Notice */}
+        {objectionNotice && (
+          <div className="mb-4 rounded-xl border-2 border-[#801824] bg-[#FBF3E4] p-3.5 sm:p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in-50 slide-in-from-top-2">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#801824] text-[#FDF6ED] shadow-2xs">
+                <AlertCircle className="size-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-[#801824] uppercase tracking-wide">
+                    Objection on {objectionNotice.stageName} Stage
+                  </span>
+                  <span className="inline-block bg-[#801824] text-[#FDF6ED] text-[10px] font-bold px-2 py-0.5 rounded-full shadow-2xs">
+                    {objectionNotice.status}
+                  </span>
+                  {objectionNotice.hearingDate && (
+                    <span className="text-[11px] text-slate-600 font-mono bg-white px-2 py-0.5 rounded border border-[#DCD5C8]">
+                      Action Due: {objectionNotice.hearingDate}
+                    </span>
+                  )}
+                  {objectionNotice.amount && (
+                    <span className="text-[11px] text-emerald-800 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-300">
+                      Amount: {objectionNotice.amount}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-semibold text-[#4A1017]">
+                  {objectionNotice.reason}
+                </p>
+                <p className="text-[11px] text-slate-600">
+                  Resumed directly at this stage so you can rectify the shortfall without having to restart from the applicant details.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => {
+                  showToast(`Rectifications saved for ${objectionNotice.stageName}. Objection updated.`);
+                }}
+                className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold px-4 py-2 rounded-lg shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+              >
+                <Check className="size-3.5" />
+                <span>Mark Rectified</span>
+              </button>
+            </div>
+          </div>
+        )}
         {/* ========================================================================= */}
         {/* SUB-TAB 1: GENERAL INFORMATION                                           */}
         {/* ========================================================================= */}

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -476,6 +476,10 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     case "revoke":
       return { title: "Revocation Proceedings", category: "Application Status" };
 
+    case "settings":
+    case "admin-settings":
+      return { title: "System Settings & Access Control", category: "Administration" };
+
     default:
       break;
   }
@@ -514,6 +518,7 @@ export function Topbar() {
     portal,
     view,
     ltpActiveMenu,
+    setLtpActiveMenu,
     notifications,
     mobileNavOpen,
     setMobileNavOpen,
@@ -526,6 +531,7 @@ export function Topbar() {
     loginAsRole,
     logout,
   } = useAppStore();
+  const portalName = useAppStore((s) => s.systemSettings?.portalName) || "Building Permission System";
   const { toast } = useToast();
   const unread = notifications.filter((n) => !n.read).length;
 
@@ -618,7 +624,7 @@ export function Topbar() {
               {menuHeader.title}
             </span>
             <span className="text-[11px] text-slate-400 leading-tight font-medium">
-              {menuHeader.category ? `${menuHeader.category} · APCRDA` : "APCRDA Building Permission"}
+              {menuHeader.category ? `${menuHeader.category} · APCRDA` : `APCRDA ${portalName}`}
             </span>
           </>
         )}
@@ -847,6 +853,24 @@ export function Topbar() {
           </PopoverContent>
         </Popover>
 
+        {/* Admin Settings Quick Link */}
+        {user?.role === "ADMIN" && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              setLtpActiveMenu("settings");
+              if (view !== "ltp-applications") {
+                navigate("ltp-applications");
+              }
+            }}
+            title="System Settings & Access Control"
+            className="size-9 rounded-full text-[#801824] hover:bg-[#F3EADF] cursor-pointer"
+          >
+            <Settings className="size-4" />
+          </Button>
+        )}
+
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -872,9 +896,16 @@ export function Topbar() {
             <DropdownMenuItem onClick={() => navigate("ltp-profile")}>
               <User className="size-4" /> Profile
             </DropdownMenuItem>
-            {portal === "ADMIN" && (
-              <DropdownMenuItem onClick={() => navigate("admin-settings")}>
-                <Settings className="size-4" /> Settings
+            {(portal === "ADMIN" || user?.role === "ADMIN") && (
+              <DropdownMenuItem
+                onClick={() => {
+                  setLtpActiveMenu("settings");
+                  if (view !== "ltp-applications") {
+                    navigate("ltp-applications");
+                  }
+                }}
+              >
+                <Settings className="size-4" /> Settings & Access Control
               </DropdownMenuItem>
             )}
 

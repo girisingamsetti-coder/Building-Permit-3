@@ -15,7 +15,9 @@ import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpObjections } from "@/components/ltp/ltp-objections";
 import { LtpComplianceView } from "@/components/ltp/ltp-compliance-view";
 import { LtpApprovedFiles } from "@/components/ltp/ltp-approved-files";
+import { LtpInReview } from "@/components/ltp/ltp-in-review";
 import { LtpReportsView } from "@/components/ltp/ltp-reports-view";
+import { AdminSettings } from "@/components/admin/admin-settings";
 import {
   FilePlus2,
   Search,
@@ -51,19 +53,19 @@ export function LtpPortalView() {
 
   const userApps = applications;
 
-  // Sync activeMenu to dashboard if view is explicitly ltp-dashboard
+  // Sync activeMenu to dashboard ONLY when top-level view transitions to ltp-dashboard, or settings when admin-settings
   React.useEffect(() => {
-    if (view === "ltp-dashboard" && ltpActiveMenu !== "dashboard") {
+    if (view === "ltp-dashboard") {
       setLtpActiveMenu("dashboard");
+    } else if (view === "admin-settings") {
+      setLtpActiveMenu("settings");
     }
-  }, [view, ltpActiveMenu, setLtpActiveMenu]);
+  }, [view, setLtpActiveMenu]);
 
   // Dynamic content based on selected menu
   const renderContent = () => {
-    if (view === "ltp-dashboard") {
-      return <UnifiedDashboard />;
-    }
-    switch (ltpActiveMenu) {
+    const activeKey = (view === "admin-settings" || ltpActiveMenu === "admin-settings") ? "settings" : ltpActiveMenu;
+    switch (activeKey) {
       case "dashboard": {
         return <UnifiedDashboard />;
       }
@@ -84,74 +86,7 @@ export function LtpPortalView() {
       }
 
       case "review-proceeding": {
-        const reviewApps = userApps.filter(
-          (a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status)
-        );
-        return (
-          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-3 font-sans text-slate-800 overflow-y-auto">
-            {/* Quick Status Pill */}
-            <div className="flex items-center justify-between gap-2.5 shrink-0">
-              <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3.5 py-1.5 text-xs text-[#5C1A20] shadow-2xs">
-                <Clock className="size-3.5 text-[#801824] shrink-0" />
-                <span className="text-[11px] text-slate-500 font-medium">In Review:</span>
-                <span className="font-bold text-xs text-[#801824]">{reviewApps.length} In Progress</span>
-              </div>
-            </div>
-            <div className="rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
-              <div className="overflow-x-auto flex-1 min-h-0">
-                <table className="w-full border-collapse text-left text-xs">
-                  <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
-                    <tr className="divide-x divide-[#DCD5C8]">
-                      <th className="px-3.5 py-2.5 font-bold">Application No.</th>
-                      <th className="px-3.5 py-2.5 font-bold">Project</th>
-                      <th className="px-3.5 py-2.5 font-bold">Current Review Stage</th>
-                      <th className="px-3.5 py-2.5 font-bold">Assigned Officer</th>
-                      <th className="px-3.5 py-2.5 font-bold text-center">Status</th>
-                      <th className="px-4 py-2.5 font-bold text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
-                    {reviewApps.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="text-center py-10 text-slate-400">
-                          No applications currently in review proceeding.
-                        </td>
-                      </tr>
-                    ) : (
-                      reviewApps.map((app) => (
-                        <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                          <td className="px-3.5 py-3">
-                            <button
-                              onClick={() => openApplication(app.id, "ltp-application-details")}
-                              className="font-mono font-bold text-[#7A1316] hover:text-[#801824] hover:underline cursor-pointer text-left"
-                              title="Click to view application details"
-                            >
-                              {app.applicationNo}
-                            </button>
-                          </td>
-                          <td className="px-3.5 py-3 font-medium text-slate-800">{app.project.name}</td>
-                          <td className="px-3.5 py-3 text-slate-700">{app.currentStageLabel}</td>
-                          <td className="px-3.5 py-3 text-slate-600">{app.assignedOfficer?.name ?? "Under Scrutiny"}</td>
-                          <td className="px-3.5 py-3 text-center"><StatusBadge status={app.status} /></td>
-                          <td className="px-4 py-3 text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openApplication(app.id, "ltp-application-details")}
-                              className="h-7 text-xs border-[#DCD5C8] text-[#801824] hover:bg-[#F3EADF] gap-1"
-                            >
-                              View <ArrowRight className="size-3" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        );
+        return <LtpInReview />;
       }
 
       case "objected-files": {
@@ -322,6 +257,18 @@ export function LtpPortalView() {
         return <LtpReportsView initialTab={ltpActiveMenu} />;
       }
 
+      case "settings":
+      case "admin-settings": {
+        if (user?.role !== "ADMIN") {
+          return <UnifiedDashboard />;
+        }
+        return (
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col min-h-0 overflow-hidden">
+            <AdminSettings />
+          </div>
+        );
+      }
+
       default: {
         return (
           <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
@@ -367,7 +314,9 @@ export function LtpPortalView() {
     ltpActiveMenu === "reports-summary" ||
     ltpActiveMenu === "reports-payments" ||
     ltpActiveMenu === "reports-scrutiny" ||
-    ltpActiveMenu === "reports-mis";
+    ltpActiveMenu === "reports-mis" ||
+    ltpActiveMenu === "settings" ||
+    ltpActiveMenu === "admin-settings";
 
   return (
     <div className={cn("h-full w-full", isEdgeToEdge ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-y-auto p-4 bg-[#F8F9FA]")}>
