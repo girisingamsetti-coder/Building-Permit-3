@@ -67,6 +67,7 @@ export interface User {
   role: RoleKey;
   email: string;
   phone: string;
+  password?: string;
   employeeId?: string;
   licenseNo?: string;
   designation?: string;

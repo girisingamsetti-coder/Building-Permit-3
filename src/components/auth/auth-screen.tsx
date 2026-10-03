@@ -125,7 +125,7 @@ function LoginForm() {
   const [emailError, setEmailError] = React.useState("");
   const [pwError, setPwError] = React.useState("");
   const [loading, setLoading] = React.useState(false);
-  const [demoRole, setDemoRole] = React.useState<string>("LTP");
+  const [demoRole, setDemoRole] = React.useState<string>("");
   const [showLoginBox, setShowLoginBox] = React.useState(false);
   const [version, setVersion] = React.useState<"v1" | "v2" | "v3" | "v4">("v4");
   const [mounted, setMounted] = React.useState(false);

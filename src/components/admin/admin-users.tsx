@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -78,6 +78,12 @@ import {
   Trash2,
   Clock,
   ShieldAlert,
+  Eye,
+  EyeOff,
+  Copy,
+  UserCheck,
+  Lock,
+  Phone,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { RoleKey, User, UserStatus } from "@/types";
@@ -129,10 +135,9 @@ function UserStatusBadge({ status }: { status: UserStatus }) {
 }
 
 const ZONE_OPTIONS: { value: string; label: string }[] = [
-  { value: "Zone I — East", label: "Zone I — East" },
-  { value: "Zone II — South", label: "Zone II — South" },
-  { value: "Zone III — North", label: "Zone III — North" },
-  { value: "Zone IV — West", label: "Zone IV — West" },
+  { value: "Zone 1", label: "Zone 1" },
+  { value: "Zone 2", label: "Zone 2" },
+  { value: "Zone 3", label: "Zone 3" },
   { value: "Head Office", label: "Head Office" },
 ];
 
@@ -149,6 +154,7 @@ interface AddUserForm {
   zone: string;
   employeeId: string;
   licenseNo: string;
+  password?: string;
 }
 
 const EMPTY_ADD_FORM: AddUserForm = {
@@ -160,6 +166,7 @@ const EMPTY_ADD_FORM: AddUserForm = {
   zone: "",
   employeeId: "",
   licenseNo: "",
+  password: "demo1234",
 };
 
 interface EditUserForm {
@@ -170,6 +177,7 @@ interface EditUserForm {
   zone: string;
   employeeId: string;
   licenseNo: string;
+  password?: string;
 }
 
 // Normalize the Select zone value: NONE means "no zone" (undefined).
@@ -184,6 +192,7 @@ export function AdminUsers() {
     navigate,
     users,
     roles,
+    login,
     createUser,
     updateUser,
     setUserRole,
@@ -197,7 +206,27 @@ export function AdminUsers() {
   // Filter state
   const [search, setSearch] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState<RoleKey | "ALL">("ALL");
+  const [zoneFilter, setZoneFilter] = React.useState<string>("ALL");
   const [statusFilter, setStatusFilter] = React.useState<"ALL" | UserStatus>("ALL");
+
+  // User details & password modal target
+  const [detailTarget, setDetailTarget] = React.useState<User | null>(null);
+  const [detailPwVisible, setDetailPwVisible] = React.useState(false);
+
+  // Table password reveal state (per user)
+  const [revealedPasswords, setRevealedPasswords] = React.useState<Record<string, boolean>>({});
+
+  const toggleReveal = (id: string) => {
+    setRevealedPasswords((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const copyToClipboard = (text: string, title: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: `${title} copied`,
+      description: text,
+    });
+  };
 
   // Add dialog
   const [addOpen, setAddOpen] = React.useState(false);
@@ -242,25 +271,30 @@ export function AdminUsers() {
     return users
       .filter((u) => {
         if (roleFilter !== "ALL" && u.role !== roleFilter) return false;
+        if (zoneFilter !== "ALL" && (u.zone ?? "") !== zoneFilter) return false;
         if (statusFilter !== "ALL" && u.status !== statusFilter) return false;
         if (!q) return true;
         return (
           u.name.toLowerCase().includes(q) ||
           u.email.toLowerCase().includes(q) ||
+          u.phone.toLowerCase().includes(q) ||
+          u.role.toLowerCase().includes(q) ||
           (u.employeeId ?? "").toLowerCase().includes(q) ||
           (u.licenseNo ?? "").toLowerCase().includes(q) ||
           (u.designation ?? "").toLowerCase().includes(q) ||
-          (u.zone ?? "").toLowerCase().includes(q)
+          (u.zone ?? "").toLowerCase().includes(q) ||
+          (u.department ?? "").toLowerCase().includes(q)
         );
       })
-      .sort((a, b) => (b.lastLogin ?? "").localeCompare(a.lastLogin ?? ""));
-  }, [users, search, roleFilter, statusFilter]);
+      .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [users, search, roleFilter, zoneFilter, statusFilter]);
 
-  const hasFilters = search.trim() !== "" || roleFilter !== "ALL" || statusFilter !== "ALL";
+  const hasFilters = search.trim() !== "" || roleFilter !== "ALL" || zoneFilter !== "ALL" || statusFilter !== "ALL";
 
   function resetFilters() {
     setSearch("");
     setRoleFilter("ALL");
+    setZoneFilter("ALL");
     setStatusFilter("ALL");
   }
 
@@ -278,6 +312,7 @@ export function AdminUsers() {
       email: addForm.email.trim(),
       phone: addForm.phone.trim(),
       role: addForm.role,
+      password: addForm.password?.trim() || "demo1234",
       designation: addForm.designation.trim() || undefined,
       zone: zoneFromForm(addForm.zone),
       employeeId: addForm.employeeId.trim() || undefined,
@@ -311,6 +346,7 @@ export function AdminUsers() {
       zone: u.zone ?? "",
       employeeId: u.employeeId ?? "",
       licenseNo: u.licenseNo ?? "",
+      password: u.password ?? "demo1234",
     });
   }
 
@@ -334,6 +370,7 @@ export function AdminUsers() {
       zone: zoneFromForm(editForm.zone),
       employeeId: editForm.employeeId.trim() || undefined,
       licenseNo: editForm.licenseNo.trim() || undefined,
+      password: editForm.password?.trim() || "demo1234",
     });
     toast({
       title: "User details updated",
@@ -445,11 +482,11 @@ export function AdminUsers() {
   function exportCsv() {
     const headers = [
       "Name", "Email", "Phone", "Role", "Designation", "Zone",
-      "Employee ID", "License No", "Status", "Created", "Last Login",
+      "Employee ID", "License No", "Status", "Password", "Created", "Last Login",
     ];
     const rows = filtered.map((u) => [
       u.name, u.email, u.phone, u.role, u.designation ?? "", u.zone ?? "",
-      u.employeeId ?? "", u.licenseNo ?? "", u.status,
+      u.employeeId ?? "", u.licenseNo ?? "", u.status, u.password ?? "demo1234",
       u.createdAt ?? "", u.lastLogin ?? "",
     ]);
     const csv = [headers, ...rows]
@@ -525,8 +562,8 @@ export function AdminUsers() {
               id="user-search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder=""
-              className="pl-9"
+              placeholder="Search by name, email, phone, role, zone, designation, ID..."
+              className="pl-9 h-9 text-xs"
             />
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -534,7 +571,7 @@ export function AdminUsers() {
               <Filter className="size-3.5" aria-hidden="true" /> Filters:
             </div>
             <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as RoleKey | "ALL")}>
-              <SelectTrigger className="w-[180px]" aria-label="Filter by role">
+              <SelectTrigger className="w-[160px] h-9 text-xs" aria-label="Filter by role">
                 <SelectValue placeholder="Role" />
               </SelectTrigger>
               <SelectContent>
@@ -544,8 +581,20 @@ export function AdminUsers() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={zoneFilter} onValueChange={(v) => setZoneFilter(v)}>
+              <SelectTrigger className="w-[140px] h-9 text-xs" aria-label="Filter by zone">
+                <SelectValue placeholder="Zone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All zones</SelectItem>
+                <SelectItem value="Zone 1">Zone 1</SelectItem>
+                <SelectItem value="Zone 2">Zone 2</SelectItem>
+                <SelectItem value="Zone 3">Zone 3</SelectItem>
+                <SelectItem value="Head Office">Head Office</SelectItem>
+              </SelectContent>
+            </Select>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as "ALL" | UserStatus)}>
-              <SelectTrigger className="w-[140px]" aria-label="Filter by status">
+              <SelectTrigger className="w-[130px] h-9 text-xs" aria-label="Filter by status">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -557,7 +606,7 @@ export function AdminUsers() {
               </SelectContent>
             </Select>
             {hasFilters && (
-              <Button variant="ghost" size="sm" onClick={resetFilters}>
+              <Button variant="ghost" size="sm" className="h-9 text-xs" onClick={resetFilters}>
                 Reset
               </Button>
             )}
@@ -582,21 +631,28 @@ export function AdminUsers() {
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-card">
                 <TableRow className="border-b-2 border-border">
-                  <TableHead className="pl-4 font-bold text-foreground">Name</TableHead>
+                  <TableHead className="pl-4 font-bold text-foreground">Name & Contact</TableHead>
                   <TableHead className="font-bold text-foreground">Role</TableHead>
                   <TableHead className="font-bold text-foreground">Status</TableHead>
-                  <TableHead className="font-bold text-foreground">Zone / Designation</TableHead>
-                  <TableHead className="font-bold text-foreground">Created</TableHead>
+                  <TableHead className="font-bold text-foreground">Zone & Designation</TableHead>
+                  <TableHead className="font-bold text-foreground">Password / Login</TableHead>
                   <TableHead className="font-bold text-foreground">Last login</TableHead>
                   <TableHead className="pr-4 text-right font-bold text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((u) => (
-                  <TableRow key={u.id}>
+                  <TableRow key={u.id} className="hover:bg-muted/40 transition-colors">
                     <TableCell className="pl-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="size-9 border border-border" aria-hidden="true">
+                        <Avatar
+                          className="size-9 border border-border cursor-pointer hover:ring-2 hover:ring-[#801824]/30 transition-all"
+                          onClick={() => {
+                            setDetailTarget(u);
+                            setDetailPwVisible(false);
+                          }}
+                          aria-hidden="true"
+                        >
                           <AvatarFallback
                             className={cn(
                               "text-xs font-semibold",
@@ -609,11 +665,30 @@ export function AdminUsers() {
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-foreground">{u.name}</p>
-                          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDetailTarget(u);
+                              setDetailPwVisible(false);
+                            }}
+                            className="text-left font-medium text-sm text-foreground hover:text-[#801824] hover:underline transition-colors block truncate"
+                          >
+                            {u.name}
+                          </button>
+                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Mail className="size-3 shrink-0" aria-hidden="true" />
                             <span className="truncate">{u.email}</span>
-                          </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(u.email, "Email");
+                              }}
+                              className="text-slate-400 hover:text-slate-700"
+                              title="Copy email"
+                            >
+                              <Copy className="size-3" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -625,17 +700,39 @@ export function AdminUsers() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-xs text-foreground">
+                        <span className="flex items-center gap-1.5 text-xs text-foreground font-medium">
                           <MapPin className="size-3 text-muted-foreground" aria-hidden="true" />
-                          {u.zone ?? "—"}
+                          {u.zone ?? "Head Office"}
                         </span>
                         <span className="truncate text-[11px] text-muted-foreground">
-                          {u.designation ?? "—"}
+                          {u.designation ?? u.department ?? "—"}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                      {u.createdAt ? formatDate(u.createdAt) : "—"}
+                    <TableCell>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-xs bg-[#FAF4EB] text-[#5C1A20] border border-[#E0D2BE] px-2 py-0.5 rounded-md font-semibold tracking-wider select-all">
+                          {revealedPasswords[u.id] ? (u.password || "demo1234") : "••••••••"}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 text-muted-foreground hover:text-foreground"
+                          onClick={() => toggleReveal(u.id)}
+                          title={revealedPasswords[u.id] ? "Hide password" : "Show password"}
+                        >
+                          {revealedPasswords[u.id] ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="size-7 text-muted-foreground hover:text-foreground"
+                          onClick={() => copyToClipboard(u.password || "demo1234", "Password")}
+                          title="Copy password"
+                        >
+                          <Copy className="size-3.5" />
+                        </Button>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
@@ -648,59 +745,105 @@ export function AdminUsers() {
                       </div>
                     </TableCell>
                     <TableCell className="pr-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            aria-label={`Actions for ${u.name}`}
-                          >
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            {u.name}
-                          </DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onSelect={() => openEdit(u)}>
-                            <Pencil className="size-3.5" /> Edit details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => openRoleChange(u)}>
-                            <KeyRound className="size-3.5" /> Change role
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {u.status !== "ACTIVE" && (
-                            <DropdownMenuItem
-                              className="text-emerald-600 focus:text-emerald-700"
-                              onSelect={() => handleActivate(u)}
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs px-2.5 gap-1 border-[#E0D2BE] hover:bg-[#FAF4EB] text-[#5C1A20]"
+                          onClick={() => {
+                            setDetailTarget(u);
+                            setDetailPwVisible(false);
+                          }}
+                        >
+                          <Eye className="size-3.5" />
+                          <span className="hidden sm:inline">Details</span>
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                              aria-label={`Actions for ${u.name}`}
                             >
-                              <CircleCheck className="size-3.5" /> Activate
-                            </DropdownMenuItem>
-                          )}
-                          {u.status !== "INACTIVE" && (
-                            <DropdownMenuItem onSelect={() => openDeactivate(u)}>
-                              <CircleSlash className="size-3.5" /> Deactivate
-                            </DropdownMenuItem>
-                          )}
-                          {u.status !== "SUSPENDED" && (
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-52">
+                            <DropdownMenuLabel className="text-xs text-muted-foreground truncate">
+                              {u.name}
+                            </DropdownMenuLabel>
+                            <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="text-amber-700 focus:text-amber-800"
-                              onSelect={() => openSuspend(u)}
+                              onSelect={() => {
+                                setDetailTarget(u);
+                                setDetailPwVisible(false);
+                              }}
                             >
-                              <Ban className="size-3.5" /> Suspend
+                              <KeyRound className="size-3.5" /> View details & password
                             </DropdownMenuItem>
-                          )}
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onSelect={() => setDeleteTarget(u)}
-                          >
-                            <Trash2 className="size-3.5" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <DropdownMenuItem
+                              className="text-[#801824] font-medium"
+                              onSelect={() => {
+                                const res = login(u.email, u.password || "demo1234");
+                                if (res.ok) {
+                                  toast({
+                                    title: `Switched to ${u.name}`,
+                                    description: `Signed in as ${u.role} (${u.email})`,
+                                  });
+                                }
+                              }}
+                            >
+                              <UserCheck className="size-3.5" /> Login / Switch to user
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                const text = `Email: ${u.email}\nPassword: ${u.password || "demo1234"}`;
+                                navigator.clipboard.writeText(text);
+                                toast({ title: "Copied credentials", description: "Email & password copied." });
+                              }}
+                            >
+                              <Copy className="size-3.5" /> Copy credentials
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onSelect={() => openEdit(u)}>
+                              <Pencil className="size-3.5" /> Edit details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onSelect={() => openRoleChange(u)}>
+                              <KeyRound className="size-3.5" /> Change role
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {u.status !== "ACTIVE" && (
+                              <DropdownMenuItem
+                                className="text-emerald-600 focus:text-emerald-700"
+                                onSelect={() => handleActivate(u)}
+                              >
+                                <CircleCheck className="size-3.5" /> Activate
+                              </DropdownMenuItem>
+                            )}
+                            {u.status !== "INACTIVE" && (
+                              <DropdownMenuItem onSelect={() => openDeactivate(u)}>
+                                <CircleSlash className="size-3.5" /> Deactivate
+                              </DropdownMenuItem>
+                            )}
+                            {u.status !== "SUSPENDED" && (
+                              <DropdownMenuItem
+                                className="text-amber-700 focus:text-amber-800"
+                                onSelect={() => openSuspend(u)}
+                              >
+                                <Ban className="size-3.5" /> Suspend
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onSelect={() => setDeleteTarget(u)}
+                            >
+                              <Trash2 className="size-3.5" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -716,6 +859,268 @@ export function AdminUsers() {
         <span className="font-medium text-foreground">it-cell@municipality.gov.in</span>{" "}
         for assistance. All user management actions are written to the audit log.
       </p>
+
+      {/* ===== User Details & Password Modal ===== */}
+      <Dialog
+        open={!!detailTarget}
+        onOpenChange={(o) => {
+          if (!o) {
+            setDetailTarget(null);
+            setDetailPwVisible(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto">
+          {detailTarget && (
+            <>
+              <DialogHeader className="pb-2 border-b">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-12 border-2 border-[#E0D2BE] shadow-sm">
+                      <AvatarFallback className="bg-[#FAF4EB] text-sm font-semibold text-[#5C1A20]">
+                        {initials(detailTarget.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+                        {detailTarget.name}
+                        <UserStatusBadge status={detailTarget.status} />
+                      </DialogTitle>
+                      <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                        {roles[detailTarget.role]?.fullName ?? detailTarget.role} • {detailTarget.designation || "Municipal Officer"}
+                      </DialogDescription>
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="space-y-4 py-2 text-sm">
+                {/* Credentials & Login Card */}
+                <div className="rounded-lg border-2 border-[#C97A63]/30 bg-gradient-to-br from-[#FAF4EB] to-white p-4 shadow-xs space-y-3 dark:from-stone-900 dark:to-stone-950 dark:border-stone-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-md bg-[#801824] text-white">
+                        <Lock className="size-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#5C1A20] dark:text-stone-300">
+                          Login Credentials & Access
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground">
+                          Direct credentials to authenticate into the system as this user
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="text-[11px] font-mono border-[#C97A63]/40 text-[#801824] bg-white/80 dark:bg-stone-900">
+                      {detailTarget.role}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Email */}
+                    <div className="rounded-md border bg-background/80 p-2.5 space-y-1">
+                      <div className="text-[11px] text-muted-foreground flex items-center justify-between">
+                        <span className="flex items-center gap-1 font-medium">
+                          <Mail className="size-3 text-muted-foreground" /> Email / Username
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="size-6 text-muted-foreground hover:text-foreground"
+                          title="Copy email"
+                          onClick={() => copyToClipboard(detailTarget.email, "Email")}
+                        >
+                          <Copy className="size-3" />
+                        </Button>
+                      </div>
+                      <div className="font-mono text-xs font-semibold text-foreground select-all break-all">
+                        {detailTarget.email}
+                      </div>
+                    </div>
+
+                    {/* Password */}
+                    <div className="rounded-md border bg-background/80 p-2.5 space-y-1">
+                      <div className="text-[11px] text-muted-foreground flex items-center justify-between">
+                        <span className="flex items-center gap-1 font-medium">
+                          <KeyRound className="size-3 text-muted-foreground" /> Password
+                        </span>
+                        <div className="flex items-center gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-6 text-muted-foreground hover:text-foreground"
+                            title={detailPwVisible ? "Hide password" : "Show password"}
+                            onClick={() => setDetailPwVisible(!detailPwVisible)}
+                          >
+                            {detailPwVisible ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="size-6 text-muted-foreground hover:text-foreground"
+                            title="Copy password"
+                            onClick={() => copyToClipboard(detailTarget.password || "demo1234", "Password")}
+                          >
+                            <Copy className="size-3" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="font-mono text-xs font-bold text-[#801824] dark:text-red-400 select-all flex items-center">
+                        {detailPwVisible ? (
+                          detailTarget.password || "demo1234"
+                        ) : (
+                          <span className="tracking-widest">••••••••••••</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar inside Credentials Card */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#E0D2BE]/60 dark:border-stone-800">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5"
+                      onClick={() => {
+                        const text = `Email: ${detailTarget.email}\nPassword: ${detailTarget.password || "demo1234"}`;
+                        copyToClipboard(text, "Email and Password");
+                      }}
+                    >
+                      <Copy className="size-3.5" /> Copy Email & Password
+                    </Button>
+
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5 bg-[#801824] text-white hover:bg-[#5C1A20]"
+                      onClick={() => {
+                        const res = login(detailTarget.email, detailTarget.password || "demo1234");
+                        if (res.ok) {
+                          toast({
+                            title: `Switched to ${detailTarget.name}`,
+                            description: `You are now logged in as ${detailTarget.role} (${detailTarget.email})`,
+                          });
+                          setDetailTarget(null);
+                        }
+                      }}
+                    >
+                      <UserCheck className="size-3.5" /> Switch & Login as this User
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Statutory & Jurisdictional Information */}
+                <div className="rounded-lg border bg-card p-3.5 space-y-2.5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Organizational & Statutory Details
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Role</span>
+                      <span className="font-medium text-foreground">{roles[detailTarget.role]?.fullName ?? detailTarget.role}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Designation</span>
+                      <span className="font-medium text-foreground">{detailTarget.designation || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Zone / Jurisdiction</span>
+                      <span className="font-medium text-foreground flex items-center gap-1">
+                        <MapPin className="size-3 text-muted-foreground" />
+                        {detailTarget.zone || "Head Office / Central"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Department</span>
+                      <span className="font-medium text-foreground">{detailTarget.department || "Town Planning & Building Permissions"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Phone</span>
+                      <span className="font-medium text-foreground flex items-center gap-1">
+                        <Phone className="size-3 text-muted-foreground" />
+                        {detailTarget.phone || "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Portal Type</span>
+                      <span className="font-medium text-foreground">
+                        {detailTarget.role === "LTP" ? "EXTERNAL (Architect / LTP)" : "INTERNAL (Department)"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* System & Identification */}
+                <div className="rounded-lg border bg-muted/40 p-3.5 space-y-2.5">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    System Identifiers & Activity
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Employee ID</span>
+                      <span className="font-mono text-foreground">{detailTarget.employeeId || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">License Number</span>
+                      <span className="font-mono text-foreground">{detailTarget.licenseNo || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">System User ID</span>
+                      <span className="font-mono text-[11px] text-muted-foreground truncate block" title={detailTarget.id}>
+                        {detailTarget.id}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Last Login</span>
+                      <span className="text-foreground">
+                        {detailTarget.lastLogin ? formatDateTime(detailTarget.lastLogin) : "Never logged in"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Created Date</span>
+                      <span className="text-foreground">
+                        {detailTarget.createdAt ? formatDateTime(detailTarget.createdAt) : "—"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground block">Status</span>
+                      <span className="text-foreground font-medium">{detailTarget.status}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="pt-2 border-t flex flex-row items-center justify-between sm:justify-between">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const u = detailTarget;
+                    setDetailTarget(null);
+                    openEdit(u);
+                  }}
+                  className="gap-1.5"
+                >
+                  <Pencil className="size-3.5" /> Edit User Profile
+                </Button>
+                <Button
+                  type="button"
+                  variant="default"
+                  size="sm"
+                  onClick={() => setDetailTarget(null)}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* ===== Add User Dialog ===== */}
       <Dialog
@@ -835,6 +1240,20 @@ export function AdminUsers() {
                   placeholder="LTP-MC-YYYY-NNNN"
                 />
               </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="add-password">
+                  Login Password <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="add-password"
+                  type="text"
+                  value={addForm.password ?? "demo1234"}
+                  onChange={(e) => setAddForm((f) => ({ ...f, password: e.target.value }))}
+                  placeholder="demo1234"
+                  required
+                />
+                <p className="text-[11px] text-muted-foreground">Password required for direct login or user switching.</p>
+              </div>
             </div>
             <DialogFooter className="pt-2">
               <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
@@ -936,6 +1355,19 @@ export function AdminUsers() {
                     onChange={(e) => setEditForm((f) => (f ? { ...f, licenseNo: e.target.value } : f))}
                     placeholder="LTP-MC-YYYY-NNNN"
                   />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="edit-password">
+                    Login Password
+                  </Label>
+                  <Input
+                    id="edit-password"
+                    type="text"
+                    value={editForm.password ?? "demo1234"}
+                    onChange={(e) => setEditForm((f) => (f ? { ...f, password: e.target.value } : f))}
+                    placeholder="demo1234"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Password required for direct login or user switching.</p>
                 </div>
               </div>
               <DialogFooter className="pt-2">

@@ -15,7 +15,6 @@ import {
   LogOut,
   Calendar,
   User,
-  Settings,
   Users,
   CheckCheck,
   MessageSquare,
@@ -519,7 +518,6 @@ export function Topbar() {
     portal,
     view,
     ltpActiveMenu,
-    setLtpActiveMenu,
     notifications,
     mobileNavOpen,
     setMobileNavOpen,
@@ -876,24 +874,6 @@ export function Topbar() {
           </PopoverContent>
         </Popover>
 
-        {/* Admin Settings Quick Link */}
-        {user?.role === "ADMIN" && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              setLtpActiveMenu("settings");
-              if (view !== "ltp-applications") {
-                navigate("ltp-applications");
-              }
-            }}
-            title="System Settings & Access Control"
-            className="size-9 rounded-full text-[#801824] hover:bg-[#F3EADF] cursor-pointer"
-          >
-            <Settings className="size-4" />
-          </Button>
-        )}
-
         {/* User menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -919,18 +899,6 @@ export function Topbar() {
             <DropdownMenuItem onClick={() => navigate("ltp-profile")}>
               <User className="size-4" /> Profile
             </DropdownMenuItem>
-            {(portal === "ADMIN" || user?.role === "ADMIN") && (
-              <DropdownMenuItem
-                onClick={() => {
-                  setLtpActiveMenu("settings");
-                  if (view !== "ltp-applications") {
-                    navigate("ltp-applications");
-                  }
-                }}
-              >
-                <Settings className="size-4" /> Settings & Access Control
-              </DropdownMenuItem>
-            )}
 
             {/* Switch User */}
             <SwitchUserPanel />

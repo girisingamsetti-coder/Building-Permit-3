@@ -242,8 +242,8 @@ interface AppState {
   markAllNotificationsRead: () => void;
 
   // ---- admin: user management ----
-  createUser: (data: { name: string; email: string; phone: string; role: RoleKey; designation?: string; zone?: string; employeeId?: string; licenseNo?: string }) => { ok: boolean; error?: string; userId?: string };
-  updateUser: (userId: string, data: Partial<Pick<User, "name" | "email" | "phone" | "designation" | "zone" | "employeeId" | "licenseNo">>) => void;
+  createUser: (data: { name: string; email: string; phone: string; role: RoleKey; designation?: string; zone?: string; employeeId?: string; licenseNo?: string; password?: string }) => { ok: boolean; error?: string; userId?: string };
+  updateUser: (userId: string, data: Partial<Pick<User, "name" | "email" | "phone" | "designation" | "zone" | "employeeId" | "licenseNo" | "password">>) => void;
   setUserRole: (userId: string, newRole: RoleKey, reason?: string) => void;
   activateUser: (userId: string) => void;
   deactivateUser: (userId: string, reason?: string) => void;
@@ -394,16 +394,22 @@ export const useAppStore = create<AppState>()(
       // ---- AUTH ----
       login: (email, password) => {
         const cleanEmail = email.trim().toLowerCase();
-        const cred = DEMO_CREDENTIALS.find((c) => c.email.toLowerCase() === cleanEmail);
-        if (!cred) return { ok: false, error: "No account found with this email." };
-        if (password !== cred.password) return { ok: false, error: "Incorrect password. Please try again." };
         const storeUsers = get().users;
-        const seedUser = USERS.find((u) => u.email.toLowerCase() === cleanEmail) ?? USERS.find((u) => u.role === cred.role);
-        let user = storeUsers.find((u) => u.email?.toLowerCase() === cleanEmail) ?? storeUsers.find((u) => u.role === cred.role);
+        const allUsers = [...storeUsers, ...USERS];
+        const foundUser = allUsers.find((u) => u.email?.toLowerCase() === cleanEmail);
+        const cred = DEMO_CREDENTIALS.find((c) => c.email.toLowerCase() === cleanEmail);
+        if (!foundUser && !cred) return { ok: false, error: "No account found with this email." };
+        const expectedPassword = foundUser?.password || cred?.password || "demo1234";
+        if (password !== expectedPassword) return { ok: false, error: "Incorrect password. Please try again." };
+        const seedUser = USERS.find((u) => u.email.toLowerCase() === cleanEmail) ?? (cred ? USERS.find((u) => u.role === cred.role) : undefined);
+        let user = storeUsers.find((u) => u.email?.toLowerCase() === cleanEmail) ?? (cred ? storeUsers.find((u) => u.role === cred.role) : undefined);
         if (!user) {
           if (seedUser) {
             set((s) => ({ users: [...s.users, seedUser] }));
             user = seedUser;
+          } else if (foundUser) {
+            set((s) => ({ users: [...s.users, foundUser] }));
+            user = foundUser;
           }
         } else if (seedUser) {
           user = { ...user, ...seedUser };
@@ -413,7 +419,7 @@ export const useAppStore = create<AppState>()(
         if (user.status === "SUSPENDED") return { ok: false, error: "Your account has been suspended. Contact the administrator." };
         if (user.status === "PENDING") return { ok: false, error: "Your account is pending approval. Please try again later." };
         const portal = portalForRole(user.role);
-        set((s) => ({ users: s.users.map((u) => u.id === user.id ? { ...u, lastLogin: nowISO() } : u) }));
+        set((s) => ({ users: s.users.map((u) => u.id === user!.id ? { ...u, lastLogin: nowISO() } : u) }));
         set({
           user: { ...user, lastLogin: nowISO() },
           isAuthenticated: true,
@@ -1385,6 +1391,7 @@ export const useAppStore = create<AppState>()(
         const userId = genId("u");
         const newUser: User = {
           id: userId, name: data.name, email: data.email.trim().toLowerCase(), phone: data.phone,
+          password: data.password || "demo1234",
           role: data.role, designation: data.designation, zone: data.zone, employeeId: data.employeeId,
           licenseNo: data.licenseNo, avatarColor: "slate", department: data.designation,
           active: true, status: "ACTIVE", createdAt: nowISO(),
