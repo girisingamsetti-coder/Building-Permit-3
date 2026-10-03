@@ -353,30 +353,16 @@ export function LtpSubmittedApplications({
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── TOP CONTROLS: New Application on Left | Search & Filters on Right ── */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2.5 shrink-0">
-        {/* Left: Create New / New Application Button (Pillow-shaped Maroon & Beige Theme) */}
-        <div className="relative shrink-0 self-start lg:self-auto">
-          <button
-            id="sub-new-app-btn"
-            onClick={() => setIsSelectingScheme(true)}
-            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-4 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-          >
-            <Plus className="size-3.5" />
-            <span>New Application</span>
-          </button>
-        </div>
-
-        {/* Right: Search Bar & Filters */}
-        <div className="flex flex-wrap items-center justify-start lg:justify-end gap-2.5 flex-1">
+      {/* ── TOP CONTROLS: Search, Filters & New Application Button in a Single Row ── */}
+      <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
           {/* Search Input Box (Pillow-shaped) */}
-          <div className="flex items-center gap-2.5 border border-[#DCD5C8] bg-white rounded-full px-4 py-2 w-full sm:w-72 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder="Enter keywords to search for"
+              placeholder="Search BA no., owner, status..."
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -392,7 +378,7 @@ export function LtpSubmittedApplications({
           </div>
 
           {/* Filter: Type (LPS or Non LPS - Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
             <select
               value={filterType}
@@ -407,7 +393,7 @@ export function LtpSubmittedApplications({
           </div>
 
           {/* Filter: Status (Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Status:</span>
             <select
               value={filterStatus}
@@ -422,13 +408,13 @@ export function LtpSubmittedApplications({
           </div>
 
           {/* Filter: Owner (Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
             <select
               value={filterOwner}
               onChange={(e) => setFilterOwner(e.target.value)}
               aria-label="Filter by Owner"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1 max-w-[130px] truncate"
             >
               <option value="ALL">All Owners</option>
               <option value="Vadduri Veeraiah">Vadduri Veeraiah</option>
@@ -448,13 +434,22 @@ export function LtpSubmittedApplications({
                 setFilterStatus("ALL");
                 setFilterOwner("ALL");
               }}
-              className="rounded-full px-3.5 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+              className="rounded-full px-3 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
             >
               <X className="size-3" />
-              <span>Clear filters</span>
+              <span>Clear</span>
             </button>
           )}
-        </div>
+
+          {/* Right: New Application Button (after filters) */}
+          <button
+            id="sub-new-app-btn"
+            onClick={() => setIsSelectingScheme(true)}
+            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[30px] px-3.5 rounded-full flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer border border-[#630E10]"
+          >
+            <Plus className="size-3.5" />
+            <span>New Application</span>
+          </button>
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}

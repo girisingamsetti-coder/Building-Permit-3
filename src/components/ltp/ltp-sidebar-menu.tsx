@@ -12,6 +12,7 @@ import {
   Building2,
   RefreshCw,
   ChevronDown,
+  BarChart3,
 } from "lucide-react";
 
 export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
@@ -24,7 +25,7 @@ interface SubmenuItem {
 interface LtpModuleDef {
   id: string;
   label: string;
-  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change";
+  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change" | "reports";
   directMenuId?: string;
   submenus: SubmenuItem[];
 }
@@ -58,15 +59,10 @@ const LTP_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Compliance & Regulatory Notices",
+    label: "Compliance & Regulations",
     iconType: "compliance",
-    submenus: [
-      { id: "verified", label: "DCR & Document Verified Files" },
-      { id: "shortfall", label: "Shortfall Notices" },
-      { id: "review-shortfall-submission", label: "Shortfall Compliance Submissions" },
-      { id: "show-cause", label: "Show Cause Directives" },
-      { id: "review-show-cause-submission", label: "Show Cause Explanations" },
-    ],
+    directMenuId: "proceeding-status",
+    submenus: [],
   },
   {
     id: "commencement",
@@ -84,6 +80,18 @@ const LTP_MODULES: LtpModuleDef[] = [
     submenus: [
       { id: "occupancy-list", label: "Completion & OC Registry" },
       { id: "submitted-application", label: "Submitted OC Applications" },
+    ],
+  },
+  {
+    id: "reports",
+    label: "Reports",
+    iconType: "reports",
+    directMenuId: "reports-summary",
+    submenus: [
+      { id: "reports-summary", label: "Application Reports" },
+      { id: "reports-payments", label: "Fee & Challan Reports" },
+      { id: "reports-scrutiny", label: "Scrutiny & Shortfalls" },
+      { id: "reports-mis", label: "MIS Registry & Export" },
     ],
   },
   {
@@ -126,15 +134,10 @@ const ZONAL_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Proceeding Status",
+    label: "Compliance & Regulations",
     iconType: "compliance",
-    submenus: [
-      { id: "verified", label: "Verified" },
-      { id: "shortfall", label: "Shortfall" },
-      { id: "review-shortfall-submission", label: "Review Shortfall Submission" },
-      { id: "show-cause", label: "Show Cause" },
-      { id: "review-show-cause-submission", label: "Review Show Cause Submission" },
-    ],
+    directMenuId: "proceeding-status",
+    submenus: [],
   },
   {
     id: "change-of-ltp",
@@ -179,15 +182,10 @@ const TPA_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Proceeding Status",
+    label: "Compliance & Regulations",
     iconType: "compliance",
-    submenus: [
-      { id: "verified", label: "Verified" },
-      { id: "shortfall", label: "Shortfall" },
-      { id: "review-shortfall-submission", label: "Review Shortfall Submission" },
-      { id: "show-cause", label: "Show Cause" },
-      { id: "review-show-cause-submission", label: "Review Show Cause Submission" },
-    ],
+    directMenuId: "proceeding-status",
+    submenus: [],
   },
   {
     id: "outward",
@@ -356,6 +354,26 @@ export const THEME_DETAILS: Record<LtpSidebarTheme, ThemeDetails> = {
   },
 };
 
+const COMPLIANCE_TAB_IDS = new Set([
+  "proceeding-status",
+  "verified",
+  "shortfall",
+  "review-shortfall-submission",
+  "show-cause",
+  "review-show-cause-submission",
+]);
+
+function isMenuMatch(mod: LtpModuleDef, menuId: string): boolean {
+  if (mod.id === "proceeding-status" || mod.directMenuId === "proceeding-status") {
+    return COMPLIANCE_TAB_IDS.has(menuId);
+  }
+  return (
+    mod.id === menuId ||
+    mod.directMenuId === menuId ||
+    mod.submenus.some((s) => s.id === menuId)
+  );
+}
+
 export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   const ltpActiveMenu = useAppStore((s) => s.ltpActiveMenu) ?? "dashboard";
   const setLtpActiveMenu = useAppStore((s) => s.setLtpActiveMenu);
@@ -372,24 +390,17 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   // Single module expanded at a time
   const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {
     return (
-      modules.find(
-        (m) => m.directMenuId === ltpActiveMenu || m.submenus.some((s) => s.id === ltpActiveMenu)
-      )?.id ?? "dashboard"
+      modules.find((m) => isMenuMatch(m, ltpActiveMenu))?.id ?? "dashboard"
     );
   });
 
   // Keep parent module expanded if active menu changes
   React.useEffect(() => {
-    const parentMod = modules.find(
-      (m) =>
-        m.id === ltpActiveMenu ||
-        m.directMenuId === ltpActiveMenu ||
-        m.submenus.some((s) => s.id === ltpActiveMenu)
-    );
+    const parentMod = modules.find((m) => isMenuMatch(m, ltpActiveMenu));
     if (parentMod) {
       setOpenModuleId(parentMod.id);
     }
-  }, [ltpActiveMenu]);
+  }, [ltpActiveMenu, modules]);
 
   const handleSelectSubmenu = (menuId: string) => {
     setLtpActiveMenu(menuId);
@@ -405,10 +416,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
-    const isCurrentlyActiveModule =
-      mod.id === ltpActiveMenu ||
-      mod.directMenuId === ltpActiveMenu ||
-      mod.submenus.some((s) => s.id === ltpActiveMenu);
+    const isCurrentlyActiveModule = isMenuMatch(mod, ltpActiveMenu);
 
     if (openModuleId === mod.id && !collapsed && mod.submenus.length > 0) {
       if (!isCurrentlyActiveModule) {
@@ -439,6 +447,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       case "scrutiny": return <ClipboardCheck className={cls} />;
       case "compliance": return <ShieldAlert className={cls} />;
       case "occupancy": return <Building2 className={cls} />;
+      case "reports": return <BarChart3 className={cls} />;
       case "ltp-change": return <RefreshCw className={cls} />;
     }
   };
@@ -448,9 +457,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     return (
       <div className="flex flex-col w-full items-center pt-2 pb-6 space-y-1">
         {modules.map((mod) => {
-          const isActive =
-            mod.directMenuId === ltpActiveMenu ||
-            mod.submenus.some((s) => s.id === ltpActiveMenu);
+          const isActive = isMenuMatch(mod, ltpActiveMenu);
           return (
             <button
               key={mod.id}
@@ -476,23 +483,25 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     <div className="flex flex-col w-full text-sm font-sans px-2 pt-2 space-y-1 pb-6">
       {modules.map((mod) => {
         const isOpen = openModuleId === mod.id;
+        const isActive = isMenuMatch(mod, ltpActiveMenu);
         const hasSubmenus = mod.submenus.length > 0;
+        const isHeaderActive = hasSubmenus ? isOpen : isActive;
         return (
           <div key={mod.id} className="transition-all duration-150">
             <button
               onClick={() => handleModuleClick(mod)}
               className={cn(
                 "flex w-full items-center justify-between px-3.5 py-2.5 text-left transition-all duration-150 rounded-lg",
-                isOpen ? (theme.selectedHeaderBg ?? "bg-[#801824]") : theme.headerBg,
-                isOpen ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]") : theme.headerHoverBg
+                isHeaderActive ? (theme.selectedHeaderBg ?? "bg-[#801824]") : theme.headerBg,
+                isHeaderActive ? (theme.selectedHeaderHoverBg ?? "hover:bg-[#941C2B]") : theme.headerHoverBg
               )}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                {getModuleIcon(mod, isOpen)}
+                {getModuleIcon(mod, isHeaderActive)}
                 <span
                   className={cn(
                     "truncate tracking-wide transition-colors",
-                    isOpen ? (theme.selectedHeaderText ?? "text-[#FDF6ED] font-bold") : theme.headerText
+                    isHeaderActive ? (theme.selectedHeaderText ?? "text-[#FDF6ED] font-bold") : theme.headerText
                   )}
                 >
                   {mod.label}
@@ -506,14 +515,14 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
             {hasSubmenus && isOpen && (
               <div className={cn("mt-1 p-1 rounded-lg border shadow-xs animate-in fade-in-50 duration-150 space-y-0.5", theme.submenuBg, theme.submenuBorder)}>
                 {mod.submenus.map((sub) => {
-                  const isActive = ltpActiveMenu === sub.id;
+                  const isSubActive = ltpActiveMenu === sub.id;
                   return (
                     <button
                       key={sub.id}
                       onClick={() => handleSelectSubmenu(sub.id)}
                       className={cn(
                         "flex w-full items-center px-4 py-2 text-left transition-all duration-150 rounded-md",
-                        isActive
+                        isSubActive
                           ? cn(theme.activeItemBg, theme.activeItemText, theme.activeIndicator)
                           : cn(theme.submenuText, theme.submenuHoverBg, theme.submenuHoverText)
                       )}

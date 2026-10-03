@@ -11,18 +11,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { mobileNavOpen, setMobileNavOpen, theme, user, ltpActiveMenu, view } = useAppStore();
 
   const isLtpDashboard =
-    (user?.role === "LTP" &&
-      (ltpActiveMenu === "dashboard" ||
-        ltpActiveMenu === "draft-application" ||
-        ltpActiveMenu === "submitted-applications" ||
-        ltpActiveMenu === "proceeding-status" ||
-        ltpActiveMenu === "verified" ||
-        ltpActiveMenu === "shortfall" ||
-        ltpActiveMenu === "review-shortfall-submission" ||
-        ltpActiveMenu === "show-cause" ||
-        ltpActiveMenu === "review-show-cause-submission" ||
-        (!ltpActiveMenu && view === "ltp-applications"))) ||
-    view === "ltp-dashboard";
+    user?.role === "LTP" ||
+    view === "ltp-dashboard" ||
+    view === "ltp-applications";
 
   // Apply theme class to <html>
   React.useEffect(() => {

@@ -388,6 +388,124 @@ function SearchDropdown({
 }
 
 // ============================================================
+// MENU HEADER LOGIC FOR TOPBAR
+// ============================================================
+interface HeaderInfo {
+  title: string;
+  category?: string;
+}
+
+function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: string): HeaderInfo {
+  // If viewing specific application sub-screens
+  if (view === "ltp-application-details") {
+    return { title: "Application Details", category: "Applications" };
+  }
+  if (view === "ltp-scrutiny") {
+    return { title: "Detailed Scrutiny Report", category: "Technical Scrutiny" };
+  }
+  if (view === "ltp-documents") {
+    return { title: "Application Documents", category: "Documents" };
+  }
+  if (view === "ltp-payment") {
+    return { title: "Payments & Receipts", category: "Payments" };
+  }
+
+  // LTP active menu mappings
+  switch (ltpActiveMenu) {
+    case "submitted-applications":
+    case "all-ltp-in-process":
+      return { title: "Submissions", category: "Applications" };
+
+    case "draft-application":
+      return { title: "Drafts", category: "Applications" };
+
+    case "objected-files":
+      return { title: "Objections", category: "Applications" };
+
+    case "approved-files":
+    case "proceeding-issued":
+      return { title: "Approved Files", category: "Application Status" };
+
+    case "review-proceeding":
+      return { title: "In Review", category: "Application Status" };
+
+    case "proceeding-status":
+    case "verified":
+    case "shortfall":
+    case "review-shortfall-submission":
+    case "show-cause":
+    case "review-show-cause-submission":
+      return { title: "Compliance & Regulations", category: "Regulations" };
+
+    case "cc-issued":
+      return { title: "Commencement Certificates", category: "Work Commencement" };
+
+    case "work-initiated":
+      return { title: "Work Initiation", category: "Work Commencement" };
+
+    case "occupancy-list":
+      return { title: "Completion & OC Registry", category: "Occupancy Certification (OC)" };
+
+    case "submitted-application":
+      return { title: "Submitted OC Applications", category: "Occupancy Certification (OC)" };
+
+    case "change-ltp":
+    case "change-of-ltp":
+      return { title: "LTP Change", category: "Professional Transfer" };
+
+    // Reports module
+    case "reports":
+    case "reports-summary":
+      return { title: "Application Reports", category: "Reports & Analytics" };
+    case "reports-payments":
+      return { title: "Fee & Challan Reports", category: "Reports & Analytics" };
+    case "reports-scrutiny":
+      return { title: "Scrutiny & Shortfalls", category: "Reports & Analytics" };
+    case "reports-mis":
+      return { title: "MIS Registry & Export", category: "Reports & Analytics" };
+
+    // Zonal modules
+    case "developer-verification":
+      return { title: "Developer Verification", category: "Registration" };
+    case "rejected-registration":
+      return { title: "Rejected Registrations", category: "Registration" };
+    case "approved-registration":
+      return { title: "Approved Registrations", category: "Registration" };
+    case "all-ltp-approved":
+      return { title: "All LTP Approved", category: "Registration" };
+    case "revoke":
+      return { title: "Revocation Proceedings", category: "Application Status" };
+
+    default:
+      break;
+  }
+
+  // Fallback to view-based header for other portals/views
+  const VIEW_HEADERS: Record<string, HeaderInfo> = {
+    applications: { title: "Applications", category: "Building Permission" },
+    tasks: { title: "Tasks & Scrutiny Chain", category: "Workflow" },
+    payments: { title: "Payments & Challans", category: "Finance" },
+    reports: { title: "Reports & Analytics", category: "Analytics" },
+    settings: { title: "System Settings", category: "Administration" },
+    inspections: { title: "Site Inspections", category: "Field Verification" },
+    nocs: { title: "NOC Clearances", category: "Approvals" },
+    shortfalls: { title: "Shortfall Notices", category: "Scrutiny" },
+    "show-cause": { title: "Show Cause Notices", category: "Legal & Enforcement" },
+    revocations: { title: "Revocations", category: "Enforcement" },
+    "ltp-changes": { title: "LTP Changes", category: "Technical Personnel" },
+    "work-initiated": { title: "Work Commencement", category: "Field Operations" },
+    developers: { title: "Developers", category: "Empanelment" },
+    professionals: { title: "Professionals", category: "Empanelment" },
+    outward: { title: "Outward Dispatch", category: "Administration" },
+    occupancy: { title: "Occupancy Certification", category: "Completion" },
+    "2d-drawings": { title: "2D Drawings & CAD", category: "Drawings" },
+    bim: { title: "BIM 3D Models", category: "Digital Engineering" },
+  };
+
+  return VIEW_HEADERS[view] || { title: "Building Permission", category: "APCRDA" };
+}
+
+// ============================================================
 // MAIN TOPBAR
 // ============================================================
 export function Topbar() {
@@ -395,6 +513,7 @@ export function Topbar() {
     user,
     portal,
     view,
+    ltpActiveMenu,
     notifications,
     mobileNavOpen,
     setMobileNavOpen,
@@ -409,6 +528,16 @@ export function Topbar() {
   } = useAppStore();
   const { toast } = useToast();
   const unread = notifications.filter((n) => !n.read).length;
+
+  const isDashboard =
+    ltpActiveMenu === "dashboard" ||
+    view === "ltp-dashboard" ||
+    view === "dashboard" ||
+    view === "officer-dashboard" ||
+    view === "admin-dashboard" ||
+    (!ltpActiveMenu && (view === "ltp-applications" || view === "applications"));
+
+  const menuHeader = getMenuHeader(ltpActiveMenu, view, portal);
 
   // Search state
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -471,14 +600,27 @@ export function Topbar() {
         <Menu className="size-5" />
       </Button>
 
-      {/* Welcome + Role + Scope */}
+      {/* Welcome on Dashboard | Menu Header on other screens */}
       <div className="flex flex-col justify-center ml-2">
-        <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
-          Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
-        </span>
-        <span className="text-[11px] text-slate-400 leading-tight">
-          {user?.role ? (ROLES[user.role as keyof typeof ROLES]?.fullName ?? user.role) : ""}
-        </span>
+        {isDashboard ? (
+          <>
+            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+              Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
+            </span>
+            <span className="text-[11px] text-slate-400 leading-tight">
+              {user?.role ? (ROLES[user.role as keyof typeof ROLES]?.fullName ?? user.role) : ""}
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="text-sm font-bold text-[#801824] dark:text-[#E89BA2] leading-tight tracking-tight">
+              {menuHeader.title}
+            </span>
+            <span className="text-[11px] text-slate-400 leading-tight font-medium">
+              {menuHeader.category ? `${menuHeader.category} · APCRDA` : "APCRDA Building Permission"}
+            </span>
+          </>
+        )}
       </div>
 
       {/* Search & Date Filter */}

@@ -15,7 +15,6 @@ import {
   X,
   Download,
   Search,
-  Plus,
 } from "lucide-react";
 import type { Application } from "@/types";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
@@ -46,6 +45,7 @@ export function LtpDraftApplications({
   const [searchKeywords, setSearchKeywords] = React.useState("");
   const [filterType, setFilterType] = React.useState("ALL");
   const [filterOwner, setFilterOwner] = React.useState("ALL");
+  const [filterScheme, setFilterScheme] = React.useState("ALL");
   const [sortField, setSortField] = React.useState<keyof DraftItem>("createdDate");
   const [sortAsc, setSortAsc] = React.useState(false);
   const [selectedDraft, setSelectedDraft] = React.useState<DraftItem | null>(null);
@@ -103,6 +103,26 @@ export function LtpDraftApplications({
     return items;
   }, [applications, user]);
 
+  const uniqueOwners = React.useMemo(() => {
+    const set = new Set<string>();
+    draftItems.forEach((item) => {
+      if (item.owner) set.add(item.owner);
+    });
+    return Array.from(set);
+  }, [draftItems]);
+
+  const activeFilterCount =
+    (filterType !== "ALL" ? 1 : 0) +
+    (filterOwner !== "ALL" ? 1 : 0) +
+    (filterScheme !== "ALL" ? 1 : 0);
+
+  const handleClearAllFilters = () => {
+    setSearchKeywords("");
+    setFilterType("ALL");
+    setFilterOwner("ALL");
+    setFilterScheme("ALL");
+  };
+
   // Filtering
   const filteredItems = React.useMemo(() => {
     return draftItems.filter((item) => {
@@ -120,10 +140,15 @@ export function LtpDraftApplications({
       // Column filters
       if (filterType !== "ALL" && item.permissionType !== filterType) return false;
       if (filterOwner !== "ALL" && item.owner !== filterOwner) return false;
+      if (filterScheme !== "ALL") {
+        const isLps = item.baNo.includes("/LPS/") || item.lpsType === "LPS Layout";
+        if (filterScheme === "LPS" && !isLps) return false;
+        if (filterScheme === "Non LPS" && isLps) return false;
+      }
 
       return true;
     });
-  }, [draftItems, searchKeywords, filterType, filterOwner]);
+  }, [draftItems, searchKeywords, filterType, filterOwner, filterScheme]);
 
   // Sorting
   const sortedItems = React.useMemo(() => {
@@ -184,18 +209,16 @@ export function LtpDraftApplications({
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── TOP CONTROLS: Search & Filters ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
-        {/* Left: Search Bar & Filters */}
-        <div className="flex flex-wrap items-center gap-3 flex-1">
+      {/* ── TOP CONTROLS: Search, Filters & Export in a Single Row ── */}
+      <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
           {/* Search Input Box (Pillow-shaped) */}
-          <div className="flex items-center gap-2.5 border border-[#DCD5C8] bg-white rounded-full px-4 py-2 w-full sm:w-80 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder="Search by draft no, owner, permission type..."
+              placeholder="Search draft no., owner..."
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -210,14 +233,14 @@ export function LtpDraftApplications({
             )}
           </div>
 
-          {/* Filter: Permission Type (Pillow-shaped) */}
-          <div className="flex items-center gap-2.5 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          {/* Filter: Permission Type */}
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              aria-label="Filter by Permission Type"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-2"
+              aria-label="Filter Permission Type"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
             >
               <option value="ALL">All Types</option>
               <option value="Building Permission">Building Permission</option>
@@ -225,53 +248,64 @@ export function LtpDraftApplications({
             </select>
           </div>
 
-          {/* Filter: Owner (Pillow-shaped) */}
-          <div className="flex items-center gap-2.5 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          {/* Filter: Scheme Layout */}
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+            <span className="text-[11px] font-bold text-slate-600 shrink-0">Scheme:</span>
+            <select
+              value={filterScheme}
+              onChange={(e) => setFilterScheme(e.target.value)}
+              aria-label="Filter Scheme"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
+            >
+              <option value="ALL">All Schemes</option>
+              <option value="LPS">LPS Layout</option>
+              <option value="Non LPS">Non-LPS</option>
+            </select>
+          </div>
+
+          {/* Filter: Owner / Applicant */}
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
             <select
               value={filterOwner}
               onChange={(e) => setFilterOwner(e.target.value)}
-              aria-label="Filter by Owner"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-2"
+              aria-label="Filter Owner"
+              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1 max-w-[130px] truncate"
             >
               <option value="ALL">All Owners</option>
               <option value="New">New</option>
+              {uniqueOwners.map((owner) => (
+                <option key={owner} value={owner}>
+                  {owner || "New Proposal"}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Clear Filters Button (Pillow-shaped) */}
-          {(searchKeywords || filterType !== "ALL" || filterOwner !== "ALL") && (
+          {/* Clear Filters Button */}
+          {(searchKeywords || activeFilterCount > 0) && (
             <button
-              onClick={() => {
-                setSearchKeywords("");
-                setFilterType("ALL");
-                setFilterOwner("ALL");
-              }}
-              className="rounded-full px-3.5 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+              onClick={handleClearAllFilters}
+              className="rounded-full px-3 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
             >
               <X className="size-3" />
-              <span>Clear filters</span>
+              <span>Clear</span>
             </button>
           )}
-        </div>
 
-        {/* Right side: New Application Button */}
-        {onNewApp && (
-          <div className="relative shrink-0 self-start sm:self-auto">
-            <button
-              id="draft-new-app-btn"
-              onClick={() => onNewApp()}
-              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[34px] px-4 rounded-full flex items-center gap-2 shadow-xs transition-colors cursor-pointer border border-[#630E10]"
-            >
-              <Plus className="size-3.5" />
-              <span>New Application</span>
-            </button>
-          </div>
-        )}
+          {/* Export Action Button */}
+          <button
+            onClick={exportCSV}
+            title="Export to Excel / CSV"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-900 border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+          >
+            <FileSpreadsheet className="size-3.5" />
+            <span>Export</span>
+          </button>
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}
-      <div className="rounded-xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div className="w-full rounded-xl border-2 border-[#7A1316] bg-[#FBF3E4] shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <div className="overflow-x-auto flex-1 min-h-0">
           <table className="w-full border-collapse text-left text-xs">
             {/* Table Header Row */}

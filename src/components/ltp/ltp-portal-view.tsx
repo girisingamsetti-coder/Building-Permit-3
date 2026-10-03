@@ -14,6 +14,8 @@ import { LtpSubmissionDetails } from "@/components/ltp/ltp-submission-details";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpObjections } from "@/components/ltp/ltp-objections";
 import { LtpComplianceView } from "@/components/ltp/ltp-compliance-view";
+import { LtpApprovedFiles } from "@/components/ltp/ltp-approved-files";
+import { LtpReportsView } from "@/components/ltp/ltp-reports-view";
 import {
   FilePlus2,
   Search,
@@ -67,13 +69,7 @@ export function LtpPortalView() {
       }
 
       case "draft-application": {
-        return (
-          <LtpDraftApplications
-            onNewApp={(_type) => {
-              setNewAppOpen(true);
-            }}
-          />
-        );
+        return <LtpDraftApplications />;
       }
 
       case "submitted-applications":
@@ -92,63 +88,67 @@ export function LtpPortalView() {
           (a) => !["APPROVED", "REJECTED", "DRAFT"].includes(a.status)
         );
         return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">In Review</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Applications currently under departmental review and scrutiny chain.
-              </p>
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-3 font-sans text-slate-800 overflow-y-auto">
+            {/* Quick Status Pill */}
+            <div className="flex items-center justify-between gap-2.5 shrink-0">
+              <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3.5 py-1.5 text-xs text-[#5C1A20] shadow-2xs">
+                <Clock className="size-3.5 text-[#801824] shrink-0" />
+                <span className="text-[11px] text-slate-500 font-medium">In Review:</span>
+                <span className="font-bold text-xs text-[#801824]">{reviewApps.length} In Progress</span>
+              </div>
             </div>
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3">Application No.</th>
-                    <th className="px-4 py-3">Project</th>
-                    <th className="px-4 py-3">Current Review Stage</th>
-                    <th className="px-4 py-3">Assigned Officer</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {reviewApps.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-slate-400">
-                        No applications currently in review proceeding.
-                      </td>
+            <div className="rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+              <div className="overflow-x-auto flex-1 min-h-0">
+                <table className="w-full border-collapse text-left text-xs">
+                  <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
+                    <tr className="divide-x divide-[#DCD5C8]">
+                      <th className="px-3.5 py-2.5 font-bold">Application No.</th>
+                      <th className="px-3.5 py-2.5 font-bold">Project</th>
+                      <th className="px-3.5 py-2.5 font-bold">Current Review Stage</th>
+                      <th className="px-3.5 py-2.5 font-bold">Assigned Officer</th>
+                      <th className="px-3.5 py-2.5 font-bold text-center">Status</th>
+                      <th className="px-4 py-2.5 font-bold text-right">Action</th>
                     </tr>
-                  ) : (
-                    reviewApps.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
-                            title="Click to view application details"
-                          >
-                            {app.applicationNo}
-                          </button>
-                        </td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-slate-700">{app.currentStageLabel}</td>
-                        <td className="px-4 py-3 text-slate-600">{app.assignedOfficer?.name ?? "Under Scrutiny"}</td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs text-blue-600 hover:text-blue-800 gap-1"
-                          >
-                            View <ArrowRight className="size-3" />
-                          </Button>
+                  </thead>
+                  <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
+                    {reviewApps.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="text-center py-10 text-slate-400">
+                          No applications currently in review proceeding.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      reviewApps.map((app) => (
+                        <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
+                          <td className="px-3.5 py-3">
+                            <button
+                              onClick={() => openApplication(app.id, "ltp-application-details")}
+                              className="font-mono font-bold text-[#7A1316] hover:text-[#801824] hover:underline cursor-pointer text-left"
+                              title="Click to view application details"
+                            >
+                              {app.applicationNo}
+                            </button>
+                          </td>
+                          <td className="px-3.5 py-3 font-medium text-slate-800">{app.project.name}</td>
+                          <td className="px-3.5 py-3 text-slate-700">{app.currentStageLabel}</td>
+                          <td className="px-3.5 py-3 text-slate-600">{app.assignedOfficer?.name ?? "Under Scrutiny"}</td>
+                          <td className="px-3.5 py-3 text-center"><StatusBadge status={app.status} /></td>
+                          <td className="px-4 py-3 text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openApplication(app.id, "ltp-application-details")}
+                              className="h-7 text-xs border-[#DCD5C8] text-[#801824] hover:bg-[#F3EADF] gap-1"
+                            >
+                              View <ArrowRight className="size-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         );
@@ -169,85 +169,18 @@ export function LtpPortalView() {
 
       case "approved-files":
       case "proceeding-issued": {
-        const approvedApps = userApps.filter((a) => a.status === "APPROVED");
-        return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Approved Files</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Sanctioned building permits with approved Building Permit Orders (BPO) and proceedings.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-emerald-50 border-b border-emerald-200 text-emerald-900 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3">Application No.</th>
-                    <th className="px-4 py-3">Project</th>
-                    <th className="px-4 py-3">Applicant</th>
-                    <th className="px-4 py-3">Approval Date</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Permit Order</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {approvedApps.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-8 text-slate-400">
-                        No approved building permits found.
-                      </td>
-                    </tr>
-                  ) : (
-                    approvedApps.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
-                            title="Click to view application details"
-                          >
-                            {app.applicationNo}
-                          </button>
-                        </td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
-                        <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs border-emerald-500 text-emerald-700 hover:bg-emerald-50 gap-1"
-                          >
-                            <Download className="size-3" /> View BPO Order
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <LtpApprovedFiles />;
       }
 
       case "change-ltp": {
         return (
-          <div className="space-y-6 max-w-2xl">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">Change of LTP / Handover</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Transfer licensed technical person on an existing building permission file.
-              </p>
-            </div>
-            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 max-w-2xl">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-700">Enter File No. / Application No.</label>
                 <div className="flex gap-2">
                   <Input placeholder="e.g. BA 1168/0001/BP/..." className="h-9 text-xs" />
-                  <Button className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-9 px-4">
+                  <Button className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-9 px-4 cursor-pointer">
                     Search File
                   </Button>
                 </div>
@@ -264,27 +197,19 @@ export function LtpPortalView() {
       case "work-initiated": {
         const readyForCC = userApps.filter((a) => a.status === "APPROVED");
         return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {ltpActiveMenu === "cc-issued" ? "Commencement Certificates" : "Site Initiation Notices"}
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Notify commencement date for approved files to obtain the Commencement Certificate.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
+            <div className="overflow-hidden rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3">Application No.</th>
-                    <th className="px-4 py-3">Project</th>
-                    <th className="px-4 py-3">Approval Date</th>
-                    <th className="px-4 py-3">Commencement Status</th>
-                    <th className="px-4 py-3 text-right">Action</th>
+                <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs">
+                  <tr className="divide-x divide-[#DCD5C8]">
+                    <th className="px-4 py-2.5">Application No.</th>
+                    <th className="px-4 py-2.5">Project</th>
+                    <th className="px-4 py-2.5">Approval Date</th>
+                    <th className="px-4 py-2.5">Commencement Status</th>
+                    <th className="px-4 py-2.5 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#EADBCE] bg-white">
                   {readyForCC.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="text-center py-8 text-slate-400">
@@ -293,7 +218,7 @@ export function LtpPortalView() {
                     </tr>
                   ) : (
                     readyForCC.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
                         <td className="px-4 py-3">
                           <button
                             onClick={() => openApplication(app.id, "ltp-application-details")}
@@ -306,14 +231,15 @@ export function LtpPortalView() {
                         <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
                         <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">
                             Ready for Initiation
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">
                           <Button
                             size="sm"
-                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1"
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
+                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1 cursor-pointer"
                           >
                             <Calendar className="size-3" /> Notify Commencement
                           </Button>
@@ -332,27 +258,19 @@ export function LtpPortalView() {
       case "submitted-application": {
         const approvedApps = userApps.filter((a) => a.status === "APPROVED");
         return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900">
-                {ltpActiveMenu === "occupancy-list" ? "Completion & OC Registry" : "Submitted OC Applications"}
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Intimate building completion and submit applications for Occupancy Certificate.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
+            <div className="overflow-hidden rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#801824]/5 border-b border-slate-200 text-slate-700 font-semibold uppercase text-[11px]">
-                  <tr>
-                    <th className="px-4 py-3">Permit No.</th>
-                    <th className="px-4 py-3">Project Name</th>
-                    <th className="px-4 py-3">Applicant</th>
-                    <th className="px-4 py-3">Occupancy Status</th>
-                    <th className="px-4 py-3 text-right">Action</th>
+                <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs">
+                  <tr className="divide-x divide-[#DCD5C8]">
+                    <th className="px-4 py-2.5">Permit No.</th>
+                    <th className="px-4 py-2.5">Project Name</th>
+                    <th className="px-4 py-2.5">Applicant</th>
+                    <th className="px-4 py-2.5">Occupancy Status</th>
+                    <th className="px-4 py-2.5 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#EADBCE] bg-white">
                   {approvedApps.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="text-center py-8 text-slate-400">
@@ -361,7 +279,7 @@ export function LtpPortalView() {
                     </tr>
                   ) : (
                     approvedApps.map((app) => (
-                      <tr key={app.id} className="hover:bg-slate-50 transition-colors">
+                      <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
                         <td className="px-4 py-3">
                           <button
                             onClick={() => openApplication(app.id, "ltp-application-details")}
@@ -381,7 +299,7 @@ export function LtpPortalView() {
                         <td className="px-4 py-3 text-right">
                           <Button
                             size="sm"
-                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1"
+                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1 cursor-pointer"
                           >
                             Intimate Completion
                           </Button>
@@ -396,14 +314,17 @@ export function LtpPortalView() {
         );
       }
 
+      case "reports":
+      case "reports-summary":
+      case "reports-payments":
+      case "reports-scrutiny":
+      case "reports-mis": {
+        return <LtpReportsView initialTab={ltpActiveMenu} />;
+      }
+
       default: {
         return (
-          <div className="space-y-4">
-            <div className="border-b border-border pb-4">
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 capitalize">
-                {ltpActiveMenu.replace(/-/g, " ")}
-              </h2>
-            </div>
+          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
             <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500 text-xs">
               No records found for this section.
             </div>
@@ -432,13 +353,21 @@ export function LtpPortalView() {
     ltpActiveMenu === "dashboard" ||
     ltpActiveMenu === "draft-application" ||
     ltpActiveMenu === "submitted-applications" ||
+    ltpActiveMenu === "approved-files" ||
+    ltpActiveMenu === "proceeding-issued" ||
+    ltpActiveMenu === "review-proceeding" ||
     ltpActiveMenu === "objected-files" ||
     ltpActiveMenu === "proceeding-status" ||
     ltpActiveMenu === "verified" ||
     ltpActiveMenu === "shortfall" ||
     ltpActiveMenu === "review-shortfall-submission" ||
     ltpActiveMenu === "show-cause" ||
-    ltpActiveMenu === "review-show-cause-submission";
+    ltpActiveMenu === "review-show-cause-submission" ||
+    ltpActiveMenu === "reports" ||
+    ltpActiveMenu === "reports-summary" ||
+    ltpActiveMenu === "reports-payments" ||
+    ltpActiveMenu === "reports-scrutiny" ||
+    ltpActiveMenu === "reports-mis";
 
   return (
     <div className={cn("h-full w-full", isEdgeToEdge ? "overflow-hidden p-0 bg-[#FAF7F2]" : "overflow-y-auto p-4 bg-[#F8F9FA]")}>

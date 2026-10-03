@@ -423,19 +423,17 @@ export function LtpObjections() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-4 flex flex-col gap-3 font-sans text-slate-800 overflow-hidden">
-      {/* ── SEARCH & FILTERS ROW (Outside Table - Pillow Shaped) ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
-        {/* Left: Search Bar & Filters */}
-        <div className="flex flex-wrap items-center gap-2.5 flex-1">
-          {/* Search Input Box (Pillow-shaped) */}
-          <div className="flex items-center gap-2.5 border border-[#DCD5C8] bg-white rounded-full px-4 py-2 w-full sm:w-72 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+      {/* ── TOP CONTROLS: Search (before filters), Filters & Action Buttons in a Single Row ── */}
+      <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+          {/* Search Input Box (Pillow-shaped) - BEFORE FILTERS */}
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               ref={searchInputRef}
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder="Search proposals by BA No., owner, reason..."
+              placeholder="Search BA no., owner, reason..."
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -451,7 +449,7 @@ export function LtpObjections() {
           </div>
 
           {/* Filter: Objection Type / Status (Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Objection:</span>
             <select
               value={filterCategory}
@@ -466,7 +464,7 @@ export function LtpObjections() {
           </div>
 
           {/* Filter: Permission Type (Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
             <select
               value={filterType}
@@ -481,7 +479,7 @@ export function LtpObjections() {
           </div>
 
           {/* Filter: Case Type (Pillow-shaped) */}
-          <div className="flex items-center gap-2 bg-white border border-[#DCD5C8] rounded-full px-4 py-2 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <span className="text-[11px] font-bold text-slate-600 shrink-0">Case Type:</span>
             <select
               value={filterCaseType}
@@ -497,42 +495,40 @@ export function LtpObjections() {
             </select>
           </div>
 
-          {/* Clear Filters Button (Pillow-shaped) */}
+          {/* Clear Filters Button */}
           {(searchKeywords ||
             filterCategory !== "ALL" ||
             filterType !== "ALL" ||
             filterCaseType !== "ALL") && (
             <button
               onClick={handleClear}
-              className="rounded-full px-3.5 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+              className="rounded-full px-3 py-1.5 bg-red-50 text-[#7A1316] border border-[#7A1316]/20 hover:bg-red-100 hover:border-[#7A1316]/40 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
             >
               <X className="size-3" />
-              <span>Clear filters</span>
+              <span>Clear</span>
             </button>
           )}
-        </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+          {/* Other Action Buttons (Scrutiny Report & Export) */}
           <button
             type="button"
             id="objections-view-report-btn"
             onClick={() => setViewReportModal(true)}
             title="View Scrutiny Report"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-[#FBF3E4] text-[#7A1316] hover:text-[#8F161A] border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
           >
             <FileText className="size-3.5 text-[#7A1316]" />
             <span>Scrutiny Report</span>
           </button>
+
           <button
             onClick={exportCSV}
             title="Export to Excel / CSV"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-900 border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-emerald-50 text-emerald-700 hover:text-emerald-900 border border-[#DCD5C8] font-bold text-xs shadow-2xs hover:shadow-xs transition-all cursor-pointer"
           >
             <FileSpreadsheet className="size-3.5" />
             <span>Export</span>
           </button>
-        </div>
       </div>
 
       {/* ── TABLE CONTAINER (Maroon & Beige Theme) ── */}

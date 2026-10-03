@@ -663,7 +663,26 @@ export function UnifiedDashboard() {
               View all <ArrowRight className="size-3" />
             </Button>
           </div>
-          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[#E0D2BE]/40">
+
+          {/* Stats Bar at Top */}
+          {scope.applications.length > 0 && (
+            <div className="border-b border-[#E0D2BE] px-4 py-1.5 grid grid-cols-3 text-center shrink-0 bg-[#FAF4EB]/80 divide-x divide-[#E0D2BE]/60">
+              <div className="px-1">
+                <div className="text-xs sm:text-sm font-black text-emerald-700 leading-tight">{kpis.approved}</div>
+                <div className="text-[10px] font-semibold text-slate-600">Approved</div>
+              </div>
+              <div className="px-1">
+                <div className="text-xs sm:text-sm font-black text-[#7A1316] leading-tight">{kpis.inProgress}</div>
+                <div className="text-[10px] font-semibold text-slate-600">In Progress</div>
+              </div>
+              <div className="px-1">
+                <div className="text-xs sm:text-sm font-black text-rose-700 leading-tight">{kpis.rejected}</div>
+                <div className="text-[10px] font-semibold text-slate-600">Rejected</div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-[#E0D2BE]/40 rounded-b-2xl">
             {scope.applications.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full gap-2 text-slate-400">
                 <Building2 className="size-8 opacity-30 text-[#7A1316]" />
@@ -676,22 +695,6 @@ export function UnifiedDashboard() {
                 .map((app) => <AppRow key={app.id} app={app} onOpen={() => navigate(applicationsView)} />)
             )}
           </div>
-          {scope.applications.length > 0 && (
-            <div className="border-t border-[#E0D2BE] px-4 py-1.5 grid grid-cols-3 text-center shrink-0 bg-[#FAF4EB]/60 rounded-b-2xl">
-              <div>
-                <div className="text-xs sm:text-sm font-black text-emerald-700">{kpis.approved}</div>
-                <div className="text-[10px] font-semibold text-slate-600">Approved</div>
-              </div>
-              <div>
-                <div className="text-xs sm:text-sm font-black text-[#7A1316]">{kpis.inProgress}</div>
-                <div className="text-[10px] font-semibold text-slate-600">In Progress</div>
-              </div>
-              <div>
-                <div className="text-xs sm:text-sm font-black text-rose-700">{kpis.rejected}</div>
-                <div className="text-[10px] font-semibold text-slate-600">Rejected</div>
-              </div>
-            </div>
-          )}
         </div>
 
       </div>

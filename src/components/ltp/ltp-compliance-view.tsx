@@ -255,59 +255,14 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
   return (
     <div className="flex flex-col h-full w-full bg-[#FAF7F2] text-slate-800 overflow-y-auto">
-      {/* ── Top Header Banner ── */}
-      <div className="bg-white border-b border-[#EADBCE] px-6 py-5 shadow-xs shrink-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2.5">
-              <div className="flex size-9 items-center justify-center rounded-lg bg-[#801824] text-[#FDF6ED] shadow-xs">
-                <ShieldAlert className="size-5" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-[#5C1A20]">
-                  Compliance & Regulatory Notices
-                </h1>
-                <p className="text-xs text-slate-500">
-                  APCRDA Statutory Compliance, Deficiency Shortfall Resolvers & Section 53 Regulatory Directives
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-            <div className="flex items-center gap-2 rounded-lg bg-emerald-50/80 border border-emerald-200/80 px-3 py-1.5 text-xs text-emerald-800">
-              <FileCheck2 className="size-4 text-emerald-600 shrink-0" />
-              <div>
-                <span className="font-bold text-sm block leading-none">{stats.totalVerified}</span>
-                <span className="text-[10px] text-emerald-700">Verified Files</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-lg bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 text-xs text-amber-900">
-              <AlertTriangle className="size-4 text-amber-600 shrink-0" />
-              <div>
-                <span className="font-bold text-sm block leading-none">{stats.openShortfalls}</span>
-                <span className="text-[10px] text-amber-700">Open Shortfalls</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 rounded-lg bg-rose-50/80 border border-rose-200/80 px-3 py-1.5 text-xs text-rose-900">
-              <Gavel className="size-4 text-rose-600 shrink-0" />
-              <div>
-                <span className="font-bold text-sm block leading-none">{stats.activeShowCauses}</span>
-                <span className="text-[10px] text-rose-700">Show Causes</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Submodule Tabs Navigation ── */}
-        <div className="flex items-center gap-2 border-t border-[#F0E6D8] mt-4 pt-3 overflow-x-auto no-scrollbar">
+      {/* ── Submodule Tabs Navigation & Quick Metrics (No Duplicate Header) ── */}
+      <div className="bg-white border-b border-[#EADBCE] px-4 sm:px-6 py-3 shadow-xs shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* Submodule Tabs Navigation */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
           <button
             onClick={() => handleTabChange("verified")}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
               activeTab === "verified"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
                 : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
@@ -328,7 +283,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
           <button
             onClick={() => handleTabChange("shortfall")}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
               activeTab === "shortfall"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
                 : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
@@ -351,7 +306,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
           <button
             onClick={() => handleTabChange("review-shortfall-submission")}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
               activeTab === "review-shortfall-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
                 : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
@@ -372,7 +327,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
           <button
             onClick={() => handleTabChange("show-cause")}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
               activeTab === "show-cause"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
                 : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
@@ -395,7 +350,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
           <button
             onClick={() => handleTabChange("review-show-cause-submission")}
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap",
+              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
               activeTab === "review-show-cause-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
                 : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
@@ -412,6 +367,33 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
               {stats.submittedShowCauses}
             </span>
           </button>
+        </div>
+
+        {/* Quick Metrics */}
+        <div className="flex items-center gap-2 overflow-x-auto shrink-0 pb-1 md:pb-0">
+          <div className="flex items-center gap-2 rounded-lg bg-emerald-50/80 border border-emerald-200/80 px-3 py-1.5 text-xs text-emerald-800 shadow-2xs">
+            <FileCheck2 className="size-4 text-emerald-600 shrink-0" />
+            <div>
+              <span className="font-bold text-xs block leading-none">{stats.totalVerified}</span>
+              <span className="text-[10px] text-emerald-700">Verified</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-lg bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 text-xs text-amber-900 shadow-2xs">
+            <AlertTriangle className="size-4 text-amber-600 shrink-0" />
+            <div>
+              <span className="font-bold text-xs block leading-none">{stats.openShortfalls}</span>
+              <span className="text-[10px] text-amber-700">Shortfalls</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50/80 border border-rose-200/80 px-3 py-1.5 text-xs text-rose-900 shadow-2xs">
+            <Gavel className="size-4 text-rose-600 shrink-0" />
+            <div>
+              <span className="font-bold text-xs block leading-none">{stats.activeShowCauses}</span>
+              <span className="text-[10px] text-rose-700">Show Causes</span>
+            </div>
+          </div>
         </div>
       </div>
 
