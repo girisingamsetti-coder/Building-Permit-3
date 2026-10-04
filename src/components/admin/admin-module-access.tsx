@@ -52,6 +52,7 @@ import {
   Info,
   Layers,
   HelpCircle,
+  UserCheck,
 } from "lucide-react";
 
 // ============================================================
@@ -126,6 +127,13 @@ export const ALL_SYSTEM_MODULES: SystemModuleInfo[] = [
     category: "Compliance",
     description: "Title deeds, structural stability certificates, encumbrance certificates & statutory affidavits",
     iconName: "FileCheck",
+  },
+  {
+    id: "compliance",
+    label: "Compliance",
+    category: "Compliance",
+    description: "Compliance management: Shortfall resolution (technical deficiencies) and Show Cause notices (statutory deviations)",
+    iconName: "ShieldAlert",
   },
   {
     id: "shortfalls",
@@ -230,6 +238,13 @@ export const ALL_SYSTEM_MODULES: SystemModuleInfo[] = [
     iconName: "BarChart3",
   },
   {
+    id: "registration",
+    label: "Registration & Approvals",
+    category: "Administrative",
+    description: "Approve or reject new LTP and Developer registrations submitted via login, verify credentials, council/RERA licenses & affidavits",
+    iconName: "UserCheck",
+  },
+  {
     id: "settings",
     label: "System Settings",
     category: "Administrative",
@@ -299,6 +314,7 @@ function renderModuleIcon(iconName: string, className?: string) {
     case "Users": return <Users className={cls} />;
     case "Send": return <Send className={cls} />;
     case "BarChart3": return <BarChart3 className={cls} />;
+    case "UserCheck": return <UserCheck className={cls} />;
     case "Settings": return <Settings className={cls} />;
     default: return <Layers className={cls} />;
   }

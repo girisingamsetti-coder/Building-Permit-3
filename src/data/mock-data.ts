@@ -14,6 +14,7 @@ import type {
   RoleKey,
   ScrutinyReport,
   Shortfall,
+  ShowCause,
   SmsLog,
   SystemSettings,
   User,
@@ -650,22 +651,506 @@ export function generateHierarchicalApplications(): Application[] {
         ? makeDocuments("shortfall")
         : makeDocuments("verified");
 
-      const shortfalls: Shortfall[] = status === "SHORTFALL_RAISED"
-        ? [{
-            id: `sf-${appId}`,
+      let shortfalls: Shortfall[] = [];
+      let showCauses: ShowCause[] = [];
+      if (status === "SHORTFALL_RAISED") {
+        shortfalls = [
+          {
+            id: `sf-${appId}-1`,
             shortfallId: `SF/2026/${String(100 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-01",
             type: "DOCUMENT",
             title: "Structural Stability Certificate — missing SE stamp",
             description: "The structural stability certificate does not bear the stamp and signature of a Licensed Structural Engineer.",
+            requiredAction: "Upload updated Structural Stability Certificate in PDF format bearing Licensed Structural Engineer (LSE) registration seal and signature.",
+            requiredDocuments: ["Structural Stability Certificate (Signed & Sealed)", "LSE Registration License Copy"],
             raisedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Structural Safety & Scrutiny Cell",
             raisedAt: lastUpDate,
-            dueDate: "2026-03-31",
+            dueDate: "2026-10-25",
             status: "OPEN",
             applicationId: appId,
             applicationNo: appNo,
             stageRaisedAt: "ZONAL_HEAD_REVIEW",
-          }]
-        : [];
+            timeline: [
+              {
+                id: `sftl-${appId}-1`,
+                title: "Shortfall Raised",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: lastUpDate,
+                status: "OPEN",
+                remarks: "Structural stability certificate missing SE stamp and signature.",
+              },
+            ],
+          },
+          {
+            id: `sf-${appId}-2`,
+            shortfallId: `SF/2026/${String(200 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-02",
+            type: "TECHNICAL",
+            title: "Setback Clarification & Parking Layout Verification",
+            description: "Front setback is shown as 4.2m on sheet A-02 but calculated as 3.8m on schedule table. Additional site photograph and clarification required.",
+            requiredAction: "Submit cross-verified site dimension plan and clarify discrepancy between sheet A-02 and drawing schedule.",
+            requiredDocuments: ["Revised Ground Level Dimension Plan", "Site Geo-tagged Photographs"],
+            raisedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Town Planning Cell",
+            raisedAt: "2026-09-10T11:00:00",
+            dueDate: "2026-10-20",
+            status: "REOPENED",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageRaisedAt: "ZONAL_HEAD_REVIEW",
+            response: {
+              text: "Initial clarification submitted on 15/09/2026 noting 4.2m setback as per physical peg marking on site.",
+              respondedAt: "2026-09-15T14:30:00",
+              supportingDocument: "Site_Peg_Marking_Survey.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "Initial clarification submitted on 15/09/2026 noting 4.2m setback as per physical peg marking on site.",
+                respondedAt: "2026-09-15T14:30:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `doc-${appId}-v1-1`, name: "Site_Peg_Marking_Survey.pdf", size: "2.4 MB", type: "application/pdf" },
+                ],
+                supportingDocument: "Site_Peg_Marking_Survey.pdf",
+              },
+            ],
+            timeline: [
+              {
+                id: `sftl-${appId}-2-1`,
+                title: "Shortfall Raised",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-09-10T11:00:00",
+                status: "OPEN",
+                remarks: "Front setback discrepancy identified between sheet A-02 and schedule table.",
+              },
+              {
+                id: `sftl-${appId}-2-2`,
+                title: "Response Submitted (V1)",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-09-15T14:30:00",
+                status: "RESPONDED",
+                remarks: "Initial clarification submitted with peg marking survey.",
+              },
+              {
+                id: `sftl-${appId}-2-3`,
+                title: "Under Review",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-09-18T10:15:00",
+                status: "UNDER_REVIEW",
+                description: "Officer reviewing peg marking survey and dimension cross-sections.",
+              },
+              {
+                id: `sftl-${appId}-2-4`,
+                title: "Clarification Required",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-09-22T16:00:00",
+                status: "REOPENED",
+                remarks: "Survey shows site pegs, but revised CAD drawing schedule was not updated. Please upload revised dimension plan.",
+              },
+            ],
+          },
+        ];
+      } else if (j === 7) {
+        shortfalls = [
+          {
+            id: `sf-${appId}-fnoc`,
+            shortfallId: `SF/2026/${String(300 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-01",
+            type: "GENERAL",
+            title: "Fire Safety NOC Compliance Undertaking",
+            description: "Provisional fire safety declaration and consultant registration certificate required for building height > 15m.",
+            requiredAction: "Submit Fire Safety Undertaking on notarized stamp paper along with certified fire consultant credentials.",
+            requiredDocuments: ["Fire Safety Undertaking", "Consultant Certification"],
+            raisedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Fire & Life Safety Desk",
+            raisedAt: "2026-09-20T10:00:00",
+            dueDate: "2026-10-30",
+            status: "RESPONDED",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageRaisedAt: "ZONAL_HEAD_REVIEW",
+            response: {
+              text: "Uploaded provisional Fire Safety NOC compliance declaration form signed by developer and licensed fire safety consultant.",
+              respondedAt: "2026-09-28T16:20:00",
+              supportingDocument: "Fire_NOC_Compliance_Declaration.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "Uploaded provisional Fire Safety NOC compliance declaration form signed by developer and licensed fire safety consultant.",
+                respondedAt: "2026-09-28T16:20:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `doc-${appId}-fnoc-1`, name: "Fire_NOC_Compliance_Declaration.pdf", size: "3.1 MB", type: "application/pdf" },
+                ],
+                supportingDocument: "Fire_NOC_Compliance_Declaration.pdf",
+              },
+            ],
+            timeline: [
+              {
+                id: `sftl-${appId}-fnoc-1`,
+                title: "Shortfall Raised",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-09-20T10:00:00",
+                status: "OPEN",
+                remarks: "Provisional fire safety declaration pending.",
+              },
+              {
+                id: `sftl-${appId}-fnoc-2`,
+                title: "Response Submitted (V1)",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-09-28T16:20:00",
+                status: "RESPONDED",
+                remarks: "Uploaded provisional Fire Safety NOC compliance declaration form.",
+              },
+            ],
+          },
+        ];
+      } else if (j === 8) {
+        shortfalls = [
+          {
+            id: `sf-${appId}-rwh`,
+            shortfallId: `SF/2026/${String(400 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-01",
+            type: "TECHNICAL",
+            title: "Rainwater Harvesting & Ground Water Recharging Pit Design",
+            description: "Rainwater harvesting recharge pit dimension calculation not attached with landscape drawings.",
+            requiredAction: "Attach hydraulic calculation and cross-section details of recharge pit complying with APCRDA standards.",
+            requiredDocuments: ["RWH Hydraulic Calculations", "Recharge Pit Section Drawings (DWG/PDF)"],
+            raisedBy: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+            department: "Engineering & Environment Section",
+            raisedAt: "2026-09-18T14:00:00",
+            dueDate: "2026-10-28",
+            status: "UNDER_REVIEW",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageRaisedAt: "DIRECTOR_REVIEW",
+            response: {
+              text: "Revised stormwater drain calculation sheet and cross-sectional drawing of RWH recharge pit submitted.",
+              respondedAt: "2026-09-26T11:45:00",
+              supportingDocument: "RWH_Cross_Section_v2.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "Revised stormwater drain calculation sheet and cross-sectional drawing of RWH recharge pit submitted.",
+                respondedAt: "2026-09-26T11:45:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `doc-${appId}-rwh-1`, name: "RWH_Cross_Section_v2.pdf", size: "4.8 MB", type: "application/pdf" },
+                ],
+                supportingDocument: "RWH_Cross_Section_v2.pdf",
+              },
+            ],
+            timeline: [
+              {
+                id: `sftl-${appId}-rwh-1`,
+                title: "Shortfall Raised",
+                actor: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+                timestamp: "2026-09-18T14:00:00",
+                status: "OPEN",
+                remarks: "RWH recharge pit dimensions insufficient for plot extent.",
+              },
+              {
+                id: `sftl-${appId}-rwh-2`,
+                title: "Response Submitted (V1)",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-09-26T11:45:00",
+                status: "RESPONDED",
+                remarks: "Revised stormwater drain calculation sheet submitted.",
+              },
+              {
+                id: `sftl-${appId}-rwh-3`,
+                title: "Under Review",
+                actor: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+                timestamp: "2026-09-27T09:30:00",
+                status: "UNDER_REVIEW",
+                description: "Director technical cell reviewing hydraulic design calculation.",
+              },
+            ],
+          },
+        ];
+      } else if (j === 0) {
+        shortfalls = [
+          {
+            id: `sf-${appId}-soil`,
+            shortfallId: `SF/2026/${String(500 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-01",
+            type: "DOCUMENT",
+            title: "Soil Bearing Capacity Test Report Verification",
+            description: "Soil test report missing NABL laboratory accreditation stamp and engineer endorsement.",
+            requiredAction: "Provide NABL accredited lab report with geotechnical engineer signature.",
+            requiredDocuments: ["NABL Geotechnical Report"],
+            raisedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Engineering Division",
+            raisedAt: "2026-08-01T10:00:00",
+            dueDate: "2026-08-15",
+            status: "RESOLVED",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageRaisedAt: "ZONAL_HEAD_REVIEW",
+            resolution: "Soil test report verified by APCRDA Engineering Division. SBC value 180 kN/m² accepted for foundation design.",
+            resolvedBy: { name: ltp.tpaName, role: "TPA" },
+            resolvedAt: "2026-08-12T15:30:00",
+            response: {
+              text: "Uploaded NABL endorsed Geo-technical Investigation Report with geotechnical engineer signature.",
+              respondedAt: "2026-08-08T12:00:00",
+              supportingDocument: "NABL_Soil_Investigation_Report.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "Uploaded NABL endorsed Geo-technical Investigation Report with geotechnical engineer signature.",
+                respondedAt: "2026-08-08T12:00:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `doc-${appId}-soil-1`, name: "NABL_Soil_Investigation_Report.pdf", size: "5.2 MB", type: "application/pdf" },
+                ],
+                supportingDocument: "NABL_Soil_Investigation_Report.pdf",
+              },
+            ],
+            timeline: [
+              {
+                id: `sftl-${appId}-soil-1`,
+                title: "Shortfall Raised",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-01T10:00:00",
+                status: "OPEN",
+                remarks: "Soil test report missing NABL laboratory accreditation stamp.",
+              },
+              {
+                id: `sftl-${appId}-soil-2`,
+                title: "Response Submitted (V1)",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-08-08T12:00:00",
+                status: "RESPONDED",
+                remarks: "Uploaded NABL endorsed Geo-technical Investigation Report.",
+              },
+              {
+                id: `sftl-${appId}-soil-3`,
+                title: "Under Review",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-10T11:00:00",
+                status: "UNDER_REVIEW",
+                description: "Verification by Engineering Division",
+              },
+              {
+                id: `sftl-${appId}-soil-4`,
+                title: "Response Accepted / Closed",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-12T15:30:00",
+                status: "RESOLVED",
+                remarks: "Soil test report verified by APCRDA Engineering Division. SBC value accepted.",
+              },
+            ],
+          },
+        ];
+      } else if (j === 3) {
+        shortfalls = [
+          {
+            id: `sf-${appId}-ec`,
+            shortfallId: `SF/2026/${String(600 + appIndex).padStart(4, "0")}`,
+            shortfallNumber: "SF-01",
+            type: "DOCUMENT",
+            title: "Registered Encumbrance Certificate (EC) for 30 Years",
+            description: "Submitted Encumbrance Certificate is only for 13 years. As per APCRDA Rule 12(b), search period must cover minimum 30 years from Sub-Registrar Office.",
+            requiredAction: "Obtain and upload 30-year Registered Encumbrance Certificate (Form 15/16) from Registration Department.",
+            requiredDocuments: ["30-Year Encumbrance Certificate (Form 15)"],
+            raisedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Revenue & Land Scrutiny Cell",
+            raisedAt: "2026-03-01T10:00:00",
+            dueDate: "2026-03-15", // In the past -> Overdue!
+            status: "OPEN",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageRaisedAt: "DOCUMENTS",
+            timeline: [
+              {
+                id: `sftl-${appId}-ec-1`,
+                title: "Shortfall Raised",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-03-01T10:00:00",
+                status: "OPEN",
+                remarks: "30-year EC required from Sub-Registrar Office.",
+              },
+            ],
+          },
+        ];
+      }
+
+      // ---- Show Cause Notices ----
+      if (j === 9) {
+        showCauses = [
+          {
+            id: `sc-${appId}-hv`,
+            showCauseId: `SCN/2026/${String(100 + appIndex).padStart(4, "0")}`,
+            showCauseNumber: "SCN-01",
+            violationType: "HEIGHT_VIOLATION",
+            severity: "CRITICAL",
+            title: "Unauthorised Extra Floor Construction Beyond Sanctioned Height",
+            description: "Site inspection conducted on 18-Sep-2026 reveals construction of an additional floor (Ground + 4 floors) against sanctioned G+3 in approved plan. This constitutes a serious deviation under APCRDA Building Rules 2017, Rule 27(3).",
+            violationDetails: "Sanctioned plan permits G+3 (12.5m). Actual construction measured at G+4 (15.8m). Deviation: 3.3m excess height and one additional floor slab.",
+            requiredAction: "Submit sworn affidavit explaining the deviation with supporting survey report, or initiate demolition of the unauthorized floor within 30 days.",
+            issuedBy: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+            department: "Enforcement & Compliance Wing",
+            issuedAt: "2026-09-20T10:00:00",
+            hearingDate: "2026-10-15T11:00:00",
+            replyDueDate: "2026-10-10",
+            status: "REPLY_PENDING",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageIssuedAt: "ADDITIONAL_COMMISSIONER_REVIEW",
+            timeline: [
+              {
+                id: `sctl-${appId}-hv-1`,
+                title: "Show Cause Notice Issued",
+                actor: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+                timestamp: "2026-09-20T10:00:00",
+                status: "ISSUED",
+                remarks: "Site inspection reveals G+4 construction against sanctioned G+3.",
+              },
+              {
+                id: `sctl-${appId}-hv-2`,
+                title: "Hearing Scheduled",
+                actor: { name: "Hemanthsai", role: "ADDITIONAL_COMMISSIONER" },
+                timestamp: "2026-09-22T09:00:00",
+                status: "HEARING_SCHEDULED",
+                description: "Personal hearing scheduled for 15-Oct-2026 at 11:00 AM.",
+              },
+            ],
+          },
+          {
+            id: `sc-${appId}-enc`,
+            showCauseId: `SCN/2026/${String(200 + appIndex).padStart(4, "0")}`,
+            showCauseNumber: "SCN-02",
+            violationType: "ENCROACHMENT",
+            severity: "HIGH",
+            title: "Encroachment on Government Road Margin (ROW Violation)",
+            description: "Compound wall constructed extending 0.9m into the 9m wide road margin reserved under Master Plan. Violation of APCRDA Building Rules 2017, Rule 18(b) — Road margin reservation.",
+            violationDetails: "Plot boundary as per approved plan ends at 9m from road centre. Compound wall constructed at 8.1m. Encroachment: 0.9m into reserved margin.",
+            requiredAction: "Remove encroaching portion of compound wall and restore road margin to original condition within 21 days. Submit compliance photograph and survey report.",
+            issuedBy: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+            department: "Town Planning & Survey Section",
+            issuedAt: "2026-09-25T14:00:00",
+            replyDueDate: "2026-10-16",
+            status: "REPLY_SUBMITTED",
+            applicationId: appId,
+            applicationNo: appNo,
+            stageIssuedAt: "ADDITIONAL_COMMISSIONER_REVIEW",
+            response: {
+              text: "The compound wall was constructed based on physical site peg markings placed by the survey team. A revised survey is being arranged to verify the exact road margin. We request 30 additional days to submit the corrective compliance report.",
+              respondedAt: "2026-10-02T16:30:00",
+              supportingDocument: "Survey_Recheck_Request_Letter.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "The compound wall was constructed based on physical site peg markings placed by the survey team. A revised survey is being arranged to verify the exact road margin.",
+                respondedAt: "2026-10-02T16:30:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `scdoc-${appId}-enc-1`, name: "Survey_Recheck_Request_Letter.pdf", size: "1.2 MB", type: "application/pdf" },
+                ],
+              },
+            ],
+            timeline: [
+              {
+                id: `sctl-${appId}-enc-1`,
+                title: "Show Cause Notice Issued",
+                actor: { name: "Shri. Suresh Nair", role: "DIRECTOR" },
+                timestamp: "2026-09-25T14:00:00",
+                status: "ISSUED",
+                remarks: "Compound wall encroaching 0.9m into road margin.",
+              },
+              {
+                id: `sctl-${appId}-enc-2`,
+                title: "Reply Submitted",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-10-02T16:30:00",
+                status: "REPLY_SUBMITTED",
+                remarks: "LTP submitted reply citing survey peg ambiguity.",
+              },
+            ],
+          },
+        ];
+      } else if (j === 4) {
+        showCauses = [
+          {
+            id: `sc-${appId}-uc`,
+            showCauseId: `SCN/2026/${String(300 + appIndex).padStart(4, "0")}`,
+            showCauseNumber: "SCN-01",
+            violationType: "UNAUTHORIZED_CONSTRUCTION",
+            severity: "CRITICAL",
+            title: "Construction Commenced Without Valid Building Permission",
+            description: "Physical inspection on 05-Aug-2026 confirms construction activity at site (foundation + plinth) prior to issuance of Building Permission Order. Violation of AP Buildings (Regulation of Promotion of Construction and Sale) Rules.",
+            violationDetails: "Application is at Payment Pending stage. No permission order exists. Foundation poured and plinth beam cast as of inspection date.",
+            requiredAction: "Stop construction immediately. Submit a stop-work compliance photograph within 7 days. Explain deviation via written submission with legal counsel affidavit.",
+            issuedBy: { name: ltp.tpaName, role: "TPA" },
+            department: "Site Enforcement & Monitoring Cell",
+            issuedAt: "2026-08-06T10:00:00",
+            replyDueDate: "2026-08-13",
+            status: "PENALTY_IMPOSED",
+            penaltyAmount: 150000,
+            applicationId: appId,
+            applicationNo: appNo,
+            stageIssuedAt: "PAYMENT",
+            orderDetails: "Order dated 22-Aug-2026: Penalty of ₹1,50,000 imposed under APCRDA Act Section 51. Construction stay order in force until payment cleared and regularisation approved.",
+            response: {
+              text: "Work has been stopped immediately as directed. Compliance photographs attached. We humbly submit that the foundation work was commenced based on verbal assurance from a field engineer, which was a misunderstanding. We seek regularisation and commit to full compliance.",
+              respondedAt: "2026-08-12T11:00:00",
+              supportingDocument: "Stop_Work_Compliance_Photos.pdf",
+            },
+            responseVersions: [
+              {
+                version: 1,
+                text: "Work has been stopped immediately as directed. Compliance photographs attached.",
+                respondedAt: "2026-08-12T11:00:00",
+                respondedBy: { name: ltp.name, role: "LTP" },
+                supportingDocuments: [
+                  { id: `scdoc-${appId}-uc-1`, name: "Stop_Work_Compliance_Photos.pdf", size: "6.8 MB", type: "application/pdf" },
+                ],
+              },
+            ],
+            timeline: [
+              {
+                id: `sctl-${appId}-uc-1`,
+                title: "Show Cause Notice Issued",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-06T10:00:00",
+                status: "ISSUED",
+                remarks: "Construction without permission detected during inspection.",
+              },
+              {
+                id: `sctl-${appId}-uc-2`,
+                title: "Reply Submitted",
+                actor: { name: ltp.name, role: "LTP" },
+                timestamp: "2026-08-12T11:00:00",
+                status: "REPLY_SUBMITTED",
+                remarks: "LTP confirmed stop-work and submitted compliance report.",
+              },
+              {
+                id: `sctl-${appId}-uc-3`,
+                title: "Order Passed",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-22T15:00:00",
+                status: "ORDER_PASSED",
+                description: "Penalty order issued.",
+              },
+              {
+                id: `sctl-${appId}-uc-4`,
+                title: "Penalty Imposed",
+                actor: { name: ltp.tpaName, role: "TPA" },
+                timestamp: "2026-08-22T15:30:00",
+                status: "PENALTY_IMPOSED",
+                remarks: "₹1,50,000 penalty imposed. Stay order in force.",
+              },
+            ],
+          },
+        ];
+      }
 
       const app: Application = {
         id: appId,
@@ -709,6 +1194,7 @@ export function generateHierarchicalApplications(): Application[] {
         scrutinyReport,
         documents,
         shortfalls,
+        showCauses,
         workflowHistory: makeWorkflowHistory(appNo, stage, status, dates),
         auditLog: makeAuditLog(appNo, stage, dates),
         remarks: status === "APPROVED"
@@ -797,13 +1283,13 @@ export const SEED_SYSTEM_SETTINGS: SystemSettings = {
   // All roles have full access to all modules by default.
   // Administrator can restrict these in Settings → Access Control.
   roleAccessConfig: {
-    LTP:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    TPA:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    ZDD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    ZJD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    ADDITIONAL_COMMISSIONER: { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    COMMISSIONER:         { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
-    ADMIN:                { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
+    LTP:                  { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "none", outward: "none" },
+    TPA:                  { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "none", outward: "full" },
+    ZDD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "full", outward: "full" },
+    ZJD:                  { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "full", outward: "full" },
+    ADDITIONAL_COMMISSIONER: { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "full", outward: "full" },
+    COMMISSIONER:         { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "full", outward: "full" },
+    ADMIN:                { dashboard: "full", "application-submission": "full", "application-status": "full", compliance: "full", "proceeding-status": "full", "compliance-v2": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full", registration: "full", outward: "full" },
   },
   userAccessConfig: {},
   hideRestrictedModules: false,

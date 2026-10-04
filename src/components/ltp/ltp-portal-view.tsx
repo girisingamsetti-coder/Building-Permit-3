@@ -17,8 +17,13 @@ import { LtpComplianceView } from "@/components/ltp/ltp-compliance-view";
 import { LtpApprovedFiles } from "@/components/ltp/ltp-approved-files";
 import { LtpInReview } from "@/components/ltp/ltp-in-review";
 import { LtpReportsView } from "@/components/ltp/ltp-reports-view";
+import { LtpMyShortfalls } from "@/components/ltp/ltp-my-shortfalls";
+import { LtpMyShowCause } from "@/components/ltp/ltp-my-showcause";
 import { LtpWorkCommencement } from "@/components/ltp/ltp-work-commencement";
 import { AdminSettings } from "@/components/admin/admin-settings";
+import { RegistrationApprovalsView } from "@/components/registration/registration-approvals-view";
+import { OutwardView } from "@/components/outward/outward-view";
+import { OccupancyModuleView } from "@/components/occupancy/occupancy-module-view";
 import {
   FilePlus2,
   Search,
@@ -71,6 +76,20 @@ export function LtpPortalView() {
         return <UnifiedDashboard />;
       }
 
+      case "registration":
+      case "registration-all":
+      case "registration-pending":
+      case "registration-ltp":
+      case "registration-developer":
+      case "registration-approved":
+      case "registration-rejected":
+      case "developer-verification":
+      case "all-ltp-approved":
+      case "approved-registration":
+      case "rejected-registration": {
+        return <RegistrationApprovalsView initialTab={activeKey} />;
+      }
+
       case "draft-application": {
         return <LtpDraftApplications />;
       }
@@ -92,6 +111,15 @@ export function LtpPortalView() {
 
       case "objected-files": {
         return <LtpObjections />;
+      }
+
+      case "compliance":
+      case "my-shortfalls": {
+        return <LtpMyShortfalls />;
+      }
+
+      case "my-show-cause": {
+        return <LtpMyShowCause />;
       }
 
       case "proceeding-status":
@@ -139,65 +167,13 @@ export function LtpPortalView() {
         );
       }
 
+      case "occupancy":
+      case "occupancy-dashboard":
       case "occupancy-list":
+      case "occupancy-apply":
+      case "occupancy-certificates":
       case "submitted-application": {
-        const approvedApps = userApps.filter((a) => a.status === "APPROVED");
-        return (
-          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
-            <div className="overflow-hidden rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs">
-                  <tr className="divide-x divide-[#DCD5C8]">
-                    <th className="w-36 px-3 py-2 whitespace-nowrap">Permit No.</th>
-                    <th className="w-56 max-w-[240px] px-3 py-2">Project Name</th>
-                    <th className="w-44 max-w-[180px] px-3 py-2 whitespace-nowrap">Applicant</th>
-                    <th className="w-32 px-2 py-2 text-center whitespace-nowrap">Occupancy Status</th>
-                    <th className="w-36 px-3 py-2 text-center whitespace-nowrap">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EADBCE] bg-white">
-                  {approvedApps.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-8 text-slate-400">
-                        No completed buildings ready for occupancy intimation.
-                      </td>
-                    </tr>
-                  ) : (
-                    approvedApps.map((app) => (
-                      <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          <button
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
-                            title="Click to view application details"
-                          >
-                            {app.applicationNo}
-                          </button>
-                        </td>
-                        <td className="px-3 py-2 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{app.applicant.name}</td>
-                        <td className="px-2 py-2 text-center whitespace-nowrap">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">
-                            Construction Complete
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-center whitespace-nowrap">
-                          <Button
-                            size="sm"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1 cursor-pointer"
-                          >
-                            Apply Occupancy
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        );
+        return <OccupancyModuleView initialTab={ltpActiveMenu} />;
       }
 
       case "reports":
@@ -206,6 +182,13 @@ export function LtpPortalView() {
       case "reports-scrutiny":
       case "reports-mis": {
         return <LtpReportsView initialTab={ltpActiveMenu} />;
+      }
+
+      case "outward":
+      case "ltp-outward":
+      case "officer-outward":
+      case "admin-outward": {
+        return <OutwardView />;
       }
 
       case "settings":
@@ -255,6 +238,9 @@ export function LtpPortalView() {
     ltpActiveMenu === "proceeding-issued" ||
     ltpActiveMenu === "review-proceeding" ||
     ltpActiveMenu === "objected-files" ||
+    ltpActiveMenu === "compliance" ||
+    ltpActiveMenu === "my-shortfalls" ||
+    ltpActiveMenu === "my-show-cause" ||
     ltpActiveMenu === "proceeding-status" ||
     ltpActiveMenu === "verified" ||
     ltpActiveMenu === "shortfall" ||
@@ -269,6 +255,27 @@ export function LtpPortalView() {
     ltpActiveMenu === "reports-payments" ||
     ltpActiveMenu === "reports-scrutiny" ||
     ltpActiveMenu === "reports-mis" ||
+    ltpActiveMenu === "registration" ||
+    ltpActiveMenu === "registration-all" ||
+    ltpActiveMenu === "registration-pending" ||
+    ltpActiveMenu === "registration-ltp" ||
+    ltpActiveMenu === "registration-developer" ||
+    ltpActiveMenu === "registration-approved" ||
+    ltpActiveMenu === "registration-rejected" ||
+    ltpActiveMenu === "developer-verification" ||
+    ltpActiveMenu === "all-ltp-approved" ||
+    ltpActiveMenu === "approved-registration" ||
+    ltpActiveMenu === "rejected-registration" ||
+    ltpActiveMenu === "outward" ||
+    ltpActiveMenu === "ltp-outward" ||
+    ltpActiveMenu === "officer-outward" ||
+    ltpActiveMenu === "admin-outward" ||
+    ltpActiveMenu === "occupancy" ||
+    ltpActiveMenu === "occupancy-dashboard" ||
+    ltpActiveMenu === "occupancy-list" ||
+    ltpActiveMenu === "occupancy-apply" ||
+    ltpActiveMenu === "occupancy-certificates" ||
+    ltpActiveMenu === "submitted-application" ||
     ltpActiveMenu === "settings" ||
     ltpActiveMenu === "admin-settings";
 

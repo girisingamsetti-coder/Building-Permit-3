@@ -25,6 +25,10 @@ import type {
   ScrutinyReport,
   Shortfall,
   ShortfallType,
+  ShortfallSupportingDoc,
+  ShortfallResponseVersion,
+  ShortfallTimelineEvent,
+  ShortfallDraftResponse,
   SmsLog,
   SystemSettings,
   User,
@@ -215,6 +219,8 @@ interface AppState {
   initiatePayment: (appId: string, method: Payment["method"]) => void;
 
   respondToShortfall: (appId: string, shortfallId: string, responseText: string, supportingDoc?: string) => void;
+  saveShortfallDraft: (appId: string, shortfallId: string, text: string, files: ShortfallSupportingDoc[]) => void;
+  submitShortfallResponse: (appId: string, shortfallId: string, text: string, files?: ShortfallSupportingDoc[]) => void;
 
   // Document review actions (reviewer-only â€” permission-checked)
   verifyDocument: (appId: string, docId: string, remarks?: string) => { ok: boolean; error?: string };
@@ -262,8 +268,8 @@ interface AppState {
   // ---- registration workflow ----
   pendingRegistrations: PendingRegistration[];
   submitRegistration: (data: Omit<PendingRegistration, "id" | "submittedAt" | "status">) => void;
-  approveRegistration: (id: string, approvedBy: string) => void;
-  rejectRegistration: (id: string, reason: string) => void;
+  approveRegistration: (id: string, approvedBy: string, remarks?: string, regNumber?: string) => void;
+  rejectRegistration: (id: string, reason: string, rejectedBy?: string) => void;
   undoRegistrationAction: (id: string) => void;
 }
 
@@ -279,6 +285,11 @@ export interface PendingRegistration {
   rejectedAt?: string;
   rejectionReason?: string;
   approvedBy?: string;
+  rejectedBy?: string;
+  officerRemarks?: string;
+  registrationNumber?: string;
+  district?: string;
+  experienceYears?: number;
   // Common fields
   name: string;
   email: string;
@@ -297,6 +308,152 @@ export interface PendingRegistration {
   authorizedPerson?: string;
   companyType?: string;
 }
+
+export const INITIAL_PENDING_REGISTRATIONS: PendingRegistration[] = [
+  {
+    id: "reg-101",
+    type: "LTP",
+    name: "Ar. Ramesh Varma",
+    email: "ramesh.varma@archstudio.in",
+    phone: "+91 98480 12345",
+    licenseNo: "COA/2016/78291",
+    council: "Council of Architecture (COA)",
+    qualification: "B.Arch, School of Planning & Architecture",
+    designation: "Chief Architect",
+    zone: "Mangalagiri",
+    address: "Plot 45, Amaravati Road, Mangalagiri",
+    experienceYears: 10,
+    status: "PENDING",
+    submittedAt: "2026-10-02T10:30:00Z",
+  },
+  {
+    id: "reg-102",
+    type: "DEVELOPER",
+    name: "K. Srinivasa Rao",
+    companyName: "Pragati Infra Developers India Ltd",
+    authorizedPerson: "K. Srinivasa Rao (Director)",
+    email: "srinivas@pragatiinfradev.com",
+    phone: "+91 94401 56789",
+    pan: "AAACP1928K",
+    reraNumber: "AP-RERA-D-2024-00812",
+    companyType: "PUBLIC_LIMITED",
+    zone: "Amaravati Capital City",
+    address: "D.No 4-12-80, MG Road, Vijayawada",
+    experienceYears: 14,
+    status: "PENDING",
+    submittedAt: "2026-10-03T11:15:00Z",
+  },
+  {
+    id: "reg-103",
+    type: "LTP",
+    name: "Er. P. Madhavi Latha",
+    email: "madhavi.structures@gmail.com",
+    phone: "+91 91770 45678",
+    licenseNo: "IEI/STR/2018/4512",
+    council: "Institution of Engineers (India)",
+    qualification: "M.Tech (Structural Engineering), JNTU Kakinada",
+    designation: "Licensed Structural Engineer Grade-1",
+    zone: "Guntur",
+    address: "Flat 202, Sri Krishna Towers, Brodipet, Guntur",
+    experienceYears: 8,
+    status: "PENDING",
+    submittedAt: "2026-10-03T14:45:00Z",
+  },
+  {
+    id: "reg-104",
+    type: "DEVELOPER",
+    name: "G. Rajesh Naidu",
+    companyName: "Capital Horizon Builders & Promoters LLP",
+    authorizedPerson: "G. Rajesh Naidu (Designated Partner)",
+    email: "rajesh@capitalhorizon.in",
+    phone: "+91 99899 33221",
+    pan: "AABFC9912H",
+    reraNumber: "AP-RERA-D-2025-01140",
+    companyType: "LLP",
+    zone: "Tenali",
+    address: "Plot 14, Auto Nagar, Guntur",
+    experienceYears: 7,
+    status: "PENDING",
+    submittedAt: "2026-10-04T09:20:00Z",
+  },
+  {
+    id: "reg-105",
+    type: "LTP",
+    name: "T. Kalyan Chakravarthy",
+    email: "kalyan.townplanner@urbanplan.org",
+    phone: "+91 98492 88776",
+    licenseNo: "ITPI/2019/1104",
+    council: "Institute of Town Planners India (ITPI)",
+    qualification: "Master of Urban & Regional Planning, SPA Vijayawada",
+    designation: "Licensed Urban Planner",
+    zone: "Vijayawada",
+    address: "Benz Circle, Bandar Road, Vijayawada",
+    experienceYears: 6,
+    status: "PENDING",
+    submittedAt: "2026-10-04T12:00:00Z",
+  },
+  {
+    id: "reg-106",
+    type: "DEVELOPER",
+    name: "B. Satyanarayana",
+    companyName: "Navya Coastal Estates Pvt Ltd",
+    authorizedPerson: "B. Satyanarayana (Managing Director)",
+    email: "contact@navyacoastal.com",
+    phone: "+91 97010 22334",
+    pan: "AABCN5544J",
+    reraNumber: "AP-RERA-D-2024-00650",
+    companyType: "PRIVATE_LIMITED",
+    zone: "Amaravati Capital City",
+    address: "Sy No. 45/2, Tulluru Mandal, Amaravati",
+    experienceYears: 12,
+    status: "APPROVED",
+    approvedBy: "S. Venkata Ramana (ZJD)",
+    approvedAt: "2026-09-28T16:20:00Z",
+    registrationNumber: "APCRDA/DEV/2026/0142",
+    officerRemarks: "Company incorporation deed and AP RERA documents verified. Approved as Grade-A Developer.",
+    submittedAt: "2026-09-25T10:00:00Z",
+  },
+  {
+    id: "reg-107",
+    type: "LTP",
+    name: "Ar. S. Sneha Reddy",
+    email: "sneha@reddyarchitects.in",
+    phone: "+91 94901 99887",
+    licenseNo: "COA/2017/84120",
+    council: "Council of Architecture (COA)",
+    qualification: "B.Arch, CSIIT Hyderabad",
+    designation: "Architect Grade-A",
+    zone: "Mangalagiri",
+    address: "D.No 6-3-112, IT Corridor, Mangalagiri",
+    experienceYears: 9,
+    status: "APPROVED",
+    approvedBy: "K. Vijaya Kumar (Commissioner)",
+    approvedAt: "2026-09-30T15:00:00Z",
+    registrationNumber: "APCRDA/LTP/2026/0398",
+    officerRemarks: "COA certification and architectural license authenticated. Empaneled for 3-year term.",
+    submittedAt: "2026-09-27T11:30:00Z",
+  },
+  {
+    id: "reg-108",
+    type: "DEVELOPER",
+    name: "V. Sudhakar",
+    companyName: "Royal Prime Properties Partnership",
+    authorizedPerson: "V. Sudhakar (Partner)",
+    email: "sudhakar@royalprime.example.com",
+    phone: "+91 98488 77665",
+    pan: "AAAAR4432Q",
+    reraNumber: "AP-RERA-D-2023-00109",
+    companyType: "PARTNERSHIP",
+    zone: "Guntur",
+    address: "Opp. Collectorate, Guntur",
+    experienceYears: 4,
+    status: "REJECTED",
+    rejectedBy: "Zonal Deputy Director (ZDD)",
+    rejectedAt: "2026-10-01T14:10:00Z",
+    rejectionReason: "Registered deed and firm partnership certificate not submitted. Invalid RERA registration documentation.",
+    submittedAt: "2026-09-29T16:40:00Z",
+  },
+];
 
 // ============================================================
 // INTERNAL HELPERS â€” update application immutably + side effects
@@ -385,7 +542,7 @@ export const useAppStore = create<AppState>()(
       cVersion: "c2",
       processingAppIds: [],
       viewHistory: [],
-      pendingRegistrations: [],
+      pendingRegistrations: INITIAL_PENDING_REGISTRATIONS,
       ltpActiveMenu: "dashboard",
       setLtpActiveMenu: (menu) => set({ ltpActiveMenu: menu }),
       ltpTheme: "maroon-cream",
@@ -566,6 +723,7 @@ export const useAppStore = create<AppState>()(
           drawings,
           documents,
           shortfalls: [],
+          showCauses: [],
           workflowHistory: [{
             id: genId("wf"),
             stage: "APPLICATION_CREATED",
@@ -953,19 +1111,107 @@ export const useAppStore = create<AppState>()(
         }, 2800);
       },
 
-      respondToShortfall: (appId, shortfallId, responseText, supportingDoc) => {
+      saveShortfallDraft: (appId, shortfallId, text, files) => {
+        set((s) => ({
+          applications: updateApp(s.applications, appId, (app) => ({
+            ...app,
+            shortfalls: app.shortfalls.map((sf) =>
+              sf.id === shortfallId
+                ? {
+                    ...sf,
+                    draftResponse: {
+                      text,
+                      files,
+                      savedAt: nowISO(),
+                    },
+                  }
+                : sf
+            ),
+          })),
+        }));
+      },
+
+      submitShortfallResponse: (appId, shortfallId, text, files = []) => {
         const user = get().user!;
+        const now = nowISO();
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => {
-            let updated: Application = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "RESPONDED" as const, response: { text: responseText, respondedAt: nowISO(), supportingDocument: supportingDoc } } : sf) };
-            updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall responded: ${shortfallId}`, remarks: responseText });
+            let updated: Application = {
+              ...app,
+              shortfalls: app.shortfalls.map((sf) => {
+                if (sf.id !== shortfallId) return sf;
+                const existingVersions = sf.responseVersions ?? (sf.response ? [{
+                  version: 1,
+                  text: sf.response.text,
+                  respondedAt: sf.response.respondedAt,
+                  supportingDocuments: sf.response.supportingDocument ? [{ id: "doc-legacy", name: sf.response.supportingDocument }] : [],
+                  supportingDocument: sf.response.supportingDocument,
+                }] : []);
+                const nextVersionNum = existingVersions.length + 1;
+                const newVersion: ShortfallResponseVersion = {
+                  version: nextVersionNum,
+                  text,
+                  respondedAt: now,
+                  respondedBy: { name: user.name, role: user.role },
+                  supportingDocuments: files,
+                  supportingDocument: files[0]?.name,
+                };
+                const existingTimeline = sf.timeline ?? [
+                  {
+                    id: genId("sftl"),
+                    title: "Shortfall Raised",
+                    actor: { name: sf.raisedBy.name, role: sf.raisedBy.role },
+                    timestamp: sf.raisedAt,
+                    status: "OPEN",
+                    remarks: sf.description,
+                  },
+                ];
+                const timelineEntry: ShortfallTimelineEvent = {
+                  id: genId("sftl"),
+                  title: nextVersionNum > 1 ? `Response Resubmitted (V${nextVersionNum})` : "Response Submitted",
+                  actor: { name: user.name, role: user.role },
+                  timestamp: now,
+                  status: "RESPONDED",
+                  remarks: text,
+                };
+                return {
+                  ...sf,
+                  status: "RESPONDED" as const,
+                  response: {
+                    text,
+                    respondedAt: now,
+                    supportingDocument: files[0]?.name,
+                  },
+                  responseVersions: [...existingVersions, newVersion],
+                  draftResponse: undefined,
+                  timeline: [...existingTimeline, timelineEntry],
+                };
+              }),
+            };
+            updated = addAudit(updated, {
+              user: user.name,
+              role: user.role,
+              action: `Shortfall response submitted: ${shortfallId}`,
+              remarks: text,
+            });
             return updated;
           }),
         }));
         // Notification to officer
         const app = get().applications.find((a) => a.id === appId)!;
-        const { notification, smsLog } = NotificationFactory.shortfallResponded(app, shortfallId);
-        set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
+        const targetSf = app?.shortfalls.find((sf) => sf.id === shortfallId);
+        const { notification, smsLog } = NotificationFactory.shortfallResponded(app, targetSf?.shortfallId ?? shortfallId);
+        set((s) => ({
+          notifications: [notification, ...s.notifications],
+          smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs,
+        }));
+      },
+
+      respondToShortfall: (appId, shortfallId, responseText, supportingDoc) => {
+        const files: ShortfallSupportingDoc[] = supportingDoc
+          ? [{ id: genId("doc"), name: supportingDoc }]
+          : [];
+        get().submitShortfallResponse(appId, shortfallId, responseText, files);
       },
 
       // ---- OFFICER WORKFLOW ----
@@ -1119,21 +1365,36 @@ export const useAppStore = create<AppState>()(
 
       raiseShortfall: (appId, data) => {
         const user = get().user!;
+        const now = nowISO();
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => {
+            const sfCount = app.shortfalls.length + 1;
+            const sfId = `SF/2026/${String(Math.floor(Math.random() * 9000) + 1000)}`;
             const shortfall: Shortfall = {
               id: genId("sf"),
-              shortfallId: `SF/2026/${String(Math.floor(Math.random() * 9000) + 1000)}`,
+              shortfallId: sfId,
+              shortfallNumber: `SF-${String(sfCount).padStart(2, "0")}`,
               type: data.type,
               title: data.title,
               description: data.description,
               raisedBy: { name: user.name, role: user.role },
-              raisedAt: nowISO(),
+              department: "Town Planning & Scrutiny Cell",
+              raisedAt: now,
               dueDate: data.dueDate,
               status: "OPEN",
               applicationId: app.id,
               applicationNo: app.applicationNo,
               stageRaisedAt: app.currentStage,
+              timeline: [
+                {
+                  id: genId("sftl"),
+                  title: "Shortfall Raised",
+                  actor: { name: user.name, role: user.role },
+                  timestamp: now,
+                  status: "OPEN",
+                  remarks: data.description,
+                },
+              ],
             };
             let updated: Application = { ...app, shortfalls: [...app.shortfalls, shortfall] };
             const oldStatus = app.status;
@@ -1149,31 +1410,88 @@ export const useAppStore = create<AppState>()(
 
       reviewShortfallResponse: (appId, shortfallId) => {
         const user = get().user!;
+        const now = nowISO();
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => ({
             ...app,
-            shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "UNDER_REVIEW" as const, reviewedBy: { name: user.name, role: user.role }, reviewedAt: nowISO() } : sf),
-            auditLog: [...app.auditLog, { id: genId("audit"), user: user.name, role: user.role, action: `Shortfall under review: ${shortfallId}`, entity: "Application", entityId: app.applicationNo, timestamp: nowISO() }],
+            shortfalls: app.shortfalls.map((sf) =>
+              sf.id === shortfallId
+                ? {
+                    ...sf,
+                    status: "UNDER_REVIEW" as const,
+                    reviewedBy: { name: user.name, role: user.role },
+                    reviewedAt: now,
+                    timeline: [
+                      ...(sf.timeline ?? []),
+                      {
+                        id: genId("sftl"),
+                        title: "Under Review",
+                        actor: { name: user.name, role: user.role },
+                        timestamp: now,
+                        status: "UNDER_REVIEW" as const,
+                        description: "Officer started reviewing the response",
+                      },
+                    ],
+                  }
+                : sf
+            ),
+            auditLog: [
+              ...app.auditLog,
+              {
+                id: genId("audit"),
+                user: user.name,
+                role: user.role,
+                action: `Shortfall under review: ${shortfallId}`,
+                entity: "Application",
+                entityId: app.applicationNo,
+                timestamp: now,
+              },
+            ],
           })),
         }));
       },
 
       resolveShortfall: (appId, shortfallId, resolution) => {
         const user = get().user!;
+        const now = nowISO();
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => {
-            let updated: Application = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "RESOLVED" as const, resolvedBy: { name: user.name, role: user.role }, resolvedAt: nowISO(), resolution } : sf) };
-            // Check if all shortfalls resolved â†’ resume workflow
+            let updated: Application = {
+              ...app,
+              shortfalls: app.shortfalls.map((sf) =>
+                sf.id === shortfallId
+                  ? {
+                      ...sf,
+                      status: "RESOLVED" as const,
+                      resolvedBy: { name: user.name, role: user.role },
+                      resolvedAt: now,
+                      resolution,
+                      timeline: [
+                        ...(sf.timeline ?? []),
+                        {
+                          id: genId("sftl"),
+                          title: "Response Accepted / Closed",
+                          actor: { name: user.name, role: user.role },
+                          timestamp: now,
+                          status: "RESOLVED" as const,
+                          remarks: resolution,
+                        },
+                      ],
+                    }
+                  : sf
+              ),
+            };
+            // Check if all shortfalls resolved → resume workflow
             const hasOpen = updated.shortfalls.some((sf) => sf.status !== "RESOLVED");
             if (!hasOpen) {
               // Resume to the stage where shortfall was raised
               const raisedAt = app.shortfalls.find((sf) => sf.id === shortfallId)?.stageRaisedAt ?? "ZONAL_HEAD_REVIEW";
               const stageInfo = getStage(raisedAt)!;
               const officer = getAssignedOfficerForStage(raisedAt, USERS);
-              updated = { ...updated, assignedOfficer: officer, assignedAt: nowISO() };
+              updated = { ...updated, assignedOfficer: officer, assignedAt: now };
               updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, oldStatus: "SHORTFALL_RAISED", newStatus: statusForStage(raisedAt), remarks: resolution });
               updated = setAppStatus(updated, statusForStage(raisedAt), raisedAt);
-              updated = addWorkflowHistory(updated, raisedAt, { name: user.name, role: user.role }, "Shortfall resolved â€” resuming review", resolution, "CURRENT");
+              updated = addWorkflowHistory(updated, raisedAt, { name: user.name, role: user.role }, "Shortfall resolved — resuming review", resolution, "CURRENT");
             } else {
               updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall resolved: ${shortfallId}`, remarks: resolution });
             }
@@ -1181,20 +1499,47 @@ export const useAppStore = create<AppState>()(
           }),
         }));
         const app = get().applications.find((a) => a.id === appId)!;
-        const { notification, smsLog } = NotificationFactory.shortfallResolved(app, shortfallId);
+        const targetSf = app?.shortfalls.find((sf) => sf.id === shortfallId);
+        const { notification, smsLog } = NotificationFactory.shortfallClosed(app, targetSf?.shortfallId ?? shortfallId);
         set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
       },
 
       reopenShortfall: (appId, shortfallId, reason) => {
         const user = get().user!;
+        const now = nowISO();
         set((s) => ({
           applications: updateApp(s.applications, appId, (app) => {
-            let updated: Application = { ...app, shortfalls: app.shortfalls.map((sf) => sf.id === shortfallId ? { ...sf, status: "REOPENED" as const } : sf) };
-            updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall reopened: ${shortfallId}`, remarks: reason });
+            let updated: Application = {
+              ...app,
+              shortfalls: app.shortfalls.map((sf) =>
+                sf.id === shortfallId
+                  ? {
+                      ...sf,
+                      status: "REOPENED" as const,
+                      timeline: [
+                        ...(sf.timeline ?? []),
+                        {
+                          id: genId("sftl"),
+                          title: "Clarification Required",
+                          actor: { name: user.name, role: user.role },
+                          timestamp: now,
+                          status: "REOPENED" as const,
+                          remarks: reason,
+                        },
+                      ],
+                    }
+                  : sf
+              ),
+            };
+            updated = addAudit(updated, { user: user.name, role: user.role, action: `Shortfall reopened (clarification required): ${shortfallId}`, remarks: reason });
             updated = setAppStatus(updated, "SHORTFALL_RAISED");
             return updated;
           }),
         }));
+        const app = get().applications.find((a) => a.id === appId)!;
+        const targetSf = app?.shortfalls.find((sf) => sf.id === shortfallId);
+        const { notification, smsLog } = NotificationFactory.shortfallClarificationRequired(app, targetSf?.shortfallId ?? shortfallId, reason);
+        set((s) => ({ notifications: [notification, ...s.notifications], smsLogs: smsLog ? [smsLog, ...s.smsLogs] : s.smsLogs }));
       },
 
       verifyDocument: (appId, docId, remarks) => {
@@ -1569,18 +1914,40 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ pendingRegistrations: [reg, ...s.pendingRegistrations] }));
       },
 
-      approveRegistration: (id, approvedBy) => {
+      approveRegistration: (id, approvedBy, remarks, regNumber) => {
         set((s) => ({
           pendingRegistrations: s.pendingRegistrations.map((r) =>
-            r.id === id ? { ...r, status: "APPROVED" as const, approvedAt: nowISO(), approvedBy } : r
+            r.id === id
+              ? {
+                  ...r,
+                  status: "APPROVED" as const,
+                  approvedAt: nowISO(),
+                  approvedBy,
+                  officerRemarks: remarks ?? r.officerRemarks,
+                  registrationNumber:
+                    regNumber ??
+                    r.registrationNumber ??
+                    (r.type === "LTP"
+                      ? `APCRDA/LTP/2026/${Math.floor(1000 + Math.random() * 9000)}`
+                      : `APCRDA/DEV/2026/${Math.floor(1000 + Math.random() * 9000)}`),
+                }
+              : r
           ),
         }));
       },
 
-      rejectRegistration: (id, reason) => {
+      rejectRegistration: (id, reason, rejectedBy) => {
         set((s) => ({
           pendingRegistrations: s.pendingRegistrations.map((r) =>
-            r.id === id ? { ...r, status: "REJECTED" as const, rejectedAt: nowISO(), rejectionReason: reason } : r
+            r.id === id
+              ? {
+                  ...r,
+                  status: "REJECTED" as const,
+                  rejectedAt: nowISO(),
+                  rejectionReason: reason,
+                  rejectedBy: rejectedBy ?? r.rejectedBy,
+                }
+              : r
           ),
         }));
       },

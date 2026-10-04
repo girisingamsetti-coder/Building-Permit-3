@@ -123,17 +123,23 @@ export function SeverityBadge({ severity }: { severity: ScrutinySeverity }) {
 
 // ---------- Shortfall Badges ----------
 const SF_STATUS_MAP: Record<ShortfallStatus, { label: string; cls: string }> = {
-  OPEN: { label: "Open", cls: "bg-warning/15 text-warning-foreground border-warning/40" },
-  RESPONDED: { label: "Responded", cls: "bg-info/10 text-info border-info/30" },
-  UNDER_REVIEW: { label: "Under Review", cls: "bg-info/10 text-info border-info/30" },
-  RESOLVED: { label: "Resolved", cls: "bg-success/10 text-success border-success/30" },
-  REOPENED: { label: "Reopened", cls: "bg-destructive/10 text-destructive border-destructive/30" },
-  OVERDUE: { label: "Overdue", cls: "bg-destructive/10 text-destructive border-destructive/30" },
+  OPEN: { label: "Pending Response", cls: "bg-amber-100 text-amber-800 border-amber-300 font-semibold" },
+  RAISED: { label: "Raised", cls: "bg-amber-100 text-amber-800 border-amber-300 font-semibold" },
+  PENDING_RESPONSE: { label: "Pending Response", cls: "bg-amber-100 text-amber-800 border-amber-300 font-semibold" },
+  RESPONDED: { label: "Response Submitted", cls: "bg-blue-100 text-blue-800 border-blue-300 font-semibold" },
+  RESPONSE_SUBMITTED: { label: "Response Submitted", cls: "bg-blue-100 text-blue-800 border-blue-300 font-semibold" },
+  UNDER_REVIEW: { label: "Under Review", cls: "bg-indigo-100 text-indigo-800 border-indigo-300 font-semibold" },
+  CLARIFICATION_REQUIRED: { label: "Clarification Required", cls: "bg-orange-100 text-orange-800 border-orange-300 font-semibold" },
+  REOPENED: { label: "Clarification Required", cls: "bg-orange-100 text-orange-800 border-orange-300 font-semibold" },
+  RESPONSE_ACCEPTED: { label: "Response Accepted", cls: "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold" },
+  RESOLVED: { label: "Closed", cls: "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold" },
+  CLOSED: { label: "Closed", cls: "bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold" },
+  OVERDUE: { label: "Overdue", cls: "bg-rose-100 text-rose-800 border-rose-300 font-bold" },
 };
 
 export function ShortfallStatusBadge({ status }: { status: ShortfallStatus }) {
-  const cfg = SF_STATUS_MAP[status];
-  return <Badge variant="outline" className={cfg.cls}>{cfg.label}</Badge>;
+  const cfg = SF_STATUS_MAP[status] ?? { label: status, cls: "bg-slate-100 text-slate-700 border-slate-300 font-medium" };
+  return <Badge variant="outline" className={cn("text-[11px] px-2 py-0.5 whitespace-nowrap", cfg.cls)}>{cfg.label}</Badge>;
 }
 
 const SF_TYPE_MAP: Record<ShortfallType, { label: string; cls: string; icon: React.ComponentType<{ className?: string }> }> = {

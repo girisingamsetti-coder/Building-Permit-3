@@ -166,6 +166,7 @@ export interface Application {
   scrutinyReport?: ScrutinyReport;
   documents: DocumentRecord[];
   shortfalls: Shortfall[];
+  showCauses: ShowCause[];
   workflowHistory: WorkflowHistoryEntry[];
   auditLog: AuditEntry[];
   remarks: Remark[];
@@ -423,31 +424,165 @@ export interface WorkflowHistoryEntry {
 
 // ---------- Shortfalls ----------
 export type ShortfallType = "DOCUMENT" | "FEE" | "TECHNICAL" | "GENERAL";
-export type ShortfallStatus = "OPEN" | "RESPONDED" | "UNDER_REVIEW" | "RESOLVED" | "REOPENED" | "OVERDUE";
+export type ShortfallStatus =
+  | "OPEN"
+  | "RAISED"
+  | "PENDING_RESPONSE"
+  | "RESPONDED"
+  | "RESPONSE_SUBMITTED"
+  | "UNDER_REVIEW"
+  | "CLARIFICATION_REQUIRED"
+  | "RESPONSE_ACCEPTED"
+  | "RESOLVED"
+  | "CLOSED"
+  | "REOPENED"
+  | "OVERDUE";
+
+export interface ShortfallSupportingDoc {
+  id: string;
+  name: string;
+  size?: string;
+  type?: string;
+  url?: string;
+}
+
+export interface ShortfallResponseVersion {
+  version: number;
+  text: string;
+  respondedAt: string;
+  respondedBy?: { name: string; role: RoleKey | string };
+  supportingDocuments?: ShortfallSupportingDoc[];
+  supportingDocument?: string;
+}
+
+export interface ShortfallTimelineEvent {
+  id: string;
+  title: string;
+  actor: { name: string; role: string | RoleKey };
+  timestamp: string;
+  status: ShortfallStatus;
+  description?: string;
+  remarks?: string;
+}
+
+export interface ShortfallDraftResponse {
+  text: string;
+  files: ShortfallSupportingDoc[];
+  savedAt: string;
+}
 
 export interface Shortfall {
   id: string;
   shortfallId: string;
+  shortfallNumber?: string;
   type: ShortfallType;
   title: string;
   description: string;
   raisedBy: { name: string; role: RoleKey };
+  department?: string;
   raisedAt: string;
   dueDate: string;
   status: ShortfallStatus;
   applicationId: string;
   applicationNo: string;
   stageRaisedAt: WorkflowStageKey;
+  requiredAction?: string;
+  requiredDocuments?: string[];
   response?: {
     text: string;
     respondedAt: string;
     supportingDocument?: string;
   };
+  responseVersions?: ShortfallResponseVersion[];
+  draftResponse?: ShortfallDraftResponse;
+  timeline?: ShortfallTimelineEvent[];
   reviewedBy?: { name: string; role: RoleKey };
   reviewedAt?: string;
   resolvedBy?: { name: string; role: RoleKey };
   resolvedAt?: string;
   resolution?: string;
+}
+
+// ---------- Show Cause Notices ----------
+export type ShowCauseViolationType =
+  | "STRUCTURAL_DEVIATION"
+  | "UNAUTHORIZED_CONSTRUCTION"
+  | "SETBACK_VIOLATION"
+  | "HEIGHT_VIOLATION"
+  | "USE_CHANGE"
+  | "ENCROACHMENT"
+  | "FIRE_SAFETY_VIOLATION"
+  | "ENVIRONMENTAL_VIOLATION";
+
+export type ShowCauseSeverity = "CRITICAL" | "HIGH" | "MEDIUM";
+
+export type ShowCauseStatus =
+  | "ISSUED"
+  | "REPLY_PENDING"
+  | "REPLY_SUBMITTED"
+  | "HEARING_SCHEDULED"
+  | "ORDER_PASSED"
+  | "COMPLIED"
+  | "PENALTY_IMPOSED"
+  | "CLOSED"
+  | "OVERDUE";
+
+export interface ShowCauseSupportingDoc {
+  id: string;
+  name: string;
+  size?: string;
+  type?: string;
+  url?: string;
+}
+
+export interface ShowCauseResponseVersion {
+  version: number;
+  text: string;
+  respondedAt: string;
+  respondedBy?: { name: string; role: RoleKey | string };
+  supportingDocuments?: ShowCauseSupportingDoc[];
+}
+
+export interface ShowCauseTimelineEvent {
+  id: string;
+  title: string;
+  actor: { name: string; role: string | RoleKey };
+  timestamp: string;
+  status: ShowCauseStatus;
+  description?: string;
+  remarks?: string;
+}
+
+export interface ShowCause {
+  id: string;
+  showCauseId: string;
+  showCauseNumber?: string;
+  violationType: ShowCauseViolationType;
+  severity: ShowCauseSeverity;
+  title: string;
+  description: string;
+  issuedBy: { name: string; role: RoleKey };
+  department?: string;
+  issuedAt: string;
+  hearingDate?: string;
+  replyDueDate: string;
+  status: ShowCauseStatus;
+  applicationId: string;
+  applicationNo: string;
+  stageIssuedAt: WorkflowStageKey;
+  violationDetails?: string;
+  requiredAction?: string;
+  penaltyAmount?: number;
+  response?: {
+    text: string;
+    respondedAt: string;
+    supportingDocument?: string;
+  };
+  responseVersions?: ShowCauseResponseVersion[];
+  timeline?: ShowCauseTimelineEvent[];
+  orderDetails?: string;
+  resolvedAt?: string;
+  resolvedBy?: { name: string; role: RoleKey };
 }
 
 // ---------- Notifications ----------

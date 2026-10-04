@@ -15,6 +15,9 @@ import {
   ChevronDown,
   BarChart3,
   Settings,
+  UserCheck,
+  Send,
+  AlertTriangle,
 } from "lucide-react";
 
 export type LtpSidebarTheme = "maroon-cream" | "apcrda-blue" | "charcoal-indigo" | "midnight-slate" | "clean-light";
@@ -27,7 +30,7 @@ interface SubmenuItem {
 interface LtpModuleDef {
   id: string;
   label: string;
-  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change" | "reports" | "settings";
+  iconType: "dashboard" | "applications" | "commencement" | "scrutiny" | "compliance" | "occupancy" | "ltp-change" | "reports" | "settings" | "registration" | "outward" | "shortfalls";
   directMenuId?: string;
   submenus: SubmenuItem[];
 }
@@ -60,11 +63,13 @@ const LTP_MODULES: LtpModuleDef[] = [
     ],
   },
   {
-    id: "proceeding-status",
+    id: "compliance",
     label: "Compliance",
     iconType: "compliance",
-    directMenuId: "proceeding-status",
-    submenus: [],
+    submenus: [
+      { id: "my-shortfalls", label: "Shortfalls" },
+      { id: "my-show-cause", label: "Show Cause" },
+    ],
   },
   {
     id: "commencement",
@@ -75,12 +80,10 @@ const LTP_MODULES: LtpModuleDef[] = [
   },
   {
     id: "occupancy",
-    label: "Occupancy Certification (OC)",
+    label: "Occupancy",
     iconType: "occupancy",
-    submenus: [
-      { id: "occupancy-list", label: "Completion & OC Registry" },
-      { id: "submitted-application", label: "Submitted OC Applications" },
-    ],
+    directMenuId: "occupancy",
+    submenus: [],
   },
   {
     id: "change-of-ltp",
@@ -94,12 +97,7 @@ const LTP_MODULES: LtpModuleDef[] = [
     label: "Reports",
     iconType: "reports",
     directMenuId: "reports-summary",
-    submenus: [
-      { id: "reports-summary", label: "Application Reports" },
-      { id: "reports-payments", label: "Fee & Challan Reports" },
-      { id: "reports-scrutiny", label: "Scrutiny & Shortfalls" },
-      { id: "reports-mis", label: "MIS Registry & Export" },
-    ],
+    submenus: [],
   },
 ];
 
@@ -113,6 +111,44 @@ const ADMIN_MODULES: LtpModuleDef[] = [
     submenus: [],
   },
 ];
+
+export const REGISTRATION_MODULE: LtpModuleDef = {
+  id: "registration",
+  label: "Registration",
+  iconType: "registration",
+  submenus: [
+    { id: "registration-all", label: "All Registrations" },
+    { id: "registration-pending", label: "Pending Approvals" },
+    { id: "registration-ltp", label: "LTP Registrations" },
+    { id: "registration-developer", label: "Developer Registrations" },
+    { id: "registration-approved", label: "Approved" },
+    { id: "registration-rejected", label: "Rejected" },
+  ],
+};
+
+export function hasRegistrationAccess(role?: string): boolean {
+  if (!role) return false;
+  return (
+    role === "ZJD" ||
+    role === "ZDD" ||
+    role === "ADDITIONAL_COMMISSIONER" ||
+    role === "COMMISSIONER" ||
+    role === "ADMIN"
+  );
+}
+
+export const OUTWARD_MODULE: LtpModuleDef = {
+  id: "outward",
+  label: "Outward",
+  iconType: "outward",
+  directMenuId: "outward",
+  submenus: [],
+};
+
+export function hasOutwardAccess(role?: string): boolean {
+  if (!role) return false;
+  return role !== "LTP";
+}
 
 const ZONAL_MODULES: LtpModuleDef[] = [
   {
@@ -380,12 +416,56 @@ const COMMENCEMENT_TAB_IDS = new Set([
   "work-initiated",
 ]);
 
+const REGISTRATION_TAB_IDS = new Set([
+  "registration",
+  "registration-all",
+  "registration-pending",
+  "registration-ltp",
+  "registration-developer",
+  "registration-approved",
+  "registration-rejected",
+  "developer-verification",
+  "all-ltp-approved",
+  "approved-registration",
+  "rejected-registration",
+  "all-ltp-in-process",
+]);
+
+const REPORTS_TAB_IDS = new Set([
+  "reports",
+  "reports-summary",
+  "reports-payments",
+  "reports-scrutiny",
+  "reports-mis",
+]);
+
+const OCCUPANCY_TAB_IDS = new Set([
+  "occupancy",
+  "occupancy-dashboard",
+  "occupancy-list",
+  "occupancy-apply",
+  "occupancy-certificates",
+  "submitted-application",
+]);
+
 function isMenuMatch(mod: LtpModuleDef, menuId: string): boolean {
-  if (mod.id === "proceeding-status" || mod.directMenuId === "proceeding-status") {
-    return COMPLIANCE_TAB_IDS.has(menuId);
+  if (mod.id === "compliance" || mod.id === "compliance-v2" || mod.id === "proceeding-status" || mod.directMenuId === "proceeding-status") {
+    return mod.submenus.some((s) => s.id === menuId) || COMPLIANCE_TAB_IDS.has(menuId);
   }
   if (mod.id === "commencement" || mod.directMenuId === "commencement") {
     return COMMENCEMENT_TAB_IDS.has(menuId);
+  }
+  if (mod.id === "registration" || mod.directMenuId === "registration") {
+    return REGISTRATION_TAB_IDS.has(menuId);
+  }
+  if (mod.id === "reports" || mod.directMenuId === "reports" || mod.directMenuId === "reports-summary") {
+    return REPORTS_TAB_IDS.has(menuId);
+  }
+  if (mod.id === "outward" || mod.directMenuId === "outward") {
+    return menuId === "outward" || menuId === "ltp-outward" || menuId === "officer-outward" || menuId === "admin-outward";
+  }
+  if (mod.id === "occupancy") {
+    return OCCUPANCY_TAB_IDS.has(menuId) || mod.submenus.some((s) => s.id === menuId);
   }
   return (
     mod.id === menuId ||
@@ -405,9 +485,39 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
 
-  // All roles see the full module list — access level per module is configured by Admin in Settings.
-  // ONLY Admin has access to the Settings module in the left menu bar.
-  const rawModules = user?.role === "ADMIN" ? ADMIN_MODULES : LTP_MODULES;
+  // Base modules according to role
+  const baseModules = user?.role === "ADMIN" ? ADMIN_MODULES : LTP_MODULES;
+  const rawModules = React.useMemo(() => {
+    let list = [...baseModules];
+
+    // Registration module for authorized approval roles (ZJD, ZDD, Addl Commissioner, Commissioner, Admin)
+    if (hasRegistrationAccess(user?.role)) {
+      const dashIdx = list.findIndex((m) => m.id === "dashboard");
+      const insertIdx = dashIdx >= 0 ? dashIdx + 1 : 0;
+      if (!list.some((m) => m.id === "registration")) {
+        list.splice(insertIdx, 0, REGISTRATION_MODULE);
+      }
+    }
+
+    // Outward module for all roles except LTP — placed next to Compliance module
+    if (hasOutwardAccess(user?.role)) {
+      if (!list.some((m) => m.id === "outward")) {
+        const complianceIdx = list.findIndex((m) => m.id === "proceeding-status" || m.label === "Compliance");
+        if (complianceIdx >= 0) {
+          list.splice(complianceIdx + 1, 0, OUTWARD_MODULE);
+        } else {
+          const settingsIdx = list.findIndex((m) => m.id === "settings");
+          if (settingsIdx >= 0) {
+            list.splice(settingsIdx, 0, OUTWARD_MODULE);
+          } else {
+            list.push(OUTWARD_MODULE);
+          }
+        }
+      }
+    }
+
+    return list;
+  }, [user?.role, baseModules]);
   const userAccessConfig = useAppStore((s) => s.systemSettings?.userAccessConfig);
   const roleAccessConfig = useAppStore((s) => s.systemSettings?.roleAccessConfig);
   const hideRestricted = useAppStore((s) => s.systemSettings?.hideRestrictedModules);
@@ -486,7 +596,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       case "occupancy": return <Building2 className={cls} />;
       case "reports": return <BarChart3 className={cls} />;
       case "ltp-change": return <RefreshCw className={cls} />;
+      case "registration": return <UserCheck className={cls} />;
+      case "outward": return <Send className={cls} />;
       case "settings": return <Settings className={cls} />;
+      case "shortfalls": return <AlertTriangle className={cls} />;
     }
   };
 

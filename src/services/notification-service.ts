@@ -188,6 +188,36 @@ export const NotificationFactory = {
       recipientRole: "LTP",
     });
   },
+  shortfallClarificationRequired(app: Application, shortfallId: string, reason?: string) {
+    return createNotification({
+      type: "SHORTFALL_RAISED",
+      title: "Clarification Required on Shortfall",
+      message: `Additional clarification has been requested on shortfall ${shortfallId} for ${app.applicationNo}.${reason ? ` Remark: ${reason}` : ""}`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  shortfallClosed(app: Application, shortfallId: string) {
+    return createNotification({
+      type: "SHORTFALL_RESOLVED",
+      title: "Shortfall Closed",
+      message: `Shortfall ${shortfallId} on ${app.applicationNo} has been accepted and closed.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
+  shortfallApproachingDue(app: Application, shortfallId: string, dueDate: string) {
+    return createNotification({
+      type: "SHORTFALL_RAISED",
+      title: "Shortfall Response Approaching Due Date",
+      message: `Shortfall ${shortfallId} on ${app.applicationNo} is due on ${dueDate}. Please submit your response to avoid delays.`,
+      applicationId: app.id,
+      applicationNo: app.applicationNo,
+      recipientRole: "LTP",
+    });
+  },
   applicationForwarded(app: Application, stageLabel: string) {
     return createNotification({
       type: "APPLICATION_FORWARDED",

@@ -220,22 +220,6 @@ export function LtpApplicationDetails() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800 overflow-y-auto">
-      {/* Top Header / Back Button */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#DCD5C8] shrink-0">
-        <button
-          onClick={handleBack}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#DCD5C8] bg-white text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-        >
-          <ArrowLeft className="size-4" /> Back to Submissions
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500 font-medium">Application:</span>
-          <span className="font-mono text-xs font-bold text-[#7A1316] bg-white px-2.5 py-1 rounded border border-[#DCD5C8]">
-            {app.applicationNo}
-          </span>
-        </div>
-      </div>
-
       {/* Status banner */}
       <StatusBanner app={app} />
 

@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   AsBuiltFigures,
   ComparisonRow,
   OccupancyDocument,
@@ -84,6 +84,12 @@ export type OccupancyApplicationRecord = {
     address: string;
     approvedAreaSqm: number;
     completedAreaSqm: number;
+    plotNo?: string;
+    approvedFloors?: string;
+    actualFloors?: string;
+    approvedUnits?: number;
+    actualUnits?: number;
+    occupancyCapacity?: number;
   };
   documents: OccupancyDocument[];
   inspections: InspectionRecord[];

@@ -437,16 +437,27 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     case "review-show-cause-submission":
       return { title: "Compliance", category: "Compliance" };
 
+    case "my-shortfalls":
+    case "shortfalls":
+      return { title: "Shortfalls", category: "Compliance" };
+
+    case "my-show-cause":
+    case "showcause":
+    case "show-causes":
+      return { title: "Show Cause", category: "Compliance" };
+
     case "commencement":
     case "cc-issued":
     case "work-initiated":
       return { title: "Work Commencement", category: "Field Operations" };
 
+    case "occupancy":
+    case "occupancy-dashboard":
     case "occupancy-list":
-      return { title: "Completion & OC Registry", category: "Occupancy Certification (OC)" };
-
+    case "occupancy-apply":
+    case "occupancy-certificates":
     case "submitted-application":
-      return { title: "Submitted OC Applications", category: "Occupancy Certification (OC)" };
+      return { title: "Occupancy", category: "Building Permission" };
 
     case "change-ltp":
     case "change-of-ltp":
@@ -463,17 +474,32 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     case "reports-mis":
       return { title: "MIS Registry & Export", category: "Reports & Analytics" };
 
-    // Zonal modules
+    // Registration module
+    case "registration":
+    case "registration-all":
+      return { title: "Registrations & Empanelment", category: "Registration" };
+    case "registration-pending":
+      return { title: "Pending Registration Approvals", category: "Registration" };
+    case "registration-ltp":
+      return { title: "LTP Registrations", category: "Registration" };
+    case "registration-developer":
     case "developer-verification":
-      return { title: "Developer Verification", category: "Registration" };
+      return { title: "Developer Verification & Approval", category: "Registration" };
+    case "registration-approved":
+    case "approved-registration":
+    case "all-ltp-approved":
+      return { title: "Approved Registrations", category: "Registration" };
+    case "registration-rejected":
     case "rejected-registration":
       return { title: "Rejected Registrations", category: "Registration" };
-    case "approved-registration":
-      return { title: "Approved Registrations", category: "Registration" };
-    case "all-ltp-approved":
-      return { title: "All LTP Approved", category: "Registration" };
     case "revoke":
       return { title: "Revocation Proceedings", category: "Application Status" };
+
+    case "outward":
+    case "ltp-outward":
+    case "officer-outward":
+    case "admin-outward":
+      return { title: "Outward Letters & Endorsements", category: "Outward Despatch" };
 
     case "settings":
     case "admin-settings":
@@ -492,15 +518,19 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     settings: { title: "System Settings", category: "Administration" },
     inspections: { title: "Site Inspections", category: "Field Verification" },
     nocs: { title: "NOC Clearances", category: "Approvals" },
-    shortfalls: { title: "Shortfall Notices", category: "Scrutiny" },
-    "show-cause": { title: "Show Cause Notices", category: "Legal & Enforcement" },
+    compliance: { title: "Compliance", category: "Compliance" },
+    shortfalls: { title: "Shortfalls", category: "Compliance" },
+    "my-shortfalls": { title: "Shortfalls", category: "Compliance" },
+    "show-cause": { title: "Show Cause", category: "Compliance" },
+    "my-show-cause": { title: "Show Cause", category: "Compliance" },
+    "compliance-v2": { title: "Compliance", category: "Compliance" },
     revocations: { title: "Revocations", category: "Enforcement" },
     "ltp-changes": { title: "LTP Changes", category: "Technical Personnel" },
     "work-initiated": { title: "Work Commencement", category: "Field Operations" },
     developers: { title: "Developers", category: "Empanelment" },
     professionals: { title: "Professionals", category: "Empanelment" },
     outward: { title: "Outward Dispatch", category: "Administration" },
-    occupancy: { title: "Occupancy Certification", category: "Completion" },
+    occupancy: { title: "Occupancy", category: "Occupancy" },
     "2d-drawings": { title: "2D Drawings & CAD", category: "Drawings" },
     bim: { title: "BIM 3D Models", category: "Digital Engineering" },
   };
@@ -540,9 +570,16 @@ export function Topbar() {
     viewStr !== "ltp-application-details" &&
     viewStr !== "admin-settings" &&
     ltpActiveMenu !== "settings" &&
+    ltpActiveMenu !== "my-shortfalls" &&
+    ltpActiveMenu !== "my-show-cause" &&
+    ltpActiveMenu !== "occupancy" &&
+    ltpActiveMenu !== "occupancy-dashboard" &&
+    ltpActiveMenu !== "occupancy-list" &&
+    ltpActiveMenu !== "occupancy-apply" &&
+    ltpActiveMenu !== "occupancy-certificates" &&
     (
       (ltpActiveMenu === "dashboard" && (viewStr === "ltp-dashboard" || viewStr === "dashboard" || viewStr === "ltp-applications")) ||
-      viewStr === "ltp-dashboard" ||
+      (viewStr === "ltp-dashboard" && (!ltpActiveMenu || ltpActiveMenu === "dashboard")) ||
       viewStr === "dashboard" ||
       viewStr === "officer-dashboard" ||
       viewStr === "admin-dashboard" ||

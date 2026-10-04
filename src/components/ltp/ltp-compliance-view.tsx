@@ -267,17 +267,17 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
             onClick={() => handleTabChange("verified")}
             title="DCR & Document Verified"
             className={cn(
-              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "verified"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-800 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
-            <FileCheck className="size-3.5 shrink-0" />
-            <span className="truncate">DCR & Document Verified</span>
+            <FileCheck className="size-4 shrink-0" />
+            <span className="truncate font-bold">DCR & Document Verified</span>
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
+                "px-2 py-0.5 rounded-full text-xs font-black shrink-0",
                 activeTab === "verified" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800"
               )}
             >
@@ -289,41 +289,39 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
             onClick={() => handleTabChange("shortfall")}
             title="Shortfall Notices"
             className={cn(
-              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "shortfall"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-800 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
-            <AlertTriangle className="size-3.5 shrink-0" />
-            <span className="truncate">Shortfall Notices</span>
-            {stats.openShortfalls > 0 && (
-              <span
-                className={cn(
-                  "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
-                  activeTab === "shortfall" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
-                )}
-              >
-                {stats.openShortfalls}
-              </span>
-            )}
+            <AlertTriangle className="size-4 shrink-0" />
+            <span className="truncate font-bold">Shortfall Notices</span>
+            <span
+              className={cn(
+                "px-2 py-0.5 rounded-full text-xs font-black shrink-0",
+                activeTab === "shortfall" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
+              )}
+            >
+              {stats.openShortfalls}
+            </span>
           </button>
 
           <button
             onClick={() => handleTabChange("review-shortfall-submission")}
             title="Shortfall Compliance Submissions"
             className={cn(
-              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "review-shortfall-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-800 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
-            <Send className="size-3.5 shrink-0" />
-            <span className="truncate">Shortfall Compliance Submissions</span>
+            <Send className="size-4 shrink-0" />
+            <span className="truncate font-bold">Shortfall Compliance Submissions</span>
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
+                "px-2 py-0.5 rounded-full text-xs font-black shrink-0",
                 activeTab === "review-shortfall-submission" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800"
               )}
             >
@@ -335,41 +333,39 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
             onClick={() => handleTabChange("show-cause")}
             title="Show Cause Directives"
             className={cn(
-              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "show-cause"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-800 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
-            <Gavel className="size-3.5 shrink-0" />
-            <span className="truncate">Show Cause Directives</span>
-            {stats.activeShowCauses > 0 && (
-              <span
-                className={cn(
-                  "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
-                  activeTab === "show-cause" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-800"
-                )}
-              >
-                {stats.activeShowCauses}
-              </span>
-            )}
+            <Gavel className="size-4 shrink-0" />
+            <span className="truncate font-bold">Show Cause Directives</span>
+            <span
+              className={cn(
+                "px-2 py-0.5 rounded-full text-xs font-black shrink-0",
+                activeTab === "show-cause" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-800"
+              )}
+            >
+              {stats.activeShowCauses}
+            </span>
           </button>
 
           <button
             onClick={() => handleTabChange("review-show-cause-submission")}
             title="Show Cause Explanations"
             className={cn(
-              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2.5 text-[13px] sm:text-sm font-bold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "review-show-cause-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-800 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
-            <FileText className="size-3.5 shrink-0" />
-            <span className="truncate">Show Cause Explanations</span>
+            <FileText className="size-4 shrink-0" />
+            <span className="truncate font-bold">Show Cause Explanations</span>
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
+                "px-2 py-0.5 rounded-full text-xs font-black shrink-0",
                 activeTab === "review-show-cause-submission" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
               )}
             >
