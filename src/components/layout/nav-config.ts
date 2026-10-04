@@ -51,7 +51,6 @@ export const NAV: Record<Portal, NavGroup[]> = {
       label: "",
       items: [
         { view: "officer-dashboard", label: "Dashboard", icon: LayoutDashboard },
-        { view: "officer-applications", label: "Applications", icon: FileStack },
         { view: "officer-occupancy", label: "Occupancy", icon: ClipboardList },
         { view: "officer-tasks", label: "Tasks", icon: ClipboardList },
         { view: "officer-shortfalls", label: "Shortfalls", icon: AlertTriangle },
@@ -71,7 +70,6 @@ export const NAV: Record<Portal, NavGroup[]> = {
     label: "",
     items: [
       { view: "admin-dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { view: "admin-applications", label: "Applications", icon: FileStack },
       { view: "admin-occupancy", label: "Occupancy", icon: ClipboardList },
       { view: "admin-tasks", label: "Tasks", icon: ClipboardList },
       { view: "admin-shortfalls", label: "Shortfalls", icon: AlertTriangle },

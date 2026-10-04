@@ -121,6 +121,114 @@ export function LtpSubmissionDetails({
   const [isReceiptModalOpen, setIsReceiptModalOpen] = React.useState<boolean>(false);
   const [showProceeding, setShowProceeding] = React.useState<boolean>(false);
 
+  // ─────────────────────────────────────────────────────────────
+  // 6 STATUTORY PAYMENT CATEGORIES (APCRDA 101 - 106)
+  // ─────────────────────────────────────────────────────────────
+  interface StatutoryPaymentCategory {
+    code: string;
+    name: string;
+    shortName: string;
+    description: string;
+    challanNo: string;
+    demandNoteNo: string;
+    receiptNo: string;
+    amount: number;
+    status: "PAID" | "PENDING";
+    paymentDate?: string;
+    transactionId?: string;
+    paymentMode?: string;
+    paymentGateway?: string;
+  }
+
+  const [paymentCategories, setPaymentCategories] = React.useState<StatutoryPaymentCategory[]>([
+    {
+      code: "101",
+      name: "101 Scrutiny fee/Application fee",
+      shortName: "Scrutiny fee/Application fee",
+      description: "Base scrutiny and architectural plan processing fee",
+      challanNo: "CH-2026-10101",
+      demandNoteNo: "1168/CH/0101/2026",
+      receiptNo: "1168/REC/0101/2026",
+      amount: 5800,
+      status: "PAID",
+      transactionId: "TXN786612801",
+      paymentDate: submissionDate || "23 July, 2026",
+      paymentMode: "Net Banking (SBI)",
+      paymentGateway: "TP",
+    },
+    {
+      code: "102",
+      name: "102 Development Charges (BUA)",
+      shortName: "Development Charges (BUA)",
+      description: "Infrastructure development charges assessed on Built-Up Area (BUA)",
+      challanNo: "CH-2026-10202",
+      demandNoteNo: "1168/CH/0102/2026",
+      receiptNo: "1168/REC/0102/2026",
+      amount: 48500,
+      status: "PENDING",
+      paymentMode: "Net Banking / Credit Card / Debit Card",
+      paymentGateway: "TP",
+    },
+    {
+      code: "103",
+      name: "103 Development Charges (Vacant Land)",
+      shortName: "Development Charges (Vacant Land)",
+      description: "Statutory development charges on vacant land / open plot extent",
+      challanNo: "CH-2026-10303",
+      demandNoteNo: "1168/CH/0103/2026",
+      receiptNo: "1168/REC/0103/2026",
+      amount: 24200,
+      status: "PENDING",
+      paymentMode: "Net Banking / Credit Card / Debit Card",
+      paymentGateway: "TP",
+    },
+    {
+      code: "104",
+      name: "104 Special Development Charges (IRR)",
+      shortName: "Special Development Charges (IRR)",
+      description: "Special Inner Ring Road & Capital arterial corridor development charges",
+      challanNo: "CH-2026-10404",
+      demandNoteNo: "1168/CH/0104/2026",
+      receiptNo: "1168/REC/0104/2026",
+      amount: 16500,
+      status: "PENDING",
+      paymentMode: "Net Banking / Credit Card / Debit Card",
+      paymentGateway: "TP",
+    },
+    {
+      code: "105",
+      name: "105 1% Labour Welfare Cess",
+      shortName: "1% Labour Welfare Cess",
+      description: "Statutory 1% BOCW cess under Building & Other Construction Workers Act",
+      challanNo: "CH-2026-10505",
+      demandNoteNo: "1168/CH/0105/2026",
+      receiptNo: "1168/REC/0105/2026",
+      amount: 9800,
+      status: "PENDING",
+      paymentMode: "Net Banking / Credit Card / Debit Card",
+      paymentGateway: "TP",
+    },
+    {
+      code: "106",
+      name: "106 Green Fee",
+      shortName: "Green Fee",
+      description: "Statutory environmental greening & urban forestry conservation fee",
+      challanNo: "CH-2026-10606",
+      demandNoteNo: "1168/CH/0106/2026",
+      receiptNo: "1168/REC/0106/2026",
+      amount: 4200,
+      status: "PAID",
+      transactionId: "TXN786612806",
+      paymentDate: submissionDate || "23 July, 2026",
+      paymentMode: "UPI / Net Banking",
+      paymentGateway: "TP",
+    },
+  ]);
+
+  const [payingCategory, setPayingCategory] = React.useState<StatutoryPaymentCategory | null>(null);
+  const [payGateway, setPayGateway] = React.useState<string>("SBI ePay / Net Banking");
+  const [isProcessingPayment, setIsProcessingPayment] = React.useState<boolean>(false);
+
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">(initialTab ?? "form");
 
@@ -3408,190 +3516,610 @@ export function LtpSubmissionDetails({
               />
             ) : (
               <>
-                {/* Fee table */}
-                <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-6 space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-2">
-                <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider">
-                  Fee Assessment &amp; Payment History
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const rawChallan = "98105";
-                    const commAddress = doorNo
+                {/* ───────────────────────────────────────────────────────────── */}
+                {/* 1. TOP STATS / KPI BAR & DYNAMIC ASSESSMENT                   */}
+                {/* ───────────────────────────────────────────────────────────── */}
+                {(() => {
+                  const totalStatutoryFee = paymentCategories.reduce((s, c) => s + c.amount, 0);
+                  const paidCategories = paymentCategories.filter((c) => c.status === "PAID");
+                  const pendingCategories = paymentCategories.filter((c) => c.status === "PENDING");
+                  const totalPaidAmount = paidCategories.reduce((s, c) => s + c.amount, 0);
+                  const totalOutstanding = pendingCategories.reduce((s, c) => s + c.amount, 0);
+                  const areAllCategoriesPaid = pendingCategories.length === 0;
+
+                  const getCommAddress = () =>
+                    doorNo
                       ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
                       : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
 
+                  const handleViewSeparateReceipt = (cat: StatutoryPaymentCategory) => {
                     setActiveReceiptData({
-                      receiptNo: `1168/CH/0107/2026`,
+                      receiptNo: cat.receiptNo,
+                      receiptDate: cat.paymentDate || submissionDate || "23 July, 2026",
+                      demandNoteNo: cat.demandNoteNo,
+                      baNo: baNo,
+                      applicantName: ownerName || "NANNAPANENI RAMBABU",
+                      communicationAddress: getCommAddress(),
+                      amount: cat.amount,
+                      transactionType: cat.paymentMode || "Net Banking / Credit Card / Debit Card",
+                      paymentMadeAt: "Online",
+                      transactionId: cat.transactionId || "786612801",
+                      paymentDate: cat.paymentDate || submissionDate || "23 July, 2026",
+                      paymentGateway: cat.paymentGateway || "TP",
+                      feeCategoryCode: cat.code,
+                      feeCategoryName: cat.name,
+                      isConsolidated: false,
+                    });
+                    setIsReceiptModalOpen(true);
+                  };
+
+                  const handleViewConsolidatedReceipt = () => {
+                    if (!areAllCategoriesPaid) {
+                      showToast(
+                        `Consolidated receipt is generated after ALL payments are completed. Currently ${paidCategories.length} of 6 paid. Individual receipts for paid items are available below.`
+                      );
+                      return;
+                    }
+
+                    setActiveReceiptData({
+                      receiptNo: `1168/CH/CONSOL/2026`,
                       receiptDate: submissionDate || "23 July, 2026",
                       demandNoteNo: `1168/CH/0107/2026`,
                       baNo: baNo,
                       applicantName: ownerName || "NANNAPANENI RAMBABU",
-                      communicationAddress: commAddress,
-                      amount: 22000,
+                      communicationAddress: getCommAddress(),
+                      amount: totalStatutoryFee,
                       transactionType: "Net Banking / Credit Card / Debit Card",
                       paymentMadeAt: "Online",
-                      transactionId: "786612820",
+                      transactionId: "TXN786612820",
                       paymentDate: submissionDate || "23 July, 2026",
                       paymentGateway: "TP",
+                      isConsolidated: true,
+                      items: paymentCategories.map((c) => ({
+                        code: c.code,
+                        name: c.name,
+                        challanNo: c.challanNo,
+                        amount: c.amount,
+                        status: c.status,
+                      })),
                     });
                     setIsReceiptModalOpen(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-[#7A1316] hover:bg-[#8F161A] rounded-lg shadow-xs cursor-pointer transition-colors"
-                >
-                  <Download className="size-3.5" /> Consolidated Receipt (₹ 22,000)
-                </button>
-              </div>
+                  };
 
-              <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden">
-                <table className="w-full text-left">
-                  <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                    <tr>
-                      <th className="px-3.5 py-2.5">Fee Head</th>
-                      <th className="px-3.5 py-2.5">Challan No.</th>
-                      <th className="px-3.5 py-2.5">Amount (₹)</th>
-                      <th className="px-3.5 py-2.5">Status</th>
-                      <th className="px-3.5 py-2.5 text-right">Receipt</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DCD5C8]">
-                    <tr>
-                      <td className="px-3.5 py-2.5 font-medium">Scrutiny Fee (CAD Engine)</td>
-                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98102</td>
-                      <td className="px-3.5 py-2.5 font-bold">₹ 5,800</td>
-                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const commAddress = doorNo
-                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
-                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
-                            setActiveReceiptData({
-                              receiptNo: "1168/CH/8102/2026",
-                              receiptDate: submissionDate || "23 July, 2026",
-                              demandNoteNo: "1168/CH/8102/2026",
-                              baNo: baNo,
-                              applicantName: ownerName || "NANNAPANENI RAMBABU",
-                              communicationAddress: commAddress,
-                              amount: 5800,
-                              transactionType: "Net Banking / Credit Card / Debit Card",
-                              paymentMadeAt: "Online",
-                              transactionId: "786612802",
-                              paymentDate: submissionDate || "23 July, 2026",
-                              paymentGateway: "TP",
-                            });
-                            setIsReceiptModalOpen(true);
-                          }}
-                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
-                        >
-                          <Download className="size-3" /> Official Receipt
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-3.5 py-2.5 font-medium">Building Permit Basic Fee</td>
-                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98105</td>
-                      <td className="px-3.5 py-2.5 font-bold">₹ 14,200</td>
-                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const commAddress = doorNo
-                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
-                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
-                            setActiveReceiptData({
-                              receiptNo: "1168/CH/8105/2026",
-                              receiptDate: submissionDate || "23 July, 2026",
-                              demandNoteNo: "1168/CH/8105/2026",
-                              baNo: baNo,
-                              applicantName: ownerName || "NANNAPANENI RAMBABU",
-                              communicationAddress: commAddress,
-                              amount: 14200,
-                              transactionType: "Net Banking / Credit Card / Debit Card",
-                              paymentMadeAt: "Online",
-                              transactionId: "786612805",
-                              paymentDate: submissionDate || "23 July, 2026",
-                              paymentGateway: "TP",
-                            });
-                            setIsReceiptModalOpen(true);
-                          }}
-                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
-                        >
-                          <Download className="size-3" /> Official Receipt
-                        </button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-3.5 py-2.5 font-medium">Gramkantam Verification Fee</td>
-                      <td className="px-3.5 py-2.5 font-mono">CH-2026-98109</td>
-                      <td className="px-3.5 py-2.5 font-bold">₹ 2,000</td>
-                      <td className="px-3.5 py-2.5 text-emerald-700 font-bold">Paid (Online)</td>
-                      <td className="px-3.5 py-2.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const commAddress = doorNo
-                              ? `D.No. ${doorNo}, ${revenueVillage || city || "Ainavolu"}, ${mandal || "Thullur"} Mandalam, ${applicantDistrict || "Guntur"} District - ${pinCode || "522503"}`
-                              : ", St. Jhons Brothers Quaters, Gannavaram Mandalam, Buddavaram Panchayathi, Davaj,";
-                            setActiveReceiptData({
-                              receiptNo: "1168/CH/8109/2026",
-                              receiptDate: submissionDate || "23 July, 2026",
-                              demandNoteNo: "1168/CH/8109/2026",
-                              baNo: baNo,
-                              applicantName: ownerName || "NANNAPANENI RAMBABU",
-                              communicationAddress: commAddress,
-                              amount: 2000,
-                              transactionType: "Net Banking / Credit Card / Debit Card",
-                              paymentMadeAt: "Online",
-                              transactionId: "786612809",
-                              paymentDate: submissionDate || "23 July, 2026",
-                              paymentGateway: "TP",
-                            });
-                            setIsReceiptModalOpen(true);
-                          }}
-                          className="font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer inline-flex items-center gap-1"
-                        >
-                          <Download className="size-3" /> Official Receipt
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  const handleConfirmPayment = (cat: StatutoryPaymentCategory) => {
+                    setIsProcessingPayment(true);
+                    setTimeout(() => {
+                      const txnId = `TXN${Math.floor(100000000 + Math.random() * 900000000)}`;
+                      const nowStr = new Date().toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      });
 
-            {/* Payment success banner + Proceeding CTA */}
-            <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
-                  <CheckCircle2 className="size-5" />
-                </div>
-                <div>
-                  <p className="font-black text-emerald-800 text-[13px]">All Fees Paid — Payment Proceeding Issued</p>
-                  <p className="text-emerald-700 text-[11px] mt-0.5">
-                    Your payment has been acknowledged. A proceeding has been issued. The Building Permit Order will be issued after authority approval.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowProceeding(true)}
-                className="shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
-              >
-                <FileText className="size-3.5" />
-                View Proceeding
-              </button>
-            </div>
+                      setPaymentCategories((prev) =>
+                        prev.map((item) =>
+                          item.code === cat.code
+                            ? {
+                                ...item,
+                                status: "PAID",
+                                transactionId: txnId,
+                                paymentDate: nowStr,
+                                paymentMode: payGateway,
+                              }
+                            : item
+                        )
+                      );
+                      setIsProcessingPayment(false);
+                      setPayingCategory(null);
+                      showToast(`Payment successful for ${cat.name}! Receipt generated.`);
+                    }, 600);
+                  };
 
-            {/* Official Modal Receipt */}
-            <ApcrdaPaymentReceiptModal
-              isOpen={isReceiptModalOpen}
-              onClose={() => setIsReceiptModalOpen(false)}
-              data={activeReceiptData}
-            />
+                  const handlePayAllRemaining = () => {
+                    setIsProcessingPayment(true);
+                    setTimeout(() => {
+                      const nowStr = new Date().toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      });
+
+                      setPaymentCategories((prev) =>
+                        prev.map((item) => ({
+                          ...item,
+                          status: "PAID",
+                          transactionId: item.transactionId || `TXN${Math.floor(100000000 + Math.random() * 900000000)}`,
+                          paymentDate: item.paymentDate || nowStr,
+                          paymentMode: item.paymentMode || "Net Banking / Credit Card / Debit Card",
+                        }))
+                      );
+                      setIsProcessingPayment(false);
+                      showToast("All 6 statutory fees settled! Consolidated receipt generated.");
+                    }, 600);
+                  };
+
+                  const handleResetToPartial = () => {
+                    setPaymentCategories((prev) =>
+                      prev.map((item) => {
+                        if (item.code === "101" || item.code === "106") {
+                          return {
+                            ...item,
+                            status: "PAID",
+                            transactionId: item.code === "101" ? "TXN786612801" : "TXN786612806",
+                            paymentDate: submissionDate || "23 July, 2026",
+                          };
+                        }
+                        return {
+                          ...item,
+                          status: "PENDING",
+                          transactionId: undefined,
+                          paymentDate: undefined,
+                        };
+                      })
+                    );
+                    showToast("Reset to partial payment demo (2 of 6 categories paid).");
+                  };
+
+                  return (
+                    <>
+                      {/* Top Metric Cards */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div className="bg-white border border-[#DCD5C8] rounded-xl p-3.5 shadow-2xs">
+                          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Total Assessment</p>
+                          <p className="text-lg font-black font-mono text-[#7A1316] mt-0.5">
+                            ₹ {totalStatutoryFee.toLocaleString("en-IN")}
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-1">6 Statutory Categories</p>
+                        </div>
+                        <div className="bg-white border border-[#DCD5C8] rounded-xl p-3.5 shadow-2xs">
+                          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Total Remitted</p>
+                          <p className="text-lg font-black font-mono text-emerald-700 mt-0.5">
+                            ₹ {totalPaidAmount.toLocaleString("en-IN")}
+                          </p>
+                          <p className="text-[10px] text-emerald-600 font-semibold mt-1">
+                            {paidCategories.length} Categories Settled
+                          </p>
+                        </div>
+                        <div className="bg-white border border-[#DCD5C8] rounded-xl p-3.5 shadow-2xs">
+                          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Outstanding Balance</p>
+                          <p className={cn("text-lg font-black font-mono mt-0.5", totalOutstanding > 0 ? "text-rose-700" : "text-emerald-700")}>
+                            ₹ {totalOutstanding.toLocaleString("en-IN")}
+                          </p>
+                          <p className="text-[10px] text-slate-500 mt-1">
+                            {pendingCategories.length} Categories Pending
+                          </p>
+                        </div>
+                        <div className="bg-white border border-[#DCD5C8] rounded-xl p-3.5 shadow-2xs flex flex-col justify-between">
+                          <div>
+                            <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Consolidated Receipt Status</p>
+                            <div className="mt-1 flex items-center gap-1.5">
+                              {areAllCategoriesPaid ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                  <CheckCircle2 className="size-3" /> Unlocked (All 6 Paid)
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                                  <Clock className="size-3" /> Locked ({paidCategories.length}/6 Paid)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-slate-500 mt-1">
+                            {areAllCategoriesPaid
+                              ? "Consolidated receipt ready"
+                              : "Separate receipts available below"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Main Fee Assessment Card */}
+                      <div className="bg-[#FBF3E4] border-2 border-[#7A1316] rounded-xl shadow-xs p-5 sm:p-6 space-y-4">
+                        {/* Card Header Toolbar */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#DCD5C8] pb-3">
+                          <div>
+                            <h3 className="font-black text-[#7A1316] text-sm uppercase tracking-wider flex items-center gap-2">
+                              <span>Fee Assessment &amp; Statutory Payment Categories</span>
+                              <span className={cn(
+                                "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                                areAllCategoriesPaid ? "bg-emerald-100 text-emerald-800 border border-emerald-300" : "bg-amber-100 text-amber-800 border border-amber-300"
+                              )}>
+                                {paidCategories.length} of 6 Paid
+                              </span>
+                            </h3>
+                            <p className="text-[11px] text-slate-600 mt-0.5">
+                              Remit payments per statutory head. Individual receipts are generated for paid heads. A consolidated receipt is issued after all 6 categories are settled.
+                            </p>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {/* Demo State Switchers */}
+                            <div className="flex items-center gap-1 border border-[#DCD5C8] rounded-lg p-0.5 bg-white text-[10px]">
+                              <button
+                                type="button"
+                                onClick={handleResetToPartial}
+                                className={cn(
+                                  "px-2 py-1 rounded font-bold cursor-pointer transition-colors",
+                                  !areAllCategoriesPaid ? "bg-[#7A1316] text-white" : "text-slate-600 hover:bg-slate-100"
+                                )}
+                                title="Set 2 categories paid (to test individual separate receipts)"
+                              >
+                                Partial (2 Paid)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handlePayAllRemaining}
+                                className={cn(
+                                  "px-2 py-1 rounded font-bold cursor-pointer transition-colors",
+                                  areAllCategoriesPaid ? "bg-emerald-700 text-white" : "text-slate-600 hover:bg-slate-100"
+                                )}
+                                title="Set all 6 categories paid (to test consolidated receipt)"
+                              >
+                                All Paid (6/6)
+                              </button>
+                            </div>
+
+                            {/* Pay All Remaining button if any pending */}
+                            {!areAllCategoriesPaid && (
+                              <button
+                                type="button"
+                                onClick={handlePayAllRemaining}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-lg shadow-xs cursor-pointer transition-colors"
+                              >
+                                <CreditCard className="size-3.5" /> Pay All Remaining (₹ {totalOutstanding.toLocaleString("en-IN")})
+                              </button>
+                            )}
+
+                            {/* Consolidated Receipt Button */}
+                            <button
+                              type="button"
+                              onClick={handleViewConsolidatedReceipt}
+                              className={cn(
+                                "inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-lg shadow-xs cursor-pointer transition-all",
+                                areAllCategoriesPaid
+                                  ? "text-white bg-[#7A1316] hover:bg-[#8F161A] ring-2 ring-[#7A1316]/20"
+                                  : "text-slate-600 bg-slate-200 hover:bg-slate-300 border border-slate-300 cursor-not-allowed opacity-80"
+                              )}
+                              title={areAllCategoriesPaid ? "Download Consolidated Receipt for all 6 categories" : "Pay all 6 categories to generate consolidated receipt"}
+                            >
+                              <Download className="size-3.5" />
+                              <span>Consolidated Receipt (₹ {totalStatutoryFee.toLocaleString("en-IN")})</span>
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Categories Table */}
+                        <div className="bg-white rounded-lg border border-[#DCD5C8] overflow-hidden shadow-2xs">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8] text-[11px] uppercase tracking-wider">
+                                <tr>
+                                  <th className="px-3 py-2.5 w-12 text-center">Code</th>
+                                  <th className="px-3.5 py-2.5">Statutory Fee Category</th>
+                                  <th className="px-3.5 py-2.5">Challan / Demand No.</th>
+                                  <th className="px-3.5 py-2.5 text-right">Amount (₹)</th>
+                                  <th className="px-3.5 py-2.5 text-center">Status</th>
+                                  <th className="px-3.5 py-2.5 text-right">Receipt / Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[#DCD5C8]">
+                                {paymentCategories.map((cat) => {
+                                  const isPaid = cat.status === "PAID";
+                                  return (
+                                    <tr key={cat.code} className={cn("hover:bg-[#FAF7F2] transition-colors", isPaid ? "bg-white" : "bg-amber-50/20")}>
+                                      {/* Code */}
+                                      <td className="px-3 py-3 text-center">
+                                        <span className="font-mono font-black text-[#7A1316] bg-[#7A1316]/10 px-2 py-0.5 rounded text-[11px]">
+                                          {cat.code}
+                                        </span>
+                                      </td>
+
+                                      {/* Category Name & Desc */}
+                                      <td className="px-3.5 py-3">
+                                        <p className="font-bold text-slate-900 text-xs">
+                                          {cat.name}
+                                        </p>
+                                        <p className="text-[10px] text-slate-500 mt-0.5">
+                                          {cat.description}
+                                        </p>
+                                      </td>
+
+                                      {/* Challan & Demand Note */}
+                                      <td className="px-3.5 py-3 font-mono text-[11px]">
+                                        <div className="text-slate-800 font-semibold">{cat.challanNo}</div>
+                                        <div className="text-[10px] text-slate-500">{cat.demandNoteNo}</div>
+                                      </td>
+
+                                      {/* Amount */}
+                                      <td className="px-3.5 py-3 text-right font-mono font-bold text-xs tabular-nums text-slate-900">
+                                        ₹ {cat.amount.toLocaleString("en-IN")}
+                                      </td>
+
+                                      {/* Status */}
+                                      <td className="px-3.5 py-3 text-center">
+                                        {isPaid ? (
+                                          <div className="inline-flex flex-col items-center">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                              <CheckCircle2 className="size-3" /> Paid (Online)
+                                            </span>
+                                            {cat.transactionId && (
+                                              <span className="text-[9px] font-mono text-slate-500 mt-0.5">
+                                                {cat.transactionId}
+                                              </span>
+                                            )}
+                                          </div>
+                                        ) : (
+                                          <div className="inline-flex flex-col items-center">
+                                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                              <Clock className="size-3" /> Pending Payment
+                                            </span>
+                                            <span className="text-[9px] text-slate-500 mt-0.5">
+                                              Challan Active
+                                            </span>
+                                          </div>
+                                        )}
+                                      </td>
+
+                                      {/* Receipt / Action */}
+                                      <td className="px-3.5 py-3 text-right">
+                                        {isPaid ? (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleViewSeparateReceipt(cat)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-[#7A1316] bg-[#7A1316]/10 hover:bg-[#7A1316] hover:text-white border border-[#7A1316]/30 rounded-lg transition-all cursor-pointer shadow-2xs"
+                                            title={`Generate & view separate receipt for ${cat.name}`}
+                                          >
+                                            <Download className="size-3" /> Official Receipt
+                                          </button>
+                                        ) : (
+                                          <button
+                                            type="button"
+                                            onClick={() => setPayingCategory(cat)}
+                                            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-white bg-[#7A1316] hover:bg-[#8F161A] rounded-lg transition-all cursor-pointer shadow-2xs"
+                                          >
+                                            <CreditCard className="size-3" /> Pay Now
+                                          </button>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+
+                              {/* Table Totals Footer */}
+                              <tfoot className="bg-[#FAF7F2] border-t-2 border-[#DCD5C8] font-bold text-xs text-slate-800">
+                                <tr>
+                                  <td colSpan={3} className="px-3.5 py-2.5 uppercase tracking-wider text-[#7A1316]">
+                                    Total Statutory Assessment:
+                                  </td>
+                                  <td className="px-3.5 py-2.5 text-right font-mono text-sm text-[#7A1316]">
+                                    ₹ {totalStatutoryFee.toLocaleString("en-IN")}
+                                  </td>
+                                  <td colSpan={2} className="px-3.5 py-2.5 text-right text-[11px] text-slate-600 font-medium">
+                                    <span className="text-emerald-700 font-bold mr-3">
+                                      Paid: ₹ {totalPaidAmount.toLocaleString("en-IN")}
+                                    </span>
+                                    <span className={cn("font-bold", totalOutstanding > 0 ? "text-rose-700" : "text-emerald-700")}>
+                                      Balance: ₹ {totalOutstanding.toLocaleString("en-IN")}
+                                    </span>
+                                  </td>
+                                </tr>
+                              </tfoot>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ───────────────────────────────────────────────────────────── */}
+                      {/* 3. STATUS BANNERS & PROCEEDING CTAS                           */}
+                      {/* ───────────────────────────────────────────────────────────── */}
+                      {areAllCategoriesPaid ? (
+                        /* All 6 Paid Banner */
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border-2 border-emerald-400 bg-emerald-50 px-5 py-4 shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-emerald-500 text-white shrink-0">
+                              <CheckCircle2 className="size-5" />
+                            </div>
+                            <div>
+                              <p className="font-black text-emerald-800 text-[13px]">
+                                All 6 Statutory Fee Categories Settled — Payment Proceeding Issued
+                              </p>
+                              <p className="text-emerald-700 text-[11px] mt-0.5">
+                                Full payment of ₹ {totalStatutoryFee.toLocaleString("en-IN")} has been verified by the APCRDA Revenue Gateway. Consolidated payment receipt and Payment Proceeding are generated.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={handleViewConsolidatedReceipt}
+                              className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+                            >
+                              <Download className="size-3.5" />
+                              Consolidated Receipt
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowProceeding(true)}
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white border border-[#630E10] rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+                            >
+                              <FileText className="size-3.5" />
+                              View Proceeding
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Partial Payment Notice Banner */
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border-2 border-amber-400 bg-amber-50 px-5 py-4 shadow-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="flex size-10 items-center justify-center rounded-full bg-amber-500 text-white shrink-0">
+                              <AlertCircle className="size-5" />
+                            </div>
+                            <div>
+                              <p className="font-black text-amber-900 text-[13px]">
+                                Partial Payment Recorded: {paidCategories.length} of 6 Statutory Heads Paid (₹ {totalPaidAmount.toLocaleString("en-IN")} settled)
+                              </p>
+                              <p className="text-amber-800 text-[11px] mt-0.5">
+                                Separate official payment receipts are generated for each settled category above. Settle the remaining {pendingCategories.length} categories (₹ {totalOutstanding.toLocaleString("en-IN")}) to unlock the Consolidated Payment Receipt and issue the Payment Proceeding.
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={handlePayAllRemaining}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold shadow transition-colors cursor-pointer"
+                            >
+                              <CreditCard className="size-3.5" />
+                              Pay Remaining (₹ {totalOutstanding.toLocaleString("en-IN")})
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* ───────────────────────────────────────────────────────────── */}
+                      {/* 4. MODAL FOR PAYING A SINGLE CATEGORY                         */}
+                      {/* ───────────────────────────────────────────────────────────── */}
+                      {payingCategory && (
+                        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+                          <div className="bg-white rounded-2xl border-2 border-[#7A1316] shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                            {/* Modal Header */}
+                            <div className="bg-[#7A1316] text-white px-5 py-4 flex items-center justify-between">
+                              <div className="flex items-center gap-2.5">
+                                <CreditCard className="size-5 text-amber-300" />
+                                <div>
+                                  <h3 className="font-black text-sm tracking-wide">
+                                    APCRDA Statutory Fee Payment
+                                  </h3>
+                                  <p className="text-[10px] text-white/80">
+                                    Online Challan Settlement
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setPayingCategory(null)}
+                                className="text-white/80 hover:text-white size-7 flex items-center justify-center rounded-lg hover:bg-white/10 cursor-pointer"
+                              >
+                                <X className="size-4" />
+                              </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-5 space-y-4 text-xs">
+                              {/* Summary box */}
+                              <div className="bg-[#FBF3E4] border border-[#DCD5C8] rounded-xl p-3.5 space-y-2">
+                                <div className="flex items-start justify-between gap-2 border-b border-[#DCD5C8]/60 pb-2">
+                                  <span className="text-slate-600 font-medium">Category:</span>
+                                  <span className="font-bold text-slate-900 text-right">
+                                    {payingCategory.name}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                                  <span className="text-slate-600 font-medium">Challan Number:</span>
+                                  <span className="font-mono font-bold text-slate-800">
+                                    {payingCategory.challanNo}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
+                                  <span className="text-slate-600 font-medium">Demand Note Ref:</span>
+                                  <span className="font-mono font-bold text-slate-800">
+                                    {payingCategory.demandNoteNo}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between pt-0.5">
+                                  <span className="text-slate-900 font-bold">Amount to Remit:</span>
+                                  <span className="font-mono text-base font-black text-[#7A1316]">
+                                    ₹ {payingCategory.amount.toLocaleString("en-IN")}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Payment Gateway Options */}
+                              <div className="space-y-2">
+                                <label className="font-bold text-slate-800 block text-[11px] uppercase tracking-wide">
+                                  Select Payment Channel:
+                                </label>
+                                <div className="grid grid-cols-1 gap-2">
+                                  {[
+                                    { id: "SBI ePay / Net Banking", label: "SBI ePay Gateway (Net Banking / All Major Banks)" },
+                                    { id: "UPI (Google Pay / PhonePe / BHIM)", label: "UPI Instant Payment (Google Pay / PhonePe / Paytm)" },
+                                    { id: "AP State Treasury / CFMS", label: "AP State Cyber Treasury (CFMS Portal)" },
+                                    { id: "Debit / Credit Card", label: "Debit / Credit Card (Visa, MasterCard, RuPay)" },
+                                  ].map((opt) => (
+                                    <label
+                                      key={opt.id}
+                                      className={cn(
+                                        "flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all",
+                                        payGateway === opt.id
+                                          ? "border-[#7A1316] bg-[#7A1316]/5 font-semibold text-[#7A1316]"
+                                          : "border-slate-200 hover:border-slate-300 text-slate-700"
+                                      )}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name="payGateway"
+                                        checked={payGateway === opt.id}
+                                        onChange={() => setPayGateway(opt.id)}
+                                        className="accent-[#7A1316]"
+                                      />
+                                      <span className="text-xs">{opt.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Guarantee notice */}
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                                <ShieldCheck className="size-4 text-emerald-600 shrink-0" />
+                                <span>
+                                  Secured by APCRDA Revenue Settlement System with 256-bit encryption. Individual receipt generated instantly upon confirmation.
+                                </span>
+                              </div>
+
+                              {/* Modal Actions */}
+                              <div className="flex items-center justify-end gap-2.5 pt-2">
+                                <button
+                                  type="button"
+                                  onClick={() => setPayingCategory(null)}
+                                  disabled={isProcessingPayment}
+                                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-xs cursor-pointer"
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleConfirmPayment(payingCategory)}
+                                  disabled={isProcessingPayment}
+                                  className="inline-flex items-center gap-2 px-5 py-2 bg-[#7A1316] hover:bg-[#8F161A] text-white rounded-lg font-bold text-xs shadow-md cursor-pointer transition-colors"
+                                >
+                                  {isProcessingPayment ? (
+                                    <>
+                                      <span className="size-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                      <span>Processing...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CreditCard className="size-3.5" />
+                                      <span>Pay ₹ {payingCategory.amount.toLocaleString("en-IN")}</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Official Modal Receipt (Separate or Consolidated) */}
+                      <ApcrdaPaymentReceiptModal
+                        isOpen={isReceiptModalOpen}
+                        onClose={() => setIsReceiptModalOpen(false)}
+                        data={activeReceiptData}
+                      />
+                    </>
+                  );
+                })()}
           </>
         )}
       </div>
@@ -4473,7 +5001,7 @@ export function LtpSubmissionDetails({
                 </div>
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
                   <span className="text-slate-500 font-medium">Total Assessed Fee:</span>
-                  <span className="font-mono font-bold text-slate-900">₹ 22,000 (Scrutiny + Permit + Gramkantam)</span>
+                  <span className="font-mono font-bold text-slate-900">₹ 1,09,000 (6 Statutory Categories per APCRDA Rules)</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-500 font-medium">Submission Timestamp:</span>

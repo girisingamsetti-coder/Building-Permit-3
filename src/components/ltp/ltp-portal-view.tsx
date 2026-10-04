@@ -68,6 +68,39 @@ export function LtpPortalView() {
     }
   }, [view, setLtpActiveMenu]);
 
+  // Applications module (drafts, submissions, objections) is strictly LTP-only
+  React.useEffect(() => {
+    if (user?.role && user.role !== "LTP") {
+      const ltpOnlyMenus = ["draft-application", "submitted-applications", "objected-files", "application-submission"];
+      if (ltpOnlyMenus.includes(ltpActiveMenu)) {
+        setLtpActiveMenu("dashboard");
+      }
+    }
+  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
+
+  // Registration module is strictly visible to all EXCEPT LTP and TPA
+  React.useEffect(() => {
+    if (user?.role === "LTP" || user?.role === "TPA") {
+      const regMenus = [
+        "registration",
+        "registration-all",
+        "registration-pending",
+        "registration-ltp",
+        "registration-developer",
+        "registration-approved",
+        "registration-rejected",
+        "developer-verification",
+        "all-ltp-approved",
+        "approved-registration",
+        "rejected-registration",
+        "all-ltp-in-process",
+      ];
+      if (regMenus.includes(ltpActiveMenu)) {
+        setLtpActiveMenu("dashboard");
+      }
+    }
+  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
+
   // Dynamic content based on selected menu
   const renderContent = () => {
     const activeKey = (view === "admin-settings" || ltpActiveMenu === "admin-settings") ? "settings" : ltpActiveMenu;
@@ -87,14 +120,20 @@ export function LtpPortalView() {
       case "all-ltp-approved":
       case "approved-registration":
       case "rejected-registration": {
+        if (user?.role === "LTP" || user?.role === "TPA") return <UnifiedDashboard />;
         return <RegistrationApprovalsView initialTab={activeKey} />;
       }
 
       case "draft-application": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpDraftApplications />;
       }
 
-      case "submitted-applications":
+      case "submitted-applications": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
+        return <LtpSubmittedApplications />;
+      }
+
       case "all-ltp-in-process": {
         return <LtpSubmittedApplications />;
       }
@@ -104,6 +143,7 @@ export function LtpPortalView() {
       }
 
       case "objected-files": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpObjections />;
       }
 

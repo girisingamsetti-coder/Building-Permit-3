@@ -6,6 +6,14 @@ import { Printer, Download, X, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Application } from "@/types";
 
+export interface ReceiptLineItem {
+  code: string;
+  name: string;
+  challanNo: string;
+  amount: number;
+  status?: string;
+}
+
 export interface ApcrdaPaymentReceiptData {
   receiptNo: string;
   receiptDate: string;
@@ -20,6 +28,12 @@ export interface ApcrdaPaymentReceiptData {
   transactionId: string;
   paymentDate?: string;
   paymentGateway?: string;
+  // Specific category info (for separate payment receipt):
+  feeCategoryCode?: string;
+  feeCategoryName?: string;
+  // Consolidated receipt info (when multiple/all categories are paid):
+  isConsolidated?: boolean;
+  items?: ReceiptLineItem[];
 }
 
 export function amountToWordsINR(amount: number): string {
@@ -192,8 +206,18 @@ export function ApcrdaPaymentReceipt({
             DEVELOPMENT PROMOTION DEPARTMENT
           </h2>
           <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 underline underline-offset-4 tracking-wider uppercase pt-1">
-            PAYMENT RECEIPT
+            {data.isConsolidated ? "CONSOLIDATED PAYMENT RECEIPT" : "PAYMENT RECEIPT"}
           </h3>
+          {data.isConsolidated && (
+            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-300 px-3 py-0.5 rounded-full mt-1">
+              All Statutory Categories Consolidated
+            </span>
+          )}
+          {!data.isConsolidated && (data.feeCategoryName || data.feeCategoryCode) && (
+            <span className="text-[11px] font-bold text-[#7A1316] bg-[#7A1316]/10 border border-[#7A1316]/20 px-3 py-0.5 rounded-full mt-1">
+              Category: {data.feeCategoryName || data.feeCategoryCode}
+            </span>
+          )}
         </div>
 
         {/* Metadata Top 4-Grid */}
@@ -246,6 +270,15 @@ export function ApcrdaPaymentReceipt({
         <div className="border border-slate-700 rounded-xs overflow-hidden mt-5 mb-8 text-xs sm:text-[13px]">
           {/* Top Payment Rows */}
           <div className="p-3.5 space-y-2.5">
+            {data.feeCategoryName && (
+              <div className="flex items-baseline">
+                <span className="font-bold text-slate-900 w-44 shrink-0">Payment Category</span>
+                <span className="font-bold text-slate-900 mx-2">:</span>
+                <span className="font-bold text-[#7A1316]">
+                  {data.feeCategoryName}
+                </span>
+              </div>
+            )}
             <div className="flex items-baseline">
               <span className="font-bold text-slate-900 w-44 shrink-0">Amount (INR)</span>
               <span className="font-bold text-slate-900 mx-2">:</span>
@@ -275,6 +308,45 @@ export function ApcrdaPaymentReceipt({
               </span>
             </div>
           </div>
+
+          {/* Consolidated Items Table if items exist */}
+          {data.items && data.items.length > 0 && (
+            <div className="border-t border-slate-700">
+              <div className="bg-[#EFEFEF] border-b border-slate-300 px-3.5 py-1.5 text-xs font-bold text-slate-900 tracking-wide uppercase">
+                Consolidated Fee Heads Breakdown ({data.items.length} Categories)
+              </div>
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
+                  <tr>
+                    <th className="px-3.5 py-2 w-14 text-center">Code</th>
+                    <th className="px-3.5 py-2">Category Description</th>
+                    <th className="px-3.5 py-2">Challan No.</th>
+                    <th className="px-3.5 py-2 text-right">Amount (INR)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {data.items.map((it) => (
+                    <tr key={it.code} className="hover:bg-slate-50">
+                      <td className="px-3.5 py-2 font-mono font-bold text-[#7A1316] text-center">{it.code}</td>
+                      <td className="px-3.5 py-2 font-medium text-slate-900">{it.name}</td>
+                      <td className="px-3.5 py-2 font-mono text-slate-600">{it.challanNo}</td>
+                      <td className="px-3.5 py-2 text-right font-mono font-bold text-slate-900">
+                        {formatIndianCurrency(it.amount)}
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="bg-amber-50 font-bold border-t-2 border-slate-400">
+                    <td colSpan={3} className="px-3.5 py-2 text-right text-slate-900 uppercase">
+                      Total Consolidated Amount Remitted:
+                    </td>
+                    <td className="px-3.5 py-2 text-right font-mono text-sm text-[#7A1316]">
+                      {formatIndianCurrency(data.amount)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
 
           {/* Payment Details Subheading Bar */}
           <div className="bg-[#EFEFEF] border-t border-b border-slate-400 px-3.5 py-1.5 text-xs font-bold text-slate-900 tracking-wide">
@@ -351,6 +423,14 @@ export function buildReceiptFromApplication(app: Application): ApcrdaPaymentRece
     transactionId: p?.transactionId || "786612820",
     paymentDate: formattedDate,
     paymentGateway: p?.gateway || "TP",
+    isConsolidated: (app.fee?.lineItems?.length ?? 0) > 1,
+    items: app.fee?.lineItems?.map((li) => ({
+      code: li.componentCode.slice(0, 3) || "FEE",
+      name: li.name,
+      challanNo: `CH-2026-${li.componentCode.slice(0, 6)}`,
+      amount: li.amount,
+      status: "PAID",
+    })),
   };
 }
 

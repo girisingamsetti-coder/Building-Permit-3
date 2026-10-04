@@ -80,12 +80,12 @@ export const FEE_STRUCTURES: FeeStructure[] = [
 ];
 
 export const FEE_COMPONENTS: FeeComponent[] = [
-  { id: "fc-1", name: "Application Fee", code: "APP_FEE", description: "Base processing fee per application", basis: "FIXED", rate: 2500 },
-  { id: "fc-2", name: "Scrutiny Fee", code: "SCRUTINY_FEE", description: "Per sq.m scrutiny charge on built-up area", basis: "AREA_BASED", rate: 45, unit: "sq.m" },
-  { id: "fc-3", name: "Development Fee", code: "DEV_FEE", description: "Infrastructure development charge", basis: "AREA_BASED", rate: 120, unit: "sq.m" },
-  { id: "fc-4", name: "Processing Fee", code: "PROC_FEE", description: "Administrative processing fee", basis: "FIXED", rate: 1500 },
-  { id: "fc-5", name: "Document Verification Fee", code: "DOC_FEE", description: "Per-document verification charge", basis: "FIXED", rate: 800 },
-  { id: "fc-6", name: "Labour Cess", code: "LABOUR_CESS", description: "1% of Development Fee — statutory", basis: "PERCENTAGE", rate: 1 },
+  { id: "fc-101", name: "101 Scrutiny fee/Application fee", code: "101_SCRUTINY_APP_FEE", description: "Statutory scrutiny & application assessment charge", basis: "AREA_BASED", rate: 45, unit: "sq.m" },
+  { id: "fc-102", name: "102 Development Charges (BUA)", code: "102_DEV_CHARGES_BUA", description: "Infrastructure development charges on Built-Up Area", basis: "AREA_BASED", rate: 120, unit: "sq.m" },
+  { id: "fc-103", name: "103 Development Charges (Vacant Land)", code: "103_DEV_CHARGES_VACANT", description: "Statutory development charges on vacant land portion", basis: "AREA_BASED", rate: 35, unit: "sq.m" },
+  { id: "fc-104", name: "104 Special Development Charges (IRR)", code: "104_SPL_DEV_IRR", description: "Special Inner Ring Road corridor development assessment", basis: "FIXED", rate: 16500 },
+  { id: "fc-105", name: "105 1% Labour Welfare Cess", code: "105_LABOUR_CESS", description: "Statutory 1% BOCW labour welfare cess on development charges", basis: "PERCENTAGE", rate: 1 },
+  { id: "fc-106", name: "106 Green Fee", code: "106_GREEN_FEE", description: "Statutory environmental greening & urban forestry fee", basis: "FIXED", rate: 4200 },
 ];
 
 // Re-export tax configs for admin UI / tests

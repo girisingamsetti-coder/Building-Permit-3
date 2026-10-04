@@ -239,7 +239,7 @@ function useGlobalSearch(query: string): { results: SearchResult[]; loading: boo
             title: officer.name,
             subtitle: ROLES[officer.role].fullName,
             meta: officer.zone || officer.department || "",
-            view: "officer-applications" as ViewKey,
+            view: "officer-review" as ViewKey,
           });
         }
       });

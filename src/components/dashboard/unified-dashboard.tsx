@@ -70,7 +70,7 @@ export function UnifiedDashboard() {
     }));
   }, [scope.applications]);
 
-  const applicationsView: ViewKey = isLTP ? "ltp-applications" : isAdmin ? "admin-applications" : "officer-applications";
+  const applicationsView: ViewKey = isLTP ? "ltp-applications" : isAdmin ? "admin-tasks" : "officer-tasks";
 
   // ── 1. Top Stat Card 1: Total Applications ──────────────────────────────────
   const totalApplications = kpis.total;

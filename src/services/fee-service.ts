@@ -84,8 +84,8 @@ export class FeeCalculationService {
     const lineItems: FeeLineItem[] = [];
 
     for (const comp of this.components) {
-      // LABOUR_CESS is computed separately as 1% of DEV_FEE — skip in main loop
-      if (comp.code === "LABOUR_CESS") continue;
+      // LABOUR_CESS (105) is computed separately as 1% of DEV_FEE (102) — skip in main loop
+      if (comp.code === "LABOUR_CESS" || comp.code === "105" || comp.code === "105_LABOUR_CESS") continue;
       const item = this.computeLineItem(comp, input);
       if (item) lineItems.push(item);
     }
@@ -93,16 +93,16 @@ export class FeeCalculationService {
     const subtotal = lineItems.reduce((sum, li) => sum + li.amount, 0);
 
     // Labour cess = 1% of development fee (statutory) — added as a line item
-    const devFeeItem = lineItems.find((li) => li.componentCode === "DEV_FEE");
+    const devFeeItem = lineItems.find((li) => li.componentCode === "DEV_FEE" || li.componentCode === "102" || li.componentCode === "102_DEV_CHARGES_BUA");
     const devFeeAmount = devFeeItem?.amount ?? 0;
     const labourCess = devFeeAmount > 0 ? round((devFeeAmount * 0.01)) : 0;
     if (labourCess > 0) {
-      const cessComponent = this.components.find((c) => c.code === "LABOUR_CESS");
+      const cessComponent = this.components.find((c) => c.code === "LABOUR_CESS" || c.code === "105" || c.code === "105_LABOUR_CESS");
       if (cessComponent) {
         lineItems.push({
-          componentCode: "LABOUR_CESS",
+          componentCode: cessComponent.code,
           name: cessComponent.name,
-          description: "1% of Development Fee (statutory)",
+          description: "1% of Development Charges (BUA) (statutory)",
           basis: "Percentage",
           rate: 1,
           ratePercent: 1,

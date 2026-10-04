@@ -278,11 +278,11 @@ const MODULE_DEFS: ModuleDef[] = [
       ADMIN: "admin-dashboard",
     },
   },
-  // 2 — Applications
+  // 2 — Applications (Only for LTP)
   {
     label: "Building Permits",
     permKey: "applications",
-    requiredAny: ["application:view_own", "application:view_all"],
+    requiredAny: ["application:create"], // Only LTP can apply/submit applications
     views: {
       LTP: "ltp-applications",
       OFFICER: "officer-applications",
@@ -510,9 +510,11 @@ export function getDynamicNav(
 
   return MODULE_DEFS
     .filter((mod) => {
+      // Applications module is strictly only for LTP login
+      if (mod.permKey === "applications") return false;
       // No permission requirement → always show
       if (mod.requiredAny.length === 0) return true;
-      // ADMIN always sees everything
+      // ADMIN always sees everything (except applications which is LTP-only)
       if (user.role === "ADMIN") return true;
       // Otherwise check if user has at least one required permission
       return mod.requiredAny.some((p) => effectivePerms.has(p));
