@@ -96,13 +96,7 @@ export function LtpPortalView() {
 
       case "submitted-applications":
       case "all-ltp-in-process": {
-        return (
-          <LtpSubmittedApplications
-            onNewApp={(_type) => {
-              setNewAppOpen(true);
-            }}
-          />
-        );
+        return <LtpSubmittedApplications />;
       }
 
       case "review-proceeding": {

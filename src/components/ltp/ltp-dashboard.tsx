@@ -4,7 +4,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/app-store";
 import { SectionCard, EmptyState } from "@/components/design-system/layout";
-import { NewApplicationModal } from "@/components/ltp/new-application/new-application-modal";
+import { NewApplicationDialog } from "@/components/ltp/new-application-dialog";
+import { LtpSubmissionDetails } from "@/components/ltp/ltp-submission-details";
 import {
   StatusBadge,
   RoleBadge,
@@ -116,6 +117,10 @@ export function LtpDashboard() {
   const paymentData = paymentStatusData(apps);
 
   const [newAppOpen, setNewAppOpen] = React.useState(false);
+  const [activeNewApp, setActiveNewApp] = React.useState<{
+    baNo: string;
+    scheme: "LPS Layout" | "Non-LPS";
+  } | null>(null);
   const [trackerAppId, setTrackerAppId] = React.useState<string>("");
 
   // All applications sorted by lastUpdated (most recent first)
@@ -147,6 +152,21 @@ export function LtpDashboard() {
   }, [trackerAppId, apps]);
 
   const today = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" });
+
+  if (activeNewApp) {
+    return (
+      <div className="h-full w-full overflow-hidden p-0 bg-[#FAF7F2]">
+        <LtpSubmissionDetails
+          baNo={activeNewApp.baNo}
+          proposalStatus="Draft"
+          submissionDate={`${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`}
+          isDraft={true}
+          initialLpsType={activeNewApp.scheme}
+          onBack={() => setActiveNewApp(null)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -403,8 +423,21 @@ export function LtpDashboard() {
         </SectionCard>
       )}
 
-      {/* New Application Modal */}
-      <NewApplicationModal open={newAppOpen} onOpenChange={setNewAppOpen} />
+      {/* New Application Dialog */}
+      <NewApplicationDialog
+        open={newAppOpen}
+        onOpenChange={setNewAppOpen}
+        onSelectScheme={(scheme) => {
+          setNewAppOpen(false);
+          const now = new Date();
+          const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
+          const newDraftNo = `D/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+          setActiveNewApp({
+            baNo: newDraftNo,
+            scheme,
+          });
+        }}
+      />
     </div>
   );
 }

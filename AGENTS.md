@@ -1,37 +1,4 @@
 <!-- BEGIN:nextjs-agent-rules -->
-# Antigravity Agent Rules
-
-## Browser Verification
-
-Do not automatically open Chrome or any browser after making code changes.
-
-Do not take screenshots for verification unless explicitly requested.
-
-Do not perform browser-based visual verification automatically.
-
-After making changes, use code-based validation whenever possible:
-- Type checking
-- Linting
-- Unit tests
-- Integration tests
-- Build validation
-- Compiler/runtime error checking
-
-Do not repeatedly refresh or reload the browser to verify changes.
-
-Do not wait for visual confirmation before continuing with the development task.
-
-If browser verification is genuinely required, ask for permission before opening Chrome or taking screenshots.
-
-### Default workflow
-
-Understand → Implement → Validate code → Run tests/build → Fix errors → Continue
-
-Do NOT use:
-
-Understand → Implement → Open Chrome → Take screenshot → Visually verify → Repeat
-
-Prioritize completing the requested development work efficiently and avoid unnecessary browser verification.
 
 # This is NOT the Next.js you know
 
