@@ -388,40 +388,40 @@ export function PmApplications() {
               </caption>
               <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
                 <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-36 px-3 py-2 font-bold whitespace-nowrap">
                     Application No.
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-56 max-w-[220px] px-3 py-2 font-bold">
                     Project
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-44 max-w-[180px] px-3 py-2 font-bold">
                     Applicant
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-32 px-3 py-2 font-bold whitespace-nowrap">
                     App Type
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-36 px-3 py-2 font-bold whitespace-nowrap">
                     Current Stage
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-32 px-2 py-2 font-bold text-center whitespace-nowrap">
                     Assigned Role
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-36 px-3 py-2 font-bold whitespace-nowrap">
                     Assigned Officer
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-28 px-2 py-2 font-bold text-center whitespace-nowrap">
                     Status
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-bold">
+                  <th scope="col" className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">
                     Progress
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">
                     SLA
                   </th>
-                  <th scope="col" className="px-4 py-3 font-bold">
+                  <th scope="col" className="w-24 px-2.5 py-2 font-bold text-center whitespace-nowrap">
                     Last Updated
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right font-bold">
+                  <th scope="col" className="w-20 px-2 py-2 text-center font-bold whitespace-nowrap">
                     Action
                   </th>
                 </tr>
@@ -437,7 +437,7 @@ export function PmApplications() {
                         openApplication(a.id, "pm-application-details")
                       }
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -448,46 +448,46 @@ export function PmApplications() {
                           {a.applicationNo}
                         </button>
                       </td>
-                      <td className="px-4 py-3 max-w-[200px]">
+                      <td className="px-3 py-2">
                         <p className="truncate text-xs font-medium">
                           {a.project.name}
                         </p>
                       </td>
-                      <td className="px-4 py-3 max-w-[160px]">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <p className="truncate text-xs">{a.applicant.name}</p>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <span className="text-xs">
                           {APP_TYPE_LABELS[a.project.type] ?? a.project.type}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <span className="text-xs">{a.currentStageLabel}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         {a.assignedOfficer ? (
                           <RoleBadge role={a.assignedOfficer.role} />
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <span className="text-xs">
                           {a.assignedOfficer?.name ?? "Unassigned"}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <StatusBadge status={a.status} showIcon={false} />
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center gap-2 justify-end">
-                          <Progress value={a.progress} className="h-1.5 w-14" />
+                      <td className="px-2.5 py-2 text-center whitespace-nowrap">
+                        <div className="flex items-center gap-2 justify-center">
+                          <Progress value={a.progress} className="h-1.5 w-12" />
                           <span className="text-[11px] tabular-nums text-muted-foreground">
                             {a.progress}%
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         {sla ? (
                           <Badge
                             variant="outline"
@@ -502,10 +502,10 @@ export function PmApplications() {
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                      <td className="px-2.5 py-2 text-xs text-muted-foreground text-center whitespace-nowrap">
                         {timeAgo(a.lastUpdated)}
                       </td>
-                      <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-2 py-2 text-center whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                         <Button
                           variant="ghost"
                           size="sm"

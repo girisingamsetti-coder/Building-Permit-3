@@ -437,11 +437,10 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     case "review-show-cause-submission":
       return { title: "Compliance", category: "Compliance" };
 
+    case "commencement":
     case "cc-issued":
-      return { title: "Commencement Certificates", category: "Work Commencement" };
-
     case "work-initiated":
-      return { title: "Work Initiation", category: "Work Commencement" };
+      return { title: "Work Commencement", category: "Field Operations" };
 
     case "occupancy-list":
       return { title: "Completion & OC Registry", category: "Occupancy Certification (OC)" };
@@ -538,12 +537,17 @@ export function Topbar() {
 
   const viewStr = view as string;
   const isDashboard =
-    ltpActiveMenu === "dashboard" ||
-    viewStr === "ltp-dashboard" ||
-    viewStr === "dashboard" ||
-    viewStr === "officer-dashboard" ||
-    viewStr === "admin-dashboard" ||
-    (!ltpActiveMenu && (viewStr === "ltp-applications" || viewStr === "applications"));
+    viewStr !== "ltp-application-details" &&
+    viewStr !== "admin-settings" &&
+    ltpActiveMenu !== "settings" &&
+    (
+      (ltpActiveMenu === "dashboard" && (viewStr === "ltp-dashboard" || viewStr === "dashboard" || viewStr === "ltp-applications")) ||
+      viewStr === "ltp-dashboard" ||
+      viewStr === "dashboard" ||
+      viewStr === "officer-dashboard" ||
+      viewStr === "admin-dashboard" ||
+      viewStr === "pm-dashboard"
+    );
 
   const menuHeader = getMenuHeader(ltpActiveMenu, view, portal);
 
@@ -617,169 +621,165 @@ export function Topbar() {
                 if (useAppStore.getState().viewHistory.length > 0) {
                   goBack();
                 } else {
-                  navigate("ltp-applications");
+                  navigate("ltp-dashboard");
                 }
               }}
               className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DCD5C8] bg-[#FAF7F2] text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-              title="Back to Application Status"
+              title="Back"
             >
               <ArrowLeft className="size-3.5" />
               <span className="hidden sm:inline">Back</span>
             </button>
-            <span className="font-mono text-base font-black text-[#801824] dark:text-[#E89BA2] tracking-tight leading-none">
+            <span className="font-mono text-lg sm:text-xl font-black text-[#801824] dark:text-[#E89BA2] tracking-tight leading-none">
               {selectedApp.applicationNo}
             </span>
           </div>
         ) : isDashboard ? (
           <div className="flex flex-col justify-center">
-            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 leading-tight">
+            <span className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight">
               Welcome back, <span className="text-[#801824]">{user?.name?.split(" ")[0]}</span>
-            </span>
-            <span className="text-[11px] text-slate-400 leading-tight">
-              {user?.role ? (ROLES[user.role as keyof typeof ROLES]?.fullName ?? user.role) : ""}
             </span>
           </div>
         ) : (
           <div className="flex flex-col justify-center">
-            <span className="text-sm font-bold text-[#801824] dark:text-[#E89BA2] leading-tight tracking-tight">
+            <span className="text-lg sm:text-xl font-bold text-[#801824] dark:text-[#E89BA2] leading-tight tracking-tight">
               {menuHeader.title}
-            </span>
-            <span className="text-[11px] text-slate-400 leading-tight font-medium">
-              {menuHeader.category ? `${menuHeader.category} · APCRDA` : `APCRDA ${portalName}`}
             </span>
           </div>
         )}
       </div>
 
-      {/* Search & Date Filter */}
-      <div className="hidden sm:flex items-center gap-2 ml-auto">
-        {/* Search */}
-        <div ref={searchContainerRef} className="relative w-48 lg:w-64">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSearchOpen(true);
-            }}
-            onFocus={() => setSearchOpen(true)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                setSearchOpen(false);
-                searchInputRef.current?.blur();
-              }
-            }}
-            placeholder=""
-            className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setSearchOpen(false);
-                searchInputRef.current?.focus();
+      {/* Search & Date Filter (Shown only in Dashboard module) */}
+      {isDashboard && (
+        <div className="hidden sm:flex items-center gap-2 ml-auto">
+          {/* Search */}
+          <div ref={searchContainerRef} className="relative w-48 lg:w-64">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setSearchOpen(true);
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label="Clear search"
-            >
-              <X className="size-4" />
-            </button>
-          )}
-          {searchOpen && (
-            <SearchDropdown
-              query={searchQuery}
-              results={results}
-              loading={loading}
-              onSelect={handleSearchSelect}
-              onClose={() => setSearchOpen(false)}
+              onFocus={() => setSearchOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  setSearchOpen(false);
+                  searchInputRef.current?.blur();
+                }
+              }}
+              placeholder=""
+              className="h-9 w-full rounded-full border border-input bg-muted/40 pl-9 pr-9 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:border-primary/40"
             />
-          )}
-        </div>
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchOpen(false);
+                  searchInputRef.current?.focus();
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                aria-label="Clear search"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+            {searchOpen && (
+              <SearchDropdown
+                query={searchQuery}
+                results={results}
+                loading={loading}
+                onSelect={handleSearchSelect}
+                onClose={() => setSearchOpen(false)}
+              />
+            )}
+          </div>
 
-        {/* Date Filter */}
-        <Popover open={isDatePickerOpen} onOpenChange={(open) => {
-          setIsDatePickerOpen(open);
-          if (open) {
-            setTempDateRange(dateRange);
-          }
-        }}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className={cn("h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full", dateRange.from && "text-foreground")}>
-              <Calendar className="size-4" />
-              <span>
-                {datePreset !== "Custom" && datePreset !== "Overall" ? (
-                  datePreset
-                ) : dateRange.from ? (
-                  dateRange.to ? (
-                    <>
-                      {format(dateRange.from, "LLL dd, y")} -{" "}
-                      {format(dateRange.to, "LLL dd, y")}
-                    </>
+          {/* Date Filter */}
+          <Popover open={isDatePickerOpen} onOpenChange={(open) => {
+            setIsDatePickerOpen(open);
+            if (open) {
+              setTempDateRange(dateRange);
+            }
+          }}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className={cn("h-9 gap-2 px-4 text-muted-foreground font-normal border-input bg-muted/40 hover:bg-muted/60 hidden md:flex rounded-full", dateRange.from && "text-foreground")}>
+                <Calendar className="size-4" />
+                <span>
+                  {datePreset !== "Custom" && datePreset !== "Overall" ? (
+                    datePreset
+                  ) : dateRange.from ? (
+                    dateRange.to ? (
+                      <>
+                        {format(dateRange.from, "LLL dd, y")} -{" "}
+                        {format(dateRange.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(dateRange.from, "LLL dd, y")
+                    )
                   ) : (
-                    format(dateRange.from, "LLL dd, y")
-                  )
-                ) : (
-                  "Date filter"
-                )}
-              </span>
-              <ChevronDown className="size-3.5 opacity-50 ml-1" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-3 shadow-lg rounded-xl border-slate-200" align="end">
-            <div className="flex gap-4">
-              <div className="flex flex-col gap-1.5 w-32 shrink-0">
-                {(["Overall", "Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Custom"] as const).map(preset => (
-                  <button
-                    key={preset}
-                    onClick={() => {
-                      setDatePreset(preset);
-                      const now = new Date();
-                      if (preset === "Overall") setTempDateRange({ from: undefined, to: undefined });
-                      else if (preset === "Today") setTempDateRange({ from: startOfDay(now), to: endOfDay(now) });
-                      else if (preset === "Yesterday") setTempDateRange({ from: startOfDay(subDays(now, 1)), to: endOfDay(subDays(now, 1)) });
-                      else if (preset === "Last 7 Days") setTempDateRange({ from: startOfDay(subDays(now, 7)), to: endOfDay(now) });
-                      else if (preset === "Last 30 Days") setTempDateRange({ from: startOfDay(subDays(now, 30)), to: endOfDay(now) });
+                    "Date filter"
+                  )}
+                </span>
+                <ChevronDown className="size-3.5 opacity-50 ml-1" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-3 shadow-lg rounded-xl border-slate-200" align="end">
+              <div className="flex gap-4">
+                <div className="flex flex-col gap-1.5 w-32 shrink-0">
+                  {(["Overall", "Today", "Yesterday", "Last 7 Days", "Last 30 Days", "Custom"] as const).map(preset => (
+                    <button
+                      key={preset}
+                      onClick={() => {
+                        setDatePreset(preset);
+                        const now = new Date();
+                        if (preset === "Overall") setTempDateRange({ from: undefined, to: undefined });
+                        else if (preset === "Today") setTempDateRange({ from: startOfDay(now), to: endOfDay(now) });
+                        else if (preset === "Yesterday") setTempDateRange({ from: startOfDay(subDays(now, 1)), to: endOfDay(subDays(now, 1)) });
+                        else if (preset === "Last 7 Days") setTempDateRange({ from: startOfDay(subDays(now, 7)), to: endOfDay(now) });
+                        else if (preset === "Last 30 Days") setTempDateRange({ from: startOfDay(subDays(now, 30)), to: endOfDay(now) });
+                      }}
+                      className={cn(
+                        "text-left px-3 py-1.5 text-[13px] rounded-md transition-colors border",
+                        datePreset === preset 
+                          ? "bg-indigo-50 text-indigo-700 border-indigo-100 font-semibold"
+                          : "bg-slate-50/50 text-slate-700 border-slate-100 hover:bg-slate-100"
+                      )}
+                    >
+                      {preset}
+                    </button>
+                  ))}
+                </div>
+                <div className="border-l border-slate-100 pl-4">
+                  <CalendarComponent
+                    initialFocus
+                    mode="range"
+                    defaultMonth={tempDateRange?.from}
+                    selected={tempDateRange as any}
+                    onSelect={(range) => {
+                      setTempDateRange(range as any);
+                      setDatePreset("Custom");
                     }}
-                    className={cn(
-                      "text-left px-3 py-1.5 text-[13px] rounded-md transition-colors border",
-                      datePreset === preset 
-                        ? "bg-indigo-50 text-indigo-700 border-indigo-100 font-semibold"
-                        : "bg-slate-50/50 text-slate-700 border-slate-100 hover:bg-slate-100"
-                    )}
-                  >
-                    {preset}
-                  </button>
-                ))}
+                    numberOfMonths={1}
+                    className="p-0"
+                  />
+                </div>
               </div>
-              <div className="border-l border-slate-100 pl-4">
-                <CalendarComponent
-                  initialFocus
-                  mode="range"
-                  defaultMonth={tempDateRange?.from}
-                  selected={tempDateRange as any}
-                  onSelect={(range) => {
-                    setTempDateRange(range as any);
-                    setDatePreset("Custom");
-                  }}
-                  numberOfMonths={1}
-                  className="p-0"
-                />
+              <div className="mt-3 pt-3 border-t border-slate-100 flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={() => setIsDatePickerOpen(false)} className="text-xs font-semibold px-4">Cancel</Button>
+                <Button size="sm" onClick={() => {
+                  setDateRange(tempDateRange);
+                  setIsDatePickerOpen(false);
+                }} className="bg-indigo-600 hover:bg-indigo-700 text-xs text-white font-semibold px-5">Apply</Button>
               </div>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-100 flex justify-end gap-2">
-              <Button variant="outline" size="sm" onClick={() => setIsDatePickerOpen(false)} className="text-xs font-semibold px-4">Cancel</Button>
-              <Button size="sm" onClick={() => {
-                setDateRange(tempDateRange);
-                setIsDatePickerOpen(false);
-              }} className="bg-indigo-600 hover:bg-indigo-700 text-xs text-white font-semibold px-5">Apply</Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
-      <div className="flex items-center gap-1.5 ml-1">
+      <div className={cn("flex items-center gap-1.5", isDashboard ? "ml-1" : "ml-auto")}>
 
         {/* Notifications */}
         <Popover>

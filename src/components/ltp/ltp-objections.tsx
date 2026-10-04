@@ -698,7 +698,7 @@ export function LtpObjections() {
   const exportCSV = () => {
     const headers = [
       "#",
-      "BA No.",
+      "Application No.",
       "Permission Type",
       "Objection Stage",
       "Status",
@@ -776,7 +776,7 @@ export function LtpObjections() {
       {/* ── TOP CONTROLS: Search, Filters & Action Buttons in a Single Row ── */}
       <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
         {/* Search Input Box (Pillow-shaped) */}
-        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-56 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 h-8 w-full sm:w-56 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
           <Search className="size-3.5 text-slate-400 shrink-0" />
           <input
             ref={searchInputRef}
@@ -887,21 +887,21 @@ export function LtpObjections() {
             {/* Table Header Row */}
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
               <tr className="divide-x divide-[#DCD5C8]">
-                <th className="w-12 px-2.5 py-2.5 text-center font-bold">#</th>
+                <th className="w-10 px-2 py-2 text-center font-bold">#</th>
 
                 <th
                   onClick={() => handleSort("baNo")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-44"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>BA No.</span>
+                    <span>Application No.</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort("permissionType")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Permission Type</span>
@@ -911,7 +911,7 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("stage")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-44"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Objection Stage</span>
@@ -921,9 +921,9 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("status")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
+                  className="w-24 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center whitespace-nowrap"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Status</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
@@ -931,7 +931,7 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("shortfallReason")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none min-w-[280px]"
+                  className="w-64 max-w-[260px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Objection / Shortfall Details</span>
@@ -941,7 +941,7 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("owner")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36"
+                  className="w-40 max-w-[160px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Owner</span>
@@ -951,9 +951,9 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("caseType")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
+                  className="w-24 px-2 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Case Type</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
@@ -961,15 +961,15 @@ export function LtpObjections() {
 
                 <th
                   onClick={() => handleSort("createdDate")}
-                  className="px-3 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
+                  className="w-24 px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Date</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
-                <th className="w-28 px-2.5 py-2.5 font-bold text-center">Action</th>
+                <th className="w-24 px-2 py-2 font-bold text-center">Action</th>
               </tr>
             </thead>
 
@@ -984,12 +984,12 @@ export function LtpObjections() {
                       className="divide-x divide-[#EFE7DC] hover:bg-[#FAF4EB] transition-colors"
                     >
                       {/* Index */}
-                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">
+                      <td className="px-2 py-2 text-center font-medium text-slate-700">
                         {idx + 1}
                       </td>
 
-                      {/* BA No. */}
-                      <td className="px-3.5 py-2.5 whitespace-nowrap">
+                      {/* Application No. */}
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <button
                           onClick={() => setSelectedObjection(item)}
                           className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
@@ -1012,12 +1012,12 @@ export function LtpObjections() {
                       </td>
 
                       {/* Permission Type */}
-                      <td className="px-3 py-2.5 text-slate-700 font-medium whitespace-nowrap">
+                      <td className="px-3 py-2 text-slate-700 font-medium whitespace-nowrap">
                         {item.permissionType}
                       </td>
 
                       {/* Objection Stage Badge */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <span
                           className={cn(
                             "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border",
@@ -1032,7 +1032,7 @@ export function LtpObjections() {
                       </td>
 
                       {/* Status Badge */}
-                      <td className="px-3 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         {item.status === "Scrutiny Failed" ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-rose-50 text-rose-800 border-rose-300">
                             <span className="size-1.5 rounded-full bg-rose-600 inline-block" />
@@ -1052,7 +1052,7 @@ export function LtpObjections() {
                       </td>
 
                       {/* Objection / Shortfall Details */}
-                      <td className="px-3.5 py-2.5">
+                      <td className="px-3 py-2">
                         <p
                           className="text-[11.5px] text-slate-800 leading-snug line-clamp-2"
                           title={item.shortfallReason}
@@ -1067,24 +1067,24 @@ export function LtpObjections() {
                       </td>
 
                       {/* Owner */}
-                      <td className="px-3 py-2.5 text-slate-800 font-medium whitespace-nowrap">
+                      <td className="px-3 py-2 text-slate-800 font-medium whitespace-nowrap">
                         {item.owner || "-"}
                       </td>
 
                       {/* Case Type */}
-                      <td className="px-3 py-2.5 text-slate-700 font-medium whitespace-nowrap">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <span className="inline-block bg-[#F5EBE1] text-[#7A1316] border border-[#E0D2BE] px-2 py-0.5 rounded text-[11px] font-bold">
                           {item.caseType}
                         </span>
                       </td>
 
                       {/* Date */}
-                      <td className="px-3 py-2.5 text-slate-600 font-mono text-[11px] whitespace-nowrap">
+                      <td className="px-2.5 py-2 text-slate-600 font-mono text-[11px] text-center whitespace-nowrap">
                         {item.createdDate}
                       </td>
 
                       {/* Action Button: Resume Directly at Stage */}
-                      <td className="px-2.5 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <button
                           onClick={() => setSelectedObjection(item)}
                           title={`Resume proposal directly at ${stageInfo.stageLabel}`}

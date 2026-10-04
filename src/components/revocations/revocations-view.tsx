@@ -187,13 +187,13 @@ export function RevocationsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Proceeding # / App #</th>
-                <th className="py-3 px-4">Sanction Order #</th>
-                <th className="py-3 px-4">Owner & Site</th>
-                <th className="py-3 px-4">Grounds of Revocation</th>
-                <th className="py-3 px-4">Hearing Date</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Proceeding # / App #</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Sanction Order #</th>
+                <th className="w-48 max-w-[200px] py-2 px-3 font-medium">Owner & Site</th>
+                <th className="w-60 max-w-[240px] py-2 px-3 font-medium">Grounds of Revocation</th>
+                <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Hearing Date</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-20 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -206,31 +206,31 @@ export function RevocationsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.proceedingNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
                       <div className="font-mono text-foreground font-medium">{item.approvalOrderNumber}</div>
                       <div className="text-muted-foreground text-[11px]">Sanction: {item.approvalDate}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-medium text-foreground">{item.ownerName}</div>
+                    <td className="w-48 max-w-[200px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.ownerName}</div>
                       <div className="truncate text-[11px] text-muted-foreground">{item.siteAddress}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-sm">
+                    <td className="w-60 max-w-[240px] py-2 px-3">
                       <div className="line-clamp-2 text-foreground font-medium">
                         {item.grounds[0]}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2.5 text-center whitespace-nowrap">
                       {item.hearingHeldDate ? (
                         <div className="text-[11px] font-medium text-foreground">{item.hearingHeldDate}</div>
                       ) : (
                         <span className="text-muted-foreground italic text-[11px]">Awaiting hearing</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -244,12 +244,12 @@ export function RevocationsView() {
                         {item.status.replace("_", " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedRevocation(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Details
                       </Button>

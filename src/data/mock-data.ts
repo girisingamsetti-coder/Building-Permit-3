@@ -494,7 +494,7 @@ export function generateHierarchicalApplications(): Application[] {
         status = "SCRUTINY_FAILED";
         stage = "DRAWING_SCRUTINY";
         stageLabel = "Drawing Auto-Scrutiny (Failed)";
-        assignedOfficer = { name: ltp.name, role: "LTP" };
+        assignedOfficer = undefined;
         progress = 20;
       } else if (j === 3) {
         status = "DOCUMENT_UPLOAD_PENDING";
@@ -506,7 +506,7 @@ export function generateHierarchicalApplications(): Application[] {
         status = "PAYMENT_PENDING";
         stage = "PAYMENT";
         stageLabel = "Fee & Betterment Payment";
-        assignedOfficer = { name: ltp.name, role: "LTP" };
+        assignedOfficer = undefined;
         progress = 40;
       } else if (j === 6) {
         status = "SHORTFALL_RAISED";
@@ -805,6 +805,8 @@ export const SEED_SYSTEM_SETTINGS: SystemSettings = {
     COMMISSIONER:         { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
     ADMIN:                { dashboard: "full", "application-submission": "full", "application-status": "full", "proceeding-status": "full", commencement: "full", occupancy: "full", "change-of-ltp": "full", reports: "full" },
   },
+  userAccessConfig: {},
+  hideRestrictedModules: false,
   approvalSequence: [
     { id: "step-1", role: "ZONAL_HEAD", label: "Zonal Head Review", order: 1, canApprove: false, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-2" },
     { id: "step-2", role: "DIRECTOR", label: "Director Review", order: 2, canApprove: true, canReturn: true, canRaiseShortfall: true, nextRoleId: "step-3" },

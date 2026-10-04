@@ -62,7 +62,7 @@ Figure 4.1 — Citizen Service, Developer & TPAs, and LTP entry tiles
 4.1 Citizen Service
 1. Open the Citizen Service tile.
 2. Use Pay your fees here to pay a generated fee memo.
-3. Use Search your application status with the BA number to see the current stage.
+3. Use Search your application status with the Application number to see the current stage.
 4.2 Developer & TPAs
 1. Open the Developer & TPAs tile.
 2. Choose the required link:
@@ -169,8 +169,8 @@ Figure 6.11 — Payments tab on a draft (no memo until scrutiny / fee generation
 
 6.11 Submitted Applications
 1. Open Application Submission → Submitted Applications.
-2. Search or filter by BA No., Permission Type, Status, Submission Date, Owner, or Case Type.
-3. Click a BA number to open the file.
+2. Search or filter by Application No., Permission Type, Status, Submission Date, Owner, or Case Type.
+3. Click a Application number to open the file.
 
 Figure 6.12 — Submitted Applications list (search, filter, Excel export)
 7. Module: Application Status
@@ -179,13 +179,13 @@ Menu path: Application Status. Use this module after the file has left your draf
 7.1 Review Proceeding
 1. Open Application Status → Review Proceeding.
 2. Use search / column filters if the list is long.
-3. Click the BA No. to open the application in read or limited-edit mode.
+3. Click the Application No. to open the application in read or limited-edit mode.
 
 Figure 7.1 — Review Proceeding queue with Permission Type filter
 7.2 Objected Files — find the file
 1. Open Application Status → Objected Files.
 2. Note Status (example: Scrutiny Can Not Done in red).
-3. Click the BA No. (example: 1168/0156/BP/10/020/2026 (SUB-6)).
+3. Click the Application No. (example: 1168/0156/BP/10/020/2026 (SUB-6)).
 
 Figure 7.2 — Objected Files: one record with status Scrutiny Can Not Done
 7.3 Objected Files — correct and resubmit
@@ -208,7 +208,7 @@ Figure 7.6 — Objected file: Document Checklist — attach or replace missing p
 Figure 7.7 — Objected file: BIM Model list with Download and upload dates
 7.4 Approved Files
 1. Open Application Status → Approved Files.
-2. Click the BA No. Status shows Approved. Proposal Status inside the file is often Proceeding Verified.
+2. Click the Application No. Status shows Approved. Proposal Status inside the file is often Proceeding Verified.
 3. Review form tabs in read mode. After approval, two extra form tabs appear: Letter and Apply for NOCs.
 
 Figure 7.8 — Approved Files list (example BA 1168/0001/BP/10/020/2025)
@@ -229,7 +229,7 @@ Figure 7.10 — Letter tab: APCRDA Building Permit Order (BPO)
 Figure 7.11 — Apply for NOCs: External Fire, Yes selected, fire NOC.pdf attached
 7.7 Proceeding Issued
 1. Open Application Status → Proceeding Issued.
-2. Search the BA No. to confirm the proceeding is on your list.
+2. Search the Application No. to confirm the proceeding is on your list.
 3. Open the row to view reports, drawing plan, scrutiny report, and proceeding letter when those icons are shown.
 
 Figure 7.12 — Proceeding Issued queue (empty in this example)
@@ -238,7 +238,7 @@ Menu path: Proceeding Status. Use this after a proceeding exists and APCRDA is v
 
 8.1 Verified
 1. Open Proceeding Status → Verified.
-2. Click the BA No. Proposal Status should read Proceeding Verified (green).
+2. Click the Application No. Proposal Status should read Proceeding Verified (green).
 3. Use Proposal Flow and Reports as needed.
 4. Confirm Payments: memos such as General, Green fee charges, Labour Cess, and Development should show Paid with View Receipt.
 
@@ -251,7 +251,7 @@ Figure 8.3 — Payments on a verified file: General, Green fee, Labour Cess, Dev
 Figure 8.4 — BIM Model history on a verified file (revision dates and Download)
 8.2 Shortfall and Review Shortfall Submission
 1. Open Proceeding Status → Shortfall to see files with pending deficiencies.
-2. Open the BA No., complete the missing items, and submit the shortfall reply.
+2. Open the Application No., complete the missing items, and submit the shortfall reply.
 3. Then open Review Shortfall Submission to confirm APCRDA has received / is reviewing the reply.
 
 Figure 8.5 — Shortfall queue
@@ -269,8 +269,8 @@ Figure 8.8 — Review Show Cause Submission queue
 Menu path: Commencement Certificate → CC Issued or Work Initiated. Use this after the building permission proceeding is in force and construction is about to start.
 9.1 Work Initiated — open the file
 1. Open Commencement Certificate → Work Initiated (or CC Issued if you only need the issued certificate list).
-2. Find the BA No. (example: 1168/0001/BP/10/020/2025 (SUB-38)).
-3. Click the BA No. or Status link.
+2. Find the Application No. (example: 1168/0001/BP/10/020/2025 (SUB-38)).
+3. Click the Application No. or Status link.
 
 Figure 9.1 — Work Initiated list: approved building permission ready for commencement notify
 9.2 Notify commencement date
@@ -298,7 +298,7 @@ Figure 10.1 — Change LTP: enter File No. and search
 Menu path: Occupancy → Occupancy List or Submitted Application. Use this after construction is complete and you need to intimate completion / apply for occupancy.
 1. Open Occupancy → Occupancy List.
 2. Click INTIMATE COMPLETION (top right) to notify APCRDA that the building is complete and ready for occupancy process.
-3. Use search, Filter, Find, and Clear to locate a BA No. on the list.
+3. Use search, Filter, Find, and Clear to locate a Application No. on the list.
 4. Open Submitted Application to see occupancy applications already filed.
 
 Figure 11.1 — Occupancy List with INTIMATE COMPLETION action

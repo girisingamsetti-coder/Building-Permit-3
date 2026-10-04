@@ -508,16 +508,16 @@ function ApplicationProgressSection({
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Application No.</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[16%]">Project</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Applicant</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Current Stage</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[8%]">Role</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Officer</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Status</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[8%]">Progress</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[5%]">SLA</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[5%]">Updated</th>
+                <th scope="col" className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Application No.</th>
+                <th scope="col" className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Project</th>
+                <th scope="col" className="w-44 max-w-[180px] px-4 py-2.5 font-bold">Applicant</th>
+                <th scope="col" className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Current Stage</th>
+                <th scope="col" className="w-28 px-4 py-2.5 font-bold whitespace-nowrap">Role</th>
+                <th scope="col" className="w-40 max-w-[160px] px-4 py-2.5 font-bold">Officer</th>
+                <th scope="col" className="w-28 px-4 py-2.5 font-bold whitespace-nowrap">Status</th>
+                <th scope="col" className="w-28 px-4 py-2.5 text-right font-bold whitespace-nowrap">Progress</th>
+                <th scope="col" className="w-24 px-4 py-2.5 font-bold whitespace-nowrap">SLA</th>
+                <th scope="col" className="w-24 px-4 py-2.5 font-bold whitespace-nowrap">Updated</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -844,13 +844,13 @@ function OfficerWorkloadSection({
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
-                <th scope="col" className="px-4 py-2.5 font-bold w-[22%]">Officer</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Role</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Assigned</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Pending</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">At Risk</th>
-                <th scope="col" className="px-4 py-2.5 text-right font-bold w-[10%]">Delayed</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[26%]">Workload</th>
+                <th scope="col" className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Officer</th>
+                <th scope="col" className="w-40 px-4 py-2.5 font-bold whitespace-nowrap">Role</th>
+                <th scope="col" className="w-24 px-4 py-2.5 text-right font-bold whitespace-nowrap">Assigned</th>
+                <th scope="col" className="w-24 px-4 py-2.5 text-right font-bold whitespace-nowrap">Pending</th>
+                <th scope="col" className="w-24 px-4 py-2.5 text-right font-bold whitespace-nowrap">At Risk</th>
+                <th scope="col" className="w-24 px-4 py-2.5 text-right font-bold whitespace-nowrap">Delayed</th>
+                <th scope="col" className="w-48 px-4 py-2.5 font-bold whitespace-nowrap">Workload</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -980,14 +980,14 @@ function PendingActionsSection({
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr className="border-b-2 border-border text-left text-[10px] uppercase tracking-wide text-foreground">
-                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Application</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[16%]">Project</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Stage</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Role</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[14%]">Officer</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[12%]">Pending Since</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">SLA</th>
-                <th scope="col" className="px-4 py-2.5 font-bold w-[10%]">Priority</th>
+                <th scope="col" className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Application</th>
+                <th scope="col" className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Project</th>
+                <th scope="col" className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Stage</th>
+                <th scope="col" className="w-28 px-4 py-2.5 font-bold whitespace-nowrap">Role</th>
+                <th scope="col" className="w-40 max-w-[160px] px-4 py-2.5 font-bold">Officer</th>
+                <th scope="col" className="w-28 px-4 py-2.5 font-bold whitespace-nowrap">Pending Since</th>
+                <th scope="col" className="w-24 px-4 py-2.5 font-bold whitespace-nowrap">SLA</th>
+                <th scope="col" className="w-20 px-4 py-2.5 font-bold whitespace-nowrap">Priority</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

@@ -48,3 +48,11 @@ Whenever the user says "push" or "commit", it always means:
 - Create a clean, descriptive commit message
 - Push to GitHub (`git push origin <branch>`)
 - Ensure the working tree is completely clean without leaving untracked or unstaged files
+
+# Application Details vs Application Process Navigation Rule
+
+Whenever an application is opened from **Submissions** (`LtpSubmittedApplications` / `submitted-applications`):
+- ALWAYS open the comprehensive **Application Details** view (`ltp-application-details` / `LtpApplicationDetails`) via `openApplication(appId, "ltp-application-details")`.
+- NEVER open the **Application Process** form (`LtpSubmissionDetails` / 8-step filing form) when clicking on a submitted application.
+- `LtpSubmissionDetails` is strictly reserved for drafting / filing a new application proposal (e.g. from Draft Applications or New Application creation).
+

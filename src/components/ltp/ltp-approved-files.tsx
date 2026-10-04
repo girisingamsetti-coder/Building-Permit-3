@@ -216,7 +216,7 @@ export function LtpApprovedFiles() {
   };
 
   const exportCSV = () => {
-    const headers = ["#", "BA No.", "BPO No.", "Project", "Applicant", "Scheme", "Sanction Date", "Area"];
+    const headers = ["#", "Application No.", "BPO No.", "Project", "Applicant", "Scheme", "Sanction Date", "Area"];
     const rows = sortedItems.map((item, idx) => [
       idx + 1,
       `"${item.baNo}"`,
@@ -279,7 +279,7 @@ export function LtpApprovedFiles() {
       {/* ── Controls: Search, Filters & Export ── */}
       <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
         {/* Search Box */}
-        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-64 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
+        <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 h-[34px] w-full sm:w-64 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
           <Search className="size-3.5 text-slate-400 shrink-0" />
           <input
             type="text"
@@ -372,21 +372,21 @@ export function LtpApprovedFiles() {
           <table className="w-full border-collapse text-left text-xs">
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
               <tr className="divide-x divide-[#DCD5C8]">
-                <th className="w-12 px-3 py-2.5 text-center font-bold">#</th>
+                <th className="w-10 px-2 py-2 text-center font-bold">#</th>
 
                 <th
                   onClick={() => handleSort("baNo")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>Application No. (BA)</span>
+                    <span>Application No.</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort("projectName")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="w-60 max-w-[240px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Project Name</span>
@@ -396,7 +396,7 @@ export function LtpApprovedFiles() {
 
                 <th
                   onClick={() => handleSort("applicantName")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="w-44 max-w-[180px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Applicant / Owner</span>
@@ -404,11 +404,11 @@ export function LtpApprovedFiles() {
                   </div>
                 </th>
 
-                <th className="px-3 py-2.5 font-bold text-center">Scheme</th>
+                <th className="w-20 px-2 py-2 font-bold text-center">Scheme</th>
 
                 <th
                   onClick={() => handleSort("sanctionDate")}
-                  className="px-3.5 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center"
+                  className="w-24 px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center whitespace-nowrap"
                 >
                   <div className="flex items-center justify-center gap-1">
                     <span>Sanction Date</span>
@@ -416,9 +416,9 @@ export function LtpApprovedFiles() {
                   </div>
                 </th>
 
-                <th className="px-3.5 py-2.5 font-bold text-center">Status</th>
+                <th className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">Status</th>
 
-                <th className="px-4 py-2.5 font-bold text-right">Permit Order & Details</th>
+                <th className="w-36 px-3 py-2 font-bold text-center whitespace-nowrap">Permit Order & Details</th>
               </tr>
             </thead>
 
@@ -441,9 +441,9 @@ export function LtpApprovedFiles() {
                     key={item.id}
                     className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]"
                   >
-                    <td className="px-3 py-3 text-center text-slate-500 font-medium">{idx + 1}</td>
+                    <td className="px-2 py-2 text-center text-slate-500 font-medium">{idx + 1}</td>
 
-                    <td className="px-3.5 py-3">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <div className="flex flex-col">
                         <button
                           onClick={() => {
@@ -462,16 +462,16 @@ export function LtpApprovedFiles() {
                       </div>
                     </td>
 
-                    <td className="px-3.5 py-3">
+                    <td className="px-3 py-2">
                       <div className="font-semibold text-slate-900 leading-snug">{item.projectName}</div>
                       <span className="text-[11px] text-slate-500">{item.village}, {item.district} • {item.totalArea}</span>
                     </td>
 
-                    <td className="px-3.5 py-3 text-slate-700 font-medium">
+                    <td className="px-3 py-2 text-slate-700 font-medium whitespace-nowrap">
                       {item.applicantName}
                     </td>
 
-                    <td className="px-3 py-3 text-center">
+                    <td className="px-2 py-2 text-center whitespace-nowrap">
                       <span
                         className={cn(
                           "px-2.5 py-0.5 rounded-full text-[10px] font-bold inline-block",
@@ -484,18 +484,18 @@ export function LtpApprovedFiles() {
                       </span>
                     </td>
 
-                    <td className="px-3.5 py-3 text-center font-mono text-slate-600">
+                    <td className="px-2.5 py-2 text-center font-mono text-slate-600 whitespace-nowrap">
                       {item.sanctionDate}
                     </td>
 
-                    <td className="px-3.5 py-3 text-center">
+                    <td className="px-2 py-2 text-center whitespace-nowrap">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
                         <CheckCircle2 className="size-3 text-emerald-600" /> Sanctioned
                       </span>
                     </td>
 
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-3 py-2 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           onClick={() => setSelectedBpo(item)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#801824] text-[#FDF6ED] hover:bg-[#941C2B] transition-colors shadow-2xs cursor-pointer"

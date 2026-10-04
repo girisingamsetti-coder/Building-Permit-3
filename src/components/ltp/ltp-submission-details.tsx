@@ -124,6 +124,12 @@ export function LtpSubmissionDetails({
   // Main Tabs: Application Form | Drawings | Documentation | Payments | Apply for NOCs
   const [mainTab, setMainTab] = React.useState<"form" | "drawing" | "documentation" | "payments" | "nocs">(initialTab ?? "form");
 
+  React.useEffect(() => {
+    if (initialTab) {
+      setMainTab(initialTab);
+    }
+  }, [initialTab]);
+
   // ─────────────────────────────────────────────────────────────
   // DOCUMENTATION REPOSITORY STATE
   // ─────────────────────────────────────────────────────────────
@@ -1004,7 +1010,7 @@ export function LtpSubmissionDetails({
         </div>
       )}
 
-      {/* ── TOP HEADER: Back button, BA Number, Status & Resumed Stage ── */}
+      {/* ── TOP HEADER: Back button, Application Number, Status & Resumed Stage ── */}
       <div className="bg-[#F5EBE1] border-b border-[#DCD5C8] px-4 py-2 flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3 flex-wrap">
           {onBack && (
@@ -1035,6 +1041,12 @@ export function LtpSubmissionDetails({
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#7A1316] text-[#FDF6ED] shadow-2xs">
                 <AlertCircle className="size-3" />
                 <span>Resumed at: {objectionNotice.stageName}</span>
+              </span>
+            )}
+            {isDraft && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                <FileText className="size-3 text-amber-800" />
+                <span>Draft Stage: {mainTab === "form" ? "Application Form" : mainTab === "drawing" ? "Drawings" : mainTab === "documentation" ? "Documentation" : mainTab === "payments" ? "Payments" : "Apply for NOCs"}</span>
               </span>
             )}
           </div>
@@ -2866,7 +2878,7 @@ export function LtpSubmissionDetails({
                     <button
                       type="button"
                       onClick={() => {
-                        showToast(`Application BA No. ${baNo} documents submitted successfully!`);
+                        showToast(`Application No. ${baNo} documents submitted successfully!`);
                         setDocSubmissionModal(true);
                       }}
                       className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-1.5 rounded transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-1.5"
@@ -2937,7 +2949,7 @@ export function LtpSubmissionDetails({
                     <button
                       type="button"
                       onClick={() => {
-                        showToast(`Application BA No. ${baNo} documents submitted successfully!`);
+                        showToast(`Application No. ${baNo} documents submitted successfully!`);
                         setDocSubmissionModal(true);
                       }}
                       className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-2xs hover:shadow-xs cursor-pointer flex items-center gap-2 group"
@@ -3149,7 +3161,7 @@ export function LtpSubmissionDetails({
                         </span>
                       </div>
                       <p className="text-slate-600 text-[11px] mt-0.5">
-                        Official verified land title deeds, structural integrity certificates, NOCs and statutory affidavits for BA No. <strong className="font-mono text-slate-900">{baNo}</strong>
+                        Official verified land title deeds, structural integrity certificates, NOCs and statutory affidavits for Application No. <strong className="font-mono text-slate-900">{baNo}</strong>
                       </p>
                     </div>
 
@@ -3601,7 +3613,7 @@ export function LtpSubmissionDetails({
                     </h3>
                   </div>
                   <p className="text-slate-600 text-[11px]">
-                    Departmental statutory clearances for Proposal BA No. <strong className="font-mono text-slate-900">{baNo}</strong>
+                    Departmental statutory clearances for Proposal Application No. <strong className="font-mono text-slate-900">{baNo}</strong>
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -4108,7 +4120,7 @@ export function LtpSubmissionDetails({
                   <table className="w-full text-left">
                     <tbody className="divide-y divide-[#DCD5C8]">
                       <tr>
-                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 w-36">Application BA No.</td>
+                        <td className="px-3 py-1.5 font-bold text-slate-600 bg-slate-50 w-36">Application No.</td>
                         <td className="px-3 py-1.5 font-mono font-bold text-[#7A1316]">{baNo}</td>
                       </tr>
                       <tr>
@@ -4444,7 +4456,7 @@ export function LtpSubmissionDetails({
               {/* Application Details Summary */}
               <div className="bg-white border border-[#DCD5C8] rounded-lg p-3.5 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#DCD5C8]/60 pb-2">
-                  <span className="text-slate-500 font-medium">Application BA No.:</span>
+                  <span className="text-slate-500 font-medium">Application No.:</span>
                   <span className="font-mono font-bold text-[#7A1316] text-xs bg-[#FAF7F2] border border-[#DCD5C8] px-2.5 py-0.5 rounded shadow-2xs">
                     {baNo || draftAppNo || "BA/2026/0892/BP"}
                   </span>
@@ -4575,7 +4587,7 @@ function PaymentProceeding({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-3">
               <Row label="Proceeding Number" value={proceedingNo} mono />
-              <Row label="Proposal / BA Number" value={baNo} mono />
+              <Row label="Proposal / Application Number" value={baNo} mono />
               <Row label="Date of Issue" value={today} />
               <Row label="Payment Date" value={submissionDate || today} />
             </div>
@@ -4593,7 +4605,7 @@ function PaymentProceeding({
           {/* Formal proceeding body */}
           <div className="bg-[#FBF3E4] border border-[#DCD5C8] rounded-lg p-4 space-y-3 text-[12px] text-slate-800 leading-relaxed">
             <p>
-              This is to acknowledge that the development application bearing Proposal BA No.{" "}
+              This is to acknowledge that the development application bearing Proposal Application No.{" "}
               <span className="font-bold font-mono">{baNo}</span> has been received and the prescribed development fees and scrutiny charges have been duly paid to the Andhra Pradesh Capital Region Development Authority (APCRDA).
             </p>
             <p>

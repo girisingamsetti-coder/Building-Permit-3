@@ -203,13 +203,13 @@ export function PaymentsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Txn # / Challan #</th>
-                <th className="py-3 px-4">App # & Payer</th>
-                <th className="py-3 px-4">Amount</th>
-                <th className="py-3 px-4">Payment Mode</th>
-                <th className="py-3 px-4">Gateway Reference</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Txn # / Challan #</th>
+                <th className="w-48 max-w-[200px] py-2 px-3 font-medium">App # & Payer</th>
+                <th className="w-28 py-2 px-3 text-right whitespace-nowrap font-medium">Amount</th>
+                <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Payment Mode</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Gateway Reference</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-20 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -222,27 +222,27 @@ export function PaymentsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.transactionId}</div>
                       <div className="text-muted-foreground text-[11px]">{item.challanNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.payerName}</div>
-                      <div className="text-[11px] text-muted-foreground font-mono">{item.applicationNumber}</div>
+                    <td className="w-48 max-w-[200px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.payerName}</div>
+                      <div className="text-[11px] text-muted-foreground font-mono truncate">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-28 py-2 px-3 text-right whitespace-nowrap">
                       <div className="text-sm font-bold text-foreground">₹{item.amount.toLocaleString()}</div>
                       <div className="text-[10px] text-muted-foreground">{item.feeBreakdown.length} line items</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2.5 text-center whitespace-nowrap">
                       <Badge variant="outline" className="text-[10px]">
                         {item.paymentMode.replace(/_/g, " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-muted-foreground">
+                    <td className="w-32 py-2 px-3 font-mono text-[11px] text-muted-foreground whitespace-nowrap truncate">
                       {item.gatewayRef}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -256,12 +256,12 @@ export function PaymentsView() {
                         {item.status}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedPayment(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Receipt className="size-3.5" /> Receipt
                       </Button>

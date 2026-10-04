@@ -206,24 +206,25 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
-      {/* ── Submodule Tabs & Quick Action Bar (No Duplicate Header) ── */}
-      <div className="bg-white border-b border-[#EADBCE] rounded-xl px-4 py-3 shadow-xs shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-        {/* Submodule Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+      {/* ── Submodule Tabs (Spread across the screen) ── */}
+      <div className="bg-white border-b border-[#EADBCE] rounded-xl px-3 sm:px-4 py-2.5 shadow-xs shrink-0 w-full">
+        {/* 4 Tabs Grid spreading evenly across the screen */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 w-full">
           <button
             onClick={() => handleTabChange("reports-summary")}
+            title="Application Reports"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "reports-summary"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <BarChart3 className="size-3.5 shrink-0" />
-            <span>Application Reports</span>
+            <span className="truncate">Application Reports</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "reports-summary" ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
               )}
             >
@@ -233,18 +234,19 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
 
           <button
             onClick={() => handleTabChange("reports-payments")}
+            title="Fee & Challan Reports"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "reports-payments"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <IndianRupee className="size-3.5 shrink-0" />
-            <span>Fee & Challan Reports</span>
+            <span className="truncate">Fee & Challan Reports</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "reports-payments" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800"
               )}
             >
@@ -254,18 +256,19 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
 
           <button
             onClick={() => handleTabChange("reports-scrutiny")}
+            title="Scrutiny & Shortfalls"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "reports-scrutiny"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <ShieldAlert className="size-3.5 shrink-0" />
-            <span>Scrutiny & Shortfalls</span>
+            <span className="truncate">Scrutiny & Shortfalls</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "reports-scrutiny" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
               )}
             >
@@ -275,44 +278,16 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
 
           <button
             onClick={() => handleTabChange("reports-mis")}
+            title="MIS Registry & Export"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "reports-mis"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <FileSpreadsheet className="size-3.5 shrink-0" />
-            <span>MIS Registry & Export</span>
-          </button>
-        </div>
-
-        {/* Right Tools: Export CSV, Print, Refresh */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleExportCSV}
-            title="Download CSV Spreadsheet"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-          >
-            <Download className="size-3.5" />
-            <span className="hidden sm:inline">Export CSV</span>
-          </button>
-
-          <button
-            onClick={handlePrint}
-            title="Print Report"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-          >
-            <Printer className="size-3.5" />
-            <span className="hidden sm:inline">Print</span>
-          </button>
-
-          <button
-            onClick={handleRefresh}
-            title="Refresh Reports"
-            className="flex size-9 items-center justify-center rounded-full border border-[#DCD5C8] bg-white text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
-          >
-            <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin text-[#801824]")} />
+            <span className="truncate">MIS Registry & Export</span>
           </button>
         </div>
       </div>
@@ -364,10 +339,10 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
         </div>
       </div>
 
-      {/* ── Filters & Search Controls Row ── */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+      {/* ── Filters, Search & Action Buttons (Single Row) ── */}
+      <div className="flex items-center justify-between gap-2.5 shrink-0 overflow-x-auto no-scrollbar py-0.5">
         {/* Left: Quick scheme pills */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-center gap-1.5 rounded-full bg-white border border-[#EADBCE] px-3 py-1 text-xs text-[#5C1A20] shadow-2xs">
             <Building2 className="size-3.5 text-[#801824] shrink-0" />
             <span className="text-[11px] text-slate-500 font-medium">LPS Scheme:</span>
@@ -385,16 +360,16 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
           </div>
         </div>
 
-        {/* Right: Search & Dropdowns */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Right: Search, Filters & Action Buttons in a Single Row */}
+        <div className="flex items-center gap-2 shrink-0">
           {/* Search Box */}
-          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-64 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 h-8 w-44 sm:w-56 shadow-2xs hover:shadow-xs focus-within:border-[#801824] focus-within:ring-2 focus-within:ring-[#801824]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
               value={searchKeywords}
               onChange={(e) => setSearchKeywords(e.target.value)}
-              placeholder=""
+              placeholder="Search..."
               className="w-full bg-transparent text-xs text-slate-800 placeholder:italic placeholder:text-slate-400 outline-none"
             />
             {searchKeywords && (
@@ -445,12 +420,43 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                 setFilterScheme("ALL");
                 setFilterStatus("ALL");
               }}
-              className="rounded-full px-3.5 py-1.5 bg-rose-50 text-[#801824] border border-[#801824]/20 hover:bg-rose-100 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1.5"
+              className="rounded-full px-3 py-1 bg-rose-50 text-[#801824] border border-[#801824]/20 hover:bg-rose-100 text-xs font-semibold cursor-pointer transition-all shadow-2xs flex items-center gap-1 shrink-0"
+              title="Reset all filters"
             >
               <X className="size-3" />
               <span>Clear</span>
             </button>
           )}
+
+          {/* Divider */}
+          <div className="h-5 w-px bg-[#DCD5C8] mx-0.5 shrink-0" />
+
+          {/* Export CSV, Print, Refresh */}
+          <button
+            onClick={handleExportCSV}
+            title="Download CSV Spreadsheet"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+          >
+            <Download className="size-3.5" />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={handlePrint}
+            title="Print Report"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 h-8 rounded-full border border-[#DCD5C8] bg-white text-xs font-bold text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
+          >
+            <Printer className="size-3.5" />
+            <span>Print</span>
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            title="Refresh Reports"
+            className="flex size-8 items-center justify-center rounded-full border border-[#DCD5C8] bg-white text-[#801824] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs shrink-0"
+          >
+            <RefreshCw className={cn("size-3.5", isRefreshing && "animate-spin text-[#801824]")} />
+          </button>
         </div>
       </div>
 
@@ -461,15 +467,15 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
             <table className="w-full border-collapse text-left text-xs">
               <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
                 <tr className="divide-x divide-[#DCD5C8]">
-                  <th className="px-3.5 py-2.5 font-bold w-12 text-center">#</th>
-                  <th className="px-3.5 py-2.5 font-bold">Application No.</th>
-                  <th className="px-3.5 py-2.5 font-bold">Project Details</th>
-                  <th className="px-3.5 py-2.5 font-bold">Applicant Name</th>
-                  <th className="px-3.5 py-2.5 font-bold">Scheme</th>
-                  <th className="px-3.5 py-2.5 font-bold">Submission Date</th>
-                  <th className="px-3.5 py-2.5 font-bold">Current Stage</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">Status</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Action</th>
+                  <th className="w-10 px-2 py-2 font-bold text-center">#</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Application No.</th>
+                  <th className="w-56 max-w-[220px] px-3 py-2 font-bold">Project Details</th>
+                  <th className="w-44 max-w-[180px] px-3 py-2 font-bold whitespace-nowrap">Applicant Name</th>
+                  <th className="w-20 px-2 py-2 font-bold text-center">Scheme</th>
+                  <th className="w-24 px-2.5 py-2 font-bold text-center whitespace-nowrap">Submission Date</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Current Stage</th>
+                  <th className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">Status</th>
+                  <th className="w-18 px-2 py-2 font-bold text-center">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
@@ -484,8 +490,8 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                     const isLps = app.applicationNo?.includes("/LPS/") || app.project?.type === "LAYOUT_APPROVAL";
                     return (
                       <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                        <td className="px-3.5 py-3 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
-                        <td className="px-3.5 py-3">
+                        <td className="px-2 py-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                        <td className="px-3 py-2 whitespace-nowrap">
                           <button
                             onClick={() => openApplication(app.id, "ltp-application-details")}
                             className="font-mono font-bold text-[#7A1316] hover:text-[#801824] hover:underline cursor-pointer text-left"
@@ -494,12 +500,12 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                             {app.applicationNo}
                           </button>
                         </td>
-                        <td className="px-3.5 py-3">
+                        <td className="px-3 py-2">
                           <p className="font-semibold text-slate-900">{app.project?.name || "Building Proposal"}</p>
                           <p className="text-[11px] text-slate-500">{app.project?.type || "Residential"}</p>
                         </td>
-                        <td className="px-3.5 py-3 font-medium text-slate-700">{app.applicant?.name || "Applicant"}</td>
-                        <td className="px-3.5 py-3">
+                        <td className="px-3 py-2 font-medium text-slate-700 whitespace-nowrap">{app.applicant?.name || "Applicant"}</td>
+                        <td className="px-2 py-2 text-center whitespace-nowrap">
                           <span
                             className={cn(
                               "px-2 py-0.5 rounded-full text-[10px] font-bold border",
@@ -511,14 +517,14 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                             {isLps ? "LPS" : "Non-LPS"}
                           </span>
                         </td>
-                        <td className="px-3.5 py-3 text-slate-600 font-mono text-[11px]">
+                        <td className="px-2.5 py-2 text-slate-600 font-mono text-[11px] text-center whitespace-nowrap">
                           {new Date(app.submissionDate || app.lastUpdated || Date.now()).toLocaleDateString("en-IN")}
                         </td>
-                        <td className="px-3.5 py-3 text-slate-700">{app.currentStageLabel || "Review Chain"}</td>
-                        <td className="px-3.5 py-3 text-center">
+                        <td className="px-3 py-2 text-slate-700 whitespace-nowrap">{app.currentStageLabel || "Review Chain"}</td>
+                        <td className="px-2 py-2 text-center whitespace-nowrap">
                           <StatusBadge status={app.status} />
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-2 py-2 text-center whitespace-nowrap">
                           <button
                             onClick={() => openApplication(app.id, "ltp-application-details")}
                             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-[#801824] hover:bg-[#F3EADF] border border-[#DCD5C8] cursor-pointer"
@@ -547,15 +553,15 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
             <table className="w-full border-collapse text-left text-xs">
               <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
                 <tr className="divide-x divide-[#DCD5C8]">
-                  <th className="px-3.5 py-2.5 font-bold w-12 text-center">#</th>
-                  <th className="px-3.5 py-2.5 font-bold">Challan / Receipt No.</th>
-                  <th className="px-3.5 py-2.5 font-bold">Application No.</th>
-                  <th className="px-3.5 py-2.5 font-bold">Applicant / Owner</th>
-                  <th className="px-3.5 py-2.5 font-bold">Fee Type</th>
-                  <th className="px-3.5 py-2.5 font-bold text-right">Amount (₹)</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">Payment Status</th>
-                  <th className="px-3.5 py-2.5 font-bold">Transaction Date</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Action</th>
+                  <th className="w-10 px-2 py-2 font-bold text-center">#</th>
+                  <th className="w-40 px-3 py-2 font-bold whitespace-nowrap">Challan / Receipt No.</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Application No.</th>
+                  <th className="w-44 max-w-[180px] px-3 py-2 font-bold whitespace-nowrap">Applicant / Owner</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Fee Type</th>
+                  <th className="w-28 px-2.5 py-2 font-bold text-right whitespace-nowrap">Amount (₹)</th>
+                  <th className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">Payment Status</th>
+                  <th className="w-28 px-2.5 py-2 font-bold text-center whitespace-nowrap">Transaction Date</th>
+                  <th className="w-20 px-2 py-2 font-bold text-center whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
@@ -565,15 +571,15 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                   const amount = app.payment?.amount || (idx % 2 === 0 ? 18500 : 36200);
                   return (
                     <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                      <td className="px-3.5 py-3 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
-                      <td className="px-3.5 py-3 font-mono font-bold text-[#801824]">{challanNo}</td>
-                      <td className="px-3.5 py-3 font-mono text-slate-800">{app.applicationNo}</td>
-                      <td className="px-3.5 py-3 font-medium text-slate-800">{app.applicant?.name || "Applicant"}</td>
-                      <td className="px-3.5 py-3 text-slate-600">Scrutiny & Betterment Charges</td>
-                      <td className="px-3.5 py-3 text-right font-mono font-bold text-[#5C1A20]">
+                      <td className="px-2 py-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                      <td className="px-3 py-2 font-mono font-bold text-[#801824] whitespace-nowrap">{challanNo}</td>
+                      <td className="px-3 py-2 font-mono text-slate-800 whitespace-nowrap">{app.applicationNo}</td>
+                      <td className="px-3 py-2 font-medium text-slate-800 whitespace-nowrap">{app.applicant?.name || "Applicant"}</td>
+                      <td className="px-3 py-2 text-slate-600 whitespace-nowrap">Scrutiny & Betterment Charges</td>
+                      <td className="px-2.5 py-2 text-right font-mono font-bold text-[#5C1A20] whitespace-nowrap">
                         ₹{amount.toLocaleString("en-IN")}
                       </td>
-                      <td className="px-3.5 py-3 text-center">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <span
                           className={cn(
                             "px-2.5 py-0.5 rounded-full text-[10px] font-bold border",
@@ -585,10 +591,10 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                           {isPaid ? "Realized" : "Pending Challan"}
                         </span>
                       </td>
-                      <td className="px-3.5 py-3 text-slate-600 font-mono text-[11px]">
+                      <td className="px-2.5 py-2 text-slate-600 font-mono text-[11px] text-center whitespace-nowrap">
                         {new Date(app.payment?.completedAt || app.payment?.initiatedAt || app.submissionDate || Date.now()).toLocaleDateString("en-IN")}
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <button
                           onClick={() => {
                             toast({
@@ -621,15 +627,15 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
             <table className="w-full border-collapse text-left text-xs">
               <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
                 <tr className="divide-x divide-[#DCD5C8]">
-                  <th className="px-3.5 py-2.5 font-bold w-12 text-center">#</th>
-                  <th className="px-3.5 py-2.5 font-bold">Report No.</th>
-                  <th className="px-3.5 py-2.5 font-bold">Application No.</th>
-                  <th className="px-3.5 py-2.5 font-bold">Project Name</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">Checks Tested</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">Passed</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">Violations</th>
-                  <th className="px-3.5 py-2.5 font-bold text-center">PreDCR Status</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Action</th>
+                  <th className="w-10 px-2 py-2 font-bold text-center">#</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Report No.</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Application No.</th>
+                  <th className="w-56 max-w-[220px] px-3 py-2 font-bold">Project Name</th>
+                  <th className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">Checks Tested</th>
+                  <th className="w-20 px-2 py-2 font-bold text-center whitespace-nowrap">Passed</th>
+                  <th className="w-20 px-2 py-2 font-bold text-center whitespace-nowrap">Violations</th>
+                  <th className="w-24 px-2 py-2 font-bold text-center whitespace-nowrap">PreDCR Status</th>
+                  <th className="w-20 px-2 py-2 font-bold text-center whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
@@ -641,14 +647,14 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                   const isPassed = failed === 0;
                   return (
                     <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                      <td className="px-3.5 py-3 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
-                      <td className="px-3.5 py-3 font-mono font-bold text-[#801824]">{reportNo}</td>
-                      <td className="px-3.5 py-3 font-mono text-slate-800">{app.applicationNo}</td>
-                      <td className="px-3.5 py-3 font-medium text-slate-800">{app.project?.name || "Building Proposal"}</td>
-                      <td className="px-3.5 py-3 text-center font-mono font-bold text-slate-700">{totalChecks}</td>
-                      <td className="px-3.5 py-3 text-center font-mono font-bold text-emerald-700">{passed}</td>
-                      <td className="px-3.5 py-3 text-center font-mono font-bold text-rose-700">{failed}</td>
-                      <td className="px-3.5 py-3 text-center">
+                      <td className="px-2 py-2 text-center text-slate-400 font-mono text-[11px]">{idx + 1}</td>
+                      <td className="px-3 py-2 font-mono font-bold text-[#801824] whitespace-nowrap">{reportNo}</td>
+                      <td className="px-3 py-2 font-mono text-slate-800 whitespace-nowrap">{app.applicationNo}</td>
+                      <td className="px-3 py-2 font-medium text-slate-800">{app.project?.name || "Building Proposal"}</td>
+                      <td className="px-2 py-2 text-center font-mono font-bold text-slate-700 whitespace-nowrap">{totalChecks}</td>
+                      <td className="px-2 py-2 text-center font-mono font-bold text-emerald-700 whitespace-nowrap">{passed}</td>
+                      <td className="px-2 py-2 text-center font-mono font-bold text-rose-700 whitespace-nowrap">{failed}</td>
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <span
                           className={cn(
                             "px-2.5 py-0.5 rounded-full text-[10px] font-bold border",
@@ -660,7 +666,7 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
                           {isPassed ? "Scrutiny Cleared" : "Shortfalls Found"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <button
                           onClick={() => openApplication(app.id, "ltp-application-details")}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold text-[#801824] hover:bg-[#F3EADF] border border-[#DCD5C8] cursor-pointer"

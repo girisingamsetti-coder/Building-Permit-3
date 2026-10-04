@@ -886,11 +886,11 @@ function DocumentsTab({ app, user }: { app: Application; user: AppUser }) {
         <table className="w-full text-sm">
           <thead className="bg-muted/40">
             <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-2 font-medium">Document</th>
-              <th className="px-3 py-2 font-medium">Required</th>
-              <th className="px-3 py-2 font-medium">Status</th>
-              <th className="px-3 py-2 font-medium">Verified By</th>
-              <th className="px-3 py-2 font-medium text-right">Actions</th>
+              <th className="w-64 max-w-[260px] px-3 py-2 font-medium">Document</th>
+              <th className="w-24 px-3 py-2 font-medium whitespace-nowrap">Required</th>
+              <th className="w-32 px-3 py-2 font-medium whitespace-nowrap">Status</th>
+              <th className="w-36 px-3 py-2 font-medium whitespace-nowrap">Verified By</th>
+              <th className="w-28 px-3 py-2 font-medium text-right whitespace-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -1041,10 +1041,10 @@ function ScrutinyReportView({ app }: { app: Application }) {
         <table className="w-full text-sm">
           <thead className="bg-muted/40">
             <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-              <th className="px-3 py-2 font-medium">Rule</th>
-              <th className="px-3 py-2 font-medium">Category</th>
-              <th className="px-3 py-2 font-medium">Severity</th>
-              <th className="px-3 py-2 font-medium">Result</th>
+              <th className="min-w-[200px] max-w-md px-3 py-2 font-medium">Rule</th>
+              <th className="w-36 px-3 py-2 font-medium whitespace-nowrap">Category</th>
+              <th className="w-24 px-3 py-2 font-medium whitespace-nowrap">Severity</th>
+              <th className="w-24 px-3 py-2 font-medium whitespace-nowrap">Result</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">

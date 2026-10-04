@@ -188,29 +188,29 @@ export function AdminAudit() {
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
                 <tr className="text-left text-[11px] uppercase tracking-wide text-foreground">
-                  <th className="px-4 py-2.5 font-bold">Timestamp</th>
-                  <th className="px-4 py-2.5 font-bold">Actor</th>
-                  <th className="px-4 py-2.5 font-bold">Action</th>
-                  <th className="px-4 py-2.5 font-bold">Target</th>
-                  <th className="px-4 py-2.5 font-bold">Change</th>
+                  <th className="w-40 px-4 py-2.5 font-bold">Timestamp</th>
+                  <th className="w-44 max-w-[180px] px-4 py-2.5 font-bold">Actor</th>
+                  <th className="w-40 max-w-[160px] px-4 py-2.5 font-bold">Action</th>
+                  <th className="w-36 px-4 py-2.5 font-bold">Target</th>
+                  <th className="min-w-[200px] max-w-md px-4 py-2.5 font-bold">Change</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filtered.map((e) => (
                   <tr key={`${e.id}-${e.timestamp}`} className="hover:bg-muted/30 align-top">
-                    <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="w-40 px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
                       {formatDateTime(e.timestamp)}
                     </td>
-                    <td className="px-4 py-2.5">
-                      <p className="text-xs font-medium">{e.user}</p>
+                    <td className="w-44 max-w-[180px] px-4 py-2.5">
+                      <p className="text-xs font-medium truncate">{e.user}</p>
                       <RoleBadge role={e.role} />
                     </td>
-                    <td className="px-4 py-2.5">
-                      <p className="text-xs font-medium">{e.action}</p>
+                    <td className="w-40 max-w-[160px] px-4 py-2.5">
+                      <p className="text-xs font-medium truncate">{e.action}</p>
                       <Badge variant="outline" className="text-[9px]">{e.targetType ?? e.entity}</Badge>
                     </td>
-                    <td className="px-4 py-2.5 text-xs font-mono text-muted-foreground">{e.entityId}</td>
-                    <td className="px-4 py-2.5 text-xs">
+                    <td className="w-36 px-4 py-2.5 text-xs font-mono text-muted-foreground truncate">{e.entityId}</td>
+                    <td className="min-w-[200px] max-w-md px-4 py-2.5 text-xs">
                       {e.oldValue && e.newValue ? (
                         <span><span className="text-destructive">{e.oldValue}</span> → <span className="text-success">{e.newValue}</span></span>
                       ) : e.newValue ? (

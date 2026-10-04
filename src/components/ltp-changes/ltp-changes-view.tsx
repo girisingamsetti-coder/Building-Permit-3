@@ -187,13 +187,13 @@ export function LtpChangesView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Request # / App #</th>
-                <th className="py-3 px-4">Owner & Site</th>
-                <th className="py-3 px-4">Current LTP</th>
-                <th className="py-3 px-4">Proposed New LTP</th>
-                <th className="py-3 px-4">Clearance Status</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Request # / App #</th>
+                <th className="w-52 max-w-[220px] py-2 px-3 font-medium">Owner & Site</th>
+                <th className="w-44 max-w-[180px] py-2 px-3 font-medium">Current LTP</th>
+                <th className="w-44 max-w-[180px] py-2 px-3 font-medium">Proposed New LTP</th>
+                <th className="w-40 py-2 px-3 whitespace-nowrap font-medium">Clearance Status</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-20 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -206,25 +206,25 @@ export function LtpChangesView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.changeRequestNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-medium text-foreground">{item.ownerName}</div>
-                      <div className="truncate text-[11px] text-muted-foreground">{item.siteAddress}</div>
+                    <td className="w-52 max-w-[220px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.ownerName}</div>
+                      <div className="truncate text-[11px] text-muted-foreground max-w-[200px]">{item.siteAddress}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.currentLtp.name}</div>
+                    <td className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap">
+                      <div className="font-medium text-foreground truncate">{item.currentLtp.name}</div>
                       <div className="font-mono text-[10px] text-muted-foreground">{item.currentLtp.licenceNo}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-primary flex items-center gap-1">
-                        <ArrowRight className="size-3" /> {item.proposedLtp.name}
+                    <td className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap">
+                      <div className="font-medium text-primary flex items-center gap-1 truncate">
+                        <ArrowRight className="size-3 shrink-0" /> <span className="truncate">{item.proposedLtp.name}</span>
                       </div>
                       <div className="font-mono text-[10px] text-muted-foreground pl-4">{item.proposedLtp.licenceNo}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-40 py-2 px-3 whitespace-nowrap">
                       <div className="flex items-center gap-2 text-[11px]">
                         <span title="Owner Consent" className={item.hasOwnerConsent ? "text-emerald-600" : "text-red-500"}>
                           Owner: {item.hasOwnerConsent ? "✓" : "✗"}
@@ -237,7 +237,7 @@ export function LtpChangesView() {
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -251,12 +251,12 @@ export function LtpChangesView() {
                         {item.status.replace("_", " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedChange(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Details
                       </Button>

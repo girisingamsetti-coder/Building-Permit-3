@@ -70,10 +70,8 @@ const LTP_MODULES: LtpModuleDef[] = [
     id: "commencement",
     label: "Work Commencement",
     iconType: "commencement",
-    submenus: [
-      { id: "cc-issued", label: "Commencement Certificates" },
-      { id: "work-initiated", label: "Work Initiation" },
-    ],
+    directMenuId: "commencement",
+    submenus: [],
   },
   {
     id: "occupancy",
@@ -376,9 +374,18 @@ const COMPLIANCE_TAB_IDS = new Set([
   "review-show-cause-submission",
 ]);
 
+const COMMENCEMENT_TAB_IDS = new Set([
+  "commencement",
+  "cc-issued",
+  "work-initiated",
+]);
+
 function isMenuMatch(mod: LtpModuleDef, menuId: string): boolean {
   if (mod.id === "proceeding-status" || mod.directMenuId === "proceeding-status") {
     return COMPLIANCE_TAB_IDS.has(menuId);
+  }
+  if (mod.id === "commencement" || mod.directMenuId === "commencement") {
+    return COMMENCEMENT_TAB_IDS.has(menuId);
   }
   return (
     mod.id === menuId ||
@@ -400,10 +407,22 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   // All roles see the full module list — access level per module is configured by Admin in Settings.
   // ONLY Admin has access to the Settings module in the left menu bar.
-  const modules = user?.role === "ADMIN" ? ADMIN_MODULES : LTP_MODULES;
+  const rawModules = user?.role === "ADMIN" ? ADMIN_MODULES : LTP_MODULES;
+  const userAccessConfig = useAppStore((s) => s.systemSettings?.userAccessConfig);
   const roleAccessConfig = useAppStore((s) => s.systemSettings?.roleAccessConfig);
-  const getAccessLevel = (moduleId: string): ModuleAccessLevel =>
-    roleAccessConfig?.[user?.role ?? ""]?.[moduleId] ?? "full";
+  const hideRestricted = useAppStore((s) => s.systemSettings?.hideRestrictedModules);
+
+  const getAccessLevel = React.useCallback((moduleId: string): ModuleAccessLevel => {
+    if (user?.id && userAccessConfig?.[user.id]?.[moduleId]) {
+      return userAccessConfig[user.id][moduleId];
+    }
+    return roleAccessConfig?.[user?.role ?? ""]?.[moduleId] ?? "full";
+  }, [user?.id, user?.role, userAccessConfig, roleAccessConfig]);
+
+  const modules = React.useMemo(() => {
+    if (user?.role === "ADMIN" || !hideRestricted) return rawModules;
+    return rawModules.filter((m) => getAccessLevel(m.id) !== "none");
+  }, [rawModules, user?.role, hideRestricted, getAccessLevel]);
 
   // Single module expanded at a time
   const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {

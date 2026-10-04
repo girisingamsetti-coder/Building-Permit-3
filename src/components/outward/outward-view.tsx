@@ -209,13 +209,13 @@ export function OutwardView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Dispatch # / App #</th>
-                <th className="py-3 px-4">Document Type</th>
-                <th className="py-3 px-4">Mode & Tracking #</th>
-                <th className="py-3 px-4">Recipient & Address</th>
-                <th className="py-3 px-4">Dispatch Date</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Dispatch # / App #</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Document Type</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Mode & Tracking #</th>
+                <th className="w-52 max-w-[220px] py-2 px-3 font-medium">Recipient & Address</th>
+                <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Dispatch Date</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-24 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -228,32 +228,32 @@ export function OutwardView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.dispatchNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="text-[10px] font-semibold">
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
+                      <Badge variant="outline" className="text-[10px] font-semibold truncate max-w-[130px]">
                         {item.documentType.replace(/_/g, " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
                       <div className="font-semibold text-foreground flex items-center gap-1">
                         <Truck className="size-3 text-primary" /> {item.dispatchMode.replace(/_/g, " ")}
                       </div>
                       <div className="font-mono text-[11px] text-muted-foreground">{item.trackingNumber}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-medium text-foreground">{item.recipientName}</div>
-                      <div className="truncate text-[11px] text-muted-foreground">{item.recipientAddress}</div>
+                    <td className="w-52 max-w-[220px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.recipientName}</div>
+                      <div className="truncate text-[11px] text-muted-foreground max-w-[200px]">{item.recipientAddress}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2.5 text-center whitespace-nowrap">
                       <div className="text-[11px] font-medium text-foreground">{item.dispatchDate}</div>
                       {item.deliveryDate && (
                         <div className="text-[10px] text-emerald-600">Delivered: {item.deliveryDate}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -269,12 +269,12 @@ export function OutwardView() {
                         {item.status}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-24 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedOutward(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Consignment
                       </Button>

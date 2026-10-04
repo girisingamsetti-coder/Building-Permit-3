@@ -198,15 +198,15 @@ export function PmShortfalls() {
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
                   <tr className="text-left text-[11px] uppercase tracking-wide text-foreground border-b-2 border-border">
-                    <th className="px-4 py-2.5 font-bold">Shortfall ID</th>
-                    <th className="px-4 py-2.5 font-bold">Application No.</th>
-                    <th className="px-4 py-2.5 font-bold">Title</th>
-                    <th className="px-4 py-2.5 font-bold">Type</th>
-                    <th className="px-4 py-2.5 font-bold">Raised By</th>
-                    <th className="px-4 py-2.5 font-bold">Raised At</th>
-                    <th className="px-4 py-2.5 font-bold text-right">Age</th>
-                    <th className="px-4 py-2.5 font-bold">Status</th>
-                    <th className="px-4 py-2.5 font-bold">Due Date</th>
+                    <th className="w-28 px-3 py-2 font-bold whitespace-nowrap">Shortfall ID</th>
+                    <th className="w-32 px-3 py-2 font-bold whitespace-nowrap">Application No.</th>
+                    <th className="w-60 max-w-[240px] px-3 py-2 font-bold">Title</th>
+                    <th className="w-24 px-3 py-2 font-bold whitespace-nowrap">Type</th>
+                    <th className="w-32 px-3 py-2 font-bold whitespace-nowrap">Raised By</th>
+                    <th className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">Raised At</th>
+                    <th className="w-16 px-2.5 py-2 text-right font-bold whitespace-nowrap">Age</th>
+                    <th className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">Status</th>
+                    <th className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">Due Date</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -227,28 +227,28 @@ export function PmShortfalls() {
                         }
                         className="cursor-pointer hover:bg-muted/40 transition-colors"
                       >
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 py-2">
                           <span className="font-mono text-[11px] text-foreground">
                             {s.shortfallId}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 py-2">
                           <span className="font-mono text-xs text-primary">
                             {s.applicationNo}
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
-                          <p className="text-xs font-medium text-foreground truncate max-w-[240px]">
+                        <td className="px-3 py-2">
+                          <p className="text-xs font-medium text-foreground truncate max-w-[220px]">
                             {s.title}
                           </p>
-                          <p className="text-[11px] text-muted-foreground truncate max-w-[240px]">
+                          <p className="text-[11px] text-muted-foreground truncate max-w-[220px]">
                             {s.application.project.name}
                           </p>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 py-2">
                           <ShortfallTypeBadge type={s.type} />
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-3 py-2">
                           <p className="text-xs font-medium text-foreground">
                             {s.raisedBy.name}
                           </p>
@@ -256,10 +256,10 @@ export function PmShortfalls() {
                             <RoleBadge role={s.raisedBy.role} />
                           </div>
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-2.5 py-2 text-center text-xs text-muted-foreground whitespace-nowrap">
                           {formatDate(s.raisedAt)}
                         </td>
-                        <td className="px-4 py-2.5 text-right tabular-nums">
+                        <td className="px-2.5 py-2 text-right tabular-nums">
                           <span
                             className={cn(
                               "text-xs font-medium",
@@ -269,10 +269,10 @@ export function PmShortfalls() {
                             {age}d
                           </span>
                         </td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-2.5 py-2 text-center">
                           <ShortfallStatusBadge status={s.status} />
                         </td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground whitespace-nowrap">
+                        <td className="px-2.5 py-2 text-center text-xs text-muted-foreground whitespace-nowrap">
                           {formatDate(s.dueDate)}
                         </td>
                       </tr>

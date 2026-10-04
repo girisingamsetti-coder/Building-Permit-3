@@ -232,13 +232,13 @@ export function PmOfficerDetails() {
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
                   <tr className="text-left text-[11px] uppercase tracking-wide text-foreground border-b-2 border-border">
-                    <th className="px-4 py-2.5 font-bold">Application No.</th>
-                    <th className="px-4 py-2.5 font-bold">Project</th>
-                    <th className="px-4 py-2.5 font-bold">Current Stage</th>
-                    <th className="px-4 py-2.5 font-bold">Status</th>
-                    <th className="px-4 py-2.5 font-bold">Assigned Since</th>
-                    <th className="px-4 py-2.5 font-bold">SLA</th>
-                    <th className="px-4 py-2.5 font-bold text-right">Action</th>
+                    <th className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Application No.</th>
+                    <th className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Project</th>
+                    <th className="w-40 px-4 py-2.5 font-bold whitespace-nowrap">Current Stage</th>
+                    <th className="w-28 px-4 py-2.5 font-bold text-center whitespace-nowrap">Status</th>
+                    <th className="w-28 px-4 py-2.5 font-bold text-center whitespace-nowrap">Assigned Since</th>
+                    <th className="w-24 px-4 py-2.5 font-bold text-center whitespace-nowrap">SLA</th>
+                    <th className="w-20 px-4 py-2.5 font-bold text-right whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">

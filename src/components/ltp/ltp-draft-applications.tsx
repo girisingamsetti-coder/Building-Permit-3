@@ -15,12 +15,55 @@ import {
   X,
   Download,
   Search,
+  ArrowRight,
 } from "lucide-react";
 import type { Application } from "@/types";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+export type DraftStageKey = "form" | "drawing" | "documentation" | "payments" | "nocs";
+
+export interface DraftStageConfig {
+  key: DraftStageKey;
+  label: string;
+  badgeCls: string;
+  stepNumber: number;
+}
+
+export const DRAFT_STAGES: Record<DraftStageKey, DraftStageConfig> = {
+  form: {
+    key: "form",
+    label: "Application Form",
+    stepNumber: 1,
+    badgeCls: "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100",
+  },
+  drawing: {
+    key: "drawing",
+    label: "Drawings",
+    stepNumber: 2,
+    badgeCls: "bg-purple-50 text-purple-900 border-purple-300 hover:bg-purple-100",
+  },
+  documentation: {
+    key: "documentation",
+    label: "Documentation",
+    stepNumber: 3,
+    badgeCls: "bg-blue-50 text-blue-900 border-blue-300 hover:bg-blue-100",
+  },
+  payments: {
+    key: "payments",
+    label: "Payments",
+    stepNumber: 4,
+    badgeCls: "bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100",
+  },
+  nocs: {
+    key: "nocs",
+    label: "Apply for NOCs",
+    stepNumber: 5,
+    badgeCls: "bg-orange-50 text-orange-900 border-orange-300 hover:bg-orange-100",
+  },
+};
 
 interface DraftItem {
   id: string;
@@ -32,6 +75,7 @@ interface DraftItem {
   appId?: string;
   lpsType?: "LPS Layout" | "Non-LPS";
   type: "LPS" | "Non LPS";
+  stage: DraftStageKey;
 }
 
 export function LtpDraftApplications({
@@ -48,6 +92,7 @@ export function LtpDraftApplications({
   const [filterType, setFilterType] = React.useState("ALL");
   const [filterOwner, setFilterOwner] = React.useState("ALL");
   const [filterScheme, setFilterScheme] = React.useState("ALL");
+  const [filterStage, setFilterStage] = React.useState("ALL");
   const [sortField, setSortField] = React.useState<keyof DraftItem>("createdDate");
   const [sortAsc, setSortAsc] = React.useState(false);
   const [selectedDraft, setSelectedDraft] = React.useState<DraftItem | null>(null);
@@ -57,21 +102,33 @@ export function LtpDraftApplications({
   const [typeOverrides, setTypeOverrides] = React.useState<Record<string, "LPS" | "Non LPS">>({}); 
   const getItemType = (item: DraftItem): "LPS" | "Non LPS" =>
     typeOverrides[item.id] ?? item.type;
+  // Per-row stage overrides
+  const [stageOverrides, setStageOverrides] = React.useState<Record<string, DraftStageKey>>({});
+  const getItemStage = (item: DraftItem): DraftStageKey =>
+    stageOverrides[item.id] ?? item.stage;
 
-  // Compute draft proposals from store or include the standard APCRDA demo draft
+  // Compute draft proposals from store or include realistic APCRDA demo drafts
   const draftItems: DraftItem[] = React.useMemo(() => {
     const userDrafts = applications.filter(
       (a) => a.status === "DRAFT"
     );
 
+    const stageSequence: DraftStageKey[] = [
+      "form",
+      "drawing",
+      "documentation",
+      "payments",
+      "nocs",
+    ];
+
     // Format draft items
     const items: DraftItem[] = userDrafts.map((a, idx) => {
-      // Format BA No: if not already D or Temp, format as APCRDA draft number starting with D/
+      // Format Application No: if not already D or Temp, format as APCRDA draft number starting with D/
       const ba = a.applicationNo.startsWith("D/")
         ? a.applicationNo
         : a.applicationNo.startsWith("Temp/")
         ? a.applicationNo.replace(/^Temp\//, "D/")
-        : `D/1168/0267/BP/${new Date(a.submissionDate || Date.now()).getFullYear()}`;
+        : `D/1168/${String(260 + idx).padStart(4, "0")}/BP/${new Date(a.submissionDate || Date.now()).getFullYear()}`;
 
       const created = new Date(a.submissionDate || a.lastUpdated || Date.now());
       const dateStr = `${created.getDate()}/${created.getMonth() + 1}/${created.getFullYear()}`;
@@ -82,6 +139,8 @@ export function LtpDraftApplications({
           : "Building Permission";
 
       const isLps = a.applicationNo.includes("/LPS/") || a.project?.type === "LAYOUT_APPROVAL";
+      const stage: DraftStageKey = stageSequence[idx % stageSequence.length];
+
       return {
         id: a.id || `draft-${idx}`,
         baNo: ba,
@@ -91,8 +150,72 @@ export function LtpDraftApplications({
         owner: a.applicant?.name || "",
         appId: a.id,
         type: isLps ? "LPS" : "Non LPS",
+        stage,
       };
     });
+
+    // If user has fewer drafts (e.g. 0 to 2), supply realistic APCRDA demo drafts
+    // so all 5 drafting stages are represented and easily testable
+    if (items.length < 5) {
+      const demoDrafts: DraftItem[] = [
+        {
+          id: "demo-draft-form",
+          baNo: "D/1168/0189/BP/2026",
+          permissionType: "Building Permission",
+          createdDate: "02/10/2026",
+          status: "Draft",
+          owner: "K. Ramamurthy",
+          type: "Non LPS",
+          stage: "form",
+        },
+        {
+          id: "demo-draft-drawing",
+          baNo: "D/1168/0234/BP/2026",
+          permissionType: "Building Permission",
+          createdDate: "28/09/2026",
+          status: "Draft",
+          owner: "P. Venkata Rao",
+          type: "Non LPS",
+          stage: "drawing",
+        },
+        {
+          id: "demo-draft-doc",
+          baNo: "D/1168/0312/GD/2026",
+          permissionType: "Group Development",
+          createdDate: "24/09/2026",
+          status: "Draft",
+          owner: "M/s Amaravati Estates",
+          type: "LPS",
+          stage: "documentation",
+        },
+        {
+          id: "demo-draft-pay",
+          baNo: "D/1168/0405/BP/2026",
+          permissionType: "Building Permission",
+          createdDate: "20/09/2026",
+          status: "Draft",
+          owner: "Ch. Nageswara Rao",
+          type: "Non LPS",
+          stage: "payments",
+        },
+        {
+          id: "demo-draft-noc",
+          baNo: "D/1168/0521/BP/2026",
+          permissionType: "Building Permission",
+          createdDate: "15/09/2026",
+          status: "Draft",
+          owner: "T. Balaram Krishna",
+          type: "LPS",
+          stage: "nocs",
+        },
+      ];
+
+      for (const demo of demoDrafts) {
+        if (!items.some((it) => it.baNo === demo.baNo || it.stage === demo.stage)) {
+          items.push(demo);
+        }
+      }
+    }
 
     return items;
   }, [applications]);
@@ -108,26 +231,34 @@ export function LtpDraftApplications({
   const activeFilterCount =
     (filterType !== "ALL" ? 1 : 0) +
     (filterOwner !== "ALL" ? 1 : 0) +
-    (filterScheme !== "ALL" ? 1 : 0);
+    (filterScheme !== "ALL" ? 1 : 0) +
+    (filterStage !== "ALL" ? 1 : 0);
 
   const handleClearAllFilters = () => {
     setSearchKeywords("");
     setFilterType("ALL");
     setFilterOwner("ALL");
     setFilterScheme("ALL");
+    setFilterStage("ALL");
   };
 
   // Filtering
   const filteredItems = React.useMemo(() => {
     return draftItems.filter((item) => {
+      const currentStage = getItemStage(item);
+      const currentType = getItemType(item);
+
       // Keyword search
       if (searchKeywords.trim()) {
         const q = searchKeywords.toLowerCase();
+        const stageLabel = DRAFT_STAGES[currentStage]?.label?.toLowerCase() || "";
         const matches =
           item.baNo.toLowerCase().includes(q) ||
           item.permissionType.toLowerCase().includes(q) ||
           item.owner.toLowerCase().includes(q) ||
-          item.status.toLowerCase().includes(q);
+          item.status.toLowerCase().includes(q) ||
+          currentType.toLowerCase().includes(q) ||
+          stageLabel.includes(q);
         if (!matches) return false;
       }
 
@@ -135,25 +266,36 @@ export function LtpDraftApplications({
       if (filterType !== "ALL" && item.permissionType !== filterType) return false;
       if (filterOwner !== "ALL" && item.owner !== filterOwner) return false;
       if (filterScheme !== "ALL") {
-        const isLps = item.baNo.includes("/LPS/") || item.lpsType === "LPS Layout";
+        const isLps = currentType === "LPS";
         if (filterScheme === "LPS" && !isLps) return false;
         if (filterScheme === "Non LPS" && isLps) return false;
       }
+      if (filterStage !== "ALL" && currentStage !== filterStage) return false;
 
       return true;
     });
-  }, [draftItems, searchKeywords, filterType, filterOwner, filterScheme]);
+  }, [draftItems, searchKeywords, filterType, filterOwner, filterScheme, filterStage, stageOverrides, typeOverrides]);
 
   // Sorting
   const sortedItems = React.useMemo(() => {
     return [...filteredItems].sort((a, b) => {
-      const valA = a[sortField] || "";
-      const valB = b[sortField] || "";
+      let valA: string = "";
+      let valB: string = "";
+      if (sortField === "type") {
+        valA = getItemType(a);
+        valB = getItemType(b);
+      } else if (sortField === "stage") {
+        valA = DRAFT_STAGES[getItemStage(a)]?.label || getItemStage(a);
+        valB = DRAFT_STAGES[getItemStage(b)]?.label || getItemStage(b);
+      } else {
+        valA = (a[sortField] as string) || "";
+        valB = (b[sortField] as string) || "";
+      }
       if (valA < valB) return sortAsc ? -1 : 1;
       if (valA > valB) return sortAsc ? 1 : -1;
       return 0;
     });
-  }, [filteredItems, sortField, sortAsc]);
+  }, [filteredItems, sortField, sortAsc, typeOverrides, stageOverrides]);
 
   const handleSort = (field: keyof DraftItem) => {
     if (sortField === field) {
@@ -165,15 +307,24 @@ export function LtpDraftApplications({
   };
 
   const handleOpenDraft = (item: DraftItem) => {
-    setSelectedDraft(item);
+    const currentStage = getItemStage(item);
+    const currentType = getItemType(item);
+    setSelectedDraft({
+      ...item,
+      stage: currentStage,
+      type: currentType,
+      lpsType: currentType === "LPS" ? "LPS Layout" : "Non-LPS",
+    });
   };
 
   const exportCSV = () => {
-    const headers = ["#", "BA No.", "Permission Type", "Created Date", "Owner"];
+    const headers = ["#", "Draft No.", "Permission Type", "Type", "Stage", "Created Date", "Owner"];
     const rows = sortedItems.map((item, idx) => [
       idx + 1,
       `"${item.baNo}"`,
       `"${item.permissionType}"`,
+      `"${getItemType(item)}"`,
+      `"${DRAFT_STAGES[getItemStage(item)]?.label || item.stage}"`,
       item.createdDate,
       `"${item.owner}"`,
     ]);
@@ -195,7 +346,8 @@ export function LtpDraftApplications({
         proposalStatus={selectedDraft.status}
         submissionDate={selectedDraft.createdDate}
         isDraft={true}
-        initialLpsType={selectedDraft.lpsType || (selectedDraft.baNo.includes("/LPS/") ? "LPS Layout" : "Non-LPS")}
+        initialLpsType={selectedDraft.lpsType || (selectedDraft.type === "LPS" ? "LPS Layout" : "Non-LPS")}
+        initialTab={selectedDraft.stage}
         onBack={() => setSelectedDraft(null)}
       />
     );
@@ -206,7 +358,7 @@ export function LtpDraftApplications({
       {/* ── TOP CONTROLS: Search, Filters & Export in a Single Row ── */}
       <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
           {/* Search Input Box (Pillow-shaped) */}
-          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 h-8 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
@@ -250,6 +402,22 @@ export function LtpDraftApplications({
               <SelectItem value="ALL">All</SelectItem>
               <SelectItem value="LPS">LPS Layout</SelectItem>
               <SelectItem value="Non LPS">Non-LPS</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Filter: Draft Stage */}
+          <Select value={filterStage} onValueChange={setFilterStage}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Stage:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="form">Application Form</SelectItem>
+              <SelectItem value="drawing">Drawings</SelectItem>
+              <SelectItem value="documentation">Documentation</SelectItem>
+              <SelectItem value="payments">Payments</SelectItem>
+              <SelectItem value="nocs">Apply for NOCs</SelectItem>
             </SelectContent>
           </Select>
 
@@ -299,11 +467,11 @@ export function LtpDraftApplications({
             {/* Table Header Row */}
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
               <tr className="divide-x divide-[#DCD5C8]">
-                <th className="w-12 px-2.5 py-2.5 text-center font-bold">#</th>
+                <th className="w-10 px-2 py-2 text-center font-bold">#</th>
 
                 <th
                   onClick={() => handleSort("baNo")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-64 min-w-[220px]"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Draft No.</span>
@@ -313,7 +481,7 @@ export function LtpDraftApplications({
 
                 <th
                   onClick={() => handleSort("permissionType")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-48 min-w-[160px]"
+                  className="w-44 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Permission Type</span>
@@ -321,14 +489,25 @@ export function LtpDraftApplications({
                   </div>
                 </th>
 
-                {/* NEW: Type column */}
-                <th className="px-4 py-2.5 font-bold select-none w-32 min-w-[110px] text-center">
+                {/* Type column */}
+                <th className="px-2 py-2 font-bold select-none w-20 text-center whitespace-nowrap">
                   Type
+                </th>
+
+                {/* Stage column */}
+                <th
+                  onClick={() => handleSort("stage")}
+                  className="px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-36 text-center whitespace-nowrap"
+                >
+                  <div className="flex items-center justify-center gap-1">
+                    <span>Stage</span>
+                    <ChevronsUpDown className="size-3 text-slate-400" />
+                  </div>
                 </th>
 
                 <th
                   onClick={() => handleSort("owner")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none flex-1 min-w-[200px]"
+                  className="w-56 max-w-[240px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Owner / Applicant</span>
@@ -338,15 +517,15 @@ export function LtpDraftApplications({
 
                 <th
                   onClick={() => handleSort("createdDate")}
-                  className="px-4 py-2.5 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-40 min-w-[130px]"
+                  className="px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28 text-center whitespace-nowrap"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Created Date</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
-                <th className="w-28 min-w-[100px] px-3.5 py-2.5 font-bold text-center">Action</th>
+                <th className="w-24 px-2.5 py-2 font-bold text-center whitespace-nowrap">Action</th>
               </tr>
             </thead>
 
@@ -355,20 +534,21 @@ export function LtpDraftApplications({
               {sortedItems.length > 0 ? (
                 sortedItems.map((item, idx) => {
                   const currentType = getItemType(item);
+                  const currentStage = getItemStage(item);
                   return (
                     <tr
                       key={item.id}
                       className="divide-x divide-[#EFE7DC] hover:bg-[#FAF4EB] transition-colors"
                     >
                       {/* Index */}
-                      <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">{idx + 1}</td>
+                      <td className="px-2 py-2 text-center font-medium text-slate-700">{idx + 1}</td>
 
                       {/* Draft No. */}
-                      <td className="px-4 py-2.5 whitespace-nowrap">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <button
                           onClick={() => handleOpenDraft(item)}
                           className="inline-flex items-center gap-1.5 text-[#7A1316] hover:text-[#8F161A] font-bold hover:underline cursor-pointer text-left font-mono"
-                          title="Click to view and continue this draft"
+                          title={`Click to continue draft at ${DRAFT_STAGES[currentStage]?.label || currentStage} stage`}
                         >
                           <span>{item.baNo}</span>
                           <ExternalLink className="size-3 text-[#7A1316]/60 hover:text-[#7A1316]" />
@@ -376,10 +556,10 @@ export function LtpDraftApplications({
                       </td>
 
                       {/* Permission Type */}
-                      <td className="px-4 py-2.5 text-slate-800 font-medium whitespace-nowrap">{item.permissionType}</td>
+                      <td className="px-3 py-2 text-slate-800 font-medium whitespace-nowrap">{item.permissionType}</td>
 
-                      {/* Type: LPS / Non LPS — inline selectable badge */}
-                      <td className="px-4 py-2.5 text-center">
+                      {/* Type: LPS / Non LPS */}
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <select
                           value={currentType}
                           onChange={(e) =>
@@ -402,19 +582,48 @@ export function LtpDraftApplications({
                         </select>
                       </td>
 
+                      {/* Current Stage */}
+                      <td className="px-2.5 py-2 text-center whitespace-nowrap">
+                        <select
+                          value={currentStage}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            setStageOverrides((prev) => ({
+                              ...prev,
+                              [item.id]: e.target.value as DraftStageKey,
+                            }));
+                          }}
+                          aria-label="Select draft stage"
+                          onClick={(e) => e.stopPropagation()}
+                          className={cn(
+                            "rounded-full px-2.5 py-0.5 text-[11px] font-bold border cursor-pointer outline-none appearance-none text-center shadow-2xs transition-colors",
+                            DRAFT_STAGES[currentStage]?.badgeCls
+                          )}
+                          title="Current stage of proposal preparation. Click to change stage."
+                        >
+                          <option value="form">1. Application Form</option>
+                          <option value="drawing">2. Drawings</option>
+                          <option value="documentation">3. Documentation</option>
+                          <option value="payments">4. Payments</option>
+                          <option value="nocs">5. Apply for NOCs</option>
+                        </select>
+                      </td>
+
                       {/* Owner / Applicant */}
-                      <td className="px-4 py-2.5 text-slate-700 font-medium">{item.owner || "New Proposal"}</td>
+                      <td className="px-3 py-2 text-slate-700 font-medium">{item.owner || "New Proposal"}</td>
 
                       {/* Created Date */}
-                      <td className="px-4 py-2.5 text-slate-700 tabular-nums whitespace-nowrap">{item.createdDate}</td>
+                      <td className="px-2.5 py-2 text-slate-700 tabular-nums whitespace-nowrap text-center">{item.createdDate}</td>
 
                       {/* Action: Resume */}
-                      <td className="px-3.5 py-2.5 text-center whitespace-nowrap">
+                      <td className="px-2.5 py-2 text-center whitespace-nowrap">
                         <button
                           onClick={() => handleOpenDraft(item)}
-                          className="rounded-full px-4 py-1.5 bg-[#7A1316]/10 hover:bg-[#7A1316] text-[#7A1316] hover:text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs"
+                          className="rounded-full px-3 py-1 bg-[#7A1316]/10 hover:bg-[#7A1316] text-[#7A1316] hover:text-white font-bold text-xs transition-colors cursor-pointer shadow-2xs inline-flex items-center gap-1"
+                          title={`Resume proposal at ${DRAFT_STAGES[currentStage]?.label || currentStage} stage`}
                         >
-                          Resume
+                          <span>Resume</span>
+                          <ArrowRight className="size-3" />
                         </button>
                       </td>
                     </tr>
@@ -422,7 +631,7 @@ export function LtpDraftApplications({
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">
+                  <td colSpan={8} className="p-8 text-center text-slate-500">
                     No draft proposals found matching the search criteria.
                   </td>
                 </tr>
@@ -449,6 +658,8 @@ export function LtpDraftApplications({
                   setSearchKeywords("");
                   setFilterType("ALL");
                   setFilterOwner("ALL");
+                  setFilterScheme("ALL");
+                  setFilterStage("ALL");
                 }}
                 title="Refresh Table"
                 className="px-2.5 py-1 hover:bg-white rounded-full transition-colors text-slate-700 hover:text-[#7A1316] cursor-pointer flex items-center gap-1.5"
@@ -593,7 +804,7 @@ export function LtpDraftApplications({
                       <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
                         <tr>
                           <th className="px-3 py-2 w-10 text-center">#</th>
-                          <th className="px-3 py-2">Proposal / BA No.</th>
+                          <th className="px-3 py-2">Proposal / Application No.</th>
                           <th className="px-3 py-2">Permission Type</th>
                           <th className="px-3 py-2 text-center">Type</th>
                           <th className="px-3 py-2">Created Date</th>

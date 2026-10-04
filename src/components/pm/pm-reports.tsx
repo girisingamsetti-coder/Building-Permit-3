@@ -222,9 +222,9 @@ export function PmReports() {
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
               <tr className="text-left text-[11px] uppercase tracking-wide text-foreground border-b-2 border-border">
-                <th className="px-4 py-2.5 font-bold">Stage</th>
-                <th className="px-4 py-2.5 font-bold text-right">Pending</th>
-                <th className="px-4 py-2.5 font-bold text-right">Avg Days</th>
+                <th className="w-56 px-4 py-2.5 font-bold">Stage</th>
+                <th className="w-28 px-4 py-2.5 font-bold text-right">Pending</th>
+                <th className="w-28 px-4 py-2.5 font-bold text-right">Avg Days</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -282,14 +282,14 @@ export function PmReports() {
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
                 <tr className="text-left text-[11px] uppercase tracking-wide text-foreground border-b-2 border-border">
-                  <th className="px-4 py-2.5 font-bold">Officer</th>
-                  <th className="px-4 py-2.5 font-bold">Role</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Assigned</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Completed</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Pending</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Delayed</th>
-                  <th className="px-4 py-2.5 font-bold text-right">Avg Days</th>
-                  <th className="px-4 py-2.5 font-bold text-right">SLA %</th>
+                  <th className="w-48 px-4 py-2.5 font-bold">Officer</th>
+                  <th className="w-40 px-4 py-2.5 font-bold">Role</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">Assigned</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">Completed</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">Pending</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">Delayed</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">Avg Days</th>
+                  <th className="w-20 px-4 py-2.5 font-bold text-right">SLA %</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

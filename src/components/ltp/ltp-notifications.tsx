@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -181,12 +181,12 @@ export function LtpNotifications() {
           <table className="w-full text-sm">
             <thead className="bg-muted/40">
               <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-2.5 font-medium">Template</th>
-                <th className="px-4 py-2.5 font-medium">Recipient</th>
-                <th className="px-4 py-2.5 font-medium">Application</th>
-                <th className="px-4 py-2.5 font-medium">Status</th>
-                <th className="px-4 py-2.5 font-medium">Sent At</th>
-                <th className="px-4 py-2.5 font-medium">Delivered At</th>
+                <th className="w-56 max-w-[240px] px-4 py-2.5 font-medium">Template</th>
+                <th className="w-40 px-4 py-2.5 font-medium">Recipient</th>
+                <th className="w-36 px-4 py-2.5 font-medium whitespace-nowrap">Application</th>
+                <th className="w-24 px-4 py-2.5 font-medium text-center whitespace-nowrap">Status</th>
+                <th className="w-36 px-4 py-2.5 font-medium text-center whitespace-nowrap">Sent At</th>
+                <th className="w-36 px-4 py-2.5 font-medium text-center whitespace-nowrap">Delivered At</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

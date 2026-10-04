@@ -544,6 +544,12 @@ export type RoleAccessConfig = {
   };
 };
 
+export type UserAccessConfig = {
+  [userId: string]: {
+    [moduleId: string]: ModuleAccessLevel;
+  };
+};
+
 export interface ApprovalStepConfig {
   id: string;
   role: RoleKey;
@@ -567,6 +573,10 @@ export interface SystemSettings {
   demoMode: boolean;
   /** Per-role, per-module access level configured by Admin */
   roleAccessConfig: RoleAccessConfig;
+  /** Per-user, per-module access level configured by Admin */
+  userAccessConfig?: UserAccessConfig;
+  /** Whether to hide restricted modules from navigation menus */
+  hideRestrictedModules?: boolean;
   /** Hierarchical approval sequence configuring which role comes after which role */
   approvalSequence?: ApprovalStepConfig[];
 }

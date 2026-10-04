@@ -293,12 +293,12 @@ export function OccupancyView() {
             <table className="w-full text-xs text-left">
               <thead className="bg-muted/40 text-muted-foreground font-semibold border-b border-border">
                 <tr>
-                  <th className="px-4 py-3">Occupancy Ref</th>
-                  <th className="px-4 py-3">Application / BPO</th>
-                  <th className="px-4 py-3">Owner / Applicant</th>
-                  <th className="px-4 py-3">Timeline Dates</th>
-                  <th className="px-4 py-3">Current Status &amp; Desk</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="w-36 py-2 px-3 whitespace-nowrap">Occupancy Ref</th>
+                  <th className="w-36 py-2 px-3 whitespace-nowrap">Application / BPO</th>
+                  <th className="w-52 max-w-[220px] py-2 px-3">Owner / Applicant</th>
+                  <th className="w-28 py-2 px-2.5 whitespace-nowrap">Timeline Dates</th>
+                  <th className="w-32 py-2 px-2.5 whitespace-nowrap">Current Status &amp; Desk</th>
+                  <th className="w-28 py-2 px-3 text-center whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -315,7 +315,7 @@ export function OccupancyView() {
                       className="hover:bg-muted/30 transition-colors cursor-pointer group"
                       onClick={() => setSelectedRecordId(row.id)}
                     >
-                      <td className="px-4 py-3">
+                      <td className="w-36 py-2 px-3 whitespace-nowrap">
                         <div className="font-mono font-bold text-primary group-hover:underline">
                           {row.occupancyNumber}
                         </div>
@@ -328,17 +328,17 @@ export function OccupancyView() {
                           </div>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="w-36 py-2 px-3 whitespace-nowrap">
                         <div className="font-medium text-foreground">{row.applicationNumber}</div>
                         <div className="text-[11px] text-muted-foreground">{row.orderNumber}</div>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">{row.owner.name}</div>
+                      <td className="w-52 max-w-[220px] py-2 px-3">
+                        <div className="font-medium text-foreground truncate">{row.owner.name}</div>
                         <div className="text-[11px] text-muted-foreground truncate max-w-[180px]">
                           {row.project.name}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="w-28 py-2 px-2.5 whitespace-nowrap">
                         <div className="space-y-0.5 text-[11px]">
                           <div className="flex gap-2">
                             <span className="text-muted-foreground">Comp:</span>
@@ -354,15 +354,15 @@ export function OccupancyView() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="w-32 py-2 px-2.5 whitespace-nowrap">
                         <div className="flex flex-col gap-1 items-start">
                           <RowStateBadge state={row.state} />
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-[10px] text-muted-foreground truncate max-w-[110px]">
                             Desk: <strong className="text-foreground">{row.currentDesk}</strong>
                           </span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="w-28 py-2 px-3 text-center whitespace-nowrap">
                         <Button
                           variant="default"
                           size="sm"

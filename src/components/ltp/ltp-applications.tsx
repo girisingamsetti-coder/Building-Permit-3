@@ -390,6 +390,7 @@ export function LtpApplications() {
               <thead className="sticky top-0 z-10 bg-muted/60 backdrop-blur">
                 <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
                   <SortableTh
+                    className="w-32 px-3 py-2 font-bold whitespace-nowrap"
                     label="Application No."
                     active={sortKey === "applicationNo"}
                     dir={sortDir}
@@ -397,27 +398,31 @@ export function LtpApplications() {
                     icon={Hash}
                   />
                   <SortableTh
+                    className="w-56 max-w-[220px] px-3 py-2 font-bold"
                     label="Project"
                     active={sortKey === "projectName"}
                     dir={sortDir}
                     onClick={() => toggleColumnSort("projectName")}
                     icon={Building2}
                   />
-                  <th className="px-4 py-3 font-bold">Applicant</th>
+                  <th className="w-44 max-w-[180px] px-3 py-2 font-bold">Applicant</th>
                   <SortableTh
+                    className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap"
                     label="Status"
                     active={sortKey === "status"}
                     dir={sortDir}
                     onClick={() => toggleColumnSort("status")}
                   />
-                  <th className="px-4 py-3 font-bold">Current Stage</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Current Stage</th>
                   <SortableTh
+                    className="w-20 px-2 py-2 text-center font-bold whitespace-nowrap"
                     label="Priority"
                     active={sortKey === "priority"}
                     dir={sortDir}
                     onClick={() => toggleColumnSort("priority")}
                   />
                   <SortableTh
+                    className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap"
                     label="Submitted"
                     active={sortKey === "submissionDate"}
                     dir={sortDir}
@@ -425,13 +430,14 @@ export function LtpApplications() {
                     icon={Calendar}
                   />
                   <SortableTh
+                    className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap"
                     label="Updated"
                     active={sortKey === "lastUpdated"}
                     dir={sortDir}
                     onClick={() => toggleColumnSort("lastUpdated")}
                     icon={Clock}
                   />
-                  <th className="px-4 py-3 text-right font-bold">Action</th>
+                  <th className="w-18 px-2.5 py-2 text-center font-bold whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -441,7 +447,7 @@ export function LtpApplications() {
                     className="group cursor-pointer transition-colors hover:bg-muted/30"
                     onClick={() => openApplication(a.id)}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -453,34 +459,34 @@ export function LtpApplications() {
                       </button>
                       <div className="text-[10px] text-muted-foreground">{formatDate(a.submissionDate)}</div>
                     </td>
-                    <td className="px-4 py-3 max-w-[220px]">
+                    <td className="px-3 py-2 max-w-[220px]">
                       <p className="truncate text-xs font-medium">{a.project.name}</p>
                       <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
                         <MapPin className="size-2.5" /> {a.project.ward} · {a.project.zone}
                       </p>
                     </td>
-                    <td className="px-4 py-3 max-w-[160px]">
+                    <td className="px-3 py-2 max-w-[180px]">
                       <p className="truncate text-xs">{a.applicant.name}</p>
                       <p className="text-[10px] text-muted-foreground capitalize">
                         {a.project.propertyType.replace("_", " ").toLowerCase()}
                       </p>
                     </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-2.5 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                       <StatusBadge status={a.status} showIcon={false} />
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-2">
                       <span className="text-xs">{a.currentStageLabel}</span>
                     </td>
-                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-2 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                       <PriorityBadge priority={a.priority} />
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="px-2.5 py-2 text-center text-xs text-muted-foreground whitespace-nowrap">
                       {formatDate(a.submissionDate)}
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    <td className="px-2.5 py-2 text-center text-xs text-muted-foreground whitespace-nowrap">
                       {timeAgo(a.lastUpdated)}
                     </td>
-                    <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-2.5 py-2 text-center" onClick={(e) => e.stopPropagation()}>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -605,16 +611,18 @@ function SortableTh({
   dir,
   onClick,
   icon: Icon,
+  className,
 }: {
   label: string;
   active: boolean;
   dir: SortDir;
   onClick: () => void;
   icon?: React.ComponentType<{ className?: string }>;
+  className?: string;
 }) {
   return (
     <th
-      className="px-4 py-3 font-bold"
+      className={className ?? "px-4 py-3 font-bold"}
       aria-sort={active ? (dir === "asc" ? "ascending" : "descending") : "none"}
     >
       <button

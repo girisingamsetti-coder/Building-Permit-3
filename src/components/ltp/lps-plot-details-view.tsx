@@ -857,7 +857,7 @@ export function LpsPlotDetailsView({
                 <div className="p-3 sm:p-4">
                   <div className="border border-[#DCD5C8] rounded-md overflow-hidden bg-white text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">
-                      {renderCell("BA file number", "baFileNumber", "plotId")}
+                      {renderCell("Application number", "baFileNumber", "plotId")}
                       {renderCell("Plot code", "plotCode", "plotId", { mono: true })}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-[130px_1fr_130px_1fr] divide-y sm:divide-y-0 sm:divide-x divide-[#DCD5C8] border-b border-[#DCD5C8]">

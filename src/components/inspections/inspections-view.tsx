@@ -201,13 +201,13 @@ export function InspectionsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Inspection # / App #</th>
-                <th className="py-3 px-4">Site & Owner</th>
-                <th className="py-3 px-4">Inspector</th>
-                <th className="py-3 px-4">Scheduled / Done</th>
-                <th className="py-3 px-4">Round</th>
-                <th className="py-3 px-4">Status & Rec.</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap">Inspection # / App #</th>
+                <th className="w-56 max-w-[220px] py-2 px-3">Site & Owner</th>
+                <th className="w-40 max-w-[160px] py-2 px-3">Inspector</th>
+                <th className="w-28 py-2 px-3 whitespace-nowrap">Scheduled / Done</th>
+                <th className="w-20 py-2 px-2.5 text-center whitespace-nowrap">Round</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap">Status & Rec.</th>
+                <th className="w-20 py-2 px-2.5 text-center whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -220,19 +220,19 @@ export function InspectionsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.inspectionNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
+                    <td className="w-56 max-w-[220px] py-2 px-3">
                       <div className="truncate font-medium text-foreground">{item.siteAddress}</div>
-                      <div className="text-[11px] text-muted-foreground">Owner: {item.ownerName}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">Owner: {item.ownerName}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.inspectorName}</div>
-                      <div className="text-[11px] text-muted-foreground">{item.inspectorDesignation}</div>
+                    <td className="w-40 max-w-[160px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.inspectorName}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{item.inspectorDesignation}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-28 py-2 px-3 whitespace-nowrap">
                       <div className="flex items-center gap-1 font-medium">
                         <Calendar className="size-3 text-muted-foreground" />
                         {item.scheduledDate}
@@ -241,15 +241,15 @@ export function InspectionsView() {
                         <div className="text-[11px] text-muted-foreground">Done: {item.inspectedDate}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-20 py-2 px-2.5 text-center whitespace-nowrap">
                       <Badge variant="outline" className="font-mono text-[10px]">
                         Round {item.round}
                       </Badge>
-                      <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                      <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center justify-center gap-1">
                         <Camera className="size-2.5" /> {item.photos.length} photos
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-32 py-2 px-3 whitespace-nowrap">
                       <div className="flex flex-col gap-1 items-start">
                         <Badge
                           className={cn(
@@ -265,17 +265,17 @@ export function InspectionsView() {
                         >
                           {item.status}
                         </Badge>
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
                           Rec: <strong className="text-foreground">{item.recommendation}</strong>
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-2.5 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedInspection(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> View Report
                       </Button>

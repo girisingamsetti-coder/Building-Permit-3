@@ -139,15 +139,15 @@ export function PmOfficers() {
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-muted/80 backdrop-blur z-10">
               <tr className="text-left text-[11px] uppercase tracking-wide text-foreground border-b-2 border-border">
-                <th className="px-4 py-2.5 font-bold">Officer</th>
-                <th className="px-4 py-2.5 font-bold">Role</th>
-                <th className="px-4 py-2.5 font-bold text-right">Assigned</th>
-                <th className="px-4 py-2.5 font-bold text-right">Completed</th>
-                <th className="px-4 py-2.5 font-bold text-right">Pending</th>
-                <th className="px-4 py-2.5 font-bold text-right">Delayed</th>
-                <th className="px-4 py-2.5 font-bold text-right">At Risk</th>
-                <th className="px-4 py-2.5 font-bold text-right">Avg Days</th>
-                <th className="px-4 py-2.5 font-bold text-right">Action</th>
+                <th className="w-64 max-w-xs px-3 py-2 font-bold">Officer</th>
+                <th className="w-40 px-3 py-2 font-bold">Role</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-right">Assigned</th>
+                <th className="w-24 px-2.5 py-2 font-bold text-right">Completed</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-right">Pending</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-right">Delayed</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-right">At Risk</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-right">Avg Days</th>
+                <th className="w-20 px-2.5 py-2 font-bold text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -157,7 +157,7 @@ export function PmOfficers() {
                   onClick={() => handleRowClick(w.user.id)}
                   className="cursor-pointer hover:bg-muted/40 transition-colors"
                 >
-                  <td className="px-4 py-2.5">
+                  <td className="px-3 py-2">
                     <div className="flex items-center gap-2.5">
                       <div
                         className="flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
@@ -180,19 +180,19 @@ export function PmOfficers() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-2.5">
+                  <td className="px-3 py-2">
                     <RoleBadge role={w.user.role} />
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums font-medium">
+                  <td className="px-2.5 py-2 text-right tabular-nums font-medium">
                     {w.assigned}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">
+                  <td className="px-2.5 py-2 text-right tabular-nums">
                     <span className="text-success font-medium">{w.completed}</span>
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">
+                  <td className="px-2.5 py-2 text-right tabular-nums">
                     {w.pending}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">
+                  <td className="px-2.5 py-2 text-right tabular-nums">
                     {w.delayed > 0 ? (
                       <span className="text-destructive font-medium">
                         {w.delayed}
@@ -201,17 +201,17 @@ export function PmOfficers() {
                       <span className="text-muted-foreground">0</span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums">
+                  <td className="px-2.5 py-2 text-right tabular-nums">
                     {w.atRisk > 0 ? (
                       <span className="text-amber-600 font-medium">{w.atRisk}</span>
                     ) : (
                       <span className="text-muted-foreground">0</span>
                     )}
                   </td>
-                  <td className="px-4 py-2.5 text-right tabular-nums text-muted-foreground">
+                  <td className="px-2.5 py-2 text-right tabular-nums text-muted-foreground">
                     {w.avgProcessingDays > 0 ? `${w.avgProcessingDays}d` : "—"}
                   </td>
-                  <td className="px-4 py-2.5 text-right">
+                  <td className="px-2.5 py-2 text-center">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

@@ -151,7 +151,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:155:## 4
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:156:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:157:1. 1\. Open the __Citizen Service__ tile\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:158:2. 2\. Use __Pay your fees here__ to pay a generated fee memo\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:159:3. 3\. Use __Search your application status__ with the BA number to see the current stage\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:159:3. 3\. Use __Search your application status__ with the Application number to see the current stage\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:160:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:161:## 4\.2 Developer & TPAs
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:162:
@@ -417,8 +417,8 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:434:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:435:## 6\.11 Submitted Applications
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:436:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:437:1. 1\. Open __Application Submission GåÆ Submitted Applications__\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:438:2. 2\. Search or filter by BA No\., Permission Type, Status, Submission Date, Owner, or Case Type\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:439:3. 3\. Click a BA number to open the file\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:438:2. 2\. Search or filter by Application No\., Permission Type, Status, Submission Date, Owner, or Case Type\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:439:3. 3\. Click a Application number to open the file\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:440:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:442:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:443:Figure 6\.12 GÇö Submitted Applications list \(search, filter, Excel export\)
@@ -451,7 +451,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:469:## 7
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:470:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:471:1. 1\. Open __Application Status GåÆ Review Proceeding__\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:472:2. 2\. Use search / column filters if the list is long\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:473:3. 3\. Click the BA No\. to open the application in read or limited\-edit mode\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:473:3. 3\. Click the Application No\. to open the application in read or limited\-edit mode\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:474:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:476:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:477:Figure 7\.1 GÇö Review Proceeding queue with Permission Type filter
@@ -460,7 +460,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:479:## 7
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:480:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:481:1. 1\. Open __Application Status GåÆ Objected Files__\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:482:2. 2\. Note Status \(example: __Scrutiny Can Not Done__ in red\)\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:483:3. 3\. Click the BA No\. \(example: 1168/0156/BP/10/020/2026 \(SUB\-6\)\)\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:483:3. 3\. Click the Application No\. \(example: 1168/0156/BP/10/020/2026 \(SUB\-6\)\)\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:484:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:486:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:487:Figure 7\.2 GÇö Objected Files: one record with status Scrutiny Can Not Done
@@ -494,7 +494,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:519:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:520:## 7\.4 Approved Files
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:521:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:522:1. 1\. Open __Application Status GåÆ Approved Files__\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:523:2. 2\. Click the BA No\. Status shows __Approved__\. Proposal Status inside the file is often __Proceeding Verified__\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:523:2. 2\. Click the Application No\. Status shows __Approved__\. Proposal Status inside the file is often __Proceeding Verified__\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:524:3. 3\. Review form tabs in read mode\. After approval, two extra form tabs appear: __Letter__ and __Apply for NOCs__\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:525:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:527:
@@ -525,7 +525,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:554:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:555:## 7\.7 Proceeding Issued
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:556:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:557:1. 1\. Open __Application Status GåÆ Proceeding Issued__\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:558:2. 2\. Search the BA No\. to confirm the proceeding is on your list\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:558:2. 2\. Search the Application No\. to confirm the proceeding is on your list\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:559:3. 3\. Open the row to view reports, drawing plan, scrutiny report, and proceeding letter when those icons are shown\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:560:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:562:
@@ -562,7 +562,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:592:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:593:## 8\.1 Verified
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:594:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:595:1. 1\. Open __Proceeding Status GåÆ Verified__\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:596:2. 2\. Click the BA No\. Proposal Status should read __Proceeding Verified__ \(green\)\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:596:2. 2\. Click the Application No\. Proposal Status should read __Proceeding Verified__ \(green\)\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:597:3. 3\. Use __Proposal Flow__ and __Reports__ as needed\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:598:4. 4\. Confirm Payments: memos such as General, Green fee charges, Labour Cess, and Development should show __Paid__ with View Receipt\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:599:
@@ -581,7 +581,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:615:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:616:## 8\.2 Shortfall and Review Shortfall Submission
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:617:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:618:1. 1\. Open __Proceeding Status GåÆ Shortfall__ to see files with pending deficiencies\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:619:2. 2\. Open the BA No\., complete the missing items, and submit the shortfall reply\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:619:2. 2\. Open the Application No\., complete the missing items, and submit the shortfall reply\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:620:3. 3\. Then open __Review Shortfall Submission__ to confirm APCRDA has received / is reviewing the reply\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:621:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:623:
@@ -609,8 +609,8 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:647:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:648:## 9\.1 Work Initiated GÇö open the file
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:649:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:650:1. 1\. Open __Commencement Certificate GåÆ Work Initiated__ \(or __CC Issued__ if you only need the issued certificate list\)\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:651:2. 2\. Find the BA No\. \(example: 1168/0001/BP/10/020/2025 \(SUB\-38\)\)\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:652:3. 3\. Click the BA No\. or Status link\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:651:2. 2\. Find the Application No\. \(example: 1168/0001/BP/10/020/2025 \(SUB\-38\)\)\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:652:3. 3\. Click the Application No\. or Status link\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:653:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:655:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:656:Figure 9\.1 GÇö Work Initiated list: approved building permission ready for commencement notify
@@ -652,7 +652,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:694:Menu
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:695:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:696:1. 1\. Open __Occupancy GåÆ Occupancy List__\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:697:2. 2\. Click __INTIMATE COMPLETION__ \(top right\) to notify APCRDA that the building is complete and ready for occupancy process\.
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:698:3. 3\. Use search, Filter, Find, and Clear to locate a BA No\. on the list\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:698:3. 3\. Use search, Filter, Find, and Clear to locate a Application No\. on the list\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:699:4. 4\. Open __Submitted Application__ to see occupancy applications already filed\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:700:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:702:
@@ -666,7 +666,7 @@ D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:709:__Wh
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:710:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:711:Enter keywords to search for
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:712:
-D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:713:Finds a BA No\., owner name, or other text on the current list\.
+D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:713:Finds a Application No\., owner name, or other text on the current list\.
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:714:
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:715:Filter / Find / Clear
 D:\Coding\Z ai Building permisson\Building Permission 3\LTP_doc_utf8.md:716:

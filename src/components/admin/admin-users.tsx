@@ -634,22 +634,22 @@ export function AdminUsers() {
             <Table>
               <TableHeader className="sticky top-0 z-10 bg-card">
                 <TableRow className="border-b-2 border-border">
-                  <TableHead className="pl-4 font-bold text-foreground">Name & Contact</TableHead>
-                  <TableHead className="font-bold text-foreground">Role</TableHead>
-                  <TableHead className="font-bold text-foreground">Status</TableHead>
-                  <TableHead className="font-bold text-foreground">Zone & Designation</TableHead>
-                  <TableHead className="font-bold text-foreground">Password / Login</TableHead>
-                  <TableHead className="font-bold text-foreground">Last login</TableHead>
-                  <TableHead className="pr-4 text-right font-bold text-foreground">Actions</TableHead>
+                  <TableHead className="w-56 max-w-[220px] pl-4 font-bold text-foreground">Name & Contact</TableHead>
+                  <TableHead className="w-36 font-bold text-foreground">Role</TableHead>
+                  <TableHead className="w-28 text-center font-bold text-foreground">Status</TableHead>
+                  <TableHead className="w-48 max-w-[180px] font-bold text-foreground">Zone & Designation</TableHead>
+                  <TableHead className="w-44 font-bold text-foreground">Password / Login</TableHead>
+                  <TableHead className="w-28 font-bold text-foreground">Last login</TableHead>
+                  <TableHead className="w-28 pr-4 text-right font-bold text-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((u) => (
                   <TableRow key={u.id} className="hover:bg-muted/40 transition-colors">
-                    <TableCell className="pl-4">
+                    <TableCell className="w-56 max-w-[220px] pl-4">
                       <div className="flex items-center gap-3">
                         <Avatar
-                          className="size-9 border border-border cursor-pointer hover:ring-2 hover:ring-[#801824]/30 transition-all"
+                          className="size-9 border border-border cursor-pointer hover:ring-2 hover:ring-[#801824]/30 transition-all shrink-0"
                           onClick={() => {
                             setDetailTarget(u);
                             setDetailPwVisible(false);
@@ -695,24 +695,24 @@ export function AdminUsers() {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-36 whitespace-nowrap">
                       <RoleBadge role={u.role} label={roles[u.role]?.title ?? u.role} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-28 text-center whitespace-nowrap">
                       <UserStatusBadge status={u.status} />
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-48 max-w-[180px]">
                       <div className="flex flex-col gap-0.5">
-                        <span className="flex items-center gap-1.5 text-xs text-foreground font-medium">
-                          <MapPin className="size-3 text-muted-foreground" aria-hidden="true" />
-                          {u.zone ?? "Head Office"}
+                        <span className="flex items-center gap-1.5 text-xs text-foreground font-medium truncate">
+                          <MapPin className="size-3 text-muted-foreground shrink-0" aria-hidden="true" />
+                          <span className="truncate">{u.zone ?? "Head Office"}</span>
                         </span>
                         <span className="truncate text-[11px] text-muted-foreground">
                           {u.designation ?? u.department ?? "—"}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-44 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono text-xs bg-[#FAF4EB] text-[#5C1A20] border border-[#E0D2BE] px-2 py-0.5 rounded-md font-semibold tracking-wider select-all">
                           {revealedPasswords[u.id] ? (u.password || "demo1234") : "••••••••"}
@@ -737,7 +737,7 @@ export function AdminUsers() {
                         </Button>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="w-28 whitespace-nowrap">
                       <div className="flex flex-col">
                         <span className="whitespace-nowrap text-xs text-foreground">
                           {u.lastLogin ? formatDateTime(u.lastLogin) : "—"}
@@ -747,7 +747,7 @@ export function AdminUsers() {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="pr-4 text-right">
+                    <TableCell className="w-28 pr-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="outline"

@@ -195,13 +195,13 @@ export function ShortfallsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Shortfall # / App #</th>
-                <th className="py-3 px-4">Cycle & Stage</th>
-                <th className="py-3 px-4">Owner & LTP</th>
-                <th className="py-3 px-4">Raised By & Date</th>
-                <th className="py-3 px-4">Compliance Due</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Shortfall # / App #</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Cycle & Stage</th>
+                <th className="w-52 max-w-[220px] py-2 px-3 font-medium">Owner & LTP</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Raised By & Date</th>
+                <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Compliance Due</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-24 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -214,31 +214,31 @@ export function ShortfallsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.shortfallNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-32 py-2 px-3 whitespace-nowrap">
                       <Badge variant="outline" className="text-[10px] font-mono">
                         Cycle {item.cycle}
                       </Badge>
-                      <div className="text-[11px] text-foreground font-medium mt-0.5">{item.stageName}</div>
+                      <div className="text-[11px] text-foreground font-medium mt-0.5 truncate max-w-[120px]">{item.stageName}</div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-medium text-foreground">{item.ownerName}</div>
-                      <div className="text-[11px] text-muted-foreground">{item.ltpName}</div>
+                    <td className="w-52 max-w-[220px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.ownerName}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{item.ltpName}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.raisedBy}</div>
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
+                      <div className="font-medium text-foreground truncate max-w-[140px]">{item.raisedBy}</div>
                       <div className="text-[10px] text-muted-foreground">{item.raisedDate}</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2.5 text-center whitespace-nowrap">
                       <div className="text-foreground font-medium">{item.dueDate}</div>
                       {item.responseDate && (
                         <div className="text-[10px] text-blue-600">Replied: {item.responseDate}</div>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -255,12 +255,12 @@ export function ShortfallsView() {
                         {item.items.length} deficiency {item.items.length === 1 ? "item" : "items"}
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-24 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedShortfall(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Queries ({item.items.length})
                       </Button>

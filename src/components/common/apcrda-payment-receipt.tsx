@@ -217,7 +217,7 @@ export function ApcrdaPaymentReceipt({
               <span className="font-semibold text-slate-900">{data.demandNoteNo}</span>
             </div>
             <div className="flex sm:justify-start">
-              <span className="font-bold text-slate-900 w-32 shrink-0">BA No</span>
+              <span className="font-bold text-slate-900 w-36 shrink-0">Application Number</span>
               <span className="font-bold text-slate-900 mx-2">:</span>
               <span className="font-semibold text-slate-900">{data.baNo}</span>
             </div>

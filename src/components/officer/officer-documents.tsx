@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -142,46 +142,36 @@ export function OfficerDocuments() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <colgroup>
-                <col className="w-[14%]" />
-                <col className="w-[20%]" />
-                <col className="w-[14%]" />
-                <col className="w-[18%]" />
-                <col className="w-[10%]" />
-                <col className="w-[10%]" />
-                <col className="w-[10%]" />
-                <col className="w-[8%]" />
-              </colgroup>
               <thead className="bg-muted/40">
                 <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
-                  <th className="px-4 py-2.5 font-bold">Application No.</th>
-                  <th className="px-4 py-2.5 font-bold">Project</th>
-                  <th className="px-4 py-2.5 font-bold">Applicant</th>
-                  <th className="px-4 py-2.5 font-bold">Document</th>
-                  <th className="px-4 py-2.5 font-bold">Version</th>
-                  <th className="px-4 py-2.5 font-bold">Uploaded By</th>
-                  <th className="px-4 py-2.5 font-bold">Status</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Action</th>
+                  <th className="w-36 px-3 py-2 font-bold whitespace-nowrap">Application No.</th>
+                  <th className="w-52 max-w-[200px] px-3 py-2 font-bold">Project</th>
+                  <th className="w-40 max-w-[160px] px-3 py-2 font-bold">Applicant</th>
+                  <th className="w-56 max-w-[220px] px-3 py-2 font-bold">Document</th>
+                  <th className="w-16 px-2.5 py-2 text-center font-bold whitespace-nowrap">Version</th>
+                  <th className="w-28 px-3 py-2 font-bold whitespace-nowrap">Uploaded By</th>
+                  <th className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">Status</th>
+                  <th className="w-20 px-2.5 py-2 text-center font-bold whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filtered.map(({ app, doc }) => (
-                  <tr key={`${app.id}-${doc.id}`} className="hover:bg-muted/30 h-14">
-                    <td className="px-4 py-2">
+                  <tr key={`${app.id}-${doc.id}`} className="hover:bg-muted/30">
+                    <td className="px-3 py-2">
                       <button onClick={() => openApplication(app.id, "officer-review")} className="font-mono text-xs font-semibold text-primary hover:underline">
                         {app.applicationNo}
                       </button>
                     </td>
-                    <td className="px-4 py-2 text-xs truncate max-w-[180px]">{app.project.name}</td>
-                    <td className="px-4 py-2 text-xs truncate max-w-[140px]">{app.applicant.name}</td>
-                    <td className="px-4 py-2">
+                    <td className="px-3 py-2 text-xs truncate max-w-[180px]">{app.project.name}</td>
+                    <td className="px-3 py-2 text-xs truncate max-w-[140px]">{app.applicant.name}</td>
+                    <td className="px-3 py-2">
                       <p className="text-xs font-medium leading-tight">{doc.name}</p>
                       <p className="font-mono text-[9px] text-muted-foreground">{doc.code}</p>
                     </td>
-                    <td className="px-4 py-2 text-xs">v{doc.version ?? 1}</td>
-                    <td className="px-4 py-2 text-xs truncate">{doc.uploadedBy ?? "—"}</td>
-                    <td className="px-4 py-2"><DocumentStatusBadge status={doc.status} /></td>
-                    <td className="px-4 py-2 text-right">
+                    <td className="px-2.5 py-2 text-center text-xs">v{doc.version ?? 1}</td>
+                    <td className="px-3 py-2 text-xs truncate">{doc.uploadedBy ?? "—"}</td>
+                    <td className="px-2.5 py-2 text-center"><DocumentStatusBadge status={doc.status} /></td>
+                    <td className="px-2.5 py-2 text-center">
                       <Button size="sm" variant="default" className="h-7 text-xs" onClick={() => handleReview(app, doc)}>
                         <Eye className="size-3" /> Review
                       </Button>

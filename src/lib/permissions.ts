@@ -75,14 +75,15 @@ export function canAccessView(user: User, view: string, roles: Record<RoleKey, R
 }
 
 // Which roles can act on a given stage (some stages accept multiple roles)
+// LTP is the applicant's licensed technical person. Authority officers get involved starting from TPA onwards.
 export function rolesForStage(stage: WorkflowStageKey): RoleKey[] {
   const map: Record<WorkflowStageKey, RoleKey[]> = {
     APPLICATION_CREATED: ["LTP"],
     DRAWING_SCRUTINY: ["LTP"],
-    DOCUMENTS: ["ZONAL_HEAD"],
+    DOCUMENTS: ["TPA", "ZONAL_HEAD"],
     FEE_GENERATED: ["LTP"],
     PAYMENT: ["LTP"],
-    ZONAL_HEAD_REVIEW: ["ZONAL_HEAD"],
+    ZONAL_HEAD_REVIEW: ["TPA", "ZDD", "ZJD", "ZONAL_HEAD"],
     DIRECTOR_REVIEW: ["DIRECTOR"],
     ADDITIONAL_COMMISSIONER_REVIEW: ["ADDITIONAL_COMMISSIONER"],
     COMMISSIONER_REVIEW: ["COMMISSIONER"],
@@ -180,16 +181,26 @@ export function computeProgress(status: ApplicationStatus, currentStage: Workflo
 }
 
 // Determine the assigned officer for a stage
+// Note: LTP is NOT an officer in this workflow; authority officers get involved starting from TPA onwards.
 export function getAssignedOfficerForStage(
   stage: WorkflowStageKey,
   officers: User[]
 ): { name: string; role: RoleKey } | undefined {
   const roles = rolesForStage(stage);
   for (const role of roles) {
+    if (role === "LTP") continue; // LTP is the applicant's technical person, not an authority officer
     const officer = officers.find((o) => o.role === role && o.active);
     if (officer) return { name: officer.name, role: officer.role };
   }
   return undefined;
+}
+
+/**
+ * Checks if a given role is an authority approval officer.
+ * LTP is NOT an officer in this workflow; officers get involved starting from TPA onwards.
+ */
+export function isOfficerRole(role: RoleKey): boolean {
+  return ["TPA", "ZDD", "ZJD", "ZONAL_HEAD", "DIRECTOR", "ADDITIONAL_COMMISSIONER", "COMMISSIONER"].includes(role);
 }
 
 // LTP action availability

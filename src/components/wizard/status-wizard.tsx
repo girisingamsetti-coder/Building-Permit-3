@@ -134,13 +134,13 @@ export function StatusWizard({ onClose }: StatusWizardProps) {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8]">
-                      <th className="font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] min-w-[150px]">File No. / Temporary No.</th>
-                      <th className="font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] min-w-[200px]">Name of Applicant</th>
-                      <th className="font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] min-w-[150px]">Architect/LE/SE Name</th>
-                      <th className="font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] min-w-[100px]">File Status</th>
-                      <th className="font-bold py-2.5 px-2 text-center border-r border-[#DCD5C8] text-[11px] leading-tight max-w-[80px]">Application Form</th>
-                      <th className="font-bold py-2.5 px-2 text-center border-r border-[#DCD5C8] text-[11px] leading-tight max-w-[80px]">Building Permit Letter</th>
-                      <th className="font-bold py-2.5 px-2 text-center text-[11px] leading-tight max-w-[80px]">Plan Permit Letter</th>
+                      <th className="w-40 font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] whitespace-nowrap">File No. / Temporary No.</th>
+                      <th className="w-52 max-w-[220px] font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8]">Name of Applicant</th>
+                      <th className="w-44 max-w-[180px] font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8]">Architect/LE/SE Name</th>
+                      <th className="w-28 font-bold py-2.5 px-3 text-center border-r border-[#DCD5C8] whitespace-nowrap">File Status</th>
+                      <th className="w-24 font-bold py-2.5 px-2 text-center border-r border-[#DCD5C8] text-[11px] leading-tight whitespace-nowrap">Application Form</th>
+                      <th className="w-24 font-bold py-2.5 px-2 text-center border-r border-[#DCD5C8] text-[11px] leading-tight whitespace-nowrap">Building Permit Letter</th>
+                      <th className="w-24 font-bold py-2.5 px-2 text-center text-[11px] leading-tight whitespace-nowrap">Plan Permit Letter</th>
                     </tr>
                   </thead>
                   <tbody>

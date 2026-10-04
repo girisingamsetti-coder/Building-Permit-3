@@ -63,6 +63,7 @@ import {
   SecuritySection,
   SystemAdminSection,
 } from "./admin-settings-sections";
+import { ModuleAccessManager, AccessControlMatrix } from "./admin-module-access";
 
 // ============================================================
 // Constants — option lists for select / toggle inputs
@@ -88,13 +89,15 @@ function settingsEqual(a: SystemSettings, b: SystemSettings): boolean {
   if (a.maxFileSizeMB !== b.maxFileSizeMB) return false;
   if (a.sessionTimeoutMinutes !== b.sessionTimeoutMinutes) return false;
   if (a.demoMode !== b.demoMode) return false;
+  if (a.hideRestrictedModules !== b.hideRestrictedModules) return false;
   if (a.allowedDrawingFormats.length !== b.allowedDrawingFormats.length) return false;
   if (!a.allowedDrawingFormats.every((v) => b.allowedDrawingFormats.includes(v))) return false;
   if (a.allowedDocumentFormats.length !== b.allowedDocumentFormats.length) return false;
   if (!a.allowedDocumentFormats.every((v) => b.allowedDocumentFormats.includes(v))) return false;
-  // Compare roleAccessConfig
+  // Compare roleAccessConfig and userAccessConfig
   try {
     if (JSON.stringify(a.roleAccessConfig) !== JSON.stringify(b.roleAccessConfig)) return false;
+    if (JSON.stringify(a.userAccessConfig ?? {}) !== JSON.stringify(b.userAccessConfig ?? {})) return false;
   } catch { return false; }
   return true;
 }
@@ -269,7 +272,7 @@ export function AdminSettings() {
                 value="access"
                 className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
-                <ShieldCheck className="size-3.5" /> Access Control
+                <ShieldCheck className="size-3.5" /> Module Access
               </TabsTrigger>
             </TabsList>
 
@@ -425,6 +428,10 @@ export function AdminSettings() {
               <UsersAccessSection
                 roleAccessConfig={form.roleAccessConfig}
                 onRoleAccessChange={(cfg) => setField("roleAccessConfig", cfg)}
+                userAccessConfig={form.userAccessConfig}
+                onUserAccessChange={(cfg) => setField("userAccessConfig", cfg)}
+                hideRestrictedModules={form.hideRestrictedModules}
+                onHideRestrictedModulesChange={(val) => setField("hideRestrictedModules", val)}
               />
             </TabsContent>
 
@@ -477,11 +484,25 @@ export function AdminSettings() {
               <SystemAdminSection />
             </TabsContent>
 
-            {/* ---------- Access Control ---------- */}
+            {/* ---------- Access Control / Module Access ---------- */}
             <TabsContent value="access" className="space-y-4 pt-3">
-              <AccessControlMatrix
+              <ModuleAccessManager
                 config={form.roleAccessConfig ?? {}}
                 onChange={(cfg) => setField("roleAccessConfig", cfg)}
+                userConfig={form.userAccessConfig ?? {}}
+                onUserConfigChange={(cfg) => setField("userAccessConfig", cfg)}
+                hideRestricted={form.hideRestrictedModules ?? false}
+                onHideRestrictedChange={(val) => setField("hideRestrictedModules", val)}
+                onDirectSave={(newRoleCfg, newUserCfg, newHide) => {
+                  setField("roleAccessConfig", newRoleCfg);
+                  setField("userAccessConfig", newUserCfg);
+                  setField("hideRestrictedModules", newHide);
+                  updateSystemSettings({
+                    roleAccessConfig: newRoleCfg,
+                    userAccessConfig: newUserCfg,
+                    hideRestrictedModules: newHide,
+                  });
+                }}
               />
             </TabsContent>
           </div>
@@ -695,184 +716,7 @@ function FormatToggleGroup({
   );
 }
 
-// ============================================================
-// Access Control Matrix
-// ============================================================
-const ROLES_FOR_ACCESS = [
-  { key: "LTP",                  label: "LTP" },
-  { key: "TPA",                  label: "TPA" },
-  { key: "ZDD",                  label: "ZDD" },
-  { key: "ZJD",                  label: "ZJD" },
-  { key: "ADDITIONAL_COMMISSIONER", label: "Addl. Commissioner" },
-  { key: "COMMISSIONER",         label: "Commissioner" },
-  { key: "ADMIN",                label: "Admin" },
-] as const;
-
-const MODULES_FOR_ACCESS = [
-  { id: "dashboard",             label: "Dashboard" },
-  { id: "application-submission",label: "Applications" },
-  { id: "application-status",    label: "Application Status" },
-  { id: "proceeding-status",     label: "Compliance" },
-  { id: "commencement",          label: "Work Commencement" },
-  { id: "occupancy",             label: "Occupancy (OC)" },
-  { id: "change-of-ltp",         label: "LTP Change" },
-  { id: "reports",               label: "Reports" },
-] as const;
-
-const ACCESS_OPTIONS: { value: ModuleAccessLevel; label: string; color: string }[] = [
-  { value: "full",  label: "Full",  color: "bg-emerald-500" },
-  { value: "read",  label: "Read",  color: "bg-blue-400" },
-  { value: "none",  label: "None",  color: "bg-rose-400" },
-];
-
-export function AccessControlMatrix({
-  config,
-  onChange,
-}: {
-  config: Record<string, Record<string, ModuleAccessLevel>>;
-  onChange: (cfg: Record<string, Record<string, ModuleAccessLevel>>) => void;
-}) {
-  function getLevel(role: string, moduleId: string): ModuleAccessLevel {
-    return config[role]?.[moduleId] ?? "full";
-  }
-
-  function setLevel(role: string, moduleId: string, level: ModuleAccessLevel) {
-    const next = {
-      ...config,
-      [role]: { ...(config[role] ?? {}), [moduleId]: level },
-    };
-    onChange(next);
-  }
-
-  function setRowAll(role: string, level: ModuleAccessLevel) {
-    const next = { ...config, [role]: {} as Record<string, ModuleAccessLevel> };
-    MODULES_FOR_ACCESS.forEach((m) => { next[role][m.id] = level; });
-    onChange(next);
-  }
-
-  function setColAll(moduleId: string, level: ModuleAccessLevel) {
-    const next = { ...config };
-    ROLES_FOR_ACCESS.forEach((r) => {
-      next[r.key] = { ...(next[r.key] ?? {}), [moduleId]: level };
-    });
-    onChange(next);
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-start gap-3.5 rounded-xl border border-[#EADBCE] bg-[#FDFBF7] p-5">
-        <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#FBF3E4] border border-[#EADBCE] text-[#801824]">
-          <ShieldCheck className="size-5" />
-        </div>
-        <div className="space-y-1">
-          <p className="text-sm font-bold text-[#801824]">Module Access Control</p>
-          <p className="text-xs text-[#5C1A20]">
-            Configure what each role can do in every module.
-            All users see all modules — access level controls their capabilities within each module.
-          </p>
-          <div className="flex items-center gap-4 mt-2 text-[11px]">
-            {ACCESS_OPTIONS.map((o) => (
-              <span key={o.value} className="flex items-center gap-1.5 font-bold text-[#4A1017]">
-                <span className={`inline-block size-2.5 rounded-full ${o.color}`} />
-                {o.label === "Full" ? "Full Access" : o.label === "Read" ? "Read Only" : "No Access"}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Matrix Table */}
-      <div className="overflow-hidden rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs border-collapse text-left">
-            <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0">
-              <tr className="divide-x divide-[#DCD5C8]">
-                <th className="px-4 py-3 text-left font-bold text-[#7A1316] w-44 min-w-[140px]">Role</th>
-                {MODULES_FOR_ACCESS.map((m) => (
-                  <th key={m.id} className="px-2 py-3 text-center font-bold text-[#7A1316] min-w-[90px]">
-                    <div className="flex flex-col items-center gap-1.5">
-                      <span className="text-[11px] leading-tight font-bold">{m.label}</span>
-                      {/* Column quick-set buttons */}
-                      <div className="flex gap-1">
-                        {ACCESS_OPTIONS.map((o) => (
-                          <button
-                            key={o.value}
-                            type="button"
-                            title={`Set all to ${o.label}`}
-                            onClick={() => setColAll(m.id, o.value)}
-                            className={`size-2.5 rounded-full ${o.color} opacity-70 hover:opacity-100 transition-opacity cursor-pointer`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </th>
-                ))}
-                <th className="px-3 py-3 text-center font-bold text-[#7A1316] min-w-[80px] text-[11px]">Set Row</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#EADBCE] bg-white text-xs">
-              {ROLES_FOR_ACCESS.map((role) => (
-                <tr key={role.key} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                  <td className="px-4 py-3 font-bold text-[#801824] whitespace-nowrap bg-[#FAF7F2]/50">
-                    {role.label}
-                  </td>
-                  {MODULES_FOR_ACCESS.map((m) => {
-                    const current = getLevel(role.key, m.id);
-                    return (
-                      <td key={m.id} className="px-2 py-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
-                          {ACCESS_OPTIONS.map((o) => (
-                            <button
-                              key={o.value}
-                              type="button"
-                              title={o.value === "full" ? "Full Access" : o.value === "read" ? "Read Only" : "No Access"}
-                              onClick={() => setLevel(role.key, m.id, o.value)}
-                              className={cn(
-                                "rounded px-2 py-0.5 text-[10px] font-bold border cursor-pointer transition-all",
-                                current === o.value
-                                  ? o.value === "full"
-                                    ? "bg-emerald-100 text-emerald-800 border-emerald-400 shadow-2xs"
-                                    : o.value === "read"
-                                    ? "bg-blue-100 text-blue-800 border-blue-400 shadow-2xs"
-                                    : "bg-rose-100 text-rose-800 border-rose-400 shadow-2xs"
-                                  : "bg-[#FAF7F2] text-slate-400 border-[#EADBCE] hover:border-[#DCD5C8] hover:text-[#5C1A20]"
-                              )}
-                            >
-                              {o.label}
-                            </button>
-                          ))}
-                        </div>
-                      </td>
-                    );
-                  })}
-                  {/* Row quick-set */}
-                  <td className="px-3 py-3 text-center bg-[#FAF7F2]/30">
-                    <div className="flex items-center justify-center gap-1.5">
-                      {ACCESS_OPTIONS.map((o) => (
-                        <button
-                          key={o.value}
-                          type="button"
-                          title={`Set entire row to ${o.label}`}
-                          onClick={() => setRowAll(role.key, o.value)}
-                          className={`size-3 rounded-full ${o.color} opacity-70 hover:opacity-100 transition-opacity cursor-pointer`}
-                        />
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="text-xs text-[#5C1A20] rounded-xl border border-[#EADBCE] bg-[#FAF4EB] px-4 py-3">
-        <strong className="text-[#801824]">Note:</strong> Changes take effect after clicking &quot;Save Changes&quot;. The access configuration controls module-level capabilities — 
-        &quot;Full&quot; allows all actions, &quot;Read&quot; allows viewing only, &quot;None&quot; hides action buttons while keeping the module visible.
-      </div>
-    </div>
-  );
-}
+// Re-export ModuleAccessManager and AccessControlMatrix
+export { ModuleAccessManager, AccessControlMatrix } from "./admin-module-access";
 
 export default AdminSettings;

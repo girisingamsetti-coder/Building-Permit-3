@@ -187,7 +187,7 @@ export function LtpApplicationDetails() {
     if (useAppStore.getState().viewHistory.length > 0) {
       goBack();
     } else {
-      navigate("ltp-applications");
+      navigate("ltp-dashboard");
     }
   };
 
@@ -198,19 +198,19 @@ export function LtpApplicationDetails() {
           onClick={handleBack}
           className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#DCD5C8] bg-white text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
         >
-          <ArrowLeft className="size-4" /> Back to Application Status
+          <ArrowLeft className="size-4" /> Back to Submissions
         </button>
         <EmptyState
           icon={FileWarning}
           title="No application selected"
-          description="Select an application from Application Status to view its details."
+          description="Select an application from Submissions or Dashboard to view its details."
           action={
             <Button
               size="sm"
-              onClick={() => navigate("ltp-applications")}
+              onClick={() => navigate("ltp-dashboard")}
               className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer"
             >
-              Browse applications
+              Browse Submissions
             </Button>
           }
         />
@@ -220,6 +220,22 @@ export function LtpApplicationDetails() {
 
   return (
     <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800 overflow-y-auto">
+      {/* Top Header / Back Button */}
+      <div className="flex items-center justify-between pb-3 border-b border-[#DCD5C8] shrink-0">
+        <button
+          onClick={handleBack}
+          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#DCD5C8] bg-white text-xs font-bold text-[#7A1316] hover:bg-[#F3EADF] transition-all cursor-pointer shadow-2xs"
+        >
+          <ArrowLeft className="size-4" /> Back to Submissions
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 font-medium">Application:</span>
+          <span className="font-mono text-xs font-bold text-[#7A1316] bg-white px-2.5 py-1 rounded border border-[#DCD5C8]">
+            {app.applicationNo}
+          </span>
+        </div>
+      </div>
+
       {/* Status banner */}
       <StatusBanner app={app} />
 
@@ -1011,10 +1027,10 @@ function DrawingsTab({ app }: { app: Application }) {
                   <table className="w-full text-sm">
                     <thead className="bg-[#F5EBE1] text-[#7A1316]">
                       <tr className="text-left text-[11px] font-bold uppercase tracking-wide text-[#7A1316]">
-                        <th className="px-3.5 py-2.5 font-bold">Rule</th>
-                        <th className="px-3.5 py-2.5 font-bold">Category</th>
-                        <th className="px-3.5 py-2.5 font-bold">Severity</th>
-                        <th className="px-3.5 py-2.5 font-bold">Result</th>
+                        <th className="w-1/2 px-3.5 py-2.5 font-bold">Rule</th>
+                        <th className="w-1/6 px-3.5 py-2.5 font-bold">Category</th>
+                        <th className="w-1/6 px-3.5 py-2.5 font-bold">Severity</th>
+                        <th className="w-1/6 px-3.5 py-2.5 font-bold">Result</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#EADBCE] bg-white">
@@ -1122,13 +1138,13 @@ function DocumentsTab({ app }: { app: Application }) {
           <table className="w-full text-sm">
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8]">
               <tr className="text-left text-[11px] font-bold uppercase tracking-wide text-[#7A1316]">
-                <th className="px-4 py-2.5 font-bold">Document</th>
-                <th className="px-4 py-2.5 font-bold">Required</th>
-                <th className="px-4 py-2.5 font-bold">Status</th>
-                <th className="px-4 py-2.5 font-bold">Version</th>
-                <th className="px-4 py-2.5 font-bold">Verified By</th>
-                <th className="px-4 py-2.5 font-bold">Date</th>
-                <th className="px-4 py-2.5 font-bold text-right">Actions</th>
+                <th className="w-[32%] px-4 py-2.5 font-bold">Document</th>
+                <th className="w-[10%] px-4 py-2.5 font-bold text-center">Required</th>
+                <th className="w-[14%] px-4 py-2.5 font-bold text-center">Status</th>
+                <th className="w-[8%] px-4 py-2.5 font-bold text-center">Version</th>
+                <th className="w-[14%] px-4 py-2.5 font-bold">Verified By</th>
+                <th className="w-[11%] px-4 py-2.5 font-bold text-center">Date</th>
+                <th className="w-[11%] px-4 py-2.5 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#EADBCE] bg-white">

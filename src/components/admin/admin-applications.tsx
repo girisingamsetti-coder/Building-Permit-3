@@ -178,17 +178,17 @@ export function AdminApplications() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50/80">
                 <tr className="text-left text-[10px] uppercase tracking-wider text-slate-500">
-                  <th className="px-4 py-3 font-semibold">Application</th>
-                  <th className="px-4 py-3 font-semibold">Applicant</th>
-                  <th className="px-4 py-3 font-semibold">Property</th>
-                  <th className="px-4 py-3 font-semibold">Filed By</th>
-                  <th className="px-4 py-3 font-semibold">Status</th>
-                  <th className="px-4 py-3 font-semibold">Current Stage</th>
-                  <th className="px-4 py-3 font-semibold">With</th>
-                  <th className="px-4 py-3 font-semibold">Fee / Payment</th>
-                  <th className="px-4 py-3 font-semibold">Last updated</th>
-                  <th className="px-4 py-3 font-semibold">SLA</th>
-                  <th className="px-4 py-3 font-semibold text-right">Action</th>
+                  <th className="w-36 px-4 py-3 font-semibold">Application</th>
+                  <th className="w-44 max-w-[180px] px-4 py-3 font-semibold">Applicant</th>
+                  <th className="w-56 max-w-[220px] px-4 py-3 font-semibold">Property</th>
+                  <th className="w-40 max-w-[160px] px-4 py-3 font-semibold">Filed By</th>
+                  <th className="w-28 px-4 py-3 font-semibold">Status</th>
+                  <th className="w-36 px-4 py-3 font-semibold">Current Stage</th>
+                  <th className="w-32 px-4 py-3 font-semibold">With</th>
+                  <th className="w-28 px-4 py-3 font-semibold">Fee / Payment</th>
+                  <th className="w-24 px-4 py-3 font-semibold">Last updated</th>
+                  <th className="w-24 px-4 py-3 font-semibold">SLA</th>
+                  <th className="w-28 px-4 py-3 font-semibold text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -206,24 +206,24 @@ export function AdminApplications() {
                       className="group cursor-pointer transition-colors hover:bg-slate-50/50"
                       onClick={() => openApplication(a.id, "pm-application-details")}
                     >
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-36 px-4 py-3 align-top">
                         <div className="font-semibold text-slate-900 text-[13px]">{a.applicationNo}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">{a.project.type === "LAYOUT_APPROVAL" ? "Layout approval" : "Commercial building permission"}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5 truncate">{a.project.type === "LAYOUT_APPROVAL" ? "Layout approval" : "Commercial building permission"}</div>
                       </td>
-                      <td className="px-4 py-3 align-top max-w-[160px]">
+                      <td className="w-44 max-w-[180px] px-4 py-3 align-top">
                         <div className="font-medium text-slate-900 text-xs truncate">{a.applicant.name}</div>
-                        <div className="text-[11px] text-slate-500 mt-0.5">{a.applicant.contact}</div>
+                        <div className="text-[11px] text-slate-500 mt-0.5 truncate">{a.applicant.contact}</div>
                       </td>
-                      <td className="px-4 py-3 align-top max-w-[200px]">
+                      <td className="w-56 max-w-[220px] px-4 py-3 align-top">
                         <div className="text-xs text-slate-600 truncate" title={a.project.address}>
                           {a.project.address || `Plot 171, Sy. 144/B2, Nalla...`}
                         </div>
                       </td>
-                      <td className="px-4 py-3 align-top max-w-[160px]">
+                      <td className="w-40 max-w-[160px] px-4 py-3 align-top">
                         <div className="font-medium text-slate-900 text-xs truncate">{a.ltpName}</div>
                         <div className="text-[11px] text-slate-500 mt-0.5 truncate">Skyline Design Studio</div>
                       </td>
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-28 px-4 py-3 align-top whitespace-nowrap">
                         {a.status === "SHORTFALL_RAISED" && firstShortfall ? (
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 whitespace-nowrap">
@@ -239,21 +239,21 @@ export function AdminApplications() {
                           <StatusBadge status={a.status} showIcon={false} />
                         )}
                       </td>
-                      <td className="px-4 py-3 align-top">
-                        <span className="text-[12px] text-slate-700">
+                      <td className="w-36 px-4 py-3 align-top whitespace-nowrap">
+                        <span className="text-[12px] text-slate-700 truncate block">
                           {a.status === "DRAFT" ? "Filing" : a.status === "APPROVED" ? "Closed approved" : a.status === "REJECTED" ? "Closed rejected" : a.currentStageLabel}
                         </span>
                       </td>
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-32 px-4 py-3 align-top whitespace-nowrap">
                         {a.assignedOfficer ? (
-                          <div className="text-[11px] text-slate-600 font-medium uppercase tracking-wider">
+                          <div className="text-[11px] text-slate-600 font-medium uppercase tracking-wider truncate">
                             {a.assignedOfficer.role.replace(/_/g, " ")} QUEUE
                           </div>
                         ) : (
                           <span className="text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-28 px-4 py-3 align-top whitespace-nowrap">
                         {isPaid ? (
                           <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Paid</span>
                         ) : a.status === "PAYMENT_FAILED" ? (
@@ -272,10 +272,10 @@ export function AdminApplications() {
                           <span className="text-[11px] text-slate-400">No demand</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-24 px-4 py-3 align-top whitespace-nowrap">
                         <span className="text-[12px] text-slate-500">6h ago</span>
                       </td>
-                      <td className="px-4 py-3 align-top">
+                      <td className="w-24 px-4 py-3 align-top whitespace-nowrap">
                         <div className="flex flex-col items-start gap-1">
                           <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold", sla.cls)}>
                             {sla.label.split(" ")[0]} {sla.label.split(" ")[1] === "track" && "track"}
@@ -285,7 +285,7 @@ export function AdminApplications() {
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 align-top text-right">
+                      <td className="w-28 px-4 py-3 align-top text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-2">
                           {a.status === "DRAFT" ? (
                              <Button size="sm" className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 rounded-full px-4 text-white">

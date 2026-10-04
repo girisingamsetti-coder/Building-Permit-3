@@ -17,6 +17,7 @@ import { LtpComplianceView } from "@/components/ltp/ltp-compliance-view";
 import { LtpApprovedFiles } from "@/components/ltp/ltp-approved-files";
 import { LtpInReview } from "@/components/ltp/ltp-in-review";
 import { LtpReportsView } from "@/components/ltp/ltp-reports-view";
+import { LtpWorkCommencement } from "@/components/ltp/ltp-work-commencement";
 import { AdminSettings } from "@/components/admin/admin-settings";
 import {
   FilePlus2,
@@ -114,7 +115,7 @@ export function LtpPortalView() {
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-700">Enter File No. / Application No.</label>
                 <div className="flex gap-2">
-                  <Input placeholder="e.g. BA 1168/0001/BP/..." className="h-9 text-xs" />
+                  <Input placeholder="e.g. 1168/0001/BP/..." className="h-9 text-xs" />
                   <Button className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-9 px-4 cursor-pointer">
                     Search File
                   </Button>
@@ -128,64 +129,13 @@ export function LtpPortalView() {
         );
       }
 
+      case "commencement":
       case "cc-issued":
       case "work-initiated": {
-        const readyForCC = userApps.filter((a) => a.status === "APPROVED");
         return (
-          <div className="w-full h-full bg-[#FAF7F2] p-3 sm:p-5 flex flex-col gap-4 font-sans text-slate-800 overflow-y-auto">
-            <div className="overflow-hidden rounded-xl border-2 border-[#801824] bg-[#FBF3E4] shadow-xs">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs">
-                  <tr className="divide-x divide-[#DCD5C8]">
-                    <th className="px-4 py-2.5">Application No.</th>
-                    <th className="px-4 py-2.5">Project</th>
-                    <th className="px-4 py-2.5">Approval Date</th>
-                    <th className="px-4 py-2.5">Commencement Status</th>
-                    <th className="px-4 py-2.5 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EADBCE] bg-white">
-                  {readyForCC.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-8 text-slate-400">
-                        No approved files available for commencement notification.
-                      </td>
-                    </tr>
-                  ) : (
-                    readyForCC.map((app) => (
-                      <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                        <td className="px-4 py-3">
-                          <button
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
-                            title="Click to view application details"
-                          >
-                            {app.applicationNo}
-                          </button>
-                        </td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-slate-500">{new Date(app.lastUpdated).toLocaleDateString("en-IN")}</td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">
-                            Ready for Initiation
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            onClick={() => openApplication(app.id, "ltp-application-details")}
-                            className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1 cursor-pointer"
-                          >
-                            <Calendar className="size-3" /> Notify Commencement
-                          </Button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <LtpWorkCommencement
+            initialTab={ltpActiveMenu === "work-initiated" ? "work-initiated" : "cc-issued"}
+          />
         );
       }
 
@@ -198,11 +148,11 @@ export function LtpPortalView() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs">
                   <tr className="divide-x divide-[#DCD5C8]">
-                    <th className="px-4 py-2.5">Permit No.</th>
-                    <th className="px-4 py-2.5">Project Name</th>
-                    <th className="px-4 py-2.5">Applicant</th>
-                    <th className="px-4 py-2.5">Occupancy Status</th>
-                    <th className="px-4 py-2.5 text-right">Action</th>
+                    <th className="w-36 px-3 py-2 whitespace-nowrap">Permit No.</th>
+                    <th className="w-56 max-w-[240px] px-3 py-2">Project Name</th>
+                    <th className="w-44 max-w-[180px] px-3 py-2 whitespace-nowrap">Applicant</th>
+                    <th className="w-32 px-2 py-2 text-center whitespace-nowrap">Occupancy Status</th>
+                    <th className="w-36 px-3 py-2 text-center whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EADBCE] bg-white">
@@ -215,7 +165,7 @@ export function LtpPortalView() {
                   ) : (
                     approvedApps.map((app) => (
                       <tr key={app.id} className="hover:bg-[#FDFBF7] transition-colors divide-x divide-[#EADBCE]">
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2 whitespace-nowrap">
                           <button
                             onClick={() => openApplication(app.id, "ltp-application-details")}
                             className="font-mono font-bold text-[#7A1316] hover:text-[#8F161A] hover:underline cursor-pointer text-left"
@@ -224,19 +174,20 @@ export function LtpPortalView() {
                             {app.applicationNo}
                           </button>
                         </td>
-                        <td className="px-4 py-3 font-medium text-slate-800">{app.project.name}</td>
-                        <td className="px-4 py-3 text-slate-600">{app.applicant.name}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-2 font-medium text-slate-800">{app.project.name}</td>
+                        <td className="px-3 py-2 text-slate-600 whitespace-nowrap">{app.applicant.name}</td>
+                        <td className="px-2 py-2 text-center whitespace-nowrap">
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700">
                             Construction Complete
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-3 py-2 text-center whitespace-nowrap">
                           <Button
                             size="sm"
+                            onClick={() => openApplication(app.id, "ltp-application-details")}
                             className="h-7 text-xs bg-[#801824] hover:bg-[#941C2B] text-white gap-1 cursor-pointer"
                           >
-                            Intimate Completion
+                            Apply Occupancy
                           </Button>
                         </td>
                       </tr>
@@ -310,6 +261,9 @@ export function LtpPortalView() {
     ltpActiveMenu === "review-shortfall-submission" ||
     ltpActiveMenu === "show-cause" ||
     ltpActiveMenu === "review-show-cause-submission" ||
+    ltpActiveMenu === "commencement" ||
+    ltpActiveMenu === "cc-issued" ||
+    ltpActiveMenu === "work-initiated" ||
     ltpActiveMenu === "reports" ||
     ltpActiveMenu === "reports-summary" ||
     ltpActiveMenu === "reports-payments" ||

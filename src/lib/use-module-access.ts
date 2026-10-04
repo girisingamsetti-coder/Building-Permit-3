@@ -14,9 +14,15 @@ import type { ModuleAccessLevel } from "@/types";
 
 export function useModuleAccess(moduleId: string): ModuleAccessLevel {
   const user = useAppStore((s) => s.user);
-  const roleAccessConfig = useAppStore((s) => s.systemSettings.roleAccessConfig);
+  const roleAccessConfig = useAppStore((s) => s.systemSettings?.roleAccessConfig);
+  const userAccessConfig = useAppStore((s) => s.systemSettings?.userAccessConfig);
 
-  if (!user?.role) return "full";
+  if (!user) return "full";
+  // User-specific override takes precedence if configured
+  if (user.id && userAccessConfig?.[user.id]?.[moduleId]) {
+    return userAccessConfig[user.id][moduleId];
+  }
+  if (!user.role) return "full";
   return roleAccessConfig?.[user.role]?.[moduleId] ?? "full";
 }
 

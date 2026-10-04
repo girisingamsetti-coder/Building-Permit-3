@@ -270,9 +270,17 @@ export function OrganizationSection() {
 export function UsersAccessSection({
   roleAccessConfig,
   onRoleAccessChange,
+  userAccessConfig,
+  onUserAccessChange,
+  hideRestrictedModules,
+  onHideRestrictedModulesChange,
 }: {
   roleAccessConfig: SystemSettings["roleAccessConfig"];
   onRoleAccessChange: (cfg: SystemSettings["roleAccessConfig"]) => void;
+  userAccessConfig?: SystemSettings["userAccessConfig"];
+  onUserAccessChange?: (cfg: SystemSettings["userAccessConfig"]) => void;
+  hideRestrictedModules?: boolean;
+  onHideRestrictedModulesChange?: (val: boolean) => void;
 }) {
   const { toast } = useToast();
   const [authSettings, setAuthSettings] = React.useState({
@@ -350,7 +358,14 @@ export function UsersAccessSection({
         </TabsContent>
 
         <TabsContent value="access" className="pt-4">
-          <AccessControlMatrix config={roleAccessConfig ?? {}} onChange={onRoleAccessChange} />
+          <AccessControlMatrix
+            config={roleAccessConfig ?? {}}
+            onChange={onRoleAccessChange}
+            userConfig={userAccessConfig ?? {}}
+            onUserConfigChange={onUserAccessChange}
+            hideRestricted={hideRestrictedModules ?? false}
+            onHideRestrictedChange={onHideRestrictedModulesChange}
+          />
         </TabsContent>
 
         <TabsContent value="auth" className="pt-4 space-y-4">

@@ -626,39 +626,39 @@ export function Drawings2DModule() {
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
                   <tr>
-                    <th className="py-3 px-4">Rule ID & Clause</th>
-                    <th className="py-3 px-4">Parameter & Description</th>
-                    <th className="py-3 px-4">Required by DCR</th>
-                    <th className="py-3 px-4">Measured in CAD</th>
-                    <th className="py-3 px-4">Delta</th>
-                    <th className="py-3 px-4">Status</th>
-                    <th className="py-3 px-4 text-right">Action</th>
+                    <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Rule ID & Clause</th>
+                    <th className="w-64 max-w-[280px] py-2 px-3 font-medium">Parameter & Description</th>
+                    <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Required by DCR</th>
+                    <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Measured in CAD</th>
+                    <th className="w-20 py-2 px-2 text-center whitespace-nowrap font-medium">Delta</th>
+                    <th className="w-20 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                    <th className="w-20 py-2 px-3 text-center whitespace-nowrap font-medium">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
                   {MOCK_2D_RULES.filter((r) => scrutinyCategory === "ALL" || r.category === scrutinyCategory).map((rule) => (
                     <tr key={rule.id} className={cn("hover:bg-muted/30 transition-colors", rule.status === "FAIL" && "bg-red-500/5")}>
-                      <td className="py-3 px-4 font-mono font-medium">
+                      <td className="w-32 py-2 px-3 font-mono font-medium whitespace-nowrap">
                         <div className="text-foreground font-bold">{rule.id}</div>
                         <div className="text-[10px] text-muted-foreground">{rule.clause}</div>
                       </td>
-                      <td className="py-3 px-4 max-w-sm">
-                        <div className="font-semibold text-foreground">{rule.title}</div>
-                        <div className="text-[11px] text-muted-foreground">{rule.description}</div>
+                      <td className="w-64 max-w-[280px] py-2 px-3">
+                        <div className="font-semibold text-foreground truncate">{rule.title}</div>
+                        <div className="text-[11px] text-muted-foreground line-clamp-2">{rule.description}</div>
                         {rule.recommendation && (
-                          <div className="mt-1 text-[11px] text-red-600 font-medium bg-red-500/10 p-1.5 rounded">
+                          <div className="mt-1 text-[11px] text-red-600 font-medium bg-red-500/10 p-1.5 rounded truncate">
                             {rule.recommendation}
                           </div>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-semibold text-foreground">{rule.requiredValue}</td>
-                      <td className="py-3 px-4 font-semibold text-foreground">{rule.observedValue}</td>
-                      <td className="py-3 px-4 font-mono font-semibold">
+                      <td className="w-24 py-2 px-2.5 text-center font-semibold text-foreground whitespace-nowrap">{rule.requiredValue}</td>
+                      <td className="w-24 py-2 px-2.5 text-center font-semibold text-foreground whitespace-nowrap">{rule.observedValue}</td>
+                      <td className="w-20 py-2 px-2 text-center font-mono font-semibold whitespace-nowrap">
                         <span className={rule.status === "FAIL" ? "text-red-600" : "text-emerald-600"}>
                           {rule.delta}
                         </span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="w-20 py-2 px-2 text-center whitespace-nowrap">
                         <Badge
                           className={cn(
                             "text-[10px] uppercase font-bold",
@@ -672,7 +672,7 @@ export function Drawings2DModule() {
                           {rule.status}
                         </Badge>
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="w-20 py-2 px-3 text-center whitespace-nowrap">
                         <Button
                           size="sm"
                           variant="outline"

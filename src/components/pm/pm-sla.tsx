@@ -285,14 +285,14 @@ function SlaDetailsTable({ apps, filter }: { apps: Application[]; filter: Filter
             <Table>
               <TableHeader>
                 <TableRow className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <TableHead className="px-4 py-2.5 font-bold">Application No.</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Project</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Current Stage</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold text-right">Expected SLA</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold text-right">Elapsed</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold text-right">Remaining</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Status</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Reason</TableHead>
+                  <TableHead className="w-32 px-3 py-2 font-bold whitespace-nowrap">Application No.</TableHead>
+                  <TableHead className="w-56 max-w-[220px] px-3 py-2 font-bold">Project</TableHead>
+                  <TableHead className="w-36 px-3 py-2 font-bold whitespace-nowrap">Current Stage</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 font-bold text-right whitespace-nowrap">Expected SLA</TableHead>
+                  <TableHead className="w-20 px-2.5 py-2 font-bold text-right whitespace-nowrap">Elapsed</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 font-bold text-right whitespace-nowrap">Remaining</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 font-bold text-center whitespace-nowrap">Status</TableHead>
+                  <TableHead className="w-56 max-w-[240px] px-3 py-2 font-bold">Reason</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -305,28 +305,28 @@ function SlaDetailsTable({ apps, filter }: { apps: Application[]; filter: Filter
                       className="cursor-pointer hover:bg-muted/30"
                       onClick={() => openApplication(a.id, "pm-application-details")}
                     >
-                      <TableCell className="px-4 py-3 font-mono text-[11px] font-medium">
+                      <TableCell className="px-3 py-2 font-mono text-[11px] font-medium">
                         {a.applicationNo}
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         <p className="truncate text-xs font-medium">{a.project.name}</p>
                         <p className="truncate text-[10px] text-muted-foreground">
                           {a.applicant.name}
                         </p>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         <span className="text-xs">{stageInfo?.label ?? a.currentStageLabel}</span>
                         <div className="mt-0.5">
                           <PriorityBadge priority={a.priority} />
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-right text-xs tabular-nums">
+                      <TableCell className="px-2.5 py-2 text-right text-xs tabular-nums">
                         {sla.expectedDays > 0 ? `${sla.expectedDays} d` : "—"}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-right text-xs tabular-nums">
+                      <TableCell className="px-2.5 py-2 text-right text-xs tabular-nums">
                         {sla.elapsedDays > 0 ? `${sla.elapsedDays} d` : "—"}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-right text-xs tabular-nums">
+                      <TableCell className="px-2.5 py-2 text-right text-xs tabular-nums">
                         <span
                           className={
                             sla.remainingDays < 0
@@ -339,10 +339,10 @@ function SlaDetailsTable({ apps, filter }: { apps: Application[]; filter: Filter
                           {sla.remainingDays > 0 ? `${sla.remainingDays} d` : sla.remainingDays === 0 ? "Due today" : `${Math.abs(sla.remainingDays)} d over`}
                         </span>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-2.5 py-2 text-center">
                         <Badge className={sla.cls}>{sla.label}</Badge>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         {sla.reason ? (
                           <span className="text-[11px] text-muted-foreground">{sla.reason}</span>
                         ) : (
@@ -423,11 +423,11 @@ function BlockedApplications({
           <Table>
             <TableHeader>
               <TableRow className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <TableHead className="px-4 py-2.5 font-bold">Application No.</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold">Project</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold">Current Stage</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold">Blocking Reason</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold text-right">Action</TableHead>
+                <TableHead className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Application No.</TableHead>
+                <TableHead className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Project</TableHead>
+                <TableHead className="w-40 px-4 py-2.5 font-bold whitespace-nowrap">Current Stage</TableHead>
+                <TableHead className="w-64 max-w-[280px] px-4 py-2.5 font-bold">Blocking Reason</TableHead>
+                <TableHead className="w-24 px-4 py-2.5 font-bold text-right whitespace-nowrap">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

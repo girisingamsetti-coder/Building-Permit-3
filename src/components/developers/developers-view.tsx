@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -236,14 +236,14 @@ export function DevelopersView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">Reg # / Firm Name</th>
-                <th className="py-3 px-4">Entity Type</th>
-                <th className="py-3 px-4">Authorized Person</th>
-                <th className="py-3 px-4">RERA Number</th>
-                <th className="py-3 px-4">Grade & Projects</th>
-                <th className="py-3 px-4">Validity</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-48 max-w-[200px] py-2 px-3 whitespace-nowrap font-medium">Reg # / Firm Name</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Entity Type</th>
+                <th className="w-36 max-w-[160px] py-2 px-3 font-medium">Authorized Person</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">RERA Number</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Grade & Projects</th>
+                <th className="w-32 py-2 px-3 whitespace-nowrap font-medium">Validity</th>
+                <th className="w-24 py-2 px-2.5 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-20 py-2 px-2.5 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -256,32 +256,32 @@ export function DevelopersView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-medium">
-                      <div className="text-foreground font-semibold flex items-center gap-1.5">
-                        <Building2 className="size-3.5 text-primary" /> {item.companyName}
+                    <td className="w-48 max-w-[200px] py-2 px-3 font-medium">
+                      <div className="text-foreground font-semibold flex items-center gap-1.5 truncate">
+                        <Building2 className="size-3.5 text-primary shrink-0" /> <span className="truncate">{item.companyName}</span>
                       </div>
-                      <div className="font-mono text-muted-foreground text-[11px]">{item.registrationNumber}</div>
+                      <div className="font-mono text-muted-foreground text-[11px] truncate">{item.registrationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="text-[10px]">
+                    <td className="w-32 py-2 px-3 whitespace-nowrap">
+                      <Badge variant="outline" className="text-[10px] truncate max-w-[120px]">
                         {item.developerType.replace("_", " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.authorizedPerson}</div>
-                      <div className="text-[11px] text-muted-foreground">{item.designation}</div>
+                    <td className="w-36 max-w-[160px] py-2 px-3">
+                      <div className="font-medium text-foreground truncate">{item.authorizedPerson}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{item.designation}</div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-muted-foreground">
+                    <td className="w-32 py-2 px-3 font-mono text-[11px] text-muted-foreground whitespace-nowrap truncate">
                       {item.reraNumber}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-32 py-2 px-3 whitespace-nowrap">
                       <div className="font-semibold text-foreground flex items-center gap-1">
                         <Award className="size-3.5 text-amber-500" />
                         {item.grade.replace("_", " ")}
                       </div>
                       <div className="text-[10px] text-muted-foreground">{item.activeProjects} active projects</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-32 py-2 px-3 whitespace-nowrap">
                       <div className="text-[11px] font-medium text-slate-700">
                         <span className="text-muted-foreground">From:</span> {new Date(item.validFrom).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </div>
@@ -293,7 +293,7 @@ export function DevelopersView() {
                         <span className="text-muted-foreground font-medium">To:</span> {new Date(item.validTo).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2.5 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -309,12 +309,12 @@ export function DevelopersView() {
                         {item.status}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-2.5 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedDev(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Profile
                       </Button>

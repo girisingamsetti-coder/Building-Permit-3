@@ -259,24 +259,25 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
   return (
     <div className="flex flex-col h-full w-full bg-[#FAF7F2] text-slate-800 overflow-y-auto">
-      {/* ── Submodule Tabs Navigation & Quick Metrics (No Duplicate Header) ── */}
-      <div className="bg-white border-b border-[#EADBCE] px-4 sm:px-6 py-3 shadow-xs shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        {/* Submodule Tabs Navigation */}
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+      {/* ── Submodule Tabs Navigation & Quick Metrics (Spread across the screen) ── */}
+      <div className="bg-white border-b border-[#EADBCE] px-3 sm:px-4 md:px-6 py-2.5 shadow-xs shrink-0 w-full">
+        {/* 5 Tabs Grid spreading evenly across the screen */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2.5 w-full">
           <button
             onClick={() => handleTabChange("verified")}
+            title="DCR & Document Verified"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "verified"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <FileCheck className="size-3.5 shrink-0" />
-            <span>DCR & Document Verified</span>
+            <span className="truncate">DCR & Document Verified</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "verified" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800"
               )}
             >
@@ -286,19 +287,20 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
           <button
             onClick={() => handleTabChange("shortfall")}
+            title="Shortfall Notices"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "shortfall"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <AlertTriangle className="size-3.5 shrink-0" />
-            <span>Shortfall Notices</span>
+            <span className="truncate">Shortfall Notices</span>
             {stats.openShortfalls > 0 && (
               <span
                 className={cn(
-                  "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                  "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                   activeTab === "shortfall" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
                 )}
               >
@@ -309,18 +311,19 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
           <button
             onClick={() => handleTabChange("review-shortfall-submission")}
+            title="Shortfall Compliance Submissions"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "review-shortfall-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <Send className="size-3.5 shrink-0" />
-            <span>Shortfall Compliance Submissions</span>
+            <span className="truncate">Shortfall Compliance Submissions</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "review-shortfall-submission" ? "bg-white/20 text-white" : "bg-blue-100 text-blue-800"
               )}
             >
@@ -330,19 +333,20 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
           <button
             onClick={() => handleTabChange("show-cause")}
+            title="Show Cause Directives"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "show-cause"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <Gavel className="size-3.5 shrink-0" />
-            <span>Show Cause Directives</span>
+            <span className="truncate">Show Cause Directives</span>
             {stats.activeShowCauses > 0 && (
               <span
                 className={cn(
-                  "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                  "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                   activeTab === "show-cause" ? "bg-white/20 text-white" : "bg-rose-100 text-rose-800"
                 )}
               >
@@ -353,18 +357,19 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
           <button
             onClick={() => handleTabChange("review-show-cause-submission")}
+            title="Show Cause Explanations"
             className={cn(
-              "flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg transition-all whitespace-nowrap cursor-pointer",
+              "w-full flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center min-w-0",
               activeTab === "review-show-cause-submission"
                 ? "bg-[#801824] text-[#FDF6ED] shadow-xs"
-                : "bg-white text-slate-600 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
+                : "bg-white text-slate-700 hover:bg-[#F3EADF] hover:text-[#801824] border border-[#EADBCE]"
             )}
           >
             <FileText className="size-3.5 shrink-0" />
-            <span>Show Cause Explanations</span>
+            <span className="truncate">Show Cause Explanations</span>
             <span
               className={cn(
-                "px-1.5 py-0.2 rounded-full text-[10px] font-bold",
+                "px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0",
                 activeTab === "review-show-cause-submission" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
               )}
             >
@@ -486,13 +491,13 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#801824]/5 border-b border-[#EADBCE] text-[#5C1A20] font-bold uppercase text-[11px] tracking-wider">
                     <tr>
-                      <th className="px-4 py-3.5">Proposal / BA No.</th>
-                      <th className="px-4 py-3.5">Project & Type</th>
-                      <th className="px-4 py-3.5">Applicant Name</th>
-                      <th className="px-4 py-3.5">DCR Automated Scrutiny</th>
-                      <th className="px-4 py-3.5">Document Verification</th>
-                      <th className="px-4 py-3.5">Current Stage</th>
-                      <th className="px-4 py-3.5 text-right">Actions</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Proposal / Application No.</th>
+                      <th className="w-56 max-w-[220px] py-2 px-3">Project & Type</th>
+                      <th className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap">Applicant Name</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">DCR Automated Scrutiny</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Document Verification</th>
+                      <th className="w-28 py-2 px-2.5 text-center whitespace-nowrap">Current Stage</th>
+                      <th className="w-28 py-2 px-3 text-center whitespace-nowrap">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -526,7 +531,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
                       return filtered.map((app) => (
                         <tr key={app.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <button
                               onClick={() => openApplication(app.id, "ltp-application-details")}
                               className="font-mono font-bold text-[#801824] hover:text-[#941C2B] hover:underline cursor-pointer text-left block"
@@ -538,7 +543,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               {new Date(app.lastUpdated).toLocaleDateString("en-IN")}
                             </span>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3">
                             <div className="font-semibold text-slate-800">{app.project.name}</div>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal border-slate-200">
@@ -547,11 +552,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               <span className="text-[11px] text-slate-500">{app.project.plotArea} sq.m</span>
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-700">
+                          <td className="py-2 px-3 text-slate-700 whitespace-nowrap">
                             <div className="font-medium">{app.applicant.name}</div>
                             <div className="text-[11px] text-slate-400">{app.applicant.contact}</div>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <div className="flex items-center gap-1.5 text-emerald-700 font-semibold text-[11px]">
                               <BadgeCheck className="size-4 text-emerald-600 shrink-0" />
                               <span>Rules Passed (DCR)</span>
@@ -560,7 +565,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               FAR, Setbacks, Height Verified
                             </span>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
                               <CheckCircle2 className="size-3 text-emerald-600" />
                               <span>Docs Cleared</span>
@@ -569,12 +574,12 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               Title, Geo & Structural NOC Clear
                             </span>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-2.5 text-center whitespace-nowrap">
                             <Badge className="bg-[#801824]/10 text-[#801824] hover:bg-[#801824]/15 border-0 font-semibold text-[10px]">
                               {app.currentStageLabel ?? "In Review Proceeding"}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3.5 text-right space-x-1 whitespace-nowrap">
+                          <td className="py-2 px-3 text-center space-x-1 whitespace-nowrap">
                             <Button
                               size="sm"
                               variant="outline"
@@ -769,13 +774,13 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#801824]/5 border-b border-[#EADBCE] text-[#5C1A20] font-bold uppercase text-[11px]">
                     <tr>
-                      <th className="px-4 py-3.5">Shortfall Ref & File</th>
-                      <th className="px-4 py-3.5">Deficiency Subject</th>
-                      <th className="px-4 py-3.5">LTP Compliance Statement</th>
-                      <th className="px-4 py-3.5">Attached Evidence</th>
-                      <th className="px-4 py-3.5">Reviewing Officer</th>
-                      <th className="px-4 py-3.5">Status</th>
-                      <th className="px-4 py-3.5 text-right">Action</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Shortfall Ref & File</th>
+                      <th className="w-48 max-w-[200px] py-2 px-3 whitespace-nowrap">Deficiency Subject</th>
+                      <th className="w-64 max-w-[260px] py-2 px-3">LTP Compliance Statement</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Attached Evidence</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Reviewing Officer</th>
+                      <th className="w-24 py-2 px-2 text-center whitespace-nowrap">Status</th>
+                      <th className="w-20 py-2 px-3 text-center whitespace-nowrap">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -783,14 +788,14 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                       .filter((s) => s.status === "RESPONDED" || s.status === "UNDER_REVIEW" || !!s.response || s.status === "RESOLVED")
                       .map((sf) => (
                         <tr key={sf.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <span className="font-mono font-bold text-[#801824] block">{sf.shortfallId}</span>
                             <span className="font-mono text-[11px] text-slate-500">{sf.applicationNo}</span>
                           </td>
-                          <td className="px-4 py-3.5 font-medium text-slate-800 max-w-[200px] truncate" title={sf.title}>
+                          <td className="py-2 px-3 font-medium text-slate-800 whitespace-nowrap" title={sf.title}>
                             {sf.title}
                           </td>
-                          <td className="px-4 py-3.5 max-w-[260px]">
+                          <td className="py-2 px-3">
                             <p className="text-slate-600 line-clamp-2 text-[11px]">
                               {sf.response?.text ?? "Rectification plan and signed documentation uploaded as instructed."}
                             </p>
@@ -798,17 +803,17 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               Submitted: {sf.response?.respondedAt ? new Date(sf.response.respondedAt).toLocaleDateString("en-IN") : "Recent"}
                             </span>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-[#FAF7F2] border border-[#EADBCE] text-[11px] text-slate-700">
                               <FileText className="size-3 text-[#801824]" />
                               <span className="font-mono">{sf.response?.supportingDocument ?? "Revised_Drawing_v2.dwg"}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-600">
+                          <td className="py-2 px-3 text-slate-600 whitespace-nowrap">
                             <div className="font-medium">{sf.raisedBy.name}</div>
                             <div className="text-[10px] text-slate-400">{sf.raisedBy.role}</div>
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-2 text-center whitespace-nowrap">
                             <Badge
                               className={cn(
                                 "text-[10px] font-bold uppercase",
@@ -820,7 +825,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               {sf.status === "RESOLVED" ? "Cleared & Resolved" : "Under Officer Review"}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                          <td className="py-2 px-3 text-center whitespace-nowrap">
                             <Button
                               size="sm"
                               variant="outline"
@@ -985,13 +990,13 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#801824]/5 border-b border-[#EADBCE] text-[#5C1A20] font-bold uppercase text-[11px]">
                     <tr>
-                      <th className="px-4 py-3.5">Directive Ref & File</th>
-                      <th className="px-4 py-3.5">Applicant / Owner</th>
-                      <th className="px-4 py-3.5">Filed Explanation</th>
-                      <th className="px-4 py-3.5">Hearing Date</th>
-                      <th className="px-4 py-3.5">Competent Authority Decision</th>
-                      <th className="px-4 py-3.5">Status</th>
-                      <th className="px-4 py-3.5 text-right">Proceedings</th>
+                      <th className="w-36 py-2 px-3 whitespace-nowrap">Directive Ref & File</th>
+                      <th className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap">Applicant / Owner</th>
+                      <th className="w-56 max-w-[220px] py-2 px-3">Filed Explanation</th>
+                      <th className="w-28 py-2 px-2.5 text-center whitespace-nowrap">Hearing Date</th>
+                      <th className="w-56 max-w-[220px] py-2 px-3">Competent Authority Decision</th>
+                      <th className="w-24 py-2 px-2 text-center whitespace-nowrap">Status</th>
+                      <th className="w-24 py-2 px-3 text-center whitespace-nowrap">Proceedings</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -999,15 +1004,15 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                       .filter((n) => !!n.applicantExplanation || n.status === "CLOSED" || n.responseDate)
                       .map((sc) => (
                         <tr key={sc.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-3 whitespace-nowrap">
                             <span className="font-mono font-bold text-rose-900 block">{sc.noticeNumber}</span>
                             <span className="font-mono text-[11px] text-slate-500">{sc.applicationNumber}</span>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-700">
+                          <td className="py-2 px-3 text-slate-700 whitespace-nowrap">
                             <div className="font-medium">{sc.ownerName}</div>
                             <div className="text-[10px] text-slate-400">LTP: {sc.ltpName}</div>
                           </td>
-                          <td className="px-4 py-3.5 max-w-[280px]">
+                          <td className="py-2 px-3">
                             <p className="text-slate-700 line-clamp-2 text-[11px]">
                               {sc.applicantExplanation ?? "Explanation and photographic evidence submitted for review."}
                             </p>
@@ -1015,7 +1020,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               Filed: {sc.responseDate ?? "Submitted"}
                             </span>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-600">
+                          <td className="py-2 px-2.5 text-center whitespace-nowrap">
                             {sc.hearingScheduledDate ? (
                               <span className="inline-flex items-center gap-1 font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded text-[11px]">
                                 <Calendar className="size-3" /> {sc.hearingScheduledDate}
@@ -1024,7 +1029,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               <span className="text-slate-400 italic text-[11px]">No personal hearing</span>
                             )}
                           </td>
-                          <td className="px-4 py-3.5 max-w-[220px]">
+                          <td className="py-2 px-3">
                             {sc.decisionRemarks ? (
                               <p className="text-emerald-800 text-[11px] font-medium line-clamp-2">
                                 {sc.decisionRemarks}
@@ -1033,7 +1038,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               <span className="text-slate-400 italic text-[11px]">Pending Hearing Officer Review</span>
                             )}
                           </td>
-                          <td className="px-4 py-3.5">
+                          <td className="py-2 px-2 text-center whitespace-nowrap">
                             <Badge
                               className={cn(
                                 "text-[10px] font-bold uppercase",
@@ -1045,7 +1050,7 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                               {sc.status === "CLOSED" ? "Notice Closed" : "Under Hearing"}
                             </Badge>
                           </td>
-                          <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                          <td className="py-2 px-3 text-center whitespace-nowrap">
                             <Button
                               size="sm"
                               variant="outline"

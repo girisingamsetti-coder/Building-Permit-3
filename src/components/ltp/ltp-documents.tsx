@@ -194,24 +194,15 @@ export function LtpDocuments() {
               >
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
-                    <colgroup>
-                      <col className="w-[28%]" />
-                      <col className="w-[8%]" />
-                      <col className="w-[18%]" />
-                      <col className="w-[8%]" />
-                      <col className="w-[16%]" />
-                      <col className="w-[12%]" />
-                      <col className="w-[10%]" />
-                    </colgroup>
                     <thead className="bg-muted/40">
                       <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
-                        <th className="px-4 py-2.5 font-bold">Document</th>
-                        <th className="px-4 py-2.5 font-bold">Req.</th>
-                        <th className="px-4 py-2.5 font-bold">Status</th>
-                        <th className="px-4 py-2.5 font-bold">Ver.</th>
-                        <th className="px-4 py-2.5 font-bold">Reviewed By</th>
-                        <th className="px-4 py-2.5 font-bold">Date</th>
-                        <th className="px-4 py-2.5 text-right font-bold">Actions</th>
+                        <th className="w-64 max-w-[260px] px-4 py-2.5 font-bold">Document</th>
+                        <th className="w-20 px-4 py-2.5 font-bold whitespace-nowrap">Req.</th>
+                        <th className="w-32 px-4 py-2.5 font-bold whitespace-nowrap">Status</th>
+                        <th className="w-16 px-4 py-2.5 font-bold whitespace-nowrap">Ver.</th>
+                        <th className="w-40 max-w-[160px] px-4 py-2.5 font-bold">Reviewed By</th>
+                        <th className="w-24 px-4 py-2.5 font-bold whitespace-nowrap">Date</th>
+                        <th className="w-28 px-4 py-2.5 text-right font-bold whitespace-nowrap">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">

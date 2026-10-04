@@ -609,14 +609,14 @@ export function LtpPayment() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="border-b-2 border-border text-left text-[11px] uppercase tracking-wide text-foreground">
-                  <th className="px-4 py-2.5 font-bold">Application No.</th>
-                  <th className="px-4 py-2.5 font-bold">Project</th>
-                  <th className="px-4 py-2.5 font-bold">Applicant</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Total Fee</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Paid</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Outstanding</th>
-                  <th className="px-4 py-2.5 font-bold">Status</th>
-                  <th className="px-4 py-2.5 text-right font-bold">Action</th>
+                  <th className="w-36 px-4 py-2.5 font-bold whitespace-nowrap">Application No.</th>
+                  <th className="w-56 max-w-[220px] px-4 py-2.5 font-bold">Project</th>
+                  <th className="w-44 max-w-[180px] px-4 py-2.5 font-bold">Applicant</th>
+                  <th className="w-28 px-4 py-2.5 text-right font-bold whitespace-nowrap">Total Fee</th>
+                  <th className="w-28 px-4 py-2.5 text-right font-bold whitespace-nowrap">Paid</th>
+                  <th className="w-28 px-4 py-2.5 text-right font-bold whitespace-nowrap">Outstanding</th>
+                  <th className="w-24 px-4 py-2.5 font-bold text-center whitespace-nowrap">Status</th>
+                  <th className="w-20 px-4 py-2.5 text-right font-bold whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

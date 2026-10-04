@@ -250,14 +250,14 @@ export function ProfessionalsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">LTP Name / Reg #</th>
-                <th className="py-3 px-4">Discipline</th>
-                <th className="py-3 px-4">Licence # & Council</th>
-                <th className="py-3 px-4">Qualification & Exp</th>
-                <th className="py-3 px-4">Organization</th>
-                <th className="py-3 px-4">Validity</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-48 max-w-[200px] py-2 px-3 whitespace-nowrap font-medium">LTP Name / Reg #</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Discipline</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Licence # & Council</th>
+                <th className="w-48 max-w-[200px] py-2 px-3 font-medium">Qualification & Exp</th>
+                <th className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap font-medium">Organization</th>
+                <th className="w-32 py-2 px-2.5 whitespace-nowrap font-medium">Validity</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-24 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -270,30 +270,30 @@ export function ProfessionalsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-medium">
-                      <div className="text-foreground font-semibold flex items-center gap-1.5">
-                        <IdCard className="size-3.5 text-primary" /> {item.name}
+                    <td className="w-48 max-w-[200px] py-2 px-3 font-medium whitespace-nowrap">
+                      <div className="text-foreground font-semibold flex items-center gap-1.5 truncate">
+                        <IdCard className="size-3.5 text-primary shrink-0" /> <span className="truncate">{item.name}</span>
                       </div>
-                      <div className="font-mono text-muted-foreground text-[11px]">{item.registrationNumber}</div>
+                      <div className="font-mono text-muted-foreground text-[11px] truncate">{item.registrationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <Badge variant="outline" className="text-[10px] font-semibold">
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
+                      <Badge variant="outline" className="text-[10px] font-semibold truncate max-w-[130px]">
                         {item.professionalType.replace("_", " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-mono text-foreground font-medium">{item.licenceNo}</div>
-                      <div className="text-[10px] text-muted-foreground">{item.councilRegistration}</div>
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
+                      <div className="font-mono text-foreground font-medium truncate">{item.licenceNo}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{item.councilRegistration}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="text-foreground font-medium truncate max-w-xs">{item.qualification}</div>
-                      <div className="text-[10px] text-muted-foreground">{item.experienceYears} Years Experience</div>
+                    <td className="w-48 max-w-[200px] py-2 px-3">
+                      <div className="text-foreground font-medium truncate max-w-[180px]">{item.qualification}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{item.experienceYears} Years Experience</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium text-foreground">{item.organization}</div>
-                      <div className="text-[10px] text-muted-foreground">{item.applicationsCount} Apps handled</div>
+                    <td className="w-44 max-w-[180px] py-2 px-3 whitespace-nowrap">
+                      <div className="font-medium text-foreground truncate">{item.organization}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">{item.applicationsCount} Apps handled</div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-32 py-2 px-2.5 whitespace-nowrap">
                       <div className="text-[11px] font-medium text-slate-700">
                         <span className="text-muted-foreground">From:</span> {new Date(item.validFrom).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </div>
@@ -305,7 +305,7 @@ export function ProfessionalsView() {
                         <span className="text-muted-foreground font-medium">To:</span> {new Date(item.validTo).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                       </div>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -321,12 +321,12 @@ export function ProfessionalsView() {
                         {item.status}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-24 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedProf(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Credentials
                       </Button>

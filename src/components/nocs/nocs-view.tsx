@@ -219,13 +219,13 @@ export function NocsView() {
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-muted-foreground font-medium">
               <tr>
-                <th className="py-3 px-4">NOC # / App #</th>
-                <th className="py-3 px-4">Category</th>
-                <th className="py-3 px-4">Issuing Authority</th>
-                <th className="py-3 px-4">Ref Number</th>
-                <th className="py-3 px-4">Validity</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">NOC # / App #</th>
+                <th className="w-36 py-2 px-3 whitespace-nowrap font-medium">Category</th>
+                <th className="w-52 max-w-[220px] py-2 px-3 font-medium">Issuing Authority</th>
+                <th className="w-28 py-2 px-2.5 whitespace-nowrap font-medium">Ref Number</th>
+                <th className="w-28 py-2 px-2.5 whitespace-nowrap font-medium">Validity</th>
+                <th className="w-24 py-2 px-2 text-center whitespace-nowrap font-medium">Status</th>
+                <th className="w-20 py-2 px-3 text-center whitespace-nowrap font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -238,23 +238,23 @@ export function NocsView() {
               ) : (
                 filtered.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="py-3 px-4 font-mono font-medium">
+                    <td className="w-36 py-2 px-3 font-mono font-medium whitespace-nowrap">
                       <div className="text-foreground font-semibold">{item.nocNumber}</div>
                       <div className="text-muted-foreground text-[11px]">{item.applicationNumber}</div>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-1.5 font-medium text-foreground">
+                    <td className="w-36 py-2 px-3 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5 font-medium text-foreground truncate max-w-[130px]">
                         {NOC_ICONS[item.nocType]}
-                        {item.nocTypeName}
+                        <span className="truncate">{item.nocTypeName}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 max-w-xs">
+                    <td className="w-52 max-w-[220px] py-2 px-3">
                       <div className="truncate font-medium text-foreground">{item.authority}</div>
                     </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-muted-foreground">
+                    <td className="w-28 py-2 px-2.5 font-mono text-[11px] text-muted-foreground whitespace-nowrap truncate">
                       {item.referenceNumber}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-28 py-2 px-2.5 whitespace-nowrap">
                       {item.issuedDate ? (
                         <div>
                           <div className="text-[11px] font-medium text-foreground">Issued: {item.issuedDate}</div>
@@ -266,7 +266,7 @@ export function NocsView() {
                         <span className="text-muted-foreground text-[11px] italic">Not issued yet</span>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="w-24 py-2 px-2 text-center whitespace-nowrap">
                       <Badge
                         className={cn(
                           "text-[10px] uppercase font-semibold",
@@ -284,12 +284,12 @@ export function NocsView() {
                         {item.status.replace("_", " ")}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td className="w-20 py-2 px-3 text-center whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => setSelectedNoc(item)}
-                        className="h-8 gap-1.5 text-xs"
+                        className="h-7 gap-1.5 text-xs"
                       >
                         <Eye className="size-3.5" /> Details
                       </Button>

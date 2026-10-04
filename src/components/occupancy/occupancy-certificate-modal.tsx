@@ -133,10 +133,10 @@ export function OccupancyCertificateModal({
                 <table className="w-full text-left text-xs border border-slate-300">
                   <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-300">
                     <tr>
-                      <th className="p-2 border-r border-slate-300">Parameter</th>
-                      <th className="p-2 border-r border-slate-300">Sanctioned (BPO)</th>
-                      <th className="p-2 border-r border-slate-300">As-Built Verified</th>
-                      <th className="p-2">Compliance Status</th>
+                      <th className="w-44 p-2 border-r border-slate-300 font-bold">Parameter</th>
+                      <th className="w-32 p-2 border-r border-slate-300 font-bold whitespace-nowrap">Sanctioned (BPO)</th>
+                      <th className="w-32 p-2 border-r border-slate-300 font-bold whitespace-nowrap">As-Built Verified</th>
+                      <th className="w-32 p-2 font-bold whitespace-nowrap">Compliance Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">

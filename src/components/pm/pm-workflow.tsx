@@ -152,10 +152,10 @@ export function PmWorkflow() {
           <Table>
             <TableHeader>
               <TableRow className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                <TableHead className="px-4 py-2.5 font-bold">Stage</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold">Responsible Role</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold text-right">Pending Count</TableHead>
-                <TableHead className="px-4 py-2.5 font-bold text-right">Avg Processing Days</TableHead>
+                <TableHead className="w-56 px-4 py-2.5 font-bold">Stage</TableHead>
+                <TableHead className="w-48 px-4 py-2.5 font-bold">Responsible Role</TableHead>
+                <TableHead className="w-28 px-4 py-2.5 font-bold text-right">Pending Count</TableHead>
+                <TableHead className="w-36 px-4 py-2.5 font-bold text-right">Avg Processing Days</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -306,15 +306,15 @@ function LiveWorkflowTable({ apps }: { apps: Application[] }) {
             <Table>
               <TableHeader>
                 <TableRow className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <TableHead className="px-4 py-2.5 font-bold">Application No.</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Project</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Current Stage</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Assigned Role</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Assigned Officer</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Pending Since</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold text-right">Expected SLA</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">SLA Status</TableHead>
-                  <TableHead className="px-4 py-2.5 font-bold">Next Stage</TableHead>
+                  <TableHead className="w-32 px-3 py-2 font-bold whitespace-nowrap">Application No.</TableHead>
+                  <TableHead className="w-52 max-w-[220px] px-3 py-2 font-bold">Project</TableHead>
+                  <TableHead className="w-36 px-3 py-2 font-bold whitespace-nowrap">Current Stage</TableHead>
+                  <TableHead className="w-28 px-3 py-2 font-bold whitespace-nowrap">Assigned Role</TableHead>
+                  <TableHead className="w-32 px-3 py-2 font-bold whitespace-nowrap">Assigned Officer</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">Pending Since</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 text-right font-bold whitespace-nowrap">Expected SLA</TableHead>
+                  <TableHead className="w-24 px-2.5 py-2 text-center font-bold whitespace-nowrap">SLA Status</TableHead>
+                  <TableHead className="w-28 px-3 py-2 font-bold whitespace-nowrap">Next Stage</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -329,22 +329,22 @@ function LiveWorkflowTable({ apps }: { apps: Application[] }) {
                       className="cursor-pointer hover:bg-muted/30"
                       onClick={() => openApplication(a.id, "pm-application-details")}
                     >
-                      <TableCell className="px-4 py-3 font-mono text-[11px] font-medium">
+                      <TableCell className="px-3 py-2 font-mono text-[11px] font-medium">
                         {a.applicationNo}
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         <p className="truncate text-xs font-medium">{a.project.name}</p>
                         <p className="truncate text-[10px] text-muted-foreground">
                           {a.applicant.name}
                         </p>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         <span className="text-xs">{a.currentStageLabel}</span>
                         <div className="mt-0.5">
                           <PriorityBadge priority={a.priority} />
                         </div>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         {responsibleRoles.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {responsibleRoles.map((r: RoleKey) => (
@@ -355,7 +355,7 @@ function LiveWorkflowTable({ apps }: { apps: Application[] }) {
                           <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         {a.assignedOfficer ? (
                           <div className="flex items-center gap-1.5">
                             <span className="text-xs font-medium">{a.assignedOfficer.name}</span>
@@ -364,16 +364,16 @@ function LiveWorkflowTable({ apps }: { apps: Application[] }) {
                           <span className="text-xs text-muted-foreground">Unassigned</span>
                         )}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-xs text-muted-foreground">
+                      <TableCell className="px-2.5 py-2 text-center text-xs text-muted-foreground">
                         {timeAgoBrief(sla.pendingSince)}
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-right text-xs tabular-nums">
+                      <TableCell className="px-2.5 py-2 text-right text-xs tabular-nums">
                         {sla.expectedDays > 0 ? `${sla.expectedDays} d` : "—"}
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-2.5 py-2 text-center">
                         <Badge className={sla.cls}>{sla.label}</Badge>
                       </TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-3 py-2">
                         {nextStage ? (
                           <span className="inline-flex items-center gap-1 text-xs">
                             {nextStage.shortLabel}

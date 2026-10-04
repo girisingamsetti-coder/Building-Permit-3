@@ -42,6 +42,7 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     submittedDate: "23/7/2026",
     status: "In Review",
     owner: "Vadduri Veeraiah",
+    appId: "app-1",
   },
   {
     id: "sub-2",
@@ -51,6 +52,7 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     submittedDate: "15/8/2026",
     status: "In Review",
     owner: "Smt. Meena Kulkarni",
+    appId: "app-2",
   },
   {
     id: "sub-3",
@@ -60,6 +62,7 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     submittedDate: "04/9/2026",
     status: "In Review",
     owner: "M. Lakshmi Narayana",
+    appId: "app-3",
   },
   {
     id: "sub-4",
@@ -69,6 +72,7 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     submittedDate: "18/9/2026",
     status: "In Review",
     owner: "Shri. Suresh Reddy",
+    appId: "app-4",
   },
   {
     id: "sub-5",
@@ -78,6 +82,7 @@ const DEFAULT_SUBMISSIONS: SubmissionItem[] = [
     submittedDate: "10/6/2026",
     status: "Approved",
     owner: "P. Srinivasa Rao",
+    appId: "app-5",
   },
 ];
 
@@ -88,6 +93,7 @@ export function LtpSubmittedApplications({
 }) {
   const { applications } = useDashboardScope();
   const user = useAppStore((s) => s.user);
+  const openApplication = useAppStore((s) => s.openApplication);
 
   // Search & Filter State
   const [searchKeywords, setSearchKeywords] = React.useState("");
@@ -97,7 +103,13 @@ export function LtpSubmittedApplications({
   const [sortField, setSortField] = React.useState<keyof SubmissionItem>("submittedDate");
   const [sortAsc, setSortAsc] = React.useState(false);
   const [isSelectingScheme, setIsSelectingScheme] = React.useState(false);
-  const [selectedSubmission, setSelectedSubmission] = React.useState<SubmissionItem | null>(null);
+  const [newApplicationDraft, setNewApplicationDraft] = React.useState<{
+    baNo: string;
+    permissionType: string;
+    submittedDate: string;
+    status: string;
+    lpsType: "LPS" | "Non LPS";
+  } | null>(null);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [viewReportModal, setViewReportModal] = React.useState(false);
   const [reportModalTab, setReportModalTab] = React.useState<"scrutiny" | "registry">("scrutiny");
@@ -204,7 +216,7 @@ export function LtpSubmittedApplications({
   };
 
   const exportCSV = () => {
-    const headers = ["#", "BA No.", "Type", "Submitted Date", "Status", "Owner"];
+    const headers = ["#", "Application No.", "Type", "Submitted Date", "Status", "Owner"];
     const rows = sortedItems.map((item, idx) => [
       idx + 1,
       `"${item.baNo}"`,
@@ -230,31 +242,49 @@ export function LtpSubmittedApplications({
 
   const handleCreateNewApp = (scheme: "LPS Layout" | "Non-LPS") => {
     setIsSelectingScheme(false);
-    const now = new Date();
-    const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
-    const newDraftNo = `D/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
-    const newLpsStatus: "LPS" | "Non LPS" = scheme === "LPS Layout" ? "LPS" : "Non LPS";
-    setSelectedSubmission({
-      id: `sub-new-${Date.now()}`,
-      baNo: newDraftNo,
-      permissionType: scheme === "LPS Layout" ? "LPS Building Permission" : "Building Permission",
-      submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
-      status: "Draft",
-      owner: "",
-      lpsType: newLpsStatus,
-    });
+    if (onNewApp) {
+      onNewApp(scheme);
+    } else {
+      const now = new Date();
+      const typeCode = scheme === "LPS Layout" ? "LPS" : "BP";
+      const newDraftNo = `D/1168/${String(Math.floor(Math.random() * 900) + 100).padStart(4, "0")}/${typeCode}/${now.getFullYear()}`;
+      const newLpsStatus: "LPS" | "Non LPS" = scheme === "LPS Layout" ? "LPS" : "Non LPS";
+      setNewApplicationDraft({
+        baNo: newDraftNo,
+        permissionType: scheme === "LPS Layout" ? "LPS Building Permission" : "Building Permission",
+        submittedDate: `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()}`,
+        status: "Draft",
+        lpsType: newLpsStatus,
+      });
+    }
   };
 
-  // If user opened a specific submitted application, render the full details view
-  if (selectedSubmission) {
+  const handleOpenApplication = (item: SubmissionItem) => {
+    const storeApps = useAppStore.getState().applications;
+    let targetApp =
+      (item.appId ? storeApps.find((a) => a.id === item.appId) : null) ||
+      (item.id ? storeApps.find((a) => a.id === item.id) : null) ||
+      storeApps.find((a) => a.applicationNo === item.baNo) ||
+      applications.find((a) => a.id === item.appId || a.applicationNo === item.baNo) ||
+      applications.find((a) => a.status !== "DRAFT") ||
+      storeApps.find((a) => a.status !== "DRAFT") ||
+      storeApps[0];
+
+    if (targetApp) {
+      openApplication(targetApp.id, "ltp-application-details");
+    }
+  };
+
+  // If user selected to create a new application draft directly, render the statutory form
+  if (newApplicationDraft) {
     return (
       <LtpSubmissionDetails
-        baNo={selectedSubmission.baNo}
-        proposalStatus={selectedSubmission.status}
-        submissionDate={selectedSubmission.submittedDate}
-        isDraft={false}
-        initialLpsType={selectedSubmission.lpsType === "LPS" ? "LPS Layout" : "Non-LPS"}
-        onBack={() => setSelectedSubmission(null)}
+        baNo={newApplicationDraft.baNo}
+        proposalStatus="Draft"
+        submissionDate={newApplicationDraft.submittedDate}
+        isDraft={true}
+        initialLpsType={newApplicationDraft.lpsType === "LPS" ? "LPS Layout" : "Non-LPS"}
+        onBack={() => setNewApplicationDraft(null)}
       />
     );
   }
@@ -346,7 +376,7 @@ export function LtpSubmittedApplications({
       {/* ── TOP CONTROLS: Search, Filters & New Application Button in a Single Row ── */}
       <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
           {/* Search Input Box (Pillow-shaped) */}
-          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 py-1.5 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
+          <div className="flex items-center gap-2 border border-[#DCD5C8] bg-white rounded-full px-3.5 h-8 w-full sm:w-60 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
             <Search className="size-3.5 text-slate-400 shrink-0" />
             <input
               type="text"
@@ -427,7 +457,13 @@ export function LtpSubmittedApplications({
           {/* Right: New Application Button (after filters) */}
           <button
             id="sub-new-app-btn"
-            onClick={() => setIsSelectingScheme(true)}
+            onClick={() => {
+              if (onNewApp) {
+                onNewApp();
+              } else {
+                setIsSelectingScheme(true);
+              }
+            }}
             className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-[30px] px-3.5 rounded-full flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer border border-[#630E10]"
           >
             <Plus className="size-3.5" />
@@ -442,23 +478,23 @@ export function LtpSubmittedApplications({
             {/* Table Header Row (Matches Drafts Table Layout) */}
             <thead className="bg-[#F5EBE1] text-[#7A1316] border-b border-[#DCD5C8] font-bold text-xs sticky top-0 z-10">
               <tr className="divide-x divide-[#DCD5C8]">
-                <th className="w-12 px-2.5 py-2 text-center font-bold">#</th>
+                <th className="w-10 px-2 py-2 text-center font-bold">#</th>
 
                 <th
                   onClick={() => handleSort("baNo")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="w-36 px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none whitespace-nowrap"
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span>BA No.</span>
+                    <span>Application No.</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
                 </th>
 
                 <th
                   onClick={() => handleSort("lpsType")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-28"
+                  className="px-2 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center whitespace-nowrap w-20"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Type</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
@@ -466,9 +502,9 @@ export function LtpSubmittedApplications({
 
                 <th
                   onClick={() => handleSort("submittedDate")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-32"
+                  className="px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center whitespace-nowrap w-28"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Submitted Date</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
@@ -476,9 +512,9 @@ export function LtpSubmittedApplications({
 
                 <th
                   onClick={() => handleSort("status")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none w-52"
+                  className="px-2.5 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none text-center whitespace-nowrap w-28"
                 >
-                  <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <span>Status</span>
                     <ChevronsUpDown className="size-3 text-slate-400" />
                   </div>
@@ -486,7 +522,7 @@ export function LtpSubmittedApplications({
 
                 <th
                   onClick={() => handleSort("owner")}
-                  className="px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
+                  className="w-56 max-w-[240px] px-3 py-2 font-bold cursor-pointer hover:bg-[#EFE3D5] transition-colors select-none"
                 >
                   <div className="flex items-center justify-between gap-1">
                     <span>Owner</span>
@@ -494,7 +530,7 @@ export function LtpSubmittedApplications({
                   </div>
                 </th>
 
-                <th className="w-16 px-2.5 py-2 font-bold text-center">Action</th>
+                <th className="w-20 px-2 py-2 font-bold text-center whitespace-nowrap">Action</th>
               </tr>
             </thead>
 
@@ -507,22 +543,23 @@ export function LtpSubmittedApplications({
                     className="divide-x divide-[#EFE7DC] hover:bg-[#FAF4EB] transition-colors"
                   >
                     {/* Index */}
-                    <td className="px-2.5 py-2.5 text-center font-medium text-slate-700">
+                    <td className="px-2 py-2 text-center font-medium text-slate-700">
                       {idx + 1}
                     </td>
 
-                    {/* BA No. (Clickable maroon link with hover underline, opening submission details) */}
-                    <td className="px-3 py-2.5">
+                    {/* Application No. */}
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <button
-                        onClick={() => setSelectedSubmission(item)}
+                        onClick={() => handleOpenApplication(item)}
                         className="text-[#7A1316] hover:text-[#8F161A] font-mono font-bold hover:underline text-left cursor-pointer transition-colors"
+                        title="Click to view application details"
                       >
                         {item.baNo}
                       </button>
                     </td>
 
-                    {/* Type: LPS or Non LPS Status */}
-                    <td className="px-3 py-2.5">
+                    {/* Type: LPS or Non LPS */}
+                    <td className="px-2 py-2 text-center whitespace-nowrap">
                       <span
                         className={cn(
                           "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold border",
@@ -536,12 +573,12 @@ export function LtpSubmittedApplications({
                     </td>
 
                     {/* Submitted Date */}
-                    <td className="px-3 py-2.5 text-slate-600 font-mono">
+                    <td className="px-2.5 py-2 text-slate-600 font-mono text-center whitespace-nowrap">
                       {item.submittedDate}
                     </td>
 
                     {/* Status */}
-                    <td className="px-3 py-2.5">
+                    <td className="px-2.5 py-2 text-center whitespace-nowrap">
                       <span
                         className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-bold border",
@@ -561,15 +598,16 @@ export function LtpSubmittedApplications({
                     </td>
 
                     {/* Owner */}
-                    <td className="px-3 py-2.5 text-slate-800 font-medium">
+                    <td className="px-3 py-2 text-slate-800 font-medium">
                       {item.owner || "-"}
                     </td>
 
                     {/* Action Column: View button */}
-                    <td className="px-2.5 py-2.5 text-center">
+                    <td className="px-2 py-2 text-center whitespace-nowrap">
                       <button
-                        onClick={() => setSelectedSubmission(item)}
+                        onClick={() => handleOpenApplication(item)}
                         className="bg-[#7A1316] hover:bg-[#8F161A] text-white text-[11px] font-bold px-2.5 py-1 rounded shadow-2xs transition-colors cursor-pointer"
+                        title="View Application Details"
                       >
                         View
                       </button>
@@ -736,7 +774,7 @@ export function LtpSubmittedApplications({
                       <thead className="bg-[#7A1316] text-white font-bold border-b border-[#630E10]">
                         <tr>
                           <th className="px-3 py-2 w-10 text-center">#</th>
-                          <th className="px-3 py-2">Proposal / BA No.</th>
+                          <th className="px-3 py-2">Proposal / Application No.</th>
                           <th className="px-3 py-2">Type</th>
                           <th className="px-3 py-2">Submitted Date</th>
                           <th className="px-3 py-2">Status</th>
@@ -747,7 +785,18 @@ export function LtpSubmittedApplications({
                         {sortedItems.map((item, idx) => (
                           <tr key={item.id} className="hover:bg-[#FBF3E4]/50 transition-colors">
                             <td className="px-3 py-2 text-center font-bold text-slate-500">{idx + 1}</td>
-                            <td className="px-3 py-2 font-mono font-bold text-[#7A1316]">{item.baNo}</td>
+                            <td className="px-3 py-2 font-mono font-bold text-[#7A1316]">
+                              <button
+                                onClick={() => {
+                                  setViewReportModal(false);
+                                  handleOpenApplication(item);
+                                }}
+                                className="hover:underline cursor-pointer font-mono font-bold text-[#7A1316] text-left"
+                                title="Click to view application details"
+                              >
+                                {item.baNo}
+                              </button>
+                            </td>
                             <td className="px-3 py-2">
                               <span
                                 className={cn(

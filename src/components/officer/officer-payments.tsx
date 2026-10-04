@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import * as React from "react";
 import { useAppStore } from "@/store/app-store";
 import { PageHeader, SectionCard, EmptyState } from "@/components/design-system/layout";
@@ -46,29 +46,29 @@ export function OfficerPayments() {
             <table className="w-full text-xs">
               <thead className="bg-muted/40">
                 <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-3 py-2 font-medium">Application</th>
-                  <th className="px-3 py-2 font-medium">Applicant</th>
-                  <th className="px-3 py-2 font-medium">Fee Amount</th>
-                  <th className="px-3 py-2 font-medium">Payment</th>
-                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="w-36 px-3 py-2 font-medium">Application</th>
+                  <th className="w-52 max-w-[200px] px-3 py-2 font-medium">Applicant</th>
+                  <th className="w-28 px-3 py-2 text-right font-medium">Fee Amount</th>
+                  <th className="w-24 px-3 py-2 text-center font-medium">Payment</th>
+                  <th className="w-28 px-3 py-2 text-center font-medium">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {appsWithPayments.map((a) => (
                   <tr key={a.id} className="hover:bg-muted/20">
-                    <td className="px-3 py-2 font-mono text-[11px]">{a.applicationNo}</td>
-                    <td className="px-3 py-2">{a.applicant.name}</td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 font-mono text-[11px] whitespace-nowrap">{a.applicationNo}</td>
+                    <td className="px-3 py-2 truncate max-w-[200px]">{a.applicant.name}</td>
+                    <td className="px-3 py-2 text-right font-medium whitespace-nowrap">
                       {a.fee ? `₹${a.fee.total.toLocaleString("en-IN")}` : "—"}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 text-center whitespace-nowrap">
                       {a.payment?.status === "SUCCESS"
                         ? <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">Paid</Badge>
                         : a.payment?.status === "PENDING"
                         ? <Badge className="bg-amber-500/10 text-amber-600 text-[10px]">Pending</Badge>
                         : <Badge variant="outline" className="text-[10px]">—</Badge>}
                     </td>
-                    <td className="px-3 py-2"><StatusBadge status={a.status} /></td>
+                    <td className="px-3 py-2 text-center whitespace-nowrap"><StatusBadge status={a.status} /></td>
                   </tr>
                 ))}
               </tbody>

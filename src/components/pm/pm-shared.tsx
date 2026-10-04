@@ -33,15 +33,19 @@ export function PmSearchInput({
   placeholder?: string;
   className?: string;
 }) {
+  const hasHeight = className && /\bh-\S+/.test(className);
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", !hasHeight && "h-9", className)}>
       <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" aria-hidden />
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? ""}
         aria-label={placeholder ?? "Search"}
-        className="h-9 pl-8 pr-7 text-xs"
+        className={cn(
+          "h-full pl-8 pr-7 text-xs",
+          className && /\btext-\S+/.test(className) && className.split(/\s+/).filter((c) => c.startsWith("text-")).join(" ")
+        )}
       />
       {value && (
         <button

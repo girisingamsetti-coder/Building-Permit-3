@@ -239,15 +239,15 @@ export function OfficerApplications() {
             <table className="w-full text-sm">
               <thead className="bg-muted/40">
                 <tr className="text-left text-[11px] uppercase tracking-wide text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium">Application No.</th>
-                  <th className="px-4 py-2.5 font-medium">Project</th>
-                  <th className="px-4 py-2.5 font-medium">Applicant / LTP</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                  <th className="px-4 py-2.5 font-medium">Current Stage</th>
-                  <th className="px-4 py-2.5 font-medium">Assigned Officer</th>
-                  <th className="px-4 py-2.5 font-medium">SLA</th>
-                  <th className="px-4 py-2.5 font-medium">Priority</th>
-                  <th className="px-4 py-2.5 font-medium text-right">Action</th>
+                  <th className="w-36 px-3 py-2 font-medium whitespace-nowrap">Application No.</th>
+                  <th className="w-56 max-w-[220px] px-3 py-2 font-medium">Project</th>
+                  <th className="w-44 max-w-[180px] px-3 py-2 font-medium whitespace-nowrap">Applicant / LTP</th>
+                  <th className="w-24 px-3 py-2 font-medium text-center whitespace-nowrap">Status</th>
+                  <th className="w-36 px-3 py-2 font-medium whitespace-nowrap">Current Stage</th>
+                  <th className="w-36 px-3 py-2 font-medium whitespace-nowrap">Assigned Officer</th>
+                  <th className="w-24 px-2 py-2 font-medium whitespace-nowrap text-center">SLA</th>
+                  <th className="w-20 px-2 py-2 font-medium whitespace-nowrap text-center">Priority</th>
+                  <th className="w-20 px-3 py-2 font-medium text-center whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -260,7 +260,7 @@ export function OfficerApplications() {
                       className="group cursor-pointer transition-colors hover:bg-muted/30"
                       onClick={() => openApplication(a.id, "officer-review")}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <button
                           onClick={() => openApplication(a.id, "officer-review")}
                           className="font-mono text-xs font-medium text-primary hover:underline"
@@ -271,24 +271,24 @@ export function OfficerApplications() {
                           Submitted {formatDate(a.submissionDate)}
                         </div>
                       </td>
-                      <td className="px-4 py-3 max-w-[240px]">
+                      <td className="px-3 py-2">
                         <p className="truncate text-xs font-medium">{a.project.name}</p>
                         <p className="flex items-center gap-1 text-[10px] text-muted-foreground">
                           <MapPin className="size-2.5" /> {a.project.ward} · {a.project.zone}
                         </p>
                       </td>
-                      <td className="px-4 py-3 max-w-[200px]">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <p className="truncate text-xs font-medium">{a.applicant.name}</p>
                         <p className="truncate text-[10px] text-muted-foreground">via {a.ltpName}</p>
                       </td>
-                      <td className="px-4 py-3"><StatusBadge status={a.status} showIcon={false} /></td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap"><StatusBadge status={a.status} showIcon={false} /></td>
+                      <td className="px-3 py-2 whitespace-nowrap">
                         <span className="text-xs font-medium">{a.currentStageLabel}</span>
                         <div className="text-[10px] text-muted-foreground">
                           {a.progress}% complete
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-2 whitespace-nowrap">
                         {a.assignedOfficer ? (
                           <div className="flex items-center gap-1.5">
                             <span className="truncate text-xs">{a.assignedOfficer.name}</span>
@@ -298,10 +298,10 @@ export function OfficerApplications() {
                           <span className="text-xs text-muted-foreground">Unassigned</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-1.5 cursor-help">
+                            <div className="inline-flex items-center gap-1.5 cursor-help">
                               <Clock className={cn("size-3.5", sla.cls)} />
                               <span className={cn("text-xs tabular-nums", sla.cls)}>{sla.label}</span>
                             </div>
@@ -311,8 +311,8 @@ export function OfficerApplications() {
                           </TooltipContent>
                         </Tooltip>
                       </td>
-                      <td className="px-4 py-3"><PriorityBadge priority={a.priority} /></td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="px-2 py-2 text-center whitespace-nowrap"><PriorityBadge priority={a.priority} /></td>
+                      <td className="px-3 py-2 text-center whitespace-nowrap">
                         <Button
                           variant="default"
                           size="sm"

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -491,12 +491,12 @@ export function OccupancyPanel({
             <table className="w-full text-xs text-left">
               <thead className="bg-muted/60 text-muted-foreground font-semibold border-b border-border">
                 <tr>
-                  <th className="px-4 py-2.5">Parameter</th>
-                  <th className="px-4 py-2.5">Sanctioned (BPO)</th>
-                  <th className="px-4 py-2.5">As-Built Measured</th>
-                  <th className="px-4 py-2.5">Difference</th>
-                  <th className="px-4 py-2.5">Permissible Limit</th>
-                  <th className="px-4 py-2.5 text-right">Verdict</th>
+                  <th className="w-56 max-w-[220px] px-4 py-2.5 font-semibold">Parameter</th>
+                  <th className="w-36 px-4 py-2.5 font-semibold whitespace-nowrap">Sanctioned (BPO)</th>
+                  <th className="w-36 px-4 py-2.5 font-semibold whitespace-nowrap">As-Built Measured</th>
+                  <th className="w-36 px-4 py-2.5 font-semibold whitespace-nowrap">Difference</th>
+                  <th className="w-36 px-4 py-2.5 font-semibold whitespace-nowrap">Permissible Limit</th>
+                  <th className="w-28 px-4 py-2.5 font-semibold text-right whitespace-nowrap">Verdict</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

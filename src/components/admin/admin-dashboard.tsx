@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -475,7 +475,7 @@ export function AdminDashboard() {
                     <DeskRow desk="Director (DIRECTOR_DP_REVIEW)" by="DIRECTOR_DP (3 officers)" files="4" tasks="4" un="3" />
                     <DeskRow desk="Addl Commissioner (ADDL_COMMISSIONER_REVIEW)" by="ADDL_COMMISSIONER (3 officers)" files="3" tasks="3" un="1" />
                     <DeskRow desk="Commissioner (COMMISSIONER_REVIEW)" by="COMMISSIONER (3 officers)" files="2" tasks="2" un="1" />
-                    <DeskRow desk="With applicant (LTP_SHORTFALL_ACTION)" by="LTP (8 officers)" files="14" tasks="14" un="14" />
+                    <DeskRow desk="With applicant (LTP_SHORTFALL_ACTION)" by="LTP (8 licensed persons)" files="14" tasks="14" un="14" />
                   </tbody>
                 </table>
               </div>
@@ -512,7 +512,6 @@ export function AdminDashboard() {
             <div className="border border-slate-200 bg-white rounded-xl p-4 shadow-sm group transition-all duration-200 hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 cursor-pointer">
               <h3 className="text-xs font-bold text-slate-800 mb-6">Officer Workload</h3>
               <div className="space-y-4">
-                <WorkloadBar name="Unclaimed — LTP (LTP)" val={14} max={14} color="bg-slate-300" />
                 <WorkloadBar name="Unclaimed — TPA (TPA)" val={12} max={14} color="bg-slate-300" />
                 <WorkloadBar name="Unclaimed — ZAD (ZAD)" val={6} max={14} color="bg-slate-300" />
                 <WorkloadBar name="Priya Sharma (TPA)" val={5} max={14} color="bg-blue-600" />
