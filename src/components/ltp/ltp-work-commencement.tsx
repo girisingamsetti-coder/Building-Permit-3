@@ -355,7 +355,7 @@ export function LtpWorkCommencement({ initialTab = "cc-issued" }: LtpWorkCommenc
     <div className="flex flex-col h-full w-full bg-[#FAF7F2] text-slate-800 overflow-hidden font-sans">
       {/* ── Submodule Tabs Navigation Bar (Spread across the screen) ── */}
       <div className="bg-white border-b border-[#EADBCE] px-3 sm:px-4 md:px-6 py-2.5 shadow-xs shrink-0 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 w-full">
           {/* Tab 1: Commencement Certificate */}
           <button
             id="tab-cc-issued"

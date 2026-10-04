@@ -27,7 +27,7 @@ export function OccupancyCertificateModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-[#FAF7F2] border-2 border-[#7A1316] max-h-[95vh] flex flex-col">
+      <DialogContent className="max-w-[1165px] w-[95vw] p-0 overflow-hidden bg-[#FAF7F2] border-2 border-[#7A1316] max-h-[95vh] flex flex-col">
         {/* Modal Toolbar */}
         <div className="flex items-center justify-between px-6 py-3 bg-[#FBF3E4] border-b border-[#DCD5C8] shrink-0 print:hidden">
           <div className="flex items-center gap-2">

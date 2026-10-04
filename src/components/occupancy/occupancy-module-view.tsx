@@ -845,7 +845,7 @@ function ApplyOccupancyModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0 border-2 border-[#7A1316] bg-[#FAF7F2]">
+      <DialogContent className="max-w-[1000px] w-[95vw] max-h-[90vh] overflow-y-auto p-0 border-2 border-[#7A1316] bg-[#FAF7F2]">
         <div className="p-4 bg-white border-b border-[#DCD5C8] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="size-8 rounded-lg bg-[#7A1316] text-white flex items-center justify-center font-bold">
@@ -1330,7 +1330,7 @@ function OccupancyDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[92vh] overflow-hidden p-0 border-2 border-[#7A1316] bg-[#FAF7F2] flex flex-col">
+      <DialogContent className="max-w-[1165px] w-[95vw] max-h-[92vh] overflow-hidden p-0 border-2 border-[#7A1316] bg-[#FAF7F2] flex flex-col">
         {/* Modal Header */}
         <div className="p-4 bg-white border-b border-[#DCD5C8] flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
