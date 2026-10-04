@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -82,7 +82,7 @@ import type { Application, RoleKey, User } from "@/types";
 
 // ---- Shared option lists ----
 const STATUS_OPTIONS = [
-  { value: "ALL", label: "All Statuses" },
+  { value: "ALL", label: "All" },
   { value: "DRAFT", label: "Draft" },
   { value: "DRAWING_UPLOADED", label: "Drawing Uploaded" },
   { value: "SCRUTINY_IN_PROGRESS", label: "Scrutiny In Progress" },
@@ -107,12 +107,12 @@ const STATUS_OPTIONS = [
 ];
 
 const STAGE_OPTIONS = [
-  { value: "ALL", label: "All Stages" },
+  { value: "ALL", label: "All" },
   ...WORKFLOW_STAGES.map((s) => ({ value: s.key, label: s.label })),
 ];
 
 const ROLE_OPTIONS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All Roles" },
+  { value: "ALL", label: "All" },
   { value: "LTP", label: "LTP" },
   { value: "TPS", label: "TPS" },
   { value: "TPA", label: "TPA" },
@@ -125,7 +125,7 @@ const ROLE_OPTIONS: { value: string; label: string }[] = [
 ];
 
 const SLA_OPTIONS = [
-  { value: "ALL", label: "All SLA" },
+  { value: "ALL", label: "All" },
   { value: "ON_TRACK", label: "On Track" },
   { value: "AT_RISK", label: "At Risk" },
   { value: "DELAYED", label: "Delayed" },
@@ -135,14 +135,14 @@ const SLA_OPTIONS = [
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: "ALL", label: "All Priority" },
+  { value: "ALL", label: "All" },
   { value: "URGENT", label: "Urgent" },
   { value: "HIGH", label: "High" },
   { value: "NORMAL", label: "Normal" },
 ];
 
 const ACTIVITY_TYPES = [
-  { value: "ALL", label: "All Activities" },
+  { value: "ALL", label: "All" },
   { value: "Application", label: "Application" },
   { value: "Drawing", label: "Drawing" },
   { value: "Scrutiny", label: "Scrutiny" },
@@ -491,10 +491,10 @@ function ApplicationProgressSection({
         controls={
           <div className="flex items-center gap-2 flex-wrap">
             <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-48" />
-            <PmFilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} ariaLabel="Filter by status" className="w-full sm:w-36" />
-            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
-            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
-            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-32" />
+            <PmFilterSelect value={statusFilter} onChange={setStatusFilter} options={STATUS_OPTIONS} label="Status" ariaLabel="Filter by status" className="w-full sm:w-36" />
+            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} label="Stage" ariaLabel="Filter by stage" className="w-full sm:w-36" />
+            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} label="Role" ariaLabel="Filter by role" className="w-full sm:w-32" />
+            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} label="SLA" ariaLabel="Filter by SLA" className="w-full sm:w-32" />
           </div>
         }
       />
@@ -643,9 +643,9 @@ function LiveWorkflowSection({
         controls={
           <div className="flex items-center gap-2 flex-wrap">
             <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-52" />
-            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-36" />
-            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
-            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-32" />
+            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} label="Stage" ariaLabel="Filter by stage" className="w-full sm:w-36" />
+            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} label="Role" ariaLabel="Filter by role" className="w-full sm:w-32" />
+            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} label="SLA" ariaLabel="Filter by SLA" className="w-full sm:w-32" />
           </div>
         }
       />
@@ -829,8 +829,8 @@ function OfficerWorkloadSection({
         controls={
           <div className="flex items-center gap-2 flex-wrap">
             <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-40" />
-            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-32" />
-            <PmFilterSelect value={sortBy} onChange={setSortBy} options={sortOptions} ariaLabel="Sort by" className="w-full sm:w-36" />
+            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} label="Role" ariaLabel="Filter by role" className="w-full sm:w-32" />
+            <PmFilterSelect value={sortBy} onChange={setSortBy} options={sortOptions} label="Sort" ariaLabel="Sort by" className="w-full sm:w-36" />
           </div>
         }
       />
@@ -963,10 +963,10 @@ function PendingActionsSection({
         controls={
           <div className="flex items-center gap-2 flex-wrap">
             <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-44" />
-            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} ariaLabel="Filter by role" className="w-full sm:w-28" />
-            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} ariaLabel="Filter by stage" className="w-full sm:w-32" />
-            <PmFilterSelect value={priorityFilter} onChange={setPriorityFilter} options={PRIORITY_OPTIONS} ariaLabel="Filter by priority" className="w-full sm:w-28" />
-            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} ariaLabel="Filter by SLA" className="w-full sm:w-28" />
+            <PmFilterSelect value={roleFilter} onChange={setRoleFilter} options={ROLE_OPTIONS} label="Role" ariaLabel="Filter by role" className="w-full sm:w-28" />
+            <PmFilterSelect value={stageFilter} onChange={setStageFilter} options={STAGE_OPTIONS} label="Stage" ariaLabel="Filter by stage" className="w-full sm:w-32" />
+            <PmFilterSelect value={priorityFilter} onChange={setPriorityFilter} options={PRIORITY_OPTIONS} label="Priority" ariaLabel="Filter by priority" className="w-full sm:w-28" />
+            <PmFilterSelect value={slaFilter} onChange={setSlaFilter} options={SLA_OPTIONS} label="SLA" ariaLabel="Filter by SLA" className="w-full sm:w-28" />
           </div>
         }
       />
@@ -1089,7 +1089,7 @@ function RecentActivitySection({
         </h2>
         <div className="flex items-center gap-1.5 w-full sm:w-auto">
           <PmSearchInput value={query} onChange={setQuery} placeholder="" className="w-full sm:w-28 h-7 text-[10px]" />
-          <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} ariaLabel="Filter" className="w-full sm:w-24 h-7 text-[10px]" />
+          <PmFilterSelect value={typeFilter} onChange={setTypeFilter} options={ACTIVITY_TYPES} label="Type" ariaLabel="Filter" className="w-full sm:w-28 h-7 text-[10px]" />
         </div>
       </div>
       {pageEvents.length === 0 ? (

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -62,7 +62,7 @@ function slaTone(days: number | null): { cls: string; label: string } {
 }
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All statuses" },
+  { value: "ALL", label: "All" },
   { value: "ZONAL_HEAD_REVIEW", label: "Zonal Head Review" },
   { value: "DIRECTOR_REVIEW", label: "Director Review" },
   { value: "ADDITIONAL_COMMISSIONER_REVIEW", label: "Addl. Commissioner Review" },
@@ -81,7 +81,7 @@ const PENDING_REVIEW_STATUSES: ApplicationStatus[] = [
 ];
 
 const PRIORITY_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All priorities" },
+  { value: "ALL", label: "All" },
   { value: "URGENT", label: "Urgent" },
   { value: "HIGH", label: "High" },
   { value: "NORMAL", label: "Normal" },
@@ -185,8 +185,9 @@ export function OfficerApplications() {
           </div>
           <div className="flex items-center gap-2">
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="h-9 w-[160px] rounded-full border-muted-foreground/30">
-                <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
+              <SelectTrigger className="h-9 w-[160px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50">
+                <Filter className="mr-1.5 size-3.5 text-[#7A1316]" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -196,8 +197,9 @@ export function OfficerApplications() {
               </SelectContent>
             </Select>
             <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger className="h-9 w-[150px] rounded-full border-muted-foreground/30">
-                <ListFilter className="mr-1.5 size-3.5 text-muted-foreground" />
+              <SelectTrigger className="h-9 w-[150px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50">
+                <ListFilter className="mr-1.5 size-3.5 text-[#7A1316]" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Priority:</span>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

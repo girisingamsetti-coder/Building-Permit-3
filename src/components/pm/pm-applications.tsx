@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -53,7 +53,7 @@ import type { ApplicationStatus } from "@/types";
 // ============================================================
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All statuses" },
+  { value: "ALL", label: "All" },
   { value: "DRAFT", label: "Draft" },
   { value: "DRAWING_UPLOADED", label: "Drawing Uploaded" },
   { value: "SCRUTINY_IN_PROGRESS", label: "Scrutiny In Progress" },
@@ -80,12 +80,12 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 ];
 
 const STAGE_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All stages" },
+  { value: "ALL", label: "All" },
   ...WORKFLOW_STAGES.map((s) => ({ value: s.key, label: s.label })),
 ];
 
 const SLA_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All SLA statuses" },
+  { value: "ALL", label: "All" },
   { value: "ON_TRACK", label: "On Track" },
   { value: "AT_RISK", label: "At Risk" },
   { value: "DELAYED", label: "Delayed" },
@@ -274,10 +274,11 @@ export function PmApplications() {
           {/* Status filter */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[200px] rounded-full border-muted-foreground/30"
+              className="h-9 w-full lg:w-[200px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50"
               aria-label="Filter by status"
             >
-              <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
+              <Filter className="mr-1.5 size-3.5 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -292,10 +293,11 @@ export function PmApplications() {
           {/* Stage filter */}
           <Select value={stageFilter} onValueChange={setStageFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[200px] rounded-full border-muted-foreground/30"
+              className="h-9 w-full lg:w-[200px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50"
               aria-label="Filter by workflow stage"
             >
-              <SlidersHorizontal className="mr-1.5 size-3.5 text-muted-foreground" />
+              <SlidersHorizontal className="mr-1.5 size-3.5 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Stage:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -310,10 +312,11 @@ export function PmApplications() {
           {/* SLA filter */}
           <Select value={slaFilter} onValueChange={setSlaFilter}>
             <SelectTrigger
-              className="h-9 w-full lg:w-[180px] rounded-full border-muted-foreground/30"
+              className="h-9 w-full lg:w-[180px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50"
               aria-label="Filter by SLA status"
             >
-              <Clock className="mr-1.5 size-3.5 text-muted-foreground" />
+              <Clock className="mr-1.5 size-3.5 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">SLA:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

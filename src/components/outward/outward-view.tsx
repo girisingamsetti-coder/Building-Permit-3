@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { MOCK_OUTWARD, type OutwardRecord } from "@/data/modules-data";
 
@@ -169,32 +170,36 @@ export function OutwardView() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Document Types</option>
-            <option value="BUILDING_PERMIT_ORDER">Building Permit Order</option>
-            <option value="OCCUPANCY_CERTIFICATE">Occupancy Certificate</option>
-            <option value="SHOW_CAUSE_NOTICE">Show Cause Notice</option>
-            <option value="REVOCATION_ORDER">Revocation Order</option>
-            <option value="HEARING_NOTICE">Hearing Notice</option>
-            <option value="SHORTFALL_MEMO">Shortfall Memo</option>
-          </select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[190px] h-9 text-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Type:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="BUILDING_PERMIT_ORDER">Building Permit Order</SelectItem>
+              <SelectItem value="OCCUPANCY_CERTIFICATE">Occupancy Certificate</SelectItem>
+              <SelectItem value="SHOW_CAUSE_NOTICE">Show Cause Notice</SelectItem>
+              <SelectItem value="REVOCATION_ORDER">Revocation Order</SelectItem>
+              <SelectItem value="HEARING_NOTICE">Hearing Notice</SelectItem>
+              <SelectItem value="SHORTFALL_MEMO">Shortfall Memo</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="DISPATCHED">In Transit / Dispatched</option>
-            <option value="DELIVERED">Delivered</option>
-            <option value="ACKNOWLEDGED">Acknowledged</option>
-            <option value="PENDING">Pending Dispatch</option>
-            <option value="RETURNED">Returned</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px] h-9 text-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="DISPATCHED">In Transit / Dispatched</SelectItem>
+              <SelectItem value="DELIVERED">Delivered</SelectItem>
+              <SelectItem value="ACKNOWLEDGED">Acknowledged</SelectItem>
+              <SelectItem value="PENDING">Pending Dispatch</SelectItem>
+              <SelectItem value="RETURNED">Returned</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

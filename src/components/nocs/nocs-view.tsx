@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { MOCK_NOCS, type NocRecord } from "@/data/modules-data";
 
@@ -178,33 +179,37 @@ export function NocsView() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All NOC Types</option>
-            <option value="FIRE">Fire NOC</option>
-            <option value="AIRPORT">Airport Authority</option>
-            <option value="RAILWAY">Railway</option>
-            <option value="ENVIRONMENT">Environmental</option>
-            <option value="WATER_RESOURCES">Water Resources</option>
-            <option value="HERITAGE">Heritage</option>
-          </select>
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-[180px] h-9 text-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Type:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="FIRE">Fire NOC</SelectItem>
+              <SelectItem value="AIRPORT">Airport Authority</SelectItem>
+              <SelectItem value="RAILWAY">Railway</SelectItem>
+              <SelectItem value="ENVIRONMENT">Environmental</SelectItem>
+              <SelectItem value="WATER_RESOURCES">Water Resources</SelectItem>
+              <SelectItem value="HERITAGE">Heritage</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="VERIFIED">Verified</option>
-            <option value="RECEIVED">Received</option>
-            <option value="PENDING">Pending</option>
-            <option value="SHORTFALL">Shortfall</option>
-            <option value="REJECTED">Rejected</option>
-            <option value="NOT_REQUIRED">Not Required</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[160px] h-9 text-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="VERIFIED">Verified</SelectItem>
+              <SelectItem value="RECEIVED">Received</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="SHORTFALL">Shortfall</SelectItem>
+              <SelectItem value="REJECTED">Rejected</SelectItem>
+              <SelectItem value="NOT_REQUIRED">Not Required</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

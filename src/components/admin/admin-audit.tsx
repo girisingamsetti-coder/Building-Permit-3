@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -138,18 +138,24 @@ export function AdminAudit() {
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="" className="h-8 w-52 pl-8 text-xs" />
             </div>
             <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="h-8 w-44 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 w-44 text-xs">
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Action:</span>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL" className="text-xs">All Actions</SelectItem>
+                <SelectItem value="ALL" className="text-xs">All</SelectItem>
                 {allActions.map((a) => (
                   <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={entityFilter} onValueChange={setEntityFilter}>
-              <SelectTrigger className="h-8 w-36 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 w-36 text-xs">
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Entity:</span>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL" className="text-xs">All Entities</SelectItem>
+                <SelectItem value="ALL" className="text-xs">All</SelectItem>
                 {allEntities.map((e) => (
                   <SelectItem key={e} value={e} className="text-xs">{e}</SelectItem>
                 ))}

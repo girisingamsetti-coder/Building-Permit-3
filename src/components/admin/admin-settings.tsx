@@ -712,7 +712,7 @@ const MODULES_FOR_ACCESS = [
   { id: "dashboard",             label: "Dashboard" },
   { id: "application-submission",label: "Applications" },
   { id: "application-status",    label: "Application Status" },
-  { id: "proceeding-status",     label: "Compliance & Regulations" },
+  { id: "proceeding-status",     label: "Compliance" },
   { id: "commencement",          label: "Work Commencement" },
   { id: "occupancy",             label: "Occupancy (OC)" },
   { id: "change-of-ltp",         label: "LTP Change" },

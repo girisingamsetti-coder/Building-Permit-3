@@ -62,12 +62,14 @@ export function PmFilterSelect<T extends string>({
   value,
   onChange,
   options,
+  label,
   ariaLabel,
   className,
 }: {
   value: T;
   onChange: (v: T) => void;
   options: { value: T; label: string }[];
+  label?: string;
   ariaLabel: string;
   className?: string;
 }) {
@@ -77,6 +79,11 @@ export function PmFilterSelect<T extends string>({
         aria-label={ariaLabel}
         className={cn("h-9 text-xs", className)}
       >
+        {label && (
+          <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">
+            {label}:
+          </span>
+        )}
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

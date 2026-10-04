@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import * as React from "react";
 import { useAppStore, useAllShortfalls } from "@/store/app-store";
 import { PageHeader, SectionCard, EmptyState } from "@/components/design-system/layout";
@@ -46,10 +46,11 @@ export function OfficerShortfalls() {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="h-8 w-36 text-xs">
-              <SelectValue placeholder="Status" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="ALL">All</SelectItem>
               <SelectItem value="OPEN">Open</SelectItem>
               <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
               <SelectItem value="RESOLVED">Resolved</SelectItem>

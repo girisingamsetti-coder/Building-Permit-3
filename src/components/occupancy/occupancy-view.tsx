@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/app-store";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   getOccupancyRecords,
@@ -97,17 +98,18 @@ export function OccupancyView() {
 
           <div className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground text-[11px] hidden sm:inline">Jump to another application:</span>
-            <select
-              className="h-8 rounded-md border border-input bg-background px-2.5 text-xs font-mono"
-              value={selectedRecord.id}
-              onChange={(e) => setSelectedRecordId(e.target.value)}
-            >
-              {records.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.occupancyNumber} — {r.owner.name} ({r.state})
-                </option>
-              ))}
-            </select>
+            <Select value={selectedRecord.id} onValueChange={setSelectedRecordId}>
+              <SelectTrigger className="h-8 w-[280px] text-xs font-mono">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {records.map((r) => (
+                  <SelectItem key={r.id} value={r.id} className="font-mono text-xs">
+                    {r.occupancyNumber} — {r.owner.name} ({r.state})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -253,21 +255,23 @@ export function OccupancyView() {
                 />
               </div>
 
-              <select
-                className="h-8 rounded-md border border-input bg-background px-2.5 text-xs"
-                value={selectedStateFilter}
-                onChange={(e) => setSelectedStateFilter(e.target.value)}
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="CERTIFICATE_ISSUED">Certificate Issued</option>
-                <option value="APPROVED">Approved</option>
-                <option value="RECOMMENDED">Recommended</option>
-                <option value="INSPECTION_COMPLETED">Inspection Completed</option>
-                <option value="INSPECTION_PENDING">Inspection Pending</option>
-                <option value="SHORTFALL">Shortfall</option>
-                <option value="SUBMITTED">Submitted</option>
-                <option value="REJECTED">Rejected</option>
-              </select>
+              <Select value={selectedStateFilter} onValueChange={setSelectedStateFilter}>
+                <SelectTrigger className="h-8 w-[190px] text-xs">
+                  <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All</SelectItem>
+                  <SelectItem value="CERTIFICATE_ISSUED">Certificate Issued</SelectItem>
+                  <SelectItem value="APPROVED">Approved</SelectItem>
+                  <SelectItem value="RECOMMENDED">Recommended</SelectItem>
+                  <SelectItem value="INSPECTION_COMPLETED">Inspection Completed</SelectItem>
+                  <SelectItem value="INSPECTION_PENDING">Inspection Pending</SelectItem>
+                  <SelectItem value="SHORTFALL">Shortfall</SelectItem>
+                  <SelectItem value="SUBMITTED">Submitted</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
 
               <Button
                 variant="ghost"

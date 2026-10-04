@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -137,18 +137,25 @@ export function LtpShortfalls() {
           </div>
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30"><Filter className="mr-1.5 size-3.5 text-muted-foreground" /><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30">
+                <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Type:</span>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All types</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="DOCUMENT">Document</SelectItem>
                 <SelectItem value="FEE">Fee</SelectItem>
                 <SelectItem value="GENERAL">General</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-36 rounded-full border-muted-foreground/30">
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All statuses</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="OPEN">Open</SelectItem>
                 <SelectItem value="RESPONDED">Responded</SelectItem>
                 <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>

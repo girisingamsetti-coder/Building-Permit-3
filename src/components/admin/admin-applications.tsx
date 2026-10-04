@@ -144,26 +144,28 @@ export function AdminApplications() {
             </div>
             <div className="flex items-center gap-2 ml-auto">
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="h-9 w-[140px] rounded-full border-slate-200">
-                  <SelectValue placeholder="All statuses" />
+                <SelectTrigger className="h-9 w-[140px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50">
+                  <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">All statuses</SelectItem>
+                  <SelectItem value="ALL">All</SelectItem>
                   <SelectItem value="APPROVED">Approved</SelectItem>
                   <SelectItem value="REJECTED">Rejected</SelectItem>
                   <SelectItem value="PENDING">Pending</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={type} onValueChange={setType}>
-                <SelectTrigger className="h-9 w-[130px] rounded-full border-slate-200">
-                  <SelectValue placeholder="All types" />
+                <SelectTrigger className="h-9 w-[130px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50">
+                  <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Type:</span>
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="ALL">All types</SelectItem>
+                  <SelectItem value="ALL">All</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" className="h-9 rounded-full border-slate-200">
-                <Filter className="size-4 mr-2" /> More
+              <Button variant="outline" size="sm" className="h-9 rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50 text-slate-700 hover:text-[#7A1316]">
+                <Filter className="size-4 mr-2 text-[#7A1316]" /> More
               </Button>
             </div>
           </div>

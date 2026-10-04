@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAppStore } from "@/store/app-store";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -239,17 +240,18 @@ export function Drawings2DModule() {
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Active Application Reference:
             </span>
-            <select
-              value={selectedAppId}
-              onChange={(e) => setSelectedAppId(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-mono font-bold dark:border-slate-700 dark:bg-slate-800"
-            >
-              {applications.map((app) => (
-                <option key={app.id} value={app.applicationNo}>
-                  {app.applicationNo} — {app.project.name} (CAD v2 · Scrutinized)
-                </option>
-              ))}
-            </select>
+            <Select value={selectedAppId} onValueChange={setSelectedAppId}>
+              <SelectTrigger className="w-[380px] h-8 text-xs font-mono font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {applications.map((app) => (
+                  <SelectItem key={app.id} value={app.applicationNo} className="font-mono text-xs">
+                    {app.applicationNo} — {app.project.name} (CAD v2 · Scrutinized)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center gap-3 text-xs">
@@ -293,18 +295,19 @@ export function Drawings2DModule() {
             {/* Sheet Selector */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-muted-foreground">Drawing Sheet:</span>
-              <select
-                value={activeFloor}
-                onChange={(e) => setActiveFloor(e.target.value)}
-                className="h-8 text-xs font-medium rounded-lg border border-input bg-background px-2.5 py-1 text-foreground"
-              >
-                <option value="GROUND_FLOOR">Ground Floor Plan (1:100)</option>
-                <option value="FIRST_FLOOR">First Floor Plan</option>
-                <option value="TYPICAL_FLOOR">Typical Floor Plan (2nd–7th)</option>
-                <option value="TERRACE_FLOOR">Terrace & Roof Catchment Plan</option>
-                <option value="SECTION_AA">Cross Section A-A (Clearances)</option>
-                <option value="SITE_LAYOUT">Site & Setback Layout Plan</option>
-              </select>
+              <Select value={activeFloor} onValueChange={setActiveFloor}>
+                <SelectTrigger className="w-[260px] h-8 text-xs font-medium">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="GROUND_FLOOR">Ground Floor Plan (1:100)</SelectItem>
+                  <SelectItem value="FIRST_FLOOR">First Floor Plan</SelectItem>
+                  <SelectItem value="TYPICAL_FLOOR">Typical Floor Plan (2nd–7th)</SelectItem>
+                  <SelectItem value="TERRACE_FLOOR">Terrace & Roof Catchment Plan</SelectItem>
+                  <SelectItem value="SECTION_AA">Cross Section A-A (Clearances)</SelectItem>
+                  <SelectItem value="SITE_LAYOUT">Site & Setback Layout Plan</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Layer Toggles */}
@@ -598,19 +601,20 @@ export function Drawings2DModule() {
           <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
             <div className="p-3 bg-muted/40 border-b border-border flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-foreground">Rule Category:</span>
-                <select
-                  value={scrutinyCategory}
-                  onChange={(e) => setScrutinyCategory(e.target.value)}
-                  className="h-8 text-xs rounded-lg border border-input bg-background px-2.5 py-1 text-foreground"
-                >
-                  <option value="ALL">All Categories</option>
-                  <option value="Setbacks">Setbacks & Distances</option>
-                  <option value="Bulk & Density">Bulk, FAR & Coverage</option>
-                  <option value="Fire & Safety">Fire Egress & Stairs</option>
-                  <option value="Amenities">Parking & RWH</option>
-                  <option value="Light & Ventilation">Light & Ventilation</option>
-                </select>
+                <Select value={scrutinyCategory} onValueChange={setScrutinyCategory}>
+                  <SelectTrigger className="w-[200px] h-8 text-xs">
+                    <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Category:</span>
+                    <SelectValue placeholder="All" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">All</SelectItem>
+                    <SelectItem value="Setbacks">Setbacks & Distances</SelectItem>
+                    <SelectItem value="Bulk & Density">Bulk, FAR & Coverage</SelectItem>
+                    <SelectItem value="Fire & Safety">Fire Egress & Stairs</SelectItem>
+                    <SelectItem value="Amenities">Parking & RWH</SelectItem>
+                    <SelectItem value="Light & Ventilation">Light & Ventilation</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="text-xs text-muted-foreground">

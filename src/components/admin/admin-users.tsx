@@ -572,10 +572,11 @@ export function AdminUsers() {
             </div>
             <Select value={roleFilter} onValueChange={(v) => setRoleFilter(v as RoleKey | "ALL")}>
               <SelectTrigger className="w-[160px] h-9 text-xs" aria-label="Filter by role">
-                <SelectValue placeholder="Role" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Role:</span>
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All roles</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
                 {Object.values(roles).map((r) => (
                   <SelectItem key={r.key} value={r.key}>{r.fullName}</SelectItem>
                 ))}
@@ -583,10 +584,11 @@ export function AdminUsers() {
             </Select>
             <Select value={zoneFilter} onValueChange={(v) => setZoneFilter(v)}>
               <SelectTrigger className="w-[140px] h-9 text-xs" aria-label="Filter by zone">
-                <SelectValue placeholder="Zone" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Zone:</span>
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All zones</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="Zone 1">Zone 1</SelectItem>
                 <SelectItem value="Zone 2">Zone 2</SelectItem>
                 <SelectItem value="Zone 3">Zone 3</SelectItem>
@@ -595,10 +597,11 @@ export function AdminUsers() {
             </Select>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as "ALL" | UserStatus)}>
               <SelectTrigger className="w-[130px] h-9 text-xs" aria-label="Filter by status">
-                <SelectValue placeholder="Status" />
+                <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">All status</SelectItem>
+                <SelectItem value="ALL">All</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="INACTIVE">Inactive</SelectItem>
                 <SelectItem value="SUSPENDED">Suspended</SelectItem>

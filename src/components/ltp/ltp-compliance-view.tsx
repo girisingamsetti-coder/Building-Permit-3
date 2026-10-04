@@ -405,10 +405,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <Select value={verifiedStageFilter} onValueChange={setVerifiedStageFilter}>
                   <SelectTrigger className="h-9 text-xs w-full sm:w-44 border-[#EADBCE] shrink-0">
                     <Filter className="size-3.5 mr-1.5 text-slate-400" />
-                    <SelectValue placeholder="All Stages" />
+                    <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Stage:</span>
+                    <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All Stages</SelectItem>
+                    <SelectItem value="ALL">All</SelectItem>
                     <SelectItem value="DOCUMENT_VERIFICATION">Document Verification</SelectItem>
                     <SelectItem value="FEE_GENERATED">Fee Generated</SelectItem>
                     <SelectItem value="PAYMENT_PENDING">Payment Pending</SelectItem>
@@ -423,10 +424,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <Select value={verifiedTypeFilter} onValueChange={setVerifiedTypeFilter}>
                   <SelectTrigger className="h-9 text-xs w-full sm:w-44 border-[#EADBCE] shrink-0">
                     <Layers className="size-3.5 mr-1.5 text-slate-400" />
-                    <SelectValue placeholder="All Types" />
+                    <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Type:</span>
+                    <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All Property Types</SelectItem>
+                    <SelectItem value="ALL">All</SelectItem>
                     <SelectItem value="Residential">Residential</SelectItem>
                     <SelectItem value="Commercial">Commercial</SelectItem>
                     <SelectItem value="Industrial">Industrial</SelectItem>
@@ -620,10 +622,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="h-9 text-xs w-36 border-[#EADBCE]">
                     <Filter className="size-3.5 mr-1.5 text-slate-400" />
-                    <SelectValue placeholder="All Status" />
+                    <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+                    <SelectValue placeholder="All" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ALL">All Status</SelectItem>
+                    <SelectItem value="ALL">All</SelectItem>
                     <SelectItem value="OPEN">Open (Action Needed)</SelectItem>
                     <SelectItem value="RESPONDED">Responded</SelectItem>
                     <SelectItem value="RESOLVED">Resolved</SelectItem>

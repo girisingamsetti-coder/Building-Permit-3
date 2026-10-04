@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/store/app-store";
 import { BimWorkspaceContainer } from "@/components/bim/bim-workspace-container";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MOCK_BIM_MODELS } from "@/data/mock-bim-data";
 
 export function BimModule() {
@@ -76,17 +77,18 @@ export function BimModule() {
             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Active Application Reference:
             </span>
-            <select
-              value={selectedAppId}
-              onChange={(e) => setSelectedAppId(e.target.value)}
-              className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-xs font-mono font-bold dark:border-slate-700 dark:bg-slate-800"
-            >
-              {bimAppsList.map((app) => (
-                <option key={app.id} value={app.applicationNo}>
-                  {app.applicationNo} — {app.project.name} ({app.bimStatus === "BIM_SCRUTINY_PASSED" ? "PASS" : "FAIL"})
-                </option>
-              ))}
-            </select>
+            <Select value={selectedAppId} onValueChange={setSelectedAppId}>
+              <SelectTrigger className="w-[380px] h-8 text-xs font-mono font-bold">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {bimAppsList.map((app) => (
+                  <SelectItem key={app.id} value={app.applicationNo} className="font-mono text-xs">
+                    {app.applicationNo} — {app.project.name} ({app.bimStatus === "BIM_SCRUTINY_PASSED" ? "PASS" : "FAIL"})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="text-xs text-slate-500">

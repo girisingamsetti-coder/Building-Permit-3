@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -26,6 +26,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { MOCK_WORK_COMMENCEMENTS, type WorkCommencementRecord } from "@/data/modules-data";
@@ -163,19 +170,19 @@ export function WorkInitiatedView() {
           />
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-            <Filter className="size-3.5" /> Status:
-          </span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="WORK_INITIATED">Work Initiated</option>
-            <option value="PENDING_COMMENCEMENT">Pending Commencement</option>
-            <option value="PROCEEDING_ISSUED">Proceeding Issued (Awaiting Notice)</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-9 text-xs w-[220px] rounded-xl border-[#DCD5C8] bg-white">
+              <Filter className="size-3.5 mr-1 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="WORK_INITIATED">Work Initiated</SelectItem>
+              <SelectItem value="PENDING_COMMENCEMENT">Pending Commencement</SelectItem>
+              <SelectItem value="PROCEEDING_ISSUED">Proceeding Issued (Awaiting Notice)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

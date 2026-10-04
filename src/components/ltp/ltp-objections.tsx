@@ -26,6 +26,7 @@ import {
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type ObjectionStageKey =
   | "drawing"
@@ -797,56 +798,50 @@ export function LtpObjections() {
           )}
         </div>
 
-        {/* Filter: Objection Stage (Direct Resume Target) */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-          <span className="text-[11px] font-bold text-[#7A1316] shrink-0">Stage:</span>
-          <select
-            value={filterStage}
-            onChange={(e) => setFilterStage(e.target.value)}
-            aria-label="Filter Objection Stage"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-          >
-            <option value="ALL">All Stages ({objectionItems.length})</option>
-            <option value="drawing">Drawings &amp; Scrutiny ({stageCounts.drawing})</option>
-            <option value="payments">Payments &amp; Fees ({stageCounts.payments})</option>
-            <option value="documentation">Documentation Checklist ({stageCounts.documentation})</option>
-            <option value="plot">Plot Details ({stageCounts.plot})</option>
-            <option value="nocs">Apply for NOCs ({stageCounts.nocs})</option>
-            <option value="applicant">Applicant Details ({stageCounts.applicant})</option>
-          </select>
-        </div>
+        {/* Filter: Objection Stage */}
+        <Select value={filterStage} onValueChange={setFilterStage}>
+          <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+            <span className="text-[11px] font-bold text-[#7A1316] mr-1">Stage:</span>
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="drawing">Drawings &amp; Scrutiny ({stageCounts.drawing})</SelectItem>
+            <SelectItem value="payments">Payments &amp; Fees ({stageCounts.payments})</SelectItem>
+            <SelectItem value="documentation">Documentation Checklist ({stageCounts.documentation})</SelectItem>
+            <SelectItem value="plot">Plot Details ({stageCounts.plot})</SelectItem>
+            <SelectItem value="nocs">Apply for NOCs ({stageCounts.nocs})</SelectItem>
+            <SelectItem value="applicant">Applicant Details ({stageCounts.applicant})</SelectItem>
+          </SelectContent>
+        </Select>
 
-        {/* Filter: Permission Type (Pillow-shaped) */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-          <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            aria-label="Filter Permission Type"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-          >
-            <option value="ALL">All Types</option>
-            <option value="Building Permission">Building Permission</option>
-            <option value="Group Development">Group Development</option>
-          </select>
-        </div>
+        {/* Filter: Permission Type */}
+        <Select value={filterType} onValueChange={setFilterType}>
+          <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+            <span className="text-[11px] font-bold text-slate-600 mr-1">Type:</span>
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="Building Permission">Building Permission</SelectItem>
+            <SelectItem value="Group Development">Group Development</SelectItem>
+          </SelectContent>
+        </Select>
 
-        {/* Filter: Case Type (Pillow-shaped) */}
-        <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-          <span className="text-[11px] font-bold text-slate-600 shrink-0">Case:</span>
-          <select
-            value={filterCaseType}
-            onChange={(e) => setFilterCaseType(e.target.value)}
-            aria-label="Filter Case Type"
-            className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-          >
-            <option value="ALL">All Cases</option>
-            <option value="Fresh">Fresh</option>
-            <option value="Revision">Revision</option>
-            <option value="Resubmission">Resubmission</option>
-            <option value="Regularization">Regularization</option>
-          </select>
-        </div>
+        {/* Filter: Case Type */}
+        <Select value={filterCaseType} onValueChange={setFilterCaseType}>
+          <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+            <span className="text-[11px] font-bold text-slate-600 mr-1">Case:</span>
+            <SelectValue placeholder="All" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="Fresh">Fresh</SelectItem>
+            <SelectItem value="Revision">Revision</SelectItem>
+            <SelectItem value="Resubmission">Resubmission</SelectItem>
+            <SelectItem value="Regularization">Regularization</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Clear Filters Button */}
         {(searchKeywords ||

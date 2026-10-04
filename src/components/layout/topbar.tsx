@@ -435,7 +435,7 @@ function getMenuHeader(ltpActiveMenu: string | undefined, view: string, portal: 
     case "review-shortfall-submission":
     case "show-cause":
     case "review-show-cause-submission":
-      return { title: "Compliance & Regulations", category: "Regulations" };
+      return { title: "Compliance", category: "Compliance" };
 
     case "cc-issued":
       return { title: "Commencement Certificates", category: "Work Commencement" };

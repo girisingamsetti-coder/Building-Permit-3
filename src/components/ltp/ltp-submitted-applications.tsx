@@ -20,6 +20,7 @@ import {
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface SubmissionItem {
   id: string;
@@ -365,53 +366,47 @@ export function LtpSubmittedApplications({
             )}
           </div>
 
-          {/* Filter: Type (LPS or Non LPS - Pillow-shaped) */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              aria-label="Filter by Type"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Types</option>
-              <option value="LPS">LPS</option>
-              <option value="Non LPS">Non LPS</option>
-            </select>
-          </div>
+          {/* Filter: Type (LPS or Non LPS) */}
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Type:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="LPS">LPS</SelectItem>
+              <SelectItem value="Non LPS">Non LPS</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Filter: Status (Pillow-shaped) */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Status:</span>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              aria-label="Filter by Status"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Status</option>
-              <option value="In Review">In Review</option>
-              <option value="Approved">Approved</option>
-            </select>
-          </div>
+          {/* Filter: Status */}
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="In Review">In Review</SelectItem>
+              <SelectItem value="Approved">Approved</SelectItem>
+            </SelectContent>
+          </Select>
 
-          {/* Filter: Owner (Pillow-shaped) */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
-            <select
-              value={filterOwner}
-              onChange={(e) => setFilterOwner(e.target.value)}
-              aria-label="Filter by Owner"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1 max-w-[130px] truncate"
-            >
-              <option value="ALL">All Owners</option>
-              <option value="Vadduri Veeraiah">Vadduri Veeraiah</option>
-              <option value="Smt. Meena Kulkarni">Smt. Meena Kulkarni</option>
-              <option value="M. Lakshmi Narayana">M. Lakshmi Narayana</option>
-              <option value="Shri. Suresh Reddy">Shri. Suresh Reddy</option>
-              <option value="P. Srinivasa Rao">P. Srinivasa Rao</option>
-            </select>
-          </div>
+          {/* Filter: Owner */}
+          <Select value={filterOwner} onValueChange={setFilterOwner}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs max-w-[200px]">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Owner:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="Vadduri Veeraiah">Vadduri Veeraiah</SelectItem>
+              <SelectItem value="Smt. Meena Kulkarni">Smt. Meena Kulkarni</SelectItem>
+              <SelectItem value="M. Lakshmi Narayana">M. Lakshmi Narayana</SelectItem>
+              <SelectItem value="Shri. Suresh Reddy">Shri. Suresh Reddy</SelectItem>
+              <SelectItem value="P. Srinivasa Rao">P. Srinivasa Rao</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Clear Filters Button (Pillow-shaped) */}
           {(searchKeywords || filterType !== "ALL" || filterStatus !== "ALL" || filterOwner !== "ALL") && (

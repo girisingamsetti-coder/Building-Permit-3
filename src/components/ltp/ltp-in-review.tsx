@@ -536,7 +536,7 @@ export function LtpInReview() {
             aria-label="Filter Review Stage"
             className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
           >
-            <option value="ALL">All Stages ({inReviewItems.length})</option>
+            <option value="ALL">All</option>
             <option value="predcr">PreDCR Scrutiny ({stageCounts.predcr})</option>
             <option value="documentation">Document Verification ({stageCounts.documentation})</option>
             <option value="site-inspection">Site Inspection ({stageCounts["site-inspection"]})</option>
@@ -557,7 +557,7 @@ export function LtpInReview() {
             aria-label="Filter Permission Type"
             className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
           >
-            <option value="ALL">All Types</option>
+            <option value="ALL">All</option>
             <option value="Building Permission">Building Permission</option>
             <option value="Group Development">Group Development</option>
             <option value="Commercial">Commercial</option>
@@ -573,7 +573,7 @@ export function LtpInReview() {
             aria-label="Filter Case Type"
             className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
           >
-            <option value="ALL">All Cases</option>
+            <option value="ALL">All</option>
             <option value="Fresh">Fresh</option>
             <option value="Revision">Revision</option>
             <option value="Resubmission">Resubmission</option>

@@ -46,7 +46,7 @@ type ShortfallWithApp = Shortfall & { application: Application };
 type StatusFilter = "ALL" | ShortfallStatus;
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: "ALL", label: "All Statuses" },
+  { value: "ALL", label: "All" },
   { value: "OPEN", label: "Open" },
   { value: "RESPONDED", label: "Responded" },
   { value: "UNDER_REVIEW", label: "Under Review" },
@@ -167,6 +167,7 @@ export function PmShortfalls() {
             onValueChange={(v) => setStatusFilter(v as StatusFilter)}
           >
             <SelectTrigger className="h-8 w-44 text-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

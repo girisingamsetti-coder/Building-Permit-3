@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -52,7 +52,7 @@ import { NewApplicationModal } from "@/components/ltp/new-application/new-applic
 // ============================================================
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: "ALL", label: "All statuses" },
+  { value: "ALL", label: "All" },
   { value: "DRAFT", label: "Draft" },
   { value: "DRAWING_UPLOADED", label: "Drawing Uploaded" },
   { value: "SCRUTINY_IN_PROGRESS", label: "Scrutiny In Progress" },
@@ -280,8 +280,9 @@ export function LtpApplications() {
 
           {/* Status filter (Pillow-shaped) */}
           <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="h-9 w-full sm:w-[180px] rounded-full border-muted-foreground/30" aria-label="Filter by status">
-              <Filter className="mr-1.5 size-3.5 text-muted-foreground" />
+            <SelectTrigger className="h-9 w-full sm:w-[180px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50" aria-label="Filter by status">
+              <Filter className="mr-1.5 size-3.5 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -298,8 +299,8 @@ export function LtpApplications() {
             value={`${sortKey}-${sortDir}`}
             onValueChange={handleSortChange}
           >
-            <SelectTrigger className="h-9 w-full sm:w-[230px] rounded-full border-muted-foreground/30" aria-label="Sort applications">
-              <ChevronsUpDown className="mr-1.5 size-3.5 text-muted-foreground" />
+            <SelectTrigger className="h-9 w-full sm:w-[230px] rounded-full border-[#DCD5C8] bg-white hover:border-[#7A1316]/50" aria-label="Sort applications">
+              <ChevronsUpDown className="mr-1.5 size-3.5 text-[#7A1316]" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

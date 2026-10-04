@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -28,6 +28,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { MOCK_SHOW_CAUSES, type ShowCauseRecord } from "@/data/modules-data";
@@ -165,20 +172,20 @@ export function ShowCauseView() {
           />
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-            <Filter className="size-3.5" /> Status:
-          </span>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 text-xs rounded-lg border border-input bg-background px-3 py-1 text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="ALL">All Statuses</option>
-            <option value="AWAITING_RESPONSE">Awaiting Response</option>
-            <option value="OPEN">Under Review (Answered)</option>
-            <option value="CLOSED">Closed (Complied)</option>
-            <option value="REFERRED_REVOCATION">Referred for Revocation</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-9 text-xs w-[220px] rounded-xl border-[#DCD5C8] bg-white">
+              <Filter className="size-3.5 mr-1 text-[#7A1316]" />
+              <span className="text-[11px] font-bold text-slate-600 mr-1 shrink-0">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="AWAITING_RESPONSE">Awaiting Response</SelectItem>
+              <SelectItem value="OPEN">Under Review (Answered)</SelectItem>
+              <SelectItem value="CLOSED">Closed (Complied)</SelectItem>
+              <SelectItem value="REFERRED_REVOCATION">Referred for Revocation</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

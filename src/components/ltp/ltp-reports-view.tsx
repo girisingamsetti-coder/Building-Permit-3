@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
@@ -7,6 +7,7 @@ import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { StatusBadge } from "@/components/design-system/badges";
 import { useToast } from "@/hooks/use-toast";
 import type { Application } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   BarChart3,
   Search,
@@ -409,36 +410,32 @@ export function LtpReportsView({ initialTab = "reports-summary" }: LtpReportsVie
           </div>
 
           {/* Scheme Filter */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Scheme:</span>
-            <select
-              value={filterScheme}
-              onChange={(e) => setFilterScheme(e.target.value)}
-              aria-label="Filter Scheme"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Schemes</option>
-              <option value="LPS">LPS Layout</option>
-              <option value="NON_LPS">Non-LPS</option>
-            </select>
-          </div>
+          <Select value={filterScheme} onValueChange={setFilterScheme}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Scheme:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="LPS">LPS Layout</SelectItem>
+              <SelectItem value="NON_LPS">Non-LPS</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#801824] transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Status:</span>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              aria-label="Filter Status"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="APPROVED">Sanctioned</option>
-              <option value="IN_REVIEW">In Review</option>
-              <option value="SHORTFALL">Shortfall Raised</option>
-              <option value="DRAFT">Draft</option>
-            </select>
-          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Status:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="APPROVED">Sanctioned</SelectItem>
+              <SelectItem value="IN_REVIEW">In Review</SelectItem>
+              <SelectItem value="SHORTFALL">Shortfall Raised</SelectItem>
+              <SelectItem value="DRAFT">Draft</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Clear Filters */}
           {(searchKeywords || filterScheme !== "ALL" || filterStatus !== "ALL") && (

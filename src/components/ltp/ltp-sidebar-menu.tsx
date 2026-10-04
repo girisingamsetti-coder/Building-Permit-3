@@ -61,7 +61,7 @@ const LTP_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Compliance & Regulations",
+    label: "Compliance",
     iconType: "compliance",
     directMenuId: "proceeding-status",
     submenus: [],
@@ -147,7 +147,7 @@ const ZONAL_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Compliance & Regulations",
+    label: "Compliance",
     iconType: "compliance",
     directMenuId: "proceeding-status",
     submenus: [],
@@ -195,7 +195,7 @@ const TPA_MODULES: LtpModuleDef[] = [
   },
   {
     id: "proceeding-status",
-    label: "Compliance & Regulations",
+    label: "Compliance",
     iconType: "compliance",
     directMenuId: "proceeding-status",
     submenus: [],

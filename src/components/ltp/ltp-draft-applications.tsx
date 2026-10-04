@@ -20,6 +20,7 @@ import type { Application } from "@/types";
 import { useDashboardScope } from "@/components/dashboard/dashboard-scope";
 import { LtpSubmissionDetails } from "./ltp-submission-details";
 import { DetailedScrutinyReport } from "./detailed-scrutiny-report";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DraftItem {
   id: string;
@@ -227,53 +228,47 @@ export function LtpDraftApplications({
           </div>
 
           {/* Filter: Permission Type */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Type:</span>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              aria-label="Filter Permission Type"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Types</option>
-              <option value="Building Permission">Building Permission</option>
-              <option value="Group Development">Group Development</option>
-            </select>
-          </div>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Type:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="Building Permission">Building Permission</SelectItem>
+              <SelectItem value="Group Development">Group Development</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Filter: Scheme Layout */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Scheme:</span>
-            <select
-              value={filterScheme}
-              onChange={(e) => setFilterScheme(e.target.value)}
-              aria-label="Filter Scheme"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1"
-            >
-              <option value="ALL">All Schemes</option>
-              <option value="LPS">LPS Layout</option>
-              <option value="Non LPS">Non-LPS</option>
-            </select>
-          </div>
+          <Select value={filterScheme} onValueChange={setFilterScheme}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Scheme:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="LPS">LPS Layout</SelectItem>
+              <SelectItem value="Non LPS">Non-LPS</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Filter: Owner / Applicant */}
-          <div className="flex items-center gap-1.5 bg-white border border-[#DCD5C8] rounded-full px-3.5 py-1.5 shadow-2xs hover:shadow-xs focus-within:border-[#7A1316] focus-within:ring-2 focus-within:ring-[#7A1316]/10 transition-all">
-            <span className="text-[11px] font-bold text-slate-600 shrink-0">Owner:</span>
-            <select
-              value={filterOwner}
-              onChange={(e) => setFilterOwner(e.target.value)}
-              aria-label="Filter Owner"
-              className="text-xs bg-transparent text-slate-800 outline-none font-medium cursor-pointer pr-1 max-w-[130px] truncate"
-            >
-              <option value="ALL">All Owners</option>
-              <option value="New">New</option>
+          <Select value={filterOwner} onValueChange={setFilterOwner}>
+            <SelectTrigger className="h-8 rounded-full border-[#DCD5C8] bg-white text-xs font-medium px-3.5 shadow-2xs hover:shadow-xs max-w-[200px]">
+              <span className="text-[11px] font-bold text-slate-600 mr-1">Owner:</span>
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All</SelectItem>
+              <SelectItem value="New">New</SelectItem>
               {uniqueOwners.map((owner) => (
-                <option key={owner} value={owner}>
+                <SelectItem key={owner} value={owner}>
                   {owner || "New Proposal"}
-                </option>
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
 
           {/* Clear Filters Button */}
           {(searchKeywords || activeFilterCount > 0) && (
