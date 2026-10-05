@@ -72,9 +72,10 @@ interface LtpComplianceViewProps {
 }
 
 export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
-  const { navigate, openApplication, respondToShortfall, setLtpActiveMenu } = useAppStore();
+  const { navigate, openApplication, respondToShortfall, setLtpActiveMenu, user } = useAppStore();
   const { applications } = useDashboardScope();
   const { toast } = useToast();
+  const isLtp = user?.role === "LTP";
 
   // Normalize initialTab to a valid tab or default to 'verified'
   const resolveTab = (tab?: string): ComplianceTabKey => {
@@ -95,13 +96,11 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
   };
 
   const [activeTab, setActiveTab] = React.useState<ComplianceTabKey>(resolveTab(initialTab));
-
-  // Sync when prop changes
-  React.useEffect(() => {
-    if (initialTab) {
-      setActiveTab(resolveTab(initialTab));
-    }
-  }, [initialTab]);
+  const [prevInitialTab, setPrevInitialTab] = React.useState(initialTab);
+  if (initialTab !== prevInitialTab) {
+    setPrevInitialTab(initialTab);
+    setActiveTab(resolveTab(initialTab));
+  }
 
   const handleTabChange = (tab: ComplianceTabKey) => {
     setActiveTab(tab);
@@ -634,6 +633,17 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
                     <SelectItem value="OVERDUE">Overdue</SelectItem>
                   </SelectContent>
                 </Select>
+
+                {!isLtp && applications.length > 0 && (
+                  <Button
+                    size="sm"
+                    onClick={() => openApplication(applications[0].id, "ltp-application-details")}
+                    className="h-9 px-3.5 text-xs bg-[#801824] hover:bg-[#941C2B] text-white font-bold gap-1.5 cursor-pointer shadow-xs shrink-0"
+                  >
+                    <AlertTriangle className="size-3.5 text-amber-300" />
+                    <span>Raise Shortfall</span>
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -708,15 +718,23 @@ export function LtpComplianceView({ initialTab }: LtpComplianceViewProps) {
 
                         <div className="flex md:flex-col items-center md:items-end justify-between gap-2 shrink-0">
                           {isOpen ? (
-                            <Button
-                              onClick={() => {
-                                setSelectedShortfall(sf);
-                                setShortfallModalOpen(true);
-                              }}
-                              className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-8 px-4 gap-1.5 shadow-xs"
-                            >
-                              <Send className="size-3" /> Submit Compliance
-                            </Button>
+                            isLtp ? (
+                              <Button
+                                onClick={() => {
+                                  setSelectedShortfall(sf);
+                                  setShortfallModalOpen(true);
+                                }}
+                                className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-8 px-4 gap-1.5 shadow-xs"
+                              >
+                                <Send className="size-3" /> Submit Compliance
+                              </Button>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <Badge className="bg-amber-100 text-amber-900 border-amber-300 font-semibold py-1 px-2.5 text-[10px]">
+                                  <Clock className="size-3 mr-1" /> Awaiting Response
+                                </Badge>
+                              </div>
+                            )
                           ) : (
                             <Button
                               variant="outline"

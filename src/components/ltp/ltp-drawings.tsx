@@ -71,7 +71,8 @@ function useAppOrDefault(): Application | null {
 // DRAWINGS PAGE
 // ============================================================
 export function LtpDrawings() {
-  const { navigate, openApplication, uploadDrawing, reuploadDrawing, runScrutiny } = useAppStore();
+  const { navigate, openApplication, uploadDrawing, reuploadDrawing, runScrutiny, user } = useAppStore();
+  const isLtp = user?.role === "LTP";
   const visibleApps = useVisibleApplications();
   const processingAppIds = useAppStore((s) => s.processingAppIds);
   const app = useAppOrDefault();
@@ -87,7 +88,7 @@ export function LtpDrawings() {
       <div className="space-y-6">
         <PageBackButton fallbackView="ltp-applications" />
         <PageHeader title="Drawings & Scrutiny" icon={Upload} breadcrumbs={[{ label: "LTP Portal", onClick: () => navigate("ltp-dashboard") }, { label: "Drawings & Scrutiny" }]} />
-        <EmptyState icon={FileWarning} title="No applications" description="Create an application first to upload drawings." action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Go to My Applications</Button>} />
+        <EmptyState icon={FileWarning} title="No applications" description={isLtp ? "Create an application first to upload drawings." : "No applications available to view drawings."} action={<Button size="sm" onClick={() => navigate("ltp-applications")}>Go to My Applications</Button>} />
       </div>
     );
   }
@@ -155,7 +156,7 @@ export function LtpDrawings() {
           <ApplicationContextBar app={app} />
 
           {/* Status banner */}
-          <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} />
+          <DrawingStatusBanner app={app} onScrutinize={handleRunScrutiny} onReupload={handleReupload} scrutinizing={isProcessing} isLtp={isLtp} />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="space-y-6 lg:col-span-2">
@@ -189,26 +190,28 @@ export function LtpDrawings() {
             </div>
 
             <div className="space-y-6">
-              <SectionCard title="Upload Drawing" description={`For: ${app.applicationNo}`} icon={Upload}>
-                <div className="mb-3 rounded-md border border-info/30 bg-info/5 px-3 py-2 text-[11px] text-info">
-                  <p className="font-medium">You are uploading to:</p>
-                  <p className="font-mono">{app.applicationNo}</p>
-                  <p>{app.project.name}</p>
-                </div>
-                <FileUploader
-                  label="Drop drawing here"
-                  hint="Supported: DWG, DXF, PDF · max 50 MB"
-                  accept=".dwg,.dxf,.pdf"
-                  uploadedFiles={files}
-                  onUpload={handleUpload}
-                  onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
-                />
-                {app.drawings.length > 0 && app.status !== "SCRUTINY_PASSED" && (
-                  <Button className="mt-3 w-full" onClick={handleRunScrutiny} disabled={isProcessing}>
-                    {isProcessing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
-                  </Button>
-                )}
-              </SectionCard>
+              {isLtp && (
+                <SectionCard title="Upload Drawing" description={`For: ${app.applicationNo}`} icon={Upload}>
+                  <div className="mb-3 rounded-md border border-info/30 bg-info/5 px-3 py-2 text-[11px] text-info">
+                    <p className="font-medium">You are uploading to:</p>
+                    <p className="font-mono">{app.applicationNo}</p>
+                    <p>{app.project.name}</p>
+                  </div>
+                  <FileUploader
+                    label="Drop drawing here"
+                    hint="Supported: DWG, DXF, PDF · max 50 MB"
+                    accept=".dwg,.dxf,.pdf"
+                    uploadedFiles={files}
+                    onUpload={handleUpload}
+                    onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+                  />
+                  {app.drawings.length > 0 && app.status !== "SCRUTINY_PASSED" && (
+                    <Button className="mt-3 w-full" onClick={handleRunScrutiny} disabled={isProcessing}>
+                      {isProcessing ? (<><RotateCw className="size-4 animate-spin" /> Running scrutiny…</>) : (<><Play className="size-4" /> Run Auto-Scrutiny</>)}
+                    </Button>
+                  )}
+                </SectionCard>
+              )}
 
               <SectionCard title="Version History" description={`Drawings for ${app.applicationNo}`} icon={History} noPadding>
                 <ul className="divide-y divide-border">
@@ -281,7 +284,19 @@ export function LtpDrawings() {
   );
 }
 
-function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { app: Application; onScrutinize: () => void; onReupload: () => void; scrutinizing: boolean }) {
+function DrawingStatusBanner({
+  app,
+  onScrutinize,
+  onReupload,
+  scrutinizing,
+  isLtp,
+}: {
+  app: Application;
+  onScrutinize: () => void;
+  onReupload: () => void;
+  scrutinizing: boolean;
+  isLtp?: boolean;
+}) {
   if (scrutinizing || app.status === "SCRUTINY_IN_PROGRESS") {
     return (
       <div className="flex flex-col gap-3 rounded-xl border border-info/30 bg-info/5 p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -307,9 +322,11 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
             <p className="text-[10px] text-destructive/60 font-mono">Re-uploading for: {app.applicationNo}</p>
           </div>
         </div>
-        <Button variant="destructive" size="sm" onClick={onReupload} disabled={scrutinizing}>
-          {scrutinizing ? <><RotateCw className="size-4 animate-spin" /> Processing…</> : <><Upload className="size-4" /> Re-upload Drawing</>}
-        </Button>
+        {isLtp && (
+          <Button variant="destructive" size="sm" onClick={onReupload} disabled={scrutinizing}>
+            {scrutinizing ? <><RotateCw className="size-4 animate-spin" /> Processing…</> : <><Upload className="size-4" /> Re-upload Drawing</>}
+          </Button>
+        )}
       </div>
     );
   }
@@ -360,7 +377,8 @@ function DrawingStatusBanner({ app, onScrutinize, onReupload, scrutinizing }: { 
 // SCRUTINY DASHBOARD PAGE
 // ============================================================
 export function LtpScrutiny() {
-  const { navigate, openApplication } = useAppStore();
+  const { navigate, openApplication, user } = useAppStore();
+  const isLtp = user?.role === "LTP";
   const visibleApps = useVisibleApplications();
   const app = useAppOrDefault();
 
@@ -450,7 +468,7 @@ export function LtpScrutiny() {
             <Button variant="outline" size="sm" onClick={() => navigate("ltp-drawings")}>
               <Eye className="size-4" /> View Drawing
             </Button>
-            {r.status === "FAILED" && <Button size="sm" onClick={() => navigate("ltp-drawings")}><Upload className="size-4" /> Re-upload</Button>}
+            {r.status === "FAILED" && isLtp && <Button size="sm" onClick={() => navigate("ltp-drawings")}><Upload className="size-4" /> Re-upload</Button>}
           </div>
         </div>
       </div>

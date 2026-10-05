@@ -57,11 +57,53 @@ import {
   ChevronRight,
   FolderOpen,
   HelpCircle,
+  ExternalLink,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Application, Shortfall, ShortfallStatus, ShortfallSupportingDoc } from "@/types";
+import type { Application, Shortfall, ShortfallStatus, ShortfallSupportingDoc, ShortfallType } from "@/types";
 
 type ShortfallWithApp = Shortfall & { application: Application };
+
+const APCRDA_SHORTFALL_PRESETS = [
+  {
+    label: "Custom Deficiency / Query",
+    type: "DOCUMENT" as ShortfallType,
+    title: "",
+    desc: "",
+  },
+  {
+    label: "Structural Stability Certificate — Missing SE Stamp",
+    type: "DOCUMENT" as ShortfallType,
+    title: "Structural stability certificate missing Registered Structural Engineer stamp & signature",
+    desc: "The structural drawings and stability declaration submitted lack the valid seal, registration number, and digital signature of an APCRDA-empaneled Structural Engineer.",
+  },
+  {
+    label: "Rear Setback Non-Compliance (Table 8 DCR)",
+    type: "TECHNICAL" as ShortfallType,
+    title: "Rear setback provided (2.1m) is less than statutory requirement (3.0m) as per DCR Table 8",
+    desc: "Drawing scrutiny reveals that the rear open setback provided in the layout plan is 2.1 meters, which is below the mandatory minimum of 3.0 meters for the given plot depth and building height.",
+  },
+  {
+    label: "Plot Dimension Discrepancy with Registered Deed",
+    type: "DOCUMENT" as ShortfallType,
+    title: "Plot boundary & dimensions differ from Registered Sale Deed schedule",
+    desc: "The boundary dimensions shown in the submitted site layout do not tally with the schedule of property in Registered Deed. Provide an authenticated surveyor sketch.",
+  },
+  {
+    label: "Fire NOC Endorsement for Height > 15m",
+    type: "TECHNICAL" as ShortfallType,
+    title: "Provisional Fire NOC endorsement required for building height exceeding 15 meters",
+    desc: "As the proposed total building height exceeds 15.0 meters, a Provisional No Objection Certificate from State Fire Services Department is mandatory.",
+  },
+  {
+    label: "Statutory Betterment / Development Charges Shortfall",
+    type: "FEE" as ShortfallType,
+    title: "Shortfall in statutory development charges / Betterment fee calculation",
+    desc: "A calculation variance has been noticed in the external infrastructure betterment levy. Remit balance towards revised scrutiny fees.",
+  },
+];
 
 type QuickFilter = "ALL" | "PENDING_RESPONSE" | "RESPONDED" | "UNDER_REVIEW" | "CLARIFICATION_REQUIRED" | "CLOSED" | "OVERDUE";
 
@@ -86,9 +128,10 @@ function getShortfallCategory(sf: Shortfall): "PENDING_RESPONSE" | "RESPONDED" |
 }
 
 export function LtpMyShortfalls() {
-  const { openApplication, saveShortfallDraft, submitShortfallResponse } = useAppStore();
+  const { openApplication, saveShortfallDraft, submitShortfallResponse, resolveShortfall, raiseShortfall, user } = useAppStore();
   const { applications } = useDashboardScope();
   const { toast } = useToast();
+  const isLtp = user?.role === "LTP";
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -103,6 +146,19 @@ export function LtpMyShortfalls() {
   const [selectedShortfall, setSelectedShortfall] = React.useState<ShortfallWithApp | null>(null);
   const [detailsOpen, setDetailsOpen] = React.useState(false);
   const [respondOpen, setRespondOpen] = React.useState(false);
+
+  // Raise Shortfall Modal State (for Non-LTP)
+  const [raiseOpen, setRaiseOpen] = React.useState(false);
+  const [raiseAppId, setRaiseAppId] = React.useState("");
+  const [raiseTmplIdx, setRaiseTmplIdx] = React.useState("0");
+  const [raiseType, setRaiseType] = React.useState<ShortfallType>("DOCUMENT");
+  const [raiseTitle, setRaiseTitle] = React.useState("");
+  const [raiseDesc, setRaiseDesc] = React.useState("");
+  const [raiseDueDate, setRaiseDueDate] = React.useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
 
   // Respond Form State
   const [responseText, setResponseText] = React.useState("");
@@ -188,9 +244,14 @@ export function LtpMyShortfalls() {
   }, [filteredShortfalls, currentPage, pageSize]);
 
   // Reset pagination on filter change
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, typeFilter, statusFilter]);
+  const [prevFilterFingerprint, setPrevFilterFingerprint] = React.useState("");
+  const filterFingerprint = `${searchQuery}_${typeFilter}_${statusFilter}`;
+  if (filterFingerprint !== prevFilterFingerprint) {
+    setPrevFilterFingerprint(filterFingerprint);
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }
 
   // Open details
   const handleOpenDetails = (sf: ShortfallWithApp) => {
@@ -484,6 +545,22 @@ export function LtpMyShortfalls() {
               <SelectItem value="applicationNo">Application No.</SelectItem>
             </SelectContent>
           </Select>
+
+          {!isLtp && (
+            <Button
+              size="sm"
+              onClick={() => {
+                if (applications.length > 0 && !raiseAppId) {
+                  setRaiseAppId(applications[0].id);
+                }
+                setRaiseOpen(true);
+              }}
+              className="h-8.5 px-3.5 text-xs rounded-full bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold gap-1.5 cursor-pointer shadow-xs shrink-0"
+            >
+              <AlertTriangle className="size-3.5 text-amber-300" />
+              <span>Raise Shortfall</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -554,7 +631,8 @@ export function LtpMyShortfalls() {
                 paginatedShortfalls.map((sf, idx) => {
                   const overdueFlag = isOverdue(sf);
                   const isClosed = sf.status === "RESOLVED" || sf.status === "CLOSED" || sf.status === "RESPONSE_ACCEPTED";
-                  const canRespond = !isClosed && sf.status !== "UNDER_REVIEW" && sf.status !== "RESPONDED" && sf.status !== "RESPONSE_SUBMITTED";
+                  const canRespond = isLtp && !isClosed && sf.status !== "UNDER_REVIEW" && sf.status !== "RESPONDED" && sf.status !== "RESPONSE_SUBMITTED";
+                  const canResolve = !isLtp && !isClosed && (sf.status === "RESPONDED" || sf.status === "UNDER_REVIEW" || sf.status === "RESPONSE_SUBMITTED");
 
                   return (
                     <tr
@@ -658,6 +736,16 @@ export function LtpMyShortfalls() {
                               <Send className="size-3" />
                               <span>Respond</span>
                             </Button>
+                          ) : canResolve ? (
+                            <Button
+                              size="sm"
+                              onClick={() => handleOpenDetails(sf)}
+                              className="h-7 px-2.5 text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-bold gap-1 cursor-pointer shadow-2xs"
+                              title="Verify and resolve shortfall"
+                            >
+                              <CheckCircle2 className="size-3" />
+                              <span>Review</span>
+                            </Button>
                           ) : (
                             <Button
                               size="sm"
@@ -671,7 +759,7 @@ export function LtpMyShortfalls() {
                             </Button>
                           )}
 
-                          {canRespond && (
+                          {(canRespond || canResolve) && (
                             <button
                               onClick={() => handleOpenDetails(sf)}
                               className="p-1 rounded text-slate-400 hover:text-[#7A1316] hover:bg-slate-100 cursor-pointer"
@@ -1016,7 +1104,8 @@ export function LtpMyShortfalls() {
                   Close
                 </Button>
 
-                {selectedShortfall.status !== "RESOLVED" &&
+                {isLtp &&
+                  selectedShortfall.status !== "RESOLVED" &&
                   selectedShortfall.status !== "CLOSED" &&
                   selectedShortfall.status !== "RESPONSE_ACCEPTED" &&
                   selectedShortfall.status !== "UNDER_REVIEW" &&
@@ -1034,6 +1123,46 @@ export function LtpMyShortfalls() {
                       <span>Respond to Shortfall</span>
                     </Button>
                   )}
+
+                {!isLtp &&
+                  (selectedShortfall.status === "RESPONDED" ||
+                    selectedShortfall.status === "UNDER_REVIEW" ||
+                    selectedShortfall.status === "RESPONSE_SUBMITTED") && (
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        resolveShortfall(
+                          selectedShortfall.applicationId,
+                          selectedShortfall.id,
+                          "Verified by reviewing officer. Rectification compliant."
+                        );
+                        setDetailsOpen(false);
+                        toast({
+                          title: "Shortfall Resolved",
+                          description: `Shortfall ${selectedShortfall.shortfallNumber || selectedShortfall.shortfallId} marked as verified and resolved.`,
+                        });
+                      }}
+                      className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold gap-1.5 cursor-pointer shadow-xs"
+                    >
+                      <CheckCircle2 className="size-3.5" />
+                      <span>Verify &amp; Resolve Shortfall</span>
+                    </Button>
+                  )}
+
+                {!isLtp && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setDetailsOpen(false);
+                      openApplication(selectedShortfall.applicationId, "ltp-application-details");
+                    }}
+                    className="border-[#7A1316] text-[#7A1316] hover:bg-[#FAF7F2] font-bold gap-1.5 cursor-pointer"
+                  >
+                    <ExternalLink className="size-3.5" />
+                    <span>Open Application Details</span>
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -1159,6 +1288,175 @@ export function LtpMyShortfalls() {
               </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── RAISE SHORTFALL DIALOG (FOR OFFICERS / NON-LTP) ── */}
+      <Dialog open={raiseOpen} onOpenChange={setRaiseOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border-[#DCD5C8] p-0 font-sans">
+          <DialogHeader className="bg-[#F5EBE1] border-b border-[#DCD5C8] p-4 text-left">
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-md bg-[#7A1316] text-white">
+                <AlertTriangle className="size-4" />
+              </span>
+              <div>
+                <DialogTitle className="text-base font-bold text-[#7A1316]">
+                  Raise Shortfall on Application
+                </DialogTitle>
+                <DialogDescription className="text-xs text-slate-600">
+                  Select an active application to issue a statutory shortfall notice.
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="p-4 sm:p-5 space-y-4 text-xs">
+            {/* Target Application Selector */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-800">
+                Select Application <span className="text-rose-600">*</span>
+              </Label>
+              <Select value={raiseAppId} onValueChange={setRaiseAppId}>
+                <SelectTrigger className="h-8.5 text-xs bg-white border-[#DCD5C8]">
+                  <SelectValue placeholder="Select application..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {applications.map((app) => (
+                    <SelectItem key={app.id} value={app.id} className="text-xs">
+                      {app.applicationNo} — {app.project.name} ({app.applicant.name})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Template Selector */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+                <Sparkles className="size-3 text-[#7A1316]" /> Common APCRDA Deficiency Presets
+              </Label>
+              <Select
+                value={raiseTmplIdx}
+                onValueChange={(val) => {
+                  setRaiseTmplIdx(val);
+                  const idx = parseInt(val, 10);
+                  if (idx > 0 && APCRDA_SHORTFALL_PRESETS[idx]) {
+                    const t = APCRDA_SHORTFALL_PRESETS[idx];
+                    setRaiseType(t.type);
+                    setRaiseTitle(t.title);
+                    setRaiseDesc(t.desc);
+                  }
+                }}
+              >
+                <SelectTrigger className="h-8.5 text-xs bg-white border-[#DCD5C8]">
+                  <SelectValue placeholder="Choose a preset..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {APCRDA_SHORTFALL_PRESETS.map((p, i) => (
+                    <SelectItem key={i} value={String(i)} className="text-xs">
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Type & Due Date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-slate-800">
+                  Category <span className="text-rose-600">*</span>
+                </Label>
+                <Select value={raiseType} onValueChange={(v) => setRaiseType(v as ShortfallType)}>
+                  <SelectTrigger className="h-8.5 text-xs bg-white border-[#DCD5C8]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DOCUMENT">Document</SelectItem>
+                    <SelectItem value="TECHNICAL">Technical</SelectItem>
+                    <SelectItem value="FEE">Fee</SelectItem>
+                    <SelectItem value="GENERAL">General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-slate-800">
+                  Response Due Date <span className="text-rose-600">*</span>
+                </Label>
+                <Input
+                  type="date"
+                  value={raiseDueDate}
+                  onChange={(e) => setRaiseDueDate(e.target.value)}
+                  className="h-8.5 text-xs bg-white border-[#DCD5C8]"
+                />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-800">
+                Title / Deficiency Subject <span className="text-rose-600">*</span>
+              </Label>
+              <Input
+                value={raiseTitle}
+                onChange={(e) => setRaiseTitle(e.target.value)}
+                placeholder="e.g. Structural stability certificate missing SE seal"
+                className="h-8.5 text-xs bg-white border-[#DCD5C8]"
+              />
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-800">
+                Detailed Observation &amp; Directive <span className="text-rose-600">*</span>
+              </Label>
+              <Textarea
+                value={raiseDesc}
+                onChange={(e) => setRaiseDesc(e.target.value)}
+                placeholder="Explain the non-compliance and required applicant rectification..."
+                rows={3}
+                className="text-xs bg-white border-[#DCD5C8]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="bg-[#F5EBE1] border-t border-[#DCD5C8] p-3 flex items-center justify-between sm:justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setRaiseOpen(false)}
+              className="border-[#DCD5C8] bg-white cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              disabled={!raiseAppId || !raiseTitle.trim() || !raiseDesc.trim()}
+              onClick={() => {
+                raiseShortfall(raiseAppId, {
+                  type: raiseType,
+                  title: raiseTitle.trim(),
+                  description: raiseDesc.trim(),
+                  dueDate: new Date(raiseDueDate).toISOString(),
+                });
+                setRaiseOpen(false);
+                setRaiseTitle("");
+                setRaiseDesc("");
+                setRaiseTmplIdx("0");
+                toast({
+                  title: "Shortfall Raised",
+                  description: "Shortfall notice has been issued to the applicant.",
+                });
+              }}
+              className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold gap-1.5 cursor-pointer shadow-xs"
+            >
+              <AlertTriangle className="size-3.5" />
+              <span>Issue Shortfall Notice</span>
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

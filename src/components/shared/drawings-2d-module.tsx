@@ -194,8 +194,10 @@ const MOCK_2D_RULES: ScrutinyRule2D[] = [
 
 export function Drawings2DModule() {
   const { applications, user, navigate, portal } = useAppStore();
+  const isLtp = user?.role === "LTP";
   const [selectedAppId, setSelectedAppId] = React.useState<string>("AP/BP/2026/04/0001");
   const [activeTab, setActiveTab] = React.useState<string>("viewer");
+  const effectiveTab = (!isLtp && activeTab === "upload") ? "viewer" : activeTab;
   const [activeFloor, setActiveFloor] = React.useState<string>("GROUND_FLOOR");
   const [highlightedRule, setHighlightedRule] = React.useState<ScrutinyRule2D | null>(null);
   const [zoom, setZoom] = React.useState<number>(1);
@@ -266,8 +268,8 @@ export function Drawings2DModule() {
       </div>
 
       {/* Workspace Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-6 w-full bg-muted/60 p-1 rounded-xl">
+      <Tabs value={effectiveTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className={cn("grid w-full bg-muted/60 p-1 rounded-xl", isLtp ? "grid-cols-2 sm:grid-cols-6" : "grid-cols-2 sm:grid-cols-5")}>
           <TabsTrigger value="viewer" className="text-xs gap-1.5">
             <Eye className="size-3.5" /> 2D CAD Viewer
           </TabsTrigger>
@@ -280,9 +282,11 @@ export function Drawings2DModule() {
           <TabsTrigger value="diff" className="text-xs gap-1.5">
             <FileCode className="size-3.5" /> Revision Diff (v1 vs v2)
           </TabsTrigger>
-          <TabsTrigger value="upload" className="text-xs gap-1.5">
-            <UploadCloud className="size-3.5" /> CAD Upload
-          </TabsTrigger>
+          {isLtp && (
+            <TabsTrigger value="upload" className="text-xs gap-1.5">
+              <UploadCloud className="size-3.5" /> CAD Upload
+            </TabsTrigger>
+          )}
           <TabsTrigger value="report" className="text-xs gap-1.5">
             <Printer className="size-3.5" /> Scrutiny Report
           </TabsTrigger>
@@ -786,18 +790,20 @@ export function Drawings2DModule() {
         </TabsContent>
 
         {/* TAB 5: CAD UPLOAD */}
-        <TabsContent value="upload" className="space-y-4">
-          <Card className="p-6 border border-dashed text-center space-y-3">
-            <UploadCloud className="size-12 text-primary mx-auto opacity-70" />
-            <h4 className="font-bold text-sm text-foreground">Upload Revised 2D Architectural CAD Drawing</h4>
-            <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Supported formats: AutoCAD DWG (.dwg), Drawing Exchange Format (.dxf), Architectural PDF (.pdf) up to 50 MB.
-            </p>
-            <Button size="sm" className="gap-2 text-xs">
-              <UploadCloud className="size-4" /> Select CAD Drawing File
-            </Button>
-          </Card>
-        </TabsContent>
+        {isLtp && (
+          <TabsContent value="upload" className="space-y-4">
+            <Card className="p-6 border border-dashed text-center space-y-3">
+              <UploadCloud className="size-12 text-primary mx-auto opacity-70" />
+              <h4 className="font-bold text-sm text-foreground">Upload Revised 2D Architectural CAD Drawing</h4>
+              <p className="text-xs text-muted-foreground max-w-md mx-auto">
+                Supported formats: AutoCAD DWG (.dwg), Drawing Exchange Format (.dxf), Architectural PDF (.pdf) up to 50 MB.
+              </p>
+              <Button size="sm" className="gap-2 text-xs">
+                <UploadCloud className="size-4" /> Select CAD Drawing File
+              </Button>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* TAB 6: PRINTABLE SCRUTINY REPORT */}
         <TabsContent value="report" className="space-y-4">

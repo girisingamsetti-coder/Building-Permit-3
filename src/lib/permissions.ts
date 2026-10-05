@@ -18,10 +18,7 @@ import { normalizeZone, getDashboardScope } from "@/lib/scope";
 // ============================================================
 
 export function portalForRole(role: RoleKey): Portal {
-  // ADMIN shares the same LTP portal as Commissioner — module access configured via Settings
-  if (role === "LTP" || role === "ZDD" || role === "ZJD" || role === "TPA" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER" || role === "ADMIN") return "LTP";
-  // ZONAL_HEAD, DIRECTOR land on the OFFICER portal
-  return "OFFICER";
+  return "LTP";
 }
 
 // Centralized permission check — reads from the store's mutable roles record.
@@ -40,25 +37,7 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
   if (user.role === "ADMIN") return true;
 
-  const ltpAllowedViews = [
-    "ltp-applications",
-    "ltp-dashboard",
-    "ltp-create-application",
-    "ltp-application-details",
-    "ltp-drawings",
-    "ltp-scrutiny",
-    "ltp-documents",
-    "ltp-fees",
-    "ltp-payment",
-    "ltp-receipt",
-    "ltp-profile",
-    "ltp-notifications",
-    "ltp-help",
-  ];
-
-  if (user.role === "LTP") {
-    return ltpAllowedViews.includes(view);
-  }
+  if (view.startsWith("ltp-")) return true;
 
   const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
   const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim", "admin-2d-drawings"];
@@ -278,11 +257,11 @@ const MODULE_DEFS: ModuleDef[] = [
       ADMIN: "admin-dashboard",
     },
   },
-  // 2 — Applications (Only for LTP)
+  // 2 — Applications
   {
-    label: "Building Permits",
+    label: "Applications",
     permKey: "applications",
-    requiredAny: ["application:create"], // Only LTP can apply/submit applications
+    requiredAny: [],
     views: {
       LTP: "ltp-applications",
       OFFICER: "officer-applications",
@@ -324,7 +303,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 5 — Shortfalls
   {
-    label: "Shortfall Notices",
+    label: "Shortfalls",
     permKey: "shortfalls",
     requiredAny: [],
     views: {
@@ -357,7 +336,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 8 — Show Cause
   {
-    label: "Show Cause Notices",
+    label: "Show Cause",
     permKey: "show-cause",
     requiredAny: [],
     views: {
@@ -401,7 +380,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 12 — Occupancy
   {
-    label: "Occupancy (OC)",
+    label: "Occupancy",
     permKey: "occupancy",
     requiredAny: [],
     views: {
@@ -434,7 +413,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 15 — Outward
   {
-    label: "Outward Despatch",
+    label: "Outward",
     permKey: "outward",
     requiredAny: [],
     views: {
@@ -467,7 +446,7 @@ const MODULE_DEFS: ModuleDef[] = [
   },
   // 18 — Reports
   {
-    label: "MIS Reports",
+    label: "Reports",
     permKey: "reports",
     requiredAny: ["reports:view", "application:view_all", "sla:view", "officer_progress:view"],
     views: {

@@ -48,18 +48,21 @@ export function BimWorkspaceContainer({
   // 1. Failure isolation / Error Boundary state
   const [hasError, setHasError] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<string>("viewer");
+  const isLtp = userRole === "LTP";
+  const effectiveTab = (!isLtp && activeTab === "upload") ? "viewer" : activeTab;
 
   // 2. Fetch or initialize BIM model
+  const [prevAppId, setPrevAppId] = React.useState(applicationId);
   const [model, setModel] = React.useState<BimModelData | null>(() =>
     getBimModelByAppId(applicationId)
   );
+  if (prevAppId !== applicationId) {
+    setPrevAppId(applicationId);
+    setModel(getBimModelByAppId(applicationId));
+  }
 
   // 3. Violation targeting link state
   const [activeViolation, setActiveViolation] = React.useState<BimScrutinyRule | null>(null);
-
-  React.useEffect(() => {
-    setModel(getBimModelByAppId(applicationId));
-  }, [applicationId]);
 
   // Graceful fallback if error boundary triggers
   if (hasError || !model) {
@@ -150,7 +153,7 @@ export function BimWorkspaceContainer({
       </div>
 
       {/* BIM Internal Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={effectiveTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-slate-100/80 p-1 dark:bg-slate-800/60 rounded-xl">
           <TabsTrigger value="viewer" className="gap-1.5 text-xs">
             <Eye className="size-3.5" /> 3D Viewer & Scrutiny
@@ -167,9 +170,11 @@ export function BimWorkspaceContainer({
           <TabsTrigger value="versions" className="gap-1.5 text-xs">
             <GitCompare className="size-3.5" /> Versions & Diff
           </TabsTrigger>
-          <TabsTrigger value="upload" className="gap-1.5 text-xs">
-            <UploadCloud className="size-3.5" /> Upload Revision
-          </TabsTrigger>
+          {isLtp && (
+            <TabsTrigger value="upload" className="gap-1.5 text-xs">
+              <UploadCloud className="size-3.5" /> Upload Revision
+            </TabsTrigger>
+          )}
           <TabsTrigger value="reports" className="gap-1.5 text-xs">
             <FileText className="size-3.5" /> Reports & Certificate
           </TabsTrigger>
@@ -227,9 +232,11 @@ export function BimWorkspaceContainer({
         </TabsContent>
 
         {/* 5. Upload Revision Tab */}
-        <TabsContent value="upload" className="space-y-4">
-          <BimModelUpload applicationId={applicationId} onUploadComplete={handleUploadComplete} />
-        </TabsContent>
+        {isLtp && (
+          <TabsContent value="upload" className="space-y-4">
+            <BimModelUpload applicationId={applicationId} onUploadComplete={handleUploadComplete} />
+          </TabsContent>
+        )}
 
         {/* 6. Reports View Tab */}
         <TabsContent value="reports" className="space-y-4">

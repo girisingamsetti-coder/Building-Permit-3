@@ -34,6 +34,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   FileText,
   Workflow,
   Upload,
@@ -69,9 +86,12 @@ import {
   Check,
   X,
   Save,
+  Plus,
+  Send,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { Application } from "@/types";
+import type { Application, Shortfall, ShortfallType } from "@/types";
 import {
   ApcrdaPaymentReceiptModal,
   buildReceiptFromApplication,
@@ -180,8 +200,15 @@ function EmptyState({
 
 export function LtpApplicationDetails() {
   const app = useSelectedApplication();
-  const { navigate, openApplication, goBack } = useAppStore();
+  const { navigate, openApplication, goBack, user } = useAppStore();
   const { toast } = useToast();
+  const isLtp = user?.role === "LTP";
+
+  const [activeTab, setActiveTab] = React.useState("overview");
+  const [raiseShortfallOpen, setRaiseShortfallOpen] = React.useState(false);
+  const [respondShortfallOpen, setRespondShortfallOpen] = React.useState(false);
+  const [resolveShortfallOpen, setResolveShortfallOpen] = React.useState(false);
+  const [selectedShortfall, setSelectedShortfall] = React.useState<Shortfall | null>(null);
 
   const handleBack = () => {
     if (useAppStore.getState().viewHistory.length > 0) {
@@ -218,10 +245,64 @@ export function LtpApplicationDetails() {
     );
   }
 
+  const openShortfalls = app.shortfalls.filter((s) => s.status !== "RESOLVED");
+
   return (
-    <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-6 font-sans text-slate-800 overflow-y-auto">
+    <div className="w-full h-full bg-[#FAF7F2] p-4 sm:p-6 space-y-5 font-sans text-slate-800 overflow-y-auto">
+      {/* Top Application Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-[#DCD5C8] shadow-2xs">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBack}
+            className="h-8 px-3 text-xs font-bold text-[#7A1316] border-[#DCD5C8] bg-white hover:bg-[#F3EADF] cursor-pointer shadow-2xs gap-1.5"
+          >
+            <ArrowLeft className="size-3.5" /> Back
+          </Button>
+          <div className="h-4 w-px bg-[#DCD5C8] hidden sm:block" />
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs sm:text-sm font-bold text-[#7A1316] bg-[#7A1316]/10 px-2.5 py-1 rounded border border-[#7A1316]/20">
+              {app.applicationNo}
+            </span>
+            <span className="text-xs font-bold text-slate-800 hidden md:inline">
+              {app.project.name}
+            </span>
+            <Badge variant="outline" className="text-[10px] font-semibold border-[#DCD5C8] bg-[#FAF7F2]">
+              {app.project.propertyType?.replace(/_/g, " ") || "Building Permit"}
+            </Badge>
+            <StatusBadge status={app.status} />
+          </div>
+        </div>
+
+        {/* Top Header Action Buttons: Role-aware shortfall controls */}
+        <div className="flex items-center gap-2 shrink-0">
+          {!isLtp ? (
+            <Button
+              size="sm"
+              onClick={() => setRaiseShortfallOpen(true)}
+              className="h-8 px-3.5 text-xs font-bold bg-[#7A1316] hover:bg-[#8F161A] text-white cursor-pointer shadow-xs gap-1.5"
+            >
+              <AlertTriangle className="size-3.5 text-amber-300" />
+              <span>Raise Shortfall</span>
+            </Button>
+          ) : (
+            openShortfalls.length > 0 && (
+              <Button
+                size="sm"
+                onClick={() => setActiveTab("shortfalls")}
+                className="h-8 px-3.5 text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-xs gap-1.5"
+              >
+                <MessageSquare className="size-3.5" />
+                <span>Respond to Shortfall ({openShortfalls.length})</span>
+              </Button>
+            )
+          )}
+        </div>
+      </div>
+
       {/* Status banner */}
-      <StatusBanner app={app} />
+      <StatusBanner app={app} isLtp={isLtp} onSelectTab={(tab) => setActiveTab(tab)} />
 
       {/* Workflow stepper */}
       <div className="rounded-xl border-2 border-[#7A1316] bg-[#FBF3E4] p-4 sm:p-5 shadow-xs space-y-4">
@@ -258,7 +339,7 @@ export function LtpApplicationDetails() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-[#F5EBE1] border border-[#DCD5C8] p-1.5 rounded-xl">
           <TabsTrigger value="overview" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Info className="size-3.5" /> Overview</TabsTrigger>
           <TabsTrigger value="workflow" className="gap-1.5 data-[state=active]:bg-[#7A1316] data-[state=active]:text-white font-semibold text-slate-700"><Workflow className="size-3.5" /> Workflow Timeline</TabsTrigger>
@@ -278,7 +359,7 @@ export function LtpApplicationDetails() {
           <WorkflowTab app={app} />
         </TabsContent>
         <TabsContent value="drawings" className="space-y-6">
-          <DrawingsTab app={app} />
+          <DrawingsTab app={app} isLtp={isLtp} />
         </TabsContent>
         <TabsContent value="documents" className="space-y-6">
           <DocumentsTab app={app} />
@@ -290,7 +371,18 @@ export function LtpApplicationDetails() {
           <NocsTab app={app} />
         </TabsContent>
         <TabsContent value="shortfalls" className="space-y-6">
-          <ShortfallsTab app={app} />
+          <ShortfallsTab
+            app={app}
+            onOpenRaise={() => setRaiseShortfallOpen(true)}
+            onOpenRespond={(sf) => {
+              setSelectedShortfall(sf);
+              setRespondShortfallOpen(true);
+            }}
+            onOpenResolve={(sf) => {
+              setSelectedShortfall(sf);
+              setResolveShortfallOpen(true);
+            }}
+          />
         </TabsContent>
         <TabsContent value="remarks" className="space-y-6">
           <RemarksTab app={app} />
@@ -299,12 +391,43 @@ export function LtpApplicationDetails() {
           <AuditTab app={app} />
         </TabsContent>
       </Tabs>
+
+      {/* Raise Shortfall Modal (for Officers, Admin, Reviewers) */}
+      <RaiseShortfallDialog
+        open={raiseShortfallOpen}
+        onOpenChange={setRaiseShortfallOpen}
+        app={app}
+      />
+
+      {/* Respond to Shortfall Modal (for LTP) */}
+      <RespondShortfallDialog
+        open={respondShortfallOpen}
+        onOpenChange={setRespondShortfallOpen}
+        app={app}
+        shortfall={selectedShortfall}
+      />
+
+      {/* Resolve Shortfall Modal (for Officers) */}
+      <ResolveShortfallDialog
+        open={resolveShortfallOpen}
+        onOpenChange={setResolveShortfallOpen}
+        app={app}
+        shortfall={selectedShortfall}
+      />
     </div>
   );
 }
 
 // ---------- Status Banner ----------
-function StatusBanner({ app }: { app: Application }) {
+function StatusBanner({
+  app,
+  isLtp,
+  onSelectTab,
+}: {
+  app: Application;
+  isLtp?: boolean;
+  onSelectTab?: (tab: string) => void;
+}) {
   const { openApplication, navigate } = useAppStore();
   const { toast } = useToast();
 
@@ -314,24 +437,34 @@ function StatusBanner({ app }: { app: Application }) {
       cls: "border-destructive/30 bg-destructive/5 text-destructive",
       iconCls: "bg-destructive/10 text-destructive",
       title: "Drawing scrutiny failed",
-      desc: `${app.scrutinyReport?.failed ?? 1} critical issue(s) found. Please re-upload corrected drawings.`,
-      action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
+      desc: isLtp
+        ? `${app.scrutinyReport?.failed ?? 1} critical issue(s) found. Please re-upload corrected drawings.`
+        : `${app.scrutinyReport?.failed ?? 1} critical issue(s) found in drawing scrutiny.`,
+      action: isLtp ? { label: "Re-upload drawings", view: "ltp-drawings" as const } : undefined,
     },
     DRAWING_REUPLOAD_REQUIRED: {
       icon: XCircle,
       cls: "border-destructive/30 bg-destructive/5 text-destructive",
       iconCls: "bg-destructive/10 text-destructive",
       title: "Drawing re-upload required",
-      desc: "Scrutiny identified critical non-compliances. Please re-upload a corrected drawing.",
-      action: { label: "Re-upload drawings", view: "ltp-drawings" as const },
+      desc: isLtp
+        ? "Scrutiny identified critical non-compliances. Please re-upload a corrected drawing."
+        : "Scrutiny identified critical non-compliances. Awaiting corrected drawing upload by LTP.",
+      action: isLtp ? { label: "Re-upload drawings", view: "ltp-drawings" as const } : undefined,
     },
     SHORTFALL_RAISED: {
       icon: AlertTriangle,
       cls: "border-warning/30 bg-warning/5 text-warning-foreground",
       iconCls: "bg-warning/15 text-warning-foreground",
-      title: `${app.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) raised`,
-      desc: "Action required from you. Respond to the shortfalls to resume processing.",
-      action: { label: "View shortfalls", view: "ltp-shortfalls" as const },
+      title: `${app.shortfalls.filter((sf) => sf.status !== "RESOLVED").length} shortfall(s) active`,
+      desc: isLtp
+        ? "Action required from you. Respond to the shortfalls to resume processing."
+        : "Active shortfall notice issued to applicant. File review is paused pending applicant compliance.",
+      action: {
+        label: isLtp ? "Respond to shortfalls" : "Review shortfalls",
+        view: "ltp-application-details" as const,
+        tab: "shortfalls",
+      },
     },
     PAYMENT_PENDING: {
       icon: AlertCircle,
@@ -398,17 +531,27 @@ function StatusBanner({ app }: { app: Application }) {
           <p className="text-xs opacity-90">{c.desc}</p>
         </div>
       </div>
-      <Button
-        size="sm"
-        variant="outline"
-        className={cn("shrink-0 border-current/30 bg-background/50", c.cls)}
-        onClick={() => {
-          openApplication(app.id, c.action.view);
-          toast({ title: c.action.label });
-        }}
-      >
-        {c.action.label} <ArrowRight className="size-4" />
-      </Button>
+      {(() => {
+        const action = c.action;
+        if (!action) return null;
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            className={cn("shrink-0 border-current/30 bg-background/50 cursor-pointer", c.cls)}
+            onClick={() => {
+              if ("tab" in action && action.tab && onSelectTab) {
+                onSelectTab(action.tab);
+              } else {
+                openApplication(app.id, action.view);
+                toast({ title: action.label });
+              }
+            }}
+          >
+            {action.label} <ArrowRight className="size-4" />
+          </Button>
+        );
+      })()}
     </div>
   );
 }
@@ -977,17 +1120,17 @@ function WorkflowTab({ app }: { app: Application }) {
 }
 
 // ---------- Drawings & Scrutiny Tab ----------
-function DrawingsTab({ app }: { app: Application }) {
+function DrawingsTab({ app, isLtp }: { app: Application; isLtp?: boolean }) {
   const [files, setFiles] = React.useState<UploadedFile[]>([]);
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+        <div className={cn("space-y-6", isLtp ? "lg:col-span-2" : "lg:col-span-2")}>
           <SectionCard title="Drawing Viewer" description="View, zoom, rotate and switch versions" icon={Eye}>
             {app.drawings.length > 0 ? (
               <DrawingViewer drawings={app.drawings} />
             ) : (
-              <EmptyState icon={Upload} title="No drawings uploaded" description="Upload your first drawing to begin scrutiny." />
+              <EmptyState icon={Upload} title="No drawings uploaded" description={isLtp ? "Upload your first drawing to begin scrutiny." : "No drawings have been uploaded by the LTP applicant yet."} />
             )}
           </SectionCard>
 
@@ -1042,23 +1185,25 @@ function DrawingsTab({ app }: { app: Application }) {
         </div>
 
         <div className="space-y-6">
-          <SectionCard title="Upload New Drawing" description="Re-upload corrected drawings after a failed scrutiny" icon={Upload}>
-            <FileUploader
-              variant="maroon"
-              label="Drop drawing here"
-              hint="DWG, DXF or PDF · max 50 MB"
-              accept=".dwg,.dxf,.pdf"
-              uploadedFiles={files}
-              onUpload={(newFiles) => {
-                setFiles((prev) => {
-                  const map = new Map(prev.map((f) => [f.id, f]));
-                  newFiles.forEach((f) => map.set(f.id, f));
-                  return Array.from(map.values());
-                });
-              }}
-              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
-            />
-          </SectionCard>
+          {isLtp && (
+            <SectionCard title="Upload New Drawing" description="Re-upload corrected drawings after a failed scrutiny" icon={Upload}>
+              <FileUploader
+                variant="maroon"
+                label="Drop drawing here"
+                hint="DWG, DXF or PDF · max 50 MB"
+                accept=".dwg,.dxf,.pdf"
+                uploadedFiles={files}
+                onUpload={(newFiles) => {
+                  setFiles((prev) => {
+                    const map = new Map(prev.map((f) => [f.id, f]));
+                    newFiles.forEach((f) => map.set(f.id, f));
+                    return Array.from(map.values());
+                  });
+                }}
+                onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+              />
+            </SectionCard>
+          )}
 
           <SectionCard title="Version History" icon={History} noPadding>
             <ul className="divide-y divide-[#EADBCE]">
@@ -1322,31 +1467,821 @@ function NocsTab({ app }: { app: Application }) {
   );
 }
 
+// ---------- APCRDA Common Shortfall Templates ----------
+const APCRDA_SHORTFALL_TEMPLATES = [
+  {
+    label: "Custom Deficiency / Query",
+    type: "DOCUMENT" as ShortfallType,
+    title: "",
+    desc: "",
+  },
+  {
+    label: "Structural Stability Certificate — Missing SE Stamp",
+    type: "DOCUMENT" as ShortfallType,
+    title: "Structural stability certificate missing Registered Structural Engineer stamp & signature",
+    desc: "The structural drawings and stability declaration submitted lack the valid seal, registration number, and digital signature of an APCRDA-empaneled Structural Engineer. Please furnish an attested structural certificate.",
+  },
+  {
+    label: "Rear Setback Non-Compliance (Table 8 DCR)",
+    type: "TECHNICAL" as ShortfallType,
+    title: "Rear setback provided (2.1m) is less than statutory requirement (3.0m) as per DCR Table 8",
+    desc: "Drawing scrutiny reveals that the rear open setback provided in the layout plan is 2.1 meters, which is below the mandatory minimum of 3.0 meters for the given plot depth and building height. Please revise drawings adhering to APCRDA Byelaws.",
+  },
+  {
+    label: "Plot Dimension Discrepancy with Registered Deed",
+    type: "DOCUMENT" as ShortfallType,
+    title: "Plot boundary & dimensions differ from Registered Sale Deed schedule",
+    desc: "The boundary dimensions shown in the submitted site layout (North: 18.5m, South: 18.2m) do not tally with the schedule of property in Registered Deed No. 4281/2021. Provide an authenticated surveyor sketch and rectification deed.",
+  },
+  {
+    label: "Fire NOC Endorsement for Height > 15m",
+    type: "TECHNICAL" as ShortfallType,
+    title: "Provisional Fire NOC endorsement required for building height exceeding 15 meters",
+    desc: "As the proposed total building height exceeds 15.0 meters, a Provisional No Objection Certificate from the State Disaster Response and Fire Services Department is mandatory before technical sanction.",
+  },
+  {
+    label: "Rainwater Harvesting & Percolation Pit Missing",
+    type: "TECHNICAL" as ShortfallType,
+    title: "Rainwater harvesting & percolation pit details missing from site services drawing",
+    desc: "Rainwater harvesting and recharge pit specifications as mandated under APCRDA Green Building Norms are absent in the site services plan. Incorporate detailed design and cross-section.",
+  },
+  {
+    label: "Statutory Betterment / Development Charges Shortfall",
+    type: "FEE" as ShortfallType,
+    title: "Shortfall in statutory development charges / Betterment fee calculation",
+    desc: "A calculation variance has been noticed in the external infrastructure betterment levy. An outstanding balance of Rs. 45,000 must be remitted towards revised scrutiny fees.",
+  },
+  {
+    label: "General Clarification — Ambiguous Ventilation Shaft",
+    type: "GENERAL" as ShortfallType,
+    title: "Clarification required on habitable room light and ventilation shaft",
+    desc: "The internal ventilation shaft dimensions on the second floor fail to satisfy the minimum 1.2m x 1.5m air shaft requirement under Byelaw 14.2. Submit a detailed cross-section clarification.",
+  },
+];
+
+// ---------- Modal 1: Raise Shortfall Dialog (For All Officers & Admins) ----------
+function RaiseShortfallDialog({
+  open,
+  onOpenChange,
+  app,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  app: Application;
+}) {
+  const { toast } = useToast();
+  const { raiseShortfall } = useAppStore();
+
+  const [templateIdx, setTemplateIdx] = React.useState<string>("0");
+  const [type, setType] = React.useState<ShortfallType>("DOCUMENT");
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [dueDate, setDueDate] = React.useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [files, setFiles] = React.useState<UploadedFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSelectTemplate = (val: string) => {
+    setTemplateIdx(val);
+    const idx = parseInt(val, 10);
+    if (idx > 0 && APCRDA_SHORTFALL_TEMPLATES[idx]) {
+      const tmpl = APCRDA_SHORTFALL_TEMPLATES[idx];
+      setType(tmpl.type);
+      setTitle(tmpl.title);
+      setDescription(tmpl.desc);
+    }
+  };
+
+  const handleReset = () => {
+    setTemplateIdx("0");
+    setType("DOCUMENT");
+    setTitle("");
+    setDescription("");
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    setDueDate(d.toISOString().slice(0, 10));
+    setFiles([]);
+    setIsSubmitting(false);
+  };
+
+  const handleSubmit = () => {
+    if (!title.trim() || !description.trim()) {
+      toast({
+        title: "Required information missing",
+        description: "Please specify both the shortfall title and detailed description.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    const dueIso = dueDate ? new Date(dueDate).toISOString() : new Date(Date.now() + 7 * 86400000).toISOString();
+
+    raiseShortfall(app.id, {
+      type,
+      title: title.trim(),
+      description: description.trim(),
+      dueDate: dueIso,
+    });
+
+    setIsSubmitting(false);
+    toast({
+      title: "Shortfall Notice Raised",
+      description: `Shortfall on ${app.applicationNo} (${type}) has been issued. Applicant notified via SMS and portal notice.`,
+    });
+    handleReset();
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) handleReset(); onOpenChange(v); }}>
+      <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border-[#DCD5C8] p-0 font-sans">
+        <DialogHeader className="bg-[#F5EBE1] border-b border-[#DCD5C8] p-4 text-left">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-md bg-[#7A1316] text-white">
+              <AlertTriangle className="size-4" />
+            </span>
+            <div>
+              <DialogTitle className="text-base font-bold text-[#7A1316]">
+                Raise Shortfall Notice
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-600">
+                Application: <span className="font-mono font-bold text-slate-900">{app.applicationNo}</span> · {app.applicant.name}
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="p-4 sm:p-5 space-y-4 text-xs">
+          {/* Notice info banner */}
+          <div className="rounded-lg border border-amber-300 bg-amber-50/60 p-3 text-amber-900 space-y-1">
+            <div className="font-bold flex items-center gap-1.5">
+              <AlertCircle className="size-3.5 text-amber-700" />
+              <span>Statutory Shortfall Procedure (APCRDA Building Byelaws)</span>
+            </div>
+            <p className="text-[11px] text-amber-800 leading-relaxed">
+              Raising a shortfall places the application on hold and stops the SLA countdown clock until the applicant submits compliant rectification.
+            </p>
+          </div>
+
+          {/* Quick template picker */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-slate-800 flex items-center gap-1">
+              <Sparkles className="size-3 text-[#7A1316]" /> Common APCRDA Deficiency Templates
+            </Label>
+            <Select value={templateIdx} onValueChange={handleSelectTemplate}>
+              <SelectTrigger className="h-8.5 text-xs bg-white border-[#DCD5C8]">
+                <SelectValue placeholder="Select a preset deficiency..." />
+              </SelectTrigger>
+              <SelectContent>
+                {APCRDA_SHORTFALL_TEMPLATES.map((tmpl, i) => (
+                  <SelectItem key={i} value={String(i)} className="text-xs">
+                    {tmpl.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Shortfall Type */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-slate-800">
+                Shortfall Category <span className="text-rose-600">*</span>
+              </Label>
+              <Select value={type} onValueChange={(v) => setType(v as ShortfallType)}>
+                <SelectTrigger className="h-8.5 text-xs bg-white border-[#DCD5C8]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DOCUMENT">Document — Missing / Invalid / Expired</SelectItem>
+                  <SelectItem value="TECHNICAL">Technical — Scrutiny / Drawing Violation</SelectItem>
+                  <SelectItem value="FEE">Fee — Payment Discrepancy / Shortfall</SelectItem>
+                  <SelectItem value="GENERAL">General — Statutory Query / Clarification</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="sf-due-date" className="text-xs font-bold text-slate-800">
+                Compliance Due Date <span className="text-rose-600">*</span>
+              </Label>
+              <Input
+                id="sf-due-date"
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="h-8.5 text-xs bg-white border-[#DCD5C8]"
+              />
+            </div>
+          </div>
+
+          {/* Title */}
+          <div className="space-y-1.5">
+            <Label htmlFor="sf-title-input" className="text-xs font-bold text-slate-800">
+              Shortfall Subject / Deficiency Summary <span className="text-rose-600">*</span>
+            </Label>
+            <Input
+              id="sf-title-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Structural stability certificate missing SE stamp"
+              className="h-8.5 text-xs bg-white border-[#DCD5C8] font-medium"
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <Label htmlFor="sf-desc-input" className="text-xs font-bold text-slate-800">
+              Detailed Observation & Required Action <span className="text-rose-600">*</span>
+            </Label>
+            <Textarea
+              id="sf-desc-input"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the discrepancy in detail, citing specific building byelaws or missing documents, and specify what the applicant must upload to rectify it..."
+              rows={4}
+              className="text-xs bg-white border-[#DCD5C8] leading-relaxed resize-y"
+            />
+          </div>
+
+          {/* Supporting Document / Markup file (optional) */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-slate-800">
+              Attach Scrutiny Markup / Inspection Notice (Optional)
+            </Label>
+            <FileUploader
+              label="Drop scrutiny markup or notice PDF here"
+              hint="PDF, JPG, PNG · max 25 MB"
+              accept=".pdf,.jpg,.png"
+              uploadedFiles={files}
+              onUpload={(newFiles) => {
+                setFiles((prev) => {
+                  const map = new Map(prev.map((f) => [f.id, f]));
+                  newFiles.forEach((f) => map.set(f.id, f));
+                  return Array.from(map.values());
+                });
+              }}
+              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="bg-[#F5EBE1] border-t border-[#DCD5C8] p-3.5 sm:px-5 flex items-center justify-between sm:justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="h-8 text-xs font-semibold border-[#DCD5C8] bg-white cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !title.trim() || !description.trim()}
+            className="h-8 px-4 text-xs font-bold bg-[#7A1316] hover:bg-[#8F161A] text-white cursor-pointer shadow-xs gap-1.5"
+          >
+            <AlertTriangle className="size-3.5" />
+            <span>Issue Shortfall Notice</span>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Modal 2: Respond to Shortfall Dialog (Strictly for LTP) ----------
+function RespondShortfallDialog({
+  open,
+  onOpenChange,
+  app,
+  shortfall,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  app: Application;
+  shortfall: Shortfall | null;
+}) {
+  const { toast } = useToast();
+  const { respondToShortfall } = useAppStore();
+
+  const [responseText, setResponseText] = React.useState("");
+  const [files, setFiles] = React.useState<UploadedFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleReset = () => {
+    setResponseText("");
+    setFiles([]);
+    setIsSubmitting(false);
+  };
+
+  const handleSubmit = () => {
+    if (!shortfall) return;
+    if (!responseText.trim()) {
+      toast({
+        title: "Response statement required",
+        description: "Please explain the rectification details before submitting.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    const supportingDocName = files[0]?.name || "Rectified_Compliance_Docs.pdf";
+
+    respondToShortfall(app.id, shortfall.id, responseText.trim(), supportingDocName);
+
+    setIsSubmitting(false);
+    toast({
+      title: "Shortfall Response Submitted",
+      description: `Your response for ${shortfall.shortfallNumber || shortfall.shortfallId} has been submitted for scrutiny review.`,
+    });
+    handleReset();
+    onOpenChange(false);
+  };
+
+  if (!shortfall) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { if (!v) handleReset(); onOpenChange(v); }}>
+      <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border-[#DCD5C8] p-0 font-sans">
+        <DialogHeader className="bg-[#F5EBE1] border-b border-[#DCD5C8] p-4 text-left">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs font-bold text-[#7A1316] bg-white px-2 py-0.5 rounded border border-[#DCD5C8]">
+              {shortfall.shortfallNumber || shortfall.shortfallId}
+            </span>
+            <span className="font-mono text-xs text-slate-600">{shortfall.shortfallId}</span>
+          </div>
+          <DialogTitle className="text-base font-bold text-slate-900 mt-1">
+            Respond to Shortfall
+          </DialogTitle>
+          <DialogDescription className="text-xs text-slate-600">
+            {shortfall.title} · Application: <span className="font-mono font-bold text-[#7A1316]">{app.applicationNo}</span>
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="p-4 sm:p-5 space-y-4 text-xs">
+          {/* Officer Observation Box */}
+          <div className="rounded-lg border border-[#EADBCE] bg-white p-3 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-slate-500 uppercase font-bold">Officer Observation &amp; Directive</span>
+              <span className="text-[10px] text-rose-700 font-bold">Due: {formatDate(shortfall.dueDate)}</span>
+            </div>
+            <p className="text-xs text-slate-800 leading-relaxed font-medium">{shortfall.description}</p>
+            <div className="text-[10px] text-slate-500 pt-1 border-t border-slate-100 flex items-center justify-between">
+              <span>Raised By: <strong>{shortfall.raisedBy.name}</strong> ({shortfall.raisedBy.role})</span>
+              <span>Category: <strong>{shortfall.type}</strong></span>
+            </div>
+          </div>
+
+          {/* Response Textarea */}
+          <div className="space-y-1.5">
+            <Label htmlFor="sf-resp-text" className="text-xs font-bold text-slate-800">
+              Compliance Statement &amp; Rectification Details <span className="text-rose-600">*</span>
+            </Label>
+            <Textarea
+              id="sf-resp-text"
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+              placeholder="State clearly how the discrepancy has been addressed, e.g. 'Uploaded revised structural stability declaration signed by SE Venkata Ramanujam (Reg No: SE/AP/4421)...'"
+              rows={4}
+              className="text-xs bg-white border-[#DCD5C8] leading-relaxed resize-y"
+            />
+          </div>
+
+          {/* File Upload */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-slate-800">
+              Upload Rectified Document / Revised Drawing
+            </Label>
+            <FileUploader
+              label="Drop rectified PDF or DWG drawing here"
+              hint="PDF, DWG, JPG, PNG · max 50 MB"
+              accept=".pdf,.dwg,.jpg,.png"
+              uploadedFiles={files}
+              onUpload={(newFiles) => {
+                setFiles((prev) => {
+                  const map = new Map(prev.map((f) => [f.id, f]));
+                  newFiles.forEach((f) => map.set(f.id, f));
+                  return Array.from(map.values());
+                });
+              }}
+              onRemove={(id) => setFiles((prev) => prev.filter((f) => f.id !== id))}
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="bg-[#F5EBE1] border-t border-[#DCD5C8] p-3.5 sm:px-5 flex items-center justify-between sm:justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="h-8 text-xs font-semibold border-[#DCD5C8] bg-white cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !responseText.trim()}
+            className="h-8 px-4 text-xs font-bold bg-[#7A1316] hover:bg-[#8F161A] text-white cursor-pointer shadow-xs gap-1.5"
+          >
+            <Send className="size-3.5" />
+            <span>Submit Compliance Response</span>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------- Modal 3: Verify & Resolve Shortfall Dialog (For Reviewing Officers) ----------
+function ResolveShortfallDialog({
+  open,
+  onOpenChange,
+  app,
+  shortfall,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  app: Application;
+  shortfall: Shortfall | null;
+}) {
+  const { toast } = useToast();
+  const { resolveShortfall } = useAppStore();
+
+  const [resolutionRemarks, setResolutionRemarks] = React.useState(
+    "Verified the rectified documents and drawings submitted by applicant. Discrepancy satisfactorily resolved in accordance with APCRDA Byelaws."
+  );
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSubmit = () => {
+    if (!shortfall) return;
+    if (!resolutionRemarks.trim()) {
+      toast({
+        title: "Resolution remarks required",
+        description: "Please provide verification remarks before resolving this shortfall.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+    resolveShortfall(app.id, shortfall.id, resolutionRemarks.trim());
+    setIsSubmitting(false);
+
+    toast({
+      title: "Shortfall Verified & Resolved",
+      description: `Shortfall ${shortfall.shortfallNumber || shortfall.shortfallId} has been resolved. Application review workflow resumed.`,
+    });
+    onOpenChange(false);
+  };
+
+  if (!shortfall) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[560px] max-h-[90vh] overflow-y-auto bg-[#FAF7F2] border-[#DCD5C8] p-0 font-sans">
+        <DialogHeader className="bg-[#F5EBE1] border-b border-[#DCD5C8] p-4 text-left">
+          <div className="flex items-center gap-2">
+            <span className="flex size-7 items-center justify-center rounded-md bg-emerald-700 text-white">
+              <CheckCircle2 className="size-4" />
+            </span>
+            <div>
+              <DialogTitle className="text-base font-bold text-slate-900">
+                Verify &amp; Resolve Shortfall
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-600">
+                {shortfall.title} · Application: <span className="font-mono font-bold text-[#7A1316]">{app.applicationNo}</span>
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="p-4 sm:p-5 space-y-4 text-xs">
+          {/* Notice & Response Box */}
+          <div className="rounded-lg border border-[#EADBCE] bg-white p-3 space-y-2">
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase font-bold block">Deficiency Notice</span>
+              <p className="text-xs text-slate-800 mt-0.5">{shortfall.description}</p>
+            </div>
+            {shortfall.response ? (
+              <div className="pt-2 border-t border-slate-100 bg-blue-50/50 p-2.5 rounded border border-blue-200">
+                <div className="flex items-center justify-between text-[10px] font-bold text-blue-900 mb-1">
+                  <span>Applicant Rectification Statement</span>
+                  <span className="font-mono text-slate-500">{formatDateTime(shortfall.response.respondedAt)}</span>
+                </div>
+                <p className="text-xs text-slate-800">{shortfall.response.text}</p>
+                {shortfall.response.supportingDocument && (
+                  <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-white border border-blue-200 text-[10px] font-mono text-blue-800">
+                    <FileText className="size-3" />
+                    <span>{shortfall.response.supportingDocument}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="p-2 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[11px]">
+                Note: No formal response recorded yet. You may proceed to resolve if verified via field inspection or external verification.
+              </div>
+            )}
+          </div>
+
+          {/* Resolution Remarks */}
+          <div className="space-y-1.5">
+            <Label htmlFor="sf-resolve-remarks" className="text-xs font-bold text-slate-800">
+              Officer Verification &amp; Resolution Order <span className="text-rose-600">*</span>
+            </Label>
+            <Textarea
+              id="sf-resolve-remarks"
+              value={resolutionRemarks}
+              onChange={(e) => setResolutionRemarks(e.target.value)}
+              placeholder="Record your verification findings and clearance remarks..."
+              rows={3}
+              className="text-xs bg-white border-[#DCD5C8] leading-relaxed resize-y"
+            />
+          </div>
+        </div>
+
+        <DialogFooter className="bg-[#F5EBE1] border-t border-[#DCD5C8] p-3.5 sm:px-5 flex items-center justify-between sm:justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenChange(false)}
+            className="h-8 text-xs font-semibold border-[#DCD5C8] bg-white cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSubmit}
+            disabled={isSubmitting || !resolutionRemarks.trim()}
+            className="h-8 px-4 text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white cursor-pointer shadow-xs gap-1.5"
+          >
+            <CheckCircle2 className="size-3.5" />
+            <span>Mark Shortfall Resolved</span>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ---------- Shortfalls Tab ----------
-function ShortfallsTab({ app }: { app: Application }) {
-  const { navigate } = useAppStore();
+function ShortfallsTab({
+  app,
+  onOpenRaise,
+  onOpenRespond,
+  onOpenResolve,
+}: {
+  app: Application;
+  onOpenRaise: () => void;
+  onOpenRespond: (s: Shortfall) => void;
+  onOpenResolve: (s: Shortfall) => void;
+}) {
+  const { user } = useAppStore();
+  const isLtp = user?.role === "LTP";
+
   if (app.shortfalls.length === 0) {
-    return <EmptyState icon={CheckCircle2} title="No shortfalls" description="There are no active shortfalls on this application." />;
+    if (isLtp) {
+      return (
+        <EmptyState
+          icon={CheckCircle2}
+          title="No Active Shortfalls"
+          description="There are no active shortfalls or deficiencies on this application. All statutory requirements are compliant."
+        />
+      );
+    }
+    return (
+      <EmptyState
+        icon={AlertTriangle}
+        title="No Shortfalls Raised Yet"
+        description="No shortfalls or document queries have been raised on this application. If you have identified discrepancies in the scrutiny drawings, documents, or fee schedule, you can raise a shortfall to notify the applicant."
+        action={
+          <Button
+            onClick={onOpenRaise}
+            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer shadow-xs gap-1.5"
+          >
+            <AlertTriangle className="size-4" /> Raise Shortfall
+          </Button>
+        }
+      />
+    );
   }
+
+  const activeCount = app.shortfalls.filter((s) => s.status !== "RESOLVED").length;
+  const resolvedCount = app.shortfalls.filter((s) => s.status === "RESOLVED").length;
+
   return (
     <div className="space-y-4">
-      {app.shortfalls.map((s) => (
-        <SectionCard key={s.id} title={s.title} icon={AlertTriangle}
-          action={<Badge className="bg-amber-100 text-amber-900 border border-amber-300 font-bold">{s.shortfallId}</Badge>}>
-          <div className="space-y-3">
-            <p className="text-sm text-slate-800 leading-relaxed">{s.description}</p>
-            <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4 p-3 rounded-lg bg-[#FAF7F2] border border-[#EADBCE]">
-              <div><p className="text-slate-500 font-medium">Type</p><p className="font-bold text-slate-800">{s.type}</p></div>
-              <div><p className="text-slate-500 font-medium">Raised By</p><p className="font-bold text-slate-800">{s.raisedBy.name}</p></div>
-              <div><p className="text-slate-500 font-medium">Raised On</p><p className="font-bold text-slate-800">{formatDate(s.raisedAt)}</p></div>
-              <div><p className="text-slate-500 font-medium">Due Date</p><p className="font-bold text-rose-700">{formatDate(s.dueDate)}</p></div>
-            </div>
-            <Button size="sm" className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer shadow-2xs" onClick={() => navigate("ltp-shortfalls")}>
-              <MessageSquare className="size-4 mr-1.5" /> Respond to shortfall
-            </Button>
+      {/* Shortfalls Header Banner with Action for Non-LTP */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-[#DCD5C8] bg-white shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-700">
+            <AlertTriangle className="size-5" />
           </div>
-        </SectionCard>
-      ))}
+          <div>
+            <h4 className="text-xs font-bold text-slate-900">Deficiency &amp; Shortfall Records</h4>
+            <p className="text-[11px] text-slate-500">
+              Total Notices: <strong>{app.shortfalls.length}</strong> · Open: <strong className="text-amber-700">{activeCount}</strong> · Resolved: <strong className="text-emerald-700">{resolvedCount}</strong>
+            </p>
+          </div>
+        </div>
+
+        {!isLtp && (
+          <Button
+            size="sm"
+            onClick={onOpenRaise}
+            className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold text-xs h-8 px-3.5 gap-1.5 cursor-pointer shadow-xs"
+          >
+            <Plus className="size-3.5" />
+            <span>Raise Shortfall</span>
+          </Button>
+        )}
+      </div>
+
+      {app.shortfalls.map((s) => {
+        const isResolved = s.status === "RESOLVED" || s.status === "CLOSED";
+        const hasResponded = s.status === "RESPONDED" || s.status === "UNDER_REVIEW" || s.status === "RESPONSE_SUBMITTED" || !!s.response;
+
+        return (
+          <SectionCard
+            key={s.id}
+            title={s.title}
+            icon={AlertTriangle}
+            action={
+              <div className="flex items-center gap-1.5">
+                <Badge className="bg-amber-100 text-amber-900 border border-amber-300 font-bold font-mono text-[10px]">
+                  {s.shortfallNumber || s.shortfallId}
+                </Badge>
+                <Badge
+                  className={cn(
+                    "text-[10px] font-bold uppercase",
+                    isResolved
+                      ? "bg-emerald-100 text-emerald-900 border-emerald-300"
+                      : hasResponded
+                      ? "bg-blue-100 text-blue-900 border-blue-300"
+                      : "bg-rose-100 text-rose-900 border-rose-300"
+                  )}
+                >
+                  {s.status}
+                </Badge>
+              </div>
+            }
+          >
+            <div className="space-y-3">
+              <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium">{s.description}</p>
+
+              <div className="grid grid-cols-2 gap-4 text-xs sm:grid-cols-4 p-3 rounded-lg bg-[#FAF7F2] border border-[#EADBCE]">
+                <div>
+                  <p className="text-slate-500 font-medium text-[11px]">Category</p>
+                  <p className="font-bold text-slate-800">{s.type}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 font-medium text-[11px]">Raised By</p>
+                  <p className="font-bold text-slate-800">{s.raisedBy.name}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 font-medium text-[11px]">Notice Date</p>
+                  <p className="font-bold text-slate-800">{formatDate(s.raisedAt)}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500 font-medium text-[11px]">Compliance Due</p>
+                  <p className="font-bold text-rose-700">{formatDate(s.dueDate)}</p>
+                </div>
+              </div>
+
+              {/* Applicant Response Details if available */}
+              {s.response && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-blue-900 flex items-center gap-1.5">
+                      <MessageSquare className="size-3.5 text-blue-700" /> Applicant Response Statement
+                    </span>
+                    <span className="text-[11px] text-slate-500 font-mono">
+                      {formatDateTime(s.response.respondedAt)}
+                    </span>
+                  </div>
+                  <p className="text-slate-800 leading-relaxed font-medium">{s.response.text}</p>
+                  {s.response.supportingDocument && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border border-blue-200 text-[11px] font-semibold text-blue-900">
+                      <FileText className="size-3 text-blue-700" />
+                      <span>{s.response.supportingDocument}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Resolution Remarks if resolved */}
+              {s.resolution && (
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3 space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-emerald-900 flex items-center gap-1.5">
+                      <CheckCircle2 className="size-3.5 text-emerald-700" /> Shortfall Resolved &amp; Cleared
+                    </span>
+                    {s.resolvedAt && (
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {formatDateTime(s.resolvedAt)}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-slate-800 leading-relaxed">{s.resolution}</p>
+                  {s.resolvedBy && (
+                    <p className="text-[11px] text-emerald-800 font-medium">
+                      Verified by {s.resolvedBy.name} ({s.resolvedBy.role})
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Role-Specific Action Buttons */}
+              <div className="pt-1">
+                {isLtp ? (
+                  /* LTP Actions */
+                  !isResolved ? (
+                    <Button
+                      size="sm"
+                      className="bg-[#7A1316] hover:bg-[#8F161A] text-white font-bold cursor-pointer shadow-2xs gap-1.5"
+                      onClick={() => onOpenRespond(s)}
+                    >
+                      <MessageSquare className="size-4" /> Respond to shortfall
+                    </Button>
+                  ) : (
+                    <Badge className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold py-1 px-3">
+                      <CheckCircle2 className="size-3.5 mr-1.5 text-emerald-700" /> Cleared &amp; Closed
+                    </Badge>
+                  )
+                ) : (
+                  /* Officer / Non-LTP Actions: NEVER SHOW "Respond to shortfall"! */
+                  <div className="flex flex-wrap items-center gap-2">
+                    {!isResolved ? (
+                      hasResponded ? (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => onOpenResolve(s)}
+                            className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs h-8 px-3 gap-1.5 shadow-xs cursor-pointer"
+                          >
+                            <CheckCircle2 className="size-3.5" />
+                            <span>Verify &amp; Resolve Shortfall</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={onOpenRaise}
+                            className="border-[#7A1316]/40 text-[#7A1316] hover:bg-[#FAF7F2] font-bold text-xs h-8 gap-1 cursor-pointer"
+                          >
+                            <Plus className="size-3" />
+                            <span>Raise Additional Shortfall</span>
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Badge className="bg-amber-100 text-amber-900 border border-amber-300 font-medium py-1 px-3 text-xs">
+                            <Clock className="size-3.5 mr-1.5 text-amber-700" />
+                            Awaiting Applicant Response (Due: {formatDate(s.dueDate)})
+                          </Badge>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={onOpenRaise}
+                            className="border-[#7A1316]/40 text-[#7A1316] hover:bg-[#FAF7F2] font-bold text-xs h-8 gap-1 cursor-pointer"
+                          >
+                            <Plus className="size-3" />
+                            <span>Raise Another Shortfall</span>
+                          </Button>
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <Badge className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-semibold py-1 px-3 text-xs">
+                          <CheckCircle2 className="size-3.5 mr-1.5 text-emerald-700" />
+                          Verified &amp; Resolved
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={onOpenRaise}
+                          className="border-[#7A1316]/40 text-[#7A1316] hover:bg-[#FAF7F2] font-bold text-xs h-8 gap-1 cursor-pointer"
+                        >
+                          <Plus className="size-3" />
+                          <span>Raise New Shortfall</span>
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </SectionCard>
+        );
+      })}
     </div>
   );
 }

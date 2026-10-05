@@ -68,16 +68,6 @@ export function LtpPortalView() {
     }
   }, [view, setLtpActiveMenu]);
 
-  // Applications module (drafts, submissions, objections) is strictly LTP-only
-  React.useEffect(() => {
-    if (user?.role && user.role !== "LTP") {
-      const ltpOnlyMenus = ["draft-application", "submitted-applications", "objected-files", "application-submission"];
-      if (ltpOnlyMenus.includes(ltpActiveMenu)) {
-        setLtpActiveMenu("dashboard");
-      }
-    }
-  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
-
   // Registration module is strictly visible to all EXCEPT LTP and TPA
   React.useEffect(() => {
     if (user?.role === "LTP" || user?.role === "TPA") {
@@ -125,12 +115,10 @@ export function LtpPortalView() {
       }
 
       case "draft-application": {
-        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpDraftApplications />;
       }
 
       case "submitted-applications": {
-        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpSubmittedApplications />;
       }
 
@@ -143,7 +131,6 @@ export function LtpPortalView() {
       }
 
       case "objected-files": {
-        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpObjections />;
       }
 

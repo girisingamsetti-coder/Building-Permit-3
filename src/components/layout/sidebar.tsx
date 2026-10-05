@@ -66,7 +66,7 @@ export function Sidebar() {
     return getDynamicNav(user, portal, roles);
   }, [user, portal, roles]);
 
-  const isLTP = portal === "LTP" || user?.role === "LTP";
+  const isLTP = true;
   const rawLtpTheme = useAppStore((s) => s.ltpTheme);
   const setLtpTheme = useAppStore((s) => s.setLtpTheme);
   const ltpTheme = (!rawLtpTheme || rawLtpTheme === "apcrda-blue") ? "maroon-cream" : rawLtpTheme;

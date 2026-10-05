@@ -105,14 +105,8 @@ export const REGISTRATION_MODULE: LtpModuleDef = {
   id: "registration",
   label: "Registration",
   iconType: "registration",
-  submenus: [
-    { id: "registration-all", label: "All Registrations" },
-    { id: "registration-pending", label: "Pending Approvals" },
-    { id: "registration-ltp", label: "LTP Registrations" },
-    { id: "registration-developer", label: "Developer Registrations" },
-    { id: "registration-approved", label: "Approved" },
-    { id: "registration-rejected", label: "Rejected" },
-  ],
+  directMenuId: "registration",
+  submenus: [],
 };
 
 export function hasRegistrationAccess(role?: string): boolean {
@@ -134,61 +128,11 @@ export function hasOutwardAccess(role?: string): boolean {
 }
 
 const ADMIN_MODULES: LtpModuleDef[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    iconType: "dashboard",
-    directMenuId: "dashboard",
-    submenus: [],
-  },
+  ...LTP_MODULES.slice(0, 1),
   REGISTRATION_MODULE,
-  {
-    id: "application-status",
-    label: "Application Status",
-    iconType: "scrutiny",
-    submenus: [
-      { id: "review-proceeding", label: "Review Proceeding" },
-      { id: "proceeding-issued", label: "Proceeding Issued" },
-      { id: "approved-files", label: "Approved files" },
-      { id: "revoke", label: "Revoke" },
-    ],
-  },
-  {
-    id: "proceeding-status",
-    label: "Compliance",
-    iconType: "compliance",
-    directMenuId: "proceeding-status",
-    submenus: [],
-  },
-  {
-    id: "commencement",
-    label: "Work Commencement",
-    iconType: "commencement",
-    directMenuId: "commencement",
-    submenus: [],
-  },
-  {
-    id: "occupancy",
-    label: "Occupancy",
-    iconType: "occupancy",
-    directMenuId: "occupancy",
-    submenus: [],
-  },
-  {
-    id: "change-of-ltp",
-    label: "LTP Change",
-    iconType: "ltp-change",
-    directMenuId: "change-ltp",
-    submenus: [],
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    iconType: "reports",
-    directMenuId: "reports-summary",
-    submenus: [],
-  },
+  ...LTP_MODULES.slice(1, 4),
   OUTWARD_MODULE,
+  ...LTP_MODULES.slice(4),
   {
     id: "settings",
     label: "Settings",
@@ -199,118 +143,17 @@ const ADMIN_MODULES: LtpModuleDef[] = [
 ];
 
 const ZONAL_MODULES: LtpModuleDef[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    iconType: "dashboard",
-    directMenuId: "dashboard",
-    submenus: [],
-  },
-  {
-    id: "registration",
-    label: "Registration",
-    iconType: "registration",
-    submenus: [
-      { id: "developer-verification", label: "Developer Verification" },
-      { id: "rejected-registration", label: "Rejected" },
-      { id: "approved-registration", label: "Approved" },
-      { id: "all-ltp-approved", label: "All LTP- Approved" },
-    ],
-  },
-  {
-    id: "application-status",
-    label: "Application Status",
-    iconType: "scrutiny",
-    submenus: [
-      { id: "review-proceeding", label: "Review Proceeding" },
-      { id: "proceeding-issued", label: "Proceeding Issued" },
-      { id: "revoke", label: "Revoke" },
-    ],
-  },
-  {
-    id: "proceeding-status",
-    label: "Compliance",
-    iconType: "compliance",
-    directMenuId: "proceeding-status",
-    submenus: [],
-  },
-  {
-    id: "commencement",
-    label: "Work Commencement",
-    iconType: "commencement",
-    directMenuId: "commencement",
-    submenus: [],
-  },
-  {
-    id: "occupancy",
-    label: "Occupancy",
-    iconType: "occupancy",
-    directMenuId: "occupancy",
-    submenus: [],
-  },
-  {
-    id: "change-of-ltp",
-    label: "Change Of LTP",
-    iconType: "ltp-change",
-    directMenuId: "change-ltp",
-    submenus: [],
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    iconType: "reports",
-    directMenuId: "reports-summary",
-    submenus: [],
-  },
+  ...LTP_MODULES.slice(0, 1),
+  REGISTRATION_MODULE,
+  ...LTP_MODULES.slice(1, 4),
   OUTWARD_MODULE,
+  ...LTP_MODULES.slice(4),
 ];
 
 const TPA_MODULES: LtpModuleDef[] = [
-  {
-    id: "dashboard",
-    label: "Dashboard",
-    iconType: "dashboard",
-    directMenuId: "dashboard",
-    submenus: [],
-  },
-  {
-    id: "application-status",
-    label: "Application Status",
-    iconType: "scrutiny",
-    submenus: [
-      { id: "review-proceeding", label: "Review Proceeding" },
-      { id: "proceeding-issued", label: "Proceeding Issued" },
-    ],
-  },
-  {
-    id: "proceeding-status",
-    label: "Compliance",
-    iconType: "compliance",
-    directMenuId: "proceeding-status",
-    submenus: [],
-  },
-  {
-    id: "commencement",
-    label: "Work Commencement",
-    iconType: "commencement",
-    directMenuId: "commencement",
-    submenus: [],
-  },
-  {
-    id: "occupancy",
-    label: "Occupancy",
-    iconType: "occupancy",
-    directMenuId: "occupancy",
-    submenus: [],
-  },
-  {
-    id: "reports",
-    label: "Reports",
-    iconType: "reports",
-    directMenuId: "reports-summary",
-    submenus: [],
-  },
+  ...LTP_MODULES.slice(0, 4),
   OUTWARD_MODULE,
+  ...LTP_MODULES.slice(4),
 ];
 
 interface ThemeDetails {
@@ -555,15 +398,8 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const theme = THEME_DETAILS[ltpTheme] || THEME_DETAILS["maroon-cream"];
 
-  // Base modules according to role — Applications module is strictly ONLY for LTP login
-  const baseModules = React.useMemo(() => {
-    const role = user?.role;
-    if (role === "LTP") return LTP_MODULES;
-    if (role === "TPA") return TPA_MODULES;
-    if (role === "ADMIN") return ADMIN_MODULES;
-    // ZDD, ZJD, ZONAL_HEAD, DIRECTOR, COMMISSIONER, ADDITIONAL_COMMISSIONER
-    return ZONAL_MODULES;
-  }, [user?.role]);
+  // Base modules are identical for all roles — same module and menu names as LTP
+  const baseModules = React.useMemo(() => LTP_MODULES, []);
 
   const rawModules = React.useMemo(() => {
     let list = [...baseModules];
@@ -596,12 +432,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       }
     }
 
-    // STRICT INVARIANT: Applications module is strictly ONLY for LTP login
-    if (user?.role !== "LTP") {
-      list = list.filter((m) => m.id !== "application-submission" && m.id !== "applications");
-    }
-
-    // STRICT INVARIANT: Registration module is visible to all EXCEPT LTP and TPA
+    // Registration module is visible to all EXCEPT LTP and TPA
     if (user?.role === "LTP" || user?.role === "TPA") {
       list = list.filter((m) => m.id !== "registration");
     }
@@ -618,14 +449,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       return userAccessConfig[user.id][moduleId];
     }
     return roleAccessConfig?.[user?.role ?? ""]?.[moduleId] ?? "full";
-  }, [user?.id, user?.role, userAccessConfig, roleAccessConfig]);
+  }, [user, userAccessConfig, roleAccessConfig]);
 
   const modules = React.useMemo(() => {
     let activeList = rawModules;
-    // Guarantee non-LTP never receives application-submission or applications
-    if (user?.role !== "LTP") {
-      activeList = activeList.filter((m) => m.id !== "application-submission" && m.id !== "applications");
-    }
     // Guarantee LTP and TPA never receive registration module
     if (user?.role === "LTP" || user?.role === "TPA") {
       activeList = activeList.filter((m) => m.id !== "registration");
@@ -634,20 +461,8 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     return activeList.filter((m) => getAccessLevel(m.id) !== "none");
   }, [rawModules, user?.role, hideRestricted, getAccessLevel]);
 
-  // Safety: If current user is not LTP and an LTP-only menu was active, reset to dashboard
+  // Safety: If current user is LTP or TPA and a registration menu was active, reset to dashboard
   React.useEffect(() => {
-    if (user?.role && user.role !== "LTP") {
-      const ltpOnlyMenus = [
-        "application-submission",
-        "submitted-applications",
-        "draft-application",
-        "objected-files",
-      ];
-      if (ltpOnlyMenus.includes(ltpActiveMenu)) {
-        setLtpActiveMenu("dashboard");
-      }
-    }
-    // If current user is LTP or TPA and a registration menu was active, reset to dashboard
     if (user?.role === "LTP" || user?.role === "TPA") {
       const regMenus = [
         "registration",
@@ -670,19 +485,20 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
 
   // Single module expanded at a time
-  const [openModuleId, setOpenModuleId] = React.useState<string | null>(() => {
-    return (
-      modules.find((m) => isMenuMatch(m, ltpActiveMenu))?.id ?? "dashboard"
-    );
-  });
+  const activeParentModId = React.useMemo(() => {
+    return modules.find((m) => isMenuMatch(m, ltpActiveMenu))?.id ?? "dashboard";
+  }, [modules, ltpActiveMenu]);
 
-  // Keep parent module expanded if active menu changes
-  React.useEffect(() => {
-    const parentMod = modules.find((m) => isMenuMatch(m, ltpActiveMenu));
-    if (parentMod) {
-      setOpenModuleId(parentMod.id);
-    }
-  }, [ltpActiveMenu, modules]);
+  const [toggledModuleId, setToggledModuleId] = React.useState<string | null>(null);
+  const [prevActiveMenu, setPrevActiveMenu] = React.useState(ltpActiveMenu);
+
+  if (prevActiveMenu !== ltpActiveMenu) {
+    setPrevActiveMenu(ltpActiveMenu);
+    setToggledModuleId(null);
+  }
+
+  const openModuleId = toggledModuleId ?? activeParentModId;
+  const setOpenModuleId = setToggledModuleId;
 
   const handleSelectSubmenu = (menuId: string) => {
     setLtpActiveMenu(menuId);

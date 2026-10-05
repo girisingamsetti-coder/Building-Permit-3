@@ -67,9 +67,12 @@ export function AdminApplications() {
   const [pageSize, setPageSize] = useState(10);
 
   // Reset page when filters change
-  React.useEffect(() => {
+  const [prevFilterKey, setPrevFilterKey] = useState(`${activeTab}|${query}|${status}|${type}`);
+  const currentFilterKey = `${activeTab}|${query}|${status}|${type}`;
+  if (prevFilterKey !== currentFilterKey) {
+    setPrevFilterKey(currentFilterKey);
     setPage(1);
-  }, [activeTab, query, status, type]);
+  }
 
   const filtered = useMemo(() => {
     let list = [...applications];
@@ -292,8 +295,13 @@ export function AdminApplications() {
                                Continue
                              </Button>
                           ) : a.status === "SCRUTINY_FAILED" ? (
-                             <Button size="sm" className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 rounded-full px-4 text-white">
-                               Upload drawing
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               className="h-7 text-[11px] rounded-full px-3"
+                               onClick={() => openApplication(a.id, "pm-application-details")}
+                             >
+                               View Scrutiny
                              </Button>
                           ) : ["PAYMENT_PENDING", "FEE_GENERATED", "PAYMENT_FAILED"].includes(a.status) ? (
                              <Button size="sm" className="h-7 text-[11px] bg-blue-600 hover:bg-blue-700 rounded-full px-4 text-white">
