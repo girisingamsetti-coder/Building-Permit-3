@@ -57,7 +57,6 @@ export const NAV: Record<Portal, NavGroup[]> = {
         { view: "officer-payments", label: "Payments", icon: CreditCard },
         { view: "officer-documents", label: "Documents", icon: FolderClosed },
         { view: "officer-reports", label: "Reports", icon: BarChart3 },
-        { view: "officer-settings", label: "Settings", icon: Settings },
       ],
     },
   ],

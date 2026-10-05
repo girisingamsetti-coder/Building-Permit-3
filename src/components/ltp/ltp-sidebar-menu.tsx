@@ -136,8 +136,7 @@ export const SETTINGS_MODULE: LtpModuleDef = {
 };
 
 export function hasSettingsAccess(role?: string): boolean {
-  if (!role) return false;
-  return role === "ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER";
+  return role === "ADMIN";
 }
 
 export function hasApplicationsAccess(role?: string): boolean {
@@ -489,6 +488,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     if (user?.role === "LTP" || user?.role === "TPA") {
       activeList = activeList.filter((m) => m.id !== "registration");
     }
+    // Guarantee non-ADMIN roles never receive settings module
+    if (user?.role !== "ADMIN") {
+      activeList = activeList.filter((m) => m.id !== "settings");
+    }
     if (user?.role === "ADMIN" || !hideRestricted) return activeList;
     return activeList.filter((m) => getAccessLevel(m.id) !== "none");
   }, [rawModules, user?.role, hideRestricted, getAccessLevel]);
@@ -531,6 +534,16 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     }
   }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
 
+  // Safety: If current user is not ADMIN and settings menu was active, reset to dashboard
+  React.useEffect(() => {
+    if (user?.role && user.role !== "ADMIN") {
+      const settingsMenus = ["settings", "admin-settings", "officer-settings"];
+      if (settingsMenus.includes(ltpActiveMenu)) {
+        setLtpActiveMenu("dashboard");
+      }
+    }
+  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
+
   // Single module expanded at a time
   const effectiveMenu = (view === "admin-settings" || view === "officer-settings") ? "settings" : ltpActiveMenu;
   const activeParentModId = React.useMemo(() => {
@@ -555,8 +568,12 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
         navigate("ltp-dashboard");
       }
     } else if (menuId === "settings" || menuId === "admin-settings") {
-      if (view !== "admin-settings") {
-        navigate("admin-settings");
+      if (user?.role === "ADMIN") {
+        if (view !== "admin-settings") {
+          navigate("admin-settings");
+        }
+      } else {
+        navigate("ltp-dashboard");
       }
     } else {
       if (view !== "ltp-applications") {
@@ -566,6 +583,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
+    if (mod.id === "settings" && user?.role !== "ADMIN") return;
     const isCurrentlyActiveModule = isMenuMatch(mod, effectiveMenu);
 
     if (openModuleId === mod.id && !collapsed && mod.submenus.length > 0) {

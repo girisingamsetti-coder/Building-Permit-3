@@ -37,10 +37,13 @@ export function hasPermission(user: User, permission: Permission, roles: Record<
 export function canAccessView(user: User, view: string, roles: Record<RoleKey, Role>): boolean {
   if (user.role === "ADMIN") return true;
 
+  // Settings module strictly restricted to ADMIN only
+  if (view === "admin-settings" || view === "officer-settings") return false;
+
   if (view.startsWith("ltp-")) return true;
 
   const configViews = ["admin-users", "admin-roles", "admin-application-types", "admin-fee-structures", "admin-workflow", "admin-templates"];
-  const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-settings", "admin-audit", "admin-bim", "admin-2d-drawings"];
+  const generalAdminViews = ["admin-dashboard", "admin-applications", "admin-tasks", "admin-shortfalls", "admin-payments", "admin-documents", "admin-reports", "admin-audit", "admin-bim", "admin-2d-drawings"];
 
   if (configViews.includes(view)) {
     return hasPermission(user, "config:manage" as Permission, roles);
@@ -491,6 +494,8 @@ export function getDynamicNav(
     .filter((mod) => {
       // Applications module is strictly only for LTP login
       if (mod.permKey === "applications") return false;
+      // Settings module is strictly only for ADMIN login
+      if (mod.permKey === "settings" && user.role !== "ADMIN") return false;
       // No permission requirement → always show
       if (mod.requiredAny.length === 0) return true;
       // ADMIN always sees everything (except applications which is LTP-only)

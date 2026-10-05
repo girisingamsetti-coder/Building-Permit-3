@@ -59,14 +59,28 @@ export function LtpPortalView() {
 
   const userApps = applications;
 
-  // Sync activeMenu to dashboard ONLY when top-level view transitions to ltp-dashboard, or settings when admin-settings
+  // Sync activeMenu to dashboard ONLY when top-level view transitions to ltp-dashboard, or settings when admin-settings (ADMIN only)
   React.useEffect(() => {
     if (view === "ltp-dashboard") {
       setLtpActiveMenu("dashboard");
     } else if (view === "admin-settings") {
-      setLtpActiveMenu("settings");
+      if (user?.role === "ADMIN") {
+        setLtpActiveMenu("settings");
+      } else {
+        setLtpActiveMenu("dashboard");
+      }
     }
-  }, [view, setLtpActiveMenu]);
+  }, [view, user?.role, setLtpActiveMenu]);
+
+  // Settings module is strictly for ADMIN only
+  React.useEffect(() => {
+    if (user?.role && user.role !== "ADMIN") {
+      const settingsMenus = ["settings", "admin-settings", "officer-settings"];
+      if (settingsMenus.includes(ltpActiveMenu)) {
+        setLtpActiveMenu("dashboard");
+      }
+    }
+  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
 
   // Registration module is strictly visible to all EXCEPT LTP and TPA
   React.useEffect(() => {
@@ -218,7 +232,7 @@ export function LtpPortalView() {
 
       case "settings":
       case "admin-settings": {
-        if (user?.role !== "ADMIN" && user?.role !== "COMMISSIONER" && user?.role !== "ADDITIONAL_COMMISSIONER") {
+        if (user?.role !== "ADMIN") {
           return <UnifiedDashboard />;
         }
         return (

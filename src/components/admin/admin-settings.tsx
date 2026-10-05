@@ -33,7 +33,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { SystemSettings } from "@/types";
-import { OfficerSettings } from "../officer/officer-settings";
 import {
   SectionCard,
   OrganizationSection,
@@ -153,8 +152,16 @@ export function AdminSettings() {
   // Exactly 6 Tabs State
   const [activeTab, setActiveTab] = React.useState<string>("general");
 
-  if (user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER") {
-    return <OfficerSettings />;
+  if (user?.role !== "ADMIN") {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8 bg-[#FAF7F2]">
+        <div className="bg-white border border-[#EADBCE] rounded-xl p-6 text-center max-w-md shadow-xs">
+          <ShieldAlert className="size-10 text-[#801824] mx-auto mb-3" />
+          <h2 className="text-sm font-bold text-[#4A1017] mb-1">Access Restricted</h2>
+          <p className="text-xs text-slate-600">The Settings module is reserved exclusively for Administrator accounts.</p>
+        </div>
+      </div>
+    );
   }
 
   const dirty = !settingsEqual(form, storeSettings);
