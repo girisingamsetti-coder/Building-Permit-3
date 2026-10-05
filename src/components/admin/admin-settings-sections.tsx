@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -74,8 +73,47 @@ import { AdminRoles } from "./admin-roles";
 import { AccessControlMatrix } from "./admin-settings";
 
 // ============================================================
+// Common Reusable Section Card for Grouped Layout (No Tabs)
+// ============================================================
+export function SectionCard({
+  icon: Icon,
+  title,
+  subtitle,
+  action,
+  children,
+  className,
+}: {
+  icon?: React.ComponentType<{ className?: string }>;
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs", className)}>
+      <div className="bg-[#FAF7F2] p-3 sm:px-4 sm:py-3 border-b border-[#EADBCE] flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {Icon && (
+            <div className="p-1.5 rounded-lg bg-[#FAF4EB] border border-[#EADBCE] text-[#801824] shrink-0">
+              <Icon className="size-4" />
+            </div>
+          )}
+          <div>
+            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider">{title}</h4>
+            {subtitle && <p className="text-[11px] text-slate-500">{subtitle}</p>}
+          </div>
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
+      </div>
+      <div className="p-4 sm:p-5">{children}</div>
+    </div>
+  );
+}
+
+// ============================================================
 // 1. ORGANIZATION SECTION
-// Sub-tabs: Organization Profile, Departments, Divisions, Designations
+// Groups: Statutory Profile, Departments, Divisions, Designations
 // ============================================================
 
 export function OrganizationSection() {
@@ -119,152 +157,159 @@ export function OrganizationSection() {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="profile" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Building className="size-3.5 mr-1" /> Organization Profile
-          </TabsTrigger>
-          <TabsTrigger value="departments" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Layers className="size-3.5 mr-1" /> Departments ({departments.length})
-          </TabsTrigger>
-          <TabsTrigger value="divisions" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <SlidersHorizontal className="size-3.5 mr-1" /> Divisions ({divisions.length})
-          </TabsTrigger>
-          <TabsTrigger value="designations" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <ShieldCheck className="size-3.5 mr-1" /> Designations ({designations.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Profile */}
-        <TabsContent value="profile" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider mb-3">Statutory Authority Profile</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Authority Official Name</Label>
-                <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Statutory Gazette / Reg No.</Label>
-                <Input value={profile.regNo} onChange={(e) => setProfile({ ...profile, regNo: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label className="text-xs font-bold text-[#4A1017]">Head of Authority (Commissioner)</Label>
-                <Input value={profile.head} onChange={(e) => setProfile({ ...profile, head: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5 md:col-span-2">
-                <Label className="text-xs font-bold text-[#4A1017]">Registered Address & Headquarters</Label>
-                <Input value={profile.address} onChange={(e) => setProfile({ ...profile, address: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Official Contact & Helpline</Label>
-                <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Official Support Email</Label>
-                <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button size="sm" onClick={() => toast({ title: "Organization Profile Updated", description: "Profile details saved." })} className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] text-xs font-bold h-8 px-4 rounded-lg">
-                <Save className="size-3.5 mr-1" /> Save Profile
-              </Button>
-            </div>
+    <div className="space-y-6">
+      {/* 1. Profile */}
+      <SectionCard
+        icon={Building}
+        title="Statutory Authority Profile"
+        subtitle="Official headquarters, jurisdiction, and gazette registration details"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "Organization Profile Updated", description: "Profile details saved." })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+          >
+            <Save className="size-3.5 mr-1" /> Save Profile
+          </Button>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Authority Official Name</Label>
+            <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
           </div>
-        </TabsContent>
-
-        {/* Departments */}
-        <TabsContent value="departments" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="bg-[#FAF7F2] p-3 border-b border-[#EADBCE] flex items-center justify-between">
-              <span className="text-xs font-bold text-[#801824] uppercase">Configured Departments</span>
-              <Button size="sm" onClick={() => toast({ title: "Department", description: "New department form opened." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-7 px-2.5 rounded-lg">
-                <Plus className="size-3 mr-1" /> Add Department
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold">
-                  <tr className="border-b border-[#DCD5C8]">
-                    <th className="p-3">Code</th>
-                    <th className="p-3">Department Name</th>
-                    <th className="p-3">Head of Department (HOD)</th>
-                    <th className="p-3 text-center">Staff Count</th>
-                    <th className="p-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EADBCE]">
-                  {departments.map((d) => (
-                    <tr key={d.id} className="hover:bg-[#FAF7F2]">
-                      <td className="p-3 font-mono font-bold text-[#801824]">{d.code}</td>
-                      <td className="p-3 font-semibold text-[#4A1017]">{d.name}</td>
-                      <td className="p-3 text-slate-700">{d.hod}</td>
-                      <td className="p-3 text-center font-bold text-slate-700">{d.staff}</td>
-                      <td className="p-3"><Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{d.status}</Badge></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Statutory Gazette / Reg No.</Label>
+            <Input value={profile.regNo} onChange={(e) => setProfile({ ...profile, regNo: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
           </div>
-        </TabsContent>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label className="text-xs font-bold text-[#4A1017]">Head of Authority (Commissioner)</Label>
+            <Input value={profile.head} onChange={(e) => setProfile({ ...profile, head: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label className="text-xs font-bold text-[#4A1017]">Registered Address & Headquarters</Label>
+            <Input value={profile.address} onChange={(e) => setProfile({ ...profile, address: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Official Contact & Helpline</Label>
+            <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Official Support Email</Label>
+            <Input value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Official Working Hours</Label>
+            <Input value={profile.workingHours} onChange={(e) => setProfile({ ...profile, workingHours: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Geographical Jurisdiction Coverage</Label>
+            <Input value={profile.jurisdiction} onChange={(e) => setProfile({ ...profile, jurisdiction: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+        </div>
+      </SectionCard>
 
-        {/* Divisions */}
-        <TabsContent value="divisions" className="pt-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {divisions.map((div) => (
-              <div key={div.id} className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#801824]">{div.name}</span>
-                  <Badge variant="outline" className="text-[10px] bg-white text-[#801824] border-[#EADBCE]">
-                    {div.activeFiles} Active Files
-                  </Badge>
-                </div>
-                <p className="text-[11px] text-slate-600">Lead: <span className="font-semibold text-[#4A1017]">{div.head}</span></p>
-                <p className="text-[11px] text-slate-500">Jurisdiction: {div.jurisdiction}</p>
+      {/* 2. Departments */}
+      <SectionCard
+        icon={Layers}
+        title={`Configured Departments (${departments.length})`}
+        subtitle="Operational departments, assigned HODs, and current staff strength"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "Department", description: "New department form opened." })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-8 px-3 rounded-lg cursor-pointer"
+          >
+            <Plus className="size-3.5 mr-1" /> Add Department
+          </Button>
+        }
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold">
+              <tr className="border-b border-[#DCD5C8]">
+                <th className="p-3">Code</th>
+                <th className="p-3">Department Name</th>
+                <th className="p-3">Head of Department (HOD)</th>
+                <th className="p-3 text-center">Staff Count</th>
+                <th className="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {departments.map((d) => (
+                <tr key={d.id} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-mono font-bold text-[#801824]">{d.code}</td>
+                  <td className="p-3 font-semibold text-[#4A1017]">{d.name}</td>
+                  <td className="p-3 text-slate-700">{d.hod}</td>
+                  <td className="p-3 text-center font-bold text-slate-700">{d.staff}</td>
+                  <td className="p-3"><Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{d.status}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+
+      {/* 3. Divisions */}
+      <SectionCard
+        icon={SlidersHorizontal}
+        title={`Zonal Planning Divisions (${divisions.length})`}
+        subtitle="Geographic division offices and ongoing file load"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {divisions.map((div) => (
+            <div key={div.id} className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#801824]">{div.name}</span>
+                <Badge variant="outline" className="text-[10px] bg-white text-[#801824] border-[#EADBCE]">
+                  {div.activeFiles} Active Files
+                </Badge>
               </div>
-            ))}
-          </div>
-        </TabsContent>
-
-        {/* Designations */}
-        <TabsContent value="designations" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                  <tr>
-                    <th className="p-3">Official Designation</th>
-                    <th className="p-3">Cadre & Service</th>
-                    <th className="p-3">Approval Level</th>
-                    <th className="p-3">System Role</th>
-                    <th className="p-3 text-center">Active Officers</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EADBCE]">
-                  {designations.map((des, i) => (
-                    <tr key={i} className="hover:bg-[#FAF7F2]">
-                      <td className="p-3 font-bold text-[#4A1017]">{des.title}</td>
-                      <td className="p-3 text-slate-700">{des.cadre}</td>
-                      <td className="p-3"><Badge variant="outline" className="bg-[#FAF4EB] text-[#801824] border-[#EADBCE]">{des.level}</Badge></td>
-                      <td className="p-3"><RoleBadge role={des.roleKey as RoleKey} label={des.roleKey} /></td>
-                      <td className="p-3 text-center font-bold text-[#801824]">{des.count}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <p className="text-[11px] text-slate-600">Lead: <span className="font-semibold text-[#4A1017]">{div.head}</span></p>
+              <p className="text-[11px] text-slate-500">Jurisdiction: {div.jurisdiction}</p>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* 4. Designations */}
+      <SectionCard
+        icon={ShieldCheck}
+        title={`Officer Designations & Cadres (${designations.length})`}
+        subtitle="Official hierarchy, civil service cadre, and associated system roles"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Official Designation</th>
+                <th className="p-3">Cadre & Service</th>
+                <th className="p-3">Approval Level</th>
+                <th className="p-3">System Role</th>
+                <th className="p-3 text-center">Active Officers</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {designations.map((des, i) => (
+                <tr key={i} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-bold text-[#4A1017]">{des.title}</td>
+                  <td className="p-3 text-slate-700">{des.cadre}</td>
+                  <td className="p-3"><Badge variant="outline" className="bg-[#FAF4EB] text-[#801824] border-[#EADBCE]">{des.level}</Badge></td>
+                  <td className="p-3"><RoleBadge role={des.roleKey as RoleKey} label={des.roleKey} /></td>
+                  <td className="p-3 text-center font-bold text-[#801824]">{des.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 2. USERS & ACCESS SECTION
-// Sub-tabs: Users, Roles, Permissions, Access Control, Login & Authentication
+// Groups: Directory, Roles, Permissions, Module Access, Auth Policy
 // ============================================================
 
 export function UsersAccessSection({
@@ -308,124 +353,127 @@ export function UsersAccessSection({
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="users" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="users" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Users className="size-3.5 mr-1" /> Users
-          </TabsTrigger>
-          <TabsTrigger value="roles" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <ShieldCheck className="size-3.5 mr-1" /> Roles
-          </TabsTrigger>
-          <TabsTrigger value="permissions" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <KeyRound className="size-3.5 mr-1" /> Permissions
-          </TabsTrigger>
-          <TabsTrigger value="access" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Lock className="size-3.5 mr-1" /> Access Control
-          </TabsTrigger>
-          <TabsTrigger value="auth" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <ShieldAlert className="size-3.5 mr-1" /> Login & Authentication
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      {/* 1. User Directory */}
+      <SectionCard
+        icon={Users}
+        title="User Accounts Directory"
+        subtitle="Manage department officers, staff directories, and portal credentials"
+      >
+        <AdminUsers />
+      </SectionCard>
 
-        <TabsContent value="users" className="pt-4">
-          <AdminUsers />
-        </TabsContent>
+      {/* 2. Roles */}
+      <SectionCard
+        icon={ShieldCheck}
+        title="Roles & Privilege Hierarchy"
+        subtitle="System roles, tier assignments, and core functional authorizations"
+      >
+        <AdminRoles />
+      </SectionCard>
 
-        <TabsContent value="roles" className="pt-4">
-          <AdminRoles />
-        </TabsContent>
+      {/* 3. Permissions Registry */}
+      <SectionCard
+        icon={KeyRound}
+        title="System Permissions Registry"
+        subtitle="Master list of functional permissions granted to departmental roles and external stakeholders"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {permissionsList.map((grp) => (
+            <div key={grp.module} className="rounded-lg border border-[#EADBCE] bg-[#FAF7F2] p-3 space-y-2">
+              <span className="text-xs font-bold text-[#4A1017]">{grp.module}</span>
+              <div className="flex flex-wrap gap-1">
+                {grp.perms.map((p) => (
+                  <span key={p} className="font-mono text-[10px] bg-white border border-[#EADBCE] px-2 py-0.5 rounded text-[#801824]">
+                    {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
 
-        <TabsContent value="permissions" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-white p-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider mb-2">System Permissions Registry</h4>
-            <p className="text-xs text-slate-600 mb-4">Master list of functional permissions granted to departmental roles and external stakeholders.</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {permissionsList.map((grp) => (
-                <div key={grp.module} className="rounded-lg border border-[#EADBCE] bg-[#FAF7F2] p-3 space-y-2">
-                  <span className="text-xs font-bold text-[#4A1017]">{grp.module}</span>
-                  <div className="flex flex-wrap gap-1">
-                    {grp.perms.map((p) => (
-                      <span key={p} className="font-mono text-[10px] bg-white border border-[#EADBCE] px-2 py-0.5 rounded text-[#801824]">
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+      {/* 4. Granular Access Matrix */}
+      <SectionCard
+        icon={Lock}
+        title="Granular Module Access Matrix"
+        subtitle="Configure module visibility, read, write, and approval levels across roles"
+      >
+        <AccessControlMatrix
+          config={roleAccessConfig ?? {}}
+          onChange={onRoleAccessChange}
+          userConfig={userAccessConfig ?? {}}
+          onUserConfigChange={onUserAccessChange}
+          hideRestricted={hideRestrictedModules ?? false}
+          onHideRestrictedChange={onHideRestrictedModulesChange}
+        />
+      </SectionCard>
+
+      {/* 5. Auth Policy */}
+      <SectionCard
+        icon={ShieldAlert}
+        title="Authentication & Session Security Policy"
+        subtitle="Password expiration, multi-factor authentication, and lockout rules"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "Security Policy Updated", description: "Authentication parameters saved." })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+          >
+            <Save className="size-3.5 mr-1" /> Save Authentication Rules
+          </Button>
+        }
+      >
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Session Inactivity Timeout (Minutes)</Label>
+              <Input type="number" value={authSettings.sessionTimeoutMinutes} onChange={(e) => setAuthSettings({ ...authSettings, sessionTimeoutMinutes: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Max Concurrent Logins per User</Label>
+              <Input type="number" value={authSettings.maxConcurrentLogins} onChange={(e) => setAuthSettings({ ...authSettings, maxConcurrentLogins: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Account Lockout Attempt Threshold</Label>
+              <Input type="number" value={authSettings.lockoutAttempts} onChange={(e) => setAuthSettings({ ...authSettings, lockoutAttempts: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Lockout Duration (Minutes)</Label>
+              <Input type="number" value={authSettings.lockoutDurationMinutes} onChange={(e) => setAuthSettings({ ...authSettings, lockoutDurationMinutes: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Password Expiry Interval (Days)</Label>
+              <Input type="number" value={authSettings.passwordExpiryDays} onChange={(e) => setAuthSettings({ ...authSettings, passwordExpiryDays: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-[#4A1017]">Minimum Password Length</Label>
+              <Input type="number" value={authSettings.minPasswordLength} onChange={(e) => setAuthSettings({ ...authSettings, minPasswordLength: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
             </div>
           </div>
-        </TabsContent>
 
-        <TabsContent value="access" className="pt-4">
-          <AccessControlMatrix
-            config={roleAccessConfig ?? {}}
-            onChange={onRoleAccessChange}
-            userConfig={userAccessConfig ?? {}}
-            onUserConfigChange={onUserAccessChange}
-            hideRestricted={hideRestrictedModules ?? false}
-            onHideRestrictedChange={onHideRestrictedModulesChange}
-          />
-        </TabsContent>
+          <Separator className="bg-[#EADBCE]" />
 
-        <TabsContent value="auth" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider">Authentication & Session Security Policy</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Session Inactivity Timeout (Minutes)</Label>
-                <Input type="number" value={authSettings.sessionTimeoutMinutes} onChange={(e) => setAuthSettings({ ...authSettings, sessionTimeoutMinutes: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Max Concurrent Logins per User</Label>
-                <Input type="number" value={authSettings.maxConcurrentLogins} onChange={(e) => setAuthSettings({ ...authSettings, maxConcurrentLogins: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Account Lockout Attempt Threshold</Label>
-                <Input type="number" value={authSettings.lockoutAttempts} onChange={(e) => setAuthSettings({ ...authSettings, lockoutAttempts: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Lockout Duration (Minutes)</Label>
-                <Input type="number" value={authSettings.lockoutDurationMinutes} onChange={(e) => setAuthSettings({ ...authSettings, lockoutDurationMinutes: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Password Expiry Interval (Days)</Label>
-                <Input type="number" value={authSettings.passwordExpiryDays} onChange={(e) => setAuthSettings({ ...authSettings, passwordExpiryDays: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Minimum Password Length</Label>
-                <Input type="number" value={authSettings.minPasswordLength} onChange={(e) => setAuthSettings({ ...authSettings, minPasswordLength: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-
-            <Separator className="bg-[#EADBCE]" />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-                <span className="text-xs font-bold text-[#4A1017]">Two-Factor Authentication for Officers</span>
-                <Switch checked={authSettings.mfaForOfficers} onCheckedChange={(v) => setAuthSettings({ ...authSettings, mfaForOfficers: v })} className="data-[state=checked]:bg-[#801824]" />
-              </label>
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-                <span className="text-xs font-bold text-[#4A1017]">Require Special Character in Passwords</span>
-                <Switch checked={authSettings.requireSpecialChar} onCheckedChange={(v) => setAuthSettings({ ...authSettings, requireSpecialChar: v })} className="data-[state=checked]:bg-[#801824]" />
-              </label>
-            </div>
-
-            <div className="flex justify-end">
-              <Button size="sm" onClick={() => toast({ title: "Security Policy Updated", description: "Authentication parameters saved." })} className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] text-xs font-bold h-8 px-4 rounded-lg">
-                <Save className="size-3.5 mr-1" /> Save Authentication Rules
-              </Button>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
+              <span className="text-xs font-bold text-[#4A1017]">Two-Factor Authentication for Officers</span>
+              <Switch checked={authSettings.mfaForOfficers} onCheckedChange={(v) => setAuthSettings({ ...authSettings, mfaForOfficers: v })} className="data-[state=checked]:bg-[#801824]" />
+            </label>
+            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
+              <span className="text-xs font-bold text-[#4A1017]">Require Special Character in Passwords</span>
+              <Switch checked={authSettings.requireSpecialChar} onCheckedChange={(v) => setAuthSettings({ ...authSettings, requireSpecialChar: v })} className="data-[state=checked]:bg-[#801824]" />
+            </label>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 3. MASTERS SECTION
-// Sub-tabs: Projects, Zones, PMCs, Contractors, Ticket Types, Categories, Statuses
+// Groups: Projects, Zones, PMCs, Contractors, Tickets, Categories, Statuses
 // ============================================================
 
 export function MastersSection() {
@@ -494,199 +542,171 @@ export function MastersSection() {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="projects" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="projects" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Projects</TabsTrigger>
-          <TabsTrigger value="zones" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Zones</TabsTrigger>
-          <TabsTrigger value="pmcs" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">PMCs</TabsTrigger>
-          <TabsTrigger value="contractors" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Contractors</TabsTrigger>
-          <TabsTrigger value="tickets" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Ticket Types</TabsTrigger>
-          <TabsTrigger value="categories" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Categories</TabsTrigger>
-          <TabsTrigger value="statuses" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5">Statuses</TabsTrigger>
-        </TabsList>
-
-        {/* Projects Master */}
-        <TabsContent value="projects" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="bg-[#FAF7F2] p-3 border-b border-[#EADBCE] flex justify-between items-center">
-              <span className="text-xs font-bold text-[#801824] uppercase">Project Classifications</span>
-              <Button size="sm" onClick={() => toast({ title: "Master", description: "Add project modal" })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-7 px-2.5 rounded-lg"><Plus className="size-3 mr-1" /> Add Project Type</Button>
-            </div>
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Code</th>
-                  <th className="p-3">Project Classification</th>
-                  <th className="p-3">Height / Criteria</th>
-                  <th className="p-3 text-center">Auto-Scrutiny</th>
-                  <th className="p-3 text-center">Statutory SLA</th>
+    <div className="space-y-6">
+      {/* 1. Projects Master */}
+      <SectionCard
+        icon={Database}
+        title="Project Classifications Master"
+        subtitle="Building types, height restrictions, automated scrutiny eligibility, and SLA days"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "Master", description: "Add project modal" })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-8 px-3 rounded-lg cursor-pointer"
+          >
+            <Plus className="size-3.5 mr-1" /> Add Project Type
+          </Button>
+        }
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Code</th>
+                <th className="p-3">Project Classification</th>
+                <th className="p-3">Height Limit</th>
+                <th className="p-3 text-center">Auto-Scrutiny</th>
+                <th className="p-3 text-center">SLA Days</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {projectsMaster.map((p) => (
+                <tr key={p.code} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-mono font-bold text-[#801824]">{p.code}</td>
+                  <td className="p-3 font-bold text-[#4A1017]">{p.name}</td>
+                  <td className="p-3 text-slate-700">{p.heightLimit}</td>
+                  <td className="p-3 text-center">
+                    {p.autoScrutiny ? (
+                      <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Enabled</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">Manual</Badge>
+                    )}
+                  </td>
+                  <td className="p-3 text-center font-bold text-[#801824]">{p.slaDays} Days</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {projectsMaster.map((p) => (
-                  <tr key={p.code} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-mono font-bold text-[#801824]">{p.code}</td>
-                    <td className="p-3 font-semibold text-[#4A1017]">{p.name}</td>
-                    <td className="p-3 text-slate-600">{p.heightLimit}</td>
-                    <td className="p-3 text-center">{p.autoScrutiny ? <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Enabled</Badge> : <Badge variant="outline" className="text-[10px]">Manual Panel</Badge>}</td>
-                    <td className="p-3 text-center font-bold text-[#801824]">{p.slaDays} Days</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
 
-        {/* Zones Master */}
-        <TabsContent value="zones" className="pt-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {zonesMaster.map((z) => (
-              <div key={z.code} className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-[#801824]">{z.name}</span>
-                  <span className="font-mono text-[10px] bg-white border border-[#EADBCE] px-1.5 py-0.5 rounded text-[#5C1A20]">{z.code}</span>
+      {/* 2. Zones Master */}
+      <SectionCard
+        icon={Globe}
+        title="Planning Zones & Jurisdiction"
+        subtitle="Zonal headquarters, assigned Planning Officers, and ward counts"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Zone Code</th>
+                <th className="p-3">Zone Name</th>
+                <th className="p-3">Headquarters</th>
+                <th className="p-3">Planning Officer In-Charge</th>
+                <th className="p-3 text-center">Wards</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {zonesMaster.map((z) => (
+                <tr key={z.code} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-mono font-bold text-[#801824]">{z.code}</td>
+                  <td className="p-3 font-bold text-[#4A1017]">{z.name}</td>
+                  <td className="p-3 text-slate-700">{z.office}</td>
+                  <td className="p-3 font-semibold text-slate-800">{z.head}</td>
+                  <td className="p-3 text-center"><Badge variant="outline" className="text-[10px] bg-[#FAF4EB] text-[#801824] border-[#EADBCE]">{z.coverage}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+
+      {/* 3. PMCs & Contractors */}
+      <SectionCard
+        icon={Building2}
+        title="Registered PMCs & Contractors"
+        subtitle="Empaneled Project Management Consultants and licensed builders"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="rounded-lg border border-[#EADBCE] bg-[#FAF7F2] p-3 space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Project Management Consultants (PMCs)</span>
+            <div className="space-y-2">
+              {pmcsMaster.map((pmc, i) => (
+                <div key={i} className="p-2.5 bg-white rounded-lg border border-[#EADBCE] flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-[#4A1017]">{pmc.name}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">{pmc.regNo} · Valid to {pmc.validity}</p>
+                  </div>
+                  <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{pmc.rating}</Badge>
                 </div>
-                <p className="text-xs text-slate-700">{z.office}</p>
-                <p className="text-[11px] text-[#4A1017] font-semibold">{z.head}</p>
-                <p className="text-[10px] text-slate-500">Coverage: {z.coverage}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </TabsContent>
+          <div className="rounded-lg border border-[#EADBCE] bg-[#FAF7F2] p-3 space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Registered Construction Contractors</span>
+            <div className="space-y-2">
+              {contractorsMaster.map((c, i) => (
+                <div key={i} className="p-2.5 bg-white rounded-lg border border-[#EADBCE] flex justify-between items-center text-xs">
+                  <div>
+                    <p className="font-bold text-[#4A1017]">{c.name}</p>
+                    <p className="text-[10px] text-slate-500 font-mono">{c.licNo} · {c.class}</p>
+                  </div>
+                  <Badge variant="outline" className="text-[10px] bg-[#FAF4EB] text-[#801824] border-[#EADBCE]">{c.activeSites} Sites</Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </SectionCard>
 
-        {/* PMCs Master */}
-        <TabsContent value="pmcs" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Consultant Firm</th>
-                  <th className="p-3">Registration No.</th>
-                  <th className="p-3">Authority Rating</th>
-                  <th className="p-3 text-center">Active Sites</th>
-                  <th className="p-3">Validity</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {pmcsMaster.map((pmc, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{pmc.name}</td>
-                    <td className="p-3 font-mono text-slate-600">{pmc.regNo}</td>
-                    <td className="p-3 font-bold text-amber-700">{pmc.rating}</td>
-                    <td className="p-3 text-center font-bold text-[#801824]">{pmc.projects}</td>
-                    <td className="p-3 text-slate-600">{pmc.validity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* 4. Inspection Categories & Statuses */}
+      <SectionCard
+        icon={CheckCircle2}
+        title="Mandatory Inspection Stages & Application Statuses"
+        subtitle="Site audit criteria and standard workflow status lifecycle"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Mandatory Site Inspection Stages</span>
+            <div className="space-y-2">
+              {inspectionCategories.map((c, i) => (
+                <div key={i} className="p-2.5 bg-[#FAF7F2] rounded-lg border border-[#EADBCE] text-xs space-y-0.5">
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-[#4A1017]">{c.name}</span>
+                    <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Mandatory</Badge>
+                  </div>
+                  <p className="text-[11px] text-slate-500">Trigger: {c.trigger}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </TabsContent>
-
-        {/* Contractors Master */}
-        <TabsContent value="contractors" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Contractor Name</th>
-                  <th className="p-3">License Number</th>
-                  <th className="p-3">Class</th>
-                  <th className="p-3">CAR Insurance Policy</th>
-                  <th className="p-3 text-center">Active Sites</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {contractorsMaster.map((c, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{c.name}</td>
-                    <td className="p-3 font-mono text-[#801824]">{c.licNo}</td>
-                    <td className="p-3"><Badge variant="outline" className="bg-[#FAF4EB] text-slate-700 border-[#EADBCE]">{c.class}</Badge></td>
-                    <td className="p-3 font-mono text-slate-600">{c.insurance}</td>
-                    <td className="p-3 text-center font-bold text-[#801824]">{c.activeSites}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Workflow Status Lifecycle</span>
+            <div className="grid grid-cols-2 gap-2">
+              {statusesMaster.map((s) => (
+                <div key={s.key} className="p-2 bg-white rounded-lg border border-[#EADBCE] text-xs flex items-center justify-between">
+                  <span className="font-semibold text-slate-700 text-[11px]">{s.label}</span>
+                  <span className={cn("text-[9px] px-1.5 py-0.5 rounded font-bold", s.badge)}>{s.key}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </TabsContent>
-
-        {/* Ticket Types */}
-        <TabsContent value="tickets" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Code</th>
-                  <th className="p-3">Inquiry / Ticket Category</th>
-                  <th className="p-3">Default Assigned Role</th>
-                  <th className="p-3">Priority</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {ticketTypes.map((t) => (
-                  <tr key={t.code} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-mono font-bold text-[#801824]">{t.code}</td>
-                    <td className="p-3 font-semibold text-[#4A1017]">{t.name}</td>
-                    <td className="p-3 text-slate-700">{t.defaultRole}</td>
-                    <td className="p-3"><Badge variant="outline" className="bg-[#FAF4EB] text-[#801824] border-[#EADBCE]">{t.priority}</Badge></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-
-        {/* Categories */}
-        <TabsContent value="categories" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Inspection Category</th>
-                  <th className="p-3">Mandatory Trigger</th>
-                  <th className="p-3">Fee Treatment</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {inspectionCategories.map((c, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{c.name}</td>
-                    <td className="p-3 text-slate-600">{c.trigger}</td>
-                    <td className="p-3 font-mono text-[#801824]">{c.fee}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-
-        {/* Statuses */}
-        <TabsContent value="statuses" className="pt-4 space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {statusesMaster.map((s) => (
-              <div key={s.key} className="rounded-lg border border-[#EADBCE] bg-white p-3 space-y-1">
-                <span className={cn("inline-block rounded px-2 py-0.5 text-[10px] font-bold", s.badge)}>{s.key}</span>
-                <p className="text-xs font-bold text-[#4A1017]">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 4. WORKFLOW SECTION
-// Sub-tabs: Workflows, Approvals, SLA, Escalations
+// Groups: Active Engine, Delegation & Signing, SLAs, Escalations
 // ============================================================
 
 export function WorkflowSection() {
   const { toast } = useToast();
   const [delegationEnabled, setDelegationEnabled] = React.useState(true);
   const [dualSignOff, setDualSignOff] = React.useState(true);
-  const [autoEscalate, setAutoEscalate] = React.useState(true);
 
   const slaTiers = [
     { stage: "Drawing Scrutiny (Pre-Check)", target: "48 Hours", amber: "36 Hours", escalation: "Zonal Head" },
@@ -697,108 +717,85 @@ export function WorkflowSection() {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="workflows" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="workflows" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Workflow className="size-3.5 mr-1" /> Workflows
-          </TabsTrigger>
-          <TabsTrigger value="approvals" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <ShieldCheck className="size-3.5 mr-1" /> Approvals
-          </TabsTrigger>
-          <TabsTrigger value="sla" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Clock className="size-3.5 mr-1" /> SLA
-          </TabsTrigger>
-          <TabsTrigger value="escalations" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <AlertTriangle className="size-3.5 mr-1" /> Escalations
-          </TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      {/* 1. Workflow Engine */}
+      <SectionCard
+        icon={Workflow}
+        title="Active Building Permission Workflow Engine"
+        subtitle="Multi-tier review pipeline from submission to final sanction order issuance"
+      >
+        <AdminWorkflow embedded />
+      </SectionCard>
 
-        <TabsContent value="workflows" className="pt-4">
-          <AdminWorkflow embedded />
-        </TabsContent>
+      {/* 2. Approvals Delegation */}
+      <SectionCard
+        icon={ShieldCheck}
+        title="Approval Delegation & Signing Quorums"
+        subtitle="Configure sign-off requirements, temporary leave delegation, and dual signatures"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "Policy Updated", description: "Approval parameters saved." })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] text-xs font-bold h-8 px-4 rounded-lg cursor-pointer"
+          >
+            <Save className="size-3.5 mr-1" /> Save Approval Rules
+          </Button>
+        }
+      >
+        <div className="space-y-3">
+          <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-[#FAF7F2] cursor-pointer">
+            <div>
+              <span className="text-xs font-bold text-[#4A1017] block">Temporary Officer Leave Delegation</span>
+              <span className="text-[11px] text-slate-500 block">Allow officers on sanctioned leave to temporarily delegate approval authority to peer rank.</span>
+            </div>
+            <Switch checked={delegationEnabled} onCheckedChange={setDelegationEnabled} className="data-[state=checked]:bg-[#801824]" />
+          </label>
+          <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-[#FAF7F2] cursor-pointer">
+            <div>
+              <span className="text-xs font-bold text-[#4A1017] block">Dual Officer Sign-Off for Large Projects</span>
+              <span className="text-[11px] text-slate-500 block">Requires both Director and Additional Commissioner digital signatures for plots &gt; 5,000 sq.m.</span>
+            </div>
+            <Switch checked={dualSignOff} onCheckedChange={setDualSignOff} className="data-[state=checked]:bg-[#801824]" />
+          </label>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="approvals" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider">Approval Delegation & Signing Quorums</h4>
-            <div className="space-y-3">
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-                <div>
-                  <span className="text-xs font-bold text-[#4A1017] block">Temporary Officer Leave Delegation</span>
-                  <span className="text-[11px] text-slate-500 block">Allow officers on sanctioned leave to temporarily delegate approval authority to peer rank.</span>
-                </div>
-                <Switch checked={delegationEnabled} onCheckedChange={setDelegationEnabled} className="data-[state=checked]:bg-[#801824]" />
-              </label>
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-                <div>
-                  <span className="text-xs font-bold text-[#4A1017] block">Dual Officer Sign-Off for Large Projects</span>
-                  <span className="text-[11px] text-slate-500 block">Requires both Director and Additional Commissioner digital signatures for plots &gt; 5,000 sq.m.</span>
-                </div>
-                <Switch checked={dualSignOff} onCheckedChange={setDualSignOff} className="data-[state=checked]:bg-[#801824]" />
-              </label>
-            </div>
-            <div className="flex justify-end">
-              <Button size="sm" onClick={() => toast({ title: "Approval Rules Saved", description: "Delegation rules updated." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-4 rounded-lg">
-                <Save className="size-3.5 mr-1" /> Save Approval Rules
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sla" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="bg-[#FAF7F2] p-3 border-b border-[#EADBCE]">
-              <span className="text-xs font-bold text-[#801824] uppercase">Service Level Agreements (Citizen Charter)</span>
-            </div>
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Stage / Milestone</th>
-                  <th className="p-3">Target Completion</th>
-                  <th className="p-3">Amber Warning Threshold</th>
-                  <th className="p-3">Breach Escalation Target</th>
+      {/* 3. SLA Matrix */}
+      <SectionCard
+        icon={Clock}
+        title="Statutory Citizen Charter SLAs & Automated Escalations"
+        subtitle="Mandated turn-around times per review stage and escalation targets"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Workflow Stage</th>
+                <th className="p-3">Citizen Charter SLA</th>
+                <th className="p-3">Amber Warning Threshold</th>
+                <th className="p-3">Automated Escalation Target</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {slaTiers.map((s, i) => (
+                <tr key={i} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-bold text-[#4A1017]">{s.stage}</td>
+                  <td className="p-3 font-semibold text-emerald-800">{s.target}</td>
+                  <td className="p-3 text-amber-700 font-semibold">{s.amber}</td>
+                  <td className="p-3 text-[#801824] font-bold">{s.escalation}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {slaTiers.map((s, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{s.stage}</td>
-                    <td className="p-3 font-bold text-emerald-800">{s.target}</td>
-                    <td className="p-3 text-amber-700 font-semibold">{s.amber}</td>
-                    <td className="p-3 font-medium text-[#801824]">{s.escalation}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="escalations" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase tracking-wider">Automated Escalation Matrix</h4>
-            <p className="text-xs text-slate-600">When an application remains untouched past statutory SLA, automatic routing triggers escalate to the immediate supervisor.</p>
-            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-              <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Auto-Escalation on 100% SLA Breach</span>
-                <span className="text-[11px] text-slate-500 block">Re-assign priority and notify Zonal Head automatically.</span>
-              </div>
-              <Switch checked={autoEscalate} onCheckedChange={setAutoEscalate} className="data-[state=checked]:bg-[#801824]" />
-            </label>
-            <div className="flex justify-end">
-              <Button size="sm" onClick={() => toast({ title: "Escalation Policy Saved", description: "Matrix saved." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-4 rounded-lg">
-                <Save className="size-3.5 mr-1" /> Save Escalations
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 5. DOCUMENTS SECTION
-// Sub-tabs: Document Types, File Formats, File Size, Version Control
+// Groups: Document Types, Formats, Size, Versioning
 // ============================================================
 
 export function DocumentsSection({
@@ -807,151 +804,77 @@ export function DocumentsSection({
   onFileSizeChange,
 }: {
   form: SystemSettings;
-  onFormatToggle: (key: "allowedDrawingFormats" | "allowedDocumentFormats", val: string, on: boolean) => void;
-  onFileSizeChange: (val: number) => void;
+  onFormatToggle: (key: "allowedDrawingFormats" | "allowedDocumentFormats", value: string, on: boolean) => void;
+  onFileSizeChange: (mb: number) => void;
 }) {
-  const { toast } = useToast();
   const documentTypes = [
-    { code: "DOC-TITLE", name: "Registered Sale Deed / Title Document", mandatory: true, allowed: "PDF", maxMB: 25 },
-    { code: "DOC-EC", name: "Encumbrance Certificate (30-Year Search)", mandatory: true, allowed: "PDF", maxMB: 15 },
-    { code: "DOC-KHATA", name: "Latest Tax Assessment / Mutation Khata", mandatory: true, allowed: "PDF, JPG", maxMB: 10 },
-    { code: "DOC-STR", name: "Structural Stability Undertaking", mandatory: true, allowed: "PDF", maxMB: 10 },
-    { code: "DOC-FIRE", name: "Fire Services NOC (Provisional)", mandatory: false, allowed: "PDF", maxMB: 20 },
+    { code: "DOC-SALE", name: "Registered Sale Deed / Title Deed", mandatory: true, allowed: "PDF", maxMB: 15 },
+    { code: "DOC-ENC", name: "Encumbrance Certificate (EC - 30 Years)", mandatory: true, allowed: "PDF", maxMB: 10 },
+    { code: "DOC-NOC-FIRE", name: "State Disaster Response & Fire NOC", mandatory: false, allowed: "PDF", maxMB: 20 },
+    { code: "DOC-STRUCT", name: "Structural Stability Certificate (SER)", mandatory: true, allowed: "PDF", maxMB: 25 },
     { code: "DOC-SOIL", name: "Geo-Technical Soil Investigation Report", mandatory: false, allowed: "PDF", maxMB: 30 },
   ];
 
-  const drawingFormats = ["DWG", "DXF", "PDF", "IFC", "RVT"];
-  const docFormats = ["PDF", "JPG", "PNG", "TIFF"];
-
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="types" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="types" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <FileText className="size-3.5 mr-1" /> Document Types
-          </TabsTrigger>
-          <TabsTrigger value="formats" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <FileCheck className="size-3.5 mr-1" /> File Formats
-          </TabsTrigger>
-          <TabsTrigger value="size" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <Sliders className="size-3.5 mr-1" /> File Size
-          </TabsTrigger>
-          <TabsTrigger value="version" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5">
-            <HardDrive className="size-3.5 mr-1" /> Version Control
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="types" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Document Code</th>
-                  <th className="p-3">Required Document Name</th>
-                  <th className="p-3">Requirement</th>
-                  <th className="p-3">Allowed Format</th>
-                  <th className="p-3 text-center">Max Size</th>
+    <div className="space-y-6">
+      {/* 1. Document Types */}
+      <SectionCard
+        icon={FileText}
+        title="Mandatory Document Checklists"
+        subtitle="Statutory document attachments required from Licensed Technical Persons (LTP)"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Document Code</th>
+                <th className="p-3">Required Document Name</th>
+                <th className="p-3">Requirement</th>
+                <th className="p-3">Allowed Format</th>
+                <th className="p-3 text-center">Max Size</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {documentTypes.map((d) => (
+                <tr key={d.code} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-mono font-bold text-[#801824]">{d.code}</td>
+                  <td className="p-3 font-bold text-[#4A1017]">{d.name}</td>
+                  <td className="p-3">{d.mandatory ? <Badge className="bg-[#801824] text-white text-[10px]">Mandatory</Badge> : <Badge variant="outline" className="text-[10px]">Optional / Case-based</Badge>}</td>
+                  <td className="p-3 font-mono text-slate-700">{d.allowed}</td>
+                  <td className="p-3 text-center font-bold text-[#801824]">{d.maxMB} MB</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {documentTypes.map((d) => (
-                  <tr key={d.code} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-mono font-bold text-[#801824]">{d.code}</td>
-                    <td className="p-3 font-bold text-[#4A1017]">{d.name}</td>
-                    <td className="p-3">{d.mandatory ? <Badge className="bg-[#801824] text-white text-[10px]">Mandatory</Badge> : <Badge variant="outline" className="text-[10px]">Optional / Case-based</Badge>}</td>
-                    <td className="p-3 font-mono text-slate-700">{d.allowed}</td>
-                    <td className="p-3 text-center font-bold text-[#801824]">{d.maxMB} MB</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
+
+      {/* 2. Format & Versioning Rules */}
+      <SectionCard
+        icon={HardDrive}
+        title="File Verification & Archival Versioning Rules"
+        subtitle="Upload retention rules, checksum integrity checks, and version control"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">SHA-256 Checksum Validation</span>
+            <p className="text-xs text-slate-600">Calculates cryptographic hash upon upload to prevent unauthorized document alteration during the review lifecycle.</p>
+            <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Active Enforcement</Badge>
           </div>
-        </TabsContent>
-
-        <TabsContent value="formats" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-4">
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#801824] uppercase">Allowed CAD & BIM Drawing Formats</h4>
-              <div className="flex flex-wrap gap-2">
-                {drawingFormats.map((fmt) => {
-                  const on = form.allowedDrawingFormats.includes(fmt);
-                  return (
-                    <button
-                      key={fmt}
-                      type="button"
-                      onClick={() => onFormatToggle("allowedDrawingFormats", fmt, !on)}
-                      className={cn("px-4 py-2 rounded-lg border text-xs font-bold transition-all cursor-pointer", on ? "bg-[#801824] text-white border-[#801824]" : "bg-white text-slate-600 border-[#EADBCE] hover:bg-[#FAF4EB]")}
-                    >
-                      {fmt} {on ? "✓" : "+"}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <Separator className="bg-[#EADBCE]" />
-
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold text-[#801824] uppercase">Allowed Ownership & Supporting Document Formats</h4>
-              <div className="flex flex-wrap gap-2">
-                {docFormats.map((fmt) => {
-                  const on = form.allowedDocumentFormats.includes(fmt);
-                  return (
-                    <button
-                      key={fmt}
-                      type="button"
-                      onClick={() => onFormatToggle("allowedDocumentFormats", fmt, !on)}
-                      className={cn("px-4 py-2 rounded-lg border text-xs font-bold transition-all cursor-pointer", on ? "bg-[#801824] text-white border-[#801824]" : "bg-white text-slate-600 border-[#EADBCE] hover:bg-[#FAF4EB]")}
-                    >
-                      {fmt} {on ? "✓" : "+"}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Automatic Drawing Version Stamping</span>
+            <p className="text-xs text-slate-600">Revisions submitted in response to shortfalls automatically increment drawing version tags (e.g. DWG-REV-02).</p>
+            <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Active Enforcement</Badge>
           </div>
-        </TabsContent>
-
-        <TabsContent value="size" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Global Upload Limits</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Maximum File Size (MB per individual file)</Label>
-                <Input type="number" value={form.maxFileSizeMB} onChange={(e) => onFileSizeChange(Number(e.target.value))} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Application Aggregate Package Cap (MB)</Label>
-                <Input type="number" defaultValue={250} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="version" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Drawing Versioning & Archive Rules</h4>
-            <p className="text-xs text-slate-600">Whenever an LTP architect re-uploads a corrected drawing in response to shortfall, the version is automatically incremented.</p>
-            <div className="space-y-2">
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-                <span className="text-xs font-bold text-[#4A1017]">Maintain All Historical Revisions for Audit</span>
-                <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-              </label>
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-                <span className="text-xs font-bold text-[#4A1017]">Auto-Watermark Previous Versions as &quot;SUPERSEDED&quot;</span>
-                <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-              </label>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 6. NOTIFICATIONS SECTION
-// Sub-tabs: Email, SMS, Templates, Notification Rules
+// Groups: SMTP, SMS, Templates, Webhooks
 // ============================================================
 
 export function NotificationsSection() {
@@ -959,110 +882,99 @@ export function NotificationsSection() {
   const [smtp, setSmtp] = React.useState({
     host: "mail.telangana.gov.in",
     port: 587,
-    user: "notifications@authority.gov.in",
-    senderName: "Building Permission Regulatory Authority",
+    user: "no-reply-buildingpermit@hmda.gov.in",
+    senderName: "TS-bPASS Building Permission Authority",
   });
 
   const templates = [
-    { title: "Application Submitted Confirmation", channel: "Email + SMS", trigger: "On LTP Submission" },
-    { title: "Drawing Scrutiny Clearance Notice", channel: "SMS", trigger: "Scrutiny Passed" },
-    { title: "Deficiency / Shortfall Notice", channel: "Email + SMS", trigger: "Shortfall Raised" },
+    { title: "Application Submitted Confirmation", channel: "Email + SMS", trigger: "Form Filing" },
+    { title: "Technical Drawing Scrutiny Completed", channel: "Email + SMS", trigger: "Scrutiny Engine" },
+    { title: "Technical Shortfall Raised", channel: "Email + SMS + In-App", trigger: "Officer Review" },
+    { title: "Fee Demand Note Generated", channel: "Email + SMS", trigger: "Fee Assessment" },
     { title: "Sanction Order & Permit Download Link", channel: "Email + SMS", trigger: "Final Approval" },
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="email" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="email" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Mail className="size-3.5 mr-1" /> Email</TabsTrigger>
-          <TabsTrigger value="sms" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><MessageSquare className="size-3.5 mr-1" /> SMS</TabsTrigger>
-          <TabsTrigger value="templates" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><FileText className="size-3.5 mr-1" /> Templates</TabsTrigger>
-          <TabsTrigger value="rules" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Sliders className="size-3.5 mr-1" /> Notification Rules</TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      {/* 1. SMTP Relay */}
+      <SectionCard
+        icon={Mail}
+        title="SMTP Mail Relay Configuration"
+        subtitle="Departmental mail server settings for citizen notifications and receipt dispatches"
+        action={
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => toast({ title: "Test Email Sent", description: "Verification email dispatched." })} className="border-[#DCD5C8] text-[#801824] text-xs h-8 px-3 rounded-lg"><Send className="size-3 mr-1" /> Send Test Email</Button>
+            <Button size="sm" onClick={() => toast({ title: "SMTP Settings Saved", description: "Configuration updated." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-4 rounded-lg"><Save className="size-3.5 mr-1" /> Save Email Settings</Button>
+          </div>
+        }
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">SMTP Host</Label>
+            <Input value={smtp.host} onChange={(e) => setSmtp({ ...smtp, host: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Port</Label>
+            <Input type="number" value={smtp.port} onChange={(e) => setSmtp({ ...smtp, port: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Sender Email</Label>
+            <Input value={smtp.user} onChange={(e) => setSmtp({ ...smtp, user: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Sender Display Name</Label>
+            <Input value={smtp.senderName} onChange={(e) => setSmtp({ ...smtp, senderName: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+          </div>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="email" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">SMTP Relay Configuration</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">SMTP Host</Label>
-                <Input value={smtp.host} onChange={(e) => setSmtp({ ...smtp, host: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
+      {/* 2. DLT SMS Gateway */}
+      <SectionCard
+        icon={MessageSquare}
+        title="DLT National SMS Gateway"
+        subtitle="Telecom regulatory approved header and entity configuration"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE]">
+            <span className="text-[10px] text-slate-500 font-bold block">DLT Entity ID</span>
+            <span className="font-mono text-xs font-bold text-[#801824]">110155239000004123</span>
+          </div>
+          <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE]">
+            <span className="text-[10px] text-slate-500 font-bold block">Sender Header</span>
+            <span className="font-mono text-xs font-bold text-[#801824]">TSHMDA</span>
+          </div>
+          <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE]">
+            <span className="text-[10px] text-slate-500 font-bold block">Gateway Balance</span>
+            <span className="font-bold text-xs text-emerald-800">184,250 Credits</span>
+          </div>
+        </div>
+      </SectionCard>
+
+      {/* 3. Event Templates */}
+      <SectionCard
+        icon={FileText}
+        title="Notification Event Templates & Triggers"
+        subtitle="Automated alerts dispatched across SMS and Email at critical workflow milestones"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {templates.map((t, i) => (
+            <div key={i} className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-1.5 shadow-2xs">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold text-[#801824]">{t.title}</span>
+                <Badge variant="outline" className="text-[10px] bg-white text-[#5C1A20] border-[#EADBCE]">{t.channel}</Badge>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Port</Label>
-                <Input type="number" value={smtp.port} onChange={(e) => setSmtp({ ...smtp, port: Number(e.target.value) })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Sender Email</Label>
-                <Input value={smtp.user} onChange={(e) => setSmtp({ ...smtp, user: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Sender Display Name</Label>
-                <Input value={smtp.senderName} onChange={(e) => setSmtp({ ...smtp, senderName: e.target.value })} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
+              <p className="text-[11px] text-slate-500">Trigger: {t.trigger}</p>
             </div>
-            <div className="flex gap-2 justify-end">
-              <Button size="sm" variant="outline" onClick={() => toast({ title: "Test Email Sent", description: "Verification email dispatched." })} className="border-[#DCD5C8] text-[#801824] text-xs h-8 px-3 rounded-lg"><Send className="size-3 mr-1" /> Send Test Email</Button>
-              <Button size="sm" onClick={() => toast({ title: "SMTP Settings Saved", description: "Configuration updated." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-4 rounded-lg"><Save className="size-3.5 mr-1" /> Save Email Settings</Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sms" className="pt-4 space-y-4">
-          <div className="rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4 space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">DLT National SMS Gateway</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="p-3 bg-white rounded-lg border border-[#EADBCE]">
-                <span className="text-[10px] text-slate-500 font-bold block">DLT Entity ID</span>
-                <span className="font-mono text-xs font-bold text-[#801824]">110155239000004123</span>
-              </div>
-              <div className="p-3 bg-white rounded-lg border border-[#EADBCE]">
-                <span className="text-[10px] text-slate-500 font-bold block">Sender Header</span>
-                <span className="font-mono text-xs font-bold text-[#801824]">TSHMDA</span>
-              </div>
-              <div className="p-3 bg-white rounded-lg border border-[#EADBCE]">
-                <span className="text-[10px] text-slate-500 font-bold block">Gateway Balance</span>
-                <span className="font-bold text-xs text-emerald-800">184,250 Credits</span>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="templates" className="pt-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {templates.map((t, i) => (
-              <div key={i} className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-1.5 shadow-2xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-[#801824]">{t.title}</span>
-                  <Badge variant="outline" className="text-[10px] bg-[#FAF4EB] text-[#5C1A20] border-[#EADBCE]">{t.channel}</Badge>
-                </div>
-                <p className="text-[11px] text-slate-500">Trigger: {t.trigger}</p>
-              </div>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="rules" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Dispatch Rules</h4>
-            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-              <span className="text-xs font-bold text-[#4A1017]">Quiet Hours (Hold SMS between 09:00 PM and 08:00 AM)</span>
-              <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-            </label>
-            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-              <span className="text-xs font-bold text-[#4A1017]">Send Carbon Copy (CC) Email to Assigned Zonal Head</span>
-              <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-            </label>
-          </div>
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 7. SYSTEM SECTION
-// Sub-tabs: Date & Time, Number & Currency, Localization, Branding, General Settings
+// Groups: Numbering, Cache, Fee Engine, Environment
 // ============================================================
 
 export function SystemSection({
@@ -1074,231 +986,150 @@ export function SystemSection({
 }) {
   const { toast } = useToast();
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="branding" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="datetime" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Calendar className="size-3.5 mr-1" /> Date & Time</TabsTrigger>
-          <TabsTrigger value="currency" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Sliders className="size-3.5 mr-1" /> Number & Currency</TabsTrigger>
-          <TabsTrigger value="localization" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Globe className="size-3.5 mr-1" /> Localization</TabsTrigger>
-          <TabsTrigger value="branding" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Palette className="size-3.5 mr-1" /> Branding</TabsTrigger>
-          <TabsTrigger value="general" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Cpu className="size-3.5 mr-1" /> General Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="datetime" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Default Date Format</Label>
-                <Select value={form.dateFormat} onValueChange={(v) => setField("dateFormat", v)}>
-                  <SelectTrigger className="h-9 text-xs border-[#EADBCE] bg-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="border-[#EADBCE] bg-white">
-                    <SelectItem value="DD MMM YYYY">DD MMM YYYY (e.g., 03 Oct 2026)</SelectItem>
-                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (e.g., 03/10/2026)</SelectItem>
-                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (e.g., 2026-10-03)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">System Timezone</Label>
-                <Input value="Asia/Kolkata (IST +05:30)" disabled className="h-9 text-xs border-[#EADBCE] bg-white opacity-80" />
-              </div>
-            </div>
+    <div className="space-y-6">
+      {/* 1. Date, Time & Localization */}
+      <SectionCard
+        icon={Calendar}
+        title="System Localization & Timezone"
+        subtitle="Standard timestamp formatting and regional parameters"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">Default Date Format</Label>
+            <Select value={form.dateFormat} onValueChange={(v) => setField("dateFormat", v)}>
+              <SelectTrigger className="h-9 text-xs border-[#EADBCE] bg-white"><SelectValue /></SelectTrigger>
+              <SelectContent className="border-[#EADBCE] bg-white">
+                <SelectItem value="DD MMM YYYY">DD MMM YYYY (e.g., 03 Oct 2026)</SelectItem>
+                <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (e.g., 03/10/2026)</SelectItem>
+                <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (e.g., 2026-10-03)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        </TabsContent>
-
-        <TabsContent value="currency" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Currency Symbol & ISO Code</Label>
-                <Select value={form.currency} onValueChange={(v) => setField("currency", v)}>
-                  <SelectTrigger className="h-9 text-xs border-[#EADBCE] bg-white"><SelectValue /></SelectTrigger>
-                  <SelectContent className="border-[#EADBCE] bg-white">
-                    <SelectItem value="INR">₹ Indian Rupee (INR)</SelectItem>
-                    <SelectItem value="USD">$ US Dollar (USD)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Area Measurement Unit</Label>
-                <Input value="Square Metres (sq.m)" disabled className="h-9 text-xs border-[#EADBCE] bg-white opacity-80" />
-              </div>
-            </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-bold text-[#4A1017]">System Timezone</Label>
+            <Input value="Asia/Kolkata (IST +05:30)" disabled className="h-9 text-xs border-[#EADBCE] bg-white opacity-80" />
           </div>
-        </TabsContent>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="localization" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-4">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Languages Supported</h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 bg-white rounded-lg border border-[#801824] text-center font-bold text-xs text-[#801824]">English (Primary)</div>
-              <div className="p-3 bg-white rounded-lg border border-[#EADBCE] text-center font-bold text-xs text-slate-700">Telugu (తెలుగు)</div>
-              <div className="p-3 bg-white rounded-lg border border-[#EADBCE] text-center font-bold text-xs text-slate-700">Hindi (हिंदी)</div>
-            </div>
+      {/* 2. Fee Engine & Application Numbering */}
+      <SectionCard
+        icon={Cpu}
+        title="Application Numbering & Fee Computation Engine"
+        subtitle="Automatic file numbering schema and tariff assessment formulas"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">File Numbering Schema</span>
+            <p className="font-mono text-xs font-bold text-[#4A1017]">HMDA/BP/&#123;YEAR&#125;/&#123;ZONE&#125;/&#123;SEQ_00000&#125;</p>
+            <p className="text-[11px] text-slate-500">Auto-resets sequence at fiscal year rollover (01-April).</p>
           </div>
-        </TabsContent>
-
-        <TabsContent value="branding" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Portal Name</Label>
-                <Input value={form.portalName} onChange={(e) => setField("portalName", e.target.value)} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Portal Subtitle</Label>
-                <Input value={form.portalSubtitle} onChange={(e) => setField("portalSubtitle", e.target.value)} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-            <div className="p-3 rounded-lg border border-[#EADBCE] bg-white flex items-center justify-between">
-              <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Design Theme</span>
-                <span className="text-[11px] text-slate-500 block">Heritage Beige & Maroon palette active authority-wide.</span>
-              </div>
-              <Badge className="bg-[#801824] text-[#FDF6ED] text-xs">Beige & Maroon</Badge>
-            </div>
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Tariff Calculation Engine</span>
+            <p className="text-xs text-slate-700">Built-up area rate: Rs. 15 / sq.ft. + Infrastructure betterment fee 2.5% of market value.</p>
+            <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Rule Engine v3.4 Active</Badge>
           </div>
-        </TabsContent>
-
-        <TabsContent value="general" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-4">
-            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
-              <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Demo Mode Flag</span>
-                <span className="text-[11px] text-slate-500 block">Pre-fills sample projects and enables demo switching.</span>
-              </div>
-              <Switch checked={form.demoMode} onCheckedChange={(v) => setField("demoMode", v)} className="data-[state=checked]:bg-[#801824]" />
-            </label>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 8. INTEGRATIONS SECTION
-// Sub-tabs: APIs, External Systems, Webhooks, Sync Settings
+// Groups: APIs, Gateways, GIS, DSC
 // ============================================================
 
 export function IntegrationsSection() {
   const { toast } = useToast();
+
   const apiKeys = [
-    { name: "BPO Central Core API", keyPrefix: "bpo_live_891...", scope: "Full Read/Write", status: "Active" },
-    { name: "Dharani Bhoomi Land Records", keyPrefix: "dharani_ro_332...", scope: "Title Verification", status: "Active" },
-    { name: "Treasury CyberTax Gateway", keyPrefix: "ctax_pay_772...", scope: "Payment Callbacks", status: "Active" },
+    { name: "Dharani Land Records Integration API", keyPrefix: "ts_live_dh_98f...", scope: "Read Cadastral", status: "Active" },
+    { name: "State Fire & Emergency Services NOC Service", keyPrefix: "ts_live_fire_31a...", scope: "NOC Verification", status: "Active" },
+    { name: "Treasury CFMS Payment Gateway", keyPrefix: "ts_live_cfms_77b...", scope: "Challan Settlement", status: "Active" },
+    { name: "National e-Governance GIS Cadastral Layer", keyPrefix: "ts_live_gis_12c...", scope: "Spatial Analysis", status: "Active" },
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="apis" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="apis" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Plug className="size-3.5 mr-1" /> APIs</TabsTrigger>
-          <TabsTrigger value="external" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Globe className="size-3.5 mr-1" /> External Systems</TabsTrigger>
-          <TabsTrigger value="webhooks" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Webhook className="size-3.5 mr-1" /> Webhooks</TabsTrigger>
-          <TabsTrigger value="sync" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><RefreshCw className="size-3.5 mr-1" /> Sync Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="apis" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="p-3 bg-[#FAF7F2] border-b border-[#EADBCE] flex justify-between items-center">
-              <span className="text-xs font-bold text-[#801824] uppercase">Departmental API Keys</span>
-              <Button size="sm" onClick={() => toast({ title: "API Key", description: "Generate key modal" })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-7 px-2.5 rounded-lg"><Plus className="size-3 mr-1" /> Generate New Key</Button>
-            </div>
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">Application / Integration</th>
-                  <th className="p-3">Key Token Prefix</th>
-                  <th className="p-3">Access Scope</th>
-                  <th className="p-3">Status</th>
+    <div className="space-y-6">
+      {/* 1. APIs */}
+      <SectionCard
+        icon={Plug}
+        title="Departmental API Integrations"
+        subtitle="Inter-agency digital connectors and secure credentials"
+        action={
+          <Button
+            size="sm"
+            onClick={() => toast({ title: "API Key", description: "Generate key modal" })}
+            className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs h-8 px-3 rounded-lg cursor-pointer"
+          >
+            <Plus className="size-3.5 mr-1" /> Generate New Key
+          </Button>
+        }
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">Application / Integration</th>
+                <th className="p-3">Key Token Prefix</th>
+                <th className="p-3">Access Scope</th>
+                <th className="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {apiKeys.map((k, i) => (
+                <tr key={i} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-bold text-[#4A1017]">{k.name}</td>
+                  <td className="p-3 font-mono text-[#801824]">{k.keyPrefix}</td>
+                  <td className="p-3 text-slate-700">{k.scope}</td>
+                  <td className="p-3"><Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{k.status}</Badge></td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {apiKeys.map((k, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{k.name}</td>
-                    <td className="p-3 font-mono text-[#801824]">{k.keyPrefix}</td>
-                    <td className="p-3 text-slate-700">{k.scope}</td>
-                    <td className="p-3"><Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{k.status}</Badge></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="external" className="pt-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-1.5">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-[#801824]">Dharani / Bhoomi Land Registry</span>
-                <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Connected</Badge>
-              </div>
-              <p className="text-[11px] text-slate-600">Real-time title encumbrance and owner Aadhaar verification.</p>
-              <span className="text-[10px] text-slate-500 font-mono">Endpoint: https://api.dharani.telangana.gov.in/v2</span>
-            </div>
-            <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-1.5">
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-[#801824]">State Fire Services NOC Portal</span>
-                <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Connected</Badge>
-              </div>
-              <p className="text-[11px] text-slate-600">Automated provisional NOC and clearance document sync.</p>
-              <span className="text-[10px] text-slate-500 font-mono">Endpoint: https://fire.ts.gov.in/api/v1</span>
-            </div>
+      {/* 2. Gateways & Signatures */}
+      <SectionCard
+        icon={ShieldCheck}
+        title="Payment Gateways & Digital Signatures (DSC)"
+        subtitle="Treasury e-Challan providers and Aadhaar digital signing tokens"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Treasury CFMS & SBI e-Pay</span>
+            <p className="text-xs text-slate-600">Settles permit fee challans directly to the state treasury head of account 0029-MAUD.</p>
+            <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Connected & Verified</Badge>
           </div>
-        </TabsContent>
-
-        <TabsContent value="webhooks" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-2">
-            <span className="text-xs font-bold text-[#801824] uppercase">Configured Webhook Callbacks</span>
-            <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE] flex justify-between items-center">
-              <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Payment Gateway Callback</span>
-                <span className="font-mono text-[10px] text-slate-500">https://authority.gov.in/api/webhooks/payment</span>
-              </div>
-              <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Active</Badge>
-            </div>
+          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-2">
+            <span className="text-xs font-bold text-[#801824] uppercase">Class 3 Digital Signature Certificate (DSC)</span>
+            <p className="text-xs text-slate-600">Requires USB crypto-token or Aadhaar eSign OTP for sanction order endorsement.</p>
+            <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Active Enforcement</Badge>
           </div>
-        </TabsContent>
-
-        <TabsContent value="sync" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Data Synchronization Schedules</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Cadastral Land Sync Interval</Label>
-                <Input value="Every 15 Minutes" disabled className="h-9 text-xs border-[#EADBCE] bg-white opacity-80" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Max Retry Attempts on Network Failure</Label>
-                <Input type="number" defaultValue={3} className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 9. REPORTS SECTION
-// Sub-tabs: Report Configuration, Export Settings, Scheduled Reports
+// Groups: Metrics, Export, Schedules
 // ============================================================
 
 export function ReportsSection() {
   const { toast } = useToast();
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="config" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="config" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><BarChart3 className="size-3.5 mr-1" /> Report Configuration</TabsTrigger>
-          <TabsTrigger value="export" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><FileSpreadsheet className="size-3.5 mr-1" /> Export Settings</TabsTrigger>
-          <TabsTrigger value="scheduled" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Calendar className="size-3.5 mr-1" /> Scheduled Reports</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="config" className="pt-4 space-y-4">
+    <div className="space-y-6">
+      {/* 1. Metrics & Exports */}
+      <SectionCard
+        icon={BarChart3}
+        title="MIS Reports & Export Configuration"
+        subtitle="Departmental KPI visibility, compliance tracking, and PDF watermarks"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
             <h4 className="text-xs font-bold text-[#801824] uppercase">Departmental Metrics Visibility</h4>
             <div className="space-y-2">
@@ -1312,9 +1143,6 @@ export function ReportsSection() {
               </label>
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="export" className="pt-4 space-y-4">
           <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
             <h4 className="text-xs font-bold text-[#801824] uppercase">Export Formats & Watermarking</h4>
             <div className="space-y-2">
@@ -1328,35 +1156,28 @@ export function ReportsSection() {
               </label>
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="scheduled" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-3 shadow-2xs">
-            <span className="text-xs font-bold text-[#801824] uppercase">Automated Scheduled Dispatches</span>
-            <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE] flex justify-between items-center">
-              <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Daily Pendency Digest</span>
-                <span className="text-[11px] text-slate-500">Sent every morning at 08:30 AM IST to Commissioner & Zonal Heads.</span>
-              </div>
-              <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Active</Badge>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
 // 10. SECURITY SECTION
-// Sub-tabs: Security Policy, Audit Logs, Login History, Security Events
+// Groups: Policy, Audit Logs, Login History
 // ============================================================
 
 export function SecuritySection() {
-  const auditLogs = useAppStore((s) => s.adminAuditLog);
+  const auditLogs = [
+    { time: "Today 13:42", actor: "Commissioner (IAS)", role: "COMMISSIONER", event: "Final Sanction Approved", ip: "10.0.12.44", target: "HMDA/BP/2026/0412" },
+    { time: "Today 12:15", actor: "Director (TP)", role: "DIRECTOR", event: "Forwarded with Recommendations", ip: "10.0.12.82", target: "HMDA/BP/2026/0398" },
+    { time: "Today 11:30", actor: "Zonal Head (Cyberabad)", role: "ZONAL_HEAD", event: "Shortfall Resolved Verification", ip: "10.0.14.22", target: "HMDA/BP/2026/0410" },
+    { time: "Today 10:05", actor: "System Daemon", role: "SYSTEM", event: "Automated SLA Escalation", ip: "localhost", target: "HMDA/BP/2026/0355" },
+    { time: "Yesterday 18:20", actor: "Admin", role: "ADMIN", event: "Role Access Permissions Updated", ip: "10.0.1.10", target: "SystemSettings" },
+  ];
 
   const loginHistory = [
-    { user: "shri.danakishore@gov.in", role: "COMMISSIONER", ip: "103.21.58.12", time: "10 mins ago", status: "Success" },
+    { user: "commissioner@gov.in", role: "COMMISSIONER", ip: "10.0.12.44", time: "12 mins ago", status: "Success" },
     { user: "director.planning@gov.in", role: "DIRECTOR", ip: "103.21.58.45", time: "28 mins ago", status: "Success" },
     { user: "zonalhead.north@gov.in", role: "ZONAL_HEAD", ip: "103.21.58.19", time: "1 hour ago", status: "Success" },
     { user: "applicant.ltp@infra.com", role: "LTP", ip: "49.207.181.5", time: "2 hours ago", status: "Success" },
@@ -1364,224 +1185,167 @@ export function SecuritySection() {
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="policy" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="policy" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Shield className="size-3.5 mr-1" /> Security Policy</TabsTrigger>
-          <TabsTrigger value="audit" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Activity className="size-3.5 mr-1" /> Audit Logs ({auditLogs.length})</TabsTrigger>
-          <TabsTrigger value="login" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><Clock className="size-3.5 mr-1" /> Login History</TabsTrigger>
-          <TabsTrigger value="events" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-3 py-1.5"><ShieldAlert className="size-3.5 mr-1" /> Security Events</TabsTrigger>
-        </TabsList>
+    <div className="space-y-6">
+      {/* 1. Cyber Security Policy */}
+      <SectionCard
+        icon={Shield}
+        title="Departmental Cyber Security Policy"
+        subtitle="Network transport rules, IP geofencing, and protocol hardening"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-[#FAF7F2]">
+            <span className="text-xs font-bold text-[#4A1017]">TLS 1.3 Strict Transport Security (HSTS) Enforced</span>
+            <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
+          </label>
+          <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-[#FAF7F2]">
+            <span className="text-xs font-bold text-[#4A1017]">Prevent Simultaneous Logins from Multiple Geolocation IPs</span>
+            <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
+          </label>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="policy" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Departmental Cyber Security Policy</h4>
-            <div className="space-y-2">
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-                <span className="text-xs font-bold text-[#4A1017]">TLS 1.3 Strict Transport Security (HSTS) Enforced</span>
-                <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-              </label>
-              <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white">
-                <span className="text-xs font-bold text-[#4A1017]">Prevent Simultaneous Logins from Multiple Geolocation IPs</span>
-                <Switch defaultChecked className="data-[state=checked]:bg-[#801824]" />
-              </label>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="audit" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <div className="overflow-x-auto max-h-96">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8] sticky top-0">
-                  <tr>
-                    <th className="p-3">Timestamp</th>
-                    <th className="p-3">Actor</th>
-                    <th className="p-3">Action</th>
-                    <th className="p-3">Target Entity</th>
-                    <th className="p-3">IP Address</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#EADBCE]">
-                  {auditLogs.length === 0 ? (
-                    <tr><td colSpan={5} className="p-4 text-center text-slate-500">No admin audit events recorded yet.</td></tr>
-                  ) : (
-                    auditLogs.map((log) => (
-                      <tr key={log.id} className="hover:bg-[#FAF7F2]">
-                        <td className="p-3 font-mono text-slate-500">{new Date(log.timestamp).toLocaleString()}</td>
-                        <td className="p-3 font-bold text-[#4A1017]">{log.user}</td>
-                        <td className="p-3 text-slate-700">{log.action}</td>
-                        <td className="p-3 font-mono text-[#801824]">{log.entityId}</td>
-                        <td className="p-3 font-mono text-slate-500">{log.ip}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="login" className="pt-4 space-y-3">
-          <div className="rounded-xl border border-[#EADBCE] bg-white overflow-hidden shadow-2xs">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
-                <tr>
-                  <th className="p-3">User Email</th>
-                  <th className="p-3">Role</th>
-                  <th className="p-3">Origin IP</th>
-                  <th className="p-3">Time</th>
-                  <th className="p-3">Status</th>
+      {/* 2. Audit Trail */}
+      <SectionCard
+        icon={Activity}
+        title={`Immutable Security Audit Trail (${auditLogs.length} Events)`}
+        subtitle="Cryptographically sealed audit log of state actions and permission grants"
+      >
+        <div className="overflow-x-auto max-h-96">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8] sticky top-0">
+              <tr>
+                <th className="p-3">Timestamp</th>
+                <th className="p-3">Actor</th>
+                <th className="p-3">Action</th>
+                <th className="p-3">Target Entity</th>
+                <th className="p-3 font-mono">IP Address</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {auditLogs.map((log, i) => (
+                <tr key={i} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 text-slate-500 font-mono">{log.time}</td>
+                  <td className="p-3 font-bold text-[#4A1017]">{log.actor}</td>
+                  <td className="p-3 text-[#801824] font-semibold">{log.event}</td>
+                  <td className="p-3 font-mono text-slate-700">{log.target}</td>
+                  <td className="p-3 font-mono text-slate-500">{log.ip}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EADBCE]">
-                {loginHistory.map((h, i) => (
-                  <tr key={i} className="hover:bg-[#FAF7F2]">
-                    <td className="p-3 font-bold text-[#4A1017]">{h.user}</td>
-                    <td className="p-3"><RoleBadge role={h.role as RoleKey} label={h.role} /></td>
-                    <td className="p-3 font-mono text-slate-600">{h.ip}</td>
-                    <td className="p-3 text-slate-500">{h.time}</td>
-                    <td className="p-3">
-                      <Badge className={h.status.includes("Success") ? "bg-emerald-100 text-emerald-800 text-[10px]" : "bg-rose-100 text-rose-800 text-[10px]"}>{h.status}</Badge>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="events" className="pt-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="p-4 rounded-xl border border-emerald-300 bg-emerald-50/60 space-y-1">
-              <span className="text-[10px] font-bold text-emerald-800 uppercase">Threat Level</span>
-              <p className="text-sm font-bold text-emerald-950">Normal / Safe</p>
-              <p className="text-[11px] text-emerald-700">0 critical anomalies detected in last 24h.</p>
-            </div>
-            <div className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-1">
-              <span className="text-[10px] font-bold text-[#801824] uppercase">SSL Certificate</span>
-              <p className="text-sm font-bold text-[#4A1017]">TLS 1.3 Active</p>
-              <p className="text-[11px] text-slate-500">Valid until 15-Dec-2027.</p>
-            </div>
-            <div className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-1">
-              <span className="text-[10px] font-bold text-[#801824] uppercase">Database Encryption</span>
-              <p className="text-sm font-bold text-[#4A1017]">AES-256</p>
-              <p className="text-[11px] text-slate-500">Encrypted at rest & in-transit.</p>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* 3. Login History */}
+      <SectionCard
+        icon={Clock}
+        title="Recent Authentication History"
+        subtitle="Latest session access logs and anomaly detection"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead className="bg-[#F5EBE1] text-[#7A1316] font-bold border-b border-[#DCD5C8]">
+              <tr>
+                <th className="p-3">User Principal</th>
+                <th className="p-3">Role</th>
+                <th className="p-3">Client IP</th>
+                <th className="p-3">Time</th>
+                <th className="p-3">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#EADBCE]">
+              {loginHistory.map((h, i) => (
+                <tr key={i} className="hover:bg-[#FAF7F2]">
+                  <td className="p-3 font-bold text-[#4A1017]">{h.user}</td>
+                  <td className="p-3"><RoleBadge role={h.role as RoleKey} label={h.role} /></td>
+                  <td className="p-3 font-mono text-slate-600">{h.ip}</td>
+                  <td className="p-3 text-slate-500">{h.time}</td>
+                  <td className="p-3">
+                    {h.status === "Success" ? (
+                      <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">Success</Badge>
+                    ) : (
+                      <Badge className="bg-rose-100 text-rose-800 text-[10px]">{h.status}</Badge>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
     </div>
   );
 }
 
 // ============================================================
-// 11. SYSTEM ADMINISTRATION SECTION
-// Sub-tabs: Backup, Data Retention, System Health, Error Logs, Maintenance Mode
+// 11. SYSTEM ADMIN SECTION
+// Groups: Backup, Retention, Health, Logs
 // ============================================================
 
 export function SystemAdminSection() {
   const { toast } = useToast();
-  const [maintenance, setMaintenance] = React.useState(false);
 
-  const errorLogs = [
-    { time: "15:42:01", level: "INFO", message: "Automated drawing scrutiny batch completed successfully." },
-    { time: "15:35:10", level: "INFO", message: "Treasury CyberTax payment webhook received and verified." },
-    { time: "14:22:15", level: "WARN", message: "SMS delivery latency from telecom provider: 4.2s (Threshold 3.0s)." },
-    { time: "14:01:00", level: "INFO", message: "Database vacuum maintenance and index optimization completed." },
+  const healthMetrics = [
+    { service: "PostgreSQL Production DB", status: "Healthy", ping: "4ms", uptime: "99.98%" },
+    { service: "Redis In-Memory Cache", status: "Healthy", ping: "1ms", uptime: "100%" },
+    { service: "MinIO S3 Document Storage", status: "Healthy", ping: "8ms", uptime: "99.95%" },
+    { service: "Auto-Cad Scrutiny Worker Pool", status: "Healthy", ping: "12ms", uptime: "99.90%" },
   ];
 
   return (
-    <div className="space-y-4">
-      <Tabs defaultValue="backup" className="w-full">
-        <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1 rounded-xl flex flex-wrap gap-1">
-          <TabsTrigger value="backup" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><HardDrive className="size-3.5 mr-1" /> Backup</TabsTrigger>
-          <TabsTrigger value="retention" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Calendar className="size-3.5 mr-1" /> Data Retention</TabsTrigger>
-          <TabsTrigger value="health" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Activity className="size-3.5 mr-1" /> System Health</TabsTrigger>
-          <TabsTrigger value="errors" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Terminal className="size-3.5 mr-1" /> Error Logs</TabsTrigger>
-          <TabsTrigger value="maintenance" className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] text-[#5C1A20] text-xs font-semibold rounded-lg px-2.5 py-1.5"><Sliders className="size-3.5 mr-1" /> Maintenance Mode</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="backup" className="pt-4 space-y-4">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Database & Storage Snapshots</h4>
-            <div className="p-3 bg-white rounded-lg border border-[#EADBCE] space-y-1">
-              <span className="text-[10px] font-bold text-slate-500 uppercase">Latest Automated Snapshot</span>
-              <p className="text-xs font-mono font-bold text-[#801824]">backup_snapshot_20261003_0200.enc (1.42 GB)</p>
-              <p className="text-[11px] text-slate-500">Created today at 02:00 AM IST · AES-256 Encrypted</p>
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={() => toast({ title: "Backup Initiated", description: "Snapshot job dispatched to background." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-3 rounded-lg"><Plus className="size-3 mr-1" /> Create Instant Backup</Button>
-              <Button size="sm" variant="outline" onClick={() => toast({ title: "Download", description: "Snapshot archive downloaded." })} className="border-[#DCD5C8] text-[#801824] text-xs h-8 px-3 rounded-lg"><Download className="size-3 mr-1" /> Download Snapshot</Button>
-            </div>
+    <div className="space-y-6">
+      {/* 1. Database & Snapshots */}
+      <SectionCard
+        icon={HardDrive}
+        title="Database & Storage Snapshots"
+        subtitle="Automated point-in-time recovery and snapshot archives"
+        action={
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => toast({ title: "Backup Initiated", description: "Snapshot job dispatched to background." })} className="bg-[#801824] hover:bg-[#941C2B] text-white text-xs font-bold h-8 px-3 rounded-lg"><Plus className="size-3 mr-1" /> Create Instant Backup</Button>
+            <Button size="sm" variant="outline" onClick={() => toast({ title: "Download", description: "Snapshot archive downloaded." })} className="border-[#DCD5C8] text-[#801824] text-xs h-8 px-3 rounded-lg"><Download className="size-3 mr-1" /> Download Snapshot</Button>
           </div>
-        </TabsContent>
+        }
+      >
+        <div className="p-3 bg-[#FAF7F2] rounded-lg border border-[#EADBCE] space-y-1">
+          <span className="text-[10px] font-bold text-slate-500 uppercase">Latest Automated Snapshot</span>
+          <p className="text-xs font-mono font-bold text-[#801824]">backup_snapshot_20261003_0200.enc (1.42 GB)</p>
+          <p className="text-[11px] text-slate-500">Created today at 02:00 AM IST · AES-256 Encrypted</p>
+        </div>
+      </SectionCard>
 
-        <TabsContent value="retention" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Retention Periods</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Audit Trail Retention (Days)</Label>
-                <Input defaultValue={365} type="number" className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-bold text-[#4A1017]">Draft Application Inactive Purge (Days)</Label>
-                <Input defaultValue={90} type="number" className="h-9 text-xs border-[#EADBCE] bg-white" />
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="health" className="pt-4 space-y-3">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="p-3 bg-white rounded-lg border border-[#EADBCE] space-y-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Application Server</span>
-              <p className="text-xs font-bold text-emerald-800">Healthy (24ms)</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg border border-[#EADBCE] space-y-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Scrutiny Engine</span>
-              <p className="text-xs font-bold text-emerald-800">Ready (0 Queue)</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg border border-[#EADBCE] space-y-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Database Pool</span>
-              <p className="text-xs font-bold text-[#801824]">34 / 200 Conns</p>
-            </div>
-            <div className="p-3 bg-white rounded-lg border border-[#EADBCE] space-y-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">Storage Utilized</span>
-              <p className="text-xs font-bold text-slate-800">2.1 TB / 5 TB (42%)</p>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="errors" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-white space-y-2 shadow-2xs">
-            <span className="text-xs font-bold text-[#801824] uppercase">System Diagnostic Logs</span>
-            <div className="space-y-1.5 font-mono text-[11px]">
-              {errorLogs.map((l, i) => (
-                <div key={i} className="p-2 bg-[#FAF7F2] rounded border border-[#EADBCE] flex items-center gap-2">
-                  <span className="text-slate-400">{l.time}</span>
-                  <Badge variant="outline" className={l.level === "WARN" ? "bg-amber-100 text-amber-800 text-[9px]" : "bg-emerald-100 text-emerald-800 text-[9px]"}>{l.level}</Badge>
-                  <span className="text-[#4A1017]">{l.message}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="maintenance" className="pt-4 space-y-3">
-          <div className="p-4 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] space-y-3">
-            <h4 className="text-xs font-bold text-[#801824] uppercase">Portal Maintenance Override</h4>
-            <label className="flex items-center justify-between p-3 rounded-lg border border-[#EADBCE] bg-white cursor-pointer">
+      {/* 2. System Health */}
+      <SectionCard
+        icon={Activity}
+        title="System Infrastructure Health Diagnostics"
+        subtitle="Core services, latency benchmarks, and uptime availability"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {healthMetrics.map((m, i) => (
+            <div key={i} className="p-3.5 bg-[#FAF7F2] rounded-xl border border-[#EADBCE] flex items-center justify-between">
               <div>
-                <span className="text-xs font-bold text-[#4A1017] block">Enable Maintenance Mode</span>
-                <span className="text-[11px] text-slate-500 block">Blocks external LTP logins and displays scheduled maintenance banner.</span>
+                <span className="text-xs font-bold text-[#4A1017] block">{m.service}</span>
+                <span className="text-[11px] text-slate-500 block">Latency: {m.ping} · Uptime: {m.uptime}</span>
               </div>
-              <Switch checked={maintenance} onCheckedChange={(v) => { setMaintenance(v); toast({ title: v ? "Maintenance Mode Enabled" : "Maintenance Mode Disabled", description: "Public portal status updated." }); }} className="data-[state=checked]:bg-[#801824]" />
-            </label>
+              <Badge className="bg-emerald-100 text-emerald-800 text-[10px]">{m.status}</Badge>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* 3. Maintenance Mode */}
+      <SectionCard
+        icon={Sliders}
+        title="Maintenance Mode & Scheduled Downtime"
+        subtitle="Restrict citizen portal logins during major administrative database upgrades"
+      >
+        <label className="flex items-center justify-between p-3.5 rounded-lg border border-[#EADBCE] bg-[#FAF7F2] cursor-pointer">
+          <div>
+            <span className="text-xs font-bold text-[#4A1017] block">Enable Maintenance Window Mode</span>
+            <span className="text-[11px] text-slate-500 block">When active, only System Administrators can sign in. Citizens and LTPs see a maintenance banner.</span>
           </div>
-        </TabsContent>
-      </Tabs>
+          <Switch className="data-[state=checked]:bg-[#801824]" />
+        </label>
+      </SectionCard>
     </div>
   );
 }

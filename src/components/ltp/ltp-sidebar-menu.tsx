@@ -127,19 +127,30 @@ export function hasOutwardAccess(role?: string): boolean {
   return role !== "LTP";
 }
 
+export const SETTINGS_MODULE: LtpModuleDef = {
+  id: "settings",
+  label: "Settings",
+  iconType: "settings",
+  directMenuId: "settings",
+  submenus: [],
+};
+
+export function hasSettingsAccess(role?: string): boolean {
+  if (!role) return false;
+  return role === "ADMIN" || role === "COMMISSIONER" || role === "ADDITIONAL_COMMISSIONER";
+}
+
+export function hasApplicationsAccess(role?: string): boolean {
+  return role === "LTP";
+}
+
 const ADMIN_MODULES: LtpModuleDef[] = [
   ...LTP_MODULES.slice(0, 1),
   REGISTRATION_MODULE,
   ...LTP_MODULES.slice(1, 4),
   OUTWARD_MODULE,
   ...LTP_MODULES.slice(4),
-  {
-    id: "settings",
-    label: "Settings",
-    iconType: "settings",
-    directMenuId: "settings",
-    submenus: [],
-  },
+  SETTINGS_MODULE,
 ];
 
 const ZONAL_MODULES: LtpModuleDef[] = [
@@ -377,6 +388,9 @@ function isMenuMatch(mod: LtpModuleDef, menuId: string): boolean {
   if (mod.id === "outward" || mod.directMenuId === "outward") {
     return menuId === "outward" || menuId === "ltp-outward" || menuId === "officer-outward" || menuId === "admin-outward";
   }
+  if (mod.id === "settings" || mod.directMenuId === "settings") {
+    return menuId === "settings" || menuId === "admin-settings" || menuId === "officer-settings";
+  }
   if (mod.id === "occupancy") {
     return OCCUPANCY_TAB_IDS.has(menuId) || mod.submenus.some((s) => s.id === menuId);
   }
@@ -403,6 +417,11 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const rawModules = React.useMemo(() => {
     let list = [...baseModules];
+
+    // Applications module is strictly visible to LTP
+    if (user?.role !== "LTP") {
+      list = list.filter((m) => m.id !== "application-submission");
+    }
 
     // Registration module for all roles EXCEPT LTP and TPA
     if (hasRegistrationAccess(user?.role)) {
@@ -432,6 +451,15 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       }
     }
 
+    // Settings module for Admin & Commissioners
+    if (hasSettingsAccess(user?.role)) {
+      if (!list.some((m) => m.id === "settings")) {
+        list.push(SETTINGS_MODULE);
+      }
+    } else {
+      list = list.filter((m) => m.id !== "settings");
+    }
+
     // Registration module is visible to all EXCEPT LTP and TPA
     if (user?.role === "LTP" || user?.role === "TPA") {
       list = list.filter((m) => m.id !== "registration");
@@ -453,6 +481,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
 
   const modules = React.useMemo(() => {
     let activeList = rawModules;
+    // Guarantee non-LTP roles never receive applications module
+    if (user?.role !== "LTP") {
+      activeList = activeList.filter((m) => m.id !== "application-submission");
+    }
     // Guarantee LTP and TPA never receive registration module
     if (user?.role === "LTP" || user?.role === "TPA") {
       activeList = activeList.filter((m) => m.id !== "registration");
@@ -484,16 +516,32 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     }
   }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
 
+  // Safety: If current user is not LTP and an applications menu was active, reset to dashboard
+  React.useEffect(() => {
+    if (user?.role && user.role !== "LTP") {
+      const appMenus = [
+        "application-submission",
+        "submitted-applications",
+        "draft-application",
+        "objected-files",
+      ];
+      if (appMenus.includes(ltpActiveMenu)) {
+        setLtpActiveMenu("dashboard");
+      }
+    }
+  }, [user?.role, ltpActiveMenu, setLtpActiveMenu]);
+
   // Single module expanded at a time
+  const effectiveMenu = (view === "admin-settings" || view === "officer-settings") ? "settings" : ltpActiveMenu;
   const activeParentModId = React.useMemo(() => {
-    return modules.find((m) => isMenuMatch(m, ltpActiveMenu))?.id ?? "dashboard";
-  }, [modules, ltpActiveMenu]);
+    return modules.find((m) => isMenuMatch(m, effectiveMenu))?.id ?? "dashboard";
+  }, [modules, effectiveMenu]);
 
   const [toggledModuleId, setToggledModuleId] = React.useState<string | null>(null);
-  const [prevActiveMenu, setPrevActiveMenu] = React.useState(ltpActiveMenu);
+  const [prevActiveMenu, setPrevActiveMenu] = React.useState(effectiveMenu);
 
-  if (prevActiveMenu !== ltpActiveMenu) {
-    setPrevActiveMenu(ltpActiveMenu);
+  if (prevActiveMenu !== effectiveMenu) {
+    setPrevActiveMenu(effectiveMenu);
     setToggledModuleId(null);
   }
 
@@ -506,6 +554,10 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
       if (view !== "ltp-dashboard") {
         navigate("ltp-dashboard");
       }
+    } else if (menuId === "settings" || menuId === "admin-settings") {
+      if (view !== "admin-settings") {
+        navigate("admin-settings");
+      }
     } else {
       if (view !== "ltp-applications") {
         navigate("ltp-applications");
@@ -514,7 +566,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
   };
 
   const handleModuleClick = (mod: LtpModuleDef) => {
-    const isCurrentlyActiveModule = isMenuMatch(mod, ltpActiveMenu);
+    const isCurrentlyActiveModule = isMenuMatch(mod, effectiveMenu);
 
     if (openModuleId === mod.id && !collapsed && mod.submenus.length > 0) {
       if (!isCurrentlyActiveModule) {
@@ -525,7 +577,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     } else {
       setOpenModuleId(mod.id);
       if (mod.submenus.length > 0) {
-        const activeSub = mod.submenus.find((s) => s.id === ltpActiveMenu);
+        const activeSub = mod.submenus.find((s) => s.id === effectiveMenu);
         handleSelectSubmenu(activeSub ? activeSub.id : mod.submenus[0].id);
       } else if (mod.directMenuId) {
         handleSelectSubmenu(mod.directMenuId);
@@ -559,7 +611,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     return (
       <div className="flex flex-col w-full items-center pt-2 pb-6 space-y-1">
         {modules.map((mod) => {
-          const isActive = isMenuMatch(mod, ltpActiveMenu);
+          const isActive = isMenuMatch(mod, effectiveMenu);
           return (
             <button
               key={mod.id}
@@ -585,7 +637,7 @@ export function LtpSidebarMenu({ collapsed = false }: { collapsed?: boolean }) {
     <div className="flex flex-col w-full text-sm font-sans px-2 pt-2 space-y-1 pb-6">
       {modules.map((mod) => {
         const isOpen = openModuleId === mod.id;
-        const isActive = isMenuMatch(mod, ltpActiveMenu);
+        const isActive = isMenuMatch(mod, effectiveMenu);
         const hasSubmenus = mod.submenus.length > 0;
         const isHeaderActive = hasSubmenus ? isOpen : isActive;
         return (

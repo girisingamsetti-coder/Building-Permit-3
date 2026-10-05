@@ -115,14 +115,17 @@ export function LtpPortalView() {
       }
 
       case "draft-application": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpDraftApplications />;
       }
 
       case "submitted-applications": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpSubmittedApplications />;
       }
 
       case "all-ltp-in-process": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpSubmittedApplications />;
       }
 
@@ -131,6 +134,7 @@ export function LtpPortalView() {
       }
 
       case "objected-files": {
+        if (user?.role !== "LTP") return <UnifiedDashboard />;
         return <LtpObjections />;
       }
 
@@ -214,7 +218,7 @@ export function LtpPortalView() {
 
       case "settings":
       case "admin-settings": {
-        if (user?.role !== "ADMIN") {
+        if (user?.role !== "ADMIN" && user?.role !== "COMMISSIONER" && user?.role !== "ADDITIONAL_COMMISSIONER") {
           return <UnifiedDashboard />;
         }
         return (

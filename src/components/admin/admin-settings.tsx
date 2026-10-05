@@ -10,12 +10,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -30,27 +24,18 @@ import {
   FileText,
   Sliders,
   FlaskConical,
-  CircleDot,
   ShieldCheck,
-  Eye,
-  Lock,
   Workflow,
   Building,
   Users,
-  Database,
-  FolderOpen,
-  Bell,
-  Cpu,
   Webhook,
-  BarChart3,
   ShieldAlert,
-  Server,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import type { SystemSettings, ModuleAccessLevel } from "@/types";
-import { AdminWorkflow } from "./admin-workflow";
+import type { SystemSettings } from "@/types";
 import { OfficerSettings } from "../officer/officer-settings";
 import {
+  SectionCard,
   OrganizationSection,
   UsersAccessSection,
   MastersSection,
@@ -94,32 +79,88 @@ function settingsEqual(a: SystemSettings, b: SystemSettings): boolean {
   if (!a.allowedDrawingFormats.every((v) => b.allowedDrawingFormats.includes(v))) return false;
   if (a.allowedDocumentFormats.length !== b.allowedDocumentFormats.length) return false;
   if (!a.allowedDocumentFormats.every((v) => b.allowedDocumentFormats.includes(v))) return false;
-  // Compare roleAccessConfig and userAccessConfig
   try {
     if (JSON.stringify(a.roleAccessConfig) !== JSON.stringify(b.roleAccessConfig)) return false;
     if (JSON.stringify(a.userAccessConfig ?? {}) !== JSON.stringify(b.userAccessConfig ?? {})) return false;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
   return true;
 }
 
 // ============================================================
-// Main component
+// Settings Tabs Configuration (Exactly 6 Clean Tabs)
+// ============================================================
+export interface SettingsTab {
+  id: string;
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export const SETTINGS_TABS: SettingsTab[] = [
+  {
+    id: "general",
+    label: "General",
+    description: "Portal identity, date & currency formats, upload quotas, and sandbox simulation",
+    icon: Sliders,
+  },
+  {
+    id: "organization",
+    label: "Organization & Masters",
+    description: "Statutory authority profile, departments, designations, planning zones, and masters",
+    icon: Building,
+  },
+  {
+    id: "users-access",
+    label: "Users & Access",
+    description: "User directories, role provisioning, granular module permissions, and auth policies",
+    icon: Users,
+  },
+  {
+    id: "workflow-docs",
+    label: "Workflows & Documents",
+    description: "Approval pipelines, citizen charter SLAs, escalations, and mandatory document checklists",
+    icon: Workflow,
+  },
+  {
+    id: "integrations",
+    label: "Integrations & Comms",
+    description: "External department APIs, payment gateways, SMS/email alerts, and scheduled reports",
+    icon: Webhook,
+  },
+  {
+    id: "system-security",
+    label: "System & Security",
+    description: "System rule parameters, security audit trail, diagnostics, and database maintenance",
+    icon: ShieldAlert,
+  },
+];
+
+// ============================================================
+// Main AdminSettings Component
 // ============================================================
 export function AdminSettings() {
   const { toast } = useToast();
   const storeSettings = useAppStore((s) => s.systemSettings);
   const updateSystemSettings = useAppStore((s) => s.updateSystemSettings);
 
-  // Local form state — initialised once from the store (the "draft" being edited)
+  // Local form state
   const [form, setForm] = React.useState<SystemSettings>(storeSettings);
   const [saving, setSaving] = React.useState(false);
   const user = useAppStore((s) => s.user);
+
+  // Exactly 6 Tabs State
+  const [activeTab, setActiveTab] = React.useState<string>("general");
 
   if (user?.role === "COMMISSIONER" || user?.role === "ADDITIONAL_COMMISSIONER") {
     return <OfficerSettings />;
   }
 
   const dirty = !settingsEqual(form, storeSettings);
+
+  const currentTabDef =
+    SETTINGS_TABS.find((t) => t.id === activeTab) || SETTINGS_TABS[0];
 
   function setField<K extends keyof SystemSettings>(key: K, value: SystemSettings[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -128,7 +169,7 @@ export function AdminSettings() {
   function toggleArrayValue(
     key: "allowedDrawingFormats" | "allowedDocumentFormats",
     value: string,
-    on: boolean,
+    on: boolean
   ) {
     setForm((prev) => {
       const current = prev[key];
@@ -160,7 +201,6 @@ export function AdminSettings() {
       return;
     }
     setSaving(true);
-    // Brief delay so the loading state is perceptible (in-memory store would otherwise save instantly)
     window.setTimeout(() => {
       updateSystemSettings({ ...form });
       setSaving(false);
@@ -173,258 +213,226 @@ export function AdminSettings() {
 
   return (
     <form onSubmit={handleSave} className="flex-1 flex flex-col h-full min-h-0" aria-label="System settings form">
-      {/* Main Configuration Card in Beige & Maroon Theme */}
+      {/* Main Settings Card in Beige & Maroon Theme */}
       <div className="flex-1 flex flex-col min-h-0 rounded-xl border-2 border-[#801824]/20 bg-white shadow-xs overflow-hidden">
-        <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-5 pb-0">
-          <Tabs defaultValue="general" className="flex-1 flex flex-col min-h-0 gap-2">
-            <TabsList className="bg-[#FAF4EB] border border-[#E0D2BE] p-1.5 rounded-xl flex gap-1.5 overflow-x-auto h-auto no-scrollbar w-full justify-start flex-nowrap shrink-0" aria-label="System settings sections">
-              <TabsTrigger
-                value="general"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Building2 className="size-3.5" /> General
-              </TabsTrigger>
-              <TabsTrigger
-                value="organization"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Building className="size-3.5" /> Organization
-              </TabsTrigger>
-              <TabsTrigger
-                value="users-access"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Users className="size-3.5" /> Users & Access
-              </TabsTrigger>
-              <TabsTrigger
-                value="masters"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Database className="size-3.5" /> Masters
-              </TabsTrigger>
-              <TabsTrigger
-                value="workflow"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Workflow className="size-3.5" /> Workflow
-              </TabsTrigger>
-              <TabsTrigger
-                value="documents"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <FolderOpen className="size-3.5" /> Documents
-              </TabsTrigger>
-              <TabsTrigger
-                value="notifications"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Bell className="size-3.5" /> Notifications
-              </TabsTrigger>
-              <TabsTrigger
-                value="system"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Cpu className="size-3.5" /> System
-              </TabsTrigger>
-              <TabsTrigger
-                value="integrations"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Webhook className="size-3.5" /> Integrations
-              </TabsTrigger>
-              <TabsTrigger
-                value="reports"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <BarChart3 className="size-3.5" /> Reports
-              </TabsTrigger>
-              <TabsTrigger
-                value="security"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <ShieldAlert className="size-3.5" /> Security
-              </TabsTrigger>
-              <TabsTrigger
-                value="system-admin"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Server className="size-3.5" /> System Administration
-              </TabsTrigger>
-              <TabsTrigger
-                value="formats"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <FileText className="size-3.5" /> Formats
-              </TabsTrigger>
-              <TabsTrigger
-                value="limits"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <Sliders className="size-3.5" /> Limits
-              </TabsTrigger>
-              <TabsTrigger
-                value="demo"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <FlaskConical className="size-3.5" /> Demo Mode
-              </TabsTrigger>
-              <TabsTrigger
-                value="access"
-                className="data-[state=active]:bg-[#801824] data-[state=active]:text-[#FDF6ED] data-[state=active]:shadow-xs text-[#5C1A20] font-semibold text-xs rounded-lg px-3 py-2 hover:bg-[#F3EADF] transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
-              >
-                <ShieldCheck className="size-3.5" /> Module Access
-              </TabsTrigger>
-            </TabsList>
+        {/* Top 6 Tabs Bar */}
+        <div className="bg-[#FAF4EB] border-b border-[#E0D2BE] px-3 sm:px-5 py-2.5 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5" role="tablist" aria-label="Settings Tabs">
+            {SETTINGS_TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer shrink-0 border",
+                    isActive
+                      ? "bg-[#801824] text-[#FDF6ED] border-[#801824] shadow-xs"
+                      : "bg-white/80 text-[#5C1A20] border-[#EADBCE] hover:bg-[#F3EADF] hover:text-[#801824]"
+                  )}
+                >
+                  <Icon className="size-4 shrink-0" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            <div className="flex-1 overflow-y-auto min-h-0 pr-1 mt-1 pb-4">
-              {/* ---------- General ---------- */}
-              <TabsContent value="general" className="space-y-4 pt-2">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FieldInput
-                  id="portalName"
-                  label="Portal Name"
-                  description="Project name displayed across the login screen, top bar, and left menu bar header."
-                  value={form.portalName}
-                  onChange={(v) => setField("portalName", v)}
-                  placeholder="Building Permission System"
-                  maxLength={80}
-                />
-                <FieldInput
-                  id="portalSubtitle"
-                  label="Portal Subtitle"
-                  description="Short descriptor shown beneath the portal name."
-                  value={form.portalSubtitle}
-                  onChange={(v) => setField("portalSubtitle", v)}
-                  placeholder="Building Permit Management System"
-                  maxLength={120}
-                />
-              </div>
-            </TabsContent>
+        {/* Tab Context Subheader */}
+        <div className="bg-[#FDFBF7] border-b border-[#EADBCE]/80 px-4 sm:px-5 py-2 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <currentTabDef.icon className="size-4 text-[#801824] shrink-0" />
+            <span className="text-xs font-bold text-[#4A1017]">{currentTabDef.label}</span>
+            <span className="text-slate-300 hidden sm:inline">|</span>
+            <span className="text-[11px] text-slate-500 truncate hidden sm:inline">{currentTabDef.description}</span>
+          </div>
+        </div>
 
-            {/* ---------- Formats ---------- */}
-            <TabsContent value="formats" className="space-y-4 pt-3">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FieldSelect
-                  id="dateFormat"
-                  label="Date Format"
-                  description="Display format used across the portal for all dates."
-                  value={form.dateFormat}
-                  onChange={(v) => setField("dateFormat", v)}
-                  options={DATE_FORMATS.map((d) => ({ value: d, label: d }))}
-                />
-                <FieldSelect
-                  id="currency"
-                  label="Currency"
-                  description="Currency used for fee calculation, receipts and invoices."
-                  value={form.currency}
-                  onChange={(v) => setField("currency", v)}
-                  options={CURRENCIES.map((c) => ({ value: c.value, label: c.label }))}
-                />
-              </div>
+        {/* Vertically Scrollable Page Content Area with Grouped Layout */}
+        <div className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-6 space-y-6">
+          {/* ============================================================ */}
+          {/* TAB 1: GENERAL                                               */}
+          {/* ============================================================ */}
+          {activeTab === "general" && (
+            <div className="space-y-6">
+              {/* Group 1: Portal Branding */}
+              <SectionCard
+                icon={Building2}
+                title="Portal Identity & Branding"
+                subtitle="Project title and subtitle displayed across the portal top bar and authentication screen"
+              >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <FieldInput
+                    id="portalName"
+                    label="Portal Name"
+                    description="Project name displayed across the login screen, top bar, and menu header."
+                    value={form.portalName}
+                    onChange={(v) => setField("portalName", v)}
+                    placeholder="Building Permission System"
+                    maxLength={80}
+                  />
+                  <FieldInput
+                    id="portalSubtitle"
+                    label="Portal Subtitle"
+                    description="Short descriptor shown beneath the portal name."
+                    value={form.portalSubtitle}
+                    onChange={(v) => setField("portalSubtitle", v)}
+                    placeholder="Building Permit Management System"
+                    maxLength={120}
+                  />
+                </div>
+              </SectionCard>
 
-              <div className="border-t border-[#EADBCE] my-4" />
-
-              <FormatToggleGroup
-                idPrefix="drawing-format"
-                label="Allowed Drawing Formats"
-                description="File extensions accepted for architectural drawing uploads."
-                formats={DRAWING_FORMATS}
-                selected={form.allowedDrawingFormats}
-                onToggle={(v, on) => toggleArrayValue("allowedDrawingFormats", v, on)}
-              />
-              <FormatToggleGroup
-                idPrefix="document-format"
-                label="Allowed Document Formats"
-                description="File extensions accepted for supporting document uploads."
-                formats={DOCUMENT_FORMATS}
-                selected={form.allowedDocumentFormats}
-                onToggle={(v, on) => toggleArrayValue("allowedDocumentFormats", v, on)}
-              />
-            </TabsContent>
-
-            {/* ---------- Limits ---------- */}
-            <TabsContent value="limits" className="space-y-4 pt-3">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FieldNumber
-                  id="maxFileSizeMB"
-                  label="Max File Size (MB)"
-                  description="Maximum size per individual file upload (drawings + documents)."
-                  value={form.maxFileSizeMB}
-                  min={1}
-                  max={100}
-                  onChange={(v) => setField("maxFileSizeMB", v)}
-                />
-                <FieldNumber
-                  id="sessionTimeoutMinutes"
-                  label="Session Timeout (minutes)"
-                  description="Idle session expiry applied to all signed-in users."
-                  value={form.sessionTimeoutMinutes}
-                  min={5}
-                  max={480}
-                  onChange={(v) => setField("sessionTimeoutMinutes", v)}
-                />
-              </div>
-              <div className="rounded-xl border border-[#EADBCE] bg-[#FAF4EB] p-4 text-xs text-[#5C1A20]">
-                <p className="font-bold text-[#801824]">Notes</p>
-                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-600">
-                  <li>File size limit is enforced per upload on both drawings and documents.</li>
-                  <li>Session timeout counts idle time only — active navigation resets the timer.</li>
-                </ul>
-              </div>
-            </TabsContent>
-
-            {/* ---------- Demo Mode ---------- */}
-            <TabsContent value="demo" className="space-y-4 pt-3">
-              <div className="flex items-start justify-between gap-3 rounded-xl border border-[#EADBCE] bg-[#FDFBF7] p-5">
-                <div className="flex items-start gap-3.5">
-                  <div className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#FBF3E4] border border-[#EADBCE] text-[#801824]">
-                    <FlaskConical className="size-5" />
+              {/* Group 2: Formats & Localization */}
+              <SectionCard
+                icon={FileText}
+                title="Formats & Localization"
+                subtitle="Standard date display format, active billing currency, and accepted file extensions"
+              >
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FieldSelect
+                      id="dateFormat"
+                      label="Date Format"
+                      description="Display format used across the portal for all dates."
+                      value={form.dateFormat}
+                      onChange={(v) => setField("dateFormat", v)}
+                      options={DATE_FORMATS.map((d) => ({ value: d, label: d }))}
+                    />
+                    <FieldSelect
+                      id="currency"
+                      label="Currency"
+                      description="Currency used for fee calculation, receipts, and invoices."
+                      value={form.currency}
+                      onChange={(v) => setField("currency", v)}
+                      options={CURRENCIES.map((c) => ({ value: c.value, label: c.label }))}
+                    />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-[#4A1017]">Enable Demo Mode</p>
-                    <p className="text-xs text-slate-600">
-                      When enabled, the portal uses mock SMS / payment gateways and seed data.
-                      Disable for production deployments with real integrations.
-                    </p>
-                    <p className="text-[11px] text-slate-500 pt-1">
-                      Current status:{" "}
-                      <span
-                        className={
-                          storeSettings.demoMode
-                            ? "font-bold text-[#801824]"
-                            : "font-bold text-emerald-700"
-                        }
-                      >
-                        {storeSettings.demoMode ? "Demo mode active" : "Production mode"}
-                      </span>
-                    </p>
+
+                  <Separator className="bg-[#EADBCE]" />
+
+                  <FormatToggleGroup
+                    idPrefix="drawing-format"
+                    label="Allowed Drawing Formats"
+                    description="File extensions accepted for architectural CAD drawings."
+                    formats={DRAWING_FORMATS}
+                    selected={form.allowedDrawingFormats}
+                    onToggle={(v, on) => toggleArrayValue("allowedDrawingFormats", v, on)}
+                  />
+                  <FormatToggleGroup
+                    idPrefix="document-format"
+                    label="Allowed Document Formats"
+                    description="File extensions accepted for supporting PDF/image documents."
+                    formats={DOCUMENT_FORMATS}
+                    selected={form.allowedDocumentFormats}
+                    onToggle={(v, on) => toggleArrayValue("allowedDocumentFormats", v, on)}
+                  />
+                </div>
+              </SectionCard>
+
+              {/* Group 3: Upload Quotas & Session Limits */}
+              <SectionCard
+                icon={Sliders}
+                title="Upload Quotas & Session Limits"
+                subtitle="Maximum file size limits per upload and idle user session timeout"
+              >
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FieldNumber
+                      id="maxFileSizeMB"
+                      label="Max File Size (MB)"
+                      description="Maximum size per individual file upload (drawings + documents)."
+                      value={form.maxFileSizeMB}
+                      min={1}
+                      max={100}
+                      onChange={(v) => setField("maxFileSizeMB", v)}
+                    />
+                    <FieldNumber
+                      id="sessionTimeoutMinutes"
+                      label="Session Timeout (minutes)"
+                      description="Idle session expiry applied to all signed-in users."
+                      value={form.sessionTimeoutMinutes}
+                      min={5}
+                      max={480}
+                      onChange={(v) => setField("sessionTimeoutMinutes", v)}
+                    />
+                  </div>
+                  <div className="rounded-xl border border-[#EADBCE] bg-[#FAF4EB] p-4 text-xs text-[#5C1A20]">
+                    <p className="font-bold text-[#801824]">Notes</p>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-600">
+                      <li>File size limit is enforced per upload on both drawings and documents.</li>
+                      <li>Session timeout counts idle time only — active navigation resets the timer.</li>
+                    </ul>
                   </div>
                 </div>
-                <Switch
-                  id="demoMode"
-                  checked={form.demoMode}
-                  onCheckedChange={(v) => setField("demoMode", v)}
-                  className="data-[state=checked]:bg-[#801824]"
-                  aria-label="Toggle demo mode"
-                />
-              </div>
-              <div className="rounded-xl border border-[#EADBCE] bg-[#FAF4EB] p-4 text-xs text-[#5C1A20]">
-                <p className="font-bold text-[#801824]">Demo mode limitations</p>
-                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-600">
-                  <li>SMS notifications are logged to the database but not delivered to real recipients.</li>
-                  <li>Payments are mocked — no charges are made through the payment gateway.</li>
-                  <li>Seed data is loaded on first run and may be reset by an administrator.</li>
-                </ul>
-              </div>
-            </TabsContent>
+              </SectionCard>
 
-            {/* ---------- Organization ---------- */}
-            <TabsContent value="organization" className="space-y-4 pt-3">
+              {/* Group 4: Sandbox & Demo Mode */}
+              <SectionCard
+                icon={FlaskConical}
+                title="Sandbox & Simulation Environment"
+                subtitle="Toggle simulation mode with mocked SMS and payment gateway integrations"
+              >
+                <div className="space-y-4">
+                  <div className="flex items-start justify-between gap-3 rounded-xl border border-[#EADBCE] bg-[#FAF7F2] p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#FAF4EB] border border-[#EADBCE] text-[#801824]">
+                        <FlaskConical className="size-4" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-[#4A1017]">Enable Demo Mode</p>
+                        <p className="text-[11px] text-slate-600">
+                          When enabled, the portal uses mocked SMS/payment gateways and seed applications.
+                          Disable for production deployment.
+                        </p>
+                        <p className="text-[11px] text-slate-500 pt-0.5">
+                          Current status:{" "}
+                          <span className={storeSettings.demoMode ? "font-bold text-[#801824]" : "font-bold text-emerald-700"}>
+                            {storeSettings.demoMode ? "Demo Mode Active" : "Production Mode Active"}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      id="demoMode"
+                      checked={form.demoMode}
+                      onCheckedChange={(v) => setField("demoMode", v)}
+                      className="data-[state=checked]:bg-[#801824]"
+                      aria-label="Toggle demo mode"
+                    />
+                  </div>
+                  <div className="rounded-xl border border-[#EADBCE] bg-[#FAF4EB] p-4 text-xs text-[#5C1A20]">
+                    <p className="font-bold text-[#801824]">Demo mode limitations</p>
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-600">
+                      <li>SMS notifications are logged to the database but not delivered to real recipients.</li>
+                      <li>Payments are mocked — no charges are made through real payment gateways.</li>
+                    </ul>
+                  </div>
+                </div>
+              </SectionCard>
+            </div>
+          )}
+
+          {/* ============================================================ */}
+          {/* TAB 2: ORGANIZATION & MASTERS                                */}
+          {/* ============================================================ */}
+          {activeTab === "organization" && (
+            <div className="space-y-6">
               <OrganizationSection />
-            </TabsContent>
+              <MastersSection />
+            </div>
+          )}
 
-            {/* ---------- Users & Access ---------- */}
-            <TabsContent value="users-access" className="space-y-4 pt-3">
+          {/* ============================================================ */}
+          {/* TAB 3: USERS & ACCESS                                        */}
+          {/* ============================================================ */}
+          {activeTab === "users-access" && (
+            <div className="space-y-6">
               <UsersAccessSection
                 roleAccessConfig={form.roleAccessConfig}
                 onRoleAccessChange={(cfg) => setField("roleAccessConfig", cfg)}
@@ -433,123 +441,86 @@ export function AdminSettings() {
                 hideRestrictedModules={form.hideRestrictedModules}
                 onHideRestrictedModulesChange={(val) => setField("hideRestrictedModules", val)}
               />
-            </TabsContent>
+            </div>
+          )}
 
-            {/* ---------- Masters ---------- */}
-            <TabsContent value="masters" className="space-y-4 pt-3">
-              <MastersSection />
-            </TabsContent>
-
-            {/* ---------- Workflow ---------- */}
-            <TabsContent value="workflow" className="space-y-4 pt-3">
+          {/* ============================================================ */}
+          {/* TAB 4: WORKFLOWS & DOCUMENTS                                 */}
+          {/* ============================================================ */}
+          {activeTab === "workflow-docs" && (
+            <div className="space-y-6">
               <WorkflowSection />
-            </TabsContent>
-
-            {/* ---------- Documents ---------- */}
-            <TabsContent value="documents" className="space-y-4 pt-3">
               <DocumentsSection
                 form={form}
                 onFormatToggle={toggleArrayValue}
                 onFileSizeChange={(v) => setField("maxFileSizeMB", v)}
               />
-            </TabsContent>
+            </div>
+          )}
 
-            {/* ---------- Notifications ---------- */}
-            <TabsContent value="notifications" className="space-y-4 pt-3">
-              <NotificationsSection />
-            </TabsContent>
-
-            {/* ---------- System ---------- */}
-            <TabsContent value="system" className="space-y-4 pt-3">
-              <SystemSection form={form} setField={setField} />
-            </TabsContent>
-
-            {/* ---------- Integrations ---------- */}
-            <TabsContent value="integrations" className="space-y-4 pt-3">
+          {/* ============================================================ */}
+          {/* TAB 5: INTEGRATIONS & COMMS                                  */}
+          {/* ============================================================ */}
+          {activeTab === "integrations" && (
+            <div className="space-y-6">
               <IntegrationsSection />
-            </TabsContent>
-
-            {/* ---------- Reports ---------- */}
-            <TabsContent value="reports" className="space-y-4 pt-3">
+              <NotificationsSection />
               <ReportsSection />
-            </TabsContent>
+            </div>
+          )}
 
-            {/* ---------- Security ---------- */}
-            <TabsContent value="security" className="space-y-4 pt-3">
+          {/* ============================================================ */}
+          {/* TAB 6: SYSTEM & SECURITY                                     */}
+          {/* ============================================================ */}
+          {activeTab === "system-security" && (
+            <div className="space-y-6">
+              <SystemSection form={form} setField={setField} />
               <SecuritySection />
-            </TabsContent>
-
-            {/* ---------- System Administration ---------- */}
-            <TabsContent value="system-admin" className="space-y-4 pt-3">
               <SystemAdminSection />
-            </TabsContent>
+            </div>
+          )}
+        </div>
 
-            {/* ---------- Access Control / Module Access ---------- */}
-            <TabsContent value="access" className="space-y-4 pt-3">
-              <ModuleAccessManager
-                config={form.roleAccessConfig ?? {}}
-                onChange={(cfg) => setField("roleAccessConfig", cfg)}
-                userConfig={form.userAccessConfig ?? {}}
-                onUserConfigChange={(cfg) => setField("userAccessConfig", cfg)}
-                hideRestricted={form.hideRestrictedModules ?? false}
-                onHideRestrictedChange={(val) => setField("hideRestrictedModules", val)}
-                onDirectSave={(newRoleCfg, newUserCfg, newHide) => {
-                  setField("roleAccessConfig", newRoleCfg);
-                  setField("userAccessConfig", newUserCfg);
-                  setField("hideRestrictedModules", newHide);
-                  updateSystemSettings({
-                    roleAccessConfig: newRoleCfg,
-                    userAccessConfig: newUserCfg,
-                    hideRestrictedModules: newHide,
-                  });
-                }}
-              />
-            </TabsContent>
+        {/* Integrated Card Footer Action Bar */}
+        <div className="border-t border-[#EADBCE] bg-[#FAF7F2] px-5 py-2.5 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#5C1A20]" aria-live="polite">
+            <Settings className="size-4 text-[#801824]" />
+            <span>
+              {dirty
+                ? "You have unsaved changes that have not been persisted."
+                : "All changes are saved."}
+            </span>
           </div>
-        </Tabs>
-      </div>
-
-      {/* ---------- Integrated Card Footer Action Bar in Beige & Maroon Theme ---------- */}
-      <div className="border-t border-[#EADBCE] bg-[#FAF7F2] px-5 py-2.5 flex items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-2 text-xs font-semibold text-[#5C1A20]" aria-live="polite">
-          <Settings className="size-4 text-[#801824]" />
-          <span>
-            {dirty
-              ? "You have unsaved changes that have not been persisted."
-              : "All changes are saved."}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleReset}
-            disabled={!dirty || saving}
-            className="border-[#DCD5C8] text-[#801824] bg-white hover:bg-[#F3EADF] font-semibold text-xs h-8 px-4 rounded-lg cursor-pointer"
-          >
-            <RotateCcw className="size-3.5 mr-1" /> Reset
-          </Button>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!dirty || saving}
-            className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] font-bold text-xs h-8 px-5 rounded-lg shadow-xs cursor-pointer"
-          >
-            <Save className="size-3.5 mr-1" />
-            {saving ? "Saving…" : "Save Changes"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              disabled={!dirty || saving}
+              className="border-[#DCD5C8] text-[#801824] bg-white hover:bg-[#F3EADF] font-semibold text-xs h-8 px-4 rounded-lg cursor-pointer"
+            >
+              <RotateCcw className="size-3.5 mr-1" /> Reset
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={!dirty || saving}
+              className="bg-[#801824] hover:bg-[#941C2B] text-[#FDF6ED] font-bold text-xs h-8 px-5 rounded-lg shadow-xs cursor-pointer"
+            >
+              <Save className="size-3.5 mr-1" />
+              {saving ? "Saving…" : "Save Changes"}
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
-  </form>
+    </form>
   );
 }
 
 // ============================================================
-// Sub-components
+// Form Sub-components
 // ============================================================
-
 
 function FieldInput({
   id,
